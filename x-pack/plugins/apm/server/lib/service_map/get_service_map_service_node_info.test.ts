@@ -26,6 +26,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         setup,
         serviceName,
         searchAggregatedTransactions: false,
+        unit: 'minute',
       });
 
       expect(result).toEqual({
@@ -33,7 +34,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         avgErrorRate: null,
         avgMemoryUsage: null,
         transactionStats: {
-          avgRequestsPerMinute: null,
+          avgTransactionRate: null,
           avgTransactionDuration: null,
         },
       });
@@ -73,6 +74,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         setup,
         serviceName,
         searchAggregatedTransactions: false,
+        unit: 'minute',
       });
 
       expect(result).toEqual({
@@ -80,7 +82,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         avgErrorRate: 0.5,
         avgMemoryUsage: null,
         transactionStats: {
-          avgRequestsPerMinute: 0.000001586873761097901,
+          avgTransactionRate: 0.000001586873761097901,
           avgTransactionDuration: null,
         },
       });

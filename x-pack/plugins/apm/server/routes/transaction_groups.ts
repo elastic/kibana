@@ -16,6 +16,8 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getTransactionSampleForGroup } from '../lib/transaction_groups/get_transaction_sample_for_group';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { toNumberRt } from '../../common/runtime_types/to_number_rt';
+import { bucketSizeUnitRt } from '../../common/runtime_types/bucket_size_unit_rt';
 
 export const transactionGroupsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups',
@@ -26,6 +28,7 @@ export const transactionGroupsRoute = createRoute(() => ({
     query: t.intersection([
       t.type({
         transactionType: t.string,
+        unit: bucketSizeUnitRt,
       }),
       uiFiltersRt,
       rangeRt,
@@ -34,21 +37,22 @@ export const transactionGroupsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType } = context.params.query;
+    const { transactionType, unit } = context.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    return getTransactionGroupList(
-      {
+    return getTransactionGroupList({
+      options: {
         type: 'top_transactions',
         serviceName,
         transactionType,
         searchAggregatedTransactions,
       },
-      setup
-    );
+      setup,
+      unit,
+    });
   },
 }));
 
@@ -65,13 +69,24 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
       }),
       uiFiltersRt,
       rangeRt,
+      t.type({
+        bucketSizeInSeconds: toNumberRt,
+        unit: bucketSizeUnitRt,
+        intervalString: t.string,
+      }),
     ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const logger = context.logger;
     const { serviceName } = context.params.path;
-    const { transactionType, transactionName } = context.params.query;
+    const {
+      transactionType,
+      transactionName,
+      bucketSizeInSeconds,
+      unit,
+      intervalString,
+    } = context.params.query;
 
     if (!setup.uiFilters.environment) {
       throw Boom.badRequest(
@@ -90,6 +105,9 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
       setup,
       searchAggregatedTransactions,
       logger,
+      bucketSizeInSeconds,
+      unit,
+      intervalString,
     };
 
     return getTransactionCharts(options);

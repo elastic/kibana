@@ -39,7 +39,7 @@ export function SingleRow() {
       transactionType: 'request',
       p95: 11974156,
       averageResponseTime: 8087434.558974359,
-      transactionsPerMinute: 0.40625,
+      transactionRate: 0.40625,
       impact: 100,
     },
   ];

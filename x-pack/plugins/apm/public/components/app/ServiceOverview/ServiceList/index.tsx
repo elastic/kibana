@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
+import { DateBucketUnit } from '../../../../../common/utils/get_date_bucket_options';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   asPercent,
@@ -30,6 +31,7 @@ import { ServiceListMetric } from './ServiceListMetric';
 interface Props {
   items: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
+  unit: DateBucketUnit;
 }
 
 type ServiceListItem = ValuesType<Props['items']>;
@@ -53,7 +55,9 @@ const AppLink = styled(TransactionOverviewLink)`
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
+export const getServiceColumns = (
+  dateBucketUnit: DateBucketUnit
+): Array<ITableColumn<ServiceListItem>> => [
   {
     field: 'healthStatus',
     name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
@@ -126,25 +130,29 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     width: px(unit * 10),
   },
   {
-    field: 'transactionsPerMinute',
-    name: i18n.translate(
-      'xpack.apm.servicesTable.transactionsPerMinuteColumnLabel',
-      {
-        defaultMessage: 'Trans. per minute',
-      }
-    ),
+    field: 'transactionRate',
+    name: i18n.translate('xpack.apm.servicesTable.transactionRateColumnLabel', {
+      defaultMessage:
+        'Trans. per {unit, select, second {second} minute {minute}}',
+      values: {
+        unit: dateBucketUnit,
+      },
+    }),
     sortable: true,
     dataType: 'number',
-    render: (_, { transactionsPerMinute }) => (
+    render: (_, { transactionRate }) => (
       <ServiceListMetric
-        series={transactionsPerMinute?.timeseries}
+        series={transactionRate?.timeseries}
         color="euiColorVis0"
         valueLabel={`${formatNumber(
-          transactionsPerMinute?.value || 0
+          transactionRate?.value || 0
         )} ${i18n.translate(
-          'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
+          'xpack.apm.servicesTable.transactionRateUnitLabel',
           {
-            defaultMessage: 'tpm',
+            defaultMessage: 'tp{unit,select,second {s} minute {m}}',
+            values: {
+              unit: dateBucketUnit,
+            },
           }
         )}`}
       />
@@ -153,7 +161,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     width: px(unit * 10),
   },
   {
-    field: 'errorsPerMinute',
+    field: 'transactionErrorRate',
     name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
       defaultMessage: 'Error rate %',
     }),
@@ -185,19 +193,26 @@ const SERVICE_HEALTH_STATUS_ORDER = [
   ServiceHealthStatus.critical,
 ];
 
-export function ServiceList({ items, noItemsMessage }: Props) {
+export function ServiceList({
+  items,
+  noItemsMessage,
+  unit: dateBucketUnit,
+}: Props) {
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
-  const columns = displayHealthStatus
-    ? SERVICE_COLUMNS
-    : SERVICE_COLUMNS.filter((column) => column.field !== 'healthStatus');
+  const columns = getServiceColumns(dateBucketUnit);
+
+  const displayedColumns = displayHealthStatus
+    ? columns
+    : columns.filter((column) => column.field !== 'healthStatus');
+
   const initialSortField = displayHealthStatus
     ? 'healthStatus'
-    : 'transactionsPerMinute';
+    : 'transactionRate';
 
   return (
     <ManagedTable
-      columns={columns}
+      columns={displayedColumns}
       items={items}
       noItemsMessage={noItemsMessage}
       initialSortField={initialSortField}
@@ -214,7 +229,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                     ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                     : -1;
                 },
-                (item) => item.transactionsPerMinute?.value ?? 0,
+                (item) => item.transactionRate?.value ?? 0,
               ],
               [sortDirection, sortDirection]
             )
@@ -224,8 +239,8 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                 switch (sortField) {
                   case 'avgResponseTime':
                     return item.avgResponseTime?.value ?? 0;
-                  case 'transactionsPerMinute':
-                    return item.transactionsPerMinute?.value ?? 0;
+                  case 'transactionRate':
+                    return item.transactionRate?.value ?? 0;
                   case 'transactionErrorRate':
                     return item.transactionErrorRate?.value ?? 0;
 

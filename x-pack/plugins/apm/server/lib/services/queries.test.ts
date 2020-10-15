@@ -13,6 +13,7 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
+import { getDateBucketOptions } from '../../../common/utils/get_date_bucket_options';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;
@@ -51,6 +52,7 @@ describe('services queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: {} as any,
+        ...getDateBucketOptions(setup.start, setup.end, 20),
       })
     );
 

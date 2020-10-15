@@ -5,6 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
+import { DateBucketUnit } from '../../../../common/utils/get_date_bucket_options';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getAnomalySeries } from './get_anomaly_data';
@@ -25,6 +26,9 @@ export async function getTransactionCharts(options: {
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   logger: Logger;
+  bucketSizeInSeconds: number;
+  unit: DateBucketUnit;
+  intervalString: string;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);
   const anomalyTimeseries = await getAnomalySeries({

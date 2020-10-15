@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { getDateBucketOptions } from '../../../../../plugins/apm/common/utils/get_date_bucket_options';
 import archives_metadata from '../../../common/archives_metadata';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { expectSnapshot } from '../../../common/match_snapshot';
@@ -19,13 +20,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
+
+  const { unit, intervalString, bucketSizeInSeconds } = getDateBucketOptions(
+    new Date(metadata.start).getTime(),
+    new Date(metadata.end).getTime()
+  );
+
   const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'testing' }));
 
   describe('Transaction charts', () => {
     describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}&bucketSizeInSeconds=${bucketSizeInSeconds}&unit=${unit}&intervalString=${intervalString}`
         );
 
         expect(response.status).to.be(200);
@@ -46,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}&bucketSizeInSeconds=${bucketSizeInSeconds}&unit=${unit}&intervalString=${intervalString}`
         );
       });
 

@@ -14,6 +14,7 @@ import {
 } from '../../utils/test_helpers';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggerMock } from '../../../../../../src/core/server/logging/logger.mock';
+import { getDateBucketOptions } from '../../../common/utils/get_date_bucket_options';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;
@@ -56,6 +57,7 @@ describe('transaction queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: loggerMock.create(),
+        ...getDateBucketOptions(setup.start, setup.end),
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -70,6 +72,7 @@ describe('transaction queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: loggerMock.create(),
+        ...getDateBucketOptions(setup.start, setup.end),
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -84,6 +87,7 @@ describe('transaction queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: loggerMock.create(),
+        ...getDateBucketOptions(setup.start, setup.end),
       })
     );
 

@@ -7,6 +7,7 @@
 import { ESResponse, timeseriesFetcher } from './fetcher';
 import { APMConfig } from '../../../../../server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
+import { getDateBucketOptions } from '../../../../../common/utils/get_date_bucket_options';
 
 describe('timeseriesFetcher', () => {
   let res: ESResponse;
@@ -14,13 +15,16 @@ describe('timeseriesFetcher', () => {
   beforeEach(async () => {
     clientSpy = jest.fn().mockResolvedValueOnce('ES response');
 
+    const start = 1528113600000;
+    const end = 1528977600000;
+
     res = await timeseriesFetcher({
       serviceName: 'myServiceName',
       transactionType: 'myTransactionType',
       transactionName: undefined,
       setup: {
-        start: 1528113600000,
-        end: 1528977600000,
+        start,
+        end,
         apmEventClient: { search: clientSpy } as any,
         internalClient: { search: clientSpy } as any,
         config: new Proxy(
@@ -51,6 +55,7 @@ describe('timeseriesFetcher', () => {
         },
       },
       searchAggregatedTransactions: false,
+      ...getDateBucketOptions(start, end),
     });
   });
 

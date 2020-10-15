@@ -5,6 +5,7 @@
  */
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { DateBucketUnit } from '../get_date_bucket_options';
 
 export function asDecimal(value: number) {
   return numeral(value).format('0,0.0');
@@ -14,14 +15,13 @@ export function asInteger(value: number) {
   return numeral(value).format('0,0');
 }
 
-export function tpmUnit(type?: string) {
-  return type === 'request'
-    ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
-        defaultMessage: 'rpm',
-      })
-    : i18n.translate('xpack.apm.formatters.transactionsPerMinLabel', {
-        defaultMessage: 'tpm',
-      });
+export function tpmUnit(unit: DateBucketUnit) {
+  return i18n.translate('xpack.apm.formatters.transactionsRateLabel', {
+    defaultMessage: 'tp{unit, select, minute {m} second {s}}',
+    values: {
+      unit,
+    },
+  });
 }
 
 export function asPercent(

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DateBucketUnit } from '../../../common/utils/get_date_bucket_options';
 import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
@@ -37,13 +38,14 @@ interface Options {
   environment?: string;
   serviceName: string;
   searchAggregatedTransactions: boolean;
+  unit: DateBucketUnit;
 }
 
 interface TaskParameters {
   environment?: string;
   filter: ESFilter[];
   searchAggregatedTransactions: boolean;
-  minutes: number;
+  duration: number;
   serviceName?: string;
   setup: Setup;
 }
@@ -52,6 +54,7 @@ export async function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
   searchAggregatedTransactions,
+  unit,
 }: Options & { serviceName: string }) {
   const { start, end, uiFilters } = setup;
 
@@ -61,12 +64,15 @@ export async function getServiceMapServiceNodeInfo({
     ...getEnvironmentUiFilterES(uiFilters.environment),
   ];
 
-  const minutes = Math.abs((end - start) / (1000 * 60));
+  const duration = Math.abs(
+    (end - start) / (1000 * (unit === 'minute' ? 60 : 1))
+  );
+
   const taskParams = {
     environment: uiFilters.environment,
     filter,
     searchAggregatedTransactions,
-    minutes,
+    duration,
     serviceName,
     setup,
   };
@@ -117,11 +123,11 @@ async function getErrorStats({
 async function getTransactionStats({
   setup,
   filter,
-  minutes,
+  duration,
   searchAggregatedTransactions,
 }: TaskParameters): Promise<{
   avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
+  avgTransactionRate: number | null;
 }> {
   const { apmEventClient } = setup;
 
@@ -174,11 +180,12 @@ async function getTransactionStats({
   };
   const response = await apmEventClient.search(params);
 
-  const totalRequests = response.aggregations?.count.value ?? 0;
+  const totalTransactions = response.aggregations?.count.value ?? 0;
 
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
-    avgRequestsPerMinute: totalRequests > 0 ? totalRequests / minutes : null,
+    avgTransactionRate:
+      totalTransactions > 0 ? totalTransactions / duration : null,
   };
 }
 

@@ -17,11 +17,19 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { bucketSizeUnitRt } from '../../common/runtime_types/bucket_size_unit_rt';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
   params: {
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.type({
+        unit: bucketSizeUnitRt,
+        intervalString: t.string,
+      }),
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -30,9 +38,13 @@ export const servicesRoute = createRoute(() => ({
       setup
     );
 
+    const { unit, intervalString } = context.params.query;
+
     const services = await getServices({
       setup,
       searchAggregatedTransactions,
+      unit,
+      intervalString,
       logger: context.logger,
     });
 

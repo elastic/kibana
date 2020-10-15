@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { DateBucketUnit } from '../../../../../common/utils/get_date_bucket_options';
 import {
   asDuration,
   asPercent,
@@ -35,7 +36,8 @@ export function ServiceStatsList({
   avgErrorRate,
   avgCpuUsage,
   avgMemoryUsage,
-}: ServiceStatsListProps) {
+  unit,
+}: ServiceStatsListProps & { unit: DateBucketUnit }) {
   const listItems = [
     {
       title: i18n.translate(
@@ -50,15 +52,17 @@ export function ServiceStatsList({
     },
     {
       title: i18n.translate(
-        'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
+        'xpack.apm.serviceMap.avgTransactionRatePopoverMetric',
         {
-          defaultMessage: 'Req. per minute (avg.)',
+          defaultMessage:
+            'Trans. per {unit, select, minute {m} second {s}} (avg.)',
+          values: {
+            unit,
+          },
         }
       ),
-      description: isNumber(transactionStats.avgRequestsPerMinute)
-        ? `${transactionStats.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
-            'request'
-          )}`
+      description: isNumber(transactionStats.avgTransactionRate)
+        ? `${transactionStats.avgTransactionRate.toFixed(2)} ${tpmUnit(unit)}`
         : null,
     },
     {

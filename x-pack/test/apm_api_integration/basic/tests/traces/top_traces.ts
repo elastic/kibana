@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
+import { getDateBucketOptions } from '../../../../../plugins/apm/common/utils/get_date_bucket_options';
 import archives_metadata from '../../../common/archives_metadata';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -19,13 +20,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
+
+  const { unit } = getDateBucketOptions(
+    new Date(metadata.start).getTime(),
+    new Date(metadata.end).getTime()
+  );
+
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
   describe('Top traces', () => {
     describe('when data is not loaded ', () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}&unit=${unit}`
         );
 
         expect(response.status).to.be(200);
@@ -39,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         await esArchiver.load(archiveName);
         response = await supertest.get(
-          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}&unit=${unit}`
         );
       });
       after(() => esArchiver.unload(archiveName));
@@ -72,8 +79,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "serviceName": "opbeans-java",
             "transactionName": "DispatcherServlet#doPost",
+            "transactionRate": 0.000555555555555556,
             "transactionType": "request",
-            "transactionsPerMinute": 0.0333333333333333,
           }
         `);
 
@@ -87,8 +94,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "serviceName": "opbeans-python",
             "transactionName": "opbeans.tasks.sync_customers",
+            "transactionRate": 0.0205555555555556,
             "transactionType": "celery",
-            "transactionsPerMinute": 1.23333333333333,
           }
         `);
 

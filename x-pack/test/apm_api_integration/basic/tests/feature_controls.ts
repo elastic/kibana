@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getDateBucketOptions } from '../../../../plugins/apm/common/utils/get_date_bucket_options';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
@@ -15,8 +16,16 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const es = getService('legacyEs');
   const log = getService('log');
 
-  const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
-  const end = encodeURIComponent(new Date().toISOString());
+  const startDate = new Date(Date.now() - 10000);
+  const endDate = new Date();
+
+  const { intervalString, unit, bucketSizeInSeconds } = getDateBucketOptions(
+    startDate.getTime(),
+    endDate.getTime()
+  );
+
+  const start = encodeURIComponent(startDate.toISOString());
+  const end = encodeURIComponent(endDate.toISOString());
 
   const expect403 = (result: any) => {
     expect(result.error).to.be(undefined);
@@ -74,7 +83,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      req: { url: `/api/apm/services?start=${start}&end=${end}&uiFilters=%7B%7D` },
+      req: {
+        url: `/api/apm/services?start=${start}&end=${end}&uiFilters=%7B%7D&intervalString=${intervalString}&unit=${unit}`,
+      },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
@@ -89,7 +100,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      req: { url: `/api/apm/traces?start=${start}&end=${end}&uiFilters=%7B%7D` },
+      req: {
+        url: `/api/apm/traces?start=${start}&end=${end}&uiFilters=%7B%7D&unit=${unit}`,
+      },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
@@ -100,28 +113,28 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/services/foo/transaction_groups?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%7D`,
+        url: `/api/apm/services/foo/transaction_groups?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%7D&unit=${unit}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
+        url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%22environment%22%3A%22testing%22%7D&bucketSizeInSeconds=${bucketSizeInSeconds}&unit=${unit}&intervalString=${intervalString}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
+        url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&uiFilters=%7B%22environment%22%3A%22testing%22%7D&bucketSizeInSeconds=${bucketSizeInSeconds}&unit=${unit}&intervalString=${intervalString}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&transactionName=baz&uiFilters=%7B%22environment%22%3A%22testing%22%7D`,
+        url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&transactionName=baz&uiFilters=%7B%22environment%22%3A%22testing%22%7D&bucketSizeInSeconds=${bucketSizeInSeconds}&unit=${unit}&intervalString=${intervalString}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

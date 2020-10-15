@@ -26,7 +26,7 @@ export default {
           avgErrorRate: 0.556068173242986,
           avgMemoryUsage: 0.5504868173242986,
           transactionStats: {
-            avgRequestsPerMinute: 164.47222031860858,
+            avgTransactionRate: 164.47222031860858,
             avgTransactionDuration: 61634.38905590272,
           },
         }),

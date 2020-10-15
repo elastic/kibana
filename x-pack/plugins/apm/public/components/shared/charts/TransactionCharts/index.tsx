@@ -14,10 +14,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { DateBucketUnit } from '../../../../../common/utils/get_date_bucket_options';
+import { useDateBucketOptions } from '../../../../hooks/use_date_bucket_options';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
 import { Coordinate } from '../../../../../typings/timeseries';
@@ -45,9 +46,11 @@ export function TransactionCharts({
   charts,
   urlParams,
 }: TransactionChartProps) {
+  const { unit } = useDateBucketOptions();
+
   const getTPMFormatter = (t: number) => {
-    const unit = tpmUnit(urlParams.transactionType);
-    return `${asDecimal(t)} ${unit}`;
+    const unitLabel = tpmUnit(unit);
+    return `${asDecimal(t)} ${unitLabel}`;
   };
 
   const getTPMTooltipFormatter = (p: Coordinate) => {
@@ -96,7 +99,7 @@ export function TransactionCharts({
         <EuiFlexItem style={{ flexShrink: 1 }}>
           <EuiPanel>
             <EuiTitle size="xs">
-              <span>{tpmLabel(transactionType)}</span>
+              <span>{tpmLabel(unit)}</span>
             </EuiTitle>
             <TransactionLineChart
               series={tpmSeries}
@@ -122,20 +125,17 @@ export function TransactionCharts({
   );
 }
 
-function tpmLabel(type?: string) {
-  return type === TRANSACTION_REQUEST
-    ? i18n.translate(
-        'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
-        {
-          defaultMessage: 'Requests per minute',
-        }
-      )
-    : i18n.translate(
-        'xpack.apm.metrics.transactionChart.transactionsPerMinuteLabel',
-        {
-          defaultMessage: 'Transactions per minute',
-        }
-      );
+function tpmLabel(unit: DateBucketUnit) {
+  return i18n.translate(
+    'xpack.apm.metrics.transactionChart.transactionRateLabel',
+    {
+      defaultMessage:
+        'Transactions per {unit, select, minute {minute} second {second}}',
+      values: {
+        unit,
+      },
+    }
+  );
 }
 
 function responseTimeLabel(type?: string) {

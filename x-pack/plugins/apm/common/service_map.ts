@@ -56,7 +56,7 @@ export interface ServiceNodeStats {
   avgCpuUsage: number | null;
   transactionStats: {
     avgTransactionDuration: number | null;
-    avgRequestsPerMinute: number | null;
+    avgTransactionRate: number | null;
   };
   avgErrorRate: number | null;
 }

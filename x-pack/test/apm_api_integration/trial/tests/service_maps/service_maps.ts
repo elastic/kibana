@@ -7,6 +7,7 @@
 import querystring from 'querystring';
 import expect from '@kbn/expect';
 import { isEmpty, uniq } from 'lodash';
+import { getDateBucketOptions } from '../../../../../plugins/apm/common/utils/get_date_bucket_options';
 import archives_metadata from '../../../common/archives_metadata';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { expectSnapshot } from '../../../common/match_snapshot';
@@ -22,6 +23,11 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const metadata = archives_metadata[archiveName];
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
+
+  const { unit } = getDateBucketOptions(
+    new Date(metadata.start).getTime(),
+    new Date(metadata.end).getTime()
+  );
 
   describe('Service Maps with a trial license', () => {
     describe('/api/apm/service-map', () => {
@@ -112,6 +118,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             start: metadata.start,
             end: metadata.end,
             uiFilters: {},
+            unit,
           });
           const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
@@ -120,7 +127,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           expect(response.body.avgCpuUsage).to.be(null);
           expect(response.body.avgErrorRate).to.be(null);
           expect(response.body.avgMemoryUsage).to.be(null);
-          expect(response.body.transactionStats.avgRequestsPerMinute).to.be(null);
+          expect(response.body.transactionStats.avgTransactionRate).to.be(null);
           expect(response.body.transactionStats.avgTransactionDuration).to.be(null);
         });
       });

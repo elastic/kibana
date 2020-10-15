@@ -21,6 +21,9 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { MLCallout } from './ServiceList/MLCallout';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
+import { useDateBucketOptions } from '../../../hooks/use_date_bucket_options';
+
+const NUM_BUCKETS = 20;
 
 const initialData = {
   items: [],
@@ -36,18 +39,34 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters,
   } = useUrlParams();
+
+  // We need to pick the unit based on the time range with the
+  // default number of buckets, to ensure consistency between
+  // the different views
+  const { unit } = useDateBucketOptions();
+
+  // intervalString is used to set the bucket size in ES, and
+  // it should be lower to make the sparkplots nicer.
+  const { intervalString } = useDateBucketOptions(NUM_BUCKETS);
+
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
           pathname: '/api/apm/services',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              intervalString,
+              unit,
+            },
           },
         });
       }
     },
-    [start, end, uiFilters]
+    [start, end, uiFilters, intervalString, unit]
   );
 
   useEffect(() => {
@@ -132,6 +151,7 @@ export function ServiceOverview() {
               <EuiPanel>
                 <ServiceList
                   items={data.items}
+                  unit={unit}
                   noItemsMessage={
                     <NoServicesMessage
                       historicalDataFound={data.hasHistoricalData}

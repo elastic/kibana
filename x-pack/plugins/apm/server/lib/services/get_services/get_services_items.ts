@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from '@kbn/logging';
+import { DateBucketUnit } from '../../../../common/utils/get_date_bucket_options';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -25,10 +26,14 @@ export async function getServicesItems({
   setup,
   searchAggregatedTransactions,
   logger,
+  intervalString,
+  unit,
 }: {
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
+  intervalString: string;
+  unit: DateBucketUnit;
 }) {
   const params = {
     projection: getServicesProjection({
@@ -37,6 +42,8 @@ export async function getServicesItems({
     }),
     setup,
     searchAggregatedTransactions,
+    intervalString,
+    unit,
   };
 
   const [

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mean } from 'lodash';
+import { getDateBucketOptions } from '../../../common/utils/get_date_bucket_options';
 import { EventOutcome } from '../../../common/event_outcome';
 import {
   TRANSACTION_NAME,
@@ -13,7 +14,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getBucketSize } from '../helpers/get_bucket_size';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
@@ -67,7 +67,7 @@ export async function getErrorRate({
         total_transactions: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize(start, end).intervalString,
+            fixed_interval: getDateBucketOptions(start, end).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },

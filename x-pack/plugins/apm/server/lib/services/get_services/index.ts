@@ -6,6 +6,7 @@
 
 import { isEmpty } from 'lodash';
 import { Logger } from '@kbn/logging';
+import { DateBucketUnit } from '../../../../common/utils/get_date_bucket_options';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
@@ -18,16 +19,22 @@ export async function getServices({
   setup,
   searchAggregatedTransactions,
   logger,
+  intervalString,
+  unit,
 }: {
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   logger: Logger;
+  intervalString: string;
+  unit: DateBucketUnit;
 }) {
   const [items, hasLegacyData] = await Promise.all([
     getServicesItems({
       setup,
       searchAggregatedTransactions,
       logger,
+      intervalString,
+      unit,
     }),
     getLegacyDataStatus(setup),
   ]);

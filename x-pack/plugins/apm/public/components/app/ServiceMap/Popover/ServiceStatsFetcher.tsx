@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
+import { useDateBucketOptions } from '../../../../hooks/use_date_bucket_options';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 import { ServiceStatsList } from './ServiceStatsList';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
@@ -35,6 +36,8 @@ export function ServiceStatsFetcher({
     uiFilters,
   } = useUrlParams();
 
+  const { unit } = useDateBucketOptions();
+
   const {
     data = { transactionStats: {} } as ServiceNodeStats,
     status,
@@ -45,12 +48,12 @@ export function ServiceStatsFetcher({
           pathname: '/api/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { start, end, uiFilters: JSON.stringify(uiFilters), unit },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters],
+    [serviceName, start, end, uiFilters, unit],
     {
       preservePreviousData: false,
     }
@@ -67,14 +70,14 @@ export function ServiceStatsFetcher({
     avgCpuUsage,
     avgErrorRate,
     avgMemoryUsage,
-    transactionStats: { avgRequestsPerMinute, avgTransactionDuration },
+    transactionStats: { avgTransactionRate, avgTransactionDuration },
   } = data;
 
   const hasServiceData = [
     avgCpuUsage,
     avgErrorRate,
     avgMemoryUsage,
-    avgRequestsPerMinute,
+    avgTransactionRate,
     avgTransactionDuration,
   ].some((stat) => isNumber(stat));
 
@@ -98,7 +101,7 @@ export function ServiceStatsFetcher({
           <EuiHorizontalRule margin="xs" />
         </>
       )}
-      <ServiceStatsList {...data} />
+      <ServiceStatsList {...data} unit={unit} />
     </>
   );
 }

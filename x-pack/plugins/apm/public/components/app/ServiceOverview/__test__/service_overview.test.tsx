@@ -111,18 +111,30 @@ describe('Service Overview -> View', () => {
         {
           serviceName: 'My Python Service',
           agentName: 'python',
-          transactionsPerMinute: 100,
-          errorsPerMinute: 200,
-          avgResponseTime: 300,
+          transactionRate: {
+            value: 100,
+          },
+          transactionErrorRate: {
+            value: 200,
+          },
+          avgResponseTime: {
+            value: 300,
+          },
           environments: ['test', 'dev'],
           healthStatus: ServiceHealthStatus.warning,
         },
         {
           serviceName: 'My Go Service',
           agentName: 'go',
-          transactionsPerMinute: 400,
-          errorsPerMinute: 500,
-          avgResponseTime: 600,
+          transactionRate: {
+            value: 400,
+          },
+          transactionErrorRate: {
+            value: 500,
+          },
+          avgResponseTime: {
+            value: 600,
+          },
           environments: [],
           severity: ServiceHealthStatus.healthy,
         },
@@ -221,9 +233,15 @@ describe('Service Overview -> View', () => {
           {
             serviceName: 'My Python Service',
             agentName: 'python',
-            transactionsPerMinute: 100,
-            errorsPerMinute: 200,
-            avgResponseTime: 300,
+            transactionRate: {
+              value: 100,
+            },
+            transactionErrorRate: {
+              value: 200,
+            },
+            avgResponseTime: {
+              value: 300,
+            },
             environments: ['test', 'dev'],
           },
         ],
@@ -247,9 +265,15 @@ describe('Service Overview -> View', () => {
           {
             serviceName: 'My Python Service',
             agentName: 'python',
-            transactionsPerMinute: 100,
-            errorsPerMinute: 200,
-            avgResponseTime: 300,
+            transactionRate: {
+              value: 100,
+            },
+            transactionErrorRate: {
+              value: 200,
+            },
+            avgResponseTime: {
+              value: 300,
+            },
             environments: ['test', 'dev'],
             healthStatus: ServiceHealthStatus.warning,
           },

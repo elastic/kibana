@@ -17,10 +17,10 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../typings/timeseries';
-import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 import { asDecimal, asDuration, tpmUnit } from '../../common/utils/formatters';
+import { DateBucketUnit } from '../../common/utils/get_date_bucket_options';
 
 export interface ITpmBucket {
   title: string;
@@ -50,10 +50,10 @@ const INITIAL_DATA = {
 };
 
 export function getTransactionCharts(
-  { transactionType }: IUrlParams,
+  unit: DateBucketUnit,
   { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
-  const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
+  const tpmSeries = getTpmSeries(apmTimeseries, unit);
 
   const responseTimeSeries = getResponseTimeSeries({
     apmTimeseries,
@@ -156,7 +156,7 @@ function getAnomalyBoundariesSeries(data: Coordinate[]) {
 
 export function getTpmSeries(
   apmTimeseries: ApmTimeSeriesResponse,
-  transactionType?: string
+  unit: DateBucketUnit
 ) {
   const { tpmBuckets } = apmTimeseries;
   const bucketKeys = tpmBuckets.map(({ key }) => key);
@@ -174,7 +174,7 @@ export function getTpmSeries(
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(transactionType || '')}`,
+      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(unit)}`,
       type: 'linemark',
       color: getColor(bucket.key),
     };

@@ -9,8 +9,8 @@ Array [
     "p95": 2288,
     "serviceName": "opbeans-node",
     "transactionName": "GET /*",
+    "transactionRate": 0.000555555555555556,
     "transactionType": "request",
-    "transactionsPerMinute": 0.0333333333333333,
   },
   Object {
     "averageResponseTime": 10317,
@@ -19,8 +19,8 @@ Array [
     "p95": 10304,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/orders/:id",
+    "transactionRate": 0.000555555555555556,
     "transactionType": "request",
-    "transactionsPerMinute": 0.0333333333333333,
   },
   Object {
     "averageResponseTime": 6495,
@@ -29,8 +29,8 @@ Array [
     "p95": 6720,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/products/:id",
+    "transactionRate": 0.00111111111111111,
     "transactionType": "request",
-    "transactionsPerMinute": 0.0666666666666667,
   },
   Object {
     "averageResponseTime": 9825.5,
@@ -39,8 +39,8 @@ Array [
     "p95": 16496,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/types",
+    "transactionRate": 0.00111111111111111,
     "transactionType": "request",
-    "transactionsPerMinute": 0.0666666666666667,
   },
   Object {
     "averageResponseTime": 9516.83333333333,
@@ -49,8 +49,8 @@ Array [
     "p95": 17888,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/products",
+    "transactionRate": 0.00333333333333333,
     "transactionType": "request",
-    "transactionsPerMinute": 0.2,
   },
   Object {
     "averageResponseTime": 13962.2,
@@ -59,8 +59,8 @@ Array [
     "p95": 23264,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/products/:id/customers",
+    "transactionRate": 0.00277777777777778,
     "transactionType": "request",
-    "transactionsPerMinute": 0.166666666666667,
   },
   Object {
     "averageResponseTime": 21129.5,
@@ -69,8 +69,8 @@ Array [
     "p95": 32608,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/customers/:id",
+    "transactionRate": 0.00222222222222222,
     "transactionType": "request",
-    "transactionsPerMinute": 0.133333333333333,
   },
   Object {
     "averageResponseTime": 10137.1111111111,
@@ -79,8 +79,8 @@ Array [
     "p95": 21344,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/orders",
+    "transactionRate": 0.005,
     "transactionType": "request",
-    "transactionsPerMinute": 0.3,
   },
   Object {
     "averageResponseTime": 24206.25,
@@ -89,8 +89,8 @@ Array [
     "p95": 36032,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/customers",
+    "transactionRate": 0.00222222222222222,
     "transactionType": "request",
-    "transactionsPerMinute": 0.133333333333333,
   },
   Object {
     "averageResponseTime": 17267.0833333333,
@@ -99,8 +99,8 @@ Array [
     "p95": 26208,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/products/top",
+    "transactionRate": 0.00666666666666667,
     "transactionType": "request",
-    "transactionsPerMinute": 0.4,
   },
   Object {
     "averageResponseTime": 20417.7272727273,
@@ -109,8 +109,8 @@ Array [
     "p95": 24800,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/stats",
+    "transactionRate": 0.00611111111111111,
     "transactionType": "request",
-    "transactionsPerMinute": 0.366666666666667,
   },
   Object {
     "averageResponseTime": 39822.0208333333,
@@ -119,8 +119,8 @@ Array [
     "p95": 122816,
     "serviceName": "opbeans-node",
     "transactionName": "GET /api",
+    "transactionRate": 0.0266666666666667,
     "transactionType": "request",
-    "transactionsPerMinute": 1.6,
   },
 ]
 `;

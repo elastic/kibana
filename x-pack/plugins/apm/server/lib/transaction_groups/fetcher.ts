@@ -6,6 +6,7 @@
 import { take, sortBy } from 'lodash';
 import { Unionize } from 'utility-types';
 import moment from 'moment';
+import { DateBucketUnit } from '../../../common/utils/get_date_bucket_options';
 import { joinByKey } from '../../../common/utils/join_by_key';
 import {
   SERVICE_NAME,
@@ -57,6 +58,7 @@ export type TransactionGroupSetup = Setup & SetupTimeRange;
 
 function getItemsWithRelativeImpact(
   setup: TransactionGroupSetup,
+  unit: DateBucketUnit,
   items: Array<{
     sum?: number | null;
     key: string | Record<'service.name' | 'transaction.name', string>;
@@ -74,13 +76,15 @@ function getItemsWithRelativeImpact(
   const min = Math.min(...values);
 
   const duration = moment.duration(setup.end - setup.start);
-  const minutes = duration.asMinutes();
+
+  const durationAsMinutesOrSeconds =
+    unit === 'second' ? duration.asSeconds() : duration.asMinutes();
 
   const itemsWithRelativeImpact = items.map((item) => {
     return {
       key: item.key,
       averageResponseTime: item.avg,
-      transactionsPerMinute: (item.count ?? 0) / minutes,
+      transactionRate: (item.count ?? 0) / durationAsMinutesOrSeconds,
       transactionType: item.transactionType || '',
       impact:
         item.sum !== null && item.sum !== undefined
@@ -93,11 +97,17 @@ function getItemsWithRelativeImpact(
   return itemsWithRelativeImpact;
 }
 
-export async function transactionGroupsFetcher(
-  options: Options,
-  setup: TransactionGroupSetup,
-  bucketSize: number
-) {
+export async function transactionGroupsFetcher({
+  options,
+  setup,
+  bucketSize,
+  unit,
+}: {
+  options: Options;
+  setup: TransactionGroupSetup;
+  bucketSize: number;
+  unit: DateBucketUnit;
+}) {
   const projection = getTransactionGroupsProjection({
     setup,
     options,
@@ -165,7 +175,11 @@ export async function transactionGroupsFetcher(
 
   const items = joinByKey(stats, 'key');
 
-  const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items);
+  const itemsWithRelativeImpact = getItemsWithRelativeImpact(
+    setup,
+    unit,
+    items
+  );
 
   const defaultServiceName =
     options.type === 'top_transactions' ? options.serviceName : undefined;
@@ -210,7 +224,7 @@ export interface TransactionGroup {
   transactionName: string;
   transactionType: string;
   averageResponseTime: number | null | undefined;
-  transactionsPerMinute: number;
+  transactionRate: number;
   p95: number | null | undefined;
   impact: number;
 }

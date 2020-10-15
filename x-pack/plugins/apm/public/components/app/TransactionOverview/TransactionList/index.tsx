@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionGroup } from '../../../../../server/lib/transaction_groups/fetcher';
+import { useDateBucketOptions } from '../../../../hooks/use_date_bucket_options';
 import {
   asDecimal,
   asMillisecondDuration,
@@ -39,6 +40,8 @@ interface Props {
 }
 
 export function TransactionList({ items, isLoading }: Props) {
+  const { unit } = useDateBucketOptions();
+
   const columns: Array<ITableColumn<TransactionGroup>> = useMemo(
     () => [
       {
@@ -93,20 +96,27 @@ export function TransactionList({ items, isLoading }: Props) {
         render: (time: number) => asMillisecondDuration(time),
       },
       {
-        field: 'transactionsPerMinute',
+        field: 'transactionRate',
         name: i18n.translate(
-          'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
+          'xpack.apm.transactionsTable.transactionRateColumnLabel',
           {
-            defaultMessage: 'Trans. per minute',
+            defaultMessage:
+              'Trans. per {unit, select, minute {minute} second {second}}',
+            values: {
+              unit,
+            },
           }
         ),
         sortable: true,
         dataType: 'number',
         render: (value: number) =>
           `${asDecimal(value)} ${i18n.translate(
-            'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
+            'xpack.apm.transactionsTable.transactionRateUnitLabel',
             {
-              defaultMessage: 'tpm',
+              defaultMessage: 'tp{unit, select, minute {m} second {s}}',
+              values: {
+                unit,
+              },
             }
           )}`,
       },
@@ -128,7 +138,7 @@ export function TransactionList({ items, isLoading }: Props) {
                 'xpack.apm.transactionsTable.impactColumnDescription',
                 {
                   defaultMessage:
-                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
+                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the transaction rate.",
                 }
               )}
             />
@@ -139,7 +149,7 @@ export function TransactionList({ items, isLoading }: Props) {
         render: (value: number) => <ImpactBar value={value} />,
       },
     ],
-    []
+    [unit]
   );
 
   const noItemsMessage = (

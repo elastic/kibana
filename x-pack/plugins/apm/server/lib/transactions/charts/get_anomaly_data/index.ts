@@ -6,7 +6,6 @@
 import { Logger } from 'kibana/server';
 import { isNumber } from 'lodash';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMlBucketSize } from './get_ml_bucket_size';
@@ -20,6 +19,8 @@ export async function getAnomalySeries({
   timeSeriesDates,
   setup,
   logger,
+  intervalString,
+  bucketSizeInSeconds,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -27,6 +28,8 @@ export async function getAnomalySeries({
   timeSeriesDates: number[];
   setup: Setup & SetupTimeRange;
   logger: Logger;
+  intervalString: string;
+  bucketSizeInSeconds: number;
 }) {
   // don't fetch anomalies for transaction details page
   if (transactionName) {
@@ -38,7 +41,7 @@ export async function getAnomalySeries({
     return;
   }
 
-  const { uiFilters, start, end } = setup;
+  const { uiFilters } = setup;
   const { environment } = uiFilters;
 
   // don't fetch anomalies when no specific environment is selected
@@ -77,8 +80,6 @@ export async function getAnomalySeries({
     return;
   }
 
-  const { intervalString, bucketSize } = getBucketSize(start, end);
-
   const esResponse = await anomalySeriesFetcher({
     serviceName,
     transactionType,
@@ -93,7 +94,7 @@ export async function getAnomalySeries({
     return anomalySeriesTransform(
       esResponse,
       mlBucketSize,
-      bucketSize,
+      bucketSizeInSeconds,
       timeSeriesDates,
       jobId
     );

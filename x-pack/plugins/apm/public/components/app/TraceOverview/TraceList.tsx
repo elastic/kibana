@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionGroup } from '../../../../server/lib/transaction_groups/fetcher';
+import { DateBucketUnit } from '../../../../common/utils/get_date_bucket_options';
 import { asMillisecondDuration } from '../../../../common/utils/formatters';
 import { fontSizes, truncate } from '../../../style/variables';
 import { EmptyMessage } from '../../shared/EmptyMessage';
@@ -17,6 +18,7 @@ import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
+import { useDateBucketOptions } from '../../../hooks/use_date_bucket_options';
 
 const StyledTransactionLink = styled(TransactionDetailLink)`
   font-size: ${fontSizes.large};
@@ -28,7 +30,9 @@ interface Props {
   isLoading: boolean;
 }
 
-const traceListColumns: Array<ITableColumn<TransactionGroup>> = [
+const getTraceListColumns = (
+  unit: DateBucketUnit
+): Array<ITableColumn<TransactionGroup>> => [
   {
     field: 'name',
     name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
@@ -71,17 +75,24 @@ const traceListColumns: Array<ITableColumn<TransactionGroup>> = [
     render: (time: number) => asMillisecondDuration(time),
   },
   {
-    field: 'transactionsPerMinute',
-    name: i18n.translate('xpack.apm.tracesTable.tracesPerMinuteColumnLabel', {
-      defaultMessage: 'Traces per minute',
+    field: 'transactionRate',
+    name: i18n.translate('xpack.apm.tracesTable.traceRateColumnLabel', {
+      defaultMessage:
+        'Traces per {unit, select, minute {minute} second {second}}',
+      values: {
+        unit,
+      },
     }),
     sortable: true,
     dataType: 'number',
     render: (value: number) =>
       `${value.toLocaleString()} ${i18n.translate(
-        'xpack.apm.tracesTable.tracesPerMinuteUnitLabel',
+        'xpack.apm.tracesTable.traceRateUnitLabel',
         {
-          defaultMessage: 'tpm',
+          defaultMessage: 'tp{unit, select, minute {m} second {s}}',
+          values: {
+            unit,
+          },
         }
       )}`,
   },
@@ -93,7 +104,7 @@ const traceListColumns: Array<ITableColumn<TransactionGroup>> = [
           'xpack.apm.tracesTable.impactColumnDescription',
           {
             defaultMessage:
-              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
+              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transaction rate.",
           }
         )}
       >
@@ -127,9 +138,11 @@ const noItemsMessage = (
 
 export function TraceList({ items = [], isLoading }: Props) {
   const noItems = isLoading ? <LoadingStatePrompt /> : noItemsMessage;
+  const { unit } = useDateBucketOptions();
+
   return (
     <ManagedTable
-      columns={traceListColumns}
+      columns={getTraceListColumns(unit)}
       items={items}
       initialSortField="impact"
       initialSortDirection="desc"

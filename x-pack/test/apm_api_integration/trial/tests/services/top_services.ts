@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getDateBucketOptions } from '../../../../../plugins/apm/common/utils/get_date_bucket_options';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -23,6 +24,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = encodeURIComponent(range.start);
   const end = encodeURIComponent(range.end);
 
+  const { unit } = getDateBucketOptions(
+    new Date(range.start).getTime(),
+    new Date(range.end).getTime()
+  );
+  const { intervalString } = getDateBucketOptions(
+    new Date(range.start).getTime(),
+    new Date(range.end).getTime(),
+    20
+  );
+
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
   describe('APM Services Overview', () => {
@@ -35,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let response: PromiseReturnType<typeof supertest.get>;
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
+              `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}&intervalString=${intervalString}&unit=${unit}`
             );
           });
 

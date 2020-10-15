@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
+import { getDateBucketOptions } from '../../../../../plugins/apm/common/utils/get_date_bucket_options';
 import archives_metadata from '../../../common/archives_metadata';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -24,13 +25,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
   const uiFilters = encodeURIComponent(JSON.stringify({}));
+
+  const { unit } = getDateBucketOptions(
+    new Date(metadata.start).getTime(),
+    new Date(metadata.end).getTime()
+  );
+
   const transactionType = 'request';
 
   describe('Top transaction groups', () => {
     describe('when data is not loaded ', () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transaction_groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}&unit=${unit}`
         );
 
         expect(response.status).to.be(200);
@@ -45,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         await esArchiver.load(archiveName);
         response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transaction_groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}&unit=${unit}`
         );
       });
       after(() => esArchiver.unload(archiveName));

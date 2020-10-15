@@ -13,6 +13,7 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { Projection } from '../../../../common/projections';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useDateBucketOptions } from '../../../hooks/use_date_bucket_options';
 
 type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
@@ -24,6 +25,8 @@ const DEFAULT_RESPONSE: TracesAPIResponse = {
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
+  const { unit } = useDateBucketOptions();
+
   const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -34,12 +37,13 @@ export function TraceOverview() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              unit,
             },
           },
         });
       }
     },
-    [start, end, uiFilters]
+    [start, end, uiFilters, unit]
   );
 
   useTrackPageview({ app: 'apm', path: 'traces_overview' });

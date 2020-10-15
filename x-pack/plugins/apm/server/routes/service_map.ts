@@ -17,6 +17,7 @@ import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { notifyFeatureUsage } from '../feature';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { bucketSizeUnitRt } from '../../common/runtime_types/bucket_size_unit_rt';
 
 export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
@@ -67,7 +68,11 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([rangeRt, uiFiltersRt]),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({ unit: bucketSizeUnitRt }),
+    ]),
   },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
@@ -80,6 +85,7 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
 
     const {
       path: { serviceName },
+      query: { unit },
     } = context.params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -90,6 +96,7 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
       setup,
       serviceName,
       searchAggregatedTransactions,
+      unit,
     });
   },
 }));

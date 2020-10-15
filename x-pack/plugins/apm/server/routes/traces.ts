@@ -11,21 +11,30 @@ import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { bucketSizeUnitRt } from '../../common/runtime_types/bucket_size_unit_rt';
 
 export const tracesRoute = createRoute(() => ({
   path: '/api/apm/traces',
   params: {
-    query: t.intersection([rangeRt, uiFiltersRt]),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({ unit: bucketSizeUnitRt }),
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
-    return getTransactionGroupList(
-      { type: 'top_traces', searchAggregatedTransactions },
-      setup
-    );
+
+    const { unit } = context.params.query;
+
+    return getTransactionGroupList({
+      options: { type: 'top_traces', searchAggregatedTransactions },
+      setup,
+      unit,
+    });
   },
 }));
 

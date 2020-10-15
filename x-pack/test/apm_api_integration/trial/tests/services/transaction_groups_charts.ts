@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getDateBucketOptions } from '../../../../../plugins/apm/common/utils/get_date_bucket_options';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -21,6 +22,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(range.start);
   const end = encodeURIComponent(range.end);
+
+  const { unit, intervalString, bucketSizeInSeconds } = getDateBucketOptions(
+    new Date(range.start).getTime(),
+    new Date(range.end).getTime()
+  );
   const transactionType = 'request';
 
   describe('APM Transaction Overview', () => {
@@ -36,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({}));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&bucketSizeInSeconds=${bucketSizeInSeconds}&intervalString=${intervalString}&unit=${unit}`
             );
           });
           it('should return an error response', () => {
@@ -47,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('without uiFilters', () => {
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&bucketSizeInSeconds=${bucketSizeInSeconds}&intervalString=${intervalString}&unit=${unit}`
             );
           });
           it('should return an error response', () => {
@@ -59,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'production' }));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&bucketSizeInSeconds=${bucketSizeInSeconds}&intervalString=${intervalString}&unit=${unit}`
             );
           });
 
@@ -88,7 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&bucketSizeInSeconds=${bucketSizeInSeconds}&uiFilters=${uiFilters}&intervalString=${intervalString}&unit=${unit}`
             );
           });
 
@@ -114,7 +120,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'ENVIRONMENT_ALL' }));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&bucketSizeInSeconds=${bucketSizeInSeconds}&intervalString=${intervalString}&unit=${unit}`
             );
           });
 
@@ -133,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transaction_groups/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}&bucketSizeInSeconds=${bucketSizeInSeconds}&intervalString=${intervalString}&unit=${unit}`
             );
           });
 

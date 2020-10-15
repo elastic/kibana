@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DateBucketUnit } from '../../../../common/utils/get_date_bucket_options';
 import { getServiceHealthStatus } from '../../../../common/service_health_status';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { getSeverity } from '../../../../common/anomaly_detection';
@@ -23,17 +24,20 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
   getMLJobIds,
   getServiceAnomalies,
 } from '../../service_map/get_service_anomalies';
 import { AggregationResultOf } from '../../../../typings/elasticsearch/aggregations';
 
-function getDateHistogramOpts(start: number, end: number) {
+function getDateHistogramOpts(
+  start: number,
+  end: number,
+  intervalString: string
+) {
   return {
     field: '@timestamp',
-    fixed_interval: getBucketSize(start, end, 20).intervalString,
+    fixed_interval: intervalString,
     min_doc_count: 0,
     extended_bounds: { min: start, max: end },
   };
@@ -41,19 +45,22 @@ function getDateHistogramOpts(start: number, end: number) {
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
-const getDeltaAsMinutes = (setup: ServicesItemsSetup) =>
-  (setup.end - setup.start) / 1000 / 60;
+const getDelta = (setup: ServicesItemsSetup, unit: DateBucketUnit) =>
+  (setup.end - setup.start) / 1000 / (unit === 'second' ? 1 : 60);
 
 interface AggregationParams {
   setup: ServicesItemsSetup;
   projection: ServicesItemsProjection;
   searchAggregatedTransactions: boolean;
+  intervalString: string;
+  unit: DateBucketUnit;
 }
 
 export const getTransactionDurationAverages = async ({
   setup,
   projection,
   searchAggregatedTransactions,
+  intervalString,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
 
@@ -93,7 +100,11 @@ export const getTransactionDurationAverages = async ({
                 },
               },
               timeseries: {
-                date_histogram: getDateHistogramOpts(start, end),
+                date_histogram: getDateHistogramOpts(
+                  start,
+                  end,
+                  intervalString
+                ),
                 aggs: {
                   average: {
                     avg: {
@@ -175,6 +186,8 @@ export const getTransactionRates = async ({
   setup,
   projection,
   searchAggregatedTransactions,
+  intervalString,
+  unit,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
   const response = await apmEventClient.search(
@@ -213,7 +226,11 @@ export const getTransactionRates = async ({
                 },
               },
               timeseries: {
-                date_histogram: getDateHistogramOpts(start, end),
+                date_histogram: getDateHistogramOpts(
+                  start,
+                  end,
+                  intervalString
+                ),
                 aggs: {
                   count: {
                     value_count: {
@@ -237,17 +254,17 @@ export const getTransactionRates = async ({
     return [];
   }
 
-  const deltaAsMinutes = getDeltaAsMinutes(setup);
+  const delta = getDelta(setup, unit);
 
   return aggregations.services.buckets.map((serviceBucket) => {
-    const transactionsPerMinute = serviceBucket.count.value / deltaAsMinutes;
+    const transactionRate = serviceBucket.count.value / delta;
     return {
       serviceName: serviceBucket.key as string,
-      transactionsPerMinute: {
-        value: transactionsPerMinute,
+      transactionRate: {
+        value: transactionRate,
         timeseries: serviceBucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key,
-          y: dateBucket.count.value / deltaAsMinutes,
+          y: dateBucket.count.value / delta,
         })),
       },
     };
@@ -258,6 +275,7 @@ export const getTransactionErrorRates = async ({
   setup,
   projection,
   searchAggregatedTransactions,
+  intervalString,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
 
@@ -308,7 +326,11 @@ export const getTransactionErrorRates = async ({
             aggs: {
               outcomes,
               timeseries: {
-                date_histogram: getDateHistogramOpts(start, end),
+                date_histogram: getDateHistogramOpts(
+                  start,
+                  end,
+                  intervalString
+                ),
                 aggs: {
                   outcomes,
                 },

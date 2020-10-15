@@ -26,10 +26,11 @@ export function Example() {
       avgCpuUsage={0.32809666568309237}
       avgMemoryUsage={0.5504868173242986}
       transactionStats={{
-        avgRequestsPerMinute: 164.47222031860858,
+        avgTransactionRate: 164.47222031860858,
         avgTransactionDuration: 61634.38905590272,
       }}
       avgErrorRate={0.556068173242986}
+      unit="minute"
     />
   );
 }
@@ -41,9 +42,10 @@ export function SomeNullValues() {
       avgErrorRate={0.615972134074397}
       avgMemoryUsage={null}
       transactionStats={{
-        avgRequestsPerMinute: 8.439583235652972,
+        avgTransactionRate: 8.439583235652972,
         avgTransactionDuration: 238792.54809512055,
       }}
+      unit="minute"
     />
   );
 }
@@ -55,9 +57,10 @@ export function AllNullValues() {
       avgErrorRate={null}
       avgMemoryUsage={null}
       transactionStats={{
-        avgRequestsPerMinute: null,
+        avgTransactionRate: null,
         avgTransactionDuration: null,
       }}
+      unit="minute"
     />
   );
 }

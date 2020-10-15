@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getBucketSize } from '../../../helpers/get_bucket_size';
+import { DateBucketUnit } from '../../../../../common/utils/get_date_bucket_options';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import { timeseriesFetcher } from './fetcher';
 import { timeseriesTransformer } from './transform';
@@ -15,15 +15,22 @@ export async function getApmTimeseriesData(options: {
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
+  bucketSizeInSeconds: number;
+  unit: DateBucketUnit;
+  intervalString: string;
 }) {
-  const { start, end } = options.setup;
-  const { bucketSize } = getBucketSize(start, end);
-  const durationAsMinutes = (end - start) / 1000 / 60;
+  const {
+    setup: { start, end },
+    unit,
+    bucketSizeInSeconds,
+  } = options;
 
   const timeseriesResponse = await timeseriesFetcher(options);
   return timeseriesTransformer({
     timeseriesResponse,
-    bucketSize,
-    durationAsMinutes,
+    bucketSizeInSeconds,
+    start,
+    end,
+    unit,
   });
 }

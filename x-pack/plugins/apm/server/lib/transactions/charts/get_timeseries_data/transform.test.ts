@@ -16,8 +16,10 @@ describe('timeseriesTransformer', () => {
   beforeEach(async () => {
     res = await timeseriesTransformer({
       timeseriesResponse,
-      bucketSize: 120,
-      durationAsMinutes: 10,
+      bucketSizeInSeconds: 120,
+      start: 0,
+      end: 600000,
+      unit: 'minute',
     });
   });
 
@@ -124,8 +126,10 @@ describe('getTpmBuckets', () => {
     expect(
       getTpmBuckets({
         transactionResultBuckets: buckets,
-        bucketSize: 120,
-        durationAsMinutes: 10,
+        bucketSizeInSeconds: 120,
+        start: 0,
+        end: 600000,
+        unit: 'minute',
       })
     ).toEqual([
       {

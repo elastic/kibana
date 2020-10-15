@@ -12,7 +12,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
-import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import {
@@ -28,15 +27,16 @@ export function timeseriesFetcher({
   transactionName,
   setup,
   searchAggregatedTransactions,
+  intervalString,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
+  intervalString: string;
 }) {
   const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize(start, end);
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },

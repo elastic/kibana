@@ -120,10 +120,9 @@ describe('chartSelectors', () => {
       ],
       overallAvgDuration: 200,
     };
-    const transactionType = 'MyTransactionType';
 
     it('produces correct series', () => {
-      expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
+      expect(getTpmSeries(apmTimeseries, 'minute')).toEqual([
         {
           color: successColor,
           data: [
@@ -155,10 +154,13 @@ describe('chartSelectors', () => {
       it('uses a success color', () => {
         const key = 'it was a success';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorSecondary);
       });
     });
@@ -167,10 +169,13 @@ describe('chartSelectors', () => {
       it('uses a success color', () => {
         const key = 'it was a Success';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorSecondary);
       });
     });
@@ -179,10 +184,13 @@ describe('chartSelectors', () => {
       it('uses a success color', () => {
         const key = 'it was ok';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorSecondary);
       });
     });
@@ -191,10 +199,13 @@ describe('chartSelectors', () => {
       it('uses a success color', () => {
         const key = 'it was OK';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorSecondary);
       });
     });
@@ -203,10 +214,13 @@ describe('chartSelectors', () => {
       it('uses a failure color', () => {
         const key = 'it failed';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorDanger);
       });
     });
@@ -215,10 +229,13 @@ describe('chartSelectors', () => {
       it('uses a failure color', () => {
         const key = 'it FAILED';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorDanger);
       });
     });
@@ -227,10 +244,13 @@ describe('chartSelectors', () => {
       it('uses a failure color', () => {
         const key = 'Quizás fuera un error';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorDanger);
       });
     });
@@ -239,10 +259,13 @@ describe('chartSelectors', () => {
       it('uses a failure color', () => {
         const key = 'Quizás fuera un ErroR';
         expect(
-          getTpmSeries({
-            ...apmTimeseries,
-            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
-          })[0].color
+          getTpmSeries(
+            {
+              ...apmTimeseries,
+              tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
+            },
+            'minute'
+          )[0].color
         ).toEqual(theme.euiColorDanger);
       });
     });
@@ -265,7 +288,7 @@ describe('chartSelectors', () => {
         };
         const series = getTpmSeries(
           { ...apmTimeseries, responseTimes, tpmBuckets: [] },
-          transactionType
+          'minute'
         );
 
         expect(series[0].data.length).toBe(11);

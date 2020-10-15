@@ -11,6 +11,7 @@
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { getDateBucketOptions } from '../../../../../../common/utils/get_date_bucket_options';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
@@ -22,7 +23,6 @@ import {
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 
 export async function fetchAndTransformGcMetrics({
@@ -40,7 +40,7 @@ export async function fetchAndTransformGcMetrics({
 }) {
   const { start, end, apmEventClient, config } = setup;
 
-  const { bucketSize } = getBucketSize(start, end);
+  const { bucketSizeInSeconds } = getDateBucketOptions(start, end);
 
   const projection = getMetricsProjection({
     setup,
@@ -126,7 +126,7 @@ export async function fetchAndTransformGcMetrics({
       const bucketValue = bucket.value?.value;
       const y =
         bucketValue !== null && bucketValue !== undefined && bucket.value
-          ? round(bucketValue * (60 / bucketSize), 1)
+          ? round(bucketValue * (60 / bucketSizeInSeconds), 1)
           : null;
 
       return {

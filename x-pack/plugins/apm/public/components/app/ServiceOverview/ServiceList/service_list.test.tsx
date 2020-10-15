@@ -11,7 +11,7 @@ import { ServiceHealthStatus } from '../../../../../common/service_health_status
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
-import { ServiceList, SERVICE_COLUMNS } from './';
+import { ServiceList, getServiceColumns } from './';
 import props from './__fixtures__/props.json';
 
 function Wrapper({ children }: { children?: ReactNode }) {
@@ -29,7 +29,9 @@ describe('ServiceList', () => {
 
   it('renders empty state', () => {
     expect(() =>
-      renderWithTheme(<ServiceList items={[]} />, { wrapper: Wrapper })
+      renderWithTheme(<ServiceList unit="minute" items={[]} />, {
+        wrapper: Wrapper,
+      })
     ).not.toThrowError();
   });
 
@@ -38,7 +40,10 @@ describe('ServiceList', () => {
       // Types of property 'avgResponseTime' are incompatible.
       // Type 'null' is not assignable to type '{ value: number | null; timeseries: { x: number; y: number | null; }[]; } | undefined'.ts(2322)
       renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
+        <ServiceList
+          unit="minute"
+          items={props.items as ServiceListAPIResponse['items']}
+        />,
         { wrapper: Wrapper }
       )
     ).not.toThrowError();
@@ -48,11 +53,11 @@ describe('ServiceList', () => {
     const service: any = {
       serviceName: 'opbeans-python',
       agentName: 'python',
-      transactionsPerMinute: {
+      transactionRate: {
         value: 86.93333333333334,
         timeseries: [],
       },
-      errorsPerMinute: {
+      transactionErrorRate: {
         value: 12.6,
         timeseries: [],
       },
@@ -62,7 +67,7 @@ describe('ServiceList', () => {
       },
       environments: ['test'],
     };
-    const renderedColumns = SERVICE_COLUMNS.map((c) =>
+    const renderedColumns = getServiceColumns('minute').map((c) =>
       c.render!(service[c.field!], service)
     );
 
@@ -76,7 +81,10 @@ describe('ServiceList', () => {
   describe('without ML data', () => {
     it('does not render the health column', () => {
       const { queryByText } = renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
+        <ServiceList
+          unit="minute"
+          items={props.items as ServiceListAPIResponse['items']}
+        />,
         {
           wrapper: Wrapper,
         }
@@ -86,9 +94,12 @@ describe('ServiceList', () => {
       expect(healthHeading).toBeNull();
     });
 
-    it('sorts by transactions per minute', async () => {
+    it('sorts by transaction rate', async () => {
       const { findByTitle } = renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
+        <ServiceList
+          unit="minute"
+          items={props.items as ServiceListAPIResponse['items']}
+        />,
         {
           wrapper: Wrapper,
         }
@@ -104,6 +115,7 @@ describe('ServiceList', () => {
     it('renders the health column', async () => {
       const { findByTitle } = renderWithTheme(
         <ServiceList
+          unit="minute"
           items={(props.items as ServiceListAPIResponse['items']).map(
             (item) => ({
               ...item,

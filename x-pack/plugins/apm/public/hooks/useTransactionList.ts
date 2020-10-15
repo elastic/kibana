@@ -9,6 +9,7 @@ import { useUiFilters } from '../context/UrlParamsContext';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { useFetcher } from './useFetcher';
+import { useDateBucketOptions } from './use_date_bucket_options';
 
 type TransactionsAPIResponse = APIReturnType<
   '/api/apm/services/{serviceName}/transaction_groups'
@@ -24,6 +25,8 @@ export function useTransactionList(urlParams: IUrlParams) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
+  const { unit } = useDateBucketOptions();
+
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
@@ -36,12 +39,13 @@ export function useTransactionList(urlParams: IUrlParams) {
               end,
               transactionType,
               uiFilters: JSON.stringify(uiFilters),
+              unit,
             },
           },
         });
       }
     },
-    [serviceName, start, end, transactionType, uiFilters]
+    [serviceName, start, end, transactionType, uiFilters, unit]
   );
 
   return {

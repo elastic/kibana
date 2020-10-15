@@ -291,7 +291,7 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
           >
-            0 ms
+            0.3 ms
           </div>
         </div>
       </div>
@@ -303,7 +303,7 @@ NodeList [
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
       >
-        Trans. per minute
+        Trans. per second
       </div>
       <div
         class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -344,7 +344,7 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
           >
-            0 tpm
+            100.0 tps
           </div>
         </div>
       </div>
@@ -396,7 +396,9 @@ NodeList [
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
-          />
+          >
+            20000%
+          </div>
         </div>
       </div>
     </td>
@@ -544,7 +546,7 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
           >
-            0 ms
+            0.6 ms
           </div>
         </div>
       </div>
@@ -556,7 +558,7 @@ NodeList [
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
       >
-        Trans. per minute
+        Trans. per second
       </div>
       <div
         class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -597,7 +599,7 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
           >
-            0 tpm
+            400.0 tps
           </div>
         </div>
       </div>
@@ -649,7 +651,9 @@ NodeList [
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
-          />
+          >
+            50000%
+          </div>
         </div>
       </div>
     </td>
