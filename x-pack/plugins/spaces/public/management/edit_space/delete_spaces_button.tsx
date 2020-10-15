@@ -42,7 +42,7 @@ export class DeleteSpacesButton extends Component<Props, State> {
 
     let ButtonComponent: any = EuiButton;
 
-    const extraProps: EuiButtonIconProps = {};
+    const extraProps: Partial<EuiButtonIconProps> = {};
 
     if (this.props.style === 'icon') {
       ButtonComponent = EuiButtonIcon;
