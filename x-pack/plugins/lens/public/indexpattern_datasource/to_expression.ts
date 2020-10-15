@@ -75,7 +75,7 @@ function getExpressionForLayer(
         | {
             params: {
               format?: unknown;
-              parentFormat: unknown;
+              parentFormat?: unknown;
             };
           }
       >
@@ -89,7 +89,8 @@ function getExpressionForLayer(
     ) as Array<[string, FormattedColumn]>;
     const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(
       ([id, col]: [string, FormattedColumn]) => {
-        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat : undefined;
+        // TODO: improve the type handling here
+        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
         const format = (col as FormattedColumn).params!.format;
         const base: ExpressionFunctionAST = {
           type: 'function',
