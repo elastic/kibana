@@ -30,8 +30,6 @@ import {
   FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '../../../../../common/types/feature_importance';
-import { formatSingleValue } from '../../../formatters/format_value';
-
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 
