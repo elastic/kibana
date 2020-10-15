@@ -23,6 +23,20 @@ import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 export class RoleMappings {
   constructor(private log: ToolingLog, private kbnClient: KbnClient) {}
 
+  public async getAll() {
+    this.log.debug(`Getting role mappings`);
+    const { data, status, statusText } = await this.kbnClient.request<Array<{ name: string }>>({
+      path: `/internal/security/role_mapping`,
+      method: 'GET',
+    });
+    if (status !== 200) {
+      throw new Error(
+        `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+      );
+    }
+    return data;
+  }
+
   public async create(name: string, roleMapping: Record<string, any>) {
     this.log.debug(`creating role mapping ${name}`);
     const { data, status, statusText } = await this.kbnClient.request({

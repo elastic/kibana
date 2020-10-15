@@ -18,6 +18,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Role Mappings', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('roleMappings');
+
+      // Delete any exising role mappings. ESS commonly sets up a role mapping automatically.
+      const existingMappings = await security.roleMappings.getAll();
+      await Promise.all(existingMappings.map((m) => security.roleMappings.delete(m.name)));
     });
 
     it('displays a message when no role mappings exist', async () => {
