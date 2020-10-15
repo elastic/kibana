@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { none } from 'fp-ts/lib/Option';
 
 import {
@@ -21,16 +21,12 @@ import {
   awaitTaskRunResult,
   TaskLifecycleEvent,
 } from './task_manager';
-import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
-import { SavedObjectsSerializer, SavedObjectTypeRegistry } from '../../../../src/core/server';
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
-import { Middleware } from './lib/middleware';
+import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
-
-const savedObjectsClient = savedObjectsRepositoryMock.create();
-const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
+import { taskStoreMock } from './task_store.mock';
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
@@ -46,14 +42,16 @@ describe('TaskManager', () => {
   };
 
   const taskManagerLogger = mockLogger();
+  const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config,
-    savedObjectsRepository: savedObjectsClient,
-    serializer,
-    callAsInternalUser: jest.fn(),
+    taskStore: mockTaskStore,
     logger: mockLogger(),
     taskManagerId: 'some-uuid',
     definitions: new TaskTypeDictionary(taskManagerLogger),
+    middleware: createInitialMiddleware(),
+    maxWorkersConfiguration$: of(100),
+    pollIntervalConfiguration$: of(100),
   };
 
   beforeEach(() => {
@@ -88,17 +86,11 @@ describe('TaskManager', () => {
       params: {},
       state: {},
     };
-    savedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'task',
-      attributes: {},
-      references: [],
-    });
     const promise = client.schedule(task);
     client.start();
     await promise;
 
-    expect(savedObjectsClient.create).toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
   });
 
   test('allows scheduling tasks after starting', async () => {
@@ -116,14 +108,8 @@ describe('TaskManager', () => {
       params: {},
       state: {},
     };
-    savedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'task',
-      attributes: {},
-      references: [],
-    });
     await client.schedule(task);
-    expect(savedObjectsClient.create).toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
   });
 
   test('allows scheduling existing tasks that may have already been scheduled', async () => {
@@ -135,7 +121,7 @@ describe('TaskManager', () => {
         createTaskRunner: jest.fn(),
       },
     });
-    savedObjectsClient.create.mockRejectedValueOnce({
+    mockTaskStore.schedule.mockRejectedValueOnce({
       statusCode: 409,
     });
 
@@ -160,7 +146,7 @@ describe('TaskManager', () => {
         createTaskRunner: jest.fn(),
       },
     });
-    savedObjectsClient.create.mockRejectedValueOnce({
+    mockTaskStore.schedule.mockRejectedValueOnce({
       statusCode: 500,
     });
 
@@ -187,7 +173,7 @@ describe('TaskManager', () => {
         createTaskRunner: jest.fn(),
       },
     });
-    savedObjectsClient.create.mockRejectedValueOnce({
+    mockTaskStore.schedule.mockRejectedValueOnce({
       statusCode: 409,
     });
 
@@ -207,74 +193,33 @@ describe('TaskManager', () => {
 
   test('allows and queues removing tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    savedObjectsClient.delete.mockResolvedValueOnce({});
     const promise = client.remove('1');
     client.start();
     await promise;
-    expect(savedObjectsClient.delete).toHaveBeenCalled();
+    expect(mockTaskStore.remove).toHaveBeenCalled();
   });
 
   test('allows removing tasks after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     client.start();
-    savedObjectsClient.delete.mockResolvedValueOnce({});
     await client.remove('1');
-    expect(savedObjectsClient.delete).toHaveBeenCalled();
+    expect(mockTaskStore.remove).toHaveBeenCalled();
   });
 
   test('allows and queues fetching tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.callAsInternalUser.mockResolvedValue({
-      hits: {
-        total: {
-          value: 0,
-        },
-        hits: [],
-      },
-    });
     const promise = client.fetch({});
+    expect(mockTaskStore.fetch).not.toHaveBeenCalled();
     client.start();
     await promise;
-    expect(taskManagerOpts.callAsInternalUser).toHaveBeenCalled();
+    expect(mockTaskStore.fetch).toHaveBeenCalled();
   });
 
   test('allows fetching tasks after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     client.start();
-    taskManagerOpts.callAsInternalUser.mockResolvedValue({
-      hits: {
-        total: {
-          value: 0,
-        },
-        hits: [],
-      },
-    });
     await client.fetch({});
-    expect(taskManagerOpts.callAsInternalUser).toHaveBeenCalled();
-  });
-
-  test('allows middleware registration before starting', () => {
-    const client = new TaskManager(taskManagerOpts);
-    const middleware: Middleware = {
-      beforeSave: jest.fn(async (saveOpts) => saveOpts),
-      beforeRun: jest.fn(async (runOpts) => runOpts),
-      beforeMarkRunning: jest.fn(async (runOpts) => runOpts),
-    };
-    expect(() => client.addMiddleware(middleware)).not.toThrow();
-  });
-
-  test('disallows middleware registration after starting', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    const middleware: Middleware = {
-      beforeSave: jest.fn(async (saveOpts) => saveOpts),
-      beforeRun: jest.fn(async (runOpts) => runOpts),
-      beforeMarkRunning: jest.fn(async (runOpts) => runOpts),
-    };
-
-    client.start();
-    expect(() => client.addMiddleware(middleware)).toThrow(
-      /Cannot add middleware after the task manager is initialized/i
-    );
+    expect(mockTaskStore.fetch).toHaveBeenCalled();
   });
 
   describe('runNow', () => {

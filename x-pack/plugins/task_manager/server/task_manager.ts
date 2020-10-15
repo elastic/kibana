@@ -11,13 +11,8 @@ import { performance } from 'perf_hooks';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 
-import {
-  SavedObjectsSerializer,
-  ILegacyScopedClusterClient,
-  ISavedObjectsRepository,
-} from '../../../../src/core/server';
 import { Result, asOk, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
+import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
 import { Logger } from './types';
@@ -32,17 +27,15 @@ import {
   asTaskRunRequestEvent,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
-import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
+import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import {
   ConcreteTaskInstance,
-  RunContext,
   TaskInstanceWithId,
   TaskInstanceWithDeprecatedFields,
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
-  ElasticJs,
 } from './task';
 import {
   createTaskPoller,
@@ -66,15 +59,14 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 
 const VERSION_CONFLICT_STATUS = 409;
 
-export interface TaskManagerOpts {
+export type TaskManagerOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
+  taskStore: TaskStore;
   config: TaskManagerConfig;
-  callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
-  savedObjectsRepository: ISavedObjectsRepository;
-  serializer: SavedObjectsSerializer;
   taskManagerId: string;
-}
+  middleware: Middleware;
+} & ManagedConfiguration;
 
 interface RunNowResult {
   id: string;
@@ -113,11 +105,7 @@ export class TaskManager {
   private pollingSubscription: Subscription = Subscription.EMPTY;
 
   private startQueue: Array<() => void> = [];
-  private middleware = {
-    beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
-    beforeRun: async (runOpts: RunContext) => runOpts,
-    beforeMarkRunning: async (runOpts: RunContext) => runOpts,
-  };
+  private middleware: Middleware;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -125,9 +113,16 @@ export class TaskManager {
    * mechanism.
    */
   constructor(opts: TaskManagerOpts) {
-    this.logger = opts.logger;
+    const {
+      logger,
+      taskManagerId,
+      middleware,
+      maxWorkersConfiguration$,
+      pollIntervalConfiguration$,
+    } = opts;
+    this.logger = logger;
+    this.middleware = middleware;
 
-    const { taskManagerId } = opts;
     if (!taskManagerId) {
       this.logger.error(
         `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${taskManagerId})`
@@ -138,24 +133,9 @@ export class TaskManager {
     }
 
     this.definitions = opts.definitions;
-    this.store = new TaskStore({
-      serializer: opts.serializer,
-      savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: (opts.callAsInternalUser as unknown) as ElasticJs,
-      index: opts.config.index,
-      maxAttempts: opts.config.max_attempts,
-      definitions: this.definitions,
-      taskManagerId: `kibana:${taskManagerId}`,
-    });
+    this.store = opts.taskStore;
     // pipe store events into the TaskManager's event stream
     this.store.events.subscribe((event) => this.events$.next(event));
-
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      logger: this.logger,
-      errors$: this.store.errors$,
-      startingMaxWorkers: opts.config.max_workers,
-      startingPollInterval: opts.config.poll_interval,
-    });
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: opts.config.max_workers,
@@ -285,17 +265,6 @@ export class TaskManager {
   }
 
   /**
-   * Adds middleware to the task manager, such as adding security layers, loggers, etc.
-   *
-   * @param {Middleware} middleware - The middlware being added.
-   */
-  public addMiddleware(middleware: Middleware) {
-    this.assertUninitialized('add middleware');
-    const prevMiddleWare = this.middleware;
-    this.middleware = addMiddlewareToChain(prevMiddleWare, middleware);
-  }
-
-  /**
    * Schedules a task.
    *
    * @param task - The task being scheduled.
@@ -381,20 +350,6 @@ export class TaskManager {
   public async remove(id: string): Promise<void> {
     await this.waitUntilStarted();
     return this.store.remove(id);
-  }
-
-  /**
-   * Ensures task manager IS NOT already initialized
-   *
-   * @param {string} message shown if task manager is already initialized
-   * @returns void
-   */
-  private assertUninitialized(message: string, context?: string) {
-    if (this.isStarted) {
-      throw new Error(
-        `${context ? `[${context}] ` : ''}Cannot ${message} after the task manager is initialized`
-      );
-    }
   }
 }
 

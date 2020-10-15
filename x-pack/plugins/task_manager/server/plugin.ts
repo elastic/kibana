@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from 'src/core/server';
-import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { TaskDefinition } from './task';
+import { ElasticJs, TaskDefinition } from './task';
 import { TaskManager } from './task_manager';
 import { TaskManagerConfig } from './config';
-import { Middleware } from './lib/middleware';
+import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { setupSavedObjects } from './saved_objects';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { TaskStore } from './task_store';
+import { createManagedConfiguration } from './lib/create_managed_configuration';
 
-export type TaskManagerSetupContract = Pick<TaskManager, 'addMiddleware'> &
-  Pick<TaskTypeDictionary, 'registerTaskDefinitions'>;
+export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
+  TaskTypeDictionary,
+  'registerTaskDefinitions'
+>;
 
 export type TaskManagerStartContract = Pick<
   TaskManager,
@@ -23,12 +26,14 @@ export type TaskManagerStartContract = Pick<
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
-  private legacyTaskManager$: Subject<TaskManager> = new Subject<TaskManager>();
-  private taskManager: Promise<TaskManager> = this.legacyTaskManager$.pipe(first()).toPromise();
+  private pluginLifecycle: 'start' | 'setup' | 'init' | 'stop' = 'init';
+
+  private taskManager?: TaskManager;
   private taskManagerId?: string;
   private config?: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
+  private middleware: Middleware = createInitialMiddleware();
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -36,60 +41,113 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
+  public async setup({ savedObjects }: CoreSetup): Promise<TaskManagerSetupContract> {
+    this.pluginLifecycle = 'setup';
     this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
       .toPromise();
 
-    setupSavedObjects(core.savedObjects, this.config);
+    setupSavedObjects(savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     return {
+      /**
+       * Adds middleware to the task manager, such as adding security layers, loggers, etc.
+       *
+       * @param {Middleware} middleware - The middlware being added.
+       */
       addMiddleware: (middleware: Middleware) => {
-        this.taskManager.then((tm) => tm.addMiddleware(middleware));
+        this.ensurePluginLifecycle('setup', 'add Middleware');
+        this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
       registerTaskDefinitions: (taskDefinition: Record<string, TaskDefinition>) => {
+        this.ensurePluginLifecycle('setup', 'register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
     };
   }
 
   public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
+    this.pluginLifecycle = 'start';
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
-    this.legacyTaskManager$.next(
-      new TaskManager({
-        taskManagerId: this.taskManagerId!,
-        config: this.config!,
-        savedObjectsRepository,
-        definitions: this.definitions,
-        serializer: savedObjects.createSerializer(),
-        callAsInternalUser: elasticsearch.legacy.client.callAsInternalUser,
-        logger: this.logger,
-      })
-    );
-    this.legacyTaskManager$.complete();
+    const taskStore = new TaskStore({
+      serializer: savedObjects.createSerializer(),
+      savedObjectsRepository,
+      callCluster: (elasticsearch.legacy.client.callAsInternalUser as unknown) as ElasticJs,
+      index: this.config!.index,
+      maxAttempts: this.config!.max_attempts,
+      definitions: this.definitions,
+      taskManagerId: `kibana:${this.taskManagerId!}`,
+    });
+
+    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger: this.logger,
+      errors$: taskStore.errors$,
+      startingMaxWorkers: this.config!.max_workers,
+      startingPollInterval: this.config!.poll_interval,
+    });
+
+    const taskManager = new TaskManager({
+      taskManagerId: this.taskManagerId!,
+      config: this.config!,
+      definitions: this.definitions,
+      logger: this.logger,
+      taskStore,
+      middleware: this.middleware,
+      maxWorkersConfiguration$,
+      pollIntervalConfiguration$,
+    });
+    this.taskManager = taskManager;
 
     // we need to "drain" any calls made to the seup API
     // before `starting` TaskManager. This is a legacy relic
     // of the old API that should be resolved once we split
     // Task manager into two services, setup and start, instead
     // of the single instance of TaskManager
-    this.taskManager.then((tm) => tm.start());
+    taskManager.start();
 
     return {
-      fetch: (...args) => this.taskManager.then((tm) => tm.fetch(...args)),
-      get: (...args) => this.taskManager.then((tm) => tm.get(...args)),
-      remove: (...args) => this.taskManager.then((tm) => tm.remove(...args)),
-      schedule: (...args) => this.taskManager.then((tm) => tm.schedule(...args)),
-      runNow: (...args) => this.taskManager.then((tm) => tm.runNow(...args)),
-      ensureScheduled: (...args) => this.taskManager.then((tm) => tm.ensureScheduled(...args)),
+      fetch: (...args) => {
+        this.ensurePluginLifecycle('start', 'fetch tasks');
+        return taskManager.fetch(...args);
+      },
+      get: (...args) => {
+        this.ensurePluginLifecycle('start', 'get tasks');
+        return taskManager.get(...args);
+      },
+      remove: (...args) => {
+        this.ensurePluginLifecycle('start', 'remove tasks');
+        return taskManager.remove(...args);
+      },
+      schedule: (...args) => {
+        this.ensurePluginLifecycle('start', 'schedule tasks');
+        return taskManager.schedule(...args);
+      },
+      ensureScheduled: (...args) => {
+        this.ensurePluginLifecycle('start', 'schedule tasks');
+        return taskManager.ensureScheduled(...args);
+      },
+      runNow: (...args) => {
+        this.ensurePluginLifecycle('start', 'run tasks');
+        return taskManager.runNow(...args);
+      },
     };
   }
+
   public stop() {
-    this.taskManager.then((tm) => {
-      tm.stop();
-    });
+    this.pluginLifecycle = 'stop';
+    if (this.taskManager) {
+      this.taskManager.stop();
+    }
+  }
+
+  private ensurePluginLifecycle(lifecycle: 'start' | 'setup' | 'init' | 'stop', operation: string) {
+    if (this.pluginLifecycle !== lifecycle) {
+      throw new Error(
+        `Cannot ${operation} outside of the "${lifecycle}" lifecycle stage (Task Manager is in "${this.pluginLifecycle})"`
+      );
+    }
   }
 }

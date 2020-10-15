@@ -5,56 +5,49 @@
  */
 
 import sinon from 'sinon';
-import { mockLogger } from '../test_utils';
-import { TaskManager } from '../task_manager';
-import { TaskTypeDictionary } from '../task_type_dictionary';
 import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
-import {
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, PluginInitializerContext } from '../../../../../src/core/server';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
+import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
+import { coreMock } from '../../../../../src/core/server/mocks';
+import { TaskManagerConfig } from '../config';
 
 describe('managed configuration', () => {
-  let taskManager: TaskManager;
-  let clock: sinon.SinonFakeTimers;
-  const callAsInternalUser = jest.fn();
-  const logger = mockLogger();
-  const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
-  const savedObjectsClient = savedObjectsRepositoryMock.create();
-  const config = {
-    enabled: true,
-    max_workers: 10,
-    index: 'foo',
-    max_attempts: 9,
-    poll_interval: 3000,
-    max_poll_inactivity_cycles: 10,
-    request_capacity: 1000,
-  };
+  let taskManagerPlugin: TaskManagerPlugin;
+  let pluginInitializerContext: PluginInitializerContext;
+  let taskManagerStart: TaskManagerStartContract;
 
-  beforeEach(() => {
+  let clock: sinon.SinonFakeTimers;
+  const savedObjectsClient = savedObjectsRepositoryMock.create();
+
+  beforeEach(async () => {
     jest.resetAllMocks();
-    callAsInternalUser.mockResolvedValue({ total: 0, updated: 0, version_conflicts: 0 });
     clock = sinon.useFakeTimers();
-    const definitions = new TaskTypeDictionary(logger);
-    taskManager = new TaskManager({
-      config,
-      logger,
-      serializer,
-      callAsInternalUser,
-      taskManagerId: 'some-uuid',
-      savedObjectsRepository: savedObjectsClient,
-      definitions,
+
+    pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+      enabled: true,
+      max_workers: 10,
+      index: 'foo',
+      max_attempts: 9,
+      poll_interval: 3000,
+      max_poll_inactivity_cycles: 10,
+      request_capacity: 1000,
     });
-    definitions.registerTaskDefinitions({
+
+    taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+    (await taskManagerPlugin.setup(coreMock.createSetup())).registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',
         createTaskRunner: jest.fn(),
       },
     });
-    taskManager.start();
+
+    const coreStart = coreMock.createStart();
+    coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
+
+    taskManagerStart = await taskManagerPlugin.start(coreStart);
+
     // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
     // sinon fake timers cause them to stall
     clock.tick(0);
@@ -66,15 +59,18 @@ describe('managed configuration', () => {
     savedObjectsClient.create.mockRejectedValueOnce(
       SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b')
     );
+
     // Cause "too many requests" error to be thrown
     await expect(
-      taskManager.schedule({
+      taskManagerStart.schedule({
         taskType: 'foo',
         state: {},
         params: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Too Many Requests"`);
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+    const logger = pluginInitializerContext.logger.get('taskManager');
     expect(logger.warn).toHaveBeenCalledWith(
       'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" error(s).'
     );
@@ -88,15 +84,18 @@ describe('managed configuration', () => {
     savedObjectsClient.create.mockRejectedValueOnce(
       SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b')
     );
+
     // Cause "too many requests" error to be thrown
     await expect(
-      taskManager.schedule({
+      taskManagerStart.schedule({
         taskType: 'foo',
         state: {},
         params: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Too Many Requests"`);
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+    const logger = pluginInitializerContext.logger.get('taskManager');
     expect(logger.warn).toHaveBeenCalledWith(
       'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" error(s).'
     );

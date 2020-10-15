@@ -52,3 +52,11 @@ export function addMiddlewareToChain(prevMiddleware: Middleware, middleware: Mid
     beforeMarkRunning,
   };
 }
+
+export function createInitialMiddleware(): Middleware {
+  return {
+    beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
+    beforeRun: async (runOpts: RunContext) => runOpts,
+    beforeMarkRunning: async (runOpts: RunContext) => runOpts,
+  };
+}

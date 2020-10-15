@@ -31,7 +31,7 @@ interface ManagedConfigurationOpts {
   errors$: Observable<Error>;
 }
 
-interface ManagedConfiguration {
+export interface ManagedConfiguration {
   maxWorkersConfiguration$: Observable<number>;
   pollIntervalConfiguration$: Observable<number>;
 }
