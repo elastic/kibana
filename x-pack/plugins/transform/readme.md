@@ -1,4 +1,4 @@
-# Documentation for ML UI developers
+# Documentation for Transforms UI developers
 
 This plugin provides access to the transforms features provided by Elastic.
 
@@ -74,7 +74,7 @@ New snapshots, all plugins:
 node scripts/jest
 ```
  
-Update snapshots for the transfrom plugin: 
+Update snapshots for the transform plugin: 
 
 ```
 node scripts/jest plugins/transform -u
