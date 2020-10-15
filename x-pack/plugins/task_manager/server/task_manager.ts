@@ -45,13 +45,7 @@ import {
 } from './polling';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_runner';
-import {
-  FetchResult,
-  TaskStore,
-  OwnershipClaimingOpts,
-  ClaimOwnershipResult,
-  SearchOpts,
-} from './task_store';
+import { TaskStore, OwnershipClaimingOpts, ClaimOwnershipResult } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { BufferedTaskStore } from './buffered_task_store';

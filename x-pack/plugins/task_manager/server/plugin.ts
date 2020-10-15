@@ -27,8 +27,6 @@ export type TaskManagerStartContract = Pick<
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
-  private pluginLifecycle: 'start' | 'setup' | 'init' | 'stop' = 'init';
-
   private taskManager?: TaskManager;
   private taskManagerId?: string;
   private config?: TaskManagerConfig;
@@ -43,7 +41,6 @@ export class TaskManagerPlugin
   }
 
   public async setup({ savedObjects }: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.pluginLifecycle = 'setup';
     this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
@@ -59,18 +56,17 @@ export class TaskManagerPlugin
        * @param {Middleware} middleware - The middlware being added.
        */
       addMiddleware: (middleware: Middleware) => {
-        this.ensurePluginLifecycle('setup', 'add Middleware');
+        this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
       registerTaskDefinitions: (taskDefinition: Record<string, TaskDefinition>) => {
-        this.ensurePluginLifecycle('setup', 'register task definitions');
+        this.assertStillInSetup('register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
     };
   }
 
   public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
-    this.pluginLifecycle = 'start';
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const taskStore = new TaskStore({
@@ -112,57 +108,42 @@ export class TaskManagerPlugin
        * @param opts - The query options used to filter tasks
        * @returns {Promise<FetchResult>}
        */
-      fetch: (opts: SearchOpts): Promise<FetchResult> => {
-        this.ensurePluginLifecycle('start', 'fetch tasks');
-        return taskStore.fetch(opts);
-      },
+      fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       /**
        * Get the current state of a specified task.
        *
        * @param {string} id
        * @returns {Promise<ConcreteTaskInstance>}
        */
-      get: (id: string) => {
-        this.ensurePluginLifecycle('start', 'get tasks');
-        return taskStore.get(id);
-      },
+      get: (id: string) => taskStore.get(id),
       /**
        * Removes the specified task from the index.
        *
        * @param {string} id
        * @returns {Promise<void>}
        */
-      remove: (id: string) => {
-        this.ensurePluginLifecycle('start', 'remove tasks');
-        return taskStore.remove(id);
-      },
-      schedule: (...args) => {
-        this.ensurePluginLifecycle('start', 'schedule tasks');
-        return taskManager.schedule(...args);
-      },
-      ensureScheduled: (...args) => {
-        this.ensurePluginLifecycle('start', 'schedule tasks');
-        return taskManager.ensureScheduled(...args);
-      },
-      runNow: (...args) => {
-        this.ensurePluginLifecycle('start', 'run tasks');
-        return taskManager.runNow(...args);
-      },
+      remove: (id: string) => taskStore.remove(id),
+      schedule: (...args) => taskManager.schedule(...args),
+      ensureScheduled: (...args) => taskManager.ensureScheduled(...args),
+      runNow: (...args) => taskManager.runNow(...args),
     };
   }
 
   public stop() {
-    this.pluginLifecycle = 'stop';
     if (this.taskManager) {
       this.taskManager.stop();
     }
   }
 
-  private ensurePluginLifecycle(lifecycle: 'start' | 'setup' | 'init' | 'stop', operation: string) {
-    if (this.pluginLifecycle !== lifecycle) {
-      throw new Error(
-        `Cannot ${operation} outside of the "${lifecycle}" lifecycle stage (Task Manager is in "${this.pluginLifecycle})"`
-      );
+  /**
+   * Ensures task manager hasn't started
+   *
+   * @param {string} the name of the operation being executed
+   * @returns void
+   */
+  private assertStillInSetup(operation: string) {
+    if (this.taskManager?.isStarted) {
+      throw new Error(`Cannot ${operation} after the task manager has started`);
     }
   }
 }
