@@ -65,10 +65,10 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
 
     const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
     await waitFor(() => {
-      wrapper!.update();
+      wrapper.update();
 
-      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
-      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
+      expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
         'Load Elastic prebuilt rules and timeline templates'
       );
     });
@@ -86,10 +86,10 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
 
     const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
     await waitFor(() => {
-      wrapper!.update();
+      wrapper.update();
 
-      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
-      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
+      expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
         'Load Elastic prebuilt rules'
       );
     });
@@ -107,10 +107,10 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
 
     const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
     await waitFor(() => {
-      wrapper!.update();
+      wrapper.update();
 
-      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
-      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
+      expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
         'Load Elastic prebuilt timeline templates'
       );
     });
