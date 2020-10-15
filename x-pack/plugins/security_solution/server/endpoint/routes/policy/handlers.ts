@@ -8,16 +8,16 @@ import { TypeOf } from '@kbn/config-schema';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import { GetPolicyResponseSchema } from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
-import { getPolicyResponseByHostId } from './service';
+import { getPolicyResponseByAgentId } from './service';
 
 export const getHostPolicyResponseHandler = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<undefined, TypeOf<typeof GetPolicyResponseSchema.query>, undefined> {
   return async (context, request, response) => {
     try {
-      const doc = await getPolicyResponseByHostId(
+      const doc = await getPolicyResponseByAgentId(
         policyIndexPattern,
-        request.query.hostId,
+        request.query.agentId,
         context.core.elasticsearch.legacy.client
       );
 

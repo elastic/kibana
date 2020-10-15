@@ -25,6 +25,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { DecisionPathPlotData } from './use_classification_path_data';
+import { formatSingleValue } from '../../../formatters/format_value';
 import {
   FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
