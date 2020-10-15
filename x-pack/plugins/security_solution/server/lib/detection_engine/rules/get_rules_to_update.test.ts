@@ -15,7 +15,7 @@ describe('get_rules_to_update', () => {
       expect(update).toEqual([]);
     });
 
-    test('should return empty array if the id of the two rules do not match', () => {
+    test('should return empty array if the rule_id of the two rules do not match', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
