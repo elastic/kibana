@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
+cancel?: (deps: SearchStrategyDependencies, id: string) => Promise<void>;
 ```

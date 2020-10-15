@@ -4,6 +4,8 @@
 
 ## IKibanaSearchResponse.rawResponse property
 
+The raw response returned by the internal search method (usually the raw ES response)
+
 <b>Signature:</b>
 
 ```typescript

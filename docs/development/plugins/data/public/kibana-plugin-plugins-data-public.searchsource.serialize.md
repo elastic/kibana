@@ -15,13 +15,13 @@ Using `createSearchSource`<!-- -->, the instance can be re-created.
 ```typescript
 serialize(): {
         searchSourceJSON: string;
-        references: import("../../../../../core/types").SavedObjectReference[];
+        references: import("src/core/server").SavedObjectReference[];
     };
 ```
 <b>Returns:</b>
 
 `{
         searchSourceJSON: string;
-        references: import("../../../../../core/types").SavedObjectReference[];
+        references: import("src/core/server").SavedObjectReference[];
     }`
 
