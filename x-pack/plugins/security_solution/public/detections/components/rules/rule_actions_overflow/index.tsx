@@ -66,23 +66,23 @@ const RuleActionsOverflowComponent = ({
     () =>
       rule != null
         ? [
-            <EuiToolTip
-              position="left"
-              content={getToolTipContent(rule, true, canDuplicateRuleWithActions)}
+            <EuiContextMenuItem
+              key={i18nActions.DUPLICATE_RULE}
+              icon="copy"
+              disabled={!canDuplicateRuleWithActions || userHasNoPermissions}
+              data-test-subj="rules-details-duplicate-rule"
+              onClick={async () => {
+                setIsPopoverOpen(false);
+                await duplicateRulesAction([rule], [rule.id], noop, dispatchToaster);
+              }}
             >
-              <EuiContextMenuItem
-                key={i18nActions.DUPLICATE_RULE}
-                icon="copy"
-                disabled={!canDuplicateRuleWithActions || userHasNoPermissions}
-                data-test-subj="rules-details-duplicate-rule"
-                onClick={async () => {
-                  setIsPopoverOpen(false);
-                  await duplicateRulesAction([rule], [rule.id], noop, dispatchToaster);
-                }}
+              <EuiToolTip
+                position="left"
+                content={getToolTipContent(rule, true, canDuplicateRuleWithActions)}
               >
-                {i18nActions.DUPLICATE_RULE}
-              </EuiContextMenuItem>
-            </EuiToolTip>,
+                <>{i18nActions.DUPLICATE_RULE}</>
+              </EuiToolTip>
+            </EuiContextMenuItem>,
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"

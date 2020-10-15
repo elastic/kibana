@@ -22,7 +22,7 @@ export const canEditRuleWithActions = (
   if (rule == null) {
     return true;
   }
-  if (rule.actions != null && rule.actions.length > 0 && isBoolean(privileges)) {
+  if (rule.actions?.length > 0 && isBoolean(privileges)) {
     return privileges;
   }
   return true;

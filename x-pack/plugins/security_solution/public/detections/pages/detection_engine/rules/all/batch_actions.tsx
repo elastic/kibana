@@ -43,46 +43,36 @@ export const getBatchItems = ({
   selectedRuleIds,
   hasActionsPrivileges,
 }: GetBatchItems) => {
-  const containsEnabled = selectedRuleIds.some(
-    (id) => rules.find((r) => r.id === id)?.enabled ?? false
-  );
-  const containsDisabled = selectedRuleIds.some(
-    (id) => !rules.find((r) => r.id === id)?.enabled ?? false
-  );
-  const containsLoading = selectedRuleIds.some((id) => loadingRuleIds.includes(id));
-  const containsImmutable = selectedRuleIds.some(
-    (id) => rules.find((r) => r.id === id)?.immutable ?? false
-  );
-
-  const canBulkActivateRulesWithActions = selectedRuleIds.every((id) => {
-    const found = rules.find((rule) => rule.id === id);
+  const selectedRules = selectedRuleIds.reduce((acc, id) => {
+    const found = rules.find((r) => r.id === id);
     if (found != null) {
-      if (found.actions.length > 0) {
-        if (canEditRuleWithActions(found, hasActionsPrivileges)) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return true;
-      }
+      return { [id]: found, ...acc };
     }
-    return true;
-  });
+    return acc;
+  }, {} as Record<string, Rule>);
+
+  const containsEnabled = selectedRuleIds.some((id) => selectedRules[id]?.enabled ?? false);
+  const containsDisabled = selectedRuleIds.some((id) => !selectedRules[id]?.enabled ?? false);
+  const containsLoading = selectedRuleIds.some((id) => loadingRuleIds.includes(id));
+  const containsImmutable = selectedRuleIds.some((id) => selectedRules[id]?.immutable ?? false);
+
+  const missingActionPrivileges =
+    !hasActionsPrivileges &&
+    selectedRuleIds.some((id) => {
+      return !canEditRuleWithActions(selectedRules[id], hasActionsPrivileges);
+    });
 
   return [
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_ACTIVATE_SELECTED}
       icon="checkInCircleFilled"
-      disabled={!canBulkActivateRulesWithActions || containsLoading || !containsDisabled}
+      disabled={missingActionPrivileges || containsLoading || !containsDisabled}
       onClick={async () => {
         closePopover();
-        const deactivatedIds = selectedRuleIds.filter(
-          (id) => !rules.find((r) => r.id === id)?.enabled ?? false
-        );
+        const deactivatedIds = selectedRuleIds.filter((id) => !selectedRules[id]?.enabled ?? false);
 
         const deactivatedIdsNoML = deactivatedIds.filter(
-          (id) => !isMlRule(rules.find((r) => r.id === id)?.type)
+          (id) => !isMlRule(selectedRules[id]?.type)
         );
 
         const mlRuleCount = deactivatedIds.length - deactivatedIdsNoML.length;
@@ -100,7 +90,7 @@ export const getBatchItems = ({
     >
       <EuiToolTip
         position="right"
-        content={!canBulkActivateRulesWithActions ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
+        content={missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
       >
         <>{i18n.BATCH_ACTION_ACTIVATE_SELECTED}</>
       </EuiToolTip>
@@ -108,18 +98,16 @@ export const getBatchItems = ({
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DEACTIVATE_SELECTED}
       icon="crossInACircleFilled"
-      disabled={!canBulkActivateRulesWithActions || containsLoading || !containsEnabled}
+      disabled={missingActionPrivileges || containsLoading || !containsEnabled}
       onClick={async () => {
         closePopover();
-        const activatedIds = selectedRuleIds.filter(
-          (id) => rules.find((r) => r.id === id)?.enabled ?? false
-        );
+        const activatedIds = selectedRuleIds.filter((id) => selectedRules[id]?.enabled ?? false);
         await enableRulesAction(activatedIds, false, dispatch, dispatchToaster);
       }}
     >
       <EuiToolTip
         position="right"
-        content={!canBulkActivateRulesWithActions ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
+        content={missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
       >
         <>{i18n.BATCH_ACTION_DEACTIVATE_SELECTED}</>
       </EuiToolTip>
@@ -142,7 +130,7 @@ export const getBatchItems = ({
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DUPLICATE_SELECTED}
       icon="copy"
-      disabled={!canBulkActivateRulesWithActions || containsLoading || selectedRuleIds.length === 0}
+      disabled={missingActionPrivileges || containsLoading || selectedRuleIds.length === 0}
       onClick={async () => {
         closePopover();
         await duplicateRulesAction(
@@ -156,7 +144,7 @@ export const getBatchItems = ({
     >
       <EuiToolTip
         position="right"
-        content={!canBulkActivateRulesWithActions ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
+        content={missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
       >
         <>{i18n.BATCH_ACTION_DUPLICATE_SELECTED}</>
       </EuiToolTip>
