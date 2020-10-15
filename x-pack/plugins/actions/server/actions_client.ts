@@ -343,6 +343,13 @@ export class ActionsClient {
   public async listTypes(): Promise<ActionType[]> {
     return this.actionTypeRegistry.list();
   }
+
+  public isActionTypeEnabled(
+    actionTypeId: string,
+    options: { notifyUsage: boolean } = { notifyUsage: false }
+  ) {
+    return this.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
+  }
 }
 
 function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResult {

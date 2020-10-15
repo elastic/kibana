@@ -129,7 +129,7 @@ describe('Detection rules, threshold', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${newThresholdRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newThresholdRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThresholdRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newThresholdRule.severity);

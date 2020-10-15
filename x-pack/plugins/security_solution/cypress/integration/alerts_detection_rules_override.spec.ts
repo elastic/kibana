@@ -132,7 +132,7 @@ describe('Detection rules, override', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newOverrideRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newOverrideRule.severity);

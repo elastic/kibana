@@ -32,7 +32,7 @@ import React, { useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 export const defaultAlertTitle = i18n.translate('security.checkup.insecureClusterTitle', {
-  defaultMessage: 'Please secure your installation',
+  defaultMessage: 'Your data is not secure',
 });
 
 export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountPoint = (
@@ -47,7 +47,7 @@ export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountP
           <EuiText size="s">
             <FormattedMessage
               id="security.checkup.insecureClusterMessage"
-              defaultMessage="Our free security features can protect against unauthorized access."
+              defaultMessage="Don't lose one bit. Secure your data for free with Elastic."
             />
           </EuiText>
           <EuiSpacer />
@@ -66,7 +66,7 @@ export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountP
                 size="s"
                 color="primary"
                 fill
-                href="https://www.elastic.co/what-is/elastic-stack-security"
+                href="https://www.elastic.co/what-is/elastic-stack-security?blade=kibanasecuritymessage"
                 target="_blank"
               >
                 {i18n.translate('security.checkup.learnMoreButtonText', {
