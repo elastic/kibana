@@ -22,7 +22,7 @@ import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ANALYTICS_STEPS } from '../../page';
 
 function getStringValue(value: number | undefined) {
-  return value !== undefined ? `${value}` : UNSET_CONFIG_ITEM;
+  return value !== undefined && typeof value === 'number' ? `${value}` : UNSET_CONFIG_ITEM;
 }
 
 export interface ListItems {

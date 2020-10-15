@@ -39,7 +39,6 @@ const defaultNumTopClassesOption: EuiComboBoxOptionOption = {
   }),
   value: -1,
 };
-
 const zeroClassesMessage = i18n.translate(
   'xpack.ml.dataframe.analytics.create.zeroClassesMessage',
   {
@@ -47,17 +46,22 @@ const zeroClassesMessage = i18n.translate(
       'To evaluate the area under the curve of receiver operating characteristic (AUC ROC), use a non-zero value.',
   }
 );
-
 const allClassesMessage = i18n.translate('xpack.ml.dataframe.analytics.create.allClassesMessage', {
   defaultMessage:
     'If you have a large number of classes there could be a significant effect on the size of your destination index.',
 });
+const numClassesTypeMessage = i18n.translate(
+  'xpack.ml.dataframe.analytics.create.numTopClassTypeWarning',
+  {
+    defaultMessage: 'Value must be a number.',
+  }
+);
 
-function getSelectedNumTomClassesOption(currentNumTopClasses: number) {
+function getSelectedNumTomClassesOption(currentNumTopClasses?: number) {
   const option: EuiComboBoxOptionOption[] = [];
   if (currentNumTopClasses === -1) {
     option.push(defaultNumTopClassesOption);
-  } else {
+  } else if (currentNumTopClasses !== undefined) {
     option.push({
       label: `${currentNumTopClasses}`,
     });
@@ -111,9 +115,15 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const [numTopClassesSelectedOptions, setNumTopClassesSelectedOptions] = useState<
     EuiComboBoxOptionOption[]
   >(getSelectedNumTomClassesOption(numTopClasses));
+
   const selectedNumTopClasses =
     numTopClassesSelectedOptions[0] &&
-    (numTopClassesSelectedOptions[0].value ?? Number(numTopClassesSelectedOptions[0].label));
+    ((numTopClassesSelectedOptions[0].value ?? Number(numTopClassesSelectedOptions[0].label)) as
+      | number
+      | undefined);
+
+  const selectedNumTopClassesIsNaN =
+    selectedNumTopClasses !== undefined && isNaN(selectedNumTopClasses);
 
   const mmlErrors = useMemo(() => getModelMemoryLimitErrors(modelMemoryLimitValidationResult), [
     modelMemoryLimitValidationResult,
@@ -128,6 +138,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       modelMemoryLimitValidationResult.required === true);
 
   const isStepInvalid =
+    (selectedNumTopClasses !== undefined && selectedNumTopClassesIsNaN) ||
     mmlInvalid ||
     Object.keys(advancedParamErrors).length > 0 ||
     fetchingAdvancedParamErrors === true ||
@@ -360,10 +371,17 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                     'The number of categories for which the predicted probabilities are reported.',
                 }
               )}
-              isInvalid={selectedNumTopClasses === 0 || selectedNumTopClasses === -1}
+              isInvalid={
+                selectedNumTopClasses === 0 ||
+                selectedNumTopClasses === -1 ||
+                selectedNumTopClassesIsNaN
+              }
               error={[
                 ...(selectedNumTopClasses === 0 ? [<Fragment>{zeroClassesMessage}</Fragment>] : []),
                 ...(selectedNumTopClasses === -1 ? [<Fragment>{allClassesMessage}</Fragment>] : []),
+                ...(selectedNumTopClassesIsNaN
+                  ? [<Fragment>{numClassesTypeMessage}</Fragment>]
+                  : []),
               ]}
             >
               <EuiComboBox
@@ -510,12 +528,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       <ContinueButton
         isDisabled={isStepInvalid}
         onClick={() => {
-          // @ts-ignore // TODO: fix types
-          const updatedNumTopClasses: number | undefined = numTopClassesSelectedOptions[0]
-            ? numTopClassesSelectedOptions[0].value || Number(numTopClassesSelectedOptions[0].label)
-            : undefined;
           setFormState({
-            numTopClasses: updatedNumTopClasses,
+            numTopClasses: selectedNumTopClassesIsNaN === false ? selectedNumTopClasses : undefined,
           });
           setCurrentStep(ANALYTICS_STEPS.DETAILS);
         }}
