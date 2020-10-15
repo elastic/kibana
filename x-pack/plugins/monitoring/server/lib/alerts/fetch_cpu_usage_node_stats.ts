@@ -87,16 +87,6 @@ export async function fetchCpuUsageNodeStats(
                     field: 'node_stats.process.cpu.percent',
                   },
                 },
-                average_usage: {
-                  avg: {
-                    field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
-                  },
-                },
-                average_periods: {
-                  avg: {
-                    field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
-                  },
-                },
                 average_quota: {
                   avg: {
                     field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
