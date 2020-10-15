@@ -1,1 +1,6 @@
-@import './vislib/index'
+@import './vislib/index';
+
+.visualization {
+  margin: $euiSizeS;
+  padding: 0;
+}

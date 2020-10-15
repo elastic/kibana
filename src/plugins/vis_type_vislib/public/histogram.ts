@@ -36,12 +36,12 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { Rotates } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { BasicVislibParams } from './types';
+import { toExpressionAst } from './to_ast';
 
-export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const histogramVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'histogram',
   title: i18n.translate('visTypeVislib.histogram.histogramTitle', {
     defaultMessage: 'Vertical Bar',
@@ -50,10 +50,8 @@ export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies
   description: i18n.translate('visTypeVislib.histogram.histogramDescription', {
     defaultMessage: 'Assign a continuous variable to each axis',
   }),
-  visualization: createVislibVisController(deps),
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
-  },
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  toExpressionAst,
   visConfig: {
     defaults: {
       type: 'histogram',
@@ -133,9 +131,6 @@ export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies
       },
     },
   },
-  events: {
-    brush: { disabled: false },
-  },
   editorConfig: {
     collections: getConfigCollections(),
     optionTabs: getAreaOptionTabs(),
@@ -192,4 +187,4 @@ export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies
       },
     ]),
   },
-});
+};

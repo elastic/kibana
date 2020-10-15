@@ -182,7 +182,6 @@ export class Dispatch {
     const data = d.input || d;
 
     return {
-      e: d3.event,
       data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
     };
   }
@@ -423,7 +422,6 @@ export class Dispatch {
    */
   createBrush(xScale, svg) {
     const self = this;
-    const visConfig = self.handler.visConfig;
     const { width, height } = svg.node().getBBox();
     const isHorizontal = self.handler.categoryAxes[0].axisConfig.isHorizontal();
 
@@ -449,8 +447,6 @@ export class Dispatch {
 
       return self.emit('brush', {
         range,
-        config: visConfig,
-        e: d3.event,
         data,
       });
     });

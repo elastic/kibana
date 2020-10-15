@@ -29,10 +29,13 @@ import {
   ThresholdLineStyles,
 } from './utils/collections';
 import { Labels, Style } from '../../charts/public';
+import { Dimensions } from './vislib/helpers/point_series/point_series';
 
 export interface CommonVislibParams {
   addTooltip: boolean;
+  addLegend: boolean;
   legendPosition: Positions;
+  dimensions: Dimensions;
 }
 
 export interface Scale {

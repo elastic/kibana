@@ -281,13 +281,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     };
     return `tilemap ${prepareJson('visConfig', visConfig)}`;
   },
-  pie: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.pie(schemas),
-    };
-    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
-  },
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
@@ -305,16 +298,6 @@ const buildVisConfig: BuildVisConfigFunction = {
       metric: schemas.metric[0],
       geohash: schemas.segment ? schemas.segment[0] : null,
       geocentroid: schemas.geo_centroid ? schemas.geo_centroid[0] : null,
-    };
-    return visConfig;
-  },
-  pie: (schemas) => {
-    const visConfig = {} as any;
-    visConfig.dimensions = {
-      metric: schemas.metric[0],
-      buckets: schemas.segment,
-      splitRow: schemas.split_row,
-      splitColumn: schemas.split_column,
     };
     return visConfig;
   },
