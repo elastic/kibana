@@ -6,7 +6,7 @@
 
 import { CoreStart } from '../../../../src/core/public';
 import { LensPluginStartDependencies } from './plugin';
-import { AttributeService } from '../../../../src/plugins/dashboard/public';
+import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import {
   LensSavedObjectAttributes,
   LensByValueInput,
@@ -26,7 +26,7 @@ export function getLensAttributeService(
   startDependencies: LensPluginStartDependencies
 ): LensAttributeService {
   const savedObjectStore = new SavedObjectIndexStore(core.savedObjects.client);
-  return startDependencies.dashboard.getAttributeService<
+  return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput

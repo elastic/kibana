@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { from } from 'rxjs';
 
 import es from './index';
-
 import tlConfigFn from '../fixtures/tl_config';
 import * as aggResponse from './lib/agg_response_to_series_list';
 import buildRequest from './lib/build_request';
@@ -36,7 +36,10 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
     getStartServices: sinon
       .stub()
       .returns(
-        Promise.resolve([{}, { data: { search: { search: () => Promise.resolve(response) } } }])
+        Promise.resolve([
+          {},
+          { data: { search: { search: () => from(Promise.resolve(response)) } } },
+        ])
       ),
     savedObjectsClient: {
       find: function () {
