@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).equal(10);
       });
 
-      it('should be return zero matches if the mapping does not match against anything in the mapping', async () => {
+      it('should return zero matches if the mapping does not match against anything in the mapping', async () => {
         const rule: CreateRulesSchema = {
           ...getCreateThreatMatchRulesSchemaMock(),
           from: '1900-01-01T00:00:00.000Z',
