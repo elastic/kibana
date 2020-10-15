@@ -38,8 +38,8 @@ const makeSuccessMessage = (options) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
   const configPaths = Array.isArray(options.config) ? options.config : [options.config];
   const pathsMessage = configPaths
-    .map(path => relative(process.cwd(), path))
-    .map(path => ` --config ${path}`)
+    .map((path) => relative(process.cwd(), path))
+    .map((path) => ` --config ${path}`)
     .join('');
 
   return (
