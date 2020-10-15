@@ -95,6 +95,11 @@ run(
       throw createFlagError('expected --filter to be one or more strings');
     }
 
+    const focus = typeof flags.focus === 'string' ? [flags.focus] : flags.focus;
+    if (!Array.isArray(focus) || !focus.every((f) => typeof f === 'string')) {
+      throw createFlagError('expected --focus to be one or more strings');
+    }
+
     const validateLimits = flags['validate-limits'] ?? false;
     if (typeof validateLimits !== 'boolean') {
       throw createFlagError('expected --validate-limits to have no value');
@@ -118,6 +123,7 @@ run(
       inspectWorkers,
       includeCoreBundle,
       filter,
+      focus,
     });
 
     if (validateLimits) {
@@ -165,6 +171,7 @@ run(
         cache: true,
         'inspect-workers': true,
         filter: [],
+        focus: [],
       },
       help: `
         --watch            run the optimizer in watch mode
@@ -173,6 +180,7 @@ run(
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle
         --no-cache         disable the cache
+        --focus            just like --filter, except dependencies are automatically included, --filter applies to result
         --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
         --no-examples      don't build the example plugins
         --dist             create bundles that are suitable for inclusion in the Kibana distributable, enabled when running with --update-limits
