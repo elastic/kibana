@@ -209,10 +209,6 @@ class LinksMenuUI extends Component {
       },
     });
     window.open(singleMetricViewerLink, '_blank');
-
-    // await navigateToApp(PLUGIN_ID, {
-    //   path: singleMetricViewerLink,
-    // });
   };
 
   viewExamples = () => {
