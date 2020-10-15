@@ -453,7 +453,6 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   border-radius: 10%;
   white-space: nowrap;
   will-change: left, top, width, height;
-  contain: size;
   min-width: 280px;
   min-height: 90px;
   overflow-y: visible;

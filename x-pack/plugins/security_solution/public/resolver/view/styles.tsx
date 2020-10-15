@@ -39,7 +39,7 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     left: 0;
     top: 0;
     z-index: 20;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(2px);
     pointer-events: none;
   }
 
