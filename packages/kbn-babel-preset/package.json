@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
+  "kibana": {
+    "devOnly": true
+  },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-proposal-export-namespace-from": "^7.10.4",
