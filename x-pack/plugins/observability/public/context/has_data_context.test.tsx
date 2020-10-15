@@ -58,7 +58,7 @@ describe('HasDataContextProvider', () => {
   });
 
   describe('when no plugin has registered', () => {
-    it.only('hasAnyData returns false and all apps return undefined', async () => {
+    it('hasAnyData returns false and all apps return undefined', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasData: {},

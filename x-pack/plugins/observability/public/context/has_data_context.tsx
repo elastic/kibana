@@ -84,21 +84,5 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     hasAnyData = false;
   }
 
-  const _hasData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).reduce<
-    Partial<ObservabilityHasDataResponse>
-  >((acc, app) => {
-    const data = hasData[app];
-    if (!data) {
-      return acc;
-    }
-    if (app === 'ux') {
-      acc[app] = data.hasData as UXHasDataResponse;
-    } else {
-      acc[app] = data.hasData as boolean;
-    }
-    return acc;
-  }, {});
-
-  console.log('### caue: HasDataContextProvider -> _hasData', _hasData);
   return <HasDataContext.Provider value={{ hasData, hasAnyData }} children={children} />;
 }

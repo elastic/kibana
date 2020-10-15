@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo } from 'react';
-
 import { TimePickerTime } from '../components/shared/data_picker';
 import { getAbsoluteTime } from '../utils/date';
 import { useKibanaUISettings, UI_SETTINGS } from './use_kibana_ui_settings';
@@ -22,13 +20,10 @@ export function useTimeRange({ rangeFrom, rangeTo }: { rangeFrom?: string; range
   const _rangeFrom = rangeFrom ?? timePickerSharedState.from ?? timePickerTimeDefaults.from;
   const _rangeTo = rangeTo ?? timePickerSharedState.to ?? timePickerTimeDefaults.to;
 
-  return useMemo(
-    () => ({
-      rangeFrom: _rangeFrom,
-      rangeTo: _rangeTo,
-      absStart: getAbsoluteTime(_rangeFrom)!,
-      absEnd: getAbsoluteTime(_rangeTo, { roundUp: true })!,
-    }),
-    [_rangeFrom, _rangeTo]
-  );
+  return {
+    rangeFrom: _rangeFrom,
+    rangeTo: _rangeTo,
+    absStart: getAbsoluteTime(_rangeFrom)!,
+    absEnd: getAbsoluteTime(_rangeTo, { roundUp: true })!,
+  };
 }

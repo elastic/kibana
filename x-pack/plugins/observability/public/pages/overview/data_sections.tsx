@@ -25,7 +25,7 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column">
-        {hasData?.infra_logs && (
+        {hasData?.infra_logs?.hasData && (
           <EuiFlexItem grow={false}>
             <LogsSection
               bucketSize={bucketSize}
@@ -34,7 +34,7 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
             />
           </EuiFlexItem>
         )}
-        {hasData?.infra_metrics && (
+        {hasData?.infra_metrics?.hasData && (
           <EuiFlexItem grow={false}>
             <MetricsSection
               bucketSize={bucketSize}
@@ -43,7 +43,7 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
             />
           </EuiFlexItem>
         )}
-        {hasData?.apm && (
+        {hasData?.apm?.hasData && (
           <EuiFlexItem grow={false}>
             <APMSection
               bucketSize={bucketSize}
@@ -52,7 +52,7 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
             />
           </EuiFlexItem>
         )}
-        {hasData?.uptime && (
+        {hasData?.uptime?.hasData && (
           <EuiFlexItem grow={false}>
             <UptimeSection
               bucketSize={bucketSize}
@@ -61,7 +61,7 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
             />
           </EuiFlexItem>
         )}
-        {hasData?.ux && (
+        {hasData?.ux?.hasData && (
           <EuiFlexItem grow={false}>
             <UXSection
               serviceName={(hasData.ux.hasData as UXHasDataResponse).serviceName as string}
