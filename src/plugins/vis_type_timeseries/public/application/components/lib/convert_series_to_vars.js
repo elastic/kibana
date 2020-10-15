@@ -21,6 +21,7 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import { createTickFormatter } from './tick_formatter';
+import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
 
 export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig = null) => {
@@ -63,15 +64,7 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
          * If not, return a formatted value from elasticsearch
          */
         if (row.labelFormatted) {
-          const momemntObj = moment(row.labelFormatted);
-          let val;
-
-          if (momemntObj.isValid()) {
-            val = momemntObj.format(dateFormat);
-          } else {
-            val = row.labelFormatted;
-          }
-
+          const val = labelDateFormatter(row.labelFormatted, dateFormat);
           set(variables, `${_.snakeCase(row.label)}.formatted`, val);
         }
       });

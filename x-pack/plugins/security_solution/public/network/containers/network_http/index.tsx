@@ -198,6 +198,7 @@ export const useNetworkHttp = ({
         factoryQueryType: NetworkQueries.http,
         filterQuery: createFilter(filterQuery),
         id: ID,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort: sort as SortField,
         timerange: {
@@ -211,7 +212,7 @@ export const useNetworkHttp = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkHttpSearch(networkHttpRequest);
