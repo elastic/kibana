@@ -49,6 +49,5 @@ export const getVislibVisRenderer: (
     }
 
     await registeredController.render(config.visData, config.visConfig, handlers);
-    handlers.done();
   },
 });

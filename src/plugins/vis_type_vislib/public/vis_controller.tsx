@@ -19,6 +19,7 @@
 
 import $ from 'jquery';
 import React, { RefObject } from 'react';
+import ResizeObserver from 'resize-observer-polyfill';
 
 import { mountReactNode } from '../../../core/public/utils';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -45,6 +46,7 @@ export const createVislibVisController = (
 ) => {
   return class VislibVisController {
     private removeListeners?: () => void;
+    private ro?: ResizeObserver;
 
     unmount?: () => void;
     legendRef: RefObject<VisLegend>;
@@ -88,56 +90,63 @@ export const createVislibVisController = (
         this.destroy();
       }
 
+      if (this.ro) {
+        this.ro.disconnect();
+      } else {
+        // watch for size changes of chart element
+        this.ro = new ResizeObserver(handlers.reload);
+        this.ro.observe(this.chartEl);
+      }
+
       // Used in functional tests to know when chart is loaded by type
       this.chartEl.dataset.vislibChartType = visParams.type;
 
-      return new Promise(async (resolve) => {
-        if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-          return resolve();
-        }
+      if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
+        handlers.done();
+        return;
+      }
 
-        const [, { kibanaLegacy }] = await core.getStartServices();
-        kibanaLegacy.loadFontAwesome();
+      const [, { kibanaLegacy }] = await core.getStartServices();
+      kibanaLegacy.loadFontAwesome();
 
-        // @ts-expect-error
-        const { Vis: Vislib } = await import('./vislib/vis');
-        const { uiState, event: fireEvent } = handlers;
+      // @ts-expect-error
+      const { Vis: Vislib } = await import('./vislib/vis');
+      const { uiState, event: fireEvent } = handlers;
 
-        this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
-        this.vislibVis.on('brush', fireEvent);
-        this.vislibVis.on('click', fireEvent);
-        this.vislibVis.on('renderComplete', resolve);
-        this.removeListeners = () => {
-          this.vislibVis.off('brush', fireEvent);
-          this.vislibVis.off('click', fireEvent);
-        };
+      this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
+      this.vislibVis.on('brush', fireEvent);
+      this.vislibVis.on('click', fireEvent);
+      this.vislibVis.on('renderComplete', handlers.done);
+      this.removeListeners = () => {
+        this.vislibVis.off('brush', fireEvent);
+        this.vislibVis.off('click', fireEvent);
+      };
 
-        this.vislibVis.initVisConfig(esResponse, uiState);
+      this.vislibVis.initVisConfig(esResponse, uiState);
 
-        if (visParams.addLegend) {
-          $(this.container)
-            .attr('class', (i, cls) => {
-              return cls.replace(/visLib--legend-\S+/g, '');
-            })
-            .addClass((legendClassName as any)[visParams.legendPosition]);
+      if (visParams.addLegend) {
+        $(this.container)
+          .attr('class', (i, cls) => {
+            return cls.replace(/visLib--legend-\S+/g, '');
+          })
+          .addClass((legendClassName as any)[visParams.legendPosition]);
 
-          this.mountLegend(esResponse, visParams, fireEvent, uiState);
-        }
+        this.mountLegend(esResponse, visParams, fireEvent, uiState);
+      }
 
+      this.vislibVis.render(esResponse, uiState);
+
+      // refreshing the legend after the chart is rendered.
+      // this is necessary because some visualizations
+      // provide data necessary for the legend only after a render cycle.
+      if (
+        visParams.addLegend &&
+        CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
+      ) {
+        this.unmountLegend();
+        this.mountLegend(esResponse, visParams, fireEvent, uiState);
         this.vislibVis.render(esResponse, uiState);
-
-        // refreshing the legend after the chart is rendered.
-        // this is necessary because some visualizations
-        // provide data necessary for the legend only after a render cycle.
-        if (
-          visParams.addLegend &&
-          CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
-        ) {
-          this.unmountLegend();
-          this.mountLegend(esResponse, visParams, fireEvent, uiState);
-          this.vislibVis.render(esResponse, uiState);
-        }
-      });
+      }
     }
 
     mountLegend(
@@ -165,6 +174,7 @@ export const createVislibVisController = (
 
     destroy() {
       this.unmount?.();
+      this.ro?.disconnect();
 
       if (this.vislibVis) {
         this.removeListeners?.();
