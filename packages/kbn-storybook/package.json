@@ -4,6 +4,9 @@
   "private": true,
   "license": "Apache-2.0",
   "main": "./target/index.js",
+  "kibana": {
+    "devOnly": true
+  },
   "dependencies": {
     "@kbn/dev-utils": "1.0.0",
     "@storybook/addon-actions": "^6.0.16",
