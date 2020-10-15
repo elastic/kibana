@@ -117,6 +117,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             <AdvancedNode
               nodeSummary={data.nodeSummary}
               alerts={this.alerts}
+              nodeId={data.nodeSummary.resolver}
               metrics={data.metrics}
               onBrush={this.onBrush}
               zoomInfo={this.zoomInfo}
