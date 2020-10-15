@@ -16,6 +16,18 @@ import {
   TIMELINE_SEARCHBOX,
   TITLE_INPUT,
 } from '../screens/create_new_case';
+import {
+  CONNECTOR_SELECTOR,
+  SELECT_IMPACT,
+  SELECT_INCIDENT_TYPE,
+  SELECT_ISSUE_TYPE,
+  SELECT_JIRA,
+  SELECT_PRIORITY,
+  SELECT_RESILIENT,
+  SELECT_SEVERITY,
+  SELECT_SN,
+  SELECT_URGENCY,
+} from '../screens/edit_connector';
 
 export const backToCases = () => {
   cy.get(BACK_TO_CASES_BTN).click({ force: true });
@@ -43,6 +55,31 @@ export const createNewCaseWithTimeline = (newCase: TestCase) => {
   cy.get(INSERT_TIMELINE_BTN).click({ force: true });
   cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
 
+  cy.get(SUBMIT_BTN).click({ force: true });
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
+};
+
+export const createNewCaseWithConnector = (newCase: TestCase) => {
+  cy.get(TITLE_INPUT).type(newCase.name, { force: true });
+  newCase.tags.forEach((tag) => {
+    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
+  });
+  cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `, { force: true });
+
+  cy.get(CONNECTOR_SELECTOR).click({ force: true });
+  cy.get(SELECT_JIRA).click({ force: true });
+  cy.get(SELECT_ISSUE_TYPE).should('exist');
+  cy.get(SELECT_PRIORITY).should('exist');
+  cy.get(CONNECTOR_SELECTOR).click({ force: true });
+  cy.get(SELECT_SN).click({ force: true });
+  cy.get(SELECT_SEVERITY).should('exist');
+  cy.get(SELECT_URGENCY).should('exist');
+  cy.get(SELECT_IMPACT).should('exist');
+  cy.get(CONNECTOR_SELECTOR).click({ force: true });
+  cy.get(SELECT_RESILIENT).click({ force: true });
+  cy.get(SELECT_INCIDENT_TYPE).should('exist');
+  cy.get(SELECT_SEVERITY).should('exist');
   cy.get(SUBMIT_BTN).click({ force: true });
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
