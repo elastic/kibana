@@ -17,16 +17,14 @@ export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, 
   if (packagePolicyDoc.attributes.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     const popup = {
-      popup: {
-        malware: {
-          message: '',
-          enabled: false,
-        },
+      malware: {
+        message: '',
+        enabled: false,
       },
     };
     if (input && input.config) {
       input.config.policy.value.windows.popup = popup;
-      input.config.policy.value.mac.popup = popup;
+      // input.config.policy.value.mac.popup = popup;
     }
   }
 
