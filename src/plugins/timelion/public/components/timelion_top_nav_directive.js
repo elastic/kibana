@@ -20,7 +20,6 @@ import React from 'react';
 
 export function initTimelionTopNavDirective(app, deps) {
   app.directive('timelionTopNav', function (reactDirective) {
-    console.dir(deps);
     return reactDirective(
       (props) => {
         const { TopNavMenu } = deps.plugins.navigation.ui;
