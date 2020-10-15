@@ -4,17 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-  EuiFieldText,
-  EuiText,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
@@ -22,6 +14,9 @@ import { usePolicyDetailsSelector } from './policy_hooks';
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
   for (let i = 0; i < path.length - 1; i++) {
+    if (!newPolicyConfig[path[i]]) {
+      newPolicyConfig[path[i]] = {} as Record<string, unknown>;
+    }
     newPolicyConfig = newPolicyConfig[path[i]] as Record<string, unknown>;
   }
   newPolicyConfig[path[path.length - 1]] = value;
@@ -31,7 +26,11 @@ function getValue(obj: Record<string, unknown>, path: string[]) {
   let currentPolicyConfig = obj;
 
   for (let i = 0; i < path.length - 1; i++) {
-    currentPolicyConfig = currentPolicyConfig[path[i]] as Record<string, unknown>;
+    if (currentPolicyConfig[path[i]]) {
+      currentPolicyConfig = currentPolicyConfig[path[i]] as Record<string, unknown>;
+    } else {
+      return undefined;
+    }
   }
   return currentPolicyConfig[path[path.length - 1]];
 }
@@ -52,7 +51,6 @@ export const PolicyAdvanced = React.memo(
       (event) => {
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
-
           setValue(
             (newPayload as unknown) as Record<string, unknown>,
             event.target.value,
@@ -74,23 +72,13 @@ export const PolicyAdvanced = React.memo(
     return (
       <>
         <EuiFlexItem>
-          <h1>
-            <FormattedMessage
-              id="xpack.securitySolution.policyAdvanced.field"
-              defaultMessage={configPath.join('.')}
-            />
-          </h1>
+          <h1>{configPath.join('.')}</h1>
         </EuiFlexItem>
         <EuiFlexItem>
           <h1>
-            <FormattedMessage
-              id="xpack.securitySolution.policyAdvanced.version"
-              defaultMessage={
-                lastSupportedVersion
-                  ? `${firstSupportedVersion}-${lastSupportedVersion}`
-                  : `${firstSupportedVersion}+`
-              }
-            />
+            {lastSupportedVersion
+              ? `${firstSupportedVersion}-${lastSupportedVersion}`
+              : `${firstSupportedVersion}+`}
           </h1>
         </EuiFlexItem>
         <EuiFlexItem>

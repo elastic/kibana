@@ -61,13 +61,19 @@ const AdvancedPolicyForms = React.memo(() => {
   return (
     <EuiFlexGrid columns={3}>
       <EuiFlexItem>
-        <h1>{'Field name'}</h1>
+        <FormattedMessage
+          id="xpack.securitySolution.policyAdvanced.fieldName"
+          defaultMessage="Field Name"
+        />
       </EuiFlexItem>
       <EuiFlexItem>
-        <h1>{'Supported endpoint version'}</h1>
+        <FormattedMessage
+          id="xpack.securitySolution.policyAdvanced.supportedEndpointVersion"
+          defaultMessage="Supported endpoint version"
+        />
       </EuiFlexItem>
       <EuiFlexItem>
-        <h1>{'Value'}</h1>
+        <FormattedMessage id="xpack.securitySolution.policyAdvanced.value" defaultMessage="Value" />
       </EuiFlexItem>
       {((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
         (advancedField, index) => {
