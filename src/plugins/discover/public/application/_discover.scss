@@ -172,6 +172,7 @@ discover-app {
   position: absolute;
   right: $euiSizeM;
   top: $euiSizeXS;
+  z-index: $euiZLevel1;
 }
 
 .dscApp .dscFormatSource {

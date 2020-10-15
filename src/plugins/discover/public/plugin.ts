@@ -89,6 +89,7 @@ export interface DiscoverSetup {
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
   };
+  setEnhanced: (value: boolean) => void;
 }
 
 export interface DiscoverStart {
