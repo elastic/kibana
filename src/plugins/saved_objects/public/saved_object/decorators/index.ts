@@ -17,24 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
-import { SavedObjectTaggingOssPlugin } from './plugin';
-
-export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
-
 export {
-  SavedObjectsTaggingApi,
-  SavedObjectsTaggingApiUi,
-  SavedObjectsTaggingApiUiComponent,
-  TagListComponentProps,
-  TagSelectorComponentProps,
-  GetSearchBarFilterOptions,
-  ParsedSearchQuery,
-  ParseSearchQueryOptions,
-  SavedObjectSaveModalTagSelectorComponentProps,
-} from './api';
-
-export { TagDecoratedSavedObject } from './decorator';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SavedObjectTaggingOssPlugin(initializerContext);
+  ISavedObjectDecoratorRegistry,
+  SavedObjectDecoratorRegistry,
+  SavedObjectDecoratorConfig,
+} from './registry';
+export { SavedObjectDecorator, SavedObjectDecoratorFactory } from './types';

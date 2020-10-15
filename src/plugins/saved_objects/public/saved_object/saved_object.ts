@@ -28,9 +28,13 @@
  * service and the saved object api.
  */
 import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../types';
+import { ISavedObjectDecoratorRegistry } from './decorators';
 import { buildSavedObject } from './helpers/build_saved_object';
 
-export function createSavedObjectClass(services: SavedObjectKibanaServices) {
+export function createSavedObjectClass(
+  services: SavedObjectKibanaServices,
+  decoratorRegistry: ISavedObjectDecoratorRegistry
+) {
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
    * provides additional functionality besides loading/saving/deleting/etc.
@@ -44,7 +48,7 @@ export function createSavedObjectClass(services: SavedObjectKibanaServices) {
     constructor(config: SavedObjectConfig = {}) {
       // @ts-ignore
       const self: SavedObject = this;
-      buildSavedObject(self, config, services);
+      buildSavedObject(self, config, services, decoratorRegistry.getOrderedDecorators(services));
     }
   }
 

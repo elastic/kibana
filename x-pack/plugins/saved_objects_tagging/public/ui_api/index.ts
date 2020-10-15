@@ -11,6 +11,7 @@ import { buildGetTableColumnDefinition } from './get_table_column_definition';
 import { buildGetSearchBarFilter } from './get_search_bar_filter';
 import { buildParseSearchQuery } from './parse_search_query';
 import { buildConvertNameToReference } from './convert_name_to_reference';
+import { hasTagDecoration } from './has_tag_decoration';
 
 interface GetUiApiOptions {
   cache: ITagsCache;
@@ -26,5 +27,6 @@ export const getUiApi = ({ cache }: GetUiApiOptions): SavedObjectsTaggingApiUi =
     getSearchBarFilter: buildGetSearchBarFilter({ cache }),
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
+    hasTagDecoration,
   };
 };

@@ -17,24 +17,14 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
-import { SavedObjectTaggingOssPlugin } from './plugin';
+import { SavedObjectDecoratorConfig } from '../../../saved_objects/public';
+import { tagDecoratorFactory, decoratorId } from './factory';
+import { InternalTagDecoratedSavedObject } from './types';
 
-export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+export { TagDecoratedSavedObject } from './types';
 
-export {
-  SavedObjectsTaggingApi,
-  SavedObjectsTaggingApiUi,
-  SavedObjectsTaggingApiUiComponent,
-  TagListComponentProps,
-  TagSelectorComponentProps,
-  GetSearchBarFilterOptions,
-  ParsedSearchQuery,
-  ParseSearchQueryOptions,
-  SavedObjectSaveModalTagSelectorComponentProps,
-} from './api';
-
-export { TagDecoratedSavedObject } from './decorator';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SavedObjectTaggingOssPlugin(initializerContext);
+export const tagDecoratorConfig: SavedObjectDecoratorConfig<InternalTagDecoratedSavedObject> = {
+  id: decoratorId,
+  priority: 1,
+  factory: tagDecoratorFactory,
+};

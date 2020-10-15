@@ -18,17 +18,28 @@
  */
 
 import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
+import { SavedObjectSetup } from '../../saved_objects/public';
 import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 import { SavedObjectsTaggingApi } from './api';
+import { tagDecoratorConfig } from './decorator';
+
+interface SetupDeps {
+  savedObjects?: SavedObjectSetup;
+}
 
 export class SavedObjectTaggingOssPlugin
-  implements Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, {}, {}> {
+  implements
+    Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, SetupDeps, {}> {
   private apiRegistered = false;
   private api?: SavedObjectsTaggingApi;
 
   constructor(context: PluginInitializerContext) {}
 
-  public setup({}: CoreSetup) {
+  public setup({}: CoreSetup, { savedObjects }: SetupDeps) {
+    if (savedObjects) {
+      savedObjects.registerDecorator(tagDecoratorConfig);
+    }
+
     return {
       registerTaggingApi: (provider: Promise<SavedObjectsTaggingApi>) => {
         if (this.apiRegistered) {

@@ -17,24 +17,28 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
-import { SavedObjectTaggingOssPlugin } from './plugin';
+import { SavedObjectConfig } from '../../../saved_objects/public';
 
-export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
-
-export {
-  SavedObjectsTaggingApi,
-  SavedObjectsTaggingApiUi,
-  SavedObjectsTaggingApiUiComponent,
-  TagListComponentProps,
-  TagSelectorComponentProps,
-  GetSearchBarFilterOptions,
-  ParsedSearchQuery,
-  ParseSearchQueryOptions,
-  SavedObjectSaveModalTagSelectorComponentProps,
-} from './api';
-
-export { TagDecoratedSavedObject } from './decorator';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SavedObjectTaggingOssPlugin(initializerContext);
+/**
+ * Extract the tag references from the object's attribute
+ *
+ * (`extractReferences` is used when persisting the saved object to the backend)
+ */
+export const extractTagReferences: Required<SavedObjectConfig>['extractReferences'] = ({
+  attributes,
+  references,
+}) => {
+  const { __tags, ...otherAttributes } = attributes;
+  const tags = (__tags as string[]) ?? [];
+  return {
+    attributes: otherAttributes,
+    references: [
+      ...references,
+      ...tags.map((tagId) => ({
+        id: tagId,
+        type: 'tag',
+        name: `tag-${tagId}`,
+      })),
+    ],
+  };
+};

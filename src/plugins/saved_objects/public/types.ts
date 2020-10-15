@@ -79,22 +79,21 @@ export interface SavedObjectKibanaServices {
   overlays: OverlayStart;
 }
 
+export interface SavedObjectAttributesAndRefs {
+  attributes: SavedObjectAttributes;
+  references: SavedObjectReference[];
+}
+
 export interface SavedObjectConfig {
   // is only used by visualize
   afterESResp?: (savedObject: SavedObject) => Promise<SavedObject>;
   defaults?: any;
-  extractReferences?: (opts: {
-    attributes: SavedObjectAttributes;
-    references: SavedObjectReference[];
-  }) => {
-    attributes: SavedObjectAttributes;
-    references: SavedObjectReference[];
-  };
+  extractReferences?: (opts: SavedObjectAttributesAndRefs) => SavedObjectAttributesAndRefs;
+  injectReferences?: <T extends SavedObject>(object: T, references: SavedObjectReference[]) => void;
   id?: string;
   init?: () => void;
   indexPattern?: IIndexPattern;
-  injectReferences?: any;
-  mapping?: any;
+  mapping?: Record<string, any>;
   migrationVersion?: Record<string, any>;
   path?: string;
   searchSource?: ISearchSource | boolean;

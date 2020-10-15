@@ -17,24 +17,20 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
-import { SavedObjectTaggingOssPlugin } from './plugin';
+import { SavedObject, SavedObjectKibanaServices, SavedObjectConfig } from '../../types';
 
-export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+export interface SavedObjectDecorator<T extends SavedObject = SavedObject> {
+  getId(): string;
 
-export {
-  SavedObjectsTaggingApi,
-  SavedObjectsTaggingApiUi,
-  SavedObjectsTaggingApiUiComponent,
-  TagListComponentProps,
-  TagSelectorComponentProps,
-  GetSearchBarFilterOptions,
-  ParsedSearchQuery,
-  ParseSearchQueryOptions,
-  SavedObjectSaveModalTagSelectorComponentProps,
-} from './api';
+  /**
+   * Decorate the saved object provided config. This can be used to enhance
+   * ``
+   * @param config
+   */
+  decorateConfig: (config: SavedObjectConfig) => void;
+  decorateObject: (object: T) => void;
+}
 
-export { TagDecoratedSavedObject } from './decorator';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SavedObjectTaggingOssPlugin(initializerContext);
+export type SavedObjectDecoratorFactory<T extends SavedObject = SavedObject> = (
+  services: SavedObjectKibanaServices
+) => SavedObjectDecorator<T>;

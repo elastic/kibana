@@ -20,6 +20,8 @@
 import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import { SavedObject } from '../../../core/types';
+import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
+import { TagDecoratedSavedObject } from './decorator';
 import { SavedObjectsFindOptionsReference } from '../../../core/public';
 import { ITagsClient } from '../common';
 
@@ -37,6 +39,13 @@ export interface SavedObjectsTaggingApi {
  * @public
  */
 export interface SavedObjectsTaggingApiUi {
+  /**
+   * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.
+   *
+   * @param object
+   */
+  hasTagDecoration(object: SavedObjectClass): object is TagDecoratedSavedObject;
+
   /**
    * Return a filter that can be used to filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.
    *

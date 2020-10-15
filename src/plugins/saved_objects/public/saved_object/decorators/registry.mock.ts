@@ -17,24 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
-import { SavedObjectTaggingOssPlugin } from './plugin';
+import { ISavedObjectDecoratorRegistry } from './registry';
 
-export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+const createRegistryMock = (): jest.Mocked<ISavedObjectDecoratorRegistry> => {
+  const mock = {
+    register: jest.fn(),
+    getOrderedDecorators: jest.fn(),
+  };
 
-export {
-  SavedObjectsTaggingApi,
-  SavedObjectsTaggingApiUi,
-  SavedObjectsTaggingApiUiComponent,
-  TagListComponentProps,
-  TagSelectorComponentProps,
-  GetSearchBarFilterOptions,
-  ParsedSearchQuery,
-  ParseSearchQueryOptions,
-  SavedObjectSaveModalTagSelectorComponentProps,
-} from './api';
+  mock.getOrderedDecorators.mockReturnValue([]);
 
-export { TagDecoratedSavedObject } from './decorator';
+  return mock;
+};
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SavedObjectTaggingOssPlugin(initializerContext);
+export const savedObjectsDecoratorRegistryMock = {
+  create: createRegistryMock,
+};

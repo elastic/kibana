@@ -23,7 +23,7 @@ import { expandShorthand } from './field_mapping';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose
-  const mapping = expandShorthand(config.mapping);
+  const mapping = expandShorthand(config.mapping ?? {});
   const attributes = {} as Record<string, any>;
   const references = [];
 
