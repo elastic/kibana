@@ -17,7 +17,8 @@ import {
   getEqlAggsData,
   createIntervalArray,
   getInterval,
-  getSequenceAggs,
+  formatInspect,
+  getEventsToBucket,
 } from './helpers';
 
 export const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
@@ -65,6 +66,17 @@ export const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<S
       meta: {
         request: {
           params: {
+            body: JSON.stringify({
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-10-07T00:46:12.414Z',
+                    lte: '2020-10-07T01:46:12.414Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            }),
             method: 'GET',
             path: '/_eql/search/',
           },
@@ -258,195 +270,416 @@ describe('eql/helpers', () => {
   });
 
   describe('getEqlAggsData', () => {
-    test('it returns results bucketed into 2 min intervals when range is "h"', () => {
-      const mockResponse = getMockResponse();
+    describe('non-sequence', () => {
+      test('it returns results bucketed into 2 min intervals when range is "h"', () => {
+        const mockResponse = getMockResponse();
 
-      const aggs = getEqlAggsData(
-        mockResponse,
-        'h',
-        '2020-10-04T16:00:00.368707900Z',
-        jest.fn() as inputsModel.Refetch
-      );
+        const aggs = getEqlAggsData(
+          mockResponse,
+          'h',
+          '2020-10-04T16:00:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          false
+        );
 
-      const date1 = moment(aggs.data[0].x);
-      const date2 = moment(aggs.data[1].x);
-      // This'll be in ms
-      const diff = date1.diff(date2);
+        const date1 = moment(aggs.data[0].x);
+        const date2 = moment(aggs.data[1].x);
+        // This will be in ms
+        const diff = date1.diff(date2);
 
-      expect(diff).toEqual(120000);
-      expect(aggs.data).toHaveLength(31);
-      expect(aggs.data).toEqual([
-        { g: 'hits', x: 1601827200368, y: 0 },
-        { g: 'hits', x: 1601827080368, y: 0 },
-        { g: 'hits', x: 1601826960368, y: 0 },
-        { g: 'hits', x: 1601826840368, y: 0 },
-        { g: 'hits', x: 1601826720368, y: 0 },
-        { g: 'hits', x: 1601826600368, y: 1 },
-        { g: 'hits', x: 1601826480368, y: 0 },
-        { g: 'hits', x: 1601826360368, y: 0 },
-        { g: 'hits', x: 1601826240368, y: 0 },
-        { g: 'hits', x: 1601826120368, y: 0 },
-        { g: 'hits', x: 1601826000368, y: 0 },
-        { g: 'hits', x: 1601825880368, y: 0 },
-        { g: 'hits', x: 1601825760368, y: 0 },
-        { g: 'hits', x: 1601825640368, y: 0 },
-        { g: 'hits', x: 1601825520368, y: 0 },
-        { g: 'hits', x: 1601825400368, y: 0 },
-        { g: 'hits', x: 1601825280368, y: 0 },
-        { g: 'hits', x: 1601825160368, y: 0 },
-        { g: 'hits', x: 1601825040368, y: 0 },
-        { g: 'hits', x: 1601824920368, y: 0 },
-        { g: 'hits', x: 1601824800368, y: 0 },
-        { g: 'hits', x: 1601824680368, y: 0 },
-        { g: 'hits', x: 1601824560368, y: 2 },
-        { g: 'hits', x: 1601824440368, y: 0 },
-        { g: 'hits', x: 1601824320368, y: 0 },
-        { g: 'hits', x: 1601824200368, y: 0 },
-        { g: 'hits', x: 1601824080368, y: 0 },
-        { g: 'hits', x: 1601823960368, y: 1 },
-        { g: 'hits', x: 1601823840368, y: 0 },
-        { g: 'hits', x: 1601823720368, y: 0 },
-        { g: 'hits', x: 1601823600368, y: 0 },
-      ]);
-    });
+        expect(diff).toEqual(120000);
+        expect(aggs.data).toHaveLength(31);
+        expect(aggs.data).toEqual([
+          { g: 'hits', x: 1601827200368, y: 0 },
+          { g: 'hits', x: 1601827080368, y: 0 },
+          { g: 'hits', x: 1601826960368, y: 0 },
+          { g: 'hits', x: 1601826840368, y: 0 },
+          { g: 'hits', x: 1601826720368, y: 0 },
+          { g: 'hits', x: 1601826600368, y: 1 },
+          { g: 'hits', x: 1601826480368, y: 0 },
+          { g: 'hits', x: 1601826360368, y: 0 },
+          { g: 'hits', x: 1601826240368, y: 0 },
+          { g: 'hits', x: 1601826120368, y: 0 },
+          { g: 'hits', x: 1601826000368, y: 0 },
+          { g: 'hits', x: 1601825880368, y: 0 },
+          { g: 'hits', x: 1601825760368, y: 0 },
+          { g: 'hits', x: 1601825640368, y: 0 },
+          { g: 'hits', x: 1601825520368, y: 0 },
+          { g: 'hits', x: 1601825400368, y: 0 },
+          { g: 'hits', x: 1601825280368, y: 0 },
+          { g: 'hits', x: 1601825160368, y: 0 },
+          { g: 'hits', x: 1601825040368, y: 0 },
+          { g: 'hits', x: 1601824920368, y: 0 },
+          { g: 'hits', x: 1601824800368, y: 0 },
+          { g: 'hits', x: 1601824680368, y: 0 },
+          { g: 'hits', x: 1601824560368, y: 2 },
+          { g: 'hits', x: 1601824440368, y: 0 },
+          { g: 'hits', x: 1601824320368, y: 0 },
+          { g: 'hits', x: 1601824200368, y: 0 },
+          { g: 'hits', x: 1601824080368, y: 0 },
+          { g: 'hits', x: 1601823960368, y: 1 },
+          { g: 'hits', x: 1601823840368, y: 0 },
+          { g: 'hits', x: 1601823720368, y: 0 },
+          { g: 'hits', x: 1601823600368, y: 0 },
+        ]);
+      });
 
-    test('it returns results bucketed into 1 hour intervals when range is "d"', () => {
-      const mockResponse = getMockResponse();
-      const response = {
-        ...mockResponse,
-        rawResponse: {
-          ...mockResponse.rawResponse,
-          body: {
-            is_partial: false,
-            is_running: false,
-            timed_out: false,
-            took: 15,
-            hits: {
-              events: [
-                {
-                  _index: 'index',
-                  _id: '1',
-                  _source: {
-                    '@timestamp': '2020-10-04T15:16:54.368707900Z',
+      test('it returns results bucketed into 1 hour intervals when range is "d"', () => {
+        const mockResponse = getMockResponse();
+        const response = {
+          ...mockResponse,
+          rawResponse: {
+            ...mockResponse.rawResponse,
+            body: {
+              is_partial: false,
+              is_running: false,
+              timed_out: false,
+              took: 15,
+              hits: {
+                events: [
+                  {
+                    _index: 'index',
+                    _id: '1',
+                    _source: {
+                      '@timestamp': '2020-10-04T15:16:54.368707900Z',
+                    },
                   },
-                },
-                {
-                  _index: 'index',
-                  _id: '2',
-                  _source: {
-                    '@timestamp': '2020-10-04T05:50:54.368707900Z',
+                  {
+                    _index: 'index',
+                    _id: '2',
+                    _source: {
+                      '@timestamp': '2020-10-04T05:50:54.368707900Z',
+                    },
                   },
-                },
-                {
-                  _index: 'index',
-                  _id: '3',
-                  _source: {
-                    '@timestamp': '2020-10-04T18:06:54.368707900Z',
+                  {
+                    _index: 'index',
+                    _id: '3',
+                    _source: {
+                      '@timestamp': '2020-10-04T18:06:54.368707900Z',
+                    },
                   },
-                },
-                {
-                  _index: 'index',
-                  _id: '4',
-                  _source: {
-                    '@timestamp': '2020-10-04T23:15:54.368707900Z',
+                  {
+                    _index: 'index',
+                    _id: '4',
+                    _source: {
+                      '@timestamp': '2020-10-04T23:15:54.368707900Z',
+                    },
                   },
+                ],
+                total: {
+                  value: 4,
+                  relation: '',
                 },
-              ],
-              total: {
-                value: 4,
-                relation: '',
               },
             },
           },
-        },
-      };
+        };
 
-      const aggs = getEqlAggsData(
-        response,
-        'd',
-        '2020-10-04T23:50:00.368707900Z',
-        jest.fn() as inputsModel.Refetch
-      );
-      const date1 = moment(aggs.data[0].x);
-      const date2 = moment(aggs.data[1].x);
-      // This'll be in ms
-      const diff = date1.diff(date2);
+        const aggs = getEqlAggsData(
+          response,
+          'd',
+          '2020-10-04T23:50:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          false
+        );
+        const date1 = moment(aggs.data[0].x);
+        const date2 = moment(aggs.data[1].x);
+        // This'll be in ms
+        const diff = date1.diff(date2);
 
-      expect(diff).toEqual(3600000);
-      expect(aggs.data).toHaveLength(25);
-      expect(aggs.data).toEqual([
-        { g: 'hits', x: 1601855400368, y: 0 },
-        { g: 'hits', x: 1601851800368, y: 1 },
-        { g: 'hits', x: 1601848200368, y: 0 },
-        { g: 'hits', x: 1601844600368, y: 0 },
-        { g: 'hits', x: 1601841000368, y: 0 },
-        { g: 'hits', x: 1601837400368, y: 0 },
-        { g: 'hits', x: 1601833800368, y: 1 },
-        { g: 'hits', x: 1601830200368, y: 0 },
-        { g: 'hits', x: 1601826600368, y: 0 },
-        { g: 'hits', x: 1601823000368, y: 1 },
-        { g: 'hits', x: 1601819400368, y: 0 },
-        { g: 'hits', x: 1601815800368, y: 0 },
-        { g: 'hits', x: 1601812200368, y: 0 },
-        { g: 'hits', x: 1601808600368, y: 0 },
-        { g: 'hits', x: 1601805000368, y: 0 },
-        { g: 'hits', x: 1601801400368, y: 0 },
-        { g: 'hits', x: 1601797800368, y: 0 },
-        { g: 'hits', x: 1601794200368, y: 0 },
-        { g: 'hits', x: 1601790600368, y: 1 },
-        { g: 'hits', x: 1601787000368, y: 0 },
-        { g: 'hits', x: 1601783400368, y: 0 },
-        { g: 'hits', x: 1601779800368, y: 0 },
-        { g: 'hits', x: 1601776200368, y: 0 },
-        { g: 'hits', x: 1601772600368, y: 0 },
-        { g: 'hits', x: 1601769000368, y: 0 },
-      ]);
-    });
+        expect(diff).toEqual(3600000);
+        expect(aggs.data).toHaveLength(25);
+        expect(aggs.data).toEqual([
+          { g: 'hits', x: 1601855400368, y: 0 },
+          { g: 'hits', x: 1601851800368, y: 1 },
+          { g: 'hits', x: 1601848200368, y: 0 },
+          { g: 'hits', x: 1601844600368, y: 0 },
+          { g: 'hits', x: 1601841000368, y: 0 },
+          { g: 'hits', x: 1601837400368, y: 0 },
+          { g: 'hits', x: 1601833800368, y: 1 },
+          { g: 'hits', x: 1601830200368, y: 0 },
+          { g: 'hits', x: 1601826600368, y: 0 },
+          { g: 'hits', x: 1601823000368, y: 1 },
+          { g: 'hits', x: 1601819400368, y: 0 },
+          { g: 'hits', x: 1601815800368, y: 0 },
+          { g: 'hits', x: 1601812200368, y: 0 },
+          { g: 'hits', x: 1601808600368, y: 0 },
+          { g: 'hits', x: 1601805000368, y: 0 },
+          { g: 'hits', x: 1601801400368, y: 0 },
+          { g: 'hits', x: 1601797800368, y: 0 },
+          { g: 'hits', x: 1601794200368, y: 0 },
+          { g: 'hits', x: 1601790600368, y: 1 },
+          { g: 'hits', x: 1601787000368, y: 0 },
+          { g: 'hits', x: 1601783400368, y: 0 },
+          { g: 'hits', x: 1601779800368, y: 0 },
+          { g: 'hits', x: 1601776200368, y: 0 },
+          { g: 'hits', x: 1601772600368, y: 0 },
+          { g: 'hits', x: 1601769000368, y: 0 },
+        ]);
+      });
 
-    test('it correctly returns total hits', () => {
-      const mockResponse = getMockResponse();
+      test('it correctly returns total hits', () => {
+        const mockResponse = getMockResponse();
 
-      const aggs = getEqlAggsData(
-        mockResponse,
-        'h',
-        '2020-10-04T16:00:00.368707900Z',
-        jest.fn() as inputsModel.Refetch
-      );
+        const aggs = getEqlAggsData(
+          mockResponse,
+          'h',
+          '2020-10-04T16:00:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          false
+        );
 
-      expect(aggs.totalCount).toEqual(4);
-    });
+        expect(aggs.totalCount).toEqual(4);
+      });
 
-    test('it returns array with each item having a "total" of 0 if response returns no hits', () => {
-      const mockResponse = getMockResponse();
-      const response = {
-        ...mockResponse,
-        rawResponse: {
-          ...mockResponse.rawResponse,
-          body: {
-            id: 'some-id',
-            is_partial: false,
-            is_running: false,
-            timed_out: false,
-            took: 15,
-            hits: {
-              total: {
-                value: 0,
-                relation: '',
+      test('it returns array with each item having a "total" of 0 if response returns no hits', () => {
+        const mockResponse = getMockResponse();
+        const response = {
+          ...mockResponse,
+          rawResponse: {
+            ...mockResponse.rawResponse,
+            body: {
+              id: 'some-id',
+              is_partial: false,
+              is_running: false,
+              timed_out: false,
+              took: 15,
+              hits: {
+                total: {
+                  value: 0,
+                  relation: '',
+                },
               },
             },
           },
-        },
-      };
+        };
 
-      const aggs = getEqlAggsData(
-        response,
-        'h',
-        '2020-10-04T16:00:00.368707900Z',
-        jest.fn() as inputsModel.Refetch
-      );
+        const aggs = getEqlAggsData(
+          response,
+          'h',
+          '2020-10-04T16:00:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          false
+        );
 
-      expect(aggs.data.every(({ y }) => y === 0)).toBeTruthy();
-      expect(aggs.totalCount).toEqual(0);
+        expect(aggs.data.every(({ y }) => y === 0)).toBeTruthy();
+        expect(aggs.totalCount).toEqual(0);
+      });
+    });
+
+    describe('sequence', () => {
+      test('it returns results bucketed into 2 min intervals when range is "h"', () => {
+        const mockResponse = getMockSequenceResponse();
+
+        const aggs = getEqlAggsData(
+          mockResponse,
+          'h',
+          '2020-10-04T16:00:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          true
+        );
+
+        const date1 = moment(aggs.data[0].x);
+        const date2 = moment(aggs.data[1].x);
+        // This will be in ms
+        const diff = date1.diff(date2);
+
+        expect(diff).toEqual(120000);
+        expect(aggs.data).toHaveLength(31);
+        expect(aggs.data).toEqual([
+          { g: 'hits', x: 1601827200368, y: 0 },
+          { g: 'hits', x: 1601827080368, y: 0 },
+          { g: 'hits', x: 1601826960368, y: 0 },
+          { g: 'hits', x: 1601826840368, y: 0 },
+          { g: 'hits', x: 1601826720368, y: 0 },
+          { g: 'hits', x: 1601826600368, y: 1 },
+          { g: 'hits', x: 1601826480368, y: 0 },
+          { g: 'hits', x: 1601826360368, y: 0 },
+          { g: 'hits', x: 1601826240368, y: 0 },
+          { g: 'hits', x: 1601826120368, y: 0 },
+          { g: 'hits', x: 1601826000368, y: 0 },
+          { g: 'hits', x: 1601825880368, y: 0 },
+          { g: 'hits', x: 1601825760368, y: 0 },
+          { g: 'hits', x: 1601825640368, y: 0 },
+          { g: 'hits', x: 1601825520368, y: 0 },
+          { g: 'hits', x: 1601825400368, y: 0 },
+          { g: 'hits', x: 1601825280368, y: 0 },
+          { g: 'hits', x: 1601825160368, y: 0 },
+          { g: 'hits', x: 1601825040368, y: 0 },
+          { g: 'hits', x: 1601824920368, y: 0 },
+          { g: 'hits', x: 1601824800368, y: 0 },
+          { g: 'hits', x: 1601824680368, y: 0 },
+          { g: 'hits', x: 1601824560368, y: 1 },
+          { g: 'hits', x: 1601824440368, y: 0 },
+          { g: 'hits', x: 1601824320368, y: 0 },
+          { g: 'hits', x: 1601824200368, y: 0 },
+          { g: 'hits', x: 1601824080368, y: 0 },
+          { g: 'hits', x: 1601823960368, y: 0 },
+          { g: 'hits', x: 1601823840368, y: 0 },
+          { g: 'hits', x: 1601823720368, y: 0 },
+          { g: 'hits', x: 1601823600368, y: 0 },
+        ]);
+      });
+
+      test('it returns results bucketed into 1 hour intervals when range is "d"', () => {
+        const mockResponse = getMockSequenceResponse();
+        const response = {
+          ...mockResponse,
+          rawResponse: {
+            ...mockResponse.rawResponse,
+            body: {
+              is_partial: false,
+              is_running: false,
+              timed_out: false,
+              took: 15,
+              hits: {
+                sequences: [
+                  {
+                    join_keys: [],
+                    events: [
+                      {
+                        _index: 'index',
+                        _id: '1',
+                        _source: {
+                          '@timestamp': '2020-10-04T15:16:54.368707900Z',
+                        },
+                      },
+                      {
+                        _index: 'index',
+                        _id: '2',
+                        _source: {
+                          '@timestamp': '2020-10-04T05:50:54.368707900Z',
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    join_keys: [],
+                    events: [
+                      {
+                        _index: 'index',
+                        _id: '3',
+                        _source: {
+                          '@timestamp': '2020-10-04T18:06:54.368707900Z',
+                        },
+                      },
+                      {
+                        _index: 'index',
+                        _id: '4',
+                        _source: {
+                          '@timestamp': '2020-10-04T23:15:54.368707900Z',
+                        },
+                      },
+                    ],
+                  },
+                ],
+                total: {
+                  value: 4,
+                  relation: '',
+                },
+              },
+            },
+          },
+        };
+
+        const aggs = getEqlAggsData(
+          response,
+          'd',
+          '2020-10-04T23:50:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          true
+        );
+        const date1 = moment(aggs.data[0].x);
+        const date2 = moment(aggs.data[1].x);
+        // This'll be in ms
+        const diff = date1.diff(date2);
+
+        expect(diff).toEqual(3600000);
+        expect(aggs.data).toHaveLength(25);
+        expect(aggs.data).toEqual([
+          { g: 'hits', x: 1601855400368, y: 0 },
+          { g: 'hits', x: 1601851800368, y: 1 },
+          { g: 'hits', x: 1601848200368, y: 0 },
+          { g: 'hits', x: 1601844600368, y: 0 },
+          { g: 'hits', x: 1601841000368, y: 0 },
+          { g: 'hits', x: 1601837400368, y: 0 },
+          { g: 'hits', x: 1601833800368, y: 0 },
+          { g: 'hits', x: 1601830200368, y: 0 },
+          { g: 'hits', x: 1601826600368, y: 0 },
+          { g: 'hits', x: 1601823000368, y: 0 },
+          { g: 'hits', x: 1601819400368, y: 0 },
+          { g: 'hits', x: 1601815800368, y: 0 },
+          { g: 'hits', x: 1601812200368, y: 0 },
+          { g: 'hits', x: 1601808600368, y: 0 },
+          { g: 'hits', x: 1601805000368, y: 0 },
+          { g: 'hits', x: 1601801400368, y: 0 },
+          { g: 'hits', x: 1601797800368, y: 0 },
+          { g: 'hits', x: 1601794200368, y: 0 },
+          { g: 'hits', x: 1601790600368, y: 1 },
+          { g: 'hits', x: 1601787000368, y: 0 },
+          { g: 'hits', x: 1601783400368, y: 0 },
+          { g: 'hits', x: 1601779800368, y: 0 },
+          { g: 'hits', x: 1601776200368, y: 0 },
+          { g: 'hits', x: 1601772600368, y: 0 },
+          { g: 'hits', x: 1601769000368, y: 0 },
+        ]);
+      });
+
+      test('it correctly returns total hits', () => {
+        const mockResponse = getMockSequenceResponse();
+
+        const aggs = getEqlAggsData(
+          mockResponse,
+          'h',
+          '2020-10-04T16:00:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          true
+        );
+
+        expect(aggs.totalCount).toEqual(4);
+      });
+
+      test('it returns array with each item having a "total" of 0 if response returns no hits', () => {
+        const mockResponse = getMockSequenceResponse();
+        const response = {
+          ...mockResponse,
+          rawResponse: {
+            ...mockResponse.rawResponse,
+            body: {
+              id: 'some-id',
+              is_partial: false,
+              is_running: false,
+              timed_out: false,
+              took: 15,
+              hits: {
+                total: {
+                  value: 0,
+                  relation: '',
+                },
+              },
+            },
+          },
+        };
+
+        const aggs = getEqlAggsData(
+          response,
+          'h',
+          '2020-10-04T16:00:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          true
+        );
+
+        expect(aggs.data.every(({ y }) => y === 0)).toBeTruthy();
+        expect(aggs.totalCount).toEqual(0);
+      });
     });
   });
 
@@ -604,17 +837,99 @@ describe('eql/helpers', () => {
     });
   });
 
-  describe('getSequenceAggs', () => {
-    test('it aggregates events by sequences', () => {
-      const mockResponse = getMockSequenceResponse();
-      const sequenceAggs = getSequenceAggs(mockResponse, jest.fn() as inputsModel.Refetch);
+  describe('formatInspect', () => {
+    test('it should return "dsl" with response params and index info', () => {
+      const { dsl } = formatInspect(getMockResponse(), ['foo-*']);
 
-      expect(sequenceAggs.data).toEqual([
-        { g: 'Seq. 1', x: '2020-10-04T15:16:54.368707900Z', y: 1 },
-        { g: 'Seq. 1', x: '2020-10-04T15:50:54.368707900Z', y: 1 },
-        { g: 'Seq. 2', x: '2020-10-04T15:06:54.368707900Z', y: 1 },
-        { g: 'Seq. 2', x: '2020-10-04T15:15:54.368707900Z', y: 1 },
+      expect(JSON.parse(dsl[0])).toEqual({
+        body: {
+          filter: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2020-10-07T00:46:12.414Z',
+                lte: '2020-10-07T01:46:12.414Z',
+              },
+            },
+          },
+        },
+        index: ['foo-*'],
+        method: 'GET',
+        path: '/_eql/search/',
+      });
+    });
+
+    test('it should return "response"', () => {
+      const mockResponse = getMockResponse();
+      const { response } = formatInspect(mockResponse, ['foo-*']);
+
+      expect(JSON.parse(response[0])).toEqual(mockResponse.rawResponse.body);
+    });
+  });
+
+  describe('getEventsToBucket', () => {
+    test('returns events for non-sequence queries', () => {
+      const events = getEventsToBucket(false, getMockResponse());
+
+      expect(events).toEqual([
+        { _id: '1', _index: 'index', _source: { '@timestamp': '2020-10-04T15:16:54.368707900Z' } },
+        { _id: '2', _index: 'index', _source: { '@timestamp': '2020-10-04T15:50:54.368707900Z' } },
+        { _id: '3', _index: 'index', _source: { '@timestamp': '2020-10-04T15:06:54.368707900Z' } },
+        { _id: '4', _index: 'index', _source: { '@timestamp': '2020-10-04T15:15:54.368707900Z' } },
       ]);
+    });
+
+    test('returns empty array if no hits', () => {
+      const resp = getMockResponse();
+      const mockResponse = {
+        ...resp,
+        rawResponse: {
+          ...resp.rawResponse,
+          body: {
+            ...resp.rawResponse.body,
+            hits: {
+              total: {
+                value: 0,
+                relation: '',
+              },
+            },
+          },
+        },
+      };
+      const events = getEventsToBucket(false, mockResponse);
+
+      expect(events).toEqual([]);
+    });
+
+    test('returns events for sequence queries', () => {
+      const events = getEventsToBucket(true, getMockSequenceResponse());
+
+      expect(events).toEqual([
+        { _id: '2', _index: 'index', _source: { '@timestamp': '2020-10-04T15:50:54.368707900Z' } },
+        { _id: '4', _index: 'index', _source: { '@timestamp': '2020-10-04T15:15:54.368707900Z' } },
+      ]);
+    });
+
+    test('returns empty array if no sequences', () => {
+      const resp = getMockSequenceResponse();
+      const mockResponse = {
+        ...resp,
+        rawResponse: {
+          ...resp.rawResponse,
+          body: {
+            ...resp.rawResponse.body,
+            hits: {
+              total: {
+                value: 0,
+                relation: '',
+              },
+            },
+          },
+        },
+      };
+      const events = getEventsToBucket(true, mockResponse);
+
+      expect(events).toEqual([]);
     });
   });
 });

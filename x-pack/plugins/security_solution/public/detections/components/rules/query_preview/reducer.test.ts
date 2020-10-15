@@ -48,7 +48,7 @@ describe('queryPreviewReducer', () => {
       expect(update.showHistogram).toBeFalsy();
     });
 
-    test('should reset showHistogram and warnings if queryBar defined', () => {
+    test('should reset showHistogram if queryBar defined', () => {
       const update = reducer(
         { ...initialState, showHistogram: true, warnings: ['uh oh'] },
         {
@@ -62,7 +62,6 @@ describe('queryPreviewReducer', () => {
         }
       );
 
-      expect(update.warnings).toEqual([]);
       expect(update.showHistogram).toBeFalsy();
     });
 

@@ -136,6 +136,30 @@ describe('useEqlPreview', () => {
     });
   });
 
+  // TODO: Determine why eql search strategy returns null for meta.params.body
+  // in complete responses, but not in partial responses
+  it('should update inspect information on partial response', async () => {
+    const mockResponse = getMockResponse();
+    await act(async () => {
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of({
+          isRunning: true,
+          isPartial: true,
+          rawResponse: mockResponse.rawResponse,
+        } as EqlSearchStrategyResponse<EqlSearchResponse<Source>>)
+      );
+
+      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
+
+      await waitForNextUpdate();
+
+      result.current[1](params);
+
+      expect(result.current[2].inspect.dsl.length).toEqual(1);
+      expect(result.current[2].inspect.response.length).toEqual(1);
+    });
+  });
+
   it('should add danger toast if search throws', async () => {
     await act(async () => {
       (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
