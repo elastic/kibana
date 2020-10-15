@@ -27,7 +27,7 @@ describe('get_rules_to_update', () => {
       expect(update).toEqual([]);
     });
 
-    test('should return empty array if the id of file system rule is less than the installed version', () => {
+    test('should return empty array if the version of file system rule is less than the installed version', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
@@ -39,7 +39,7 @@ describe('get_rules_to_update', () => {
       expect(update).toEqual([]);
     });
 
-    test('should return empty array if the id of file system rule is the same as the installed version', () => {
+    test('should return empty array if the version of file system rule is the same as the installed version', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
@@ -51,7 +51,7 @@ describe('get_rules_to_update', () => {
       expect(update).toEqual([]);
     });
 
-    test('should return the rule to update if the id of file system rule is greater than the installed version', () => {
+    test('should return the rule to update if the version of file system rule is greater than the installed version', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
@@ -65,7 +65,7 @@ describe('get_rules_to_update', () => {
       expect(update).toEqual([ruleFromFileSystem]);
     });
 
-    test('should return 1 rule out of 2 to update if the id of file system rule is greater than the installed version of just one', () => {
+    test('should return 1 rule out of 2 to update if the version of file system rule is greater than the installed version of just one', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
@@ -84,7 +84,7 @@ describe('get_rules_to_update', () => {
       expect(update).toEqual([ruleFromFileSystem]);
     });
 
-    test('should return 2 rules out of 2 to update if the id of file system rule is greater than the installed version of both', () => {
+    test('should return 2 rules out of 2 to update if the version of file system rule is greater than the installed version of both', () => {
       const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
@@ -325,7 +325,7 @@ describe('get_rules_to_update', () => {
       expect(shouldUpdate).toEqual(false);
     });
 
-    test('should return "false" if the id of file system rule is less than the installed version', () => {
+    test('should return "false" if the version of file system rule is less than the installed version', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
@@ -337,7 +337,7 @@ describe('get_rules_to_update', () => {
       expect(shouldUpdate).toEqual(false);
     });
 
-    test('should return "false" if the id of file system rule is the same as the installed version', () => {
+    test('should return "false" if the version of file system rule is the same as the installed version', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
@@ -349,7 +349,7 @@ describe('get_rules_to_update', () => {
       expect(shouldUpdate).toEqual(false);
     });
 
-    test('should return "true" to update if the id of file system rule is greater than the installed version', () => {
+    test('should return "true" to update if the version of file system rule is greater than the installed version', () => {
       const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
