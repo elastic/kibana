@@ -259,7 +259,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('Check Related Events for event.library Node', async () => {
         await esArchiver.load('empty_kibana');
-        await esArchiver.load('endpoint/resolver_tree/test', { useCreate: true });
+        await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
         await queryBar.setQuery('');
         await queryBar.submitQuery();
         const expectedData1 = ['329 network', '1 library', '1 library'];
