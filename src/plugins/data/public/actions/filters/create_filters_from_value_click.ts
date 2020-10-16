@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { KibanaDatatable } from '../../../../../plugins/expressions/public';
-import { deserializeAggConfig } from '../../search/expressions';
+import { Datatable } from '../../../../../plugins/expressions/public';
 import { esFilters, Filter } from '../../../public';
-import { getIndexPatterns } from '../../../public/services';
-import type { ValueClickContext } from '../../../../embeddable/public';
+import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { ValueClickContext } from '../../../../embeddable/public';
+import { AggConfigSerialized } from '../../../common/search/aggs';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -33,7 +33,7 @@ import type { ValueClickContext } from '../../../../embeddable/public';
  * @return {array} - array of terms to filter against
  */
 const getOtherBucketFilterTerms = (
-  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
+  table: Pick<Datatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
@@ -71,22 +71,28 @@ const getOtherBucketFilterTerms = (
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
 const createFilter = async (
-  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
+  table: Pick<Datatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
-  if (!table || !table.columns || !table.columns[columnIndex]) {
+  if (
+    !table ||
+    !table.columns ||
+    !table.columns[columnIndex] ||
+    !table.columns[columnIndex].meta ||
+    table.columns[columnIndex].meta.source !== 'esaggs' ||
+    !table.columns[columnIndex].meta.sourceParams?.indexPatternId
+  ) {
     return;
   }
   const column = table.columns[columnIndex];
-  if (!column.meta || !column.meta.indexPatternId) {
-    return;
-  }
-  const aggConfig = deserializeAggConfig({
-    type: column.meta.type,
-    aggConfigParams: column.meta.aggConfigParams ? column.meta.aggConfigParams : {},
-    indexPattern: await getIndexPatterns().get(column.meta.indexPatternId),
-  });
+  const { indexPatternId, ...aggConfigParams } = table.columns[columnIndex].meta
+    .sourceParams as any;
+  const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
+    await getIndexPatterns().get(indexPatternId),
+    [aggConfigParams as AggConfigSerialized]
+  );
+  const aggConfig = aggConfigsInstance.aggs[0];
   let filter: Filter[] = [];
   const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
