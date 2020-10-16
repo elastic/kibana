@@ -17,70 +17,122 @@
  * under the License.
  */
 
-import React, { memo, useMemo } from 'react';
-import { EuiDataGrid } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
+import { EuiDataGrid, EuiDataGridSorting } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
-import { TableVisConfig } from '../types';
+import { TableVisConfig, TableVisUiState } from '../types';
 import { useFormattedColumnsAndRows, usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
 
 interface TableVisBasicProps {
   fireEvent: IInterpreterRenderHandlers['event'];
+  setSort: (s?: TableVisUiState['sort']) => void;
+  sort: TableVisUiState['sort'];
   table: Table;
   visConfig: TableVisConfig;
 }
 
-export const TableVisBasic = memo(({ table, fireEvent, visConfig }: TableVisBasicProps) => {
-  const { columns, rows, splitRow } = useFormattedColumnsAndRows(table, visConfig);
-  const renderCellValue = useMemo(() => createTableVisCell(table, columns, rows, fireEvent), [
-    table,
-    columns,
-    rows,
-    fireEvent,
-  ]);
+export const TableVisBasic = memo(
+  ({ fireEvent, setSort, sort, table, visConfig }: TableVisBasicProps) => {
+    const { columns, rows, splitRow } = useFormattedColumnsAndRows(table, visConfig);
+    const renderCellValue = useMemo(() => createTableVisCell(table, columns, rows, fireEvent), [
+      table,
+      columns,
+      rows,
+      fireEvent,
+    ]);
 
-  const pagination = usePagination(visConfig);
-
-  return (
-    <EuiDataGrid
-      aria-label=""
-      columns={columns.map((col) => ({
-        id: col.id,
-        display: col.title,
-      }))}
-      gridStyle={{
-        border: 'horizontal',
-        header: 'underline',
-      }}
-      rowCount={rows.length}
-      columnVisibility={{
-        visibleColumns: columns.map((col) => col.id),
-        setVisibleColumns: () => {},
-      }}
-      toolbarVisibility={
-        visConfig.showToolbar && {
-          showColumnSelector: false,
-          showFullScreenSelector: false,
-          additionalControls: (
-            <TableVisControls
-              cols={columns}
-              rows={rows}
-              table={table}
-              filename={visConfig.title}
-              splitRow={splitRow}
-            />
-          ),
+    // Pagination
+    const pagination = usePagination(visConfig);
+    // Sorting config
+    const sortingColumns = useMemo(
+      () =>
+        sort.columnIndex && sort.direction
+          ? [{ id: columns[sort.columnIndex].id, direction: sort.direction }]
+          : [],
+      [columns, sort]
+    );
+    const onSort = useCallback(
+      (sortingCols: EuiDataGridSorting['columns']) => {
+        // data table vis sorting now only handles one column sorting
+        // if data grid provides more columns to sort, pick only the next column to sort
+        if (sortingCols.length <= 1) {
+          const [newSortValue] = sortingCols;
+          setSort(
+            newSortValue
+              ? {
+                  columnIndex: columns.findIndex((c) => c.id === newSortValue.id),
+                  direction: newSortValue.direction,
+                }
+              : undefined
+          );
+        } else {
+          const [, newSortValue] = sortingCols;
+          setSort(
+            newSortValue
+              ? {
+                  columnIndex: columns.findIndex((c) => c.id === newSortValue.id),
+                  direction: newSortValue.direction,
+                }
+              : undefined
+          );
         }
-      }
-      renderCellValue={renderCellValue}
-      renderFooterCellValue={
-        // @ts-expect-error
-        visConfig.showTotal ? ({ colIndex }) => columns[colIndex].formattedTotal || null : undefined
-      }
-      pagination={pagination}
-    />
-  );
-});
+      },
+      [columns, setSort]
+    );
+
+    return (
+      <EuiDataGrid
+        aria-label=""
+        columns={columns.map((col) => ({
+          id: col.id,
+          display: col.title,
+          displayAsText: col.title,
+          actions: {
+            showHide: false,
+            showMoveLeft: false,
+            showMoveRight: false,
+          },
+        }))}
+        gridStyle={{
+          border: 'horizontal',
+          header: 'underline',
+        }}
+        rowCount={rows.length}
+        columnVisibility={{
+          visibleColumns: columns.map(({ id }) => id),
+          setVisibleColumns: () => {},
+        }}
+        toolbarVisibility={
+          visConfig.showToolbar && {
+            showColumnSelector: false,
+            showFullScreenSelector: false,
+            showSortSelector: false,
+            additionalControls: (
+              <TableVisControls
+                cols={columns}
+                rows={rows}
+                table={table}
+                filename={visConfig.title}
+                splitRow={splitRow}
+              />
+            ),
+          }
+        }
+        renderCellValue={renderCellValue}
+        renderFooterCellValue={
+          visConfig.showTotal
+            ? // @ts-expect-error
+              ({ colIndex }) => columns[colIndex].formattedTotal || null
+            : undefined
+        }
+        pagination={pagination}
+        inMemory={{ level: 'sorting' }}
+        sorting={{ columns: sortingColumns, onSort }}
+      />
+    );
+  }
+);

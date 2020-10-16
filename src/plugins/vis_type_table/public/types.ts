@@ -35,14 +35,17 @@ export interface Dimensions {
   splitRow?: SchemaConfig[];
 }
 
+export interface TableVisUiState {
+  sort: {
+    columnIndex: number | null;
+    direction: 'asc' | 'desc' | null;
+  };
+}
+
 export interface TableVisParams {
   perPage: number | '';
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;
-  sort: {
-    columnIndex: number | null;
-    direction: string | null;
-  };
   showToolbar: boolean;
   showTotal: boolean;
   totalFunc: AggTypes;

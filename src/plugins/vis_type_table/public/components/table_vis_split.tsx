@@ -22,26 +22,36 @@ import { EuiTitle } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableGroup } from '../table_vis_response_handler';
-import { TableVisConfig } from '../types';
+import { TableVisConfig, TableVisUiState } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 
 interface TableVisSplitProps {
   fireEvent: IInterpreterRenderHandlers['event'];
+  setSort: (s?: TableVisUiState['sort']) => void;
+  sort: TableVisUiState['sort'];
   tables: TableGroup[];
   visConfig: TableVisConfig;
 }
 
-export const TableVisSplit = memo(({ fireEvent, tables, visConfig }: TableVisSplitProps) => {
-  return (
-    <>
-      {tables.map(({ tables: dataTable, key, title }) => (
-        <div key={key} className="tbvChart__split">
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-          <TableVisBasic table={dataTable[0]} fireEvent={fireEvent} visConfig={visConfig} />
-        </div>
-      ))}
-    </>
-  );
-});
+export const TableVisSplit = memo(
+  ({ fireEvent, sort, setSort, tables, visConfig }: TableVisSplitProps) => {
+    return (
+      <>
+        {tables.map(({ tables: dataTable, key, title }) => (
+          <div key={key} className="tbvChart__split">
+            <EuiTitle size="xs">
+              <h3>{title}</h3>
+            </EuiTitle>
+            <TableVisBasic
+              fireEvent={fireEvent}
+              setSort={setSort}
+              sort={sort}
+              table={dataTable[0]}
+              visConfig={visConfig}
+            />
+          </div>
+        ))}
+      </>
+    );
+  }
+);

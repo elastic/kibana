@@ -71,7 +71,6 @@ describe('table vis toExpressionAst function', () => {
       showPartialRows: true,
       showTotal: true,
       showToolbar: false,
-      sort: { columnIndex: null, direction: null },
       totalFunc: AggTypes.SUM,
     };
     const actual = toExpressionAst(vis, {} as any);

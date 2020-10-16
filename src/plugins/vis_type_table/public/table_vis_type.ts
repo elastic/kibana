@@ -43,10 +43,6 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
       perPage: 10,
       showPartialRows: false,
       showMetricsAtAllLevels: false,
-      sort: {
-        columnIndex: null,
-        direction: null,
-      },
       showTotal: false,
       showToolbar: false,
       totalFunc: 'sum',
