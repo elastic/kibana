@@ -19,6 +19,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 import { FormData, FormHook } from '../types';
+import { unflattenObject } from '../lib';
 import { useFormDataContext, Context } from '../form_data_context';
 
 interface Options {
@@ -50,24 +51,22 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
 
   const initialValue = getFormData$().value;
 
-  const previousRawData = useRef<I>(initialValue);
+  const previousRawData = useRef<FormData>(initialValue);
   const isMounted = useRef(false);
-  const [formData, setFormData] = useState<I>(previousRawData.current);
+  const [formData, setFormData] = useState<I>(() => unflattenObject<I>(previousRawData.current));
 
   useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
       if (watch) {
-        const pathsToWatchArray: Array<keyof I> = Array.isArray(watch)
-          ? (watch as Array<keyof I>)
-          : ([watch] as Array<keyof I>);
+        const pathsToWatchArray: string[] = Array.isArray(watch) ? watch : [watch];
 
         if (pathsToWatchArray.some((path) => previousRawData.current[path] !== raw[path])) {
           previousRawData.current = raw;
           // Only update the state if one of the field we watch has changed.
-          setFormData(raw);
+          setFormData(unflattenObject<I>(raw));
         }
       } else {
-        setFormData(raw);
+        setFormData(unflattenObject<I>(raw));
       }
     });
     return subscription.unsubscribe;

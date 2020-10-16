@@ -40,7 +40,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
   /** Use this handler to get the validity of the form. */
   validate: () => Promise<boolean>;
-  subscribe: (handler: OnUpdateHandler<T>) => Subscription;
+  subscribe: (handler: OnUpdateHandler<T, I>) => Subscription;
   /** Sets a field value imperatively. */
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   /** Sets a field errors imperatively. */
@@ -60,16 +60,16 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
    */
   reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
   readonly __options: Required<FormOptions>;
-  __getFormData$: () => Subject<I>;
+  __getFormData$: () => Subject<FormData>;
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (
     fieldNames: string[]
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
-  __updateFormDataAt: (field: string, value: unknown) => I;
+  __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
-  __getFieldDefaultValue: <K extends keyof I>(field: K) => I[K];
+  __getFieldDefaultValue: (path: string) => unknown;
 }
 
 export type FormSchema<T extends FormData = FormData> = {
@@ -86,16 +86,18 @@ export interface FormConfig<T extends FormData = FormData, I extends FormData = 
   id?: string;
 }
 
-export interface OnFormUpdateArg<T extends FormData> {
+export interface OnFormUpdateArg<T extends FormData, I extends FormData = T> {
   data: {
-    raw: { [key: string]: any };
+    internal: I;
     format: () => T;
   };
   validate: () => Promise<boolean>;
   isValid?: boolean;
 }
 
-export type OnUpdateHandler<T extends FormData = FormData> = (arg: OnFormUpdateArg<T>) => void;
+export type OnUpdateHandler<T extends FormData = FormData, I extends FormData = T> = (
+  arg: OnFormUpdateArg<T, I>
+) => void;
 
 export interface FormOptions {
   valueChangeDebounceTime?: number;

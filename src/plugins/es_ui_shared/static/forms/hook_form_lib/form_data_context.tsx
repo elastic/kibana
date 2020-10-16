@@ -23,7 +23,7 @@ import { FormData, FormHook } from './types';
 import { Subject } from './lib';
 
 export interface Context<T extends FormData = FormData, I extends FormData = T> {
-  getFormData$: () => Subject<I>;
+  getFormData$: () => Subject<FormData>;
   getFormData: FormHook<T, I>['getFormData'];
 }
 

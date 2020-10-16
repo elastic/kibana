@@ -253,7 +253,7 @@ describe('useForm() hook', () => {
         OnUpdateHandler
       >;
 
-      expect(data.raw).toEqual({ 'user.name': 'John' });
+      expect(data.internal).toEqual({ 'user.name': 'John' });
       expect(data.format()).toEqual({ user: { name: 'John' } });
       // As we have touched all fields, the validity went from "undefined" to "true"
       expect(isValid).toBe(true);
@@ -302,7 +302,7 @@ describe('useForm() hook', () => {
         OnUpdateHandler
       >;
 
-      expect(data.raw).toEqual({
+      expect(data.internal).toEqual({
         title: defaultValue.title,
         subTitle: 'hasBeenOverridden',
         'user.name': defaultValue.user.name,

@@ -81,21 +81,21 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   // render().
   // The "useFormData()" hook is the one in charge of reading this observable
   // and updating its own state that will trigger the necessary re-renders in the UI.
-  const formData$ = useRef<Subject<I> | null>(null);
+  const formData$ = useRef<Subject<FormData> | null>(null);
 
   // ----------------------------------
   // -- HELPERS
   // ----------------------------------
-  const getFormData$ = useCallback((): Subject<I> => {
+  const getFormData$ = useCallback((): Subject<FormData> => {
     if (formData$.current === null) {
-      formData$.current = new Subject<I>({} as I);
+      formData$.current = new Subject<FormData>({});
     }
     return formData$.current;
   }, []);
 
   const updateFormData$ = useCallback(
-    (nextValue: { [key: string]: any }) => {
-      getFormData$().next(unflattenObject<I>(nextValue));
+    (nextValue: FormData) => {
+      getFormData$().next(nextValue);
     },
     [getFormData$]
   );
@@ -125,14 +125,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const updateFormDataAt: FormHook<T, I>['__updateFormDataAt'] = useCallback(
     (path, value) => {
-      const _formData$ = getFormData$();
-      const currentFormData = _formData$.value;
+      const currentFormData = getFormData$().value;
 
       if (currentFormData[path] !== value) {
         updateFormData$({ ...currentFormData, [path]: value });
       }
-
-      return _formData$.value;
     },
     [getFormData$, updateFormData$]
   );
@@ -293,8 +290,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     });
     const fieldsValue = mapFormFields(fieldsToOutput, (field) => field.__serializeValue());
     return serializer
-      ? (serializer(unflattenObject(fieldsValue) as I) as T)
-      : (unflattenObject(fieldsValue) as T);
+      ? serializer(unflattenObject<I>(fieldsValue))
+      : unflattenObject<T>(fieldsValue);
   }, [getFieldsForOutput, formOptions.stripEmptyFields, serializer]);
 
   const getErrors: FormHook<T, I>['getErrors'] = useCallback(() => {
@@ -379,7 +376,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const subscribe: FormHook<T, I>['subscribe'] = useCallback(
     (handler) => {
       const subscription = getFormData$().subscribe((raw) => {
-        handler({ isValid, data: { raw, format: getFormData }, validate });
+        handler({
+          isValid,
+          data: { internal: unflattenObject<I>(raw), format: getFormData },
+          validate,
+        });
       });
 
       formUpdateSubscribers.current.push(subscription);
@@ -412,7 +413,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         if (isFieldMounted) {
           const fieldDefaultValue = getFieldDefaultValue(path);
           field.reset({ resetValue: resetValues, defaultValue: fieldDefaultValue });
-          currentFormData[path as keyof I] = fieldDefaultValue;
+          currentFormData[path] = fieldDefaultValue;
         }
       });
 
