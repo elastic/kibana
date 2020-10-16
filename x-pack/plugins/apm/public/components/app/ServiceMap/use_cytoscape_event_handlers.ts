@@ -66,6 +66,14 @@ function getLayoutOptions({
   };
 }
 
+function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
+  const container = event.cy.container();
+
+  if (container) {
+    container.style.cursor = cursor;
+  }
+}
+
 export function useCytoscapeEventHandlers({
   cy,
   serviceName,
@@ -123,11 +131,19 @@ export function useCytoscapeEventHandlers({
     );
 
     const mouseoverHandler: cytoscape.EventHandler = (event) => {
+      if (event.target.isNode()) {
+        setCursor('pointer', event);
+      }
+
       trackNodeEdgeHover();
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
     const mouseoutHandler: cytoscape.EventHandler = (event) => {
+      if (event.target.isNode()) {
+        setCursor('default', event);
+      }
+
       event.target.removeClass('hover');
       event.target.connectedEdges().removeClass('nodeHover');
     };
@@ -152,9 +168,15 @@ export function useCytoscapeEventHandlers({
     const dragHandler: cytoscape.EventHandler = (event) => {
       applyCubicBezierStyles(event.target.connectedEdges());
 
+      setCursor('grabbing', event);
+
       if (!event.target.data('hasBeenDragged')) {
         event.target.data('hasBeenDragged', true);
       }
+    };
+
+    const dragfreeHandler: cytoscape.EventHandler = (event) => {
+      setCursor('pointer', event);
     };
 
     if (cy) {
@@ -166,6 +188,7 @@ export function useCytoscapeEventHandlers({
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
       cy.on('drag', 'node', dragHandler);
+      cy.on('dragfree', 'node', dragfreeHandler);
     }
 
     return () => {
@@ -182,6 +205,7 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
         cy.removeListener('drag', 'node', dragHandler);
+        cy.removeListener('dragfree', 'node', dragfreeHandler);
       }
     };
   }, [cy, serviceName, trackApmEvent, theme]);
