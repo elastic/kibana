@@ -90,14 +90,6 @@ export const createVislibVisController = (
         this.destroy();
       }
 
-      if (this.ro) {
-        this.ro.disconnect();
-      } else {
-        // watch for size changes of chart element
-        this.ro = new ResizeObserver(handlers.reload);
-        this.ro.observe(this.chartEl);
-      }
-
       // Used in functional tests to know when chart is loaded by type
       this.chartEl.dataset.vislibChartType = visParams.type;
 
@@ -147,6 +139,16 @@ export const createVislibVisController = (
         this.mountLegend(esResponse, visParams, fireEvent, uiState);
         this.vislibVis.render(esResponse, uiState);
       }
+
+      if (this.ro) {
+        this.ro.disconnect();
+      }
+
+      // watch for size changes of chart element
+      this.ro = new ResizeObserver(() => {
+        this.vislibVis.render(esResponse, uiState);
+      });
+      this.ro.observe(this.chartEl);
     }
 
     mountLegend(

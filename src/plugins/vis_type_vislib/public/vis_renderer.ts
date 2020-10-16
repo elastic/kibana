@@ -31,7 +31,7 @@ export const getVislibVisRenderer: (
   charts: ChartsPluginSetup
 ) => ExpressionRenderDefinition<VislibRenderValue> = (core, charts) => ({
   name: vislibVisName,
-  reuseDomNode: false,
+  reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     let registeredController = vislibVisRegistry.get(domNode);
 
