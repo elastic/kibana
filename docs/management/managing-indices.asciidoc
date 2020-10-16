@@ -145,7 +145,7 @@ template* wizard. You'll then use the template to configure two new indices.
 
 *Step 1: Logistics*
 
-. Open the *Create template* wizard.
+. In the *Index Templates* view, open the *Create template* wizard.
 +
 [role="screenshot"]
 image::images/management_index_create_wizard.png[Create wizard]
