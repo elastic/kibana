@@ -218,20 +218,20 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
               }
             />
           );
+        } else {
+          // or is it because the data is uniform
+          return (
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.exploration.noTotalFeatureImportanceCalloutMessage"
+                  defaultMessage="Total feature importance data is not available; the data set is uniform and the features have no significant impact on the prediction."
+                />
+              }
+            />
+          );
         }
-      } else {
-        // or is it because the data is uniform
-        return (
-          <EuiCallOut
-            size="s"
-            title={
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.exploration.noTotalFeatureImportanceCalloutMessage"
-                defaultMessage="Total feature importance data is not available; the data set is uniform and the features have no significant impact on the prediction."
-              />
-            }
-          />
-        );
       }
     }
     return undefined;
