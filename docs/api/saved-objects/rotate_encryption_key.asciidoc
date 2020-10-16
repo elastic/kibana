@@ -32,7 +32,7 @@ Bulk key rotation can consume a considerable amount of resources and hence only 
 ==== Response body
 
 `total`::
-(number) Indicates the total number of _all_ saved objects with the encrypted attributes, irrespective to the key {kib} used for encryption.
+(number) Indicates the total number of _all_ encrypted saved objects (optionally filtered by the requested `type`), regardless of the key {kib} used for encryption.
 
 `successful`::
 (number) Indicates the total number of _all_ encrypted saved objects (optionally filtered by the requested `type`), regardless of the key {kib} used for encryption.
