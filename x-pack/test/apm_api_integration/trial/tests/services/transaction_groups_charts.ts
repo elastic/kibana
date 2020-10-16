@@ -23,7 +23,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = encodeURIComponent(range.end);
   const transactionType = 'request';
 
-  // skipping tests as archive apm_8.0.0 needs updating to include ML saved objects
   describe('APM Transaction Overview', () => {
     describe('when data is loaded', () => {
       before(() => esArchiver.load(archiveName));
