@@ -57,6 +57,10 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
 
   useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
+      if (!isMounted.current && Object.keys(raw).length === 0) {
+        return;
+      }
+
       if (watch) {
         const pathsToWatchArray: string[] = Array.isArray(watch) ? watch : [watch];
 
