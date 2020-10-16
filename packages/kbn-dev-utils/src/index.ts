@@ -40,6 +40,6 @@ export * from './axios';
 export * from './stdio';
 export * from './ci_stats_reporter';
 export * from './plugin_list';
-export * from './plugins/';
+export * from './plugins';
 export * from './streams';
 export * from './babel';

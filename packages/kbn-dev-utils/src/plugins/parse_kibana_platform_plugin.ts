@@ -26,6 +26,14 @@ export interface KibanaPlatformPlugin {
   readonly manifest: Manifest;
 }
 
+function isValidDepsDeclaration(input: unknown, type: string): string[] {
+  if (typeof input === 'undefined') return [];
+  if (Array.isArray(input) && input.every((i) => typeof i === 'string')) {
+    return input;
+  }
+  throw new TypeError(`The "${type}" in plugin manifest should be an array of strings.`);
+}
+
 interface Manifest {
   id: string;
   ui: boolean;
@@ -52,6 +60,10 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
     throw new TypeError('expected new platform plugin manifest to have a string id');
   }
 
+  if (typeof manifest.version !== 'string') {
+    throw new TypeError('expected new platform plugin manifest to have a string version');
+  }
+
   return {
     directory: Path.dirname(manifestPath),
     manifestPath,
@@ -61,12 +73,12 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
       ui: !!manifest.ui,
       server: !!manifest.server,
       id: manifest.id,
-      version: manifest.version!,
-      kibanaVersion: manifest.kibanaVersion || manifest.version!,
-      requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
-      optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
-      requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
-      extraPublicDirs: Array.isArray(manifest.extraPublicDirs) ? manifest.extraPublicDirs : [],
+      version: manifest.version,
+      kibanaVersion: manifest.kibanaVersion || manifest.version,
+      requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
+      optionalPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'optionalPlugins'),
+      requiredBundles: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredBundles'),
+      extraPublicDirs: isValidDepsDeclaration(manifest.requiredPlugins, 'extraPublicDirs'),
     },
   };
 }
