@@ -25,107 +25,24 @@ import {
   SelectField,
   ToggleField,
   UseMultiFields,
-  FieldConfig,
   getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';
 
+import { ROLLOVER_EMPTY_VALIDATION } from '../../../form_validations';
+
+import { ROLLOVER_FORM_PATHS } from '../../../constants';
+
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, ErrableFormRow } from '../../';
 
-import { Forcemerge, SetPriorityInput, ifExistsNumberGreaterThanZero } from '../shared';
+import { Forcemerge, SetPriorityInput } from '../shared';
 
-import { maxSizeStoredUnits, maxAgeUnits, ROLLOVER_FORM_PATHS } from './constants';
-
-import { ROLLOVER_EMPTY_VALIDATION, rolloverThresholdsValidator } from './validations';
+import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
 import { i18nTexts } from './i18n_texts';
 
 import { useRolloverPath } from '../shared';
 
 const hotProperty: keyof Phases = 'hot';
-
-const fieldsConfig = {
-  _meta: {
-    hot: {
-      useRollover: {
-        defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
-          defaultMessage: 'Enable rollover',
-        }),
-        helpText: (
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                defaultMessage="The new index created by rollover is added
-            to the index alias and designated as the write index."
-              />
-            </p>
-            <LearnMoreLink
-              text={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
-                  defaultMessage="Learn about rollover"
-                />
-              }
-              docPath="indices-rollover-index.html"
-            />
-            <EuiSpacer size="m" />
-          </>
-        ),
-      } as FieldConfig<boolean>,
-      maxStorageSizeUnit: {
-        defaultValue: 'gb',
-      } as FieldConfig<string>,
-      maxAgeUnit: {
-        defaultValue: 'd',
-      } as FieldConfig<string>,
-    },
-  },
-  rollover: {
-    maxStorageSize: {
-      defaultValue: '50',
-      label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
-        defaultMessage: 'Maximum index size',
-      }),
-      validations: [
-        {
-          validator: rolloverThresholdsValidator,
-        },
-        {
-          validator: ifExistsNumberGreaterThanZero,
-        },
-      ],
-    } as FieldConfig<string>,
-    maxDocs: {
-      label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
-        defaultMessage: 'Maximum documents',
-      }),
-      validations: [
-        {
-          validator: rolloverThresholdsValidator,
-        },
-        {
-          validator: ifExistsNumberGreaterThanZero,
-        },
-      ],
-      serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
-    } as FieldConfig<string>,
-    maxAge: {
-      defaultValue: '30',
-      label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
-        defaultMessage: 'Maximum age',
-      }),
-      validations: [
-        {
-          validator: rolloverThresholdsValidator,
-        },
-        {
-          validator: ifExistsNumberGreaterThanZero,
-        },
-      ],
-    } as FieldConfig<string>,
-  },
-};
 
 export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) => void }> = ({
   setWarmPhaseOnRollover,
@@ -135,7 +52,7 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
   const isShowingErrors = form.isValid === false;
 
   useEffect(() => {
-    setWarmPhaseOnRollover(isRolloverEnabled);
+    setWarmPhaseOnRollover(isRolloverEnabled ?? false);
   }, [setWarmPhaseOnRollover, isRolloverEnabled]);
 
   return (
@@ -170,11 +87,31 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
         <UseField<boolean>
           key="_meta.hot.useRollover"
           path="_meta.hot.useRollover"
-          config={fieldsConfig._meta.hot.useRollover}
           component={ToggleField}
           componentProps={{
             hasEmptyLabelSpace: true,
             fullWidth: false,
+            helpText: (
+              <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
+                    defaultMessage="The new index created by rollover is added
+          to the index alias and designated as the write index."
+                  />
+                </p>
+                <LearnMoreLink
+                  text={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
+                      defaultMessage="Learn about rollover"
+                    />
+                  }
+                  docPath="indices-rollover-index.html"
+                />
+                <EuiSpacer size="m" />
+              </>
+            ),
             euiFieldProps: {
               'data-test-subj': 'rolloverSwitch',
             },
@@ -187,15 +124,12 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
               fields={{
                 maxSize: {
                   path: ROLLOVER_FORM_PATHS.maxSize,
-                  config: fieldsConfig.rollover.maxStorageSize,
                 },
                 maxDocs: {
                   path: ROLLOVER_FORM_PATHS.maxDocs,
-                  config: fieldsConfig.rollover.maxDocs,
                 },
                 maxAge: {
                   path: ROLLOVER_FORM_PATHS.maxAge,
-                  config: fieldsConfig.rollover.maxAge,
                 },
               }}
             >
@@ -239,7 +173,6 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                           key="_meta.hot.maxStorageSizeUnit"
                           path="_meta.hot.maxStorageSizeUnit"
                           component={SelectField}
-                          config={fieldsConfig._meta.hot.maxStorageSizeUnit}
                           componentProps={{
                             'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
                             hasEmptyLabelSpace: true,
@@ -297,7 +230,6 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                         <UseField
                           key="_meta.hot.maxAgeUnit"
                           path="_meta.hot.maxAgeUnit"
-                          config={fieldsConfig._meta.hot.maxAgeUnit}
                           component={SelectField}
                           componentProps={{
                             'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,

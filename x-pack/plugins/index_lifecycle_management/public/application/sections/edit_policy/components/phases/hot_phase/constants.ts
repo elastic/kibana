@@ -6,16 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-/**
- * These strings describe the path to their respective values in the serialized
- * ILM form.
- */
-export const ROLLOVER_FORM_PATHS = {
-  maxDocs: 'phases.hot.actions.rollover.max_docs',
-  maxAge: 'phases.hot.actions.rollover.max_age',
-  maxSize: 'phases.hot.actions.rollover.max_size',
-};
-
 export const maxSizeStoredUnits = [
   {
     value: 'gb',

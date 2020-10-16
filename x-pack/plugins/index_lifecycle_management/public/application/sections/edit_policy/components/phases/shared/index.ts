@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useRolloverPath } from './constants';
+export { useRolloverPath } from '../../../constants';
 
 export { DataTierAllocationField } from './data_tier_allocation_field';
 
 export { Forcemerge } from './forcemerge_field';
 
 export { SetPriorityInput } from './set_priority_input';
-
-export { ifExistsNumberGreaterThanZero } from './validations';

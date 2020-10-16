@@ -5,30 +5,16 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
 
 import { PhaseWithIndexPriority, Phases } from '../../../../../../../common/types';
 
-import { UseField, NumericField, FieldConfig } from '../../../../../../shared_imports';
-
-import { defaultSetPriority } from '../../../../../constants';
+import { UseField, NumericField } from '../../../../../../shared_imports';
 
 import { propertyof } from '../../../../../services/policies/policy_validation';
 
 import { LearnMoreLink } from '../../';
-
-import { ifExistsNumberGreaterThanZero } from './validations';
-
-const setIndexPriorityConfig: FieldConfig<string> = {
-  defaultValue: defaultSetPriority,
-  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel', {
-    defaultMessage: 'Index priority (optional)',
-  }),
-  validations: [{ validator: ifExistsNumberGreaterThanZero }],
-  serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
-};
 
 interface Props {
   phase: keyof Phases & string;
@@ -62,7 +48,6 @@ export const SetPriorityInput: FunctionComponent<Props> = ({ phase }) => {
       <UseField
         key={`phases.${phase}.actions.set_priority.priority`}
         path={`phases.${phase}.actions.set_priority.priority`}
-        config={setIndexPriorityConfig}
         component={NumericField}
         componentProps={{
           fullWidth: false,

@@ -4,11 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ValidationFunc } from '../../../../../../shared_imports';
+import { i18n } from '@kbn/i18n';
+import { fieldValidators, ValidationFunc } from '../../../shared_imports';
 
-import { i18nTexts } from './i18n_texts';
+import { i18nTexts } from './components/phases/hot_phase/i18n_texts';
 
 import { ROLLOVER_FORM_PATHS } from './constants';
+
+const { numberGreaterThanField } = fieldValidators;
+
+export const positiveNumberRequiredMessage = i18n.translate(
+  'xpack.indexLifecycleMgmt.editPolicy.numberAboveZeroRequiredError',
+  {
+    defaultMessage: 'Only numbers above 0 are allowed.',
+  }
+);
+
+export const ifExistsNumberGreaterThanZero: ValidationFunc<any, any, any> = (arg) => {
+  if (arg.value) {
+    return numberGreaterThanField({
+      than: 0,
+      message: positiveNumberRequiredMessage,
+    })({
+      ...arg,
+      value: parseInt(arg.value, 10),
+    });
+  }
+};
 
 /**
  * A special validation type used to keep track of validation errors for

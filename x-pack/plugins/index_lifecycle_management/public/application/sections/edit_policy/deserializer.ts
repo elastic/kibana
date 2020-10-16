@@ -10,7 +10,7 @@ import { SerializedPolicy } from '../../../../common/types';
 
 import { splitSizeAndUnits } from '../../services/policies/policy_serialization';
 
-import { FormInternal } from './components/phases/types';
+import { FormInternal } from './types';
 
 export const deserializer = (policy: SerializedPolicy): FormInternal =>
   produce<FormInternal>(

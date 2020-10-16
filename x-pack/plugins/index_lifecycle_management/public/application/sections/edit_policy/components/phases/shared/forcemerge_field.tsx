@@ -6,67 +6,15 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSpacer, EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { Phases } from '../../../../../../../common/types';
 
-import {
-  UseField,
-  FieldConfig,
-  ToggleField,
-  NumericField,
-  useFormData,
-  fieldValidators,
-} from '../../../../../../shared_imports';
+import { UseField, ToggleField, NumericField, useFormData } from '../../../../../../shared_imports';
 
-import { ifExistsNumberGreaterThanZero } from './validations';
-
-const { emptyField } = fieldValidators;
-
-const i18nTexts = {
-  numberOfSegmentsRequiredError: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
-    { defaultMessage: 'A value for number of segments is required.' }
-  ),
-};
+import { schema } from '../../../form_schema';
 
 import { LearnMoreLink } from '../../';
-
-const fieldsConfig = {
-  _meta: {
-    forceMergeEnabled: {
-      label: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
-        defaultMessage: 'Force merge data',
-      }),
-    } as FieldConfig<boolean>,
-    bestCompression: {
-      label: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.bestCompressionLabel', {
-        defaultMessage: 'Compress stored fields',
-      }),
-      helpText: (
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.bestCompressionText"
-          defaultMessage="Use higher compression for stored fields at the cost of slower performance."
-        />
-      ),
-    } as FieldConfig<boolean>,
-  },
-  numberOfSegments: {
-    label: i18n.translate('xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel', {
-      defaultMessage: 'Number of segments',
-    }),
-    validations: [
-      {
-        validator: emptyField(i18nTexts.numberOfSegmentsRequiredError),
-      },
-      {
-        validator: ifExistsNumberGreaterThanZero,
-      },
-    ],
-    serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
-  } as FieldConfig<string>,
-};
 
 interface Props {
   phase: keyof Phases & string;
@@ -103,12 +51,11 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
       <UseField
         key={forceMergeEnabledPath}
         path={forceMergeEnabledPath}
-        config={fieldsConfig._meta.forceMergeEnabled}
         component={ToggleField}
         componentProps={{
           euiFieldProps: {
             'data-test-subj': `${phase}-forceMergeSwitch`,
-            'aria-label': fieldsConfig._meta.forceMergeEnabled.label,
+            'aria-label': schema._meta.hot.forceMergeEnabled.label,
             'aria-controls': 'forcemergeContent',
           },
         }}
@@ -120,7 +67,6 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
             <UseField
               key={`phases.${phase}.actions.forcemerge.max_num_segments`}
               path={`phases.${phase}.actions.forcemerge.max_num_segments`}
-              config={fieldsConfig.numberOfSegments}
               component={NumericField}
               componentProps={{
                 fullWidth: false,
@@ -134,7 +80,6 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
               key="_meta.hot.bestCompression"
               path="_meta.hot.bestCompression"
               component={ToggleField}
-              config={fieldsConfig._meta.bestCompression}
               componentProps={{
                 hasEmptyLabelSpace: true,
                 euiFieldProps: {

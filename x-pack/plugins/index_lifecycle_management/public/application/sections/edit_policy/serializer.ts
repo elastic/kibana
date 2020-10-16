@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormInternal } from './components/phases/types';
 import { SerializedPolicy } from '../../../../common/types';
+
+import { FormInternal } from './types';
 
 export const createSerializer = (originalPolicy?: SerializedPolicy) => (
   data: FormInternal

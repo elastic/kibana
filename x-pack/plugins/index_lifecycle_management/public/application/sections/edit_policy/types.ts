@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SerializedPolicy } from '../../../../../../common/types';
+import { SerializedPolicy } from '../../../../common/types';
 
 /**
  * Describes the shape of data after deserialization.

@@ -5,7 +5,9 @@
  */
 
 import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
+
 import { RouteComponentProps } from 'react-router-dom';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
@@ -61,6 +63,7 @@ import {
   WarmPhase,
 } from './components';
 
+import { schema } from './form_schema';
 import { deserializer } from './deserializer';
 import { createSerializer } from './serializer';
 
@@ -110,6 +113,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     return createSerializer(existingPolicy?.policy);
   }, [existingPolicy?.policy]);
   const { form } = useForm({
+    schema,
     defaultValue: existingPolicy?.policy ?? defaultPolicy,
     deserializer,
     serializer,
