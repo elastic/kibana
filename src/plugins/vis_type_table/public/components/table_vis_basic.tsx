@@ -51,7 +51,7 @@ export const TableVisBasic = memo(
     const sortingColumns = useMemo(
       () =>
         sort.columnIndex && sort.direction
-          ? [{ id: columns[sort.columnIndex].id, direction: sort.direction }]
+          ? [{ id: columns[sort.columnIndex]?.id, direction: sort.direction }]
           : [],
       [columns, sort]
     );
