@@ -1005,7 +1005,6 @@ describe('TaskManagerRunner', () => {
     const definitions = new TaskTypeDictionary(logger);
     definitions.registerTaskDefinitions({
       testbar: {
-        type: 'bar',
         title: 'Bar!',
         createTaskRunner,
       },

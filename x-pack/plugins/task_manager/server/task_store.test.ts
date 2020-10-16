@@ -51,17 +51,14 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 const taskDefinitions = new TaskTypeDictionary(loggingSystemMock.create().get());
 taskDefinitions.registerTaskDefinitions({
   report: {
-    type: 'report',
     title: 'report',
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
-    type: 'dernstraight',
     title: 'dernstraight',
     createTaskRunner: jest.fn(),
   },
   yawn: {
-    type: 'yawn',
     title: 'yawn',
     createTaskRunner: jest.fn(),
   },
@@ -357,12 +354,10 @@ describe('TaskStore', () => {
       const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
       definitions.registerTaskDefinitions({
         foo: {
-          type: 'foo',
           title: 'foo',
           createTaskRunner: jest.fn(),
         },
         bar: {
-          type: 'bar',
           title: 'bar',
           maxAttempts: customMaxAttempts,
           createTaskRunner: jest.fn(),
@@ -488,12 +483,10 @@ describe('TaskStore', () => {
       const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
       definitions.registerTaskDefinitions({
         foo: {
-          type: 'foo',
           title: 'foo',
           createTaskRunner: jest.fn(),
         },
         bar: {
-          type: 'bar',
           title: 'bar',
           maxAttempts: customMaxAttempts,
           createTaskRunner: jest.fn(),

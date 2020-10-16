@@ -59,7 +59,6 @@ describe('TaskManagerPlugin', () => {
       expect(() =>
         setupApi.registerTaskDefinitions({
           lateRegisteredType: {
-            type: 'lateRegisteredType',
             title: 'lateRegisteredType',
             createTaskRunner: () => ({ async run() {} }),
           },

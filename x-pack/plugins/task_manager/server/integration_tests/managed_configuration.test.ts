@@ -37,7 +37,6 @@ describe('managed configuration', () => {
     const taskManager = new TaskManagerPlugin(context);
     (await taskManager.setup(coreMock.createSetup())).registerTaskDefinitions({
       foo: {
-        type: 'foo',
         title: 'Foo',
         createTaskRunner: jest.fn(),
       },
@@ -45,7 +44,6 @@ describe('managed configuration', () => {
 
     const coreStart = coreMock.createStart();
     coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-
     taskManagerStart = await taskManager.start(coreStart);
 
     // force rxjs timers to fire when they are scheduled for setTimeout(0) as the

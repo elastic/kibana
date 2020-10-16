@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues } from 'lodash';
 import Joi from 'joi';
 import { TaskDefinition, validateTaskDefinition } from './task';
 import { Logger } from '../../../../src/core/server';
@@ -56,17 +55,15 @@ export class TaskTypeDictionary {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  public registerTaskDefinitions(taskDefinitions: Record<string, TaskDefinition>) {
+  public registerTaskDefinitions(taskDefinitions: Record<string, Omit<TaskDefinition, 'type'>>) {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
     }
 
     try {
-      for (const [type, sanitizedDefinition] of Object.entries(
-        sanitizeTaskDefinitions(taskDefinitions)
-      )) {
-        this.definitions.set(type, sanitizedDefinition);
+      for (const definition of sanitizeTaskDefinitions(taskDefinitions)) {
+        this.definitions.set(definition.type, definition);
       }
     } catch (e) {
       this.logger.error('Could not sanitize task definitions');
@@ -81,10 +78,9 @@ export class TaskTypeDictionary {
  * @param taskDefinitions - The Kibana task definitions dictionary
  */
 export function sanitizeTaskDefinitions(
-  taskDefinitions: Record<string, TaskDefinition> = {}
-): Record<string, TaskDefinition> {
-  return mapValues(taskDefinitions, (rawDefinition, type) => {
-    rawDefinition.type = type;
-    return Joi.attempt(rawDefinition, validateTaskDefinition);
-  });
+  taskDefinitions: Record<string, Omit<TaskDefinition, 'type'>>
+): TaskDefinition[] {
+  return Object.entries(taskDefinitions).map(([type, rawDefinition]) =>
+    Joi.attempt<TaskDefinition>({ type, ...rawDefinition }, validateTaskDefinition)
+  );
 }

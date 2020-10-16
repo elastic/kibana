@@ -31,13 +31,11 @@ describe('mark_available_tasks_as_claimed', () => {
     const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
     definitions.registerTaskDefinitions({
       sampleTask: {
-        type: 'sampleTask',
         title: 'title',
         maxAttempts: 5,
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
       },
       otherTask: {
-        type: 'otherTask',
         title: 'title',
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
       },
