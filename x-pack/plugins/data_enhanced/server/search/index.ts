@@ -5,3 +5,4 @@
  */
 
 export { enhancedEsSearchStrategyProvider } from './es_search_strategy';
+export { eqlSearchStrategyProvider } from './eql_search_strategy';

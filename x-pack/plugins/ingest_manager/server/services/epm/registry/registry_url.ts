@@ -30,14 +30,19 @@ const getDefaultRegistryUrl = (): string => {
 
 export const getRegistryUrl = (): string => {
   const customUrl = appContextService.getConfig()?.registryUrl;
-  const isGoldPlus = licenseService.isGoldPlus();
+  const isEnterprise = licenseService.isEnterprise();
 
-  if (customUrl && isGoldPlus) {
+  if (customUrl && isEnterprise) {
+    appContextService
+      .getLogger()
+      .info('Custom registry url is an experimental feature and is unsupported.');
     return customUrl;
   }
 
   if (customUrl) {
-    appContextService.getLogger().warn('Gold license is required to use a custom registry url.');
+    appContextService
+      .getLogger()
+      .warn('Enterprise license is required to use a custom registry url.');
   }
 
   return getDefaultRegistryUrl();

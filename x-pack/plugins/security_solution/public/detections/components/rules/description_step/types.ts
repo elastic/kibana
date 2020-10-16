@@ -24,6 +24,7 @@ export interface BuildQueryBarDescription {
   query: string;
   savedId: string;
   indexPatterns?: IIndexPattern;
+  queryLabel?: string;
 }
 
 export interface BuildThreatDescription {

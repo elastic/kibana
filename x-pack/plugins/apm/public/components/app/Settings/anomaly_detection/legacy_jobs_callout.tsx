@@ -8,9 +8,20 @@ import { EuiCallOut, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useMlHref } from '../../../../../../ml/public';
 
 export function LegacyJobsCallout() {
-  const { core } = useApmPluginContext();
+  const {
+    core,
+    plugins: { ml },
+  } = useApmPluginContext();
+  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+    page: 'jobs',
+    pageState: {
+      jobId: 'high_mean_response_time',
+    },
+  });
+
   return (
     <EuiCallOut
       title={i18n.translate(
@@ -28,11 +39,7 @@ export function LegacyJobsCallout() {
           }
         )}
       </p>
-      <EuiButton
-        href={core.http.basePath.prepend(
-          '/app/ml#/jobs?mlManagement=(jobId:high_mean_response_time)'
-        )}
-      >
+      <EuiButton href={mlADLink}>
         {i18n.translate(
           'xpack.apm.settings.anomaly_detection.legacy_jobs.button',
           { defaultMessage: 'Review jobs' }

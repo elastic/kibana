@@ -5,6 +5,10 @@
  */
 import expect from '@kbn/expect';
 import { SearchResponse } from 'elasticsearch';
+import {
+  ResolverPaginatedEvents,
+  SafeEndpointEvent,
+} from '../../../plugins/security_solution/common/endpoint/types';
 import { eventsIndexPattern } from '../../../plugins/security_solution/common/endpoint/constants';
 import {
   EndpointDocGenerator,
@@ -12,6 +16,7 @@ import {
 } from '../../../plugins/security_solution/common/endpoint/generate_data';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../services/resolver';
+import { deleteEventsStream } from './data_stream_helper';
 
 interface EventIngested {
   event: {
@@ -35,6 +40,8 @@ interface NetworkEvent {
 const networkIndex = 'logs-endpoint.events.network-default';
 
 export default function ({ getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
   const es = getService('es');
   const generator = new EndpointDocGenerator('data');
@@ -59,13 +66,83 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Endpoint package', () => {
+    describe('network processors', () => {
+      let networkIndexData: InsertedEvents;
+
+      after(async () => {
+        await resolver.deleteData(networkIndexData);
+      });
+
+      it('handles events without the `network.protocol` field being defined', async () => {
+        const eventWithoutNetworkObject = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(networkIndex),
+        });
+        // ensure that `network.protocol` does not exist in the event to test that the pipeline handles those type of events
+        delete eventWithoutNetworkObject.network;
+
+        // this call will fail if the pipeline fails
+        networkIndexData = await resolver.insertEvents([eventWithoutNetworkObject], networkIndex);
+        const eventWithBothIPs = await searchForID<SafeEndpointEvent>(
+          networkIndexData.eventsInfo[0]._id
+        );
+
+        // ensure that the event was inserted into ES
+        expect(eventWithBothIPs.body.hits.hits[0]._source.event?.id).to.be(
+          eventWithoutNetworkObject.event?.id
+        );
+      });
+    });
+
+    describe('dns processor', () => {
+      before(async () => {
+        await esArchiver.load('endpoint/pipeline/dns', { useCreate: true });
+      });
+
+      after(async () => {
+        await deleteEventsStream(getService);
+      });
+
+      it('does not set dns.question.type if it is already populated', async () => {
+        // this id comes from the es archive file endpoint/pipeline/dns
+        const id = 'LrLSOVHVsFY94TAi++++++eF';
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
+          .post(`/api/endpoint/resolver/events?limit=1`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `event.id:"${id}"`,
+          })
+          .expect(200);
+        expect(body.events.length).to.eql(1);
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.name).to.eql('www.google.com');
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.type).to.eql('INVALID_VALUE');
+      });
+
+      it('sets dns.question.type if it is not populated', async () => {
+        // this id comes from the es archive file endpoint/pipeline/dns
+        const id = 'LrLSOVHVsFY94TAi++++++eP';
+        const { body }: { body: ResolverPaginatedEvents } = await supertest
+          .post(`/api/endpoint/resolver/events?limit=1`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `event.id:"${id}"`,
+          })
+          .expect(200);
+        expect(body.events.length).to.eql(1);
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.name).to.eql('www.aol.com');
+        // This value is parsed out of the message field in the event. type 28 = AAAA
+        expect((body.events[0] as SafeEndpointEvent).dns?.question?.type).to.eql('AAAA');
+      });
+    });
+
     describe('ingested processor', () => {
       let event: Event;
       let genData: InsertedEvents;
 
       before(async () => {
-        event = generator.generateEvent();
-        genData = await resolver.insertEvents([event]);
+        event = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
+        genData = await resolver.insertEvents([event], processEventsIndex);
       });
 
       after(async () => {
@@ -85,19 +162,29 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // 46.239.193.5 should be in Iceland
         // 8.8.8.8 should be in the US
-        const eventWithBothIPs = generator.generateEvent({
+        const eventWithBothIPsNetwork = generator.generateEvent({
           extensions: { source: { ip: '8.8.8.8' }, destination: { ip: '46.239.193.5' } },
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(networkIndex),
         });
 
-        const eventWithSourceOnly = generator.generateEvent({
+        const eventWithSourceOnlyNetwork = generator.generateEvent({
           extensions: { source: { ip: '8.8.8.8' } },
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(networkIndex),
         });
+
         networkIndexData = await resolver.insertEvents(
-          [eventWithBothIPs, eventWithSourceOnly],
+          [eventWithBothIPsNetwork, eventWithSourceOnlyNetwork],
           networkIndex
         );
 
-        processIndexData = await resolver.insertEvents([eventWithBothIPs], processEventsIndex);
+        const eventWithBothIPsProcess = generator.generateEvent({
+          extensions: { source: { ip: '8.8.8.8' }, destination: { ip: '46.239.193.5' } },
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
+        processIndexData = await resolver.insertEvents(
+          [eventWithBothIPsProcess],
+          processEventsIndex
+        );
       });
 
       after(async () => {

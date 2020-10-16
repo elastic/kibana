@@ -17,7 +17,16 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
   return found.length > 0;
 };
 
+export const hasEqlSequenceQuery = (ruleQuery: string | undefined): boolean => {
+  if (ruleQuery != null) {
+    const parsedQuery = ruleQuery.trim().split(/[ \t\r\n]+/);
+    return parsedQuery[0] === 'sequence' && parsedQuery[1] !== 'where';
+  }
+  return false;
+};
+
 export const isEqlRule = (ruleType: Type | undefined): boolean => ruleType === 'eql';
 export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType === 'threshold';
-export const isQueryRule = (ruleType: Type | undefined): boolean => ruleType === 'query';
+export const isQueryRule = (ruleType: Type | undefined): boolean =>
+  ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type): boolean => ruleType === 'threat_match';

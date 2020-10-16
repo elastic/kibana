@@ -19,4 +19,4 @@
 
 export * from './embeddable';
 export * from './actions';
-export { RenderDeps } from './application';
+export type { RenderDeps } from './application';

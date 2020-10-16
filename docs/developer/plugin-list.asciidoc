@@ -16,7 +16,7 @@ NOTE:
 [discrete]
 === src/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -48,7 +48,7 @@ NOTE:
 
 
 |{kib-repo}blob/{branch}/src/plugins/data/README.md[data]
-|data plugin provides common data access services.
+|The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
 |{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
@@ -110,6 +110,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
 
 
+|{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
+|An overview page highlighting Kibana apps
+
+
 |{kib-repo}blob/{branch}/src/plugins/kibana_react/README.md[kibanaReact]
 |Tools for building React applications in Kibana.
 
@@ -155,6 +159,11 @@ It also provides a stateful version of it on the start contract.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
+|securityOss is responsible for educating users about Elastic's free security features,
+so they can properly protect the data within their clusters.
+
+
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |Replaces the legacy ui/share module for registering share context menus.
 
@@ -168,7 +177,7 @@ It also provides a stateful version of it on the start contract.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry_management_section/README.md[telemetryManagementSection]
-|This plugin adds the Advanced Settings section for the Usage Data collection (aka Telemetry).
+|This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
 |{kib-repo}blob/{branch}/src/plugins/tile_map[tileMap]
@@ -259,7 +268,7 @@ which will load the visualization's editor.
 [discrete]
 === x-pack/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -267,13 +276,6 @@ which will load the visualization's editor.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/actions/README.md[actions]
 |The Kibana actions plugin provides a framework to create executable actions. You can:
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/alerting_builtins/README.md[alertingBuiltins]
-|This plugin provides alertTypes shipped with Kibana for use with the
-the alerts plugin.  When enabled, it will register
-the built-in alertTypes with the alerting plugin, register associated HTTP
-routes, etc.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerts/README.md[alerts]
@@ -397,7 +399,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_manager/README.md[ingestManager]
-|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.ingestManager.fleet.tlsCheckDisabled=false)
+|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
@@ -433,8 +435,9 @@ using the CURL scripts in the scripts folder.
 |This plugin provides access to the detailed tile map services from Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ml[ml]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
+|This plugin provides access to the machine learning features provided by
+Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]
@@ -481,6 +484,13 @@ using the CURL scripts in the scripts folder.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
+|This plugin provides alertTypes shipped with Kibana for use with the
+the alerts plugin.  When enabled, it will register
+the alertTypes by the Stack in the alerting plugin, register associated HTTP
+routes, etc.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/task_manager[taskManager]
 |WARNING: Missing README.
 
@@ -489,15 +499,15 @@ using the CURL scripts in the scripts folder.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/transform[transform]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
+|This plugin provides access to the transforms features provided by Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggers_actions_ui]
+|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
 |The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions.
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
@@ -515,16 +525,16 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 in their infrastructure.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+|NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
 |This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/xpack_legacy/README.md[xpackLegacy]
 |Contains HTTP endpoints and UiSettings that are slated for removal.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
-|NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
 |===

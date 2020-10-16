@@ -22,6 +22,7 @@ require('./polyfills');
 // must load before angular
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
+require('./flot_charts');
 
 // stateful deps
 export const KbnI18n = require('@kbn/i18n');
@@ -35,7 +36,6 @@ export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
 export const ReactDomServer = require('react-dom/server');
-export const ReactIntl = require('react-intl');
 export const ReactRouter = require('react-router'); // eslint-disable-line
 export const ReactRouterDom = require('react-router-dom');
 export const StyledComponents = require('styled-components');
@@ -51,8 +51,9 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
+export const Theme = require('./theme.ts');
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
-import * as Theme from './theme.ts';
-export { Theme };
+// runtime deps which don't need to be copied across all bundles
+export const TsLib = require('tslib');

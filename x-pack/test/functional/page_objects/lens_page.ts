@@ -114,6 +114,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Open the specified dimension.
+     *
+     * @param dimension - the selector of the dimension panel to open
+     * @param layerIndex - the index of the layer
+     */
+    async openDimensionEditor(dimension: string, layerIndex = 0) {
+      await retry.try(async () => {
+        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${dimension}`);
+      });
+    },
+
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await testSubjects.click('lns-indexPattern-dimensionContainerTitle');

@@ -42,6 +42,9 @@ export const getMedianMetricAgg = () => {
         values: { field: aggConfig.getFieldDisplayName() },
       });
     },
+    getValueBucketPath(aggConfig) {
+      return `${aggConfig.id}.50`;
+    },
     params: [
       {
         name: 'field',

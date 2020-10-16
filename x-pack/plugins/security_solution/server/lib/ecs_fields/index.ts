@@ -85,6 +85,7 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
 
 export const agentFieldsMap: Readonly<Record<string, string>> = {
   'agent.type': 'agent.type',
+  'agent.id': 'agent.id',
 };
 
 export const userFieldsMap: Readonly<Record<string, string>> = {

@@ -61,6 +61,7 @@ import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { APP_ID } from '../../../../../common/constants';
+import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 
 const EndpointListNavLink = memo<{
   name: string;
@@ -260,11 +261,11 @@ export const EndpointList = () => {
 
     return [
       {
-        field: 'metadata.host',
+        field: 'metadata',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
-        render: ({ hostname, id }: HostInfo['metadata']['host']) => {
+        render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
           const toRoutePath = getEndpointDetailsPath(
             {
               ...queryParams,
@@ -275,7 +276,7 @@ export const EndpointList = () => {
           );
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EuiToolTip content={hostname} anchorClassName="eui-fullWidth">
+            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
               <EndpointListNavLink
                 name={hostname}
                 href={toRouteUrl}
@@ -319,7 +320,7 @@ export const EndpointList = () => {
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           return (
-            <EuiToolTip content={policy.name} anchorClassName="eui-fullWidth">
+            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
               <EndpointPolicyLink
                 policyId={policy.id}
                 className="eui-textTruncate"
@@ -341,7 +342,7 @@ export const EndpointList = () => {
           const toRoutePath = getEndpointDetailsPath({
             name: 'endpointPolicyResponse',
             ...queryParams,
-            selected_endpoint: item.metadata.host.id,
+            selected_endpoint: item.metadata.agent.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
@@ -560,7 +561,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      beta={true}
+      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -570,7 +571,7 @@ export const EndpointList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running Elastic Endpoint Security"
+          defaultMessage="Hosts running Endpoint Security"
         />
       }
     >
@@ -578,16 +579,32 @@ export const EndpointList = () => {
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
           <>
-            <EuiCallOut
-              size="s"
-              data-test-subj="endpointsEnrollingNotification"
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
-                  defaultMessage="Endpoints are enrolling and will display soon"
-                />
-              }
-            />
+            <EuiCallOut size="s" data-test-subj="endpointsEnrollingNotification">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
+                defaultMessage="Endpoints are enrolling. {agentsLink} to track progress."
+                values={{
+                  agentsLink: (
+                    <LinkToApp
+                      appId="ingestManager"
+                      appPath={`#${pagePathGetters.fleet_agent_list({
+                        kuery: 'fleet-agents.packages : "endpoint"',
+                      })}`}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.fleet_agent_list({
+                        kuery: 'fleet-agents.packages : "endpoint"',
+                      })}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.endpointsEnrolling.viewAgentsLink"
+                        defaultMessage="View agents"
+                      />
+                    </LinkToApp>
+                  ),
+                }}
+              />
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}

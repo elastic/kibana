@@ -12,7 +12,7 @@ import { ConfigType } from '../';
 import { IAccess } from './check_access';
 
 import { IInitialAppData } from '../../common/types';
-import { stripTrailingSlash } from '../../common/strip_trailing_slash';
+import { stripTrailingSlash } from '../../common/strip_slashes';
 
 interface IParams {
   request: KibanaRequest;

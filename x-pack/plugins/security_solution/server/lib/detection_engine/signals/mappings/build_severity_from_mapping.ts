@@ -11,10 +11,10 @@ import {
   severity as SeverityIOTS,
   SeverityMappingOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { SignalSourceHit } from '../types';
+import { SignalSource } from '../types';
 
 interface BuildSeverityFromMappingProps {
-  doc: SignalSourceHit;
+  eventSource: SignalSource;
   severity: Severity;
   severityMapping: SeverityMappingOrUndefined;
 }
@@ -32,7 +32,7 @@ const severitySortMapping = {
 };
 
 export const buildSeverityFromMapping = ({
-  doc,
+  eventSource,
   severity,
   severityMapping,
 }: BuildSeverityFromMappingProps): BuildSeverityFromMappingReturn => {
@@ -45,7 +45,7 @@ export const buildSeverityFromMapping = ({
     );
 
     severityMappingSorted.forEach((mapping) => {
-      const docValue = get(mapping.field, doc._source);
+      const docValue = get(mapping.field, eventSource);
       // TODO: Expand by verifying fieldType from index via doc._index
       // Till then, explicit parsing of event.severity (long) to number. If not ECS, this could be
       // another datatype, but until we can lookup datatype we must assume number for the Elastic

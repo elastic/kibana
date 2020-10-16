@@ -238,12 +238,43 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             aria-live="polite"
                             class="euiScreenReaderOnly"
                           >
-                            2 types found
+                            3 types found
                           </span>
                           <ul
                             class="euiKeyPadMenu visNewVisDialog__types"
                             data-test-subj="visNewDialogTypes"
                           >
+                            <li>
+                              <button
+                                aria-describedby="visTypeDescription-visAliasWithPromotion"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
+                                data-test-subj="visType-visAliasWithPromotion"
+                                data-vis-stage="alias"
+                                type="button"
+                              >
+                                <div
+                                  class="euiKeyPadMenuItem__inner"
+                                >
+                                  <div
+                                    class="euiKeyPadMenuItem__icon"
+                                  >
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
+                                  >
+                                    <span
+                                      data-test-subj="visTypeTitle"
+                                    >
+                                      Vis alias with promotion
+                                    </span>
+                                  </p>
+                                </div>
+                              </button>
+                            </li>
                             <li>
                               <button
                                 aria-describedby="visTypeDescription-visWithAliasUrl"
@@ -359,6 +390,29 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         <p>
                           Start creating your visualization by selecting a type for that visualization.
                         </p>
+                        <p>
+                          <strong>
+                            promotion description
+                          </strong>
+                        </p>
+                        <button
+                          class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                          >
+                            <div
+                              class="euiButtonContent__icon"
+                              data-euiicon-type="popout"
+                            />
+                            <span
+                              class="euiButton__text"
+                            >
+                              another app
+                            </span>
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -605,11 +659,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           id="visualizations.newVisWizard.resultsFound"
                                           values={
                                             Object {
-                                              "resultCount": 2,
+                                              "resultCount": 3,
                                             }
                                           }
                                         >
-                                          2 types found
+                                          3 types found
                                         </FormattedMessage>
                                       </span>
                                     </EuiScreenReaderOnly>
@@ -621,6 +675,75 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         className="euiKeyPadMenu visNewVisDialog__types"
                                         data-test-subj="visNewDialogTypes"
                                       >
+                                        <li
+                                          key=".$visAliasWithPromotion"
+                                        >
+                                          <EuiKeyPadMenuItem
+                                            aria-describedby="visTypeDescription-visAliasWithPromotion"
+                                            className="visNewVisDialog__type"
+                                            data-test-subj="visType-visAliasWithPromotion"
+                                            data-vis-stage="alias"
+                                            disabled={false}
+                                            key="visAliasWithPromotion"
+                                            label={
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis alias with promotion
+                                              </span>
+                                            }
+                                            onBlur={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <button
+                                              aria-describedby="visTypeDescription-visAliasWithPromotion"
+                                              className="euiKeyPadMenuItem visNewVisDialog__type"
+                                              data-test-subj="visType-visAliasWithPromotion"
+                                              data-vis-stage="alias"
+                                              disabled={false}
+                                              onBlur={[Function]}
+                                              onClick={[Function]}
+                                              onFocus={[Function]}
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                              type="button"
+                                            >
+                                              <div
+                                                className="euiKeyPadMenuItem__inner"
+                                              >
+                                                <div
+                                                  className="euiKeyPadMenuItem__icon"
+                                                >
+                                                  <VisTypeIcon>
+                                                    <EuiIcon
+                                                      color="secondary"
+                                                      size="l"
+                                                      type="empty"
+                                                    >
+                                                      <div
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
+                                                    </EuiIcon>
+                                                  </VisTypeIcon>
+                                                </div>
+                                                <p
+                                                  className="euiKeyPadMenuItem__label"
+                                                >
+                                                  <span
+                                                    data-test-subj="visTypeTitle"
+                                                  >
+                                                    Vis alias with promotion
+                                                  </span>
+                                                </p>
+                                              </div>
+                                            </button>
+                                          </EuiKeyPadMenuItem>
+                                        </li>
                                         <li
                                           key=".$visWithAliasUrl"
                                         >
@@ -867,7 +990,21 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             </EuiSpacer>
                             <NewVisHelp
                               onPromotionClicked={[Function]}
-                              promotedTypes={Array []}
+                              promotedTypes={
+                                Array [
+                                  Object {
+                                    "aliasApp": "anotherApp",
+                                    "aliasPath": "#/anotherUrl",
+                                    "name": "visAliasWithPromotion",
+                                    "promotion": Object {
+                                      "buttonText": "another app",
+                                      "description": "promotion description",
+                                    },
+                                    "stage": "production",
+                                    "title": "Vis alias with promotion",
+                                  },
+                                ]
+                              }
                             >
                               <EuiText>
                                 <div
@@ -882,6 +1019,66 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       Start creating your visualization by selecting a type for that visualization.
                                     </FormattedMessage>
                                   </p>
+                                  <p>
+                                    <strong>
+                                      promotion description
+                                    </strong>
+                                  </p>
+                                  <EuiButton
+                                    fill={true}
+                                    iconSide="right"
+                                    iconType="popout"
+                                    onClick={[Function]}
+                                    size="s"
+                                  >
+                                    <EuiButtonDisplay
+                                      element="button"
+                                      fill={true}
+                                      iconSide="right"
+                                      iconType="popout"
+                                      onClick={[Function]}
+                                      size="s"
+                                      type="button"
+                                    >
+                                      <button
+                                        className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <EuiButtonContent
+                                          className="euiButton__content"
+                                          iconSide="right"
+                                          iconType="popout"
+                                          textProps={
+                                            Object {
+                                              "className": "euiButton__text",
+                                            }
+                                          }
+                                        >
+                                          <span
+                                            className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                                          >
+                                            <EuiIcon
+                                              className="euiButtonContent__icon"
+                                              size="m"
+                                              type="popout"
+                                            >
+                                              <div
+                                                className="euiButtonContent__icon"
+                                                data-euiicon-type="popout"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                            <span
+                                              className="euiButton__text"
+                                            >
+                                              another app
+                                            </span>
+                                          </span>
+                                        </EuiButtonContent>
+                                      </button>
+                                    </EuiButtonDisplay>
+                                  </EuiButton>
                                 </div>
                               </EuiText>
                             </NewVisHelp>
@@ -1131,6 +1328,37 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <li>
                               <button
+                                aria-describedby="visTypeDescription-visAliasWithPromotion"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
+                                data-test-subj="visType-visAliasWithPromotion"
+                                data-vis-stage="alias"
+                                type="button"
+                              >
+                                <div
+                                  class="euiKeyPadMenuItem__inner"
+                                >
+                                  <div
+                                    class="euiKeyPadMenuItem__icon"
+                                  >
+                                    <div
+                                      color="secondary"
+                                      data-euiicon-type="empty"
+                                    />
+                                  </div>
+                                  <p
+                                    class="euiKeyPadMenuItem__label"
+                                  >
+                                    <span
+                                      data-test-subj="visTypeTitle"
+                                    >
+                                      Vis alias with promotion
+                                    </span>
+                                  </p>
+                                </div>
+                              </button>
+                            </li>
+                            <li>
+                              <button
                                 aria-describedby="visTypeDescription-vis"
                                 class="euiKeyPadMenuItem visNewVisDialog__type"
                                 data-test-subj="visType-vis"
@@ -1243,6 +1471,29 @@ exports[`NewVisModal should render as expected 1`] = `
                         <p>
                           Start creating your visualization by selecting a type for that visualization.
                         </p>
+                        <p>
+                          <strong>
+                            promotion description
+                          </strong>
+                        </p>
+                        <button
+                          class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                          >
+                            <div
+                              class="euiButtonContent__icon"
+                              data-euiicon-type="popout"
+                            />
+                            <span
+                              class="euiButton__text"
+                            >
+                              another app
+                            </span>
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1454,6 +1705,75 @@ exports[`NewVisModal should render as expected 1`] = `
                                         className="euiKeyPadMenu visNewVisDialog__types"
                                         data-test-subj="visNewDialogTypes"
                                       >
+                                        <li
+                                          key=".$visAliasWithPromotion"
+                                        >
+                                          <EuiKeyPadMenuItem
+                                            aria-describedby="visTypeDescription-visAliasWithPromotion"
+                                            className="visNewVisDialog__type"
+                                            data-test-subj="visType-visAliasWithPromotion"
+                                            data-vis-stage="alias"
+                                            disabled={false}
+                                            key="visAliasWithPromotion"
+                                            label={
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis alias with promotion
+                                              </span>
+                                            }
+                                            onBlur={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <button
+                                              aria-describedby="visTypeDescription-visAliasWithPromotion"
+                                              className="euiKeyPadMenuItem visNewVisDialog__type"
+                                              data-test-subj="visType-visAliasWithPromotion"
+                                              data-vis-stage="alias"
+                                              disabled={false}
+                                              onBlur={[Function]}
+                                              onClick={[Function]}
+                                              onFocus={[Function]}
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                              type="button"
+                                            >
+                                              <div
+                                                className="euiKeyPadMenuItem__inner"
+                                              >
+                                                <div
+                                                  className="euiKeyPadMenuItem__icon"
+                                                >
+                                                  <VisTypeIcon>
+                                                    <EuiIcon
+                                                      color="secondary"
+                                                      size="l"
+                                                      type="empty"
+                                                    >
+                                                      <div
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
+                                                    </EuiIcon>
+                                                  </VisTypeIcon>
+                                                </div>
+                                                <p
+                                                  className="euiKeyPadMenuItem__label"
+                                                >
+                                                  <span
+                                                    data-test-subj="visTypeTitle"
+                                                  >
+                                                    Vis alias with promotion
+                                                  </span>
+                                                </p>
+                                              </div>
+                                            </button>
+                                          </EuiKeyPadMenuItem>
+                                        </li>
                                         <li
                                           key=".$vis"
                                         >
@@ -1700,7 +2020,21 @@ exports[`NewVisModal should render as expected 1`] = `
                             </EuiSpacer>
                             <NewVisHelp
                               onPromotionClicked={[Function]}
-                              promotedTypes={Array []}
+                              promotedTypes={
+                                Array [
+                                  Object {
+                                    "aliasApp": "anotherApp",
+                                    "aliasPath": "#/anotherUrl",
+                                    "name": "visAliasWithPromotion",
+                                    "promotion": Object {
+                                      "buttonText": "another app",
+                                      "description": "promotion description",
+                                    },
+                                    "stage": "production",
+                                    "title": "Vis alias with promotion",
+                                  },
+                                ]
+                              }
                             >
                               <EuiText>
                                 <div
@@ -1715,6 +2049,66 @@ exports[`NewVisModal should render as expected 1`] = `
                                       Start creating your visualization by selecting a type for that visualization.
                                     </FormattedMessage>
                                   </p>
+                                  <p>
+                                    <strong>
+                                      promotion description
+                                    </strong>
+                                  </p>
+                                  <EuiButton
+                                    fill={true}
+                                    iconSide="right"
+                                    iconType="popout"
+                                    onClick={[Function]}
+                                    size="s"
+                                  >
+                                    <EuiButtonDisplay
+                                      element="button"
+                                      fill={true}
+                                      iconSide="right"
+                                      iconType="popout"
+                                      onClick={[Function]}
+                                      size="s"
+                                      type="button"
+                                    >
+                                      <button
+                                        className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <EuiButtonContent
+                                          className="euiButton__content"
+                                          iconSide="right"
+                                          iconType="popout"
+                                          textProps={
+                                            Object {
+                                              "className": "euiButton__text",
+                                            }
+                                          }
+                                        >
+                                          <span
+                                            className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                                          >
+                                            <EuiIcon
+                                              className="euiButtonContent__icon"
+                                              size="m"
+                                              type="popout"
+                                            >
+                                              <div
+                                                className="euiButtonContent__icon"
+                                                data-euiicon-type="popout"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                            <span
+                                              className="euiButton__text"
+                                            >
+                                              another app
+                                            </span>
+                                          </span>
+                                        </EuiButtonContent>
+                                      </button>
+                                    </EuiButtonDisplay>
+                                  </EuiButton>
                                 </div>
                               </EuiText>
                             </NewVisHelp>
