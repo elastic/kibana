@@ -332,6 +332,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
+    data.search.session.clear();
     appStateUnsubscribe();
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
@@ -794,6 +795,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     abortController = new AbortController();
 
+    const sessionId = data.search.session.start();
+
     $scope
       .updateDataSource()
       .then(setupVisualization)
@@ -802,6 +805,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         logInspectorRequest();
         return $scope.searchSource.fetch({
           abortSignal: abortController.signal,
+          sessionId,
         });
       })
       .then(onResults)
