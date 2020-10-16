@@ -221,6 +221,7 @@ describe('Authenticator', () => {
     };
 
     beforeEach(() => {
+      auditLogger.log.mockClear();
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockOptions.session.get.mockResolvedValue(null);
       mockOptions.audit.asScoped.mockReturnValue(auditLogger);
@@ -294,6 +295,7 @@ describe('Authenticator', () => {
       );
       await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
 
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: { action: 'user_login', category: 'authentication', outcome: 'success' },
@@ -309,6 +311,7 @@ describe('Authenticator', () => {
       );
       await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
 
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: { action: 'user_login', category: 'authentication', outcome: 'failure' },

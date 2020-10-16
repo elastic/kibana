@@ -66,11 +66,8 @@ export class AuditService {
    * @deprecated
    */
   private allowAuditLogging = false;
-  private readonly betaLogger: Logger;
 
-  constructor(private readonly logger: Logger) {
-    this.betaLogger = this.logger.get('beta');
-  }
+  constructor(private readonly logger: Logger) {}
 
   setup({
     license,
@@ -86,13 +83,16 @@ export class AuditService {
       });
     }
 
-    // Configure logging during setup and when license changes
-    logging.configure(
-      license.features$.pipe(
-        distinctUntilKeyChanged('allowAuditLogging'),
-        createLoggingConfig(config)
-      )
-    );
+    // Do not change logging for legacy logger
+    if (config.appender) {
+      // Configure logging during setup and when license changes
+      logging.configure(
+        license.features$.pipe(
+          distinctUntilKeyChanged('allowAuditLogging'),
+          createLoggingConfig(config)
+        )
+      );
+    }
 
     /**
      * Creates an {@link AuditLogger} scoped to the current request.
@@ -146,7 +146,7 @@ export class AuditService {
           },
         };
         if (filterEvent(meta, config.ignore_filters)) {
-          this.betaLogger.info(event.message!, meta);
+          this.logger.info(event.message!, meta);
         }
       };
       return { log };
@@ -203,7 +203,7 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
     },
     loggers: [
       {
-        context: 'audit.beta',
+        context: 'audit',
         level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
         appenders: ['auditTrailAppender'],
       },

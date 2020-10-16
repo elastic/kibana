@@ -30,6 +30,7 @@ const getSpaceId = jest.fn().mockReturnValue('default');
 
 beforeEach(() => {
   logger.info.mockClear();
+  logging.configure.mockClear();
   http.registerOnPostAuth.mockClear();
 });
 
@@ -53,16 +54,38 @@ describe('#setup', () => {
     `);
   });
 
-  it('configures logging correctly', async () => {
+  it('configures logging correctly when using ecs logger', async () => {
     new AuditService(logger).setup({
       license,
-      config,
+      config: {
+        enabled: true,
+        appender: {
+          kind: 'console',
+          layout: {
+            kind: 'pattern',
+          },
+        },
+      },
       logging,
       http,
       getCurrentUser,
       getSpaceId,
     });
     expect(logging.configure).toHaveBeenCalledWith(expect.any(Observable));
+  });
+
+  it('does not configure logging when using legacy logger', async () => {
+    new AuditService(logger).setup({
+      license,
+      config: {
+        enabled: true,
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+    });
+    expect(logging.configure).not.toHaveBeenCalled();
   });
 
   it('registers post auth hook', () => {
@@ -158,7 +181,7 @@ describe('#createLoggingConfig', () => {
             "appenders": Array [
               "auditTrailAppender",
             ],
-            "context": "audit.beta",
+            "context": "audit",
             "level": "info",
           },
         ],
