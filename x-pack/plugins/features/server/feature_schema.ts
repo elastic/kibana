@@ -21,6 +21,8 @@ const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 const reservedFeaturePrrivilegePartRegex = /^(?!reserved_)[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
+const validLicenses = ['basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial'];
+
 const managementSchema = Joi.object().pattern(
   managementSectionIdRegex,
   Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
@@ -53,10 +55,11 @@ const kibanaPrivilegeSchema = Joi.object({
   ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
-const kibanaSubFeaturePrivilegeSchema = Joi.object({
+const kibanaIndependentSubFeaturePrivilegeSchema = Joi.object({
   id: Joi.string().regex(subFeaturePrivilegePartRegex).required(),
   name: Joi.string().required(),
   includeIn: Joi.string().allow('all', 'read', 'none').required(),
+  minimumLicense: Joi.string().valid(...validLicenses),
   management: managementSchema,
   catalogue: catalogueSchema,
   alerting: Joi.object({
@@ -72,12 +75,22 @@ const kibanaSubFeaturePrivilegeSchema = Joi.object({
   ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
+const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema = kibanaIndependentSubFeaturePrivilegeSchema.keys(
+  {
+    minimumLicense: Joi.forbidden(),
+  }
+);
+
 const kibanaSubFeatureSchema = Joi.object({
   name: Joi.string().required(),
   privilegeGroups: Joi.array().items(
     Joi.object({
       groupType: Joi.string().valid('mutually_exclusive', 'independent').required(),
-      privileges: Joi.array().items(kibanaSubFeaturePrivilegeSchema).min(1),
+      privileges: Joi.when('groupType', {
+        is: 'mutually_exclusive',
+        then: Joi.array().items(kibanaMutuallyExclusiveSubFeaturePrivilegeSchema).min(1),
+        otherwise: Joi.array().items(kibanaIndependentSubFeaturePrivilegeSchema).min(1),
+      }),
     })
   ),
 });
@@ -91,14 +104,7 @@ const kibanaFeatureSchema = Joi.object({
   category: appCategorySchema,
   order: Joi.number(),
   excludeFromBasePrivileges: Joi.boolean(),
-  minimumLicense: Joi.string().valid(
-    'basic',
-    'standard',
-    'gold',
-    'platinum',
-    'enterprise',
-    'trial'
-  ),
+  minimumLicense: Joi.string().valid(...validLicenses),
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,

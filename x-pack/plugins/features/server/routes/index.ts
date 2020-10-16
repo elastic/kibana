@@ -28,20 +28,37 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
     (context, request, response) => {
       const allFeatures = featureRegistry.getAllKibanaFeatures();
 
+      const currentLicense = context.licensing!.license;
+
       return response.ok({
         body: allFeatures
           .filter(
             (feature) =>
               request.query.ignoreValidLicenses ||
               !feature.minimumLicense ||
-              (context.licensing!.license &&
-                context.licensing!.license.hasAtLeast(feature.minimumLicense))
+              (currentLicense && currentLicense.hasAtLeast(feature.minimumLicense))
           )
           .sort(
             (f1, f2) =>
               (f1.order ?? Number.MAX_SAFE_INTEGER) - (f2.order ?? Number.MAX_SAFE_INTEGER)
           )
-          .map((feature) => feature.toRaw()),
+          .map((feature) => {
+            const raw = feature.toRaw();
+            if (!currentLicense || request.query.ignoreValidLicenses) {
+              return raw;
+            }
+
+            raw.subFeatures?.forEach((subFeature) => {
+              subFeature.privilegeGroups.forEach((group) => {
+                group.privileges = group.privileges.filter(
+                  (privilege) =>
+                    !privilege.minimumLicense || currentLicense.hasAtLeast(privilege.minimumLicense)
+                );
+              });
+            });
+
+            return raw;
+          }),
       });
     }
   );

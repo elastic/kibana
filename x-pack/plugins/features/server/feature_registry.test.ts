@@ -1280,6 +1280,123 @@ describe('FeatureRegistry', () => {
       );
     });
 
+    it('allows independent sub-feature privileges to register a minimumLicense', () => {
+      const feature1: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'foo',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'foo',
+                    name: 'foo',
+                    minimumLicense: 'gold',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      featureRegistry.registerKibanaFeature(feature1);
+    });
+
+    it('prevents mutually exclusive sub-feature privileges from registering a minimumLicense', () => {
+      const feature1: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'foo',
+            privilegeGroups: [
+              {
+                groupType: 'mutually_exclusive',
+                privileges: [
+                  {
+                    id: 'foo',
+                    name: 'foo',
+                    minimumLicense: 'gold',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                  {
+                    id: 'bar',
+                    name: 'Bar',
+                    minimumLicense: 'gold',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      expect(() => {
+        featureRegistry.registerKibanaFeature(feature1);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"child \\"subFeatures\\" fails because [\\"subFeatures\\" at position 0 fails because [child \\"privilegeGroups\\" fails because [\\"privilegeGroups\\" at position 0 fails because [child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"minimumLicense\\" fails because [\\"minimumLicense\\" is not allowed]]]]]]]"`
+      );
+    });
+
     it('cannot register feature after getAll has been called', () => {
       const feature1: KibanaFeatureConfig = {
         id: 'test-feature',

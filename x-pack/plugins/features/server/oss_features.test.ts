@@ -50,6 +50,7 @@ Array [
       const privileges = [];
       for (const featurePrivilege of featurePrivilegeIterator(new KibanaFeature(featureConfig), {
         augmentWithSubFeaturePrivileges: true,
+        licenseType: 'enterprise',
       })) {
         privileges.push(featurePrivilege);
       }
