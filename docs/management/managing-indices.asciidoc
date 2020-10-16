@@ -13,7 +13,12 @@ the amount of bookkeeping when working with indices. Instead of manually
 setting up your indices, you can create them automatically from a template,
 ensuring that your settings, mappings, and aliases are consistently defined.
 
-To manage your indices, open the menu, then go to *Stack Management > Data > Index Management*.
+You can also use *Index Management* to view and manage
+{ref}/data-streams.html[data streams]. A data stream is a named resource used to
+ingest, search, and manage time series data. A data stream’s data is stored
+across multiple hidden, auto-generated indices.
+
+To get started, open the menu and go to *Stack Management > Index Management*.
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
@@ -26,8 +31,9 @@ See {ref}/security-privileges.html[Security privileges] for more
 information.
 
 Before using this feature, you should be familiar with index management
-operations. Refer to the {ref}/indices.html[index management APIs]
-and the {ref}/indices-templates.html[index template APIs].
+operations. Refer to the {ref}/indices.html[index management APIs], the
+{ref}/indices-templates.html[index template APIs], and the the
+{ref}/data-streams.html[data streams documentation].
 
 [float]
 === View and edit indices
@@ -82,6 +88,25 @@ searchable, but queries take longer.
 index.
 
 [float]
+[[manage-data-streams]]
+=== Manage data streams
+
+The *Data Streams* view lists your data streams and lets you to view or delete
+them.
+
+To view statistics about a data stream, such as its generation or its index
+lifecycle policy, click the stream's name.
+
+[role="screenshot"]
+image::images/management_index_data_stream_stats.png[Data stream stats]
+
+To view information about the stream's backing indices, click the number in the
+*Indices* column.
+
+[role="screenshot"]
+image::images/management_index_data_stream_backing_index.png[Backing index]
+
+[float]
 [[manage-index-templates]]
 === Manage index templates
 
@@ -107,20 +132,35 @@ template before you create the indices.
 
 In this example, you’ll create an index template for randomly generated log files.
 
-Open the *Create template* wizard, and enter `logs_template` in the *Name*
-field.  Set *Index pattern* to `logstash*` so the template matches any index
-with that index pattern. The merge order and version are both optional,
-and you'll leave them blank in this example.
+Open the *Create template* wizard, and enter `my-index-template` in the *Name*
+field.  Set *Index pattern* to `my-index-*` so the template matches any index
+with that index pattern. *Data Stream* *Priority*, *Version*, and *_meta field*
+are optional. Leave them blank or as-is for this example.
 
 [role="screenshot"]
 image::images/management_index_create_wizard.png[Create wizard]
 
-The second step in the *Create template* wizard allows you to define index settings.
+In the second step of the *Create template* wizard, you can add component
+templates to your index template. Component templates are pre-configured sets of
+mappings, index settings, and index aliases you can reuse across multiple index
+templates. You can create component templates using the {es}
+{ref}/indices-component-template.html[put component template API].
+
+Badges indicate whether the component template contains mappings (*M*), index
+settings (*S*), index aliases (*A*), or a combination of the three.
+
+Component templates are optional, and this example skips this
+step.
+
+[role="screenshot"]
+image::images/management_index_component_template.png[Component templates page]
+
+The third step in the *Create template* wizard allows you to define index settings.
 These settings are optional, and this example skips this step.
 
-The logs data set requires a
+The example data set requires a
 mapping to label the latitude and longitude pairs as geographic locations
-by applying the geo_point type. In the third step of the wizard, define this mapping
+by applying the geo_point type. In the forth step of the wizard, define this mapping
 under the *Mapped fields* tab as follows:
 
 [role="screenshot"]
@@ -146,23 +186,23 @@ Alternatively, you can click the *Load JSON* link and define the mapping as JSON
 You can create additional mapping configurations in the *Dynamic templates* and
 *Advanced options* tabs. No additional mappings are required for this example.
 
-In the fourth step, define an alias named `logstash`.
+In the fifth step, define an alias named `my-index`.
 
 [source,js]
 ----------------------------------
 {
-  "logstash": {}
+  "my-index": {}
 }
 ----------------------------------
 
-A summary of the template is in step 5. If everything looks right, click *Create template*.
+A summary of the template is in step six. If everything looks right, click *Create template*.
 
-At this point, you’re ready to use the {es} index API to load the logs data.
+At this point, you’re ready to use the {es} index API to load the data.
 In the {kib} *Console*, index two documents:
 
 [source,js]
 ----------------------------------
-POST /logstash-2019.05.18/_doc
+POST /my-index-000001/_doc
 {
   "@timestamp": "2019-05-18T15:57:27.541Z",
   "ip": "225.44.217.191",
@@ -177,7 +217,7 @@ POST /logstash-2019.05.18/_doc
   "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/charles-fullerton.jpg"
 }
 
-POST /logstash-2019.05.20/_doc
+POST /my-index-000001/_doc
 {
   "@timestamp": "2019-05-20T03:44:20.844Z",
   "ip": "198.247.165.49",
