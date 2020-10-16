@@ -78,34 +78,11 @@ handlebars.registerHelper('formatNumber', (rawValue: unknown, pattern: string) =
   return numeral(value).format(pattern);
 });
 
-/**
- * Allows to match regex patterns and extract capturing groups.
- * Result is array of arrays.
- *
- * @example
- *
- * Have a string: "Label:Feature:Something"
- * and want to extract: "Feature:Something"
- *
- * expression: `{{match value "Label:(.*)"}}`,
- * returns: [["Label:Feature:Something", "Feature:Something"]]
- */
-handlebars.registerHelper('match', (rawValue: unknown, regexpString: string) => {
-  if (!regexpString || typeof regexpString !== 'string')
-    throw new Error(`[match]: regexp string is required`);
-  const regexp = new RegExp(regexpString, 'g');
-  const valueString = String(rawValue);
-  return Array.from(valueString.matchAll(regexp));
-});
-
-function toString(value: unknown): string {
-  return String(value);
-}
-handlebars.registerHelper('lowercase', (rawValue: unknown) => toString(rawValue).toLowerCase());
-handlebars.registerHelper('uppercase', (rawValue: unknown) => toString(rawValue).toUpperCase());
-handlebars.registerHelper('trim', (rawValue: unknown) => toString(rawValue).trim());
-handlebars.registerHelper('trimLeft', (rawValue: unknown) => toString(rawValue).trimLeft());
-handlebars.registerHelper('trimRight', (rawValue: unknown) => toString(rawValue).trimRight());
+handlebars.registerHelper('lowercase', (rawValue: unknown) => String(rawValue).toLowerCase());
+handlebars.registerHelper('uppercase', (rawValue: unknown) => String(rawValue).toUpperCase());
+handlebars.registerHelper('trim', (rawValue: unknown) => String(rawValue).trim());
+handlebars.registerHelper('trimLeft', (rawValue: unknown) => String(rawValue).trimLeft());
+handlebars.registerHelper('trimRight', (rawValue: unknown) => String(rawValue).trimRight());
 handlebars.registerHelper('concat', (...args) => {
   const values = args.slice(0, -1) as unknown[];
   return values.join('');
@@ -114,17 +91,17 @@ handlebars.registerHelper('concat', (...args) => {
 handlebars.registerHelper('left', (rawValue: unknown, numberOfChars: number) => {
   if (typeof numberOfChars !== 'number')
     throw new Error('[left]: expected "number of characters to extract" to be a number');
-  return toString(rawValue).slice(0, numberOfChars);
+  return String(rawValue).slice(0, numberOfChars);
 });
 handlebars.registerHelper('right', (rawValue: unknown, numberOfChars: number) => {
   if (typeof numberOfChars !== 'number')
     throw new Error('[left]: expected "number of characters to extract" to be a number');
-  return toString(rawValue).slice(-1 * numberOfChars);
+  return String(rawValue).slice(-numberOfChars);
 });
 handlebars.registerHelper('mid', (rawValue: unknown, start: number, length: number) => {
   if (typeof start !== 'number') throw new Error('[left]: expected "start" to be a number');
   if (typeof length !== 'number') throw new Error('[left]: expected "length" to be a number');
-  return toString(rawValue).substr(start, length);
+  return String(rawValue).substr(start, length);
 });
 
 export function compile(url: string, context: object): string {

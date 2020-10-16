@@ -175,22 +175,6 @@ describe('formatNumber helper', () => {
   });
 });
 
-describe('match helper', () => {
-  test('matches RegExp and uses capture group', () => {
-    const url = 'https://elastic.co/{{lookup (lookup (match value "Label:(.*)") 0) 1}}';
-
-    expect(compile(url, { value: 'Label:Feature:Something' })).toMatchInlineSnapshot(
-      `"https://elastic.co/Feature:Something"`
-    );
-  });
-
-  test('no matches', () => {
-    const url = 'https://elastic.co/{{lookup (lookup (match value "Label:(.*)") 0) 1}}';
-
-    expect(compile(url, { value: 'No matches' })).toMatchInlineSnapshot(`"https://elastic.co/"`);
-  });
-});
-
 describe('basic string formatting helpers', () => {
   test('lowercase', () => {
     const compileUrl = (value: unknown) =>
