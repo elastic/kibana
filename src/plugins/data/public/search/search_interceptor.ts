@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, trimEnd, debounce } from 'lodash';
+import { get, memoize, trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
@@ -28,6 +28,7 @@ import {
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
+  ISessionService,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
@@ -39,6 +40,7 @@ export interface SearchInterceptorDeps {
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
+  session: ISessionService;
 }
 
 export class SearchInterceptor {
@@ -86,16 +88,17 @@ export class SearchInterceptor {
     e: any,
     request: IKibanaSearchRequest,
     timeoutSignal: AbortSignal,
-    appAbortSignal?: AbortSignal
+    options?: ISearchOptions
   ): Error {
     if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
       // Handle a client or a server side timeout
       const err = new SearchTimeoutError(e, this.getTimeoutMode());
 
       // Show the timeout error here, so that it's shown regardless of how an application chooses to handle errors.
-      this.showTimeoutError(err);
+      // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
+      this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (appAbortSignal?.aborted) {
+    } else if (options?.abortSignal?.aborted) {
       // In the case an application initiated abort, throw the existing AbortError.
       return e;
     } else if (isPainlessError(e)) {
@@ -162,27 +165,37 @@ export class SearchInterceptor {
     combinedSignal.addEventListener('abort', cleanup);
 
     return {
-      combinedSignal,
       timeoutSignal,
+      combinedSignal,
       cleanup,
     };
   }
 
+  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
+    this.deps.toasts.addDanger({
+      title: 'Timed out',
+      text: toMountPoint(e.getErrorMessage(this.application)),
+    });
+  };
+
+  private showTimeoutErrorMemoized = memoize(
+    this.showTimeoutErrorToast,
+    (_: SearchTimeoutError, sessionId: string) => {
+      return sessionId;
+    }
+  );
+
   /**
-   * Right now we are throttling but we will hook this up with background sessions to show only one
-   * error notification per session.
+   * Show one error notification per session.
    * @internal
    */
-  private showTimeoutError = debounce(
-    (e: SearchTimeoutError) => {
-      this.deps.toasts.addDanger({
-        title: 'Timed out',
-        text: toMountPoint(e.getErrorMessage(this.application)),
-      });
-    },
-    30000,
-    { leading: true, trailing: false }
-  );
+  private showTimeoutError = (e: SearchTimeoutError, sessionId?: string) => {
+    if (sessionId) {
+      this.showTimeoutErrorMemoized(e, sessionId);
+    } else {
+      this.showTimeoutErrorToast(e, sessionId);
+    }
+  };
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
@@ -207,12 +220,9 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
-        catchError((e: any) => {
-          return throwError(
-            this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
-          );
+        catchError((e: Error) => {
+          return throwError(this.handleSearchError(e, request, timeoutSignal, options));
         }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);

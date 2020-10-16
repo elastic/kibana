@@ -22,7 +22,12 @@ import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
-import { ISearchGeneric, SearchSourceService, SearchSourceDependencies } from '../../common/search';
+import {
+  ISearchGeneric,
+  SearchSourceService,
+  SearchSourceDependencies,
+  ISessionService,
+} from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
@@ -31,6 +36,7 @@ import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
+import { SessionService } from './session_service';
 import { ConfigSchema } from '../../config';
 import {
   SHARD_DELAY_AGG_NAME,
@@ -55,6 +61,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+  private sessionService!: ISessionService;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -64,6 +71,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
+    this.sessionService = new SessionService(this.initializerContext, getStartServices);
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -74,6 +82,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       uiSettings,
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
+      session: this.sessionService,
     });
 
     expressions.registerFunction(esdsl);
@@ -95,6 +104,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
+      session: this.sessionService,
     };
   }
 
@@ -125,6 +135,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
       },
+      session: this.sessionService,
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
     };
   }

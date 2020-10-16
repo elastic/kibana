@@ -1383,6 +1383,7 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    sessionId?: string;
     strategy?: string;
 }
 
@@ -1398,6 +1399,9 @@ export interface ISearchSetup {
     //
     // (undocumented)
     aggs: AggsSetup;
+    // Warning: (ae-forgotten-export) The symbol "ISessionService" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
+    session: ISessionService;
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1412,6 +1416,8 @@ export interface ISearchStart {
     aggs: AggsStart;
     search: ISearchGeneric;
     searchSource: ISearchStartSearchSource;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
+    session: ISessionService;
     // (undocumented)
     showError: (e: Error) => void;
 }
@@ -1981,7 +1987,7 @@ export class SearchInterceptor {
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // (undocumented)
-    protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
+    protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
@@ -1992,8 +1998,8 @@ export class SearchInterceptor {
         abortSignal?: AbortSignal;
         timeout?: number;
     }): {
-        combinedSignal: AbortSignal;
         timeoutSignal: AbortSignal;
+        combinedSignal: AbortSignal;
         cleanup: () => void;
     };
     // (undocumented)
@@ -2006,6 +2012,8 @@ export class SearchInterceptor {
 export interface SearchInterceptorDeps {
     // (undocumented)
     http: CoreSetup_2['http'];
+    // (undocumented)
+    session: ISessionService;
     // (undocumented)
     startServices: Promise<[CoreStart, any, unknown]>;
     // (undocumented)
