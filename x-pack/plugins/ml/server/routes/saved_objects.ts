@@ -81,4 +81,80 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
       }
     )
   );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
+   * @apiName ForceStartDatafeeds
+   * @apiDescription Starts one or more datafeeds
+   *
+   * @apiSchema (body) forceStartDatafeedSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/assign_job_to_space',
+      validate: {
+        body: schema.object({
+          jobType: schema.string(),
+          jobIds: schema.arrayOf(schema.string()),
+          spaces: schema.arrayOf(schema.string()),
+        }),
+      },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+      try {
+        const { jobType, jobIds, spaces } = request.body;
+
+        const ww = await jobSavedObjectService.assignJobsToSpaces(jobType, jobIds, spaces);
+
+        return response.ok({
+          body: ww,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
+   * @apiName ForceStartDatafeeds
+   * @apiDescription Starts one or more datafeeds
+   *
+   * @apiSchema (body) forceStartDatafeedSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/remove_job_from_space',
+      validate: {
+        body: schema.object({
+          jobType: schema.string(),
+          jobIds: schema.arrayOf(schema.string()),
+          spaces: schema.arrayOf(schema.string()),
+        }),
+      },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+      try {
+        const { jobType, jobIds, spaces } = request.body;
+
+        const ww = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, spaces);
+
+        return response.ok({
+          body: ww,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
 }

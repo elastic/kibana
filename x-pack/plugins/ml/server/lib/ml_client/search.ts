@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
-// import { SearchResponse } from 'elasticsearch';
 import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
 
 import { JobSavedObjectService, JobType } from '../../saved_objects';
@@ -31,8 +30,6 @@ export function searchProvider(
     searchParams: RequestParams.Search<any>,
     jobIds: string[]
   ): Promise<ApiResponse<SearchResponse7<T>>> {
-    // ): Promise<ReturnType<ElasticsearchClient['search']>> {
-    // console.log(jobIds);
     await jobIdsCheck('anomaly-detector', jobIds);
     const { asInternalUser } = client;
     const resp = await asInternalUser.search<SearchResponse7<T>>({

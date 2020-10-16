@@ -207,6 +207,48 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     }
   }
 
+  async function assignJobsToSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
+    const results: Record<string, { success: boolean; error?: any }> = {};
+    const jobs = await _getJobObjects(jobType);
+    for (const job of jobs) {
+      if (jobIds.includes(job.attributes.job_id)) {
+        try {
+          await savedObjectsClient.addToNamespaces(ML_SAVED_OBJECT_TYPE, job.id, spaces);
+          results[job.attributes.job_id] = {
+            success: true,
+          };
+        } catch (error) {
+          results[job.attributes.job_id] = {
+            success: false,
+            error,
+          };
+        }
+      }
+    }
+    return results;
+  }
+
+  async function removeJobsFromSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
+    const results: Record<string, { success: boolean; error?: any }> = {};
+    const jobs = await _getJobObjects(jobType);
+    for (const job of jobs) {
+      if (jobIds.includes(job.attributes.job_id)) {
+        try {
+          await savedObjectsClient.deleteFromNamespaces(ML_SAVED_OBJECT_TYPE, job.id, spaces);
+          results[job.attributes.job_id] = {
+            success: true,
+          };
+        } catch (error) {
+          results[job.attributes.job_id] = {
+            success: false,
+            error,
+          };
+        }
+      }
+    }
+    return results;
+  }
+
   return {
     getAllJobObjects,
     createAnomalyDetectionJob,
@@ -221,6 +263,8 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     filterDatafeedIdsForSpace,
     jobsExists,
     jobExists,
+    assignJobsToSpaces,
+    removeJobsFromSpaces,
   };
 }
 
