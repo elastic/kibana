@@ -5,5 +5,5 @@
  */
 
 export { setupSavedObjects } from './saved_objects';
-export { JobSavedObjectService, jobSavedObjectServiceFactory } from './filter';
+export { JobSavedObjectService, jobSavedObjectServiceFactory, JobType } from './service';
 export { checksFactory } from './checks';

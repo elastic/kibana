@@ -26,7 +26,7 @@ import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/cap
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 import { MLClusterClientUninitialized } from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
-import { jobSavedObjectServiceFactory } from '../saved_objects/filter';
+import { jobSavedObjectServiceFactory } from '../saved_objects';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &

@@ -9,7 +9,7 @@ import { IScopedClusterClient } from 'kibana/server';
 // import { SearchResponse } from 'elasticsearch';
 import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
 
-import { JobSavedObjectService, JobType } from '../../saved_objects/filter';
+import { JobSavedObjectService, JobType } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { SearchResponse7 } from '../../../common/types/es_client';
 

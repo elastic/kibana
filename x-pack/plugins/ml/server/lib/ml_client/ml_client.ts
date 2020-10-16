@@ -6,7 +6,7 @@
 
 import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
 
-import { JobSavedObjectService, JobType } from '../../saved_objects/filter';
+import { JobSavedObjectService, JobType } from '../../saved_objects';
 
 import {
   Job,

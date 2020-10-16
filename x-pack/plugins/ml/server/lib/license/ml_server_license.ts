@@ -11,7 +11,7 @@ import {
   RequestHandler,
 } from 'kibana/server';
 
-import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../../saved_objects/filter';
+import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../../saved_objects';
 import { MlLicense } from '../../../common/license';
 
 import { MlClient, getMlClient } from '../ml_client';

@@ -23,7 +23,7 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['read'], ml: ['read'] },
+        feature: { apm: ['read'], ml: ['read'], savedObjectsManagement: ['read'] },
         spaces: ['*'],
       },
     ],
@@ -50,7 +50,7 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['all'], ml: ['all'] },
+        feature: { apm: ['all'], ml: ['all'], savedObjectsManagement: ['all'] },
         spaces: ['*'],
       },
     ],
