@@ -9,21 +9,21 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
-export function ClientSideMonitoringCallout() {
+export function UserExperienceCallout() {
   const { core } = useApmPluginContext();
-  const clientSideMonitoringHref = core.http.basePath.prepend(`/app/ux`);
+  const userExperienceHref = core.http.basePath.prepend(`/app/ux`);
 
   return (
     <EuiCallOut
       iconType="cheer"
       title={i18n.translate(
-        'xpack.apm.transactionOverview.clientSideMonitoring.calloutTitle',
+        'xpack.apm.transactionOverview.userExperience.calloutTitle',
         { defaultMessage: 'Introducing: Elastic User Experience' }
       )}
     >
       <EuiText>
         {i18n.translate(
-          'xpack.apm.transactionOverview.clientSideMonitoring.calloutText',
+          'xpack.apm.transactionOverview.userExperience.calloutText',
           {
             defaultMessage:
               'We are beyond excited to introduce a new experience for analyzing the user experience metrics specifically for your RUM services. It provides insights into the core vitals and visitor breakdown by browser and location. The app is always available in the left sidebar among the other Observability views.',
@@ -31,9 +31,9 @@ export function ClientSideMonitoringCallout() {
         )}
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiButton href={clientSideMonitoringHref}>
+      <EuiButton href={userExperienceHref}>
         {i18n.translate(
-          'xpack.apm.transactionOverview.clientSideMonitoring.linkLabel',
+          'xpack.apm.transactionOverview.userExperience.linkLabel',
           { defaultMessage: 'Take me there' }
         )}
       </EuiButton>
