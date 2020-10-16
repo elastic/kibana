@@ -23,15 +23,7 @@ import { RenderDeps } from '../application';
 
 export function initSavedSheetService(app: angular.IModule, deps: RenderDeps) {
   const savedObjectsClient = deps.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: deps.plugins.data.indexPatterns,
-    search: deps.plugins.data.search,
-    chrome: deps.core.chrome,
-    overlays: deps.core.overlays,
-  };
-
-  const SavedSheet = createSavedSheetClass(services, deps.core.uiSettings);
+  const SavedSheet = createSavedSheetClass(deps.plugins.savedObjects, deps.core.uiSettings);
 
   const savedSheetLoader = new SavedObjectLoader(SavedSheet, savedObjectsClient);
   savedSheetLoader.urlFor = (id) => `#/${encodeURIComponent(id)}`;
