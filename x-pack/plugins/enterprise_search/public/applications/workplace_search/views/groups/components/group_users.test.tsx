@@ -31,7 +31,7 @@ describe('GroupUsers', () => {
     expect(wrapper.find(UserIcon)).toHaveLength(1);
   });
 
-  it('handles hidden users when count is higer than 20', () => {
+  it('handles hidden users when count is higher than 20', () => {
     const _users = [] as IUser[];
     const NUM_TOTAL_USERS = 20;
 

@@ -29,8 +29,8 @@ describe('UserOptionItem', () => {
 
   it('falls back to email when name not present', () => {
     const wrapper = shallow(<UserOptionItem user={{ ...user, name: null }} />);
-    const mameItem = wrapper.find(EuiFlexItem).last();
+    const nameItem = wrapper.find(EuiFlexItem).last();
 
-    expect(mameItem.prop('children')).toEqual(user.email);
+    expect(nameItem.prop('children')).toEqual(user.email);
   });
 });

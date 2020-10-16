@@ -13,12 +13,12 @@ import { shallow } from 'enzyme';
 
 import { EuiFieldSearch, EuiFilterSelectItem, EuiCard, EuiPopoverTitle } from '@elastic/eui';
 
-const mockSetState = jest.fn();
-const useStateMock: any = (initState: any) => [initState, mockSetState];
-
 import { FilterableUsersList } from './filterable_users_list';
 
 import { IUser } from '../../../types';
+
+const mockSetState = jest.fn();
+const useStateMock: any = (initState: any) => [initState, mockSetState];
 
 const addFilteredUser = jest.fn();
 const removeFilteredUser = jest.fn();
@@ -95,7 +95,7 @@ describe('FilterableUsersList', () => {
     expect((card.prop('description') as any).props.children).toEqual('loading');
   });
 
-  it('handles hidden users when count is higer than 20', () => {
+  it('handles hidden users when count is higher than 20', () => {
     const _users = [] as IUser[];
     const NUM_TOTAL_USERS = 30;
     const NUM_VISIBLE_USERS = 20;

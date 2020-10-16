@@ -13,13 +13,15 @@ import { shallow } from 'enzyme';
 
 import { SourceOptionItem } from './source_option_item';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { TruncatedContent } from '../../../../shared/truncate';
+
+import { SourceIcon } from '../../../components/shared/source_icon';
 
 describe('SourceOptionItem', () => {
   it('renders', () => {
     const wrapper = shallow(<SourceOptionItem source={contentSources[0]} />);
 
-    expect(wrapper.find(EuiFlexGroup)).toHaveLength(1);
-    expect(wrapper.find(EuiFlexItem)).toHaveLength(2);
+    expect(wrapper.find(TruncatedContent)).toHaveLength(1);
+    expect(wrapper.find(SourceIcon)).toHaveLength(1);
   });
 });

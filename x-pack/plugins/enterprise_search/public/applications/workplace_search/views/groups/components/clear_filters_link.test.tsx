@@ -29,7 +29,7 @@ describe('ClearFiltersLink', () => {
     expect(wrapper.find(EuiLink)).toHaveLength(1);
   });
 
-  it('updates the input value', () => {
+  it('handles click', () => {
     const wrapper = shallow(<ClearFiltersLink />);
 
     const button = wrapper.find(EuiLink);

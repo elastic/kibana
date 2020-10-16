@@ -25,7 +25,7 @@ describe('GroupSources', () => {
     expect(wrapper.find(SourceIcon)).toHaveLength(2);
   });
 
-  it('handles hidden users when count is higer than 20', () => {
+  it('handles hidden sources when count is higer than 10', () => {
     const sources = [] as IContentSourceDetails[];
     const NUM_TOTAL_SOURCES = 10;
 

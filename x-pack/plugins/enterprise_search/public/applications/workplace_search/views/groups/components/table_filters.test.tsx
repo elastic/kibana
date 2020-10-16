@@ -21,7 +21,7 @@ const setFilterValue = jest.fn();
 
 describe('TableFilters', () => {
   beforeEach(() => {
-    setMockValues({ filterVale: '', isFederatedAuth: true });
+    setMockValues({ filterValue: '', isFederatedAuth: true });
     setMockActions({ setFilterValue });
   });
   it('renders', () => {
@@ -33,7 +33,7 @@ describe('TableFilters', () => {
   });
 
   it('renders for non-federated Auth', () => {
-    setMockValues({ filterVale: '', isFederatedAuth: false });
+    setMockValues({ filterValue: '', isFederatedAuth: false });
     const wrapper = shallow(<TableFilters />);
 
     expect(wrapper.find(TableFilterUsersDropdown)).toHaveLength(1);
