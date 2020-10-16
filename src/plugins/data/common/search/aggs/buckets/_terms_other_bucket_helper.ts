@@ -174,7 +174,7 @@ export const buildOtherBucketAgg = (
     key: string
   ) => {
     // make sure there are actually results for the buckets
-    if (aggregations[aggId].buckets.length < 1) {
+    if (!aggregations[aggId].buckets || aggregations[aggId].buckets.length < 1) {
       noAggBucketResults = true;
       return;
     }
