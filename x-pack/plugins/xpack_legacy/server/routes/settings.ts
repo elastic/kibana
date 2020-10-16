@@ -45,6 +45,7 @@ export function registerSettingsRoute({
       const collectorFetchContext = {
         callCluster: callAsCurrentUser,
         esClient: context.core.elasticsearch.client.asCurrentUser,
+        soClient: context.core.savedObjects.client,
       };
 
       const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE) as

@@ -400,6 +400,15 @@ export class AggConfig {
     return this.params.field;
   }
 
+  /**
+   * Returns the bucket path containing the main value the agg will produce
+   * (e.g. for sum of bytes it will point to the sum, for median it will point
+   *  to the 50 percentile in the percentile multi value bucket)
+   */
+  getValueBucketPath() {
+    return this.type.getValueBucketPath(this);
+  }
+
   makeLabel(percentageMode = false) {
     if (this.params.customLabel) {
       return this.params.customLabel;

@@ -17,7 +17,7 @@ import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 import {
   AnomalySeverity,
   SelectAnomalySeverity,
-} from './SelectAnomalySeverity';
+} from './select_anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   EnvironmentField,
