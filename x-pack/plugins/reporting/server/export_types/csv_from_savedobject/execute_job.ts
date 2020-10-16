@@ -7,16 +7,11 @@
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { BasePayload, RunTaskFnFactory, TaskRunResult } from '../../types';
+import { TaskRunResult } from '../../lib/tasks';
+import { RunTaskFnFactory } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
 import { getGenerateCsvParams } from './lib/get_csv_job';
-import { JobParamsPanelCsv, SearchPanel } from './types';
-
-/*
- * The run function receives the full request which provides the un-encrypted
- * headers, so encrypted headers are not part of these kind of job params
- */
-type ImmediateJobParams = Omit<BasePayload<JobParamsPanelCsv>, 'headers'>;
+import { JobPayloadPanelCsv } from './types';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -24,7 +19,7 @@ type ImmediateJobParams = Omit<BasePayload<JobParamsPanelCsv>, 'headers'>;
  */
 export type ImmediateExecuteFn = (
   jobId: null,
-  job: ImmediateJobParams,
+  job: JobPayloadPanelCsv,
   context: RequestHandlerContext,
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
@@ -36,20 +31,15 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   const config = reporting.getConfig();
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
 
-  return async function runTask(jobId: string | null, jobPayload, context, req) {
-    // There will not be a jobID for "immediate" generation.
-    // jobID is only for "queued" jobs
-    // Use the jobID as a logging tag or "immediate"
-    const { jobParams } = jobPayload;
-    const jobLogger = logger.clone(['immediate']);
-    const generateCsv = createGenerateCsv(jobLogger);
-    const { panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
+  return async function runTask(jobId, jobPayload, context, req) {
+    const generateCsv = createGenerateCsv(logger);
+    const { panel, visType } = jobPayload;
 
-    jobLogger.debug(`Execute job generating [${visType}] csv`);
+    logger.debug(`Execute job generating [${visType}] csv`);
 
     const savedObjectsClient = context.core.savedObjects.client;
     const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const job = await getGenerateCsvParams(jobParams, panel, savedObjectsClient, uiSettingsClient);
+    const job = await getGenerateCsvParams(jobPayload, panel, savedObjectsClient, uiSettingsClient);
 
     const elasticsearch = reporting.getElasticsearchService();
     const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);
@@ -63,11 +53,11 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     );
 
     if (csvContainsFormulas) {
-      jobLogger.warn(`CSV may contain formulas whose values have been escaped`);
+      logger.warn(`CSV may contain formulas whose values have been escaped`);
     }
 
     if (maxSizeReached) {
-      jobLogger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
+      logger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
     }
 
     return {

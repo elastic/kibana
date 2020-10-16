@@ -27,6 +27,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],
+  indexNames: [],
   isFavorite: false,
   isLive: false,
   isSelectAllChecked: false,

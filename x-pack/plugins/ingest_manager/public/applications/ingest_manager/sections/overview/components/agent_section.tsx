@@ -25,8 +25,8 @@ export const OverviewAgentSection = () => {
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTitle', {
-          defaultMessage: 'Fleet',
+        title={i18n.translate('xpack.ingestManager.overviewPageAgentsPanelTitle', {
+          defaultMessage: 'Agents',
         })}
         tooltip={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTooltip', {
           defaultMessage:

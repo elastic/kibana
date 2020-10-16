@@ -39,7 +39,7 @@ export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
     account: [
       {},
       {
-        initializeAppData: (_, { appSearch: account }) => account,
+        initializeAppData: (_, { appSearch: account }) => account || {},
         setOnboardingComplete: (account) => ({
           ...account,
           onboardingComplete: true,
@@ -49,7 +49,7 @@ export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
     configuredLimits: [
       {},
       {
-        initializeAppData: (_, { configuredLimits }) => configuredLimits.appSearch,
+        initializeAppData: (_, { configuredLimits }) => configuredLimits?.appSearch || {},
       },
     ],
     ilmEnabled: [

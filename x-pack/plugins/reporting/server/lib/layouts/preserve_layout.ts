@@ -12,12 +12,13 @@ import {
   LayoutTypes,
   PageSizeParams,
   Size,
+  LayoutInstance,
 } from './';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
 
-export class PreserveLayout extends Layout {
+export class PreserveLayout extends Layout implements LayoutInstance {
   public readonly selectors: LayoutSelectorDictionary = getDefaultLayoutSelectors();
   public readonly groupCount = 1;
   public readonly height: number;

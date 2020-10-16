@@ -24,10 +24,8 @@ import { getProcessorDescriptor } from '../shared';
 
 import { DocumentationButton } from './documentation_button';
 import { ProcessorSettingsFields } from './processor_settings_fields';
+import { Fields } from './processor_form.container';
 
-interface Fields {
-  fields: { [key: string]: any };
-}
 export interface Props {
   isOnFailure: boolean;
   form: FormHook<Fields>;
@@ -118,6 +116,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                disabled={(!form.isValid && form.isSubmitted) || form.isSubmitting}
                 data-test-subj="submitButton"
                 onClick={async () => {
                   await handleSubmit();

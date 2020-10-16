@@ -28,11 +28,8 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
-  urlDrilldownGlobalScopeProvider,
 } from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
-import { UrlDrilldown } from './drilldowns';
-import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -64,22 +61,9 @@ export class EmbeddableEnhancedPlugin
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
-    const startServices = createStartServicesGetter(core.getStartServices);
     const panelNotificationAction = new PanelNotificationsAction();
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
-
-    plugins.uiActionsEnhanced.registerDrilldown(
-      new UrlDrilldown({
-        getGlobalScope: urlDrilldownGlobalScopeProvider({ core }),
-        navigateToUrl: (url: string) =>
-          core.getStartServices().then(([{ application }]) => application.navigateToUrl(url)),
-        getSyntaxHelpDocsLink: () =>
-          startServices().core.docLinks.links.dashboard.urlDrilldownTemplateSyntax,
-        getVariablesHelpDocsLink: () =>
-          startServices().core.docLinks.links.dashboard.urlDrilldownVariables,
-      })
-    );
 
     return {};
   }

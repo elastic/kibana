@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -36,6 +35,7 @@ export interface HostsKpiHostsArgs extends Omit<HostsKpiHostsStrategyResponse, '
 interface UseHostsKpiHosts {
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -43,25 +43,32 @@ interface UseHostsKpiHosts {
 export const useHostsKpiHosts = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseHostsKpiHosts): [boolean, HostsKpiHostsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [hostsKpiHostsRequest, setHostsKpiHostsRequest] = useState<HostsKpiHostsRequestOptions>({
-    defaultIndex,
-    factoryQueryType: HostsKpiQueries.kpiHosts,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    hostsKpiHostsRequest,
+    setHostsKpiHostsRequest,
+  ] = useState<HostsKpiHostsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: HostsKpiQueries.kpiHosts,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -76,7 +83,11 @@ export const useHostsKpiHosts = ({
   });
 
   const hostsKpiHostsSearch = useCallback(
-    (request: HostsKpiHostsRequestOptions) => {
+    (request: HostsKpiHostsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -134,9 +145,11 @@ export const useHostsKpiHosts = ({
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiHosts,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
@@ -148,7 +161,7 @@ export const useHostsKpiHosts = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     hostsKpiHostsSearch(hostsKpiHostsRequest);

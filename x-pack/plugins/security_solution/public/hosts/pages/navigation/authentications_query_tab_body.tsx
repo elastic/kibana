@@ -66,6 +66,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
   docValueFields,
   endDate,
   filterQuery,
+  indexNames,
   skip,
   setQuery,
   startDate,
@@ -74,7 +75,15 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
   const [
     loading,
     { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useAuthentications({ docValueFields, endDate, filterQuery, skip, startDate, type });
+  ] = useAuthentications({
+    docValueFields,
+    endDate,
+    filterQuery,
+    indexNames,
+    skip,
+    startDate,
+    type,
+  });
 
   useEffect(() => {
     return () => {
@@ -90,6 +99,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
         endDate={endDate}
         filterQuery={filterQuery}
         id={ID}
+        indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}

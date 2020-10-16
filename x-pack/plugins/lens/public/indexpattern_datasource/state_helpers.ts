@@ -5,8 +5,7 @@
  */
 
 import _ from 'lodash';
-import { isColumnTransferable } from './operations';
-import { operationDefinitionMap, IndexPatternColumn } from './operations';
+import { isColumnTransferable, operationDefinitionMap, IndexPatternColumn } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
 export function updateColumnParam<C extends IndexPatternColumn, K extends keyof C['params']>({

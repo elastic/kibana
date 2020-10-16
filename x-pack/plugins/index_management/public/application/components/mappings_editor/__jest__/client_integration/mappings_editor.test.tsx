@@ -223,6 +223,33 @@ describe('Mappings editor: core', () => {
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
     });
+
+    test('should keep default dynamic templates value when switching tabs', async () => {
+      await act(async () => {
+        testBed = setup({
+          value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
+          onChange: onChangeHandler,
+        });
+      });
+      testBed.component.update();
+
+      const {
+        actions: { selectTab, getJsonEditorValue },
+      } = testBed;
+
+      // Navigate to dynamic templates tab and verify empty array
+      await selectTab('templates');
+      let templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual([]);
+
+      // Navigate to advanced tab
+      await selectTab('advanced');
+
+      // Navigate back to dynamic templates tab and verify empty array persists
+      await selectTab('templates');
+      templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual([]);
+    });
   });
 
   describe('component props', () => {

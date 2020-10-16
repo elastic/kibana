@@ -56,6 +56,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         mutedInstanceIds: [],
         createdAt: match.createdAt,
         updatedAt: match.updatedAt,
+        executionStatus: match.executionStatus,
       });
       expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);

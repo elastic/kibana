@@ -5,7 +5,10 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import {
+  AgentName,
+  ElasticAgentName,
+} from '../../../typings/es_schemas/ui/fields/agent';
 
 export interface TimeframeMap {
   '1d': number;
@@ -20,7 +23,7 @@ export interface AggregatedTransactionsCounts {
   transaction_count: number;
 }
 
-export type APMDataTelemetry = DeepPartial<{
+export interface APMUsage {
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
   version: {
@@ -86,7 +89,7 @@ export type APMDataTelemetry = DeepPartial<{
     };
   };
   agents: Record<
-    AgentName,
+    ElasticAgentName,
     {
       agent: {
         version: string[];
@@ -139,6 +142,8 @@ export type APMDataTelemetry = DeepPartial<{
     | 'cardinality',
     { took: { ms: number } }
   >;
-}>;
+}
+
+export type APMDataTelemetry = DeepPartial<APMUsage>;
 
 export type APMTelemetry = APMDataTelemetry;

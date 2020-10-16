@@ -14,7 +14,6 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { httpServiceMock } from 'src/core/public/mocks';
-// import { HttpSetup } from 'src/core/public';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
 import {

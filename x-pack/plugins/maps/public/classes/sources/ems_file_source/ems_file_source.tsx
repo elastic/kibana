@@ -72,9 +72,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
 
   async getEMSFileLayer(): Promise<FileLayer> {
     const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find(
-      (fileLayer) => fileLayer.getId() === this._descriptor.id
-    );
+    const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
     if (!emsFileLayer) {
       throw new Error(
         i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {

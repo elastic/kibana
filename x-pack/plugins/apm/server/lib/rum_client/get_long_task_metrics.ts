@@ -4,49 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getRumLongTasksProjection,
-  getRumPageLoadTransactionsProjection,
-} from '../../projections/rum_page_load_transactions';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
-import { SPAN_DURATION } from '../../../common/elasticsearch_fieldnames';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+
+const LONG_TASK_SUM_FIELD = 'transaction.experience.longtask.sum';
+const LONG_TASK_COUNT_FIELD = 'transaction.experience.longtask.count';
+const LONG_TASK_MAX_FIELD = 'transaction.experience.longtask.max';
 
 export async function getLongTaskMetrics({
   setup,
+  urlQuery,
+  percentile = 50,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
+  urlQuery?: string;
+  percentile?: number;
 }) {
-  const projection = getRumLongTasksProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
-        transIds: {
-          terms: {
-            field: 'transaction.id',
-            size: 1000,
-          },
-          aggs: {
-            sumLongTask: {
-              sum: {
-                field: SPAN_DURATION,
-              },
+        longTaskSum: {
+          percentiles: {
+            field: LONG_TASK_SUM_FIELD,
+            percents: [percentile],
+            hdr: {
+              number_of_significant_value_digits: 3,
             },
-            longestLongTask: {
-              max: {
-                field: SPAN_DURATION,
-              },
+          },
+        },
+        longTaskCount: {
+          percentiles: {
+            field: LONG_TASK_COUNT_FIELD,
+            percents: [percentile],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
+          },
+        },
+        longTaskMax: {
+          percentiles: {
+            field: LONG_TASK_MAX_FIELD,
+            percents: [percentile],
+            hdr: {
+              number_of_significant_value_digits: 3,
             },
           },
         },
@@ -57,61 +64,15 @@ export async function getLongTaskMetrics({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { transIds } = response.aggregations ?? {};
 
-  const validTransactions: string[] = await filterPageLoadTransactions(
-    setup,
-    (transIds?.buckets ?? []).map((bucket) => bucket.key as string)
-  );
-  let noOfLongTasks = 0;
-  let sumOfLongTasks = 0;
-  let longestLongTask = 0;
+  const pkey = percentile.toFixed(1);
 
-  (transIds?.buckets ?? []).forEach((bucket) => {
-    if (validTransactions.includes(bucket.key as string)) {
-      noOfLongTasks += bucket.doc_count;
-      sumOfLongTasks += bucket.sumLongTask.value ?? 0;
-      if ((bucket.longestLongTask.value ?? 0) > longestLongTask) {
-        longestLongTask = bucket.longestLongTask.value!;
-      }
-    }
-  });
+  const { longTaskSum, longTaskCount, longTaskMax } =
+    response.aggregations ?? {};
+
   return {
-    noOfLongTasks,
-    sumOfLongTasks,
-    longestLongTask,
+    noOfLongTasks: longTaskCount?.values[pkey] ?? 0,
+    sumOfLongTasks: longTaskSum?.values[pkey] ?? 0,
+    longestLongTask: longTaskMax?.values[pkey] ?? 0,
   };
-}
-
-async function filterPageLoadTransactions(
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  transactionIds: string[]
-) {
-  const projection = getRumPageLoadTransactionsProjection({
-    setup,
-  });
-
-  const params = mergeProjection(projection, {
-    body: {
-      size: transactionIds.length,
-      query: {
-        bool: {
-          must: [
-            {
-              terms: {
-                'transaction.id': transactionIds,
-              },
-            },
-          ],
-          filter: [...projection.body.query.bool.filter],
-        },
-      },
-      _source: ['transaction.id'],
-    },
-  });
-
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search(params);
-  return response.hits.hits.map((hit) => (hit._source as any).transaction.id)!;
 }

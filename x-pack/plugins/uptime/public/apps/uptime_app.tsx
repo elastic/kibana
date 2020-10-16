@@ -40,6 +40,7 @@ export interface UptimeAppColors {
   range: string;
   mean: string;
   warning: string;
+  lightestShade: string;
 }
 
 export interface UptimeAppProps {

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
-
-import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
+import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
@@ -14,7 +13,7 @@ import { urlSearch } from '../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe(`Resolver: when analyzing a tree with no ancestors and two children, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */
@@ -32,7 +31,10 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
 
   beforeEach(() => {
     // create a mock data access layer
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
+    const {
+      metadata: dataAccessLayerMetadata,
+      dataAccessLayer,
+    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
@@ -85,6 +87,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         title: 'c.ext',
         titleIcon: 'Running Process',
         detailEntries: [
+          ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
           ['process.executable', 'executable'],
           ['process.pid', '0'],
           ['user.name', 'user.name'],
@@ -108,6 +111,16 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         wordBreaks: 2,
       });
     });
+    it('should allow all node details to be copied', async () => {
+      const copyableFields = await simulator().resolve('resolver:panel:copyable-field');
+
+      copyableFields?.map((copyableField) => {
+        copyableField.simulate('mouseenter');
+        simulator().testSubject('resolver:panel:clipboard').last().simulate('click');
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
+        copyableField.simulate('mouseleave');
+      });
+    });
   });
 
   const queryStringWithFirstChildSelected = urlSearch(resolverComponentInstanceID, {
@@ -125,6 +138,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
         ['user.name', 'user.name'],
@@ -153,6 +167,19 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     ).toYieldEqualTo(3);
   });
 
+  it('should be able to copy the timestamps for all 3 nodes', async () => {
+    const copyableFields = await simulator().resolve('resolver:panel:copyable-field');
+
+    expect(copyableFields?.length).toBe(3);
+
+    copyableFields?.map((copyableField) => {
+      copyableField.simulate('mouseenter');
+      simulator().testSubject('resolver:panel:clipboard').last().simulate('click');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
+      copyableField.simulate('mouseleave');
+    });
+  });
+
   describe('when there is an item in the node list and its text has been clicked', () => {
     beforeEach(async () => {
       const nodeLinks = await simulator().resolve('resolver:node-list:node-link:title');
@@ -165,6 +192,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
         ['process.executable', 'executable'],
         ['process.pid', '0'],
         ['user.name', 'user.name'],
@@ -183,6 +211,85 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           },
         })
       );
+    });
+    describe("and when the user clicks the link to the node's events", () => {
+      beforeEach(async () => {
+        const nodeEventsListLink = await simulator().resolve(
+          'resolver:node-detail:node-events-link'
+        );
+
+        if (nodeEventsListLink) {
+          nodeEventsListLink.simulate('click', { button: 0 });
+        }
+      });
+      it('should show a link to view 2 registry events', async () => {
+        await expect(
+          simulator().map(() => {
+            // The link text is split across two columns. The first column is the count and the second column has the type.
+            const type = simulator().testSubject('resolver:panel:node-events:event-type-count');
+            const link = simulator().testSubject('resolver:panel:node-events:event-type-link');
+            return {
+              typeLength: type.length,
+              linkLength: link.length,
+              typeText: type.text(),
+              linkText: link.text(),
+            };
+          })
+        ).toYieldEqualTo({
+          typeLength: 1,
+          linkLength: 1,
+          linkText: 'registry',
+          // EUI's Table adds the column name to the value.
+          typeText: 'Count2',
+        });
+      });
+      describe('and when the user clicks the registry events link', () => {
+        beforeEach(async () => {
+          const link = await simulator().resolve('resolver:panel:node-events:event-type-link');
+          const first = link?.first();
+          expect(first).toBeTruthy();
+
+          if (first) {
+            first.simulate('click', { button: 0 });
+          }
+        });
+        it('should show links to two events', async () => {
+          await expect(
+            simulator().map(
+              () =>
+                simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
+            )
+          ).toYieldEqualTo(2);
+        });
+        describe('and when the first event link is clicked', () => {
+          beforeEach(async () => {
+            const link = await simulator().resolve(
+              'resolver:panel:node-events-in-category:event-link'
+            );
+            const first = link?.first();
+            expect(first).toBeTruthy();
+
+            if (first) {
+              first.simulate('click', { button: 0 });
+            }
+          });
+          it('should show the event detail view', async () => {
+            await expect(
+              simulator().map(() => simulator().testSubject('resolver:panel:event-detail').length)
+            ).toYieldEqualTo(1);
+          });
+          it('should allow all fields to be copied', async () => {
+            const copyableFields = await simulator().resolve('resolver:panel:copyable-field');
+
+            copyableFields?.map((copyableField) => {
+              copyableField.simulate('mouseenter');
+              simulator().testSubject('resolver:panel:clipboard').last().simulate('click');
+              expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
+              copyableField.simulate('mouseleave');
+            });
+          });
+        });
+      });
     });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {

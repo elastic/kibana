@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,6 +25,7 @@ const StyledEdgeLine = styled.div<StyledEdgeLine>`
     return `${fontSize(props.magFactorX, 12, 8.5)}px`;
   }};
   background-color: ${(props) => props.resolverEdgeColor};
+  z-index: 10;
 `;
 
 interface StyledElapsedTime {
@@ -53,7 +56,7 @@ const StyledElapsedTime = styled.div<StyledElapsedTime>`
 /**
  * A placeholder line segment view that connects process nodes.
  */
-const EdgeLineComponent = React.memo(
+export const EdgeLine = React.memo(
   ({
     className,
     edgeLineMetadata,
@@ -155,7 +158,3 @@ const EdgeLineComponent = React.memo(
     );
   }
 );
-
-EdgeLineComponent.displayName = 'EdgeLine';
-
-export const EdgeLine = EdgeLineComponent;

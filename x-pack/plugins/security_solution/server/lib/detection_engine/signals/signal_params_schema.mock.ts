@@ -22,6 +22,7 @@ export const getSignalParamsSchemaDecodedMock = (): SignalParamsSchema => ({
   author: [],
   buildingBlockType: null,
   description: 'Detecting root and admin users',
+  eventCategoryOverride: undefined,
   falsePositives: [],
   filters: null,
   from: 'now-6m',

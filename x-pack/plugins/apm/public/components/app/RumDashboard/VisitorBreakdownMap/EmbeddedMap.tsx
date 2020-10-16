@@ -162,10 +162,10 @@ export function EmbeddedMapComponent() {
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
+    if (embeddableRoot.current && embeddable && serviceName) {
       embeddable.render(embeddableRoot.current);
     }
-  }, [embeddable, embeddableRoot]);
+  }, [embeddable, embeddableRoot, serviceName]);
 
   return (
     <EmbeddedPanel>

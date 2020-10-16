@@ -215,3 +215,20 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
 });
+
+test(`doesn't validate config if env.isDevClusterMaster is true`, async () => {
+  const devParentEnv = Env.createDefault(REPO_ROOT, {
+    ...getEnvOptions(),
+    isDevClusterMaster: true,
+  });
+
+  const server = new Server(rawConfigService, devParentEnv, logger);
+  await server.setup();
+
+  expect(mockEnsureValidConfiguration).not.toHaveBeenCalled();
+  expect(mockContextService.setup).toHaveBeenCalled();
+  expect(mockAuditTrailService.setup).toHaveBeenCalled();
+  expect(mockHttpService.setup).toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).toHaveBeenCalled();
+  expect(mockSavedObjectsService.setup).toHaveBeenCalled();
+});

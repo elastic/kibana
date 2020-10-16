@@ -199,8 +199,8 @@ export abstract class Container<
     return {
       type: factory.type,
       explicitInput: {
-        id: embeddableId,
         ...explicitInput,
+        id: embeddableId,
       } as TEmbeddableInput,
     };
   }

@@ -13,7 +13,7 @@ describe('Get CSV Job', () => {
   let mockSavedObjectsClient: any;
   let mockUiSettingsClient: any;
   beforeEach(() => {
-    mockJobParams = { isImmediate: true, savedObjectType: 'search', savedObjectId: '234-ididid' };
+    mockJobParams = { savedObjectType: 'search', savedObjectId: '234-ididid' };
     mockSearchPanel = {
       indexPatternSavedObjectId: '123-indexId',
       attributes: {

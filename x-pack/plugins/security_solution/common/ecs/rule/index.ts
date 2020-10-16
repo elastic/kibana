@@ -7,6 +7,7 @@
 export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
+  name?: string[];
   false_positives: string[];
   saved_id?: string[];
   timeline_id?: string[];
@@ -40,4 +41,5 @@ export interface RuleEcs {
   updated_by?: string[];
   version?: string[];
   note?: string[];
+  building_block_type?: string[];
 }

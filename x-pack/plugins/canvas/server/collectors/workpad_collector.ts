@@ -6,6 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
+import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
 import { TelemetryCollector, CanvasWorkpad } from '../../types';
@@ -15,7 +16,7 @@ interface WorkpadSearch {
   [CANVAS_TYPE]: CanvasWorkpad;
 }
 
-interface WorkpadTelemetry {
+export interface WorkpadTelemetry {
   workpads?: {
     total: number;
   };
@@ -53,6 +54,43 @@ interface WorkpadTelemetry {
     };
   };
 }
+
+export const workpadSchema: MakeSchemaFrom<WorkpadTelemetry> = {
+  workpads: { total: { type: 'long' } },
+  pages: {
+    total: { type: 'long' },
+    per_workpad: {
+      avg: { type: 'float' },
+      min: { type: 'long' },
+      max: { type: 'long' },
+    },
+  },
+  elements: {
+    total: { type: 'long' },
+    per_page: {
+      avg: { type: 'float' },
+      min: { type: 'long' },
+      max: { type: 'long' },
+    },
+  },
+  functions: {
+    total: { type: 'long' },
+    in_use: { type: 'array', items: { type: 'keyword' } },
+    per_element: {
+      avg: { type: 'float' },
+      min: { type: 'long' },
+      max: { type: 'long' },
+    },
+  },
+  variables: {
+    total: { type: 'long' },
+    per_workpad: {
+      avg: { type: 'float' },
+      min: { type: 'long' },
+      max: { type: 'long' },
+    },
+  },
+};
 
 /**
   Gather statistic about the given workpads

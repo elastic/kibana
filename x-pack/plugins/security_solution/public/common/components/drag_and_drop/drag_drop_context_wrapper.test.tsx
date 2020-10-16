@@ -6,9 +6,8 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 
-import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
+import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
@@ -20,11 +19,9 @@ describe('DragDropContextWrapper', () => {
 
       const wrapper = shallow(
         <TestProviders>
-          <MockedProvider mocks={{}} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              {message}
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            {message}
+          </DragDropContextWrapper>
         </TestProviders>
       );
       expect(wrapper.find('DragDropContextWrapper')).toMatchSnapshot();
@@ -35,11 +32,9 @@ describe('DragDropContextWrapper', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              {message}
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            {message}
+          </DragDropContextWrapper>
         </TestProviders>
       );
 

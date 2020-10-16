@@ -1,0 +1,11 @@
+.mapLayersWizardIcon {
+  margin-top: $euiSizeS;
+
+  &__highlight {
+    fill: $euiColorFullShade;
+  }
+
+  &__background {
+    fill: $euiColorLightShade;
+  }
+}

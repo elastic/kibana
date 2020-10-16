@@ -124,7 +124,9 @@ describe('context app', function () {
       ).then((hits) => {
         const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
-          .map(([, { query }]) => get(query, ['constant_score', 'filter', 'range', '@timestamp']));
+          .map(([, { query }]) =>
+            get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp'])
+          );
 
         expect(
           intervals.every(({ gte, lte }) => (gte && lte ? moment(gte).isBefore(lte) : true))
@@ -160,7 +162,9 @@ describe('context app', function () {
       ).then((hits) => {
         const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
-          .map(([, { query }]) => get(query, ['constant_score', 'filter', 'range', '@timestamp']));
+          .map(([, { query }]) =>
+            get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp'])
+          );
 
         // should have started at the given time
         expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 1000).toISOString());

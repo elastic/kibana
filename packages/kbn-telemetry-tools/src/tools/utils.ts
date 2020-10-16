@@ -78,14 +78,14 @@ export function getIdentifierDeclarationFromSource(node: ts.Node, source: ts.Sou
   const identifierName = node.getText();
   const identifierDefinition: ts.Node = (source as any).locals.get(identifierName);
   if (!identifierDefinition) {
-    throw new Error(`Unable to fine identifier in source ${identifierName}`);
+    throw new Error(`Unable to find identifier in source ${identifierName}`);
   }
   const declarations = (identifierDefinition as any).declarations as ts.Node[];
 
   const latestDeclaration: ts.Node | false | undefined =
     Array.isArray(declarations) && declarations[declarations.length - 1];
   if (!latestDeclaration) {
-    throw new Error(`Unable to fine declaration for identifier ${identifierName}`);
+    throw new Error(`Unable to find declaration for identifier ${identifierName}`);
   }
 
   return latestDeclaration;
@@ -100,42 +100,57 @@ export function getIdentifierDeclaration(node: ts.Node) {
   return getIdentifierDeclarationFromSource(node, source);
 }
 
-export function getVariableValue(node: ts.Node): string | Record<string, any> {
+export function getVariableValue(node: ts.Node, program: ts.Program): string | Record<string, any> {
   if (ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
     return node.text;
   }
 
   if (ts.isObjectLiteralExpression(node)) {
-    return serializeObject(node);
+    return serializeObject(node, program);
   }
 
   if (ts.isIdentifier(node)) {
     const declaration = getIdentifierDeclaration(node);
     if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
-      return getVariableValue(declaration.initializer);
+      return getVariableValue(declaration.initializer, program);
+    } else {
+      // Go fetch it in another file
+      return getIdentifierValue(node, node, program, { chaseImport: true });
     }
-    // TODO: If this is another imported value from another file, we'll need to go fetch it like in getPropertyValue
   }
 
-  throw Error(`Unsuppored Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`);
+  if (ts.isSpreadAssignment(node)) {
+    return getVariableValue(node.expression, program);
+  }
+
+  throw Error(
+    `Unsupported Node: cannot get value of node (${node.getText()}) of kind ${node.kind} [${
+      ts.SyntaxKind[node.kind]
+    }]`
+  );
 }
 
-export function serializeObject(node: ts.Node) {
+export function serializeObject(node: ts.Node, program: ts.Program) {
   if (!ts.isObjectLiteralExpression(node)) {
     throw new Error(`Expecting Object literal Expression got ${node.getText()}`);
   }
 
-  const value: Record<string, any> = {};
+  let value: Record<string, any> = {};
   for (const property of node.properties) {
     const propertyName = property.name?.getText();
+    const val = ts.isPropertyAssignment(property)
+      ? getVariableValue(property.initializer, program)
+      : getVariableValue(property, program);
+
     if (typeof propertyName === 'undefined') {
-      throw new Error(`Unable to get property name ${property.getText()}`);
-    }
-    const cleanPropertyName = propertyName.replace(/["']/g, '');
-    if (ts.isPropertyAssignment(property)) {
-      value[cleanPropertyName] = getVariableValue(property.initializer);
+      if (typeof val === 'object') {
+        value = { ...value, ...val };
+      } else {
+        throw new Error(`Unable to get property name ${property.getText()}`);
+      }
     } else {
-      value[cleanPropertyName] = getVariableValue(property);
+      const cleanPropertyName = propertyName.replace(/["']/g, '');
+      value[cleanPropertyName] = val;
     }
   }
 
@@ -155,45 +170,53 @@ export function getResolvedModuleSourceFile(
   return resolvedModuleSourceFile;
 }
 
+export function getIdentifierValue(
+  node: ts.Node,
+  initializer: ts.Identifier,
+  program: ts.Program,
+  config: Optional<{ chaseImport: boolean }> = {}
+) {
+  const { chaseImport = false } = config;
+  const identifierName = initializer.getText();
+  const declaration = getIdentifierDeclaration(initializer);
+  if (ts.isImportSpecifier(declaration)) {
+    if (!chaseImport) {
+      throw new Error(
+        `Value of node ${identifierName} is imported from another file. Chasing imports is not allowed.`
+      );
+    }
+
+    const importedModuleName = getModuleSpecifier(declaration);
+
+    const source = node.getSourceFile();
+    const declarationSource = getResolvedModuleSourceFile(source, program, importedModuleName);
+    const declarationNode = getIdentifierDeclarationFromSource(initializer, declarationSource);
+    if (!ts.isVariableDeclaration(declarationNode)) {
+      throw new Error(`Expected ${identifierName} to be variable declaration.`);
+    }
+    if (!declarationNode.initializer) {
+      throw new Error(`Expected ${identifierName} to be initialized.`);
+    }
+    const serializedObject = serializeObject(declarationNode.initializer, program);
+    return serializedObject;
+  }
+
+  return getVariableValue(declaration, program);
+}
+
 export function getPropertyValue(
   node: ts.Node,
   program: ts.Program,
   config: Optional<{ chaseImport: boolean }> = {}
 ) {
-  const { chaseImport = false } = config;
-
   if (ts.isPropertyAssignment(node)) {
     const { initializer } = node;
 
     if (ts.isIdentifier(initializer)) {
-      const identifierName = initializer.getText();
-      const declaration = getIdentifierDeclaration(initializer);
-      if (ts.isImportSpecifier(declaration)) {
-        if (!chaseImport) {
-          throw new Error(
-            `Value of node ${identifierName} is imported from another file. Chasing imports is not allowed.`
-          );
-        }
-
-        const importedModuleName = getModuleSpecifier(declaration);
-
-        const source = node.getSourceFile();
-        const declarationSource = getResolvedModuleSourceFile(source, program, importedModuleName);
-        const declarationNode = getIdentifierDeclarationFromSource(initializer, declarationSource);
-        if (!ts.isVariableDeclaration(declarationNode)) {
-          throw new Error(`Expected ${identifierName} to be variable declaration.`);
-        }
-        if (!declarationNode.initializer) {
-          throw new Error(`Expected ${identifierName} to be initialized.`);
-        }
-        const serializedObject = serializeObject(declarationNode.initializer);
-        return serializedObject;
-      }
-
-      return getVariableValue(declaration);
+      return getIdentifierValue(node, initializer, program, config);
     }
 
-    return getVariableValue(initializer);
+    return getVariableValue(initializer, program);
   }
 }
 
@@ -249,7 +272,7 @@ export function difference(actual: any, expected: any) {
       function (result, value, key) {
         if (key && /@@INDEX@@/.test(`${key}`)) {
           // The type definition is an Index Signature, fuzzy searching for similar keys
-          const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.+)?'));
+          const regexp = new RegExp(`^${key}`.replace(/@@INDEX@@/g, '(.+)?'));
           const keysInBase = Object.keys(base)
             .map((k) => {
               const match = k.match(regexp);

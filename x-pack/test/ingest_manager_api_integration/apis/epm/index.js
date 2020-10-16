@@ -7,6 +7,7 @@
 export default function loadTests({ loadTestFile }) {
   describe('EPM Endpoints', () => {
     loadTestFile(require.resolve('./list'));
+    loadTestFile(require.resolve('./setup'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./file'));
     //loadTestFile(require.resolve('./template'));
@@ -16,6 +17,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./install_prerelease'));
     loadTestFile(require.resolve('./install_remove_assets'));
     loadTestFile(require.resolve('./install_update'));
+    loadTestFile(require.resolve('./bulk_upgrade'));
     loadTestFile(require.resolve('./update_assets'));
     loadTestFile(require.resolve('./data_stream'));
     loadTestFile(require.resolve('./package_install_complete'));

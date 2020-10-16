@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BaseParams, BasePayload } from '../../../server/types';
 import { LayoutParams } from '../../lib/layouts';
+import { BaseParams, BasePayload } from '../../types';
+
+interface BaseParamsPNG {
+  layout: LayoutParams;
+  forceNow?: string;
+  relativeUrl: string;
+}
 
 // Job params: structure of incoming user request data
-export interface JobParamsPNG extends BaseParams {
-  title: string;
-  relativeUrl: string;
-}
+export type JobParamsPNG = BaseParamsPNG & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
-export interface TaskPayloadPNG extends BasePayload<JobParamsPNG> {
-  browserTimezone: string;
-  forceNow?: string;
-  layout: LayoutParams;
-  relativeUrl: string;
-}
+export type TaskPayloadPNG = BaseParamsPNG & BasePayload;

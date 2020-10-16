@@ -33,7 +33,7 @@ export const createLogEntryExamplesQuery = (
               },
             },
           },
-          ...(!!dataset
+          ...(dataset !== ''
             ? [
                 {
                   term: {
@@ -41,7 +41,19 @@ export const createLogEntryExamplesQuery = (
                   },
                 },
               ]
-            : []),
+            : [
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        exists: {
+                          field: partitionField,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ]),
           ...(categoryQuery
             ? [
                 {

@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mount } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import {
   fields,
@@ -25,6 +25,8 @@ import { ExceptionBuilderComponent } from './';
 jest.mock('../../../../common/lib/kibana');
 
 describe('ExceptionBuilderComponent', () => {
+  let wrapper: ReactWrapper;
+
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
 
   beforeEach(() => {
@@ -41,10 +43,12 @@ describe('ExceptionBuilderComponent', () => {
 
   afterEach(() => {
     getValueSuggestionsMock.mockClear();
+    jest.clearAllMocks();
+    wrapper.unmount();
   });
 
   test('it displays empty entry if no "exceptionListItems" are passed in', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
@@ -68,15 +72,19 @@ describe('ExceptionBuilderComponent', () => {
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
       1
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('Search');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual('is');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').text()).toEqual(
-      'Search field value...'
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
+      'Search'
+    );
+    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
+      'is'
+    );
+    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
+      'Please select a field first...'
     );
   });
 
   test('it displays "exceptionListItems" that are passed in', async () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[
@@ -106,19 +114,19 @@ describe('ExceptionBuilderComponent', () => {
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
       1
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
+      'ip'
+    );
+    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
       'is one of'
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').text()).toEqual(
+    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );
-
-    wrapper.unmount();
   });
 
   test('it displays "or", "and" and "add nested button" enabled', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
@@ -151,7 +159,7 @@ describe('ExceptionBuilderComponent', () => {
   });
 
   test('it adds an entry when "and" clicked', async () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
@@ -185,27 +193,27 @@ describe('ExceptionBuilderComponent', () => {
       expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
         'Search'
       );
-      expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').at(0).text()).toEqual(
+      expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
         'is'
       );
-      expect(
-        wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').at(0).text()
-      ).toEqual('Search field value...');
+      expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
+        'Please select a field first...'
+      );
 
       expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(1).text()).toEqual(
         'Search'
       );
-      expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').at(1).text()).toEqual(
+      expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(1).text()).toEqual(
         'is'
       );
-      expect(
-        wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').at(1).text()
-      ).toEqual('Search field value...');
+      expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(1).text()).toEqual(
+        'Please select a field first...'
+      );
     });
   });
 
   test('it adds an exception item when "or" clicked', async () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
@@ -243,27 +251,27 @@ describe('ExceptionBuilderComponent', () => {
       expect(item1.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
         'Search'
       );
-      expect(item1.find('[data-test-subj="exceptionBuilderEntryOperator"]').at(0).text()).toEqual(
+      expect(item1.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
         'is'
       );
-      expect(item1.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').at(0).text()).toEqual(
-        'Search field value...'
+      expect(item1.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
+        'Please select a field first...'
       );
 
       expect(item2.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
         'Search'
       );
-      expect(item2.find('[data-test-subj="exceptionBuilderEntryOperator"]').at(0).text()).toEqual(
+      expect(item2.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
         'is'
       );
-      expect(item2.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').at(0).text()).toEqual(
-        'Search field value...'
+      expect(item2.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
+        'Please select a field first...'
       );
     });
   });
 
   test('it displays empty entry if user deletes last remaining entry', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[
@@ -291,27 +299,31 @@ describe('ExceptionBuilderComponent', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
+      'ip'
+    );
+    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
       'is one of'
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').text()).toEqual(
+    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );
 
     wrapper.find('[data-test-subj="firstRowBuilderDeleteButton"] button').simulate('click');
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('Search');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual('is');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').text()).toEqual(
-      'Search field value...'
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
+      'Search'
     );
-
-    wrapper.unmount();
+    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
+      'is'
+    );
+    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
+      'Please select a field first...'
+    );
   });
 
   test('it displays "and" badge if at least one exception item includes more than one entry', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
@@ -344,7 +356,7 @@ describe('ExceptionBuilderComponent', () => {
   });
 
   test('it does not display "and" badge if none of the exception items include more than one entry', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
@@ -380,7 +392,7 @@ describe('ExceptionBuilderComponent', () => {
 
   describe('nested entry', () => {
     test('it adds a nested entry when "add nested entry" clicked', async () => {
-      const wrapper = mount(
+      wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ExceptionBuilderComponent
             exceptionListItems={[]}
@@ -410,9 +422,9 @@ describe('ExceptionBuilderComponent', () => {
         expect(entry2.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
           'Search nested field'
         );
-        expect(
-          entry2.find('[data-test-subj="exceptionBuilderEntryOperator"]').at(0).text()
-        ).toEqual('is');
+        expect(entry2.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
+          'is'
+        );
         expect(
           entry2.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').at(0).text()
         ).toEqual(getEmptyValue());

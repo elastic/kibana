@@ -7,7 +7,7 @@
     "apmOss",
     "data",
     "licensing",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "embeddable"
   ],
   "optionalPlugins": [

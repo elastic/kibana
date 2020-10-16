@@ -76,12 +76,16 @@ describe('api', () => {
           externalService,
           mapping,
           params,
-          secrets: {},
+          secrets: { username: 'elastic', password: 'elastic' },
           logger: mockedLogger,
         });
 
         expect(externalService.createIncident).toHaveBeenCalledWith({
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
+            caller_id: 'elastic',
             description:
               'Incident description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
             short_description:
@@ -103,6 +107,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             comments: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
               'Incident description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
@@ -114,6 +121,9 @@ describe('api', () => {
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             comments: 'Another comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
               'Incident description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
@@ -184,6 +194,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             description:
               'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             short_description:
@@ -205,6 +218,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledTimes(3);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             description:
               'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             short_description:
@@ -215,6 +231,9 @@ describe('api', () => {
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             comments: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
               'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
@@ -258,6 +277,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             short_description:
               'Incident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
@@ -297,6 +319,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             description:
               'description from servicenow \r\nIncident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
@@ -334,6 +359,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             short_description:
               'title from servicenow \r\nIncident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
@@ -370,9 +398,14 @@ describe('api', () => {
           secrets: {},
           logger: mockedLogger,
         });
+
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
-          incident: {},
+          incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
+          },
         });
       });
 
@@ -407,6 +440,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             short_description:
               'Incident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
@@ -444,6 +480,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             short_description:
               'Incident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
@@ -483,6 +522,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             description:
               'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
@@ -520,6 +562,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             short_description:
               'title from servicenow \r\nIncident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
@@ -559,6 +604,9 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            severity: '1',
+            urgency: '2',
+            impact: '3',
             short_description:
               'title from servicenow \r\nIncident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },

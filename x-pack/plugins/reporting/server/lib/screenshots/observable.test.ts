@@ -18,6 +18,7 @@ jest.mock('../../browsers/chromium/puppeteer', () => ({
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { HeadlessChromiumDriver } from '../../browsers';
+import { ConditionalHeaders } from '../../export_types/common';
 import {
   createMockBrowserDriverFactory,
   createMockConfig,
@@ -25,7 +26,6 @@ import {
   createMockLayoutInstance,
   createMockLevelLogger,
 } from '../../test_helpers';
-import { ConditionalHeaders } from '../../types';
 import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';

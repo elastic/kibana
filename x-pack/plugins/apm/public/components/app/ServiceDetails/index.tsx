@@ -14,8 +14,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { getAlertingCapabilities } from '../../alerting/get_alert_capabilities';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { AlertIntegrations } from './AlertIntegrations';
+import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 
 interface Props extends RouteComponentProps<{ serviceName: string }> {
@@ -23,20 +24,15 @@ interface Props extends RouteComponentProps<{ serviceName: string }> {
 }
 
 export function ServiceDetails({ match, tab }: Props) {
-  const plugin = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
   const { serviceName } = match.params;
-  const capabilities = plugin.core.application.capabilities;
-  const canReadAlerts = !!capabilities.apm['alerting:show'];
-  const canSaveAlerts = !!capabilities.apm['alerting:save'];
-  const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
-  const isAlertingAvailable =
-    isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-  const isMlPluginEnabled = 'ml' in plugin.plugins;
-  const canReadAnomalies = !!(
-    isMlPluginEnabled &&
-    capabilities.ml.canAccessML &&
-    capabilities.ml.canGetJobs
-  );
+
+  const {
+    isAlertingAvailable,
+    canReadAlerts,
+    canSaveAlerts,
+    canReadAnomalies,
+  } = getAlertingCapabilities(plugins, core.application.capabilities);
 
   const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
     defaultMessage: 'Add data',
@@ -53,7 +49,7 @@ export function ServiceDetails({ match, tab }: Props) {
           </EuiFlexItem>
           {isAlertingAvailable && (
             <EuiFlexItem grow={false}>
-              <AlertIntegrations
+              <AlertingPopoverAndFlyout
                 canReadAlerts={canReadAlerts}
                 canSaveAlerts={canSaveAlerts}
                 canReadAnomalies={canReadAnomalies}
@@ -62,9 +58,7 @@ export function ServiceDetails({ match, tab }: Props) {
           )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={plugin.core.http.basePath.prepend(
-                '/app/home#/tutorial/apm'
-              )}
+              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
               size="s"
               color="primary"
               iconType="plusInCircle"

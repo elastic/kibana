@@ -7,6 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { isEmpty } from 'lodash';
+import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { EventOutcome } from '../../../common/event_outcome';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
@@ -16,6 +18,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   EVENT_OUTCOME,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -32,8 +35,8 @@ const paramsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
-  transactionType: schema.string(),
-  serviceName: schema.string(),
+  transactionType: schema.maybe(schema.string()),
+  serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
 });
 
@@ -58,6 +61,7 @@ export function registerTransactionErrorRateAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.interval,
       ],
     },
     producer: 'apm',
@@ -84,8 +88,18 @@ export function registerTransactionErrorRateAlertType({
                   },
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                { term: { [SERVICE_NAME]: alertParams.serviceName } },
-                { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
+                ...(alertParams.serviceName
+                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
+                  : []),
+                ...(alertParams.transactionType
+                  ? [
+                      {
+                        term: {
+                          [TRANSACTION_TYPE]: alertParams.transactionType,
+                        },
+                      },
+                    ]
+                  : []),
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],
             },
@@ -93,6 +107,24 @@ export function registerTransactionErrorRateAlertType({
           aggs: {
             erroneous_transactions: {
               filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+            },
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: 50,
+              },
+              aggs: {
+                transaction_types: {
+                  terms: { field: TRANSACTION_TYPE },
+                  aggs: {
+                    environments: {
+                      terms: {
+                        field: SERVICE_ENVIRONMENT,
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -114,16 +146,54 @@ export function registerTransactionErrorRateAlertType({
         (errornousTransactionsCount / totalTransactionCount) * 100;
 
       if (transactionErrorRate > alertParams.threshold) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionErrorRate
-        );
+        function scheduleAction({
+          serviceName,
+          environment,
+          transactionType,
+        }: {
+          serviceName: string;
+          environment?: string;
+          transactionType?: string;
+        }) {
+          const alertInstanceName = [
+            AlertType.TransactionErrorRate,
+            serviceName,
+            transactionType,
+            environment,
+          ]
+            .filter((name) => name)
+            .join('_');
 
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName,
-          transactionType: alertParams.transactionType,
-          environment: alertParams.environment,
-          threshold: alertParams.threshold,
-          triggerValue: transactionErrorRate,
+          const alertInstance = services.alertInstanceFactory(
+            alertInstanceName
+          );
+          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            serviceName,
+            transactionType,
+            environment,
+            threshold: alertParams.threshold,
+            triggerValue: asDecimalOrInteger(transactionErrorRate),
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+          });
+        }
+
+        response.aggregations?.services.buckets.forEach((serviceBucket) => {
+          const serviceName = serviceBucket.key as string;
+          if (isEmpty(serviceBucket.transaction_types?.buckets)) {
+            scheduleAction({ serviceName });
+          } else {
+            serviceBucket.transaction_types.buckets.forEach((typeBucket) => {
+              const transactionType = typeBucket.key as string;
+              if (isEmpty(typeBucket.environments?.buckets)) {
+                scheduleAction({ serviceName, transactionType });
+              } else {
+                typeBucket.environments.buckets.forEach((envBucket) => {
+                  const environment = envBucket.key as string;
+                  scheduleAction({ serviceName, transactionType, environment });
+                });
+              }
+            });
+          }
         });
       }
     },
