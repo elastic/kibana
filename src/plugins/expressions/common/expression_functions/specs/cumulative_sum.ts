@@ -62,7 +62,7 @@ function getBucketIdentifier(row: DatatableRow, groupColumns?: string[]) {
  * Edge cases:
  * * Will return the input table if `inputColumnId` does not exist
  * * Will throw an error if `outputColumnId` exists already in provided data table
- * * If `column` contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of
+ * * If the row value contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of
  *   all cells of the same series further up in the table.
  * * For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the
  *   cumulative sum of the current series - if this results in `NaN` (like in case of objects), all cells of the

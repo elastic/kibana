@@ -25,7 +25,7 @@ import { Datatable } from '../../../expression_types/specs/datatable';
 describe('interpreter/functions#cumulative_sum', () => {
   const fn = functionWrapper(cumulativeSum);
   const runFn = (input: Datatable, args: CumulativeSumArgs) =>
-    fn(input, args, {} as ExecutionContext);
+    fn(input, args, {} as ExecutionContext) as Datatable;
 
   it('calculates cumulative sum', () => {
     const result = runFn(
