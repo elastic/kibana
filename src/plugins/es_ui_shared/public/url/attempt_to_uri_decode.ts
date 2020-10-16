@@ -17,5 +17,13 @@
  * under the License.
  */
 
-export { extractQueryParams } from './extract_query_params';
-export { attemptToURIDecode } from './attempt_to_uri_decode';
+export const attemptToURIDecode = (value: string) => {
+  let result = value;
+  try {
+    result = decodeURIComponent(value);
+    result = decodeURI(result);
+  } catch (e) {
+    // do nothing
+  }
+  return result;
+};

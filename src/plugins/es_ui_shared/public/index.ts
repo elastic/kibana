@@ -57,7 +57,7 @@ export {
 
 export { Forms, ace, GlobalFlyout, XJson };
 
-export { extractQueryParams } from './url';
+export { extractQueryParams, attemptToURIDecode } from './url';
 
 /** dummy plugin, we just want esUiShared to have its own bundle */
 export function plugin() {

@@ -89,9 +89,12 @@ export function registerGetOneRoute({ router, license, lib: { isEsError } }: Rou
           { data_streams: dataStream },
           { data_streams: dataStreamsStats },
         ] = await Promise.all([
-          callAsCurrentUser('dataManagement.getDataStream', { name }),
           ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
-            path: `/_data_stream/${name}/_stats`,
+            path: `/_data_stream/${encodeURIComponent(name)}`,
+            method: 'GET',
+          }),
+          ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
+            path: `/_data_stream/${encodeURIComponent(name)}/_stats`,
             method: 'GET',
             query: {
               human: true,
