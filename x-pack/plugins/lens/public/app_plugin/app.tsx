@@ -412,7 +412,7 @@ export function App({
       }
 
       notifications.toasts.addSuccess(
-        i18n.translate('visualize.topNavMenu.saveVisualization.successNotificationText', {
+        i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
           defaultMessage: `Saved '{visTitle}'`,
           values: {
             visTitle: docToSave.title,
