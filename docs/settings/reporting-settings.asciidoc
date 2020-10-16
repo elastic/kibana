@@ -251,7 +251,7 @@ a| `xpack.reporting.capture.browser`
 | `xpack.reporting.capture.networkPolicy`
   | Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown
   visualization can show an image from a remote server. You can configure what type of requests to allow or filter by setting a
-  <<reporting-network-policy, network policy> for Reporting.
+  <<reporting-network-policy, network policy>> for Reporting.
 
 | `xpack.reporting.roles.allow`
   | Specifies the roles in addition to superusers that can use reporting.
