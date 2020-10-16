@@ -175,6 +175,55 @@ describe('formatNumber helper', () => {
   });
 });
 
+describe('replace helper', () => {
+  test('replaces all occurrences', () => {
+    const url = 'https://elastic.co/{{replace value "replace-me" "with-me"}}';
+
+    expect(compile(url, { value: 'replace-me test replace-me' })).toMatchInlineSnapshot(
+      `"https://elastic.co/with-me%20test%20with-me"`
+    );
+  });
+
+  test('can be used to remove a substring', () => {
+    const url = 'https://elastic.co/{{replace value "Label:" ""}}';
+
+    expect(compile(url, { value: 'Label:Feature:Something' })).toMatchInlineSnapshot(
+      `"https://elastic.co/Feature:Something"`
+    );
+  });
+
+  test('works if no matches', () => {
+    const url = 'https://elastic.co/{{replace value "Label:" ""}}';
+
+    expect(compile(url, { value: 'No matches' })).toMatchInlineSnapshot(
+      `"https://elastic.co/No%20matches"`
+    );
+  });
+
+  test('throws on incorrect args', () => {
+    expect(() =>
+      compile('https://elastic.co/{{replace value "Label:"}}', { value: 'No matches' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+    );
+    expect(() =>
+      compile('https://elastic.co/{{replace value "Label:" 4}}', { value: 'No matches' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+    );
+    expect(() =>
+      compile('https://elastic.co/{{replace value 4 ""}}', { value: 'No matches' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+    );
+    expect(() =>
+      compile('https://elastic.co/{{replace value}}', { value: 'No matches' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[replace]: \\"searchString\\" and \\"valueString\\" parameters expected to be strings, but not a string or missing"`
+    );
+  });
+});
+
 describe('basic string formatting helpers', () => {
   test('lowercase', () => {
     const compileUrl = (value: unknown) =>

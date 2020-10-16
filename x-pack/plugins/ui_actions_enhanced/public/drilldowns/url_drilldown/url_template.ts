@@ -103,6 +103,14 @@ handlebars.registerHelper('mid', (rawValue: unknown, start: number, length: numb
   if (typeof length !== 'number') throw new Error('[left]: expected "length" to be a number');
   return String(rawValue).substr(start, length);
 });
+handlebars.registerHelper('replace', (...args) => {
+  const [str, searchString, valueString] = args.slice(0, -1) as [string, string, string];
+  if (typeof searchString !== 'string' || typeof valueString !== 'string')
+    throw new Error(
+      '[replace]: "searchString" and "valueString" parameters expected to be strings, but not a string or missing'
+    );
+  return String(str).split(searchString).join(valueString);
+});
 
 export function compile(url: string, context: object): string {
   const template = handlebars.compile(url, { strict: true, noEscape: true });
