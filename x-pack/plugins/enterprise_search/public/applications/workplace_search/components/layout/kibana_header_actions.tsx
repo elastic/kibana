@@ -14,7 +14,12 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
 
   return (
-    <EuiButtonEmpty href={getWorkplaceSearchUrl('/search')} target="_blank" iconType="search" style={{ marginRight: 5 }}>
+    <EuiButtonEmpty
+      href={getWorkplaceSearchUrl('/search')}
+      target="_blank"
+      iconType="search"
+      style={{ marginRight: 5 }}
+    >
       <EuiText size="s">
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.headerActions.searchApplication', {
           defaultMessage: 'Go to search application',
