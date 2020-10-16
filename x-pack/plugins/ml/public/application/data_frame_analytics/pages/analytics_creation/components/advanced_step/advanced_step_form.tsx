@@ -61,7 +61,7 @@ function getZeroClassesMessage(elasaticUrl: string, version: string) {
             target="_blank"
             external
           >
-            {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.huberLinkText', {
+            {i18n.translate('xpack.ml.dataframe.analytics.create.aucRocLabel', {
               defaultMessage: 'AUC ROC',
             })}
           </EuiLink>
