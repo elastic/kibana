@@ -23,9 +23,10 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('execute()', () => {
   test('schedules the action with all given parameters', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry,
       isESOUsingEphemeralEncryptionKey: false,
       preconfiguredActions: [],
     });
@@ -76,6 +77,9 @@ describe('execute()', () => {
       },
       {}
     );
+    expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
+      notifyUsage: true,
+    });
   });
 
   test('schedules the action with all given parameters with a preconfigured action', async () => {

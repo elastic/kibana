@@ -208,14 +208,24 @@ export const useRenderCellValue = (
           return results[cId.replace(`${resultsField}.`, '')];
         }
 
-        return tableItems.hasOwnProperty(adjustedRowIndex)
-          ? getNestedProperty(tableItems[adjustedRowIndex], cId, null)
-          : null;
+        if (tableItems.hasOwnProperty(adjustedRowIndex)) {
+          const item = tableItems[adjustedRowIndex];
+
+          // Try if the field name is available as is.
+          if (item.hasOwnProperty(cId)) {
+            return item[cId];
+          }
+
+          // Try if the field name is available as a nested field.
+          return getNestedProperty(tableItems[adjustedRowIndex], cId, null);
+        }
+
+        return null;
       }
 
       const cellValue = getCellValue(columnId);
 
-      // React by default doesn't all us to use a hook in a callback.
+      // React by default doesn't allow us to use a hook in a callback.
       // However, this one will be passed on to EuiDataGrid and its docs
       // recommend wrapping `setCellProps` in a `useEffect()` hook
       // so we're ignoring the linting rule here.

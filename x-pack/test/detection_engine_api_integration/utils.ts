@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
+import { Context } from '@elastic/elasticsearch/lib/Transport';
 import {
   Status,
   SignalIds,
@@ -14,7 +15,10 @@ import {
 import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
 import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
-import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/security_solution/common/constants';
+import {
+  DETECTION_ENGINE_INDEX_URL,
+  INTERNAL_RULE_ID_KEY,
+} from '../../plugins/security_solution/common/constants';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -245,34 +249,38 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      const result = await es.deleteByQuery({
-        index: '.kibana',
-        q: 'type:alert',
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        body: {},
-      });
-      // deleteByQuery will cause version conflicts as alerts are being updated
-      // by background processes; the code below accounts for that
-      if (result.body.version_conflicts !== 0) {
-        throw new Error(`Version conflicts for ${result.body.version_conflicts} alerts`);
-      }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(`Error in deleteAllAlerts(), retries left: ${retryCount - 1}`, err);
+export const deleteAllAlerts = async (es: Client): Promise<void> => {
+  return countDownES(async () => {
+    return es.deleteByQuery({
+      index: '.kibana',
+      q: 'type:alert',
+      wait_for_completion: true,
+      refresh: true,
+      conflicts: 'proceed',
+      body: {},
+    });
+  }, 'deleteAllAlerts');
+};
 
-      // retry, counting down, and delay a bit before
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      await deleteAllAlerts(es, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not deleteAllAlerts, no retries are left');
-  }
+export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
+  return countDownES(async () => {
+    return es.updateByQuery({
+      index: '.kibana',
+      refresh: true,
+      wait_for_completion: true,
+      body: {
+        script: {
+          lang: 'painless',
+          source: 'ctx._source.alert.params.version--',
+        },
+        query: {
+          term: {
+            'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+          },
+        },
+      },
+    });
+  }, 'downgradeImmutableRule');
 };
 
 /**
@@ -295,27 +303,15 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
  * @param es The ElasticSearch handle
  */
 export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      await es.deleteByQuery({
-        index: '.kibana',
-        q: 'type:siem-detection-engine-rule-status',
-        wait_for_completion: true,
-        refresh: true,
-        body: {},
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`,
-        err
-      );
-      await deleteAllRulesStatuses(es, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not deleteAllRulesStatuses, no retries are left');
-  }
+  return countDownES(async () => {
+    return es.deleteByQuery({
+      index: '.kibana',
+      q: 'type:siem-detection-engine-rule-status',
+      wait_for_completion: true,
+      refresh: true,
+      body: {},
+    });
+  }, 'deleteAllRulesStatuses');
 };
 
 /**
@@ -324,24 +320,12 @@ export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promi
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
-  retryCount = 20
+  supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `Failure trying to create the signals index, retries left are: ${retryCount - 1}`,
-        err
-      );
-      await createSignalsIndex(supertest, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not createSignalsIndex, no retries are left');
-  }
+  await countDownTest(async () => {
+    await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    return true;
+  }, 'createSignalsIndex');
 };
 
 /**
@@ -349,21 +333,12 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
-  retryCount = 20
+  supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  if (retryCount > 0) {
-    try {
-      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`, err);
-      await deleteSignalsIndex(supertest, retryCount - 1);
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Could not deleteSignalsIndex, no retries are left');
-  }
+  await countDownTest(async () => {
+    await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    return true;
+  }, 'deleteSignalsIndex');
 };
 
 /**
@@ -616,7 +591,7 @@ export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   maxTimeout: number = 5000,
   timeoutWait: number = 10
-) => {
+): Promise<void> => {
   await new Promise(async (resolve, reject) => {
     let found = false;
     let numberOfTries = 0;
@@ -635,4 +610,83 @@ export const waitFor = async (
       reject(new Error('timed out waiting for function condition to be true'));
     }
   });
+};
+
+/**
+ * Does a plain countdown and checks against es queries for either conflicts in the error
+ * or for any over the wire issues such as timeouts or temp 404's to make the tests more
+ * reliant.
+ * @param esFunction The function to test against
+ * @param esFunctionName The name of the function to print if we encounter errors
+ * @param retryCount The number of times to retry before giving up (has default)
+ * @param timeoutWait Time to wait before trying again (has default)
+ */
+export const countDownES = async (
+  esFunction: () => Promise<ApiResponse<Record<string, any>, Context>>,
+  esFunctionName: string,
+  retryCount: number = 20,
+  timeoutWait = 250
+): Promise<void> => {
+  await countDownTest(
+    async () => {
+      const result = await esFunction();
+      if (result.body.version_conflicts !== 0) {
+        // eslint-disable-next-line no-console
+        console.log(`Version conflicts for ${result.body.version_conflicts}`);
+        return false;
+      } else {
+        return true;
+      }
+    },
+    esFunctionName,
+    retryCount,
+    timeoutWait
+  );
+};
+
+/**
+ * Does a plain countdown and checks against a boolean to determine if to wait and try again.
+ * This is useful for over the wire things that can cause issues such as conflict or timeouts
+ * for testing resiliency.
+ * @param functionToTest The function to test against
+ * @param name The name of the function to print if we encounter errors
+ * @param retryCount The number of times to retry before giving up (has default)
+ * @param timeoutWait Time to wait before trying again (has default)
+ */
+export const countDownTest = async (
+  functionToTest: () => Promise<boolean>,
+  name: string,
+  retryCount: number = 20,
+  timeoutWait = 250,
+  ignoreThrow: boolean = false
+) => {
+  if (retryCount > 0) {
+    try {
+      const passed = await functionToTest();
+      if (!passed) {
+        // eslint-disable-next-line no-console
+        console.log(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
+        // retry, counting down, and delay a bit before
+        await new Promise((resolve) => setTimeout(resolve, timeoutWait));
+        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+      }
+    } catch (err) {
+      if (ignoreThrow) {
+        throw err;
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Failure trying to ${name}, with exception message of:`,
+          err.message,
+          `retries left are: ${retryCount - 1}`
+        );
+        // retry, counting down, and delay a bit before
+        await new Promise((resolve) => setTimeout(resolve, timeoutWait));
+        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+      }
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(`Could not ${name}, no retries are left`);
+  }
 };
