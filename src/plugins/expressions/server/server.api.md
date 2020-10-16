@@ -210,7 +210,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext): Promise<Output>;
+    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions): Promise<Output>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
