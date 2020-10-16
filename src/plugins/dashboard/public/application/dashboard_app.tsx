@@ -124,44 +124,6 @@ export function DashboardApp({
     );
   };
 
-  const updateIndexPatternsOperator = pipe(
-    filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-    map((container: DashboardContainer): IndexPattern[] => {
-      let panelIndexPatterns: IndexPattern[] = [];
-      Object.values(container.getChildIds()).forEach((id) => {
-        const embeddableInstance = container.getChild(id);
-        if (isErrorEmbeddable(embeddableInstance)) return;
-        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
-        if (!embeddableIndexPatterns) return;
-        panelIndexPatterns.push(...embeddableIndexPatterns);
-      });
-      panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
-      return panelIndexPatterns;
-    }),
-    distinctUntilChanged((a, b) =>
-      deepEqual(
-        a.map((ip) => ip.id),
-        b.map((ip) => ip.id)
-      )
-    ),
-    // using switchMap for previous task cancellation
-    switchMap((panelIndexPatterns: IndexPattern[]) => {
-      return new Observable((observer) => {
-        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-          if (observer.closed) return;
-          setState((s) => ({ ...s, indexPatterns: panelIndexPatterns }));
-          observer.complete();
-        } else {
-          indexPatterns.getDefault().then((defaultIndexPattern) => {
-            if (observer.closed) return;
-            setState((s) => ({ ...s, indexPatterns: [defaultIndexPattern as IndexPattern] }));
-            observer.complete();
-          });
-        }
-      });
-    })
-  );
-
   const initializeStateSyncing = useCallback(
     (savedDashboard: DashboardSavedObject) => {
       const filterManager = data.query.filterManager;
@@ -301,8 +263,119 @@ export function DashboardApp({
     [data.query]
   );
 
+  const getInputSubscription = useCallback(
+    (props: {
+      dashboardContainer: DashboardContainer;
+      dashboardStateManager: DashboardStateManager;
+    }) => {
+      const { dashboardContainer, dashboardStateManager } = props;
+      return dashboardContainer.getInput$().subscribe(() => {
+        // let dirty = false;
+
+        // This has to be first because handleDashboardContainerChanges causes
+        // appState.save which will cause refreshDashboardContainer to be called.
+
+        if (
+          !esFilters.compareFilters(
+            dashboardContainer.getInput().filters,
+            data.query.filterManager.getFilters(),
+            esFilters.COMPARE_ALL_OPTIONS
+          )
+        ) {
+          // Add filters modifies the object passed to it, hence the clone deep.
+          data.query.filterManager.addFilters(_.cloneDeep(dashboardContainer.getInput().filters));
+
+          // dashboardStateManager.applyFilters(
+          //   // $scope.model.query,
+          //   dashboardContainer.getInput().filters
+          // );
+          // dirty = true;
+        }
+
+        dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
+        // $scope.$evalAsync(() => {
+        //   if (dirty) {
+        //     updateState();
+        //   }
+        // });
+      });
+    },
+    [data.query.filterManager]
+  );
+
+  const getOutputSubscription = useCallback(
+    (props: { dashboardContainer: DashboardContainer }) => {
+      const { dashboardContainer } = props;
+
+      const updateIndexPatternsOperator = pipe(
+        filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+        map((container: DashboardContainer): IndexPattern[] => {
+          let panelIndexPatterns: IndexPattern[] = [];
+          Object.values(container.getChildIds()).forEach((id) => {
+            const embeddableInstance = container.getChild(id);
+            if (isErrorEmbeddable(embeddableInstance)) return;
+            const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
+            if (!embeddableIndexPatterns) return;
+            panelIndexPatterns.push(...embeddableIndexPatterns);
+          });
+          panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+          return panelIndexPatterns;
+        }),
+        distinctUntilChanged((a, b) =>
+          deepEqual(
+            a.map((ip) => ip.id),
+            b.map((ip) => ip.id)
+          )
+        ),
+        // using switchMap for previous task cancellation
+        switchMap((panelIndexPatterns: IndexPattern[]) => {
+          return new Observable((observer) => {
+            if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+              if (observer.closed) return;
+              setState((s) => ({ ...s, indexPatterns: panelIndexPatterns }));
+              observer.complete();
+            } else {
+              indexPatterns.getDefault().then((defaultIndexPattern) => {
+                if (observer.closed) return;
+                setState((s) => ({ ...s, indexPatterns: [defaultIndexPattern as IndexPattern] }));
+                observer.complete();
+              });
+            }
+          });
+        })
+      );
+
+      return merge(
+        // output of dashboard container itself
+        dashboardContainer.getOutput$(),
+        // plus output of dashboard container children,
+        // children may change, so make sure we subscribe/unsubscribe with switchMap
+        dashboardContainer.getOutput$().pipe(
+          map(() => dashboardContainer!.getChildIds()),
+          distinctUntilChanged(deepEqual),
+          switchMap((newChildIds: string[]) =>
+            merge(
+              ...newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$())
+            )
+          )
+        )
+      )
+        .pipe(
+          mapTo(dashboardContainer),
+          startWith(dashboardContainer), // to trigger initial index pattern update
+          updateIndexPatternsOperator
+        )
+        .subscribe();
+    },
+    [indexPatterns]
+  );
+
   // Dashboard loading useEffect
   useEffect(() => {
+    if (state?.savedDashboard?.id && state?.savedDashboard?.id === savedDashboardId) {
+      return;
+    }
+
     let inputSubscription: Subscription | undefined;
     let outputSubscription: Subscription | undefined;
 
@@ -343,72 +416,21 @@ export function DashboardApp({
               return;
             }
 
-            // outputSubscription = merge(
-            //   // output of dashboard container itself
-            //   dashboardContainer.getOutput$(),
-            //   // plus output of dashboard container children,
-            //   // children may change, so make sure we subscribe/unsubscribe with switchMap
-            //   dashboardContainer.getOutput$().pipe(
-            //     map(() => dashboardContainer!.getChildIds()),
-            //     distinctUntilChanged(deepEqual),
-            //     switchMap((newChildIds: string[]) =>
-            //       merge(
-            //         ...newChildIds.map((childId) =>
-            //           dashboardContainer!.getChild(childId).getOutput$()
-            //         )
-            //       )
-            //     )
-            //   )
-            // )
-            //   .pipe(
-            //     mapTo(dashboardContainer),
-            //     startWith(dashboardContainer), // to trigger initial index pattern update
-            //     updateIndexPatternsOperator
-            //   )
-            //   .subscribe();
-
-            // inputSubscription = dashboardContainer.getInput$().subscribe(() => {
-            //   // let dirty = false;
-
-            //   // This has to be first because handleDashboardContainerChanges causes
-            //   // appState.save which will cause refreshDashboardContainer to be called.
-
-            //   if (
-            //     !esFilters.compareFilters(
-            //       dashboardContainer.getInput().filters,
-            //       data.query.filterManager.getFilters(),
-            //       esFilters.COMPARE_ALL_OPTIONS
-            //     )
-            //   ) {
-            //     // Add filters modifies the object passed to it, hence the clone deep.
-            //     data.query.filterManager.addFilters(
-            //       _.cloneDeep(dashboardContainer.getInput().filters)
-            //     );
-
-            //     // dashboardStateManager.applyFilters(
-            //     //   // $scope.model.query,
-            //     //   dashboardContainer.getInput().filters
-            //     // );
-            //     // dirty = true;
-            //   }
-
-            //   dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
-            //   // $scope.$evalAsync(() => {
-            //   //   if (dirty) {
-            //   //     updateState();
-            //   //   }
-            //   // });
-            // });
+            inputSubscription = getInputSubscription({ dashboardContainer, dashboardStateManager });
+            outputSubscription = getOutputSubscription({ dashboardContainer });
 
             setState({
               dashboardContainer,
               dashboardStateManager,
               savedDashboard,
             });
+
             dashboardContainer.render(document.getElementById('dashboardViewport')!);
           });
 
         return () => {
+          dashboardStateManager.destroy();
+          state.dashboardContainer?.destroy();
           inputSubscription?.unsubscribe();
           outputSubscription?.unsubscribe();
           stopSyncingQueryServiceStateWithUrl();
@@ -441,17 +463,20 @@ export function DashboardApp({
         }
       });
   }, [
+    savedDashboardId,
+    state?.savedDashboard?.id,
     embeddable,
     history,
     savedDashboards,
-    savedDashboardId,
     data.indexPatterns,
     chrome.recentlyAccessed,
     core.notifications.toasts,
+    data.query.filterManager,
+    state.dashboardContainer?.destroy,
     initializeStateSyncing,
     getDashboardInput,
-    updateIndexPatternsOperator,
-    data.query.filterManager,
+    getInputSubscription,
+    getOutputSubscription,
   ]);
 
   return (
