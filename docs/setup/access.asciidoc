@@ -9,10 +9,10 @@ The fastest way to access {kib} is to use our hosted {es} Service. If you <<inst
 include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 [float]
-[[log-on-with-the-web-application]]
-=== Log on with the web application
+[[log-on-to-the-web-application]]
+=== Log on to the web application
 
-When you install {kib} on your own, you access {kib} through the web application on port 5601.
+If you are using a self-managed deployment, you access {kib} through the web application on port 5601.
 
 . Point your web browser to the machine where you are running {kib} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 
