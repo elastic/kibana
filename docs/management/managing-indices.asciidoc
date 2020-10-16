@@ -190,7 +190,7 @@ image::images/management-index-templates-mappings.png[Mapped fields page]
 Alternatively, you can click the *Load JSON* link and define the mapping as JSON:
 +
 [source,js]
-----------------------------------
+----
 {
   "properties": {
     "geo": {
@@ -202,7 +202,7 @@ Alternatively, you can click the *Load JSON* link and define the mapping as JSON
     }
   }
 }
-----------------------------------
+----
 +
 You can create additional mapping configurations in the *Dynamic templates* and
 *Advanced options* tabs. No additional mappings are required for this example.
@@ -212,13 +212,13 @@ You can create additional mapping configurations in the *Dynamic templates* and
 *Step 5: Aliases*
 
 . Define an index alias named `my-index`:
-
++
 [source,js]
-----------------------------------
+----
 {
   "my-index": {}
 }
-----------------------------------
+----
 
 . Click *Next >*.
 
@@ -234,7 +234,7 @@ You’ve now created an index template. Use the {es} index API to load the data:
 . In the {kib} *Console*, index two documents:
 +
 [source,js]
-----------------------------------
+----
 POST /my-index-000001/_doc
 {
   "@timestamp": "2019-05-18T15:57:27.541Z",
@@ -265,7 +265,7 @@ POST /my-index-000001/_doc
   "memory": 241720,
   "url": "https://theacademyofperformingartsandscience.org/people/type:astronauts/name:laurel-b-clark/profile"
 }
-----------------------------------
+----
 
 . Use the {es} {ref}/indices-get-index.html#indices-get-index[get index API] to
 view one of the newly created indices. The index's mappings and alias are
