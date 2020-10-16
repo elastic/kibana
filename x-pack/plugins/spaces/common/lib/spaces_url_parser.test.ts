@@ -31,6 +31,14 @@ describe('getSpaceIdFromPath', () => {
         pathHasExplicitSpaceIdentifier: false,
       });
     });
+
+    test('it identifies the space url context with the default space', () => {
+      const basePath = `/s/${DEFAULT_SPACE_ID}`;
+      expect(getSpaceIdFromPath(basePath)).toEqual({
+        spaceId: DEFAULT_SPACE_ID,
+        pathHasExplicitSpaceIdentifier: true,
+      });
+    });
   });
 
   describe('with a serverBasePath defined', () => {
@@ -55,6 +63,14 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath(basePath, '/this/is/a')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathHasExplicitSpaceIdentifier: false,
+      });
+    });
+
+    test('it identifies the space url context with the default space following the server base path', () => {
+      const basePath = `/server-base-path-here/s/${DEFAULT_SPACE_ID}`;
+      expect(getSpaceIdFromPath(basePath, '/server-base-path-here')).toEqual({
+        spaceId: DEFAULT_SPACE_ID,
+        pathHasExplicitSpaceIdentifier: true,
       });
     });
 
