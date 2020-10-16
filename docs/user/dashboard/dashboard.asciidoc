@@ -449,7 +449,7 @@ image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
 
 .. In the toolbar, click *Save*.
 
-.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and Return*.
+.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
 +
 The Timelion visualization panel appears on the dashboard.
 +
