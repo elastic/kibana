@@ -118,7 +118,6 @@ describe('register()', () => {
           "alerting:test": Object {
             "createTaskRunner": [Function],
             "title": "Test",
-            "type": "alerting:test",
           },
         },
       ]

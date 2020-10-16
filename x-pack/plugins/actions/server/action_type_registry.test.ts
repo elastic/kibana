@@ -66,7 +66,6 @@ describe('register()', () => {
             "getRetry": [Function],
             "maxAttempts": 1,
             "title": "My action type",
-            "type": "actions:my-action-type",
           },
         },
       ]
