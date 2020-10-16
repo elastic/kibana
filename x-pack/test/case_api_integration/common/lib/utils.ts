@@ -116,7 +116,7 @@ export const getResilientConnector = () => ({
       mapping: [
         {
           source: 'title',
-          target: 'summary',
+          target: 'name',
           actionType: 'overwrite',
         },
         {
@@ -132,6 +132,51 @@ export const getResilientConnector = () => ({
       ],
     },
     isCaseOwned: true,
+  },
+});
+
+export const getConnectorWithoutCaseOwned = () => ({
+  name: 'Connector without isCaseOwned',
+  actionTypeId: '.resilient',
+  secrets: {
+    apiKeyId: 'id',
+    apiKeySecret: 'secret',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    orgId: 'pkey',
+    incidentConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'name',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+  },
+});
+
+export const getConnectorWithoutMapping = () => ({
+  name: 'Connector without mapping',
+  actionTypeId: '.resilient',
+  secrets: {
+    apiKeyId: 'id',
+    apiKeySecret: 'secret',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    orgId: 'pkey',
   },
 });
 

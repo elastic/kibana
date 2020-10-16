@@ -1,0 +1,54 @@
+get:
+  summary: Agent policy - List
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/agent_policy.yaml
+              total:
+                type: number
+              page:
+                type: number
+              perPage:
+                type: number
+            required:
+              - items
+              - total
+              - page
+              - perPage
+  operationId: agent-policy-list
+  parameters:
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
+    - $ref: ../components/parameters/kuery.yaml
+  description: ''
+post:
+  summary: Agent policy - Create
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/agent_policy.yaml
+  operationId: post-agent-policy
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/new_agent_policy.yaml
+  security: []
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

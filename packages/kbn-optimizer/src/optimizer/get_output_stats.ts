@@ -101,13 +101,18 @@ export function getMetrics(log: ToolingLog, config: OptimizerConfig) {
           group: `page load bundle size`,
           id: bundle.id,
           value: entry.stats!.size,
-          limit: config.limits.pageLoadAssetSize[bundle.id],
+          limit: config.limits.pageLoadAssetSize?.[bundle.id],
           limitConfigPath: `packages/kbn-optimizer/limits.yml`,
         },
         {
           group: `async chunks size`,
           id: bundle.id,
           value: sumSize(asyncChunks),
+        },
+        {
+          group: `async chunk count`,
+          id: bundle.id,
+          value: asyncChunks.length,
         },
         {
           group: `miscellaneous assets size`,
