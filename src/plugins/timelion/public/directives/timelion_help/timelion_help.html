@@ -37,7 +37,7 @@
 
       <button
         ng-click="opts.dontShowHelp()"
-        class="kuiButton kuiButton--hollow"
+        class="timHelp__links"
       >
         {{translations.dontShowHelpButtonLabel}}
       </button>
@@ -45,7 +45,7 @@
 
       <button
         ng-click="setPage(page+1)"
-        class="kuiButton kuiButton--primary"
+        class="timApp__button"
       >
         {{translations.nextButtonLabel}}
       </button>
@@ -82,7 +82,7 @@
 
         <button
           ng-click="setPage(page-1)"
-          class="kuiButton kuiButton--primary"
+          class="timApp__button"
         >
           {{translations.previousButtonLabel}}
         </button>
@@ -100,7 +100,7 @@
 
         <button
           ng-click="recheckElasticsearch()"
-          class="kuiButton kuiButton--primary"
+          class="timApp__button"
           i18n-id="timelion.help.configuration.notValid.validateButtonLabel"
           i18n-default-message="Validate Config"
         ></button>
@@ -222,7 +222,7 @@
 
         <button
           ng-click="setPage(page-1)"
-          class="kuiButton kuiButton--primary"
+          class="timApp__button"
         >
           {{translations.previousButtonLabel}}
         </button>
@@ -230,7 +230,7 @@
 
         <button
           ng-click="setPage(page+1)"
-          class="kuiButton kuiButton--primary"
+          class="timApp__button"
         >
           {{translations.nextButtonLabel}}
         </button>
@@ -371,7 +371,7 @@
 
       <button
         ng-click="setPage(page-1)"
-        class="kuiButton kuiButton--primary"
+        class="timApp__button"
       >
         {{translations.previousButtonLabel}}
       </button>
@@ -379,7 +379,7 @@
 
       <button
         ng-click="setPage(page+1)"
-        class="kuiButton kuiButton--primary"
+        class="timApp__button"
       >
         {{translations.nextButtonLabel}}
       </button>
@@ -484,7 +484,7 @@
 
       <button
         ng-click="setPage(page-1)"
-        class="kuiButton kuiButton--primary"
+        class="timApp__button"
       >
         {{translations.previousButtonLabel}}
       </button>
@@ -492,7 +492,7 @@
 
       <button
         ng-click="setPage(page+1)"
-        class="kuiButton kuiButton--primary"
+        class="timApp__button"
       >
         {{translations.nextButtonLabel}}
       </button>
@@ -587,7 +587,7 @@
 
       <button
         ng-click="setPage(page-1)"
-        class="kuiButton kuiButton--primary"
+        class="timApp__button"
       >
         {{translations.previousButtonLabel}}
       </button>
@@ -596,7 +596,7 @@
 
       <button
         ng-click="opts.dontShowHelp()"
-        class="kuiButton kuiButton--hollow"
+        class="timHelp__links"
       >
         {{translations.dontShowHelpButtonLabel}}
       </button>
@@ -606,7 +606,7 @@
 </div>
 <div ng-show="page === 0">
   <h2
-    class="kuiLocalDropdownTitle"
+    class="timApp__sectionTitle"
     i18n-id="timelion.help.mainPageTitle"
     i18n-default-message="Help"
   ></h2>
@@ -618,7 +618,7 @@
   </timelion-help-tabs>
 
   <div ng-show="activeTab == 'funcref'" class="list-group-item list-group-item--noBorder">
-    <div class="kuiLocalDropdownHelpText">
+    <div class="timApp__helpText">
       <span
         i18n-id="timelion.help.mainPage.functionReference.gettingStartedText"
         i18n-default-message="Click any function for more information. Just getting started?"
@@ -626,7 +626,7 @@
       <a
         i18n-id="timelion.help.mainPage.functionReference.welcomePageLinkText"
         i18n-default-message="Check out the tutorial"
-        class="kuiLink"
+        style="color: #006BB4;"
         ng-click="setPage(1)"
         kbn-accessible-click
       ></a>.
