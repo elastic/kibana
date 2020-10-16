@@ -322,6 +322,12 @@ function FakeRequest(): KibanaRequest {
         url: '/',
       },
     },
+    // TODO: Remove once we upgrade to hapi v18
+    _core: {
+      info: {
+        uri: 'http://localhost',
+      },
+    },
     getSavedObjectsClient: () => savedObjectGetter,
   } as unknown) as KibanaRequest;
 }

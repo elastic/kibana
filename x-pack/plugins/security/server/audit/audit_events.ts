@@ -104,11 +104,9 @@ export interface HttpRequestParams {
   request: KibanaRequest;
 }
 
-export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
-  const { pathname, search } = request.url;
-
+export function httpRequestEvent({ request: { url, route } }: HttpRequestParams): AuditEvent {
   return {
-    message: `User is requesting [${pathname}] endpoint`,
+    message: `User is requesting [${url.pathname}] endpoint`,
     event: {
       action: 'http_request',
       category: EventCategory.WEB,
@@ -116,15 +114,15 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
     },
     http: {
       request: {
-        method: request.route.method,
+        method: route.method,
       },
     },
     url: {
-      domain: request.url.hostname,
-      path: pathname,
-      port: request.url.port ? parseInt(request.url.port, 10) : undefined,
-      query: search?.slice(1) || undefined,
-      scheme: request.url.protocol,
+      domain: url.hostname,
+      path: url.pathname,
+      port: url.port ? parseInt(url.port, 10) : undefined,
+      query: url.search ? url.search.slice(1) : undefined,
+      scheme: url.protocol,
     },
   };
 }
