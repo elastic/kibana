@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
 
-  describe('GET /api/saved_objects_tagging/tags/{id}', () => {
+  describe('GET /api/saved_objects_tagging/tags', () => {
     before(async () => {
       await esArchiver.load('rbac_tags');
     });
@@ -27,22 +27,28 @@ export default function ({ getService }: FtrProviderContext) {
         httpCode: 200,
         expectResponse: ({ body }) => {
           expect(body).to.eql({
-            tag: {
-              id: 'default-space-tag-1',
-              name: 'tag-1',
-              description: 'Tag 1 in default space',
-              color: '#FF00FF',
-            },
+            tags: [
+              {
+                id: 'default-space-tag-1',
+                name: 'tag-1',
+                description: 'Tag 1 in default space',
+                color: '#FF00FF',
+              },
+              {
+                id: 'default-space-tag-2',
+                name: 'tag-2',
+                description: 'Tag 2 in default space',
+                color: '#77CC11',
+              },
+            ],
           });
         },
       },
       unauthorized: {
-        httpCode: 403,
+        httpCode: 200,
         expectResponse: ({ body }) => {
           expect(body).to.eql({
-            statusCode: 403,
-            error: 'Forbidden',
-            message: 'Unable to get tag',
+            tags: [],
           });
         },
       },
@@ -67,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .get(`/api/saved_objects_tagging/tags/default-space-tag-1`)
+          .get(`/api/saved_objects_tagging/tags`)
           .auth(username, password)
           .expect(httpCode)
           .then(expectResponse);

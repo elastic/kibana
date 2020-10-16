@@ -13,12 +13,12 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
 
-  describe('GET /api/saved_objects_tagging/tags/{id}', () => {
-    before(async () => {
+  describe('POST /api/saved_objects_tagging/tags/{id}', () => {
+    beforeEach(async () => {
       await esArchiver.load('rbac_tags');
     });
 
-    after(async () => {
+    afterEach(async () => {
       await esArchiver.unload('rbac_tags');
     });
 
@@ -28,10 +28,10 @@ export default function ({ getService }: FtrProviderContext) {
         expectResponse: ({ body }) => {
           expect(body).to.eql({
             tag: {
-              id: 'default-space-tag-1',
-              name: 'tag-1',
-              description: 'Tag 1 in default space',
-              color: '#FF00FF',
+              id: body.tag.id,
+              name: 'Updated title',
+              description: 'I just updated that',
+              color: '#009000',
             },
           });
         },
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             statusCode: 403,
             error: 'Forbidden',
-            message: 'Unable to get tag',
+            message: 'Unable to update tag',
           });
         },
       },
@@ -51,14 +51,16 @@ export default function ({ getService }: FtrProviderContext) {
     const expectedResults: Record<string, User[]> = {
       authorized: [
         USERS.SUPERUSER,
-        USERS.DEFAULT_SPACE_READ_USER,
         USERS.DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER,
-        USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_WRITE_USER,
+      ],
+      unauthorized: [
+        USERS.DEFAULT_SPACE_READ_USER,
+        USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER,
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
+        USERS.NOT_A_KIBANA_USER,
       ],
-      unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 
     const createUserTest = (
@@ -67,7 +69,12 @@ export default function ({ getService }: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .get(`/api/saved_objects_tagging/tags/default-space-tag-1`)
+          .post(`/api/saved_objects_tagging/tags/default-space-tag-1`)
+          .send({
+            name: 'Updated title',
+            description: 'I just updated that',
+            color: '#009000',
+          })
           .auth(username, password)
           .expect(httpCode)
           .then(expectResponse);

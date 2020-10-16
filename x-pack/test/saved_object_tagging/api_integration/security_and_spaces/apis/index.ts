@@ -17,5 +17,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./_find'));
   });
 }
