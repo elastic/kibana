@@ -429,20 +429,22 @@ export interface DurationDetails {
  * Values shared between two vertices joined by an edge line.
  */
 export interface EdgeLineMetadata {
+  /**
+   * Represents a time duration for this edge line segment. Used to show a time duration in the UI.
+   * This is only ever present on one of the segments in an edge.
+   */
   elapsedTime?: DurationDetails;
-  // A string of the two joined process nodes concatenated together.
-  uniqueId: string;
+  /**
+   * Used to represent a react key value for the edge line.
+   */
+  reactKey: string;
 }
-/**
- * A tuple of 2 vector2 points forming a poly-line. Used to connect process nodes in the graph.
- */
-export type EdgeLinePoints = Vector2[];
 
 /**
  * Edge line components including the points joining the edge-line and any optional associated metadata
  */
 export interface EdgeLineSegment {
-  points: EdgeLinePoints;
+  points: [Vector2, Vector2];
   metadata: EdgeLineMetadata;
 }
 
@@ -538,6 +540,7 @@ export interface IsometricTaxiLayout {
    * A map of events to position. Each event represents its own node.
    */
   processNodePositions: Map<SafeResolverEvent, Vector2>;
+
   /**
    * A map of edge-line segments, which graphically connect nodes.
    */
