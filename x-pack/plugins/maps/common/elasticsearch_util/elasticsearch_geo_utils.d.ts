@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeatureCollection, GeoJsonProperties } from 'geojson';
+import { FeatureCollection, GeoJsonProperties, Polygon } from 'geojson';
 import { MapExtent } from '../descriptor_types';
-import { ES_GEO_FIELD_TYPE } from '../constants';
+import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent;
 
@@ -24,11 +24,31 @@ export function hitsToGeoJson(
   epochMillisFields: string[]
 ): FeatureCollection;
 
+export interface ESBBox {
+  top_left: number[];
+  bottom_right: number[];
+}
+
+export interface ESGeoBoundingBoxFilter {
+  geo_bounding_box: {
+    [geoFieldName: string]: ESBBox;
+  };
+}
+
+export interface ESPolygonFilter {
+  geo_shape: {
+    [geoFieldName: string]: {
+      shape: Polygon;
+      relation: ES_SPATIAL_RELATIONS.INTERSECTS;
+    };
+  };
+}
+
 export function createExtentFilter(
   mapExtent: MapExtent,
   geoFieldName: string,
   geoFieldType: ES_GEO_FIELD_TYPE
-): unknown;
+): ESPolygonFilter | ESGeoBoundingBoxFilter;
 
 export function makeESBbox({
   maxLat,
@@ -40,7 +60,4 @@ export function makeESBbox({
   maxLon: number;
   minLat: number;
   minLon: number;
-}): {
-  top_left: number[];
-  bottom_right: number[];
-};
+}): ESBBox;

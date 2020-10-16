@@ -207,12 +207,12 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof searchFilters.geogridPrecision === 'number'
           ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
           : searchFilters.buffer;
-      const extentFilter: unknown = createExtentFilter(
+      const extentFilter = (createExtentFilter(
         buffer,
         geoField.name,
         geoField.type as ES_GEO_FIELD_TYPE
-      ) as Filter;
-      allFilters.push(extentFilter as Filter);
+      ) as unknown) as Filter;
+      allFilters.push(extentFilter);
     }
     if (isTimeAware) {
       const filter = getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters);
