@@ -993,9 +993,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
         'Average',
         'Count',
         'Maximum',
+        'Median',
         'Minimum',
         'Sum',
         'Unique count',
+        '\u00a0',
       ]);
     });
 

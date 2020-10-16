@@ -191,7 +191,6 @@ function processEdgeLineSegments(
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    const edgeLineMetadata: EdgeLineMetadata = { uniqueId: '' };
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
@@ -219,10 +218,16 @@ function processEdgeLineSegments(
 
     const parentTime = eventModel.timestampSafeVersion(parent);
     const processTime = eventModel.timestampSafeVersion(process);
-    if (parentTime && processTime) {
-      edgeLineMetadata.elapsedTime = elapsedTime(parentTime, processTime) ?? undefined;
-    }
-    edgeLineMetadata.uniqueId = edgeLineID;
+
+    const timeBetweenParentAndNode =
+      parentTime !== undefined && processTime !== undefined
+        ? elapsedTime(parentTime, processTime)
+        : undefined;
+
+    const edgeLineMetadata: EdgeLineMetadata = {
+      elapsedTime: timeBetweenParentAndNode,
+      reactKey: edgeLineID,
+    };
 
     /**
      * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
@@ -270,7 +275,7 @@ function processEdgeLineSegments(
 
       const lineFromParentToMidwayLine: EdgeLineSegment = {
         points: [parentPosition, [parentPosition[0], midwayY]],
-        metadata: { uniqueId: `parentToMid${edgeLineID}` },
+        metadata: { reactKey: `parentToMid${edgeLineID}` },
       };
 
       const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
@@ -291,7 +296,7 @@ function processEdgeLineSegments(
             midwayY,
           ],
         ],
-        metadata: { uniqueId: `midway${edgeLineID}` },
+        metadata: { reactKey: `midway${edgeLineID}` },
       };
 
       edgeLineSegments.push(
@@ -501,11 +506,24 @@ const distanceBetweenNodesInUnits = 2;
  */
 const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
 
-export function nodePosition(
+/**
+ * @deprecated use `nodePosition`
+ */
+export function processPosition(
   model: IsometricTaxiLayout,
   node: SafeResolverEvent
 ): Vector2 | undefined {
   return model.processNodePositions.get(node);
+}
+
+export function nodePosition(model: IsometricTaxiLayout, nodeID: string): Vector2 | undefined {
+  // Find the indexed object matching the nodeID
+  // NB: this is O(n) now, but we will be indexing the nodeIDs in the future.
+  for (const candidate of model.processNodePositions.keys()) {
+    if (eventModel.entityIDSafeVersion(candidate) === nodeID) {
+      return processPosition(model, candidate);
+    }
+  }
 }
 
 /**
@@ -525,7 +543,7 @@ export function translated(model: IsometricTaxiLayout, translation: Vector2): Is
       ])
     ),
     edgeLineSegments: model.edgeLineSegments.map(({ points, metadata }) => ({
-      points: points.map((point) => vector2.add(point, translation)),
+      points: [vector2.add(points[0], translation), vector2.add(points[1], translation)],
       metadata,
     })),
     // these are unchanged
