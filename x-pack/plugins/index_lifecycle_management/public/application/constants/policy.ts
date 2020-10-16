@@ -19,7 +19,10 @@ export const defaultPolicy: SerializedPolicy = {
   phases: {
     hot: {
       actions: {
-        rollover: {},
+        rollover: {
+          max_age: '30d',
+          max_size: '50gb',
+        },
       },
     },
   },

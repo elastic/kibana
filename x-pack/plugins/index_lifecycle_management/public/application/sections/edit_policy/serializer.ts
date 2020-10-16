@@ -23,12 +23,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
   if (rest.phases.hot?.actions) {
     if (rest.phases.hot.actions?.rollover && _meta.hot.useRollover) {
-      if (rest.phases.hot.actions.rollover.max_size) {
-        rest.phases.hot.actions.rollover.max_size = `${rest.phases.hot.actions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
-      }
-
       if (rest.phases.hot.actions.rollover.max_age) {
         rest.phases.hot.actions.rollover.max_age = `${rest.phases.hot.actions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+      }
+
+      if (rest.phases.hot.actions.rollover.max_size) {
+        rest.phases.hot.actions.rollover.max_size = `${rest.phases.hot.actions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
       }
 
       if (_meta.hot.bestCompression && rest.phases.hot.actions?.forcemerge) {

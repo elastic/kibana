@@ -15,7 +15,6 @@ export {
   FieldConfig,
   OnFormUpdateArg,
   ValidationFunc,
-  UseMultiFields,
   getFieldValidityAndErrorMessage,
   useFormContext,
   FormSchema,

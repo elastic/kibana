@@ -52,10 +52,9 @@ export const schema: FormSchema<FormInternal> = {
     hot: {
       actions: {
         rollover: {
-          max_size: {
-            defaultValue: '50',
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
-              defaultMessage: 'Maximum index size',
+          max_age: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
+              defaultMessage: 'Maximum age',
             }),
             validations: [
               {
@@ -80,10 +79,9 @@ export const schema: FormSchema<FormInternal> = {
             ],
             serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
           },
-          max_age: {
-            defaultValue: '30',
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
-              defaultMessage: 'Maximum age',
+          max_size: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
+              defaultMessage: 'Maximum index size',
             }),
             validations: [
               {

@@ -143,7 +143,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
     );
     return (
       <Fragment key="phaseDefinition">
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle key="phaseDefinition_title">
           <strong>
             <FormattedMessage
               defaultMessage="Phase definition"

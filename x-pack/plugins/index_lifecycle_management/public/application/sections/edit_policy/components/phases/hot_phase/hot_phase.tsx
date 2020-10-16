@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent, useEffect } from 'react';
+import React, { Fragment, FunctionComponent, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiFieldNumber,
   EuiDescribedFormGroup,
   EuiCallOut,
 } from '@elastic/eui';
@@ -24,15 +23,14 @@ import {
   UseField,
   SelectField,
   ToggleField,
-  UseMultiFields,
-  getFieldValidityAndErrorMessage,
+  NumericField,
 } from '../../../../../../shared_imports';
 
 import { ROLLOVER_EMPTY_VALIDATION } from '../../../form_validations';
 
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, ErrableFormRow } from '../../';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../';
 
 import { Forcemerge, SetPriorityInput } from '../shared';
 
@@ -49,7 +47,9 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
 }) => {
   const [{ [useRolloverPath]: isRolloverEnabled }] = useFormData({ watch: [useRolloverPath] });
   const form = useFormContext();
+
   const isShowingErrors = form.isValid === false;
+  const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 
   useEffect(() => {
     setWarmPhaseOnRollover(isRolloverEnabled ?? false);
@@ -118,140 +118,114 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
           }}
         />
         {isRolloverEnabled && (
-          <Fragment>
+          <>
             <EuiSpacer size="m" />
-            <UseMultiFields
-              fields={{
-                maxSize: {
-                  path: ROLLOVER_FORM_PATHS.maxSize,
-                },
-                maxDocs: {
-                  path: ROLLOVER_FORM_PATHS.maxDocs,
-                },
-                maxAge: {
-                  path: ROLLOVER_FORM_PATHS.maxAge,
-                },
-              }}
-            >
-              {({ maxAge, maxSize, maxDocs }) => {
-                const maxSizeValidity = getFieldValidityAndErrorMessage(maxSize);
-                const maxDocsValidity = getFieldValidityAndErrorMessage(maxDocs);
-                const maxAgeValidity = getFieldValidityAndErrorMessage(maxAge);
-                return (
-                  <>
-                    {maxAge.errors.some((e) => e.validationType === ROLLOVER_EMPTY_VALIDATION) && (
-                      <>
-                        <EuiCallOut
-                          title={i18nTexts.rollOverConfigurationCallout.title}
-                          data-test-subj="rolloverSettingsRequired"
-                          color="danger"
-                        >
-                          <div>{i18nTexts.rollOverConfigurationCallout.body}</div>
-                        </EuiCallOut>
-                        <EuiSpacer size="s" />
-                      </>
-                    )}
-                    <EuiFlexGroup>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <ErrableFormRow
-                          label={maxSize.label}
-                          isShowingErrors={maxSizeValidity.isInvalid}
-                          errors={maxSizeValidity.errorMessage}
-                        >
-                          <EuiFieldNumber
-                            data-test-subj={`${hotProperty}-selectedMaxSizeStored`}
-                            value={maxSize.value}
-                            onChange={(e) => {
-                              maxSize.setValue(e.target.value);
-                            }}
-                            min={1}
-                          />
-                        </ErrableFormRow>
-                      </EuiFlexItem>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <UseField
-                          key="_meta.hot.maxStorageSizeUnit"
-                          path="_meta.hot.maxStorageSizeUnit"
-                          component={SelectField}
-                          componentProps={{
-                            'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
-                            hasEmptyLabelSpace: true,
-                            euiFieldProps: {
-                              options: maxSizeStoredUnits,
-                              'aria-label': i18n.translate(
-                                'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
-                                {
-                                  defaultMessage: 'Maximum index size units',
-                                }
-                              ),
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                    <EuiFlexGroup>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <ErrableFormRow
-                          label={maxDocs.label}
-                          isShowingErrors={maxDocsValidity.isInvalid}
-                          errors={maxDocsValidity.errorMessage}
-                        >
-                          <EuiFieldNumber
-                            data-test-subj={`${hotProperty}-selectedMaxDocuments`}
-                            value={maxDocs.value}
-                            onChange={(e) => {
-                              maxDocs.setValue(e.target.value);
-                            }}
-                            min={1}
-                          />
-                        </ErrableFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                    <EuiFlexGroup>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <ErrableFormRow
-                          label={maxAge.label}
-                          isShowingErrors={maxAgeValidity.isInvalid}
-                          errors={maxAgeValidity.errorMessage}
-                        >
-                          <EuiFieldNumber
-                            data-test-subj={`${hotProperty}-selectedMaxAge`}
-                            value={maxAge.value}
-                            onChange={(e) => {
-                              maxAge.setValue(e.target.value);
-                            }}
-                            min={1}
-                          />
-                        </ErrableFormRow>
-                      </EuiFlexItem>
-                      <EuiFlexItem style={{ maxWidth: 188 }}>
-                        <UseField
-                          key="_meta.hot.maxAgeUnit"
-                          path="_meta.hot.maxAgeUnit"
-                          component={SelectField}
-                          componentProps={{
-                            'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,
-                            hasEmptyLabelSpace: true,
-                            euiFieldProps: {
-                              'aria-label': i18n.translate(
-                                'xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel',
-                                {
-                                  defaultMessage: 'Maximum age units',
-                                }
-                              ),
-                              options: maxAgeUnits,
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                );
-              }}
-            </UseMultiFields>
-          </Fragment>
+            {showEmptyRolloverFieldsError && (
+              <>
+                <EuiCallOut
+                  title={i18nTexts.rollOverConfigurationCallout.title}
+                  data-test-subj="rolloverSettingsRequired"
+                  color="danger"
+                >
+                  <div>{i18nTexts.rollOverConfigurationCallout.body}</div>
+                </EuiCallOut>
+                <EuiSpacer size="s" />
+              </>
+            )}
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <UseField path={ROLLOVER_FORM_PATHS.maxSize}>
+                  {(field) => {
+                    const showErrorCallout = field.errors.some(
+                      (e) => e.validationType === ROLLOVER_EMPTY_VALIDATION
+                    );
+                    if (showErrorCallout !== showEmptyRolloverFieldsError) {
+                      setShowEmptyRolloverFieldsError(showErrorCallout);
+                    }
+                    return (
+                      <NumericField
+                        field={field}
+                        euiFieldProps={{
+                          'data-test-subj': `${hotProperty}-selectedMaxSizeStored`,
+                          min: 1,
+                        }}
+                      />
+                    );
+                  }}
+                </UseField>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <UseField
+                  key="_meta.hot.maxStorageSizeUnit"
+                  path="_meta.hot.maxStorageSizeUnit"
+                  component={SelectField}
+                  componentProps={{
+                    'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
+                    hasEmptyLabelSpace: true,
+                    euiFieldProps: {
+                      options: maxSizeStoredUnits,
+                      'aria-label': i18n.translate(
+                        'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
+                        {
+                          defaultMessage: 'Maximum index size units',
+                        }
+                      ),
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <UseField
+                  path={ROLLOVER_FORM_PATHS.maxDocs}
+                  component={NumericField}
+                  componentProps={{
+                    euiFieldProps: {
+                      'data-test-subj': `${hotProperty}-selectedMaxDocuments`,
+                      min: 1,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <UseField
+                  path={ROLLOVER_FORM_PATHS.maxAge}
+                  component={NumericField}
+                  componentProps={{
+                    euiFieldProps: {
+                      'data-test-subj': `${hotProperty}-selectedMaxAge`,
+                      min: 1,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <UseField
+                  key="_meta.hot.maxAgeUnit"
+                  path="_meta.hot.maxAgeUnit"
+                  component={SelectField}
+                  componentProps={{
+                    'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,
+                    hasEmptyLabelSpace: true,
+                    euiFieldProps: {
+                      'aria-label': i18n.translate(
+                        'xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel',
+                        {
+                          defaultMessage: 'Maximum age units',
+                        }
+                      ),
+                      options: maxAgeUnits,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         )}
       </EuiDescribedFormGroup>
       {isRolloverEnabled && <Forcemerge phase="hot" />}
