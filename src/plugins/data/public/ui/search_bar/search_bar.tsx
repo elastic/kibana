@@ -26,7 +26,7 @@ import { get, isEqual } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
-import { QueryBarTopRow } from '../query_string_input';
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
