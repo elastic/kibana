@@ -114,7 +114,7 @@ describe('action_form', () => {
   describe('action_form in alert', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup() {
+    async function setup(customActions?: AlertAction[]) {
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
       loadAllActions.mockResolvedValueOnce([
         {
@@ -177,6 +177,7 @@ describe('action_form', () => {
             show: true,
           },
         },
+        setHasActionsWithBrokenConnector: jest.fn(),
         actionTypeRegistry: actionTypeRegistry as any,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
@@ -198,16 +199,18 @@ describe('action_form', () => {
         schedule: {
           interval: '1m',
         },
-        actions: [
-          {
-            group: 'default',
-            id: 'test',
-            actionTypeId: actionType.id,
-            params: {
-              message: '',
-            },
-          },
-        ],
+        actions: customActions
+          ? customActions
+          : [
+              {
+                group: 'default',
+                id: 'test',
+                actionTypeId: actionType.id,
+                params: {
+                  message: '',
+                },
+              },
+            ],
         tags: [],
         muteAll: false,
         enabled: false,
@@ -229,6 +232,7 @@ describe('action_form', () => {
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
+          setHasActionsWithBrokenConnector={deps!.setHasActionsWithBrokenConnector}
           http={deps!.http}
           actionTypeRegistry={deps!.actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
@@ -306,6 +310,7 @@ describe('action_form', () => {
           .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
+      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
     });
 
     it('does not render action types disabled by config', async () => {
@@ -391,6 +396,28 @@ describe('action_form', () => {
         `[data-test-subj="${actionTypeWithoutParams.id}-ActionTypeSelectOption"]`
       );
       expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('recognizes actions with broken connectors', async () => {
+      await setup([
+        {
+          group: 'default',
+          id: 'test',
+          actionTypeId: actionType.id,
+          params: {
+            message: '',
+          },
+        },
+        {
+          group: 'default',
+          id: 'connector-doesnt-exist',
+          actionTypeId: actionType.id,
+          params: {
+            message: 'broken',
+          },
+        },
+      ]);
+      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
     });
   });
 });

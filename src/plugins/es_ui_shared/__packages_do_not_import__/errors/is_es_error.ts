@@ -25,6 +25,10 @@ interface RequestError extends Error {
   statusCode?: number;
 }
 
+/*
+ * @deprecated
+ * Only works with legacy elasticsearch js client errors and will be removed after 7.x last
+ */
 export function isEsError(err: RequestError) {
   const isInstanceOfEsError = err instanceof esErrorsParent;
   const hasStatusCode = Boolean(err.statusCode);

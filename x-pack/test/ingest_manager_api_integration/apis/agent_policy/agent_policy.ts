@@ -225,7 +225,9 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send(sharedBody)
-          .expect(200);
+          .expect(409);
+
+        expect(body.message).to.match(/already exists?/);
       });
     });
   });
