@@ -11,6 +11,7 @@ jest.mock('../../packages/get', () => {
 jest.mock('./common', () => {
   return {
     getAsset: jest.fn(),
+    getLogger: jest.fn(),
   };
 });
 
