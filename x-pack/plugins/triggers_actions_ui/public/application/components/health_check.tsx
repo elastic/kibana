@@ -15,16 +15,16 @@ import { i18n } from '@kbn/i18n';
 import { DocLinksStart, HttpSetup } from 'kibana/public';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import { AlertingFrameworkHealth } from '../../types';
+import { AlertingFrameworkHealth, placeholderAlertingFrameworkHealth } from '../../types';
 import { health } from '../lib/alert_api';
 import './health_check.scss';
+import { useHealthContext } from '../context/health_context';
 
 interface Props {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
   http: HttpSetup;
   inFlyout?: boolean;
   waitForCheck?: boolean;
-  onLoaded?: (value: boolean) => void;
 }
 
 export const HealthCheck: React.FunctionComponent<Props> = ({
@@ -33,18 +33,19 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   children,
   inFlyout = false,
   waitForCheck = true,
-  onLoaded,
 }) => {
-  const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
+  const { setLoadingHealthCheck } = useHealthContext();
+  const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(
+    waitForCheck ? none : some(placeholderAlertingFrameworkHealth)
+  );
 
   React.useEffect(() => {
     (async function () {
+      setLoadingHealthCheck(true);
       setAlertingHealth(some(await health({ http })));
-      if (onLoaded) {
-        onLoaded(true);
-      }
+      setLoadingHealthCheck(false);
     })();
-  }, [http, onLoaded]);
+  }, [http, setLoadingHealthCheck]);
 
   const className = inFlyout ? 'alertingFlyoutHealthCheck' : 'alertingHealthCheck';
 
@@ -53,9 +54,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   return pipe(
     alertingHealth,
     fold(
-      () => {
-        return waitForCheck ? <EuiLoadingSpinner size="m" /> : childComponent;
-      },
+      () => <EuiLoadingSpinner size="m" />,
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           childComponent

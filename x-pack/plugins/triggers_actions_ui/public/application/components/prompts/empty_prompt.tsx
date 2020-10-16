@@ -8,7 +8,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-export const EmptyPrompt = ({ ctaEnabled = true, onCTAClicked }: { onCTAClicked: () => void }) => (
+export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="createFirstAlertEmptyPrompt"
@@ -33,7 +33,6 @@ export const EmptyPrompt = ({ ctaEnabled = true, onCTAClicked }: { onCTAClicked:
         data-test-subj="createFirstAlertButton"
         key="create-action"
         fill
-        disabled={!ctaEnabled}
         onClick={onCTAClicked}
       >
         <FormattedMessage
