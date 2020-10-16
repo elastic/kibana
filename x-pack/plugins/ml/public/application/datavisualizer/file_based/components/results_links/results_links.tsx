@@ -190,7 +190,8 @@ export const ResultsLinks: FC<Props> = ({
       {isFullLicense() === true &&
         timeFieldName !== undefined &&
         showCreateJobLink &&
-        createIndexPattern && (
+        createIndexPattern &&
+        createJobsSelectTypePage && (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
@@ -206,7 +207,7 @@ export const ResultsLinks: FC<Props> = ({
           </EuiFlexItem>
         )}
 
-      {createIndexPattern && (
+      {createIndexPattern && dataVisualizerLink && (
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
@@ -222,33 +223,37 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
-        <EuiCard
-          icon={<EuiIcon size="xxl" type={`managementApp`} />}
-          title={
-            <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.resultsLinks.indexManagementTitle"
-              defaultMessage="Index Management"
-            />
-          }
-          description=""
-          href={indexManagementLink}
-        />
-      </EuiFlexItem>
+      {indexManagementLink && (
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.indexManagementTitle"
+                defaultMessage="Index Management"
+              />
+            }
+            description=""
+            href={indexManagementLink}
+          />
+        </EuiFlexItem>
+      )}
 
-      <EuiFlexItem>
-        <EuiCard
-          icon={<EuiIcon size="xxl" type={`managementApp`} />}
-          title={
-            <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.resultsLinks.indexPatternManagementTitle"
-              defaultMessage="Index Pattern Management"
-            />
-          }
-          description=""
-          href={indexPatternManagementLink}
-        />
-      </EuiFlexItem>
+      {indexPatternManagementLink && (
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.indexPatternManagementTitle"
+                defaultMessage="Index Pattern Management"
+              />
+            }
+            description=""
+            href={indexPatternManagementLink}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
