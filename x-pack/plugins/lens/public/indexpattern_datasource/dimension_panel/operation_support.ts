@@ -31,7 +31,7 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
     currentIndexPattern
   ).filter((operation) => props.filterOperations(operation.operationMetaData));
 
-  const supportedOperationsByField: Record<string, OperationType[]> = {};
+  const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
   const supportedOperationsWithoutField: OperationType[] = [];
   const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
 
@@ -39,7 +39,7 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
     operations.forEach((operation) => {
       if (operation.type === 'field') {
         supportedOperationsByField[operation.field] = [
-          ...supportedOperationsByField[operation.field],
+          ...(supportedOperationsByField[operation.field] ?? []),
           operation.operationType,
         ];
 
