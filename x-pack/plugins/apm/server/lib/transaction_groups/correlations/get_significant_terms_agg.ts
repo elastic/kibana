@@ -6,10 +6,15 @@
 
 import { ESFilter } from '../../../../typings/elasticsearch';
 
-export function getSignificantTermsAgg(
-  fieldNames: string[],
-  backgroundFilters: ESFilter[]
-) {
+export function getSignificantTermsAgg({
+  fieldNames,
+  backgroundFilters,
+  backgroundIsSuperset = true,
+}: {
+  fieldNames: string[];
+  backgroundFilters: ESFilter[];
+  backgroundIsSuperset?: boolean;
+}) {
   return fieldNames.reduce((acc, fieldName) => {
     return {
       ...acc,
@@ -18,6 +23,14 @@ export function getSignificantTermsAgg(
           size: 10,
           field: fieldName,
           background_filter: { bool: { filter: backgroundFilters } },
+
+          // range comparison is not a superset
+          background_is_superset: backgroundIsSuperset,
+
+          // percentage calculation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-significantterms-aggregation.html#_percentage
+          percentage: {},
+          min_doc_count: 5,
+          shard_min_doc_count: 5,
         },
       },
       [`cardinality-${fieldName}`]: {

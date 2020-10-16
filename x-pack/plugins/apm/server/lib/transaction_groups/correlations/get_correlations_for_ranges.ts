@@ -63,7 +63,11 @@ export async function getCorrelationsForRanges({
       query: {
         bool: { filter: [...baseFilters, { range: rangeFilter(start, end) }] },
       },
-      aggs: getSignificantTermsAgg(fieldNames, backgroundFilters),
+      aggs: getSignificantTermsAgg({
+        fieldNames,
+        backgroundFilters,
+        backgroundIsSuperset: false,
+      }),
     },
   };
 

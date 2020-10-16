@@ -76,7 +76,7 @@ export async function getCorrelationsForSlowTransactions({
           ],
         },
       },
-      aggs: getSignificantTermsAgg(fieldNames, backgroundFilters),
+      aggs: getSignificantTermsAgg({ fieldNames, backgroundFilters }),
     },
   };
 
