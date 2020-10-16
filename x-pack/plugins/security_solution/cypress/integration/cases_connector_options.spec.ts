@@ -5,7 +5,7 @@
  */
 
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { case1, ids, mockConnectorsResponse, responses } from '../objects/case';
+import { case1, connectorIds, mockConnectorsResponse, executeResponses } from '../objects/case';
 import { createNewCaseWithConnector } from '../tasks/create_new_case';
 import { CONNECTOR_TITLE } from '../screens/edit_connector';
 import { goToCreateNewCase } from '../tasks/all_cases';
@@ -15,19 +15,19 @@ describe('Cases connector incident fields', () => {
   before(() => {
     cy.server();
     cy.route('GET', '**/api/cases/configure/connectors/_find', mockConnectorsResponse);
-    cy.route2('POST', `**/api/actions/action/${ids.jira}/_execute`, (req) => {
+    cy.route2('POST', `**/api/actions/action/${connectorIds.jira}/_execute`, (req) => {
       const response =
         JSON.parse(req.body).params.subAction === 'issueTypes'
-          ? JSON.stringify(responses.jira.issueTypes)
-          : JSON.stringify(responses.jira.fieldsByIssueType);
-      req.reply(response);
+          ? executeResponses.jira.issueTypes
+          : executeResponses.jira.fieldsByIssueType;
+      req.reply(JSON.stringify(response));
     });
-    cy.route2('POST', `**/api/actions/action/${ids.resilient}/_execute`, (req) => {
+    cy.route2('POST', `**/api/actions/action/${connectorIds.resilient}/_execute`, (req) => {
       const response =
         JSON.parse(req.body).params.subAction === 'incidentTypes'
-          ? JSON.stringify(responses.resilient.incidentTypes)
-          : JSON.stringify(responses.resilient.severity);
-      req.reply(response);
+          ? executeResponses.resilient.incidentTypes
+          : executeResponses.resilient.severity;
+      req.reply(JSON.stringify(response));
     });
   });
   it('Correct incident fields show when connector is changed', () => {

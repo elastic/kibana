@@ -44,7 +44,7 @@ export const serviceNowConnector: Connector = {
 };
 
 export const TIMELINE_CASE_ID = '68248e00-f689-11ea-9ab2-59238b522856';
-export const ids = {
+export const connectorIds = {
   jira: '000e5f86-08b0-4882-adfd-6df981d45c1b',
   sn: '93a69ba3-3c31-4b4c-bf86-cc79a090f437',
   resilient: 'a6a8dd7f-7e88-48fe-9b9f-70b668da8cbc',
@@ -52,7 +52,7 @@ export const ids = {
 
 export const mockConnectorsResponse = [
   {
-    id: ids.jira,
+    id: connectorIds.jira,
     actionTypeId: '.jira',
     name: 'Jira',
     config: {
@@ -71,7 +71,7 @@ export const mockConnectorsResponse = [
     referencedByCount: 0,
   },
   {
-    id: ids.resilient,
+    id: connectorIds.resilient,
     actionTypeId: '.resilient',
     name: 'Resilient',
     config: {
@@ -90,7 +90,7 @@ export const mockConnectorsResponse = [
     referencedByCount: 0,
   },
   {
-    id: ids.sn,
+    id: connectorIds.sn,
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {
@@ -108,7 +108,7 @@ export const mockConnectorsResponse = [
     referencedByCount: 0,
   },
 ];
-export const responses = {
+export const executeResponses = {
   jira: {
     issueTypes: {
       status: 'ok',
@@ -116,7 +116,7 @@ export const responses = {
         { id: '10006', name: 'Task' },
         { id: '10007', name: 'Sub-task' },
       ],
-      actionId: '000e5f86-08b0-4882-adfd-6df981d45c1b',
+      actionId: connectorIds.jira,
     },
     fieldsByIssueType: {
       status: 'ok',
@@ -207,7 +207,7 @@ export const responses = {
         timetracking: { allowedValues: [], defaultValue: {} },
         labels: { allowedValues: [], defaultValue: {} },
       },
-      actionId: '000e5f86-08b0-4882-adfd-6df981d45c1b',
+      actionId: connectorIds.jira,
     },
   },
   resilient: {
@@ -217,7 +217,7 @@ export const responses = {
         { id: 17, name: 'Communication error (fax; email)' },
         { id: 21, name: 'Denial of Service' },
       ],
-      actionId: 'a6a8dd7f-7e88-48fe-9b9f-70b668da8cbc',
+      actionId: connectorIds.resilient,
     },
     severity: {
       status: 'ok',
@@ -226,7 +226,7 @@ export const responses = {
         { id: 5, name: 'Medium' },
         { id: 6, name: 'High' },
       ],
-      actionId: 'a6a8dd7f-7e88-48fe-9b9f-70b668da8cbc',
+      actionId: connectorIds.resilient,
     },
   },
 };
