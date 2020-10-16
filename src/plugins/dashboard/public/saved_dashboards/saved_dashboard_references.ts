@@ -19,16 +19,30 @@
 
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
 import { SavedObjectDashboard } from './saved_dashboard';
+import { EmbeddableStart } from '../../../embeddable/public';
+import {
+  extractPanelsReferences,
+  injectPanelsReferences,
+} from '../application/lib/embeddable_references';
+import { SavedDashboardPanel730ToLatest } from '../../common';
 
-export function extractReferences({
-  attributes,
-  references = [],
-}: {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
-}) {
+export interface ExtractDeps {
+  embeddableStart: EmbeddableStart;
+}
+
+export function extractReferences(
+  {
+    attributes,
+    references = [],
+  }: {
+    attributes: SavedObjectAttributes;
+    references: SavedObjectReference[];
+  },
+  deps: ExtractDeps
+) {
   const panelReferences: SavedObjectReference[] = [];
   const panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
+
   panels.forEach((panel, i) => {
     if (!panel.type) {
       throw new Error(`"type" attribute is missing from panel "${i}"`);
@@ -46,6 +60,13 @@ export function extractReferences({
     delete panel.type;
     delete panel.id;
   });
+
+  // TODO: can be it that here a migration from older panels format is needed?
+  // I guess no?
+  panelReferences.push(
+    ...extractPanelsReferences((panels as unknown) as SavedDashboardPanel730ToLatest[], deps)
+  );
+
   return {
     references: [...references, ...panelReferences],
     attributes: {
@@ -55,9 +76,14 @@ export function extractReferences({
   };
 }
 
+export interface InjectDeps {
+  embeddableStart: EmbeddableStart;
+}
+
 export function injectReferences(
   savedObject: SavedObjectDashboard,
-  references: SavedObjectReference[]
+  references: SavedObjectReference[],
+  deps: InjectDeps
 ) {
   // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
   // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
@@ -65,11 +91,12 @@ export function injectReferences(
   if (typeof savedObject.panelsJSON !== 'string') {
     return;
   }
-  const panels = JSON.parse(savedObject.panelsJSON);
+  let panels = JSON.parse(savedObject.panelsJSON);
   // Same here, prevent failing saved object import if ever panels aren't an array.
   if (!Array.isArray(panels)) {
     return;
   }
+
   panels.forEach((panel) => {
     if (!panel.panelRefName) {
       return;
@@ -84,5 +111,6 @@ export function injectReferences(
     panel.type = reference.type;
     delete panel.panelRefName;
   });
+  panels = injectPanelsReferences(panels, references, deps);
   savedObject.panelsJSON = JSON.stringify(panels);
 }

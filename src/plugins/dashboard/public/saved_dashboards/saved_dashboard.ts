@@ -21,6 +21,8 @@ import { extractReferences, injectReferences } from './saved_dashboard_reference
 
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
 import { createDashboardEditUrl } from '../dashboard_constants';
+import { EmbeddableStart } from '../../../embeddable/public';
+import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 
 export interface SavedObjectDashboard extends SavedObject {
   id?: string;
@@ -41,7 +43,8 @@ export interface SavedObjectDashboard extends SavedObject {
 
 // Used only by the savedDashboards service, usually no reason to change this
 export function createSavedDashboardClass(
-  savedObjectStart: SavedObjectsStart
+  savedObjectStart: SavedObjectsStart,
+  embeddableStart: EmbeddableStart
 ): new (id: string) => SavedObjectDashboard {
   class SavedDashboard extends savedObjectStart.SavedObjectClass {
     // save these objects with the 'dashboard' type
@@ -77,8 +80,12 @@ export function createSavedDashboardClass(
         type: SavedDashboard.type,
         mapping: SavedDashboard.mapping,
         searchSource: SavedDashboard.searchSource,
-        extractReferences,
-        injectReferences,
+        extractReferences: (opts: {
+          attributes: SavedObjectAttributes;
+          references: SavedObjectReference[];
+        }) => extractReferences(opts, { embeddableStart }),
+        injectReferences: (so: SavedObjectDashboard, reference: SavedObjectReference[]) =>
+          injectReferences(so, reference, { embeddableStart }),
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id,

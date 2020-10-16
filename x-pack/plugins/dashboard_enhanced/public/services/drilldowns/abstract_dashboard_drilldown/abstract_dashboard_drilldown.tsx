@@ -17,6 +17,7 @@ import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   AdvancedUiActionsStart,
+  UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '../../../../../ui_actions_enhanced/public';
 import { txtGoToDashboard } from './i18n';
 import {
@@ -25,6 +26,8 @@ import {
 } from '../../../../../../../src/plugins/kibana_utils/public';
 import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { Config } from './types';
+import { SavedObjectReference } from '../../../../../../../src/core/types';
+import { SerializedAction } from '../../../../../ui_actions_enhanced/common/types';
 
 export interface Params {
   start: StartServicesGetter<{
@@ -85,5 +88,44 @@ export abstract class AbstractDashboardDrilldown<T extends TriggerId>
     if (!urlGenerator)
       throw new Error('Dashboard URL generator is required for dashboard drilldown.');
     return urlGenerator;
+  }
+
+  public readonly inject = (
+    state: SerializedEvent,
+    references: SavedObjectReference[]
+  ): SerializedEvent => {
+    const action = state.action as SerializedAction<Config>;
+    const refName = this.generateRefName(state);
+    const ref = references.find((r) => r.name === refName);
+    if (!ref) return state;
+    if (ref.id && ref.id === action.config.dashboardId) return state;
+    return this.injectDashboardId(state, ref.id);
+  };
+
+  public readonly extract = (
+    state: SerializedEvent
+  ): { state: SerializedEvent; references: SavedObjectReference[] } => {
+    const action = state.action as SerializedAction<Config>;
+    const references: SavedObjectReference[] = action.config.dashboardId
+      ? [{ name: this.generateRefName(state), type: 'dashboard', id: action.config.dashboardId }]
+      : [];
+    delete action.config.dashboardId;
+    return { state, references };
+  };
+
+  private generateRefName = (state: SerializedEvent) =>
+    `drilldown:${this.id}:${state.eventId}:dashboardId`;
+
+  private injectDashboardId(state: SerializedEvent, dashboardId: string): SerializedEvent {
+    return {
+      ...state,
+      action: {
+        ...state.action,
+        config: {
+          ...state.action.config,
+          dashboardId,
+        },
+      },
+    };
   }
 }
