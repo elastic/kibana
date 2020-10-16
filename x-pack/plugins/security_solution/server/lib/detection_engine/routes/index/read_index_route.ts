@@ -8,6 +8,7 @@ import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
+import { templateNeedsUpdate } from './check_template_version';
 
 export const readIndexRoute = (router: IRouter) => {
   router.get(
@@ -31,9 +32,10 @@ export const readIndexRoute = (router: IRouter) => {
 
         const index = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
+        const templateOutdated = await templateNeedsUpdate(clusterClient.callAsCurrentUser, index);
 
         if (indexExists) {
-          return response.ok({ body: { name: index } });
+          return response.ok({ body: { name: index, template_outdated: templateOutdated } });
         } else {
           return siemResponse.error({
             statusCode: 404,

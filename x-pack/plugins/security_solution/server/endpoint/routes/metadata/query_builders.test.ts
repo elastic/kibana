@@ -230,7 +230,7 @@ describe('query builder', () => {
 
       expect(query).toEqual({
         body: {
-          query: { match: { 'HostDetails.host.id': mockID } },
+          query: { match: { 'HostDetails.agent.id': mockID } },
           sort: [{ 'HostDetails.event.created': { order: 'desc' } }],
           size: 1,
         },
