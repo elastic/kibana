@@ -164,14 +164,14 @@ function NodeDetailLink({
     (mouseEvent: React.MouseEvent<HTMLAnchorElement>) => {
       linkProps.onClick(mouseEvent);
       dispatch({
-        type: 'userBroughtProcessIntoView',
+        type: 'userBroughtNodeIntoView',
         payload: {
-          process: event,
+          nodeID,
           time: timestamp(),
         },
       });
     },
-    [timestamp, linkProps, dispatch, event]
+    [timestamp, linkProps, dispatch, nodeID]
   );
   return (
     <EuiButtonEmpty onClick={handleOnClick} href={linkProps.href}>

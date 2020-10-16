@@ -53,7 +53,10 @@ export interface QueryBarTimelineComponentProps {
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
-const timelineFilterDropArea = 'timeline-filter-drop-area';
+export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
+
+const getNonDropAreaFilters = (filters: Filter[] = []) =>
+  filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
 
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
@@ -91,7 +94,9 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
-    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>([]);
+    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>(
+      getNonDropAreaFilters(filters)
+    );
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
@@ -106,9 +111,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
-              const filterWithoutDropArea = filterManager
-                .getFilters()
-                .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+              const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
               setFilters(filterWithoutDropArea);
               setQueryBarFilters(filterWithoutDropArea);
             }
@@ -124,9 +127,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     }, []);
 
     useEffect(() => {
-      const filterWithoutDropArea = filterManager
-        .getFilters()
-        .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+      const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
       if (!deepEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
@@ -175,7 +176,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                 ...mySavedQuery,
                 attributes: {
                   ...mySavedQuery.attributes,
-                  filters: filters.filter((f) => f.meta.controlledBy !== timelineFilterDropArea),
+                  filters: getNonDropAreaFilters(filters),
                 },
               });
             }
@@ -250,7 +251,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             const dataProviderFilterExists =
               newSavedQuery.attributes.filters != null
                 ? newSavedQuery.attributes.filters.findIndex(
-                    (f) => f.meta.controlledBy === timelineFilterDropArea
+                    (f) => f.meta.controlledBy === TIMELINE_FILTER_DROP_AREA
                   )
                 : -1;
             savedQueryServices.saveQuery(
@@ -311,8 +312,8 @@ export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
   return {
     ...dslObject,
     meta: {
-      alias: timelineFilterDropArea,
-      controlledBy: timelineFilterDropArea,
+      alias: TIMELINE_FILTER_DROP_AREA,
+      controlledBy: TIMELINE_FILTER_DROP_AREA,
       negate: false,
       disabled: false,
       type: 'custom',
