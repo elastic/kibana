@@ -28,5 +28,45 @@ describe('TaskManagerPlugin', () => {
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
       );
     });
+
+    test('throws if setup methods are called after start', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        enabled: true,
+        max_workers: 10,
+        index: 'foo',
+        max_attempts: 9,
+        poll_interval: 3000,
+        max_poll_inactivity_cycles: 10,
+        request_capacity: 1000,
+      });
+
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+
+      const setupApi = await taskManagerPlugin.setup(coreMock.createSetup());
+
+      await taskManagerPlugin.start(coreMock.createStart());
+
+      expect(() =>
+        setupApi.addMiddleware({
+          beforeSave: async (saveOpts) => saveOpts,
+          beforeRun: async (runOpts) => runOpts,
+          beforeMarkRunning: async (runOpts) => runOpts,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot add Middleware after the task manager has started"`
+      );
+
+      expect(() =>
+        setupApi.registerTaskDefinitions({
+          lateRegisteredType: {
+            type: 'lateRegisteredType',
+            title: 'lateRegisteredType',
+            createTaskRunner: () => ({ async run() {} }),
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot register task definitions after the task manager has started"`
+      );
+    });
   });
 });

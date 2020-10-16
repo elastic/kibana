@@ -5,7 +5,7 @@
  */
 import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from 'src/core/server';
 import { first } from 'rxjs/operators';
-import { ElasticJs, TaskDefinition } from './task';
+import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
@@ -82,7 +82,7 @@ export class TaskManagerPlugin
     const taskStore = new TaskStore({
       serializer: savedObjects.createSerializer(),
       savedObjectsRepository,
-      callCluster: (elasticsearch.legacy.client.callAsInternalUser as unknown) as ElasticJs,
+      esClient: elasticsearch.createClient('taskManager').asInternalUser,
       index: this.config!.index,
       maxAttempts: this.config!.max_attempts,
       definitions: this.definitions,
