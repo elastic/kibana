@@ -25,16 +25,16 @@ export class RoleMappings {
 
   public async getAll() {
     this.log.debug(`Getting role mappings`);
-    const { data, status, statusText } = await this.kbnClient.request<Array<{ name: string }>>({
+    const { data, status, statusText } = (await this.kbnClient.request({
       path: `/internal/security/role_mapping`,
       method: 'GET',
-    });
+    })) as any;
     if (status !== 200) {
       throw new Error(
         `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
       );
     }
-    return data;
+    return data as Array<{ name: string }>;
   }
 
   public async create(name: string, roleMapping: Record<string, any>) {
