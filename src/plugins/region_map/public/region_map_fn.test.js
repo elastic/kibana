@@ -24,7 +24,7 @@ import { createRegionMapFn } from './region_map_fn';
 describe('interpreter/functions#regionmap', () => {
   const fn = functionWrapper(createRegionMapFn());
   const context = {
-    type: 'kibana_datatable',
+    type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
