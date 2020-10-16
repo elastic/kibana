@@ -5,8 +5,8 @@
 [float]
 === What you'll learn
 
-Practicing good index management helps ensure that your data is stored in the
-most cost-effective way possible. This page shows you how to use {kib}'s *Index
+Practicing good index management ensures your data is stored in the most
+cost-effective way possible. This page shows you how to use {kib}'s *Index
 Management* features to:
 
 * View and edit index settings.
