@@ -47,6 +47,10 @@ kibana_vars=(
     elasticsearch.ssl.truststore.password
     elasticsearch.ssl.verificationMode
     elasticsearch.username
+    enterpriseSearch.accessCheckTimeout
+    enterpriseSearch.accessCheckTimeoutWarning
+    enterpriseSearch.enabled
+    enterpriseSearch.host
     i18n.locale
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
