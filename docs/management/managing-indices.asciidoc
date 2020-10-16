@@ -15,7 +15,7 @@ ensuring that your settings, mappings, and aliases are consistently defined.
 
 You can also use *Index Management* to view and manage
 {ref}/data-streams.html[data streams]. A data stream lets you store time series
-data across multiple backing indices while giving you the simplicity of a single
+data across multiple backing indices while giving you a single
 named resource to use in requests.
 
 To get started, open the menu and go to *Stack Management > Index Management*.
@@ -98,7 +98,7 @@ To view more information about a data stream, such as its generation or its
 current index lifecycle policy, click the stream's name.
 
 [role="screenshot"]
-image::images/management_index_data_stream_stats.png[Data stream stats]
+image::images/management_index_data_stream_stats.png[Data stream details]
 
 To view information about the stream's backing indices, click the number in the
 *Indices* column.
