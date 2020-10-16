@@ -56,8 +56,9 @@ function expressionHelper(
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
-          // TODO load current palette from state
-          palette: [paletteService.default.toExpression()],
+          palette: [
+            paletteService[state.palette?.name || 'default'].toExpression(state.palette?.params),
+          ],
         },
       },
     ],

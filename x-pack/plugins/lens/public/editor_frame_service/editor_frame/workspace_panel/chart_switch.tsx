@@ -312,6 +312,12 @@ function getTopSuggestion(
   newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {
+  const mainPalette =
+    props.visualizationId &&
+    props.visualizationMap[props.visualizationId] &&
+    props.visualizationMap[props.visualizationId].getMainPalette
+      ? props.visualizationMap[props.visualizationId].getMainPalette!(props.visualizationState)
+      : undefined;
   const unfilteredSuggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
     datasourceStates: props.datasourceStates,
@@ -319,6 +325,7 @@ function getTopSuggestion(
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
+    mainPalette,
   });
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations

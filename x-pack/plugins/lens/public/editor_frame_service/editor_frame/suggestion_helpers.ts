@@ -50,6 +50,7 @@ export function getSuggestions({
   visualizationState,
   field,
   visualizeTriggerFieldContext,
+  mainPalette,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -65,6 +66,7 @@ export function getSuggestions({
   visualizationState: unknown;
   field?: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  mainPalette?: PaletteOutput;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -101,10 +103,13 @@ export function getSuggestions({
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
-          const mainPalette =
-            activeVisualizationId && visualizationMap[activeVisualizationId].getMainPalette
+          const palette =
+            mainPalette ||
+            (activeVisualizationId &&
+            visualizationMap[activeVisualizationId] &&
+            visualizationMap[activeVisualizationId].getMainPalette
               ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
-              : undefined;
+              : undefined);
           return getVisualizationSuggestions(
             visualization,
             table,
@@ -112,7 +117,7 @@ export function getSuggestions({
             datasourceSuggestion,
             currentVisualizationState,
             subVisualizationId,
-            mainPalette
+            palette
           );
         })
       )

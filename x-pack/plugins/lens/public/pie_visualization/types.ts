@@ -26,6 +26,7 @@ export type LayerState = SharedLayerState & {
 export interface PieVisualizationState {
   shape: 'donut' | 'pie' | 'treemap';
   layers: LayerState[];
+  palette?: PaletteOutput;
 }
 
 export type PieExpressionArgs = SharedLayerState & {

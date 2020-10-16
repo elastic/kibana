@@ -14,7 +14,7 @@ import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
-import { PieToolbar } from './toolbar';
+import { DimensionEditor, PieToolbar } from './toolbar';
 
 function newLayerState(layerId: string): LayerState {
   return {
@@ -87,14 +87,17 @@ export const getPieVisualization = ({
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
 
-  initialize(frame, state) {
+  initialize(frame, state, mainPalette) {
     return (
       state || {
         shape: 'donut',
         layers: [newLayerState(frame.addNewLayer())],
+        palette: mainPalette,
       }
     );
   },
+
+  getMainPalette: (state) => state.palette,
 
   getSuggestions: suggestions,
 
@@ -156,6 +159,7 @@ export const getPieVisualization = ({
           filterOperations: bucketedOperations,
           required: true,
           dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+          enableDimensionEditor: true,
         },
         {
           groupId: 'metric',
@@ -206,6 +210,14 @@ export const getPieVisualization = ({
         return { ...l, groups: l.groups.filter((c) => c !== columnId) };
       }),
     };
+  },
+  renderDimensionEditor(domElement, props) {
+    render(
+      <I18nProvider>
+        <DimensionEditor {...props} />
+      </I18nProvider>,
+      domElement
+    );
   },
 
   toExpression: (state, layers, attributes) =>

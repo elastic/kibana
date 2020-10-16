@@ -242,6 +242,8 @@ export const getXyVisualization = ({
       delete newLayer.xAccessor;
     } else if (newLayer.splitAccessor === columnId) {
       delete newLayer.splitAccessor;
+      // as the palette is associated with the break down by dimension, remove it together with the dimension
+      delete newLayer.palette;
     } else if (newLayer.accessors.includes(columnId)) {
       newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }

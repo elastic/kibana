@@ -9,6 +9,7 @@ import { PaletteDefinition, PaletteOutput } from 'src/plugins/charts/public';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 
+// TODO move this to shared components
 export function PalettePicker({
   palettes,
   activePalette,
