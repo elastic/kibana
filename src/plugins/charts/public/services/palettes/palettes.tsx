@@ -168,8 +168,21 @@ export const buildPalettes: (
     },
     custom: {
       id: 'custom',
-      // TODO implement this in a meaningful way
-      getColor: () => 'black',
+      getColor: (
+        series: SeriesLayer[],
+        { colors, gradient }: { colors: string[]; gradient: boolean }
+      ) => {
+        const actualColors = gradient
+          ? chroma.scale(colors).colors(series[0].totalSeriesAtDepth)
+          : colors;
+        const outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
+
+        if (series[0].maxDepth === 1) {
+          return outputColor;
+        }
+
+        return lightenColor(outputColor, series.length, series[0].maxDepth);
+      },
       internal: true,
       title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'custom' }),
       getColors: (size: number, { colors, gradient }: { colors: string[]; gradient: boolean }) => {
@@ -182,7 +195,7 @@ export const buildPalettes: (
             type: 'function',
             function: 'palette',
             arguments: {
-              colors,
+              color: colors,
               gradient: [gradient],
             },
           },

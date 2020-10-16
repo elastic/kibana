@@ -181,7 +181,7 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
-        variables={input.palette ? { palette: input.palette } : {}}
+        variables={input.palette ? { theme: { palette: input.palette } } : {}}
         handleEvent={this.handleEvent}
       />,
       domNode

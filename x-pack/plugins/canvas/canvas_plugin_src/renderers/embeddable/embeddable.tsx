@@ -72,7 +72,11 @@ export const embeddableRendererFactory = (
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
-          const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
+          const updatedExpression = embeddableInputToExpression(
+            updatedInput,
+            embeddableType,
+            plugins.charts
+          );
 
           if (updatedExpression) {
             handlers.onEmbeddableInputChange(updatedExpression);
