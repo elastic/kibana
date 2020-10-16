@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getThreatList } from './get_threat_list';
+import { getThreatList, getThreatListCount } from './get_threat_list';
 
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
@@ -46,6 +46,7 @@ export const createThreatSignals = async ({
   threatIndex,
   name,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  logger.debug(buildRuleMessage('Starting threat matching'));
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
     bulkCreateTimes: [],
@@ -54,6 +55,16 @@ export const createThreatSignals = async ({
     createdSignalsCount: 0,
     errors: [],
   };
+
+  let threatListCount = await getThreatListCount({
+    callCluster: services.callCluster,
+    exceptionItems,
+    threatFilters,
+    query: threatQuery,
+    language: threatLanguage,
+    index: threatIndex,
+  });
+  logger.debug(buildRuleMessage(`Total threat list items ${threatListCount}`));
 
   let threatList = await getThreatList({
     callCluster: services.callCluster,
@@ -66,10 +77,12 @@ export const createThreatSignals = async ({
     searchAfter: undefined,
     sortField: undefined,
     sortOrder: undefined,
+    logger,
+    buildRuleMessage,
   });
 
   while (threatList.hits.hits.length !== 0 && results.createdSignalsCount <= params.maxSignals) {
-    ({ threatList, results } = await createThreatSignal({
+    ({ results } = await createThreatSignal({
       threatMapping,
       query,
       inputIndex,
@@ -98,15 +111,31 @@ export const createThreatSignals = async ({
       tags,
       refresh,
       throttle,
-      threatFilters,
-      threatQuery,
       buildRuleMessage,
-      threatIndex,
-      threatLanguage,
       name,
       currentThreatList: threatList,
       currentResult: results,
     }));
+    threatListCount -= threatList.hits.hits.length;
+    logger.debug(
+      buildRuleMessage(`Approximate number of threat list items to check are ${threatListCount}`)
+    );
+
+    threatList = await getThreatList({
+      callCluster: services.callCluster,
+      exceptionItems,
+      query: threatQuery,
+      language: threatLanguage,
+      threatFilters,
+      index: threatIndex,
+      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
+      sortField: undefined,
+      sortOrder: undefined,
+      listClient,
+      buildRuleMessage,
+      logger,
+    });
   }
+  logger.debug(buildRuleMessage('Done threat matching'));
   return results;
 };

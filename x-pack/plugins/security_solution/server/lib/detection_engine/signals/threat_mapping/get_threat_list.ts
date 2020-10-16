@@ -10,13 +10,14 @@ import {
   GetSortWithTieBreakerOptions,
   GetThreatListOptions,
   SortWithTieBreaker,
+  ThreatListCountOptions,
   ThreatListItem,
 } from './types';
 
 /**
  * This should not exceed 10000 (10k)
  */
-export const MAX_PER_PAGE = 9000;
+export const MAX_PER_PAGE = 100;
 
 export const getThreatList = async ({
   callCluster,
@@ -30,11 +31,14 @@ export const getThreatList = async ({
   exceptionItems,
   threatFilters,
   listClient,
+  buildRuleMessage,
+  logger,
 }: GetThreatListOptions): Promise<SearchResponse<ThreatListItem>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
+
   const queryFilter = getQueryFilter(
     query,
     language ?? 'kuery',
@@ -43,6 +47,11 @@ export const getThreatList = async ({
     exceptionItems
   );
 
+  logger.debug(
+    buildRuleMessage(
+      `Querying a threat list from the index: "${index}" searchAfter: "${searchAfter}"`
+    )
+  );
   const response: SearchResponse<ThreatListItem> = await callCluster('search', {
     body: {
       query: queryFilter,
@@ -58,6 +67,8 @@ export const getThreatList = async ({
     index,
     size: calculatedPerPage,
   });
+
+  logger.debug(buildRuleMessage(`Retrieved threat list of size: ${response.hits.hits.length}`));
   return response;
 };
 
@@ -88,4 +99,31 @@ export const getSortWithTieBreaker = ({
       return [{ '@timestamp': 'asc' }];
     }
   }
+};
+
+export const getThreatListCount = async ({
+  callCluster,
+  query,
+  language,
+  threatFilters,
+  index,
+  exceptionItems,
+}: ThreatListCountOptions): Promise<number> => {
+  const queryFilter = getQueryFilter(
+    query,
+    language ?? 'kuery',
+    threatFilters,
+    index,
+    exceptionItems
+  );
+  const response: {
+    count: number;
+  } = await callCluster('count', {
+    body: {
+      query: queryFilter,
+    },
+    ignoreUnavailable: true,
+    index,
+  });
+  return response.count;
 };

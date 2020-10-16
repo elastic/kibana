@@ -93,18 +93,13 @@ export interface CreateThreatSignalOptions {
   tags: string[];
   refresh: false | 'wait_for';
   throttle: string;
-  threatFilters: PartialFilter[];
-  threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
-  threatIndex: ThreatIndex;
-  threatLanguage: ThreatLanguageOrUndefined;
   name: string;
   currentThreatList: SearchResponse<ThreatListItem>;
   currentResult: SearchAfterAndBulkCreateReturnType;
 }
 
 export interface ThreatSignalResults {
-  threatList: SearchResponse<ThreatListItem>;
   results: SearchAfterAndBulkCreateReturnType;
 }
 
@@ -156,6 +151,17 @@ export interface GetThreatListOptions {
   threatFilters: PartialFilter[];
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
+  buildRuleMessage: BuildRuleMessage;
+  logger: Logger;
+}
+
+export interface ThreatListCountOptions {
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  query: string;
+  language: ThreatLanguageOrUndefined;
+  threatFilters: PartialFilter[];
+  index: string[];
+  exceptionItems: ExceptionListItemSchema[];
 }
 
 export interface GetSortWithTieBreakerOptions {

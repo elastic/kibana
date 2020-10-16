@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getThreatList } from './get_threat_list';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 
 import { getFilter } from '../get_filter';
@@ -41,28 +40,11 @@ export const createThreatSignal = async ({
   refresh,
   tags,
   throttle,
-  threatFilters,
-  threatQuery,
-  threatLanguage,
   buildRuleMessage,
-  threatIndex,
   name,
   currentThreatList,
   currentResult,
 }: CreateThreatSignalOptions): Promise<ThreatSignalResults> => {
-  const threatList = await getThreatList({
-    callCluster: services.callCluster,
-    exceptionItems,
-    query: threatQuery,
-    language: threatLanguage,
-    threatFilters,
-    index: threatIndex,
-    searchAfter: currentThreatList.hits.hits[currentThreatList.hits.hits.length - 1].sort,
-    sortField: undefined,
-    sortOrder: undefined,
-    listClient,
-  });
-
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
@@ -71,7 +53,12 @@ export const createThreatSignal = async ({
   if (threatFilter.query.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    return { threatList, results: currentResult };
+    logger.debug(
+      buildRuleMessage(
+        'Threat list is empty after filtering for missing data, returning without attempting a match'
+      )
+    );
+    return { results: currentResult };
   } else {
     const esFilter = await getFilter({
       type,
@@ -83,6 +70,8 @@ export const createThreatSignal = async ({
       index: inputIndex,
       lists: exceptionItems,
     });
+
+    logger.debug(buildRuleMessage('Threat list is attempting a match and signal creation'));
     const newResult = await searchAfterAndBulkCreate({
       gap,
       previousStartedAt,
@@ -111,6 +100,13 @@ export const createThreatSignal = async ({
       buildRuleMessage,
     });
     const results = combineResults(currentResult, newResult);
-    return { threatList, results };
+    logger.debug(
+      buildRuleMessage(
+        `Threat list completed matching a round against indexes and the time to search was ${
+          newResult.searchAfterTimes.length !== 0 ? newResult.searchAfterTimes : '(unknown) '
+        }ms`
+      )
+    );
+    return { results };
   }
 };
