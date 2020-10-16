@@ -11,6 +11,7 @@ import { defaultSetPriority } from '../../constants';
 
 import { FormInternal } from './types';
 import { ifExistsNumberGreaterThanZero, rolloverThresholdsValidator } from './form_validations';
+import { i18nTexts } from './i18n_texts';
 
 const { emptyField } = fieldValidators;
 
@@ -30,9 +31,7 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: 'd',
       },
       forceMergeEnabled: {
-        label: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
-          defaultMessage: 'Force merge data',
-        }),
+        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
       },
       bestCompression: {
         label: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.bestCompressionLabel', {

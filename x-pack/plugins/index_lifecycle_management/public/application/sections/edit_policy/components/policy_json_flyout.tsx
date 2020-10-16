@@ -76,7 +76,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
           iconType="alert"
           color="danger"
           title={i18n.translate(
-            'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.body',
+            'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.title',
             { defaultMessage: 'Invalid policy' }
           )}
         >

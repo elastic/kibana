@@ -12,7 +12,7 @@ import { Phases } from '../../../../../../../common/types';
 
 import { UseField, ToggleField, NumericField, useFormData } from '../../../../../../shared_imports';
 
-import { schema } from '../../../form_schema';
+import { i18nTexts } from '../../../i18n_texts';
 
 import { LearnMoreLink } from '../../';
 
@@ -55,7 +55,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
         componentProps={{
           euiFieldProps: {
             'data-test-subj': `${phase}-forceMergeSwitch`,
-            'aria-label': schema._meta.hot.forceMergeEnabled.label,
+            'aria-label': i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
             'aria-controls': 'forcemergeContent',
           },
         }}
