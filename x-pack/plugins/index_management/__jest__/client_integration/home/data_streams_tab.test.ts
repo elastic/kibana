@@ -260,4 +260,35 @@ describe('Data Streams tab', () => {
       });
     });
   });
+
+  describe('when there are special characters', () => {
+    beforeEach(async () => {
+      const {
+        setLoadIndicesResponse,
+        setLoadDataStreamsResponse,
+        setLoadDataStreamResponse,
+      } = httpRequestsMockHelpers;
+
+      setLoadIndicesResponse([]);
+
+      const dataStreamDollarSign = createDataStreamPayload('%dataStream');
+      setLoadDataStreamsResponse([dataStreamDollarSign]);
+      setLoadDataStreamResponse(dataStreamDollarSign);
+
+      testBed = await setup();
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+    });
+
+    describe('detail panel', () => {
+      test('opens when the data stream name in the table is clicked', async () => {
+        const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+        await actions.clickNameAt(0);
+        expect(findDetailPanel().length).toBe(1);
+        expect(findDetailPanelTitle()).toBe('%dataStream');
+      });
+    });
+  });
 });

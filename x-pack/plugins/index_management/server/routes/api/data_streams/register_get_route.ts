@@ -82,7 +82,6 @@ export function registerGetOneRoute({ router, license, lib: { isEsError } }: Rou
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { name } = req.params as TypeOf<typeof paramsSchema>;
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
         const [
