@@ -18036,7 +18036,6 @@
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage": "无法加载操作类型",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage": "无法加载告警",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage": "无法加载告警类型",
-    "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton": "{titleBcc}",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton": "添加抄送收件人",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel": "发送者",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel": "主机",
