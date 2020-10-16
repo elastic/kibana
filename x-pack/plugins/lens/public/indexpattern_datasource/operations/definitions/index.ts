@@ -18,6 +18,8 @@ import {
   SumIndexPatternColumn,
   maxOperation,
   MaxIndexPatternColumn,
+  medianOperation,
+  MedianIndexPatternColumn,
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
 import { countOperation, CountIndexPatternColumn } from './count';
@@ -43,6 +45,7 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | CardinalityIndexPatternColumn
   | SumIndexPatternColumn
+  | MedianIndexPatternColumn
   | CountIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
@@ -59,6 +62,7 @@ const internalOperationDefinitions = [
   averageOperation,
   cardinalityOperation,
   sumOperation,
+  medianOperation,
   countOperation,
   rangeOperation,
 ];

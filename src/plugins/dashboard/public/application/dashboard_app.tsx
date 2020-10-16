@@ -18,15 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 
 import _, { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
-import { Observable, pipe } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, startWith, switchMap } from 'rxjs/operators';
+import { merge, Observable, pipe, Subscription } from 'rxjs';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { SavedObjectNotFound } from '../../../kibana_utils/public';
-import { DashboardAppProps, DashboardAppServices } from './types';
+import {
+  DashboardAppComponentActiveState,
+  DashboardAppComponentState,
+  DashboardAppProps,
+  DashboardAppServices,
+} from './types';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardSavedObject } from '../saved_dashboards';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
@@ -45,6 +50,7 @@ import {
 } from '../../../embeddable/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
+import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import {
   DashboardConstants,
   DashboardContainer,
@@ -71,7 +77,13 @@ interface UrlParamsSelectedMap {
 //   [UrlParams.HIDE_FILTER_BAR]: boolean;
 // }
 
-export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: DashboardAppProps) {
+export function DashboardApp({
+  savedDashboardId,
+  history,
+  kbnUrlStateStorage,
+  redirectToDashboard,
+  embedSettings,
+}: DashboardAppProps) {
   const {
     core,
     chrome,
@@ -83,7 +95,7 @@ export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: 
     savedDashboards,
     initializerContext,
     indexPatterns,
-    // navigation,
+    navigation,
     // dashboardCapabilities,
     // savedObjectsClient,
     dashboardConfig,
@@ -99,48 +111,56 @@ export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: 
     // share,
   } = useKibana<DashboardAppServices>().services;
 
-  // const updateIndexPatternsOperator = pipe(
-  //   filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-  //   map((container: DashboardContainer): IndexPattern[] => {
-  //     let panelIndexPatterns: IndexPattern[] = [];
-  //     Object.values(container.getChildIds()).forEach((id) => {
-  //       const embeddableInstance = container.getChild(id);
-  //       if (isErrorEmbeddable(embeddableInstance)) return;
-  //       const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
-  //       if (!embeddableIndexPatterns) return;
-  //       panelIndexPatterns.push(...embeddableIndexPatterns);
-  //     });
-  //     panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
-  //     return panelIndexPatterns;
-  //   }),
-  //   distinctUntilChanged((a, b) =>
-  //     deepEqual(
-  //       a.map((ip) => ip.id),
-  //       b.map((ip) => ip.id)
-  //     )
-  //   ),
-  //   // using switchMap for previous task cancellation
-  //   switchMap((panelIndexPatterns: IndexPattern[]) => {
-  //     return new Observable((observer) => {
-  //       if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-  //         $scope.$evalAsync(() => {
-  //           if (observer.closed) return;
-  //           $scope.indexPatterns = panelIndexPatterns;
-  //           observer.complete();
-  //         });
-  //       } else {
-  //         indexPatterns.getDefault().then((defaultIndexPattern) => {
-  //           if (observer.closed) return;
-  //           $scope.$evalAsync(() => {
-  //             if (observer.closed) return;
-  //             $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
-  //             observer.complete();
-  //           });
-  //         });
-  //       }
-  //     });
-  //   })
-  // );
+  const [state, setState] = useState<DashboardAppComponentState>({});
+
+  const isActiveState = (
+    testState: DashboardAppComponentState
+  ): testState is DashboardAppComponentActiveState => {
+    return Boolean(
+      testState.dashboardContainer &&
+        testState.dashboardStateManager &&
+        testState.indexPatterns &&
+        testState.savedDashboard
+    );
+  };
+
+  const updateIndexPatternsOperator = pipe(
+    filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+    map((container: DashboardContainer): IndexPattern[] => {
+      let panelIndexPatterns: IndexPattern[] = [];
+      Object.values(container.getChildIds()).forEach((id) => {
+        const embeddableInstance = container.getChild(id);
+        if (isErrorEmbeddable(embeddableInstance)) return;
+        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
+        if (!embeddableIndexPatterns) return;
+        panelIndexPatterns.push(...embeddableIndexPatterns);
+      });
+      panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+      return panelIndexPatterns;
+    }),
+    distinctUntilChanged((a, b) =>
+      deepEqual(
+        a.map((ip) => ip.id),
+        b.map((ip) => ip.id)
+      )
+    ),
+    // using switchMap for previous task cancellation
+    switchMap((panelIndexPatterns: IndexPattern[]) => {
+      return new Observable((observer) => {
+        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+          if (observer.closed) return;
+          setState((s) => ({ ...s, indexPatterns: panelIndexPatterns }));
+          observer.complete();
+        } else {
+          indexPatterns.getDefault().then((defaultIndexPattern) => {
+            if (observer.closed) return;
+            setState((s) => ({ ...s, indexPatterns: [defaultIndexPattern as IndexPattern] }));
+            observer.complete();
+          });
+        }
+      });
+    })
+  );
 
   const initializeStateSyncing = useCallback(
     (savedDashboard: DashboardSavedObject) => {
@@ -175,9 +195,9 @@ export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: 
             query: dashboardStateManager.getQuery(),
           }),
           state$: dashboardStateManager.appState$.pipe(
-            map((state) => ({
-              filters: state.filters,
-              query: queryStringManager.formatQuery(state.query),
+            map((appState) => ({
+              filters: appState.filters,
+              query: queryStringManager.formatQuery(appState.query),
             }))
           ),
         },
@@ -283,6 +303,9 @@ export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: 
 
   // Dashboard loading useEffect
   useEffect(() => {
+    let inputSubscription: Subscription | undefined;
+    let outputSubscription: Subscription | undefined;
+
     data.indexPatterns
       .ensureDefaultIndexPattern()
       ?.then(() => savedDashboards.get(savedDashboardId) as Promise<DashboardSavedObject>)
@@ -315,15 +338,79 @@ export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: 
 
         dashboardFactory
           .create(getDashboardInput({ dashboardStateManager }))
-          .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
-            if (!container || isErrorEmbeddable(container)) {
+          .then((dashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
+            if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
               return;
             }
 
-            container.render(document.getElementById('dashboardViewport')!);
+            // outputSubscription = merge(
+            //   // output of dashboard container itself
+            //   dashboardContainer.getOutput$(),
+            //   // plus output of dashboard container children,
+            //   // children may change, so make sure we subscribe/unsubscribe with switchMap
+            //   dashboardContainer.getOutput$().pipe(
+            //     map(() => dashboardContainer!.getChildIds()),
+            //     distinctUntilChanged(deepEqual),
+            //     switchMap((newChildIds: string[]) =>
+            //       merge(
+            //         ...newChildIds.map((childId) =>
+            //           dashboardContainer!.getChild(childId).getOutput$()
+            //         )
+            //       )
+            //     )
+            //   )
+            // )
+            //   .pipe(
+            //     mapTo(dashboardContainer),
+            //     startWith(dashboardContainer), // to trigger initial index pattern update
+            //     updateIndexPatternsOperator
+            //   )
+            //   .subscribe();
+
+            // inputSubscription = dashboardContainer.getInput$().subscribe(() => {
+            //   // let dirty = false;
+
+            //   // This has to be first because handleDashboardContainerChanges causes
+            //   // appState.save which will cause refreshDashboardContainer to be called.
+
+            //   if (
+            //     !esFilters.compareFilters(
+            //       dashboardContainer.getInput().filters,
+            //       data.query.filterManager.getFilters(),
+            //       esFilters.COMPARE_ALL_OPTIONS
+            //     )
+            //   ) {
+            //     // Add filters modifies the object passed to it, hence the clone deep.
+            //     data.query.filterManager.addFilters(
+            //       _.cloneDeep(dashboardContainer.getInput().filters)
+            //     );
+
+            //     // dashboardStateManager.applyFilters(
+            //     //   // $scope.model.query,
+            //     //   dashboardContainer.getInput().filters
+            //     // );
+            //     // dirty = true;
+            //   }
+
+            //   dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
+            //   // $scope.$evalAsync(() => {
+            //   //   if (dirty) {
+            //   //     updateState();
+            //   //   }
+            //   // });
+            // });
+
+            setState({
+              dashboardContainer,
+              dashboardStateManager,
+              savedDashboard,
+            });
+            dashboardContainer.render(document.getElementById('dashboardViewport')!);
           });
 
         return () => {
+          inputSubscription?.unsubscribe();
+          outputSubscription?.unsubscribe();
           stopSyncingQueryServiceStateWithUrl();
           stopSyncingAppFilters();
         };
@@ -363,7 +450,25 @@ export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: 
     core.notifications.toasts,
     initializeStateSyncing,
     getDashboardInput,
+    updateIndexPatternsOperator,
+    data.query.filterManager,
   ]);
 
-  return <div id="dashboardViewport" />;
+  return (
+    <>
+      {isActiveState(state) && (
+        <DashboardTopNav
+          indexPatterns={state.indexPatterns}
+          dashboardStateManager={state.dashboardStateManager}
+          timefilter={data.query.timefilter.timefilter}
+          savedDashboard={state.savedDashboard}
+          dashboardContainer={state.dashboardContainer}
+          redirectToDashboard={redirectToDashboard}
+          lastDashboardId={savedDashboardId}
+          embedSettings={embedSettings}
+        />
+      )}
+      <div id="dashboardViewport" />
+    </>
+  );
 }

@@ -27,6 +27,7 @@ import {
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
 } from '../../../../embeddable/public';
+import { NotificationsStart } from '../../../../../core/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_ADD_TO_LIBRARY = 'addToFromLibrary';
@@ -40,7 +41,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor() {}
+  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -89,5 +90,14 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
       explicitInput: { ...newInput, id: uuid.v4() },
     };
     dashboard.replacePanel(panelToReplace, newPanel);
+
+    const title = i18n.translate('dashboard.panel.addToLibrary.successMessage', {
+      defaultMessage: `Panel '{panelTitle}' was added to the visualize library`,
+      values: { panelTitle: embeddable.getTitle() },
+    });
+    this.deps.toasts.addSuccess({
+      title,
+      'data-test-subj': 'unlinkPanelSuccess',
+    });
   }
 }

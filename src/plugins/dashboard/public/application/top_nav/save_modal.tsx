@@ -22,15 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
 import { SavedObjectSaveModal } from '../../../../saved_objects/public';
-
-interface SaveOptions {
-  newTitle: string;
-  newDescription: string;
-  newCopyOnSave: boolean;
-  newTimeRestore: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
-}
+import { DashboardSaveOptions } from '../types';
 
 interface Props {
   onSave: ({
@@ -40,7 +32,7 @@ interface Props {
     newTimeRestore,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-  }: SaveOptions) => void;
+  }: DashboardSaveOptions) => void;
   onClose: () => void;
   title: string;
   description: string;

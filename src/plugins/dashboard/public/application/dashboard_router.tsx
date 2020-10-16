@@ -22,7 +22,7 @@ import React, { useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
-import { parse } from 'query-string';
+import { parse, ParsedQuery } from 'query-string';
 import {
   createKbnUrlStateStorage,
   Storage,
@@ -30,10 +30,23 @@ import {
 } from '../../../kibana_utils/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { DashboardListing, Dashboard404 } from './listing';
-import { DashboardAppServices, DashboardMountProps, RedirectToDashboardProps } from './types';
+import {
+  DashboardAppServices,
+  DashboardEmbedSettings,
+  DashboardMountProps,
+  RedirectToDashboardProps,
+} from './types';
 import { DashboardApp } from './dashboard_app';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '..';
+
+enum UrlParams {
+  SHOW_TOP_MENU = 'show-top-menu',
+  SHOW_QUERY_INPUT = 'show-query-input',
+  SHOW_TIME_FILTER = 'show-time-filter',
+  SHOW_FILTER_BAR = 'show-filter-bar',
+  HIDE_FILTER_BAR = 'hide-filter-bar',
+}
 
 export async function mountApp({
   core,
@@ -94,16 +107,6 @@ export async function mountApp({
       ...withNotifyOnErrors(core.notifications.toasts),
     });
 
-  const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
-    return (
-      <DashboardApp
-        history={routeProps.history}
-        kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
-        savedDashboardId={routeProps.match.params.id}
-      />
-    );
-  };
-
   const redirect = (
     routeProps: RouteComponentProps,
     { id, useReplace, filter }: RedirectToDashboardProps
@@ -117,10 +120,36 @@ export async function mountApp({
     historyFunction(destination);
   };
 
+  const getDashboardEmbedSettings = (routeParams: ParsedQuery<string>): DashboardEmbedSettings => {
+    if (!routeParams.embd) {
+      return {};
+    }
+    return {
+      forceShowTopNavMenu: Boolean(routeParams[UrlParams.SHOW_TOP_MENU]),
+      forceShowQueryInput: Boolean(routeParams[UrlParams.SHOW_QUERY_INPUT]),
+      forceShowDatePicker: Boolean(routeParams[UrlParams.SHOW_TIME_FILTER]),
+      forceHideFilterBar: Boolean(routeParams[UrlParams.HIDE_FILTER_BAR]),
+    };
+  };
+
+  const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
+    const routeParams = parse(routeProps.history.location.search);
+    const embedSettings = getDashboardEmbedSettings(routeParams);
+    return (
+      <DashboardApp
+        history={routeProps.history}
+        embedSettings={embedSettings}
+        kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
+        savedDashboardId={routeProps.match.params.id}
+        redirectToDashboard={(props: RedirectToDashboardProps) => redirect(routeProps, props)}
+      />
+    );
+  };
+
   const renderListingPage = (routeProps: RouteComponentProps) => {
-    const searchParams = parse(routeProps.history.location.search);
-    const title = (searchParams.title as string) || undefined;
-    const filter = (searchParams.filter as string) || undefined;
+    const routeParams = parse(routeProps.history.location.search);
+    const title = (routeParams.title as string) || undefined;
+    const filter = (routeParams.filter as string) || undefined;
     return (
       <DashboardListing
         initialFilter={filter}

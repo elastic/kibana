@@ -40,18 +40,18 @@ export function getTopNavConfig(
       return hideWriteControls
         ? [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-            getShareConfig(actions[TopNavIds.SHARE]),
+            // getShareConfig(actions[TopNavIds.SHARE]),
           ]
         : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-            getShareConfig(actions[TopNavIds.SHARE]),
+            // getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
     case ViewMode.EDIT:
       return [
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
-        getShareConfig(actions[TopNavIds.SHARE]),
+        // getShareConfig(actions[TopNavIds.SHARE]),
         getAddConfig(actions[TopNavIds.ADD_EXISTING]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getSaveConfig(actions[TopNavIds.SAVE]),

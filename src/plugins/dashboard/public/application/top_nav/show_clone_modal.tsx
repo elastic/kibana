@@ -28,7 +28,7 @@ export function showCloneModal(
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
     onTitleDuplicate: () => void
-  ) => Promise<{ id?: string } | { error: Error }>,
+  ) => Promise<void>,
   title: string
 ) {
   const container = document.createElement('div');
@@ -42,15 +42,17 @@ export function showCloneModal(
     isTitleDuplicateConfirmed: boolean,
     onTitleDuplicate: () => void
   ) => {
-    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(
-      (response: { id?: string } | { error: Error }) => {
-        // The only time you don't want to close the modal is if it's asking you
-        // to confirm a duplicate title, in which case there will be no error and no id.
-        if ((response as { error: Error }).error || (response as { id?: string }).id) {
-          closeModal();
-        }
-      }
-    );
+    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate)
+      .then
+      // TODO
+      // (response: { id?: string } | { error: Error }) => {
+      //   // The only time you don't want to close the modal is if it's asking you
+      //   // to confirm a duplicate title, in which case there will be no error and no id.
+      //   if ((response as { error: Error }).error || (response as { id?: string }).id) {
+      //     closeModal();
+      //   }
+      // }
+      ();
   };
   document.body.appendChild(container);
   const element = (

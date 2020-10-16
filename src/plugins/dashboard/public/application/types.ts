@@ -27,7 +27,12 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { History } from 'history';
-import { DataPublicPluginStart, IndexPatternsContract } from '../../../data/public';
+import {
+  DataPublicPluginStart,
+  IndexPattern,
+  IndexPatternsContract,
+  TimefilterContract,
+} from '../../../data/public';
 import { EmbeddableStart } from '../../../embeddable/public';
 import { KibanaLegacyStart } from '../../../kibana_legacy/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
@@ -38,6 +43,8 @@ import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
 import { IKbnUrlStateStorage, Storage } from '../../../kibana_utils/public';
 import { DashboardCapabilities } from '../types';
+import { DashboardStateManager } from './dashboard_state_manager';
+import { DashboardContainer, SavedObjectDashboard } from '..';
 
 export type RedirectToDashboard = (props: RedirectToDashboardProps) => void;
 
@@ -49,8 +56,42 @@ export interface RedirectToDashboardProps {
 export interface DashboardAppProps {
   savedDashboardId?: string;
   history: History; // TODO: Remove history after state deangularize?
+  embedSettings?: DashboardEmbedSettings;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  redirectToDashboard: RedirectToDashboard;
 }
+
+export interface DashboardEmbedSettings {
+  forceShowTopNavMenu?: boolean;
+  forceShowQueryInput?: boolean;
+  forceShowDatePicker?: boolean;
+  forceHideFilterBar?: boolean;
+}
+
+export interface DashboardSaveOptions {
+  newTitle: string;
+  newDescription: string;
+  newCopyOnSave: boolean;
+  newTimeRestore: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
+}
+
+export interface DashboardAppComponentState {
+  savedDashboard?: SavedObjectDashboard;
+  dashboardStateManager?: DashboardStateManager;
+  dashboardContainer?: DashboardContainer;
+  indexPatterns?: IndexPattern[];
+}
+
+export type DashboardAppComponentActiveState = Required<DashboardAppComponentState>;
+
+export type DashboardTopNavProps = Required<DashboardAppComponentState> & {
+  timefilter: TimefilterContract;
+  redirectToDashboard: RedirectToDashboard;
+  lastDashboardId?: string;
+  embedSettings?: DashboardEmbedSettings;
+};
 
 export interface DashboardListingProps {
   initialFilter?: string;
