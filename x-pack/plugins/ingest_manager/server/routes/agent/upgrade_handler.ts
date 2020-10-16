@@ -69,7 +69,7 @@ export const postAgentUpgradeHandler: RequestHandler<
     await AgentService.sendUpgradeAgentAction({
       soClient,
       agentId: request.params.agentId,
-      version: versionToUpgradeNumber,
+      version,
       sourceUri,
     });
 
@@ -109,13 +109,13 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       await AgentService.sendUpgradeAgentsActions(soClient, {
         agentIds: agents,
         sourceUri,
-        version: versionToUpgradeNumber,
+        version,
       });
     } else {
       await AgentService.sendUpgradeAgentsActions(soClient, {
         kuery: agents,
         sourceUri,
-        version: versionToUpgradeNumber,
+        version,
       });
     }
 
