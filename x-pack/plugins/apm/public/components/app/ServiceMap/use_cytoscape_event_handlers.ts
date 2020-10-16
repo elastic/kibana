@@ -85,7 +85,6 @@ export function useCytoscapeEventHandlers({
       node?: cytoscape.NodeSingular
     ) => {
       cytoscapeInstance.edges().removeClass('highlight');
-      // debugger;
       if (node) {
         node.connectedEdges().addClass('highlight');
       }
