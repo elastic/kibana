@@ -37,6 +37,7 @@ interface AlertEditProps {
 export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [healthCheckLoaded, setHealthCheckLoaded] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
     false
@@ -135,7 +136,12 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
+        <HealthCheck
+          docLinks={docLinks}
+          http={http}
+          inFlyout={true}
+          onLoaded={(loaded: boolean) => setHealthCheckLoaded(loaded)}
+        >
           <EuiFlyoutBody>
             {hasActionsDisabled && (
               <Fragment>

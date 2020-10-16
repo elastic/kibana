@@ -61,6 +61,7 @@ export const AlertAdd = ({
 
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [healthCheckLoaded, setHealthCheckLoaded] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
 
   const setAlert = (value: any) => {
@@ -183,7 +184,13 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
+        <HealthCheck
+          docLinks={docLinks}
+          http={http}
+          inFlyout={true}
+          waitForCheck={false}
+          onLoaded={(loaded: boolean) => setHealthCheckLoaded(loaded)}
+        >
           <EuiFlyoutBody>
             <AlertForm
               alert={alert}
@@ -211,7 +218,7 @@ export const AlertAdd = ({
                   data-test-subj="saveAlertButton"
                   type="submit"
                   iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
+                  isDisabled={hasErrors || hasActionErrors || !healthCheckLoaded}
                   isLoading={isSaving}
                   onClick={async () => {
                     setIsSaving(true);

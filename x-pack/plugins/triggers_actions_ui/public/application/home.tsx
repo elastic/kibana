@@ -149,7 +149,13 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             exact
             path={routeToAlerts}
             component={() => (
-              <HealthCheck docLinks={docLinks} http={http}>
+              <HealthCheck
+                docLinks={docLinks}
+                http={http}
+                inFlyout={true}
+                waitForCheck={false}
+                onLoaded={(loaded: boolean) => setHealthCheckLoaded(loaded)}
+              >
                 <AlertsList />
               </HealthCheck>
             )}

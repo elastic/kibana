@@ -23,6 +23,8 @@ interface Props {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
   http: HttpSetup;
   inFlyout?: boolean;
+  waitForCheck?: boolean;
+  onLoaded?: (value: boolean) => void;
 }
 
 export const HealthCheck: React.FunctionComponent<Props> = ({
@@ -30,24 +32,33 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   http,
   children,
   inFlyout = false,
+  waitForCheck = true,
+  onLoaded,
 }) => {
   const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
   React.useEffect(() => {
     (async function () {
       setAlertingHealth(some(await health({ http })));
+      if (onLoaded) {
+        onLoaded(true);
+      }
     })();
-  }, [http]);
+  }, [http, onLoaded]);
 
   const className = inFlyout ? 'alertingFlyoutHealthCheck' : 'alertingHealthCheck';
+
+  const childComponent = <Fragment>{children}</Fragment>;
 
   return pipe(
     alertingHealth,
     fold(
-      () => <EuiLoadingSpinner size="m" />,
+      () => {
+        return waitForCheck ? <EuiLoadingSpinner size="m" /> : childComponent;
+      },
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
-          <Fragment>{children}</Fragment>
+          childComponent
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
           <TlsAndEncryptionError docLinks={docLinks} className={className} />
         ) : !healthCheck.hasPermanentEncryptionKey ? (
