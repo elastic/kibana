@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -12,8 +12,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiFieldNumber,
-  EuiSwitch,
-  EuiFormRow,
   EuiDescribedFormGroup,
   EuiCallOut,
 } from '@elastic/eui';
@@ -135,6 +133,10 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
   const [{ [useRolloverPath]: isRolloverEnabled }] = useFormData({ watch: [useRolloverPath] });
   const form = useFormContext();
   const isShowingErrors = form.isValid === false;
+
+  useEffect(() => {
+    setWarmPhaseOnRollover(isRolloverEnabled);
+  }, [setWarmPhaseOnRollover, isRolloverEnabled]);
 
   return (
     <>
