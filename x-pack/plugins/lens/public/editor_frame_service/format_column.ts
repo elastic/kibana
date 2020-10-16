@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunctionDefinition, KibanaDatatable } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
 
 interface FormatColumn {
   format: string;
@@ -47,12 +47,12 @@ export const supportedFormats: Record<
 
 export const formatColumn: ExpressionFunctionDefinition<
   'lens_format_column',
-  KibanaDatatable,
+  Datatable,
   FormatColumn,
-  KibanaDatatable
+  Datatable
 > = {
   name: 'lens_format_column',
-  type: 'kibana_datatable',
+  type: 'datatable',
   help: '',
   args: {
     format: {
@@ -82,7 +82,7 @@ export const formatColumn: ExpressionFunctionDefinition<
       help: '',
     },
   },
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   fn(input, { format, columnId, decimals, nestedFormat, template, replaceInfinity }: FormatColumn) {
     return {
       ...input,
@@ -93,30 +93,42 @@ export const formatColumn: ExpressionFunctionDefinition<
           if (supportedFormats[format]) {
             return {
               ...col,
-              formatHint: {
-                id: format,
-                params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
+              meta: {
+                ...col.meta,
+                params: {
+                  id: format,
+                  params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
+                },
               },
             };
           }
           if (nestedFormat && supportedFormats[nestedFormat]) {
             return {
               ...col,
-              formatHint: {
-                id: format,
+              meta: {
+                ...col.meta,
                 params: {
-                  id: nestedFormat,
+                  id: format,
                   params: {
-                    pattern: supportedFormats[nestedFormat].decimalsToPattern(decimals),
+                    id: nestedFormat,
+                    params: {
+                      pattern: supportedFormats[nestedFormat].decimalsToPattern(decimals),
+                    },
+                    ...extraParams,
                   },
-                  ...extraParams,
                 },
               },
             };
           }
           return {
             ...col,
-            formatHint: { id: format, params: { ...extraParams } },
+            meta: {
+              ...col.meta,
+              params: {
+                id: format,
+                params: { ...extraParams },
+              },
+            },
           };
         }
         return col;
