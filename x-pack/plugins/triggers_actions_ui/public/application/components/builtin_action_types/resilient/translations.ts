@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.selectMessageText',
   {
-    defaultMessage: 'Push or update data to a new incident in Resilient.',
+    defaultMessage: 'Create an incident in IBM Resilient.',
   }
 );
 
