@@ -9,6 +9,9 @@
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
+  "kibana": {
+    "devOnly": true
+  },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@jest/types": "^26.5.2",
