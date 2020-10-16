@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('discover tab', function describeIndexTests() {
+  describe('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
