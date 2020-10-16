@@ -38,13 +38,11 @@ events. The following is a list of the events that can be generated:
 [[xpack-security-ecs-audit-logging]]
 ==== ECS audit events
 
-beta[]
-
 [IMPORTANT]
 ============================================================================
-The following events are only logged if the audit logger is enabled.
+The following events are only logged if the ECS audit logger is enabled.
 For information on how to configure `xpack.security.audit.appender`, refer to
-<<audit-logging-settings>>.
+<<ecs-audit-logging-settings>>.
 ============================================================================
 
 Refer to the table of events that can be logged for auditing purposes. 
