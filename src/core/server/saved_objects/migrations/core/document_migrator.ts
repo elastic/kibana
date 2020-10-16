@@ -82,11 +82,13 @@ interface DocumentMigratorOptions {
 interface ActiveMigrations {
   [type: string]: {
     latestVersion: string;
-    transforms: Array<{
-      version: string;
-      transform: TransformFn;
-    }>;
+    transforms: Transform[];
   };
+}
+
+interface Transform {
+  version: string;
+  transform: TransformFn;
 }
 
 /**
@@ -151,7 +153,7 @@ export class DocumentMigrator implements VersionedTransformer {
 }
 
 /**
- * Basic validation that the migraiton definition matches our expectations. We can't
+ * Basic validation that the migration definition matches our expectations. We can't
  * rely on TypeScript here, as the caller may be JavaScript / ClojureScript / any compile-to-js
  * language. So, this is just to provide a little developer-friendly error messaging. Joi was
  * giving weird errors, so we're just doing manual validation.
@@ -178,14 +180,15 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
   }
 
   registry.getAllTypes().forEach((type) => {
-    if (type.migrations) {
+    const { name, migrations } = type;
+    if (migrations) {
       assertObject(
         type.migrations,
-        `Migration for type ${type.name} should be an object like { '2.0.0': (doc) => doc }.`
+        `Migration for type ${name} should be an object like { '2.0.0': (doc) => doc }.`
       );
-      Object.entries(type.migrations).forEach(([version, fn]) => {
-        assertValidSemver(version, type.name);
-        assertValidTransform(fn, version, type.name);
+      Object.entries(migrations).forEach(([version, fn]) => {
+        assertValidSemver(version, name);
+        assertValidTransform(fn, version, name);
       });
     }
   });
@@ -206,7 +209,7 @@ function buildActiveMigrations(
     .filter((type) => type.migrations && Object.keys(type.migrations).length > 0)
     .reduce((migrations, type) => {
       const transforms = Object.entries(type.migrations!)
-        .map(([version, transform]) => ({
+        .map<Transform>(([version, transform]) => ({
           version,
           transform: wrapWithTry(version, type.name, transform, log),
         }))

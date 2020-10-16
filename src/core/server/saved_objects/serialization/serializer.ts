@@ -42,17 +42,16 @@ export class SavedObjectsSerializer {
   /**
    * Determines whether or not the raw document can be converted to a saved object.
    *
-   * @param {SavedObjectsRawDoc} rawDoc - The raw ES document to be tested
+   * @param {SavedObjectsRawDoc} doc - The raw ES document to be tested
    */
-  public isRawSavedObject(rawDoc: SavedObjectsRawDoc) {
-    const { type, namespace } = rawDoc._source;
-    const namespacePrefix =
-      namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
-    return Boolean(
-      type &&
-        rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
-        rawDoc._source.hasOwnProperty(type)
-    );
+  public isRawSavedObject(doc: SavedObjectsRawDoc) {
+    const { _id, _source } = doc;
+    const { type, namespace } = _source;
+    if (!type) {
+      return false;
+    }
+    const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id);
+    return idMatchesPrefix && _source.hasOwnProperty(type);
   }
 
   /**
@@ -137,15 +136,18 @@ export class SavedObjectsSerializer {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
 
+    const { prefix, idMatchesPrefix } = this.parseIdPrefix(namespace, type, id);
+    return idMatchesPrefix ? id.slice(prefix.length) : id;
+  }
+
+  private parseIdPrefix(namespace: string | undefined, type: string, id: string) {
     const namespacePrefix =
       namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
     const prefix = `${namespacePrefix}${type}:`;
 
-    if (!id.startsWith(prefix)) {
-      return id;
-    }
+    const idMatchesPrefix = id.startsWith(prefix);
 
-    return id.slice(prefix.length);
+    return { prefix, idMatchesPrefix };
   }
 }
 

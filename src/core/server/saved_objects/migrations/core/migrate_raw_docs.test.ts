@@ -26,7 +26,9 @@ import { createSavedObjectsMigrationLoggerMock } from '../../migrations/mocks';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
-    const transform = jest.fn<any, any>((doc: any) => set(doc, 'attributes.name', 'HOI!'));
+    const transform = jest.fn<any, any>((doc: any) =>
+      set(_.cloneDeep(doc), 'attributes.name', 'HOI!')
+    );
     const result = await migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
@@ -48,7 +50,23 @@ describe('migrateRawDocs', () => {
       },
     ]);
 
-    expect(transform).toHaveBeenCalled();
+    const obj1 = {
+      id: 'b',
+      type: 'a',
+      attributes: { name: 'AAA' },
+      migrationVersion: {},
+      references: [],
+    };
+    const obj2 = {
+      id: 'd',
+      type: 'c',
+      attributes: { name: 'DDD' },
+      migrationVersion: {},
+      references: [],
+    };
+    expect(transform).toHaveBeenCalledTimes(2);
+    expect(transform).toHaveBeenNthCalledWith(1, obj1);
+    expect(transform).toHaveBeenNthCalledWith(2, obj2);
   });
 
   test('passes invalid docs through untouched and logs error', async () => {
@@ -74,19 +92,15 @@ describe('migrateRawDocs', () => {
       },
     ]);
 
-    expect(transform.mock.calls).toEqual([
-      [
-        {
-          id: 'd',
-          type: 'c',
-          attributes: {
-            name: 'DDD',
-          },
-          migrationVersion: {},
-          references: [],
-        },
-      ],
-    ]);
+    const obj2 = {
+      id: 'd',
+      type: 'c',
+      attributes: { name: 'DDD' },
+      migrationVersion: {},
+      references: [],
+    };
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(transform).toHaveBeenCalledWith(obj2);
 
     expect(logger.error).toBeCalledTimes(1);
   });
