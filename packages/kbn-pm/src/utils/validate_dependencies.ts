@@ -20,14 +20,16 @@
 // @ts-expect-error published types are useless
 import { stringify as stringifyLockfile } from '@yarnpkg/lockfile';
 import dedent from 'dedent';
+import chalk from 'chalk';
 
 import { writeFile } from './fs';
 import { Kibana } from './kibana';
 import { YarnLock } from './yarn_lock';
 import { log } from './log';
 import { Project } from './project';
+import { ITree, treeToString } from './projects_tree';
 
-export async function validateYarnLock(kbn: Kibana, yarnLock: YarnLock) {
+export async function validateDependencies(kbn: Kibana, yarnLock: YarnLock) {
   // look through all of the packages in the yarn.lock file to see if
   // we have accidentally installed multiple lodash v4 versions
   const lodash4Versions = new Set<string>();
@@ -157,5 +159,45 @@ export async function validateYarnLock(kbn: Kibana, yarnLock: YarnLock) {
     process.exit(1);
   }
 
+  // look for packages that have the the `kibana.devOnly` flag in their package.json
+  // and make sure they aren't included in the production dependencies of Kibana
+  const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(kbn, 'kibana');
+  if (devOnlyProjectsInProduction) {
+    log.error(dedent`
+      Some of the packages in the production dependency chain for Kibana and X-Pack are
+      flagged with "kibana.devOnly" in their package.json. Please check changes made to
+      packages and their dependencies to ensure they don't end up in production.
+
+      The devOnly dependencies that are being dependend on in production are:
+
+        ${treeToString(devOnlyProjectsInProduction).split('\n').join('\n        ')}
+    `);
+
+    process.exit(1);
+  }
+
   log.success('yarn.lock analysis completed without any issues');
+}
+
+function getDevOnlyProductionDepsTree(kbn: Kibana, projectName: string) {
+  const project = kbn.getProject(projectName);
+  const childProjectNames = [
+    ...Object.keys(project.productionDependencies).filter((name) => kbn.hasProject(name)),
+    ...(projectName === 'kibana' ? ['x-pack'] : []),
+  ];
+
+  const children = childProjectNames
+    .map((n) => getDevOnlyProductionDepsTree(kbn, n))
+    .filter((t): t is ITree => !!t);
+
+  if (!children.length && !project.isFlaggedAsDevOnly()) {
+    return;
+  }
+
+  const tree: ITree = {
+    name: project.isFlaggedAsDevOnly() ? chalk.red.bold(projectName) : projectName,
+    children,
+  };
+
+  return tree;
 }

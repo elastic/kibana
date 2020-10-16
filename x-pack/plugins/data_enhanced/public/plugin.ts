@@ -40,6 +40,7 @@ export class DataEnhancedPlugin
       uiSettings: core.uiSettings,
       startServices: core.getStartServices(),
       usageCollector: data.search.usageCollector,
+      session: data.search.session,
     });
 
     data.__enhance({
