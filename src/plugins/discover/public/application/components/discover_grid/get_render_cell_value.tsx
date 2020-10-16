@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiCodeBlock, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { DiscoverGridPopover } from './discover_grid_popover';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -27,7 +27,7 @@ export const getRenderCellValueFn = (
   rows: ElasticSearchHit[] | undefined,
   onFilter: DocViewFilterFn
 ) => ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
-  const row = rows ? rows[rowIndex] : undefined;
+  const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
 
   if (typeof row === 'undefined') {
     return '-';
@@ -60,6 +60,13 @@ export const getRenderCellValueFn = (
       <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
     );
 
+  if (isDetails && field && (field.type === '_source' || typeof row[columnId] === 'object')) {
+    return (
+      <EuiCodeBlock language="json" paddingSize="none" transparentBackground={true}>
+        {JSON.stringify(row[columnId], null, 2)}
+      </EuiCodeBlock>
+    );
+  }
   if (isDetails && indexPattern.fields.getByName(columnId)?.filterable) {
     const createFilter = (fieldName: string, type: '-' | '+') => {
       return onFilter(

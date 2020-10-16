@@ -88,7 +88,7 @@ export function buildEuiGridColumn(
       break;
     case '_source':
     case 'object':
-      column.schema = kibanaJSON;
+      column.schema = 'object';
       break;
     case 'geo_point':
       column.schema = geoPoint;
