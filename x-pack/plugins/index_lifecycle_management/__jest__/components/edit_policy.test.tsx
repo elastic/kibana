@@ -130,7 +130,7 @@ const setPhaseAfter = (rendered: ReactWrapper, phase: string, after: string | nu
   afterInput.simulate('change', { target: { value: after } });
   rendered.update();
 };
-const setPhaseIndexPriority = (
+const setPhaseIndexPriorityLegacy = (
   rendered: ReactWrapper,
   phase: string,
   priority: string | number
@@ -139,7 +139,7 @@ const setPhaseIndexPriority = (
   priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
-const setPhaseIndexPriorityFormLib = async (
+const setPhaseIndexPriority = async (
   rendered: ReactWrapper,
   phase: string,
   priority: string | number
@@ -379,7 +379,7 @@ describe('edit policy', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      await setPhaseIndexPriorityFormLib(rendered, 'hot', '-1');
+      await setPhaseIndexPriority(rendered, 'hot', '-1');
       waitForFormLibValidation();
       rendered.update();
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
@@ -427,7 +427,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
-      setPhaseIndexPriority(rendered, 'warm', '-1');
+      setPhaseIndexPriorityLegacy(rendered, 'warm', '-1');
       await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
@@ -677,7 +677,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', '1');
-      setPhaseIndexPriority(rendered, 'cold', '-1');
+      setPhaseIndexPriorityLegacy(rendered, 'cold', '-1');
       await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
