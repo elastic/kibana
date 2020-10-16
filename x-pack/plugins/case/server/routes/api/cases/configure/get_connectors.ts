@@ -33,19 +33,13 @@ interface CaseAction extends FindActionResult {
 
 const isCaseOwned = (action: CaseAction): boolean => {
   if (
-    ![SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
+    [SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
       action.actionTypeId
     )
   ) {
-    return false;
-  }
-
-  if (action.config?.isCaseOwned === true) {
-    return true;
-  }
-
-  if (action.config?.incidentConfiguration?.mapping) {
-    return true;
+    if (action.config?.isCaseOwned === true || action.config?.incidentConfiguration?.mapping) {
+      return true;
+    }
   }
 
   return false;
