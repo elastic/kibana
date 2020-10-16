@@ -255,11 +255,11 @@ async function enrichHostMetadata(
   const log = metadataRequestContext.logger;
   try {
     /**
-     * Get agent status by elastic agent id if available or use the host id.
+     * Get agent status by elastic agent id if available or use the endpoint-agent id.
      */
 
     if (!elasticAgentId) {
-      elasticAgentId = hostMetadata.host.id;
+      elasticAgentId = hostMetadata.agent.id;
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 

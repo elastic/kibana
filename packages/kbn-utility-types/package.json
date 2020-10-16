@@ -5,6 +5,9 @@
   "license": "Apache-2.0",
   "main": "target",
   "types": "target/index.d.ts",
+  "kibana": {
+    "devOnly": true
+  },
   "scripts": {
     "build": "tsc",
     "kbn:bootstrap": "tsc",
