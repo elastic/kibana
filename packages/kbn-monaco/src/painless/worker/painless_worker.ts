@@ -17,40 +17,16 @@
  * under the License.
  */
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { PainlessCompletionResult, PainlessContext } from '../types';
 
-import { PainlessCompletionResult } from '../types';
-
-import {
-  getPainlessClassToAutocomplete,
-  painlessTypes,
-  getPainlessClassesToAutocomplete,
-  getPainlessConstructorsToAutocomplete,
-} from './painless_completion_utils';
+import { PainlessCompletionManager } from './completion_manager';
 
 export class PainlessWorker {
-  constructor(private ctx: monaco.worker.IWorkerContext) {}
-
-  private _getModel(modelUri: string) {
-    return this.ctx.getMirrorModels().find((m) => m.uri.toString() === modelUri);
-  }
-
   async provideAutocompleteSuggestions(
-    uri: string,
-    currentLineChars: any
+    currentLineChars: string,
+    context: PainlessContext
   ): Promise<PainlessCompletionResult> {
-    const model = this._getModel(uri);
-
-    if (!model) {
-      return Promise.resolve({
-        isIncomplete: false,
-        suggestions: [],
-      });
-    }
-
-    // const currentText = model.getValue();
-
+    const completionManager = new PainlessCompletionManager(context);
     // Array of the active line words, e.g., [boolean, isInCircle]
     const words = currentLineChars.replace('\t', '').split(' ');
     // What the user is currently typing
@@ -59,7 +35,7 @@ export class PainlessWorker {
     // If the active typing contains dot notation, we assume we need to access the object's properties
     const isProperty = activeTyping.split('.').length === 2;
     // If the preceding word is a type, e.g., "boolean", we assume the user is declaring a variable and skip autocomplete
-    const hasDeclaredType = words.length === 2 && painlessTypes.includes(words[0]);
+    const hasDeclaredType = words.length === 2 && completionManager.getTypes().includes(words[0]);
     // If the preceding word contains the "new" keyword, we only provide constructor autcompletion
     const isConstructor = words[words.length - 2] === 'new';
 
@@ -69,14 +45,14 @@ export class PainlessWorker {
     };
 
     if (isConstructor) {
-      autocompleteSuggestions = getPainlessConstructorsToAutocomplete();
+      autocompleteSuggestions = completionManager.getPainlessConstructorsToAutocomplete();
     } else if (isProperty) {
       const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
 
-      autocompleteSuggestions = getPainlessClassToAutocomplete(className);
+      autocompleteSuggestions = completionManager.getPainlessClassToAutocomplete(className);
     } else {
       if (!hasDeclaredType) {
-        autocompleteSuggestions = getPainlessClassesToAutocomplete();
+        autocompleteSuggestions = completionManager.getPainlessClassesToAutocomplete();
       }
     }
 

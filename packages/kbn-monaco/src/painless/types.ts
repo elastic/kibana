@@ -19,6 +19,8 @@
 
 export type PainlessCompletionKind = 'type' | 'class' | 'method' | 'constructor' | 'property';
 
+export type PainlessContext = 'painless_test' | 'filter' | 'score';
+
 export interface PainlessCompletionItem {
   label: string;
   kind: PainlessCompletionKind;

@@ -27,6 +27,6 @@ import { PainlessWorker } from './painless_worker';
 
 self.onmessage = () => {
   worker.initialize((ctx: any, createData: any) => {
-    return new PainlessWorker(ctx);
+    return new PainlessWorker();
   });
 };

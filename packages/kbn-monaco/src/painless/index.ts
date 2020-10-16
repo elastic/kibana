@@ -20,6 +20,6 @@
 /**
  * This import registers the painless monaco language contribution
  */
-import './language';
+import { getSuggestionProvider } from './language';
 
-export const PainlessLang = { ID: 'painless' };
+export const PainlessLang = { ID: 'painless', getSuggestionProvider };

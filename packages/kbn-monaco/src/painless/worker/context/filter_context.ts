@@ -17,9 +17,8 @@
  * under the License.
  */
 
-// TODO temporary export for autcomplete definitions
-export const context = {
-  name: 'painless_test',
+export const filterContext = {
+  name: 'filter',
   classes: [
     {
       name: 'boolean',

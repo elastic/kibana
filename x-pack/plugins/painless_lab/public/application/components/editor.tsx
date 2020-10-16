@@ -22,6 +22,7 @@ export function Editor({ code, onChange }: Props) {
       height="100%"
       value={code}
       onChange={onChange}
+      suggestionProvider={PainlessLang.getSuggestionProvider('painless_test')}
       options={{
         fontSize: 12,
         minimap: {

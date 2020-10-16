@@ -17,26 +17,7 @@
  * under the License.
  */
 
-import { monaco } from '../monaco';
-
-import { painlessLanguage } from './painless_lexer_rules';
-import { PainlessCompletionAdapter } from './painless_completion';
-import { WorkerProxyService } from './worker_proxy_service';
-import { ID } from './constants';
-import { PainlessContext } from './types';
-
-const wps = new WorkerProxyService();
-
-monaco.languages.register({ id: ID });
-
-const worker = (...uris: any[]) => {
-  return wps.getWorker(uris);
-};
-
-monaco.languages.onLanguage(ID, async () => {
-  wps.setup();
-});
-monaco.languages.setMonarchTokensProvider(ID, painlessLanguage);
-
-export const getSuggestionProvider = (context: PainlessContext) =>
-  new PainlessCompletionAdapter(worker, context);
+// TODO temporary exports of stubbed data to handle autocomplete
+export { painlessTestContext } from './painless_test_context';
+export { filterContext } from './filter_context';
+export { scoreContext } from './score_context';

@@ -40,7 +40,7 @@ const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.Compl
 
 export class PainlessCompletionAdapter implements monaco.languages.CompletionItemProvider {
   // @ts-ignore
-  constructor(private _worker) {}
+  constructor(private _worker, private _painlessContext) {}
 
   public get triggerCharacters(): string[] {
     return ['.'];
@@ -52,8 +52,6 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
   ): Promise<monaco.languages.CompletionList> {
-    const resource = model.uri;
-
     // Active line characters
     const currentLineChars = model.getValueInRange({
       startLineNumber: position.lineNumber,
@@ -61,10 +59,9 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
       endLineNumber: position.lineNumber,
       endColumn: position.column,
     });
-
-    return this._worker(resource)
+    return this._worker()
       .then((worker: any) => {
-        return worker.provideAutocompleteSuggestions(resource.toString(), currentLineChars);
+        return worker.provideAutocompleteSuggestions(currentLineChars, this._painlessContext);
       })
       .then((completionInfo: PainlessCompletionResult) => {
         const wordInfo = model.getWordUntilPosition(position);
