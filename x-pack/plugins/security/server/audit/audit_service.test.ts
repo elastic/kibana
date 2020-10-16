@@ -74,20 +74,6 @@ describe('#setup', () => {
     expect(logging.configure).toHaveBeenCalledWith(expect.any(Observable));
   });
 
-  it('does not configure logging when using legacy logger', async () => {
-    new AuditService(logger).setup({
-      license,
-      config: {
-        enabled: true,
-      },
-      logging,
-      http,
-      getCurrentUser,
-      getSpaceId,
-    });
-    expect(logging.configure).not.toHaveBeenCalled();
-  });
-
   it('registers post auth hook', () => {
     new AuditService(logger).setup({
       license,
@@ -181,7 +167,7 @@ describe('#createLoggingConfig', () => {
             "appenders": Array [
               "auditTrailAppender",
             ],
-            "context": "audit",
+            "context": "audit.ecs",
             "level": "info",
           },
         ],
