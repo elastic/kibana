@@ -10,7 +10,6 @@ import {
   CoreSetup,
 } from 'src/core/server';
 import { format } from 'url';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { modifyUrl } from '../utils/url';
 import { getSpaceIdFromPath } from '../../../common';
 
@@ -28,9 +27,9 @@ export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDep
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
-    const spaceId = getSpaceIdFromPath(path, serverBasePath);
+    const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(path, serverBasePath);
 
-    if (spaceId !== DEFAULT_SPACE_ID) {
+    if (pathHasExplicitSpaceIdentifier) {
       const reqBasePath = `/s/${spaceId}`;
 
       http.basePath.set(request, reqBasePath);

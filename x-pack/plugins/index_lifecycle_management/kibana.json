@@ -9,6 +9,7 @@
     "features"
   ],
   "optionalPlugins": [
+    "cloud",
     "usageCollection",
     "indexManagement",
     "home"
