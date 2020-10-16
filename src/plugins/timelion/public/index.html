@@ -1,5 +1,5 @@
 <timelion-app class="timApp app-container">
-  <span class="kuiLocalTitle">
+  <span class="timApp__title">
     <span class="timApp__stats" ng-show="stats">
       <span
         i18n-id="timelion.topNavMenu.statsDescription"
@@ -41,9 +41,9 @@
       <form
         role="form"
         ng-submit="updateChart()"
-        class="kuiFieldGroup kuiFieldGroup--alignTop kuiVerticalRhythm"
+        class="timApp__form"
       >
-        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+        <div class="timApp__expression">
           <timelion-expression-input
             sheet="expression"
             rows="1"
@@ -52,9 +52,8 @@
           ></timelion-expression-input>
         </div>
 
-        <div class="kuiFieldGroupSection">
+        <div>
           <timelion-interval
-            class="kuiVerticalRhythmSmall"
             model="state.interval"
             change-interval="changeInterval"
           ></timelion-interval>
@@ -62,14 +61,14 @@
           <button
             type="submit"
             aria-label="{{ ::'timelion.search.submitAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
-            class="kuiButton kuiButton--primary fullWidth kuiVerticalRhythmSmall"
+            class="timApp__button fullWidth"
           >
-            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-play"></span>
+            <icon type="'play'"></icon>
           </button>
         </div>
       </form>
 
-      <div class="kuiVerticalRhythm">
+      <div>
         <timelion-fullscreen
           ng-show="transient.fullscreen"
           transient="transient"

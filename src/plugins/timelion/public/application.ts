@@ -41,7 +41,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../kibana_legacy/public';
-import { TimelionPluginDependencies } from './plugin';
+import { TimelionPluginStartDependencies } from './plugin';
 import { DataPublicPluginStart } from '../../data/public';
 // @ts-ignore
 import { initTimelionApp } from './app';
@@ -50,7 +50,7 @@ export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
   mountParams: AppMountParameters;
   core: CoreStart;
-  plugins: TimelionPluginDependencies;
+  plugins: TimelionPluginStartDependencies;
   timelionPanels: Map<string, Panel>;
 }
 
@@ -137,7 +137,7 @@ function createLocalIconModule() {
     .directive('icon', (reactDirective) => reactDirective(EuiIcon));
 }
 
-function createLocalTopNavModule(navigation: TimelionPluginDependencies['navigation']) {
+function createLocalTopNavModule(navigation: TimelionPluginStartDependencies['navigation']) {
   angular
     .module('app/timelion/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
