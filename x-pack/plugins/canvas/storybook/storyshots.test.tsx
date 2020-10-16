@@ -111,6 +111,7 @@ addSerializer(styleSheetSerializer);
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
   configPath: path.resolve(__dirname, './../storybook'),
+  framework: 'react',
   test: multiSnapshotWithOptions({}),
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,

@@ -4,13 +4,15 @@
   "private": true,
   "license": "Apache-2.0",
   "main": "./target/index.js",
+  "kibana": {
+    "devOnly": true
+  },
   "scripts": {
     "build": "tsc",
     "kbn:bootstrap": "yarn build",
     "watch": "yarn build --watch"
   },
-  "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/utils": "link:../kbn-utils"
+  "devDependencies": {
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

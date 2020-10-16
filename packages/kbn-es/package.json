@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
+  "kibana": {
+    "devOnly": true
+  },
   "scripts": {
     "kbn:bootstrap": "node scripts/build",
     "kbn:watch": "node scripts/build --watch"

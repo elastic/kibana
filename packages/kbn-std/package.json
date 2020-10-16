@@ -9,7 +9,7 @@
     "build": "tsc",
     "kbn:bootstrap": "yarn build"
   },
-  "dependencies": {
+  "devDependencies": {
     "@kbn/utility-types": "link:../kbn-utility-types"
   }
 }

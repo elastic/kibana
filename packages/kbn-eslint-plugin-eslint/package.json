@@ -2,5 +2,8 @@
   "name": "@kbn/eslint-plugin-eslint",
   "version": "1.0.0",
   "private": true,
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "kibana": {
+    "devOnly": true
+  }
 }
