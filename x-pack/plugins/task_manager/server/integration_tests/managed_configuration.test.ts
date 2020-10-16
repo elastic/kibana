@@ -6,16 +6,15 @@
 
 import sinon from 'sinon';
 import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
-import { SavedObjectsErrorHelpers, PluginInitializerContext } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, Logger } from '../../../../../src/core/server';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
 import { coreMock } from '../../../../../src/core/server/mocks';
 import { TaskManagerConfig } from '../config';
 
 describe('managed configuration', () => {
-  let taskManagerPlugin: TaskManagerPlugin;
-  let pluginInitializerContext: PluginInitializerContext;
   let taskManagerStart: TaskManagerStartContract;
+  let logger: Logger;
 
   let clock: sinon.SinonFakeTimers;
   const savedObjectsClient = savedObjectsRepositoryMock.create();
@@ -24,7 +23,7 @@ describe('managed configuration', () => {
     jest.resetAllMocks();
     clock = sinon.useFakeTimers();
 
-    pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+    const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
       enabled: true,
       max_workers: 10,
       index: 'foo',
@@ -33,9 +32,10 @@ describe('managed configuration', () => {
       max_poll_inactivity_cycles: 10,
       request_capacity: 1000,
     });
+    logger = context.logger.get('taskManager');
 
-    taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-    (await taskManagerPlugin.setup(coreMock.createSetup())).registerTaskDefinitions({
+    const taskManager = new TaskManagerPlugin(context);
+    (await taskManager.setup(coreMock.createSetup())).registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',
@@ -46,7 +46,7 @@ describe('managed configuration', () => {
     const coreStart = coreMock.createStart();
     coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
 
-    taskManagerStart = await taskManagerPlugin.start(coreStart);
+    taskManagerStart = await taskManager.start(coreStart);
 
     // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
     // sinon fake timers cause them to stall
@@ -70,7 +70,6 @@ describe('managed configuration', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Too Many Requests"`);
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
-    const logger = pluginInitializerContext.logger.get('taskManager');
     expect(logger.warn).toHaveBeenCalledWith(
       'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" error(s).'
     );
@@ -95,7 +94,6 @@ describe('managed configuration', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Too Many Requests"`);
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
-    const logger = pluginInitializerContext.logger.get('taskManager');
     expect(logger.warn).toHaveBeenCalledWith(
       'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" error(s).'
     );

@@ -60,11 +60,6 @@ export class TaskManagerPlugin
     }
 
     return {
-      /**
-       * Adds middleware to the task manager, such as adding security layers, loggers, etc.
-       *
-       * @param {Middleware} middleware - The middlware being added.
-       */
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
@@ -118,26 +113,8 @@ export class TaskManagerPlugin
     taskPollingLifecycle.start();
 
     return {
-      /**
-       * Fetches a list of scheduled tasks.
-       *
-       * @param opts - The query options used to filter tasks
-       * @returns {Promise<FetchResult>}
-       */
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
-      /**
-       * Get the current state of a specified task.
-       *
-       * @param {string} id
-       * @returns {Promise<ConcreteTaskInstance>}
-       */
       get: (id: string) => taskStore.get(id),
-      /**
-       * Removes the specified task from the index.
-       *
-       * @param {string} id
-       * @returns {Promise<void>}
-       */
       remove: (id: string) => taskStore.remove(id),
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),

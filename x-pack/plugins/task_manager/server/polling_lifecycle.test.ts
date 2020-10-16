@@ -17,20 +17,18 @@ import { taskStoreMock } from './task_store.mock';
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
 
-  const config = {
-    enabled: true,
-    max_workers: 10,
-    index: 'foo',
-    max_attempts: 9,
-    poll_interval: 6000000,
-    max_poll_inactivity_cycles: 10,
-    request_capacity: 1000,
-  };
-
   const taskManagerLogger = loggingSystemMock.create().get();
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
-    config,
+    config: {
+      enabled: true,
+      max_workers: 10,
+      index: 'foo',
+      max_attempts: 9,
+      poll_interval: 6000000,
+      max_poll_inactivity_cycles: 10,
+      request_capacity: 1000,
+    },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
     definitions: new TaskTypeDictionary(taskManagerLogger),
