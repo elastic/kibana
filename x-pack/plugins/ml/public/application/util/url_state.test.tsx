@@ -45,7 +45,7 @@ describe('getUrlState', () => {
         },
         refreshInterval: {
           display: 'Off',
-          pause: false,
+          pause: true,
           value: 0,
         },
         time: {
