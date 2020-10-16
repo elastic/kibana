@@ -12,5 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup10');
 
     loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./update'));
   });
 }
