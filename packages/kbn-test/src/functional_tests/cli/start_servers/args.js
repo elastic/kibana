@@ -75,7 +75,7 @@ export function displayHelp() {
 export function processOptions(userOptions, defaultConfigPath) {
   validateOptions(userOptions);
 
-  const useDefaultConfig = userOptions.config === undefined;
+  const useDefaultConfig = !userOptions.config;
   const config = useDefaultConfig ? defaultConfigPath : userOptions.config;
 
   if (!config) {

@@ -36,6 +36,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "useDefaultConfig": true,
 }
 `;
 
