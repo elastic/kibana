@@ -165,6 +165,11 @@ describe('edit policy', () => {
     jest.useRealTimers();
   });
 
+  /**
+   * The form lib has a short delay (setTimeout) before running and rendering
+   * any validation errors. This helper advances timers and can trigger component
+   * state changes.
+   */
   const waitForFormLibValidation = () => {
     act(() => {
       jest.advanceTimersByTime(1000);
