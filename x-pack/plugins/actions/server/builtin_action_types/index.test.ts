@@ -12,6 +12,7 @@ import { Logger } from '../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
+import { licensingMock } from '../../../licensing/server/mocks';
 
 const ACTION_TYPE_IDS = ['.index', '.email', '.pagerduty', '.server-log', '.slack', '.webhook'];
 
@@ -21,6 +22,7 @@ export function createActionTypeRegistry(): {
 } {
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const actionTypeRegistry = new ActionTypeRegistry({
+    licensing: licensingMock.createSetup(),
     taskManager: taskManagerMock.setup(),
     taskRunnerFactory: new TaskRunnerFactory(
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })

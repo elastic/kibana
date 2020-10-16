@@ -137,28 +137,32 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
 
     it('should render 3 elements with "treeitem" roles, each owned by an element with a "tree" role', async () => {
       await expect(
-        simulator.map(() => ({
-          nodesOwnedByTrees: simulator.testSubject('resolver:node').filterWhere((domNode) => {
-            /**
-             * This test verifies corectness w.r.t. the tree/treeitem roles
-             * From W3C: `Authors MUST ensure elements with role treeitem are contained in, or owned by, an element with the role group or tree.`
-             *
-             * https://www.w3.org/TR/wai-aria-1.1/#tree
-             * https://www.w3.org/TR/wai-aria-1.1/#treeitem
-             *
-             * w3c defines two ways for an element to be an "owned element"
-             *  1. Any DOM descendant
-             *  2. Any element specified as a child via aria-owns
-             *  (see: https://www.w3.org/TR/wai-aria-1.1/#dfn-owned-element)
-             *
-             * In the context of Resolver (as of this writing) nodes/treeitems are children of the tree,
-             * but they could be moved out of the tree, provided that the tree is given an `aria-owns`
-             * attribute referring to them (method 2 above).
-             */
-            return domNode.closest('[role="tree"]').length === 1;
-          }).length,
-        }))
-      ).toYieldEqualTo({ nodesOwnedByTrees: 3 });
+        simulator.map(() => {
+          /**
+           * This test verifies corectness w.r.t. the tree/treeitem roles
+           * From W3C: `Authors MUST ensure elements with role treeitem are contained in, or owned by, an element with the role group or tree.`
+           *
+           * https://www.w3.org/TR/wai-aria-1.1/#tree
+           * https://www.w3.org/TR/wai-aria-1.1/#treeitem
+           *
+           * w3c defines two ways for an element to be an "owned element"
+           *  1. Any DOM descendant
+           *  2. Any element specified as a child via aria-owns
+           *  (see: https://www.w3.org/TR/wai-aria-1.1/#dfn-owned-element)
+           *
+           * In the context of Resolver (as of this writing) nodes/treeitems are children of the tree,
+           * but they could be moved out of the tree, provided that the tree is given an `aria-owns`
+           * attribute referring to them (method 2 above).
+           */
+          const tree = simulator.domNodesWithRole('tree');
+          return {
+            // There should be only one tree.
+            treeCount: tree.length,
+            // The tree should have 3 nodes in it.
+            nodesOwnedByTrees: tree.find(Simulator.nodeElementSelector()).length,
+          };
+        })
+      ).toYieldEqualTo({ treeCount: 1, nodesOwnedByTrees: 3 });
     });
 
     it(`should show links to the 3 nodes (with icons) in the node list.`, async () => {
