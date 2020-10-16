@@ -17,22 +17,5 @@
  * under the License.
  */
 
-export {
-  applyDeprecations,
-  ConfigDeprecation,
-  ConfigDeprecationFactory,
-  configDeprecationFactory,
-  ConfigDeprecationLogger,
-  ConfigDeprecationProvider,
-  ConfigDeprecationWithContext,
-} from './deprecation';
-
-export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';
-
-export { ConfigService, IConfigService } from './config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs, Env, RawPackageInfo } from './env';
-export { EnvironmentMode, PackageInfo } from './types';
-export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
-export { getPluginSearchPaths } from './plugins';
+export * from './parse_kibana_platform_plugin';
+export * from './simple_kibana_platform_plugin_discovery';
