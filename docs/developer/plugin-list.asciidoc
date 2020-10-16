@@ -499,8 +499,8 @@ routes, etc.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/transform[transform]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
+|This plugin provides access to the transforms features provided by Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
