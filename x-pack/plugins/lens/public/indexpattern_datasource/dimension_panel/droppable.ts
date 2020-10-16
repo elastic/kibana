@@ -11,7 +11,7 @@ import {
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
 import { buildColumn, changeField } from '../operations';
-import { changeColumn } from '../state_helpers';
+import { changeColumn, mergeLayer } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
@@ -75,17 +75,16 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     }
 
     // Time to replace
-    props.setState({
-      ...props.state,
-      layers: {
-        ...props.state.layers,
-        [props.layerId]: {
-          ...layer,
+    props.setState(
+      mergeLayer({
+        state: props.state,
+        layerId: props.layerId,
+        newLayer: {
           columnOrder: newColumnOrder,
           columns: newColumns,
         },
-      },
-    });
+      })
+    );
     return { deleted: droppedItem.columnId };
   }
 
