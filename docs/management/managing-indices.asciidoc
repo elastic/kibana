@@ -11,9 +11,10 @@ Management* features to:
 
 * View and edit index settings.
 * View mappings and statistics for an index.
-* Perform index-level operations, such as refreshes, freezing indices, and more.
-* Create index templates to automatically configure indices when they're created.
+* Perform index-level operations, such as refreshes and freezes.
 * View and manage data streams.
+* Create index templates to automatically configure new data streams and
+indices.
 
 To manage your indices, open the menu, then click *Stack Management > Index
 Management*.
@@ -140,9 +141,9 @@ template before you create the indices.
 
 In this example, you’ll create an index template for randomly generated log
 files. Each step in the tutorial corresponds with a step in the *Create
-template* wizard.
+template* wizard. You'll then use the template to configure two new indices.
 
-*Step1: Logistics*
+*Step 1: Logistics*
 
 . Open the *Create template* wizard.
 +
@@ -170,14 +171,13 @@ settings (*S*), index aliases (*A*), or a combination of the three.
 [role="screenshot"]
 image::images/management_index_component_template.png[Component templates page]
 
-Component templates are optional. For this example, click *Next >* to skip this
+Component templates are optional. Click *Next >* to skip this
 step.
 
 *Step 3: Index settings*
 
 The third step in the *Create template* wizard allows you to define index
-settings. These settings are optional, and this example skips this step. Click
-*Next >*.
+settings. These settings are optional. Click *Next >* to skip this step.
 
 *Step 4: Mappings*
 
