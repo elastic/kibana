@@ -16,23 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { resolve } from 'path';
 
-export {
-  applyDeprecations,
-  ConfigDeprecation,
-  ConfigDeprecationFactory,
-  configDeprecationFactory,
-  ConfigDeprecationLogger,
-  ConfigDeprecationProvider,
-  ConfigDeprecationWithContext,
-} from './deprecation';
+interface SearchOptions {
+  rootDir: string;
+  oss: boolean;
+  examples: boolean;
+}
 
-export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';
-
-export { ConfigService, IConfigService } from './config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs, Env, RawPackageInfo } from './env';
-export { EnvironmentMode, PackageInfo } from './types';
-export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
-export { getPluginSearchPaths } from './plugins';
+export function getPluginSearchPaths({ rootDir, oss, examples }: SearchOptions) {
+  return [
+    resolve(rootDir, 'src', 'plugins'),
+    ...(oss ? [] : [resolve(rootDir, 'x-pack', 'plugins')]),
+    resolve(rootDir, 'plugins'),
+    ...(examples ? [resolve(rootDir, 'examples')] : []),
+    ...(examples && !oss ? [resolve(rootDir, 'x-pack', 'examples')] : []),
+    resolve(rootDir, '..', 'kibana-extra'),
+  ];
+}
