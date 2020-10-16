@@ -20,10 +20,12 @@
 import { CspConfig, ICspConfig } from '../../../../../core/server';
 import { createCspCollector } from './csp_collector';
 import { httpServiceMock } from '../../../../../core/server/mocks';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 describe('csp collector', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
-  const mockCallCluster = null as any;
+  // changed for consistency with expected implementation
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   function updateCsp(config: Partial<ICspConfig>) {
     httpMock.csp = new CspConfig(config);
@@ -36,28 +38,28 @@ describe('csp collector', () => {
   test('fetches whether strict mode is enabled', async () => {
     const collector = createCspCollector(httpMock);
 
-    expect((await collector.fetch(mockCallCluster)).strict).toEqual(true);
+    expect((await collector.fetch(mockedFetchContext)).strict).toEqual(true);
 
     updateCsp({ strict: false });
-    expect((await collector.fetch(mockCallCluster)).strict).toEqual(false);
+    expect((await collector.fetch(mockedFetchContext)).strict).toEqual(false);
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
     const collector = createCspCollector(httpMock);
 
-    expect((await collector.fetch(mockCallCluster)).warnLegacyBrowsers).toEqual(true);
+    expect((await collector.fetch(mockedFetchContext)).warnLegacyBrowsers).toEqual(true);
 
     updateCsp({ warnLegacyBrowsers: false });
-    expect((await collector.fetch(mockCallCluster)).warnLegacyBrowsers).toEqual(false);
+    expect((await collector.fetch(mockedFetchContext)).warnLegacyBrowsers).toEqual(false);
   });
 
   test('fetches whether the csp rules have been changed or not', async () => {
     const collector = createCspCollector(httpMock);
 
-    expect((await collector.fetch(mockCallCluster)).rulesChangedFromDefault).toEqual(false);
+    expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
     updateCsp({ rules: ['not', 'default'] });
-    expect((await collector.fetch(mockCallCluster)).rulesChangedFromDefault).toEqual(true);
+    expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
   test('does not include raw csp rules under any property names', async () => {
@@ -69,7 +71,7 @@ describe('csp collector', () => {
     //
     // We use a snapshot here to ensure csp.rules isn't finding its way into the
     // payload under some new and unexpected variable name (e.g. cspRules).
-    expect(await collector.fetch(mockCallCluster)).toMatchInlineSnapshot(`
+    expect(await collector.fetch(mockedFetchContext)).toMatchInlineSnapshot(`
       Object {
         "rulesChangedFromDefault": false,
         "strict": true,

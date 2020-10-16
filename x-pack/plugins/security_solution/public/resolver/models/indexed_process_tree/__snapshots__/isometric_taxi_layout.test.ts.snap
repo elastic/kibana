@@ -182,7 +182,7 @@ Object {
   "edgeLineSegments": Array [
     Object {
       "metadata": Object {
-        "uniqueId": "parentToMidedge:0:1",
+        "reactKey": "parentToMidedge:0:1",
       },
       "points": Array [
         Array [
@@ -197,7 +197,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "midwayedge:0:1",
+        "reactKey": "midwayedge:0:1",
       },
       "points": Array [
         Array [
@@ -216,7 +216,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:0:1",
+        "reactKey": "edge:0:1",
       },
       "points": Array [
         Array [
@@ -235,7 +235,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:0:2",
+        "reactKey": "edge:0:2",
       },
       "points": Array [
         Array [
@@ -254,7 +254,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:0:8",
+        "reactKey": "edge:0:8",
       },
       "points": Array [
         Array [
@@ -269,7 +269,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "parentToMidedge:1:3",
+        "reactKey": "parentToMidedge:1:3",
       },
       "points": Array [
         Array [
@@ -284,7 +284,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "midwayedge:1:3",
+        "reactKey": "midwayedge:1:3",
       },
       "points": Array [
         Array [
@@ -303,7 +303,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:1:3",
+        "reactKey": "edge:1:3",
       },
       "points": Array [
         Array [
@@ -322,7 +322,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:1:4",
+        "reactKey": "edge:1:4",
       },
       "points": Array [
         Array [
@@ -337,7 +337,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "parentToMidedge:2:5",
+        "reactKey": "parentToMidedge:2:5",
       },
       "points": Array [
         Array [
@@ -352,7 +352,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "midwayedge:2:5",
+        "reactKey": "midwayedge:2:5",
       },
       "points": Array [
         Array [
@@ -371,7 +371,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:2:5",
+        "reactKey": "edge:2:5",
       },
       "points": Array [
         Array [
@@ -390,7 +390,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:2:6",
+        "reactKey": "edge:2:6",
       },
       "points": Array [
         Array [
@@ -409,7 +409,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:6:7",
+        "reactKey": "edge:6:7",
       },
       "points": Array [
         Array [
@@ -620,7 +620,7 @@ Object {
           "duration": "<1",
           "durationType": "millisecond",
         },
-        "uniqueId": "edge:0:1",
+        "reactKey": "edge:0:1",
       },
       "points": Array [
         Array [
