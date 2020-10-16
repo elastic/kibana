@@ -412,10 +412,10 @@ export class SavedObjectsService
       await migrator.runMigrations();
     }
 
-    // await migrationStateMachine(
-    //   elasticsearch.client.asInternalUser,
-    //   this.coreContext.env.packageInfo.version
-    // );
+    await migrationStateMachine(
+      elasticsearch.client.asInternalUser,
+      this.coreContext.env.packageInfo.version
+    );
 
     const createRepository = (
       esClient: ElasticsearchClient,

@@ -19,95 +19,50 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Option from 'fp-ts/lib/Option';
 import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../elasticsearch';
 
-export type AllResponses =
-  | CloneIndexResponse
-  | FetchAliasesResponse
-  | SetIndexWriteBlockResponse
-  | FetchIndexResponse;
+export type AllResponses = CloneIndexResponse | SetIndexWriteBlockResponse | FetchIndexResponse;
 
 export type ActionResponse<T = AllResponses> = Either.Either<Error, T>;
-
-export interface FetchAliasesResponse {
-  fetchAliases: Record<string, string>;
-}
 
 const catchEsClientErrors = (e: ElasticsearchClientError) => {
   return e instanceof ElasticsearchClientError ? Either.left(e) : Promise.reject(e);
 };
 
-/**
- * Queries Elasticsearch for the provided `aliasesToFetch` and returns a map
- * of alias to index pairs or an error.
- *
- * @param client
- * @param aliasesToFetch
- */
-export const fetchAliases = (
-  client: ElasticsearchClient,
-  aliasesToFetch: string[]
-): TaskEither.TaskEither<ElasticsearchClientError, FetchAliasesResponse> => () => {
-  return client.indices
-    .getAlias(
-      { name: aliasesToFetch },
-      { ignore: [404], maxRetries: 0 /** handle retry ourselves for now */ }
-    )
-    .then((res) => {
-      /**
-       * `getAlias` responds with a result with the following form:
-       *    {'.kibana_1': { aliases: { '.kibana': {} } } }}
-       *
-       * which we convert to an object of the form:
-       *    { '.kibana': '.kibana_1' }
-       */
-      // TODO handle alias that points to multiple indices (fail?)
-      const aliases = Object.keys(res.body).reduce((acc, index) => {
-        Object.keys(res.body[index].aliases || {}).forEach((alias) => {
-          acc[alias] = index;
-        });
-        return acc;
-      }, {} as Record<string, string>);
-      return Either.right({ fetchAliases: aliases });
-    })
-    .catch(catchEsClientErrors);
-};
-
-export type FetchIndexResponse = Option.Option<{ index: string }>;
+export interface FetchIndexResponse {
+  fetchIndices: Record<
+    string,
+    { aliases: Record<string, unknown>; mappings: unknown; settings: unknown }
+  >;
+}
 
 /**
  * Returns an `Option` wrapping the response of the `indices.get` API. The
  * `Option` is a `Some` if the index exists, and a `None` if the index doesn't
  * exist.
  *
- * Note: will also return a `Some` for closed indices
- *
  * @param client
  * @param indexToFetch
  */
-export const fetchIndex = (
+export const fetchIndices = (
   client: ElasticsearchClient,
-  indexToFetch: string
+  indicesToFetch: string[]
 ): TaskEither.TaskEither<ElasticsearchClientError, FetchIndexResponse> => () => {
   return client.indices
     .get(
       {
-        index: indexToFetch,
-        ignore_unavailable: false, // Return closed indices
+        index: indicesToFetch,
+        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
       },
       { ignore: [404], maxRetries: 0 }
     )
-    .then(({ body, statusCode }) => {
-      if (statusCode === 404) {
-        return Either.right(Option.none);
-      }
-
-      const [indexName, indexInfo] = Object.entries(body)[0];
-      return Either.right(Option.some({ index: indexName, ...indexInfo }));
+    .then(({ body }) => {
+      return Either.right({
+        fetchIndices: body,
+      });
     })
     .catch(catchEsClientErrors);
 };
@@ -233,4 +188,38 @@ export const cloneIndex = (
       }
     })
   );
+};
+
+export interface ReindexResponse {
+  reindex: {};
+}
+
+export const reindex = (
+  client: ElasticsearchClient,
+  sourceIndex: string,
+  targetIndex: string,
+  reindexScript?: string
+): TaskEither.TaskEither<ElasticsearchClientError, ReindexResponse> => () => {
+  return client
+    .reindex({
+      body: {
+        dest: { index: targetIndex },
+        source: { index: sourceIndex, size: 100 },
+        script:
+          reindexScript != null
+            ? {
+                source: reindexScript,
+                lang: 'painless',
+              }
+            : undefined,
+      },
+      refresh: true,
+      wait_for_completion: false,
+    })
+    .then(({ body, statusCode }) => {
+      return Either.right({
+        reindex: { task: body.task },
+      });
+    })
+    .catch(catchEsClientErrors);
 };

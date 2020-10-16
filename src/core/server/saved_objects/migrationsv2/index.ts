@@ -42,30 +42,35 @@ export type InitState = BaseState & {
   controlState: 'INIT';
 };
 
-// Migration complete
 export type DoneState = BaseState & {
+  /** Migration completed successfully */
   controlState: 'DONE';
 };
 
-// An error occurred, migration didn't succeed
 export type FatalState = BaseState & {
+  /** Migration terminated with a failure */
   controlState: 'FATAL';
   error?: Error;
 };
 
-// Set a write block on the source index to prevent any further writes
 export type SetSourceWriteBlockState = BaseState & {
+  /** Set a write block on the source index to prevent any further writes */
   controlState: 'SET_SOURCE_WRITE_BLOCK';
 };
 
-// Blank ES cluster, create new kibana indices
 export type InitNewIndicesState = BaseState & {
+  /** Blank ES cluster, create new kibana indices */
   controlState: 'INIT_NEW_INDICES';
 };
 
-// Create the target index by cloning the source index
 export type CloneSourceState = BaseState & {
+  /** Create the target index by cloning the source index */
   controlState: 'CLONE_SOURCE';
+};
+
+export type ReindexSourceToAlias = BaseState & {
+  /** Reindex a concrete index   */
+  controlState: 'REINDEX_SOURCE_TO_ALIAS';
 };
 
 export type State =
@@ -74,7 +79,8 @@ export type State =
   | DoneState
   | SetSourceWriteBlockState
   | InitNewIndicesState
-  | CloneSourceState;
+  | CloneSourceState
+  | ReindexSourceToAlias;
 
 type Model = (currentState: State, result: ActionResponse) => State;
 type NextAction = (
@@ -136,11 +142,23 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
   }
 
   if (stateP.controlState === 'INIT') {
-    if ('fetchAliases' in res.right) {
+    if ('fetchIndices' in res.right) {
+      const indices = res.right.fetchIndices;
+      console.log('indices', indices);
+      const aliases = Object.keys(indices).reduce((acc, index) => {
+        Object.keys(indices[index].aliases || {}).forEach((alias) => {
+          acc[alias] = index;
+        });
+        return acc;
+      }, {} as Record<string, string>);
+      // Object.entries(body).map(([indexName, indexInfo]) => ({
+      //   index: indexName,
+      //   ...indexInfo,
+      // }))
       if (
-        res.right.fetchAliases['.kibana_current'] != null &&
-        res.right.fetchAliases['.kibana_7.11.0'] != null &&
-        res.right.fetchAliases['.kibana_current'] === res.right.fetchAliases['.kibana_7.11.0']
+        aliases['.kibana_current'] != null &&
+        aliases['.kibana_7.11.0'] != null &&
+        aliases['.kibana_current'] === aliases['.kibana_7.11.0']
       ) {
         // `.kibana_current` and the version specific aliases both exists and
         // are pointing to the same index. This version's migration has already
@@ -148,8 +166,8 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
         stateP = { ...stateP, controlState: 'DONE' };
         // TODO, go to step (6)
       } else if (
-        res.right.fetchAliases['.kibana_current'] != null &&
-        gt(indexVersion(res.right.fetchAliases['.kibana_current']), '7.11.0')
+        aliases['.kibana_current'] != null &&
+        gt(indexVersion(aliases['.kibana_current']), '7.11.0')
       ) {
         // `.kibana_current` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
@@ -158,29 +176,32 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
           controlState: 'FATAL',
           error: new Error(
             'The .kibana_current alias is pointing to a newer version of Kibana: v' +
-              indexVersion(res.right.fetchAliases['.kibana_current'])
+              indexVersion(aliases['.kibana_current'])
           ),
         };
-      } else if (
-        res.right.fetchAliases['.kibana_current'] ??
-        res.right.fetchAliases['.kibana'] ??
-        false
-      ) {
+      } else if (aliases['.kibana_current'] ?? aliases['.kibana'] ?? false) {
         //  The source index is:
         //  1. the index the `.kibana_current` alias points to, or if it doesn’t exist,
         //  2. the index the `.kibana` alias points to, or if it doesn't exist,
-        const source =
-          res.right.fetchAliases['.kibana_current'] || res.right.fetchAliases['.kibana'];
+        const source = aliases['.kibana_current'] || aliases['.kibana'];
         stateP = {
           ...stateP,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           source,
           target: `.kibana_${stateP.kibanaVersion}_001`,
         };
+      } else if (indices['.kibana'] != null) {
+        // Migrate from a concrete index e.g. a < v6.5 `.kibana` index or a <
+        // v7.4.0 `.kibana_task_manager` index.
+        stateP = {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_ALIAS',
+          source: '.kibana',
+          target: `.kibana_${stateP.kibanaVersion}_001`,
+        };
       } else {
-        // TODO: Check if we need to migrate from a v6.x `.kibana` index, source = '.kibana'
-        // This cluster doesn't have any existing Kibana indices, create a new
-        // version specific index.
+        // This cluster doesn't have an existing Saved Object index, create a
+        // new version specific index.
         stateP = {
           ...stateP,
           controlState: 'INIT_NEW_INDICES',
@@ -198,6 +219,13 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
     if ('cloneIndex' in res.right) {
       stateP = { ...stateP, controlState: 'DONE' };
     }
+    return stateP;
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_ALIAS') {
+    stateP = {
+      ...stateP,
+      controlState: 'SET_SOURCE_WRITE_BLOCK',
+      source: '', // `.kibana_n`
+    };
     return stateP;
   } else if (
     stateP.controlState === 'DONE' ||
@@ -222,12 +250,13 @@ export const next: NextAction = (client, state) => {
   };
 
   if (state.controlState === 'INIT') {
-    // return Actions.fetchIndex(client, '.kibana');
-    return delay(Actions.fetchAliases(client, ['.kibana', '.kibana_current', '.kibana_7.11.0']));
+    return delay(Actions.fetchIndices(client, ['.kibana', '.kibana_current', '.kibana_7.11.0']));
   } else if (state.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     return delay(Actions.setIndexWriteBlock(client, state.source));
   } else if (state.controlState === 'CLONE_SOURCE') {
     return delay(Actions.cloneIndex(client, state.source, state.target));
+  } else if (state.controlState === 'REINDEX_SOURCE_TO_ALIAS') {
+    return null;
   } else if (state.controlState === 'INIT_NEW_INDICES') {
     return null;
   } else if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
