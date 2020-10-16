@@ -19,7 +19,7 @@ import { Logger } from '../../../../src/core/server';
 import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
 import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
+import { Middleware } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
@@ -55,15 +55,13 @@ export interface Updatable {
   remove(id: string): Promise<void>;
 }
 
-interface Opts {
+type Opts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  beforeRun: BeforeRunFunction;
-  beforeMarkRunning: BeforeMarkRunningFunction;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
-}
+} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 /**
  * Runs a background task, ensures that errors are properly handled,
@@ -79,8 +77,8 @@ export class TaskManagerRunner implements TaskRunner {
   private definitions: TaskTypeDictionary;
   private logger: Logger;
   private bufferedTaskStore: Updatable;
-  private beforeRun: BeforeRunFunction;
-  private beforeMarkRunning: BeforeMarkRunningFunction;
+  private beforeRun: Middleware['beforeRun'];
+  private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
 
   /**
