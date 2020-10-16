@@ -112,6 +112,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
   const serializer = useMemo(() => {
     return createSerializer(existingPolicy?.policy);
   }, [existingPolicy?.policy]);
+
   const { form } = useForm({
     schema,
     defaultValue: existingPolicy?.policy ?? defaultPolicy,
@@ -439,14 +440,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
               {isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout
                   policyName={policy.name || ''}
-                  readPolicy={() => {
-                    const serializedPolicy = form.getFormData();
-                    const legacySerializedPolicy = legacySerializePolicy(
-                      policy,
-                      existingPolicy?.policy
-                    );
-                    return mergeAllSerializedPolicies(serializedPolicy, legacySerializedPolicy);
-                  }}
                   close={() => setIsShowingPolicyJsonFlyout(false)}
                 />
               ) : null}
