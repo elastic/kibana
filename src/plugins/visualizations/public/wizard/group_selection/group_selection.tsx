@@ -43,6 +43,7 @@ import { DocLinksStart } from '../../../../../core/public';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import type { VisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types';
+import './group_selection.scss';
 
 interface GroupSelectionProps {
   onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;

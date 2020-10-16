@@ -26,8 +26,6 @@ export interface LensPluginSetupDependencies {
 }
 
 export class LensOSSPlugin {
-  constructor() {}
-
   setup(core: CoreSetup, { visualizations }: LensPluginSetupDependencies) {
     visualizations.registerAlias(getLensAliasConfig());
   }

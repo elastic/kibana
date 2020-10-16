@@ -26,8 +26,6 @@ export interface MapsPluginSetupDependencies {
 }
 
 export class MapsOSSPlugin {
-  constructor() {}
-
   setup(core: CoreSetup, { visualizations }: MapsPluginSetupDependencies) {
     visualizations.registerAlias(getMapsAliasConfig());
   }

@@ -54,7 +54,7 @@ export interface VisType<TVisParams = unknown> {
   readonly icon?: IconType;
   readonly image?: string;
   readonly stage: 'experimental' | 'beta' | 'production';
-  readonly group?: VisGroups.TOOLS | VisGroups.AGGBASED | VisGroups.PROMOTED;
+  readonly group?: VisGroups;
   readonly requiresSearch: boolean;
   readonly useCustomNoDataScreen: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);

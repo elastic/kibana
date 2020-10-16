@@ -20,7 +20,7 @@
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
 import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
-import type { VisType, VisGroups } from './types';
+import { VisType, VisGroups } from './types';
 
 /**
  * Vis Types Service
