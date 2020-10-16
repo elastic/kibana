@@ -43,6 +43,7 @@ export const LabelInput = ({
       value={inputValue}
       onChange={handleInputChange}
       fullWidth
+      compressed
       placeholder={placeholder || ''}
       inputRef={(node) => {
         if (inputRef && node) {
