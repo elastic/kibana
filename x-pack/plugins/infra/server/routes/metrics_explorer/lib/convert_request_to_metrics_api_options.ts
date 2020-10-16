@@ -9,13 +9,16 @@ import {
   MetricsAPIRequest,
   MetricsExplorerRequestBody,
   afterKeyObjectRT,
+  MetricsAPIMetric,
 } from '../../../../common/http_api';
 import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';
 
 export const convertRequestToMetricsAPIOptions = (
   options: MetricsExplorerRequestBody
 ): MetricsAPIRequest => {
-  const metrics = options.metrics.map(convertMetricToMetricsAPIMetric);
+  const metrics = options.metrics
+    .map(convertMetricToMetricsAPIMetric)
+    .filter((m) => m) as MetricsAPIMetric[];
   const { limit, timerange, indexPattern } = options;
 
   const metricsApiOptions: MetricsAPIRequest = {

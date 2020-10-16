@@ -9,7 +9,7 @@ import { MetricsAPIMetric, MetricsExplorerMetric } from '../../../../common/http
 export const convertMetricToMetricsAPIMetric = (
   metric: MetricsExplorerMetric,
   index: number
-): MetricsAPIMetric => {
+): MetricsAPIMetric | undefined => {
   const id = `metric_${index}`;
   if (metric.aggregation === 'rate' && metric.field) {
     return {
@@ -44,19 +44,21 @@ export const convertMetricToMetricsAPIMetric = (
     };
   }
 
-  return {
-    id,
-    aggregations: {
-      [id]: {
-        bucket_script: {
-          buckets_path: { count: '_count' },
-          script: {
-            source: 'count * 1',
-            lang: 'expression',
+  if (metric.aggregation === 'count') {
+    return {
+      id,
+      aggregations: {
+        [id]: {
+          bucket_script: {
+            buckets_path: { count: '_count' },
+            script: {
+              source: 'count * 1',
+              lang: 'expression',
+            },
+            gap_policy: 'skip',
           },
-          gap_policy: 'skip',
         },
       },
-    },
-  };
+    };
+  }
 };
