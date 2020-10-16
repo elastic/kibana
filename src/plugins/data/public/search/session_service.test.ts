@@ -17,27 +17,27 @@
  * under the License.
  */
 
-import { PluginFunctionalProviderContext } from '../../services';
+import { SessionService } from './session_service';
+import { ISessionService } from '../../common';
+import { coreMock } from '../../../../core/public/mocks';
 
-export default function ({
-  getPageObjects,
-  getService,
-  loadTestFile,
-}: PluginFunctionalProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+describe('Session service', () => {
+  let sessionService: ISessionService;
 
-  describe('data plugin', () => {
-    before(async () => {
-      await esArchiver.loadIfNeeded(
-        '../functional/fixtures/es_archiver/getting_started/shakespeare'
-      );
-      await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('shakespeare', '');
-    });
-
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./session'));
-    loadTestFile(require.resolve('./index_patterns'));
+  beforeEach(() => {
+    const initializerContext = coreMock.createPluginInitializerContext();
+    sessionService = new SessionService(
+      initializerContext,
+      coreMock.createSetup().getStartServices
+    );
   });
-}
+
+  describe('Session management', () => {
+    it('Creates and clears a session', async () => {
+      sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      sessionService.clear();
+      expect(sessionService.getSessionId()).toBeUndefined();
+    });
+  });
+});
