@@ -153,7 +153,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     width: px(unit * 10),
   },
   {
-    field: 'errorsPerMinute',
+    field: 'transactionErrorRate',
     name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
       defaultMessage: 'Error rate %',
     }),
@@ -222,13 +222,15 @@ export function ServiceList({ items, noItemsMessage }: Props) {
               itemsToSort,
               (item) => {
                 switch (sortField) {
+                  // Use `?? -1` here so `undefined` will appear after/before `0`.
+                  // In the table this will make the "N/A" items always at the
+                  // bottom/top.
                   case 'avgResponseTime':
-                    return item.avgResponseTime?.value ?? 0;
+                    return item.avgResponseTime?.value ?? -1;
                   case 'transactionsPerMinute':
-                    return item.transactionsPerMinute?.value ?? 0;
+                    return item.transactionsPerMinute?.value ?? -1;
                   case 'transactionErrorRate':
-                    return item.transactionErrorRate?.value ?? 0;
-
+                    return item.transactionErrorRate?.value ?? -1;
                   default:
                     return item[sortField as keyof typeof item];
                 }
