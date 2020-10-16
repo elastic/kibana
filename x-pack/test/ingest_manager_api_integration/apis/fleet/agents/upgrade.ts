@@ -48,6 +48,42 @@ export default function (providerContext: FtrProviderContext) {
       const res = await supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx');
       expect(typeof res.body.item.upgrade_started_at).to.be('string');
     });
+    it('should respond 400 if upgrading agent with version the same as snapshot version', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const kibanaVersionSnapshot = `${kibanaVersion}-SNAPSHOT`;
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+        },
+      });
+      await supertest
+        .post(`/api/fleet/agents/agent1/upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          version: kibanaVersionSnapshot,
+        })
+        .expect(400);
+    });
+    it('should respond 200 if upgrading agent with version less than kibana snapshot version', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const kibanaVersionSnapshot = `${kibanaVersion}-SNAPSHOT`;
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        },
+      });
+      await supertest
+        .post(`/api/fleet/agents/agent1/upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          version: kibanaVersionSnapshot,
+        })
+        .expect(200);
+    });
     it('should respond 200 to upgrade agent and update the agent SO without source_uri', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       await kibanaServer.savedObjects.update({
