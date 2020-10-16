@@ -140,7 +140,7 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(frame, state, mainPalette) {
     return (
       state || {
         title: 'Empty XY chart',
@@ -153,6 +153,7 @@ export const getXyVisualization = ({
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
+            palette: mainPalette,
           },
         ],
       }
@@ -198,9 +199,15 @@ export const getXyVisualization = ({
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage'),
+          enableDimensionEditor: true,
         },
       ],
     };
+  },
+
+  getMainPalette: (state) => {
+    if (state.layers.length === 0) return;
+    return state.layers[0].palette;
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {

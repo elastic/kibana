@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { PaletteDefinition } from 'src/plugins/charts/public';
+import { PaletteDefinition, PaletteOutput } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
@@ -375,6 +375,7 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
+  mainPalette?: PaletteOutput;
   /**
    * The visualization needs to know which table is being suggested
    */
@@ -427,32 +428,9 @@ export interface FramePublicAPI {
   filters: Filter[];
 
   /**
-   * The currently chosen global palette (currently only providing a color scheme)
+   * A map of all available palettes (keys being the ids).
    */
-  globalPalette: {
-    /**
-     * Currently selected palette
-     */
-    activePalette: PaletteDefinition;
-    /**
-     * Internal state of the current palette
-     */
-    state: unknown;
-    /**
-     * Change selected palette
-     * @param id a key of the `availablePalettes` object
-     */
-    setActivePalette: (id: string) => void;
-    /**
-     * Update internal state of the current palette. This is normally called by the editor component of the palette
-     * @param updater state updater function to be able to dispatch multiple updates before they are committed
-     */
-    setState: (updater: (state: unknown) => unknown) => void;
-    /**
-     * A map of all available palettes (keys being the ids).
-     */
-    availablePalettes: Record<string, PaletteDefinition>;
-  };
+  availablePalettes: Record<string, PaletteDefinition>;
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
@@ -491,7 +469,9 @@ export interface Visualization<T = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: T) => T;
+  initialize: (frame: FramePublicAPI, state?: T, mainPalette?: PaletteOutput) => T;
+
+  getMainPalette?: (state: T) => undefined | PaletteOutput;
 
   /**
    * Visualizations must provide at least one type for the chart switcher,

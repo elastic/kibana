@@ -336,6 +336,11 @@ export const layerConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'JSON key-value pairs of column ID to label',
     },
+    palette: {
+      default: `{theme "palette" default={system_palette name="default"} }`,
+      help: '',
+      types: ['palette'],
+    },
   },
   fn: function fn(input: unknown, args: LayerArgs) {
     return {
@@ -373,6 +378,7 @@ export interface LayerConfig {
   yConfig?: YConfig[];
   seriesType: SeriesType;
   splitAccessor?: string;
+  palette?: PaletteOutput;
 }
 
 export type LayerArgs = LayerConfig & {
@@ -380,6 +386,8 @@ export type LayerArgs = LayerConfig & {
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
   xScaleType: 'time' | 'linear' | 'ordinal';
   isHistogram: boolean;
+  // palette will always be set on the expression
+  palette: PaletteOutput;
 };
 
 // Arguments to XY chart expression, with computed properties
@@ -391,7 +399,6 @@ export interface XYArgs {
   yRightTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
-  palette: PaletteOutput;
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxesSettingsConfig & {
     type: 'lens_xy_axisTitlesVisibilityConfig';

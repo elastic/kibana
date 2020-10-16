@@ -212,8 +212,6 @@ export function SuggestionPanel({
     currentVisualizationId,
     datasourceMap,
     visualizationMap,
-    frame.globalPalette.activePalette.id,
-    frame.globalPalette.state,
   ]);
 
   const context: ExecutionContextSearch = useMemo(

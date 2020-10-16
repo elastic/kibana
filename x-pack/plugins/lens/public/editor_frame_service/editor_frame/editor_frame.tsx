@@ -105,23 +105,7 @@ export function EditorFrame(props: EditorFrameProps) {
     query: props.query,
     filters: props.filters,
 
-    globalPalette: {
-      state: state.globalPalette.state,
-      setState: (updater) => {
-        dispatch({
-          type: 'UPDATE_PALETTE_STATE',
-          updater,
-        });
-      },
-      availablePalettes: props.palettes,
-      activePalette: props.palettes[state.globalPalette.activePaletteId],
-      setActivePalette: (id) => {
-        dispatch({
-          type: 'UPDATE_PALETTE',
-          id,
-        });
-      },
-    },
+    availablePalettes: props.palettes,
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -259,8 +243,6 @@ export function EditorFrame(props: EditorFrameProps) {
       activeVisualization,
       state.datasourceStates,
       state.visualization,
-      state.globalPalette.activePaletteId,
-      state.globalPalette.state,
       props.query,
       props.dateRange,
       props.filters,

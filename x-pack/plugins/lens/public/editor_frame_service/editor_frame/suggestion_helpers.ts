@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
@@ -100,13 +101,18 @@ export function getSuggestions({
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
+          const mainPalette =
+            activeVisualizationId && visualizationMap[activeVisualizationId].getMainPalette
+              ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
+              : undefined;
           return getVisualizationSuggestions(
             visualization,
             table,
             visualizationId,
             datasourceSuggestion,
             currentVisualizationState,
-            subVisualizationId
+            subVisualizationId,
+            mainPalette
           );
         })
       )
@@ -165,7 +171,8 @@ function getVisualizationSuggestions(
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
-  subVisualizationId?: string
+  subVisualizationId?: string,
+  mainPalette?: PaletteOutput
 ) {
   return visualization
     .getSuggestions({
@@ -173,6 +180,7 @@ function getVisualizationSuggestions(
       state: currentVisualizationState,
       keptLayerIds: datasourceSuggestion.keptLayerIds,
       subVisualizationId,
+      mainPalette,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,

@@ -167,7 +167,15 @@ export function ChartSwitch(props: Props) {
               subVisualizationId,
               newVisualization.initialize(
                 props.framePublicAPI,
-                props.visualizationId === newVisualization.id ? props.visualizationState : undefined
+                props.visualizationId === newVisualization.id
+                  ? props.visualizationState
+                  : undefined,
+                props.visualizationId &&
+                  props.visualizationMap[props.visualizationId].getMainPalette
+                  ? props.visualizationMap[props.visualizationId].getMainPalette!(
+                      props.visualizationState
+                    )
+                  : undefined
               )
             );
           },

@@ -177,8 +177,6 @@ export const buildExpression = (
               ],
             },
           ],
-          // TODO load current palette from state
-          palette: [paletteService.default.toExpression()],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
@@ -242,6 +240,11 @@ export const buildExpression = (
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
+                    palette: [
+                      paletteService[layer.palette?.name || 'default'].toExpression(
+                        layer.palette?.params
+                      ),
+                    ],
                   },
                 },
               ],

@@ -48,10 +48,6 @@ function createTestArgs(initialLayerIds: string[]) {
         activeId: 'vis1',
         state: initialLayerIds,
       },
-      globalPalette: {
-        activePaletteId: 'default',
-        state: undefined,
-      },
     },
     activeVisualization,
     datasourceMap: {

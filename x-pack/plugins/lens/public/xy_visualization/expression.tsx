@@ -144,11 +144,6 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes titles',
       }),
     },
-    palette: {
-      default: `{theme "palette" default={system_palette name="default"} }`,
-      help: '',
-      types: ['palette'],
-    },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_layer'] as any,
@@ -254,7 +249,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, palette } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -549,6 +544,7 @@ export function XYChart({
             yScaleType,
             xScaleType,
             isHistogram,
+            palette,
           } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)

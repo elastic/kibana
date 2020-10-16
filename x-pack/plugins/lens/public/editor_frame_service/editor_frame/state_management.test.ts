@@ -14,13 +14,6 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 
 describe('editor_frame state management', () => {
-  const paletteBaseState = {
-    globalPalette: {
-      activePaletteId: 'default',
-      state: undefined,
-    },
-  };
-
   describe('initialization', () => {
     let props: EditorFrameProps;
 
@@ -42,9 +35,6 @@ describe('editor_frame state management', () => {
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
         filters: [],
-        palettes: {
-          default: createMockPaletteDefinition(),
-        },
         showNoDataPopover: jest.fn(),
       };
     });
@@ -120,7 +110,6 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             testDatasource: {
               state: {},
@@ -148,7 +137,6 @@ describe('editor_frame state management', () => {
       const datasourceReducer = jest.fn(() => ({ changed: true }));
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             testDatasource: {
               state: {},
@@ -177,7 +165,6 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             testDatasource: {
               state: {},
@@ -206,7 +193,6 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             testDatasource: {
               state: {},
@@ -236,7 +222,6 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             testDatasource: {
               state: {},
@@ -266,7 +251,6 @@ describe('editor_frame state management', () => {
     it('should should switch active datasource and initialize new state', () => {
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             testDatasource: {
               state: {},
@@ -294,7 +278,6 @@ describe('editor_frame state management', () => {
       const datasource2State = {};
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             testDatasource: {
               state: {},
@@ -325,7 +308,6 @@ describe('editor_frame state management', () => {
     it('should reset the state', () => {
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             a: {
               state: {},
@@ -342,7 +324,6 @@ describe('editor_frame state management', () => {
         {
           type: 'RESET',
           state: {
-            ...paletteBaseState,
             datasourceStates: {
               z: {
                 isLoading: false,
@@ -361,7 +342,6 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState).toMatchObject({
-        ...paletteBaseState,
         datasourceStates: {
           z: {
             isLoading: false,
@@ -380,7 +360,6 @@ describe('editor_frame state management', () => {
     it('should load the state from the doc', () => {
       const newState = reducer(
         {
-          ...paletteBaseState,
           datasourceStates: {
             a: {
               state: {},
@@ -414,7 +393,6 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState).toEqual({
-        ...paletteBaseState,
         activeDatasourceId: 'a',
         datasourceStates: {
           a: {
