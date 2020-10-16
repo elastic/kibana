@@ -78,7 +78,7 @@ export const FilterPopover = ({
           if (inputRef.current) inputRef.current.focus();
         }}
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <LabelInput
         value={filter.label || ''}
         onChange={setFilterLabel}

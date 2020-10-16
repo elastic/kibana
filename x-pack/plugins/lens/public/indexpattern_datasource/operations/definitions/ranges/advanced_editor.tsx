@@ -108,7 +108,7 @@ export const RangePopover = ({
       }
       data-test-subj="indexPattern-ranges-popover"
     >
-      <EuiFormRow>
+      <EuiFormRow compressed>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
             <EuiFieldNumber
@@ -164,7 +164,7 @@ export const RangePopover = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow>
+      <EuiFormRow compressed>
         <LabelInput
           value={label || ''}
           onChange={(newLabel) => {
