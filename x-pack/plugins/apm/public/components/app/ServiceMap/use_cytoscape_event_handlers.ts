@@ -85,6 +85,7 @@ export function useCytoscapeEventHandlers({
       node?: cytoscape.NodeSingular
     ) => {
       cytoscapeInstance.edges().removeClass('highlight');
+      // debugger;
       if (node) {
         node.connectedEdges().addClass('highlight');
       }
@@ -133,7 +134,7 @@ export function useCytoscapeEventHandlers({
     };
     const selectHandler: cytoscape.EventHandler = (event) => {
       trackApmEvent({ metric: 'service_map_node_select' });
-      resetConnectedEdgeStyle(event.target);
+      resetConnectedEdgeStyle(event.cy, event.target);
     };
     const unselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
