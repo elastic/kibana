@@ -14,9 +14,9 @@ setting up your indices, you can create them automatically from a template,
 ensuring that your settings, mappings, and aliases are consistently defined.
 
 You can also use *Index Management* to view and manage
-{ref}/data-streams.html[data streams]. A data stream gives you the simplicity
-of a single named resource to use in requests while letting you
-stored across multiple hidden indices.
+{ref}/data-streams.html[data streams]. A data stream lets you store time series
+data across multiple indices while giving you the simplicity of a single named
+resource to use in requests.
 
 To get started, open the menu and go to *Stack Management > Index Management*.
 
