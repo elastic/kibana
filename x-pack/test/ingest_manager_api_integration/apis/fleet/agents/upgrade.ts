@@ -11,6 +11,10 @@ import { setupIngest } from './services';
 import { skipIfNoDockerRegistry } from '../../../helpers';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../plugins/ingest_manager/common';
 
+const makeSnapshotVersion = (version: string) => {
+  return version.endsWith('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
+};
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -50,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should respond 400 if upgrading agent with version the same as snapshot version', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      const kibanaVersionSnapshot = `${kibanaVersion}-SNAPSHOT`;
+      const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
       await kibanaServer.savedObjects.update({
         id: 'agent1',
         type: AGENT_SAVED_OBJECT_TYPE,
@@ -68,7 +72,8 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should respond 200 if upgrading agent with version less than kibana snapshot version', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      const kibanaVersionSnapshot = `${kibanaVersion}-SNAPSHOT`;
+      const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
+
       await kibanaServer.savedObjects.update({
         id: 'agent1',
         type: AGENT_SAVED_OBJECT_TYPE,
