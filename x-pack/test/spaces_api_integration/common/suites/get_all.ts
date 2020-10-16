@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { getUrlPrefix } from '../lib/space_test_utils';
+import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetAllTest {
@@ -71,33 +71,35 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.exists.statusCode}`, async () => {
-        return supertest
-          .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-          .auth(user.username, user.password)
-          .expect(tests.exists.statusCode)
-          .then(tests.exists.response);
-      });
-
-      describe('copySavedObjects purpose', () => {
-        it(`should return ${tests.copySavedObjectsPurpose.statusCode}`, async () => {
+      getTestScenariosForSpace(spaceId).forEach(({ scenario, urlPrefix }) => {
+        it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
           return supertest
-            .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-            .query({ purpose: 'copySavedObjectsIntoSpace' })
+            .get(`${urlPrefix}/api/spaces/space`)
             .auth(user.username, user.password)
-            .expect(tests.copySavedObjectsPurpose.statusCode)
-            .then(tests.copySavedObjectsPurpose.response);
+            .expect(tests.exists.statusCode)
+            .then(tests.exists.response);
         });
-      });
 
-      describe('copySavedObjects purpose', () => {
-        it(`should return ${tests.shareSavedObjectsPurpose.statusCode}`, async () => {
-          return supertest
-            .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-            .query({ purpose: 'shareSavedObjectsIntoSpace' })
-            .auth(user.username, user.password)
-            .expect(tests.copySavedObjectsPurpose.statusCode)
-            .then(tests.copySavedObjectsPurpose.response);
+        describe('copySavedObjects purpose', () => {
+          it(`should return ${tests.copySavedObjectsPurpose.statusCode} ${scenario}`, async () => {
+            return supertest
+              .get(`${urlPrefix}/api/spaces/space`)
+              .query({ purpose: 'copySavedObjectsIntoSpace' })
+              .auth(user.username, user.password)
+              .expect(tests.copySavedObjectsPurpose.statusCode)
+              .then(tests.copySavedObjectsPurpose.response);
+          });
+        });
+
+        describe('copySavedObjects purpose', () => {
+          it(`should return ${tests.shareSavedObjectsPurpose.statusCode} ${scenario}`, async () => {
+            return supertest
+              .get(`${urlPrefix}/api/spaces/space`)
+              .query({ purpose: 'shareSavedObjectsIntoSpace' })
+              .auth(user.username, user.password)
+              .expect(tests.copySavedObjectsPurpose.statusCode)
+              .then(tests.copySavedObjectsPurpose.response);
+          });
         });
       });
     });
