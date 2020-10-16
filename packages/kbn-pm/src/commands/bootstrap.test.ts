@@ -19,7 +19,7 @@
 
 jest.mock('../utils/scripts');
 jest.mock('../utils/link_project_executables');
-jest.mock('../utils/validate_yarn_lock');
+jest.mock('../utils/validate_dependencies');
 
 import { resolve } from 'path';
 
