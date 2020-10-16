@@ -209,7 +209,7 @@ export function DiscoverNoResults({
         title={
           <FormattedMessage
             id="discover.noResults.searchExamples.noResultsBecauseOfError"
-            defaultMessage="No results were returned because of an error"
+            defaultMessage="We encountered an error retrieving search results"
           />
         }
         color="warning"
@@ -219,7 +219,7 @@ export function DiscoverNoResults({
         <EuiButton size="s" onClick={() => data.search.showError(error)}>
           <FormattedMessage
             id="discover.showErrorMessageAgain"
-            defaultMessage="Show error message again"
+            defaultMessage="Show error message"
           />
         </EuiButton>
       </EuiCallOut>

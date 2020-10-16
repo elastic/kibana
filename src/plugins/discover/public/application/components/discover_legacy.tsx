@@ -26,10 +26,7 @@ import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
 import { getServices, IndexPattern } from '../../kibana_services';
-// @ts-ignore
-import { DiscoverNoResults } from '../angular/directives/no_results';
-import { DiscoverUninitialized } from '../angular/directives/uninitialized';
-import { DiscoverHistogram } from '../angular/directives/histogram';
+import { DiscoverNoResults, DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
