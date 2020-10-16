@@ -8,6 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { getLogger } from './common';
+import { appContextService } from '../../../app_context';
 
 export const stopTransforms = async (transformIds: string[], callCluster: CallESAsCurrentUser) => {
   for (const transformId of transformIds) {
@@ -58,7 +59,7 @@ export const deleteTransforms = async (
           });
         }
       } else {
-        getLogger().warn(`cannot find transform for ${transformId}`);
+        appContextService.getLogger().warn(`cannot find transform for ${transformId}`);
       }
     })
   );
