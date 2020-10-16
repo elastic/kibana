@@ -2,7 +2,7 @@
 [[reporting-network-policy]]
 === Restrict requests with a Reporting network policy
 
-When {report-features} generates PDF reports, it uses the Chromium browser to fully load the {kib} page on the server. This
+When Reporting generates PDF reports, it uses the Chromium browser to fully load the {kib} page on the server. This
 potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a
 field formatted as an image, or to show an image in a Markdown visualization.
 
