@@ -54,7 +54,12 @@ export function tabifyAggResponse(
       switch (agg.type.type) {
         case AggGroupNames.Buckets:
           const aggBucket = get(bucket, agg.id);
-          const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
+          const tabifyBuckets = new TabifyBuckets(
+            aggBucket,
+            agg.params,
+            respOpts?.timeRange,
+            agg.type.name === 'filter'
+          );
 
           if (tabifyBuckets.length) {
             tabifyBuckets.forEach((subBucket, tabifyBucketKey) => {

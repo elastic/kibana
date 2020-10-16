@@ -62,6 +62,32 @@ describe('tabifyAggResponse Integration', () => {
     expect(resp.columns[0]).toHaveProperty('aggConfig', aggConfigs.aggs[0]);
   });
 
+  test('returns no rows for empty response', () => {
+    const aggConfigs = createAggConfigs([
+      mockAggConfig({ type: 'avg', schema: 'metric', params: { field: '@timestamp' } }),
+      mockAggConfig({ type: 'terms', schema: 'split', params: { field: '@timestamp' } }),
+    ]);
+
+    const resp = tabifyAggResponse(
+      aggConfigs,
+      {
+        hits: {
+          total: 1234,
+        },
+        aggregations: {
+          max_bucket_error: 1,
+        },
+      },
+      { metricsAtAllLevels: true }
+    );
+
+    expect(resp).toHaveProperty('rows');
+    expect(resp).toHaveProperty('columns');
+
+    expect(resp.rows).toHaveLength(0);
+    expect(resp.columns).toHaveLength(2);
+  });
+
   describe('transforms a complex response', () => {
     let esResp: typeof threeTermBuckets;
     let aggConfigs: IAggConfigs;

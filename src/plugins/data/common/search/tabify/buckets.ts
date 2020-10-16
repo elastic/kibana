@@ -31,20 +31,23 @@ const isRangeEqual = (range1: TabbedRangeFilterParams, range2: TabbedRangeFilter
   range1?.from === range2?.from && range1?.to === range2?.to;
 
 export class TabifyBuckets {
-  length: number;
+  length: number = 0;
   objectMode: boolean;
   buckets: any;
   _keys: any[] = [];
 
-  constructor(aggResp: any, aggParams?: AggParams, timeRange?: TimeRangeInformation) {
-    if (aggResp && aggResp.buckets) {
-      this.buckets = aggResp.buckets;
-    } else if (aggResp) {
-      // Some Bucket Aggs only return a single bucket (like filter).
-      // In those instances, the aggResp is the content of the single bucket.
+  constructor(
+    aggResp: any,
+    aggParams?: AggParams,
+    timeRange?: TimeRangeInformation,
+    missingBuckets?: boolean
+  ) {
+    if (!aggResp) {
+      this.buckets = [];
+    } else if (missingBuckets) {
       this.buckets = [aggResp];
     } else {
-      this.buckets = [];
+      this.buckets = aggResp.buckets ?? [];
     }
 
     this.objectMode = isPlainObject(this.buckets);

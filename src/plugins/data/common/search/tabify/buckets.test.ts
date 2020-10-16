@@ -168,7 +168,7 @@ describe('Buckets wrapper', () => {
         single_bucket: {},
         doc_count: 5,
       };
-      const buckets = new TabifyBuckets(aggResp);
+      const buckets = new TabifyBuckets(aggResp, {}, undefined, true);
 
       expect(buckets).toHaveLength(1);
     });
