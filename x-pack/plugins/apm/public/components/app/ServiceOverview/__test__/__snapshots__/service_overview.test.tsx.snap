@@ -181,7 +181,7 @@ NodeList [
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor apmServiceList__serviceNameTooltip"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -196,10 +196,10 @@ NodeList [
               />
             </div>
             <div
-              class="euiFlexItem"
+              class="euiFlexItem apmServiceList__serviceNameContainer"
             >
               <a
-                class="euiLink euiLink--primary c0"
+                class="euiLink euiLink--primary c0 eui-textTruncate"
                 href="/basepath/app/apm/services/My Python Service/transactions"
                 rel="noreferrer"
               >
@@ -454,7 +454,7 @@ NodeList [
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor apmServiceList__serviceNameTooltip"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -469,10 +469,10 @@ NodeList [
               />
             </div>
             <div
-              class="euiFlexItem"
+              class="euiFlexItem apmServiceList__serviceNameContainer"
             >
               <a
-                class="euiLink euiLink--primary c0"
+                class="euiLink euiLink--primary c0 eui-textTruncate"
                 href="/basepath/app/apm/services/My Go Service/transactions"
                 rel="noreferrer"
               >

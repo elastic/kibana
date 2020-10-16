@@ -26,6 +26,7 @@ import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOv
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
+import './index.scss';
 
 interface Props {
   items: ServiceListAPIResponse['items'];
@@ -81,6 +82,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
         delay="long"
         content={formatString(serviceName)}
         id="service-name-tooltip"
+        anchorClassName="apmServiceList__serviceNameTooltip"
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {agentName && (
@@ -88,8 +90,8 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
               <AgentIcon agentName={agentName} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
-            <AppLink serviceName={serviceName}>
+          <EuiFlexItem className="apmServiceList__serviceNameContainer">
+            <AppLink serviceName={serviceName} className="eui-textTruncate">
               {formatString(serviceName)}
             </AppLink>
           </EuiFlexItem>
