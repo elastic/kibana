@@ -1,8 +1,8 @@
 ---
-name: Security Solution Bug Report
+name: Bug report for Security Solution
 about: Help us identify bugs in Elastic Security, SIEM, and Endpoint so we can fix them!
 title: '[Security Solution]'
-labels: Team:Security Solution
+labels: 'Team: Security Solution'
 ---
 
 **Describe the bug:**

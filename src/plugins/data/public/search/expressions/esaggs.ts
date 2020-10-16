@@ -151,7 +151,9 @@ const handleCourierRequest = async ({
   request.stats(getRequestInspectorStats(requestSearchSource));
 
   try {
-    const response = await requestSearchSource.fetch({ abortSignal });
+    const response = await requestSearchSource.fetch({
+      abortSignal,
+    });
 
     request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
 

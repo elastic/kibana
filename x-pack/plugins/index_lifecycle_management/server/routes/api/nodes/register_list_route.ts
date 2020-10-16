@@ -62,7 +62,12 @@ export function convertSettingsIntoLists(
   );
 }
 
-export function registerListRoute({ router, config, license }: RouteDependencies) {
+export function registerListRoute({
+  router,
+  config,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   const { filteredNodeAttributes } = config;
 
   const NODE_ATTRS_KEYS_TO_IGNORE: string[] = [
@@ -95,15 +100,8 @@ export function registerListRoute({ router, config, license }: RouteDependencies
           disallowedNodeAttributes
         );
         return response.ok({ body });
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );
