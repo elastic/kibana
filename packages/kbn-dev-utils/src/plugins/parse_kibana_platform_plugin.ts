@@ -76,9 +76,9 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
       version: manifest.version,
       kibanaVersion: manifest.kibanaVersion || manifest.version,
       requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
-      optionalPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'optionalPlugins'),
-      requiredBundles: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredBundles'),
-      extraPublicDirs: isValidDepsDeclaration(manifest.requiredPlugins, 'extraPublicDirs'),
+      optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
+      requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),
+      extraPublicDirs: isValidDepsDeclaration(manifest.extraPublicDirs, 'extraPublicDirs'),
     },
   };
 }
