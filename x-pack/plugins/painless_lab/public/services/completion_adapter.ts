@@ -25,7 +25,7 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
   ): Promise<monaco.languages.CompletionList> {
-    // Active line characters, e.g., "boolean isInCircle"
+    // Active *line* characters, e.g., "boolean isInCircle"
     const activeCharacters = model.getValueInRange({
       startLineNumber: position.lineNumber,
       startColumn: 0,

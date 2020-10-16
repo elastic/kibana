@@ -17,13 +17,16 @@
  * under the License.
  */
 
-// Creates web workers
-import './global';
+export type PainlessCompletionKind = 'type' | 'class' | 'method' | 'constructor' | 'property';
 
-export { monaco } from './monaco';
-export { XJsonLang } from './xjson';
-export { PainlessLang } from './painless';
+export interface PainlessCompletionItem {
+  label: string;
+  kind: PainlessCompletionKind;
+  documentation: string;
+  insertText: string;
+}
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+export interface PainlessCompletionResult {
+  isIncomplete: boolean;
+  suggestions: PainlessCompletionItem[];
+}

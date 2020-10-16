@@ -17,13 +17,16 @@
  * under the License.
  */
 
-// Creates web workers
-import './global';
+// Please note: this module is intended to be run inside of a webworker.
+/* eslint-disable @kbn/eslint/module_migration */
 
-export { monaco } from './monaco';
-export { XJsonLang } from './xjson';
-export { PainlessLang } from './painless';
+import 'regenerator-runtime/runtime';
+// @ts-ignore
+import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+import { PainlessWorker } from './painless_worker';
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+self.onmessage = () => {
+  worker.initialize((ctx: any, createData: any) => {
+    return new PainlessWorker(ctx);
+  });
+};

@@ -17,13 +17,26 @@
  * under the License.
  */
 
-// Creates web workers
-import './global';
+import { monaco } from '../monaco';
+import { PainlessWorker } from './worker';
 
-export { monaco } from './monaco';
-export { XJsonLang } from './xjson';
-export { PainlessLang } from './painless';
+export class WorkerProxyService {
+  private worker: monaco.editor.MonacoWebWorker<PainlessWorker> | undefined;
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+  public async getWorker(resources: any[]) {
+    if (!this.worker) {
+      throw new Error('Worker Proxy Service has not been setup!');
+    }
+    await this.worker.withSyncedResources(resources);
+    const proxy = await this.worker.getProxy();
+    return proxy;
+  }
+
+  public setup() {
+    this.worker = monaco.editor.createWebWorker({ label: 'painless', moduleId: '' });
+  }
+
+  public stop() {
+    if (this.worker) this.worker.dispose();
+  }
+}

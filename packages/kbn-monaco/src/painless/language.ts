@@ -17,13 +17,23 @@
  * under the License.
  */
 
-// Creates web workers
-import './global';
+import { monaco } from '../monaco';
 
-export { monaco } from './monaco';
-export { XJsonLang } from './xjson';
-export { PainlessLang } from './painless';
+import { painlessLanguage } from './painless_lexer_rules';
+import { PainlessCompletionAdapter } from './painless_completion';
+import { WorkerProxyService } from './worker_proxy_service';
+import { ID } from './constants';
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+const wps = new WorkerProxyService();
+
+monaco.languages.register({ id: ID });
+
+const worker = (...uris: any[]) => {
+  return wps.getWorker(uris);
+};
+
+monaco.languages.onLanguage(ID, async () => {
+  wps.setup();
+});
+monaco.languages.setMonarchTokensProvider(ID, painlessLanguage);
+monaco.languages.registerCompletionItemProvider(ID, new PainlessCompletionAdapter(worker));

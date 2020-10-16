@@ -17,13 +17,4 @@
  * under the License.
  */
 
-// Creates web workers
-import './global';
-
-export { monaco } from './monaco';
-export { XJsonLang } from './xjson';
-export { PainlessLang } from './painless';
-
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+export { PainlessWorker } from './painless_worker';

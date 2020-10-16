@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { monaco } from '../../monaco';
-
-export const ID = 'painless';
+import { monaco } from '../monaco';
 
 /**
  * Extends the default type for a Monarch language so we can use
@@ -40,9 +38,8 @@ interface Language extends monaco.languages.IMonarchLanguage {
   operators: string[];
 }
 
-export const lexerRules = {
-  default: 'invalid',
-  tokenPostfix: '',
+export const painlessLanguage = {
+  default: '',
   // painless does not use < >, so we define our own
   brackets: [
     ['{', '}', 'delimiter.curly'],
@@ -136,9 +133,9 @@ export const lexerRules = {
         },
       ],
       // whitespace
-      [/[ \t\r\n]+/, { token: 'whitespace' }],
+      [/[ \t\r\n]+/, '@whitespace'],
       // comments
-      [/\/\*/, 'comment', '@comment'],
+      // [/\/\*/, 'comment', '@comment'],
       [/\/\/.*$/, 'comment'],
       // brackets
       [/[{}()\[\]]/, '@brackets'],
@@ -168,7 +165,6 @@ export const lexerRules = {
       // strings single quoted
       [/'([^'\\]|\\.)*$/, 'string.invalid'], // string without termination
       [/'/, 'string', '@string_sq'],
-      [/"""/, { token: 'punctuation.end_triple_quote', nextEmbedded: '@pop' }],
     ],
     comment: [
       [/[^\/*]+/, 'comment'],
