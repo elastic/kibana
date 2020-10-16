@@ -13,14 +13,14 @@ import { setSavedObjectsClient } from '../common/lib/index_threshold_api';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
-  savedObjects: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   I18nContext: any;
 }
 
 export const boot = (bootDeps: BootDeps) => {
-  const { I18nContext, element, savedObjects, ...appDeps } = bootDeps;
+  const { I18nContext, element, savedObjectsClient, ...appDeps } = bootDeps;
 
-  setSavedObjectsClient(savedObjects);
+  setSavedObjectsClient(savedObjectsClient);
 
   render(
     <I18nContext>

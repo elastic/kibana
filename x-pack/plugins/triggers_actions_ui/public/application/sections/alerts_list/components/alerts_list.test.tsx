@@ -99,7 +99,7 @@ describe('alerts_list component empty', () => {
     const deps = {
       chrome,
       docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
@@ -268,7 +268,7 @@ describe('alerts_list component with items', () => {
     const deps = {
       chrome,
       docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
@@ -349,7 +349,7 @@ describe('alerts_list component empty with show only capability', () => {
     const deps = {
       chrome,
       docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
@@ -468,7 +468,7 @@ describe('alerts_list with show only capability', () => {
     const deps = {
       chrome,
       docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,

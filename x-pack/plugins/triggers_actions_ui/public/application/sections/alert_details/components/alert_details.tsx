@@ -72,7 +72,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     uiSettings,
     docLinks,
     charts,
-    dataPlugin,
+    data,
     setBreadcrumbs,
     chrome,
   } = useAppDependencies();
@@ -174,11 +174,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             uiSettings,
                             docLinks,
                             charts,
-                            dataFieldsFormats: dataPlugin.fieldFormats,
+                            dataFieldsFormats: data.fieldFormats,
                             reloadAlerts: setAlert,
                             capabilities,
-                            dataUi: dataPlugin.ui,
-                            dataIndexPatterns: dataPlugin.indexPatterns,
+                            dataUi: data.ui,
+                            dataIndexPatterns: data.indexPatterns,
                           }}
                         >
                           <AlertEdit

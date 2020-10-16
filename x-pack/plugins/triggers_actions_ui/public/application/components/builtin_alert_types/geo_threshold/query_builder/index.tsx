@@ -28,6 +28,7 @@ import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 import { getTimeOptions } from '../../../../../common/lib/get_time_options';
+import { Query, QueryStringInput } from '../../../../../../../../../src/plugins/data/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -102,6 +103,14 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
+  const [tempIndexQuery, _setTempIndexQuery] = useState<Query>({
+    query: indexQuery || '',
+    language: 'kuery',
+  });
+  const setTempIndexQuery = (_tempIndexQuery: Query) => {
+    setAlertParams('indexQuery', _tempIndexQuery.query);
+    _setTempIndexQuery(_tempIndexQuery);
+  };
   const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState<IIndexPattern>({
     id: '',
     fields: [],
@@ -117,6 +126,14 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         setAlertParams('boundaryIndexId', _indexPattern.id);
       }
     }
+  };
+  const [tempBoundaryIndexQuery, _setTempBoundaryIndexQuery] = useState<Query>({
+    query: boundaryIndexQuery || '',
+    language: 'kuery',
+  });
+  const setTempBoundaryIndexQuery = (_tempBoundaryIndexQuery: Query) => {
+    setAlertParams('boundaryIndexQuery', _tempBoundaryIndexQuery.query);
+    _setTempBoundaryIndexQuery(_tempBoundaryIndexQuery);
   };
   const [delayOffset, _setDelayOffset] = useState<number>(0);
   function setDelayOffset(_delayOffset: number) {
@@ -251,14 +268,11 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiSpacer size="s" />
       <EuiFlexItem>
         <QueryStringInput
+          disableAutoFocus
+          bubbleSubmitEvent
           indexPatterns={indexPattern ? [indexPattern] : []}
-          query={
-            indexQuery || {
-              query: '',
-              language: 'KQL',
-            }
-          }
-          onSubmit={({ query }) => setAlertParams('indexQuery', query)}
+          query={tempIndexQuery}
+          onChange={setTempIndexQuery}
         />
       </EuiFlexItem>
 
@@ -329,6 +343,17 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         }
         boundaryNameField={boundaryNameField}
       />
+      <EuiSpacer size="s" />
+      <EuiFlexItem>
+        <QueryStringInput
+          disableAutoFocus
+          bubbleSubmitEvent
+          indexPatterns={boundaryIndexPattern ? [boundaryIndexPattern] : []}
+          query={tempBoundaryIndexQuery}
+          onChange={setTempBoundaryIndexQuery}
+        />
+      </EuiFlexItem>
+      <EuiSpacer size="l" />
     </Fragment>
   );
 };

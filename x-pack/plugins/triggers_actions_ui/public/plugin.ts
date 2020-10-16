@@ -24,6 +24,7 @@ import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 export interface TriggersActionsUiConfigType {
   enableGeoTrackingThresholdAlert: boolean;
@@ -89,16 +90,17 @@ export class Plugin
           unknown
         ];
         boot({
-          dataPlugin: pluginsStart.data,
+          data: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
           element: params.element,
           toastNotifications: coreStart.notifications.toasts,
+          storage: new Storage(window.localStorage),
           http: coreStart.http,
           uiSettings: coreStart.uiSettings,
           docLinks: coreStart.docLinks,
           chrome: coreStart.chrome,
-          savedObjects: coreStart.savedObjects.client,
+          savedObjectsClient: coreStart.savedObjects.client,
           I18nContext: coreStart.i18n.Context,
           capabilities: coreStart.application.capabilities,
           navigateToApp: coreStart.application.navigateToApp,
@@ -106,6 +108,7 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           alertTypeRegistry,
+          savedObjects: pluginsStart.savedObjects,
         });
         return () => {};
       },
