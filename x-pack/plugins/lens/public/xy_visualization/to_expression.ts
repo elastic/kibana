@@ -240,11 +240,29 @@ export const buildExpression = (
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
-                    palette: [
-                      paletteService[layer.palette?.name || 'default'].toExpression(
-                        layer.palette?.params
-                      ),
-                    ],
+                    ...(layer.palette
+                      ? {
+                          palette: [
+                            {
+                              type: 'expression',
+                              chain: [
+                                {
+                                  type: 'function',
+                                  function: 'theme',
+                                  arguments: {
+                                    variable: ['palette'],
+                                    default: [
+                                      paletteService[layer.palette.name].toExpression(
+                                        layer.palette.params
+                                      ),
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          ],
+                        }
+                      : {}),
                   },
                 },
               ],

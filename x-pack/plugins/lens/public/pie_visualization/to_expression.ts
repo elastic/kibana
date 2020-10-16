@@ -56,9 +56,27 @@ function expressionHelper(
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
-          palette: [
-            paletteService[state.palette?.name || 'default'].toExpression(state.palette?.params),
-          ],
+          ...(state.palette
+            ? {
+                palette: [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'theme',
+                        arguments: {
+                          variable: ['palette'],
+                          default: [
+                            paletteService[state.palette.name].toExpression(state.palette.params),
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              }
+            : {}),
         },
       },
     ],
