@@ -21,7 +21,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { get } from 'lodash';
 import { run } from '@kbn/dev-utils';
-import { getPluginDeps } from './plugin_discovery';
+import { getPluginDeps, findPlugins } from './plugin_discovery';
 
 interface AllOptions {
   id?: string;
@@ -37,10 +37,14 @@ run(
       throw new Error('Plugin id required');
     }
 
-    const result = getPluginDeps({
+    const pluginMap = findPlugins({
       oss: false,
       examples,
       extraPluginScanDirs,
+    });
+
+    const result = getPluginDeps({
+      pluginMap,
       id,
     });
 
