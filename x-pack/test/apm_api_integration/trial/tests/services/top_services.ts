@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
+            `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}&intervalString=${intervalString}&unit=${unit}`
           );
         });
 
@@ -117,7 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           response = await supertest.get(
             `/api/apm/services?start=${start}&end=${end}&uiFilters=${encodeURIComponent(
               `{"kuery":"service.name:opbeans-java","environment":"ENVIRONMENT_ALL"}`
-            )}`
+            )}&intervalString=${intervalString}&unit=${unit}`
           );
         });
 
