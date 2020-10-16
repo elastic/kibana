@@ -12,6 +12,7 @@ import '../../../../../common/mock/formatted_relative';
 import { TestProviders } from '../../../../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { AllRules } from './index';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -24,25 +25,9 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        getUrlForApp: jest.fn(),
-        capabilities: {
-          siem: {
-            crud: true,
-          },
-          actions: {
-            read: true,
-          },
-        },
-      },
-    },
-  }),
-}));
+jest.mock('../../../../../common/lib/kibana');
 
-jest.mock('../../../../../common/components/link_to');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('./reducer', () => {
   return {
@@ -178,6 +163,14 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('AllRules', () => {
+  beforeEach(() => {
+    useKibanaMock().services.application.capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      actions: { show: true },
+    };
+  });
   it('renders correctly', () => {
     const wrapper = shallow(
       <AllRules
