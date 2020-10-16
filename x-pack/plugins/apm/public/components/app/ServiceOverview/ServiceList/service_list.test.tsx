@@ -37,8 +37,6 @@ describe('ServiceList', () => {
 
   it('renders with data', () => {
     expect(() =>
-      // Types of property 'avgResponseTime' are incompatible.
-      // Type 'null' is not assignable to type '{ value: number | null; timeseries: { x: number; y: number | null; }[]; } | undefined'.ts(2322)
       renderWithTheme(
         <ServiceList
           unit="minute"

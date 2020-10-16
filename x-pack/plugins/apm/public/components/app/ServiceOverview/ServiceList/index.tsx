@@ -206,7 +206,7 @@ export function ServiceList({
     ? columns
     : columns.filter((column) => column.field !== 'healthStatus');
 
-  const initialSortField = displayHealthStatus
+  const initialSortField: keyof ServiceListItem = displayHealthStatus
     ? 'healthStatus'
     : 'transactionRate';
 
@@ -218,7 +218,10 @@ export function ServiceList({
       initialSortField={initialSortField}
       initialSortDirection="desc"
       initialPageSize={50}
-      sortFn={(itemsToSort, sortField, sortDirection) => {
+      sortFn={(itemsToSort, untypedSortField, sortDirection) => {
+        // type sortField to prevent typos of field names
+        const sortField = untypedSortField as keyof ServiceListItem;
+
         // For healthStatus, sort items by healthStatus first, then by TPM
         return sortField === 'healthStatus'
           ? orderBy(
@@ -237,13 +240,15 @@ export function ServiceList({
               itemsToSort,
               (item) => {
                 switch (sortField) {
+                  // Use `?? -1` here so `undefined` will appear after/before `0`.
+                  // In the table this will make the "N/A" items always at the
+                  // bottom/top.
                   case 'avgResponseTime':
-                    return item.avgResponseTime?.value ?? 0;
+                    return item.avgResponseTime?.value ?? -1;
                   case 'transactionRate':
-                    return item.transactionRate?.value ?? 0;
+                    return item.transactionRate?.value ?? -1;
                   case 'transactionErrorRate':
-                    return item.transactionErrorRate?.value ?? 0;
-
+                    return item.transactionErrorRate?.value ?? -1;
                   default:
                     return item[sortField as keyof typeof item];
                 }
