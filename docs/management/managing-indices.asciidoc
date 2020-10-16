@@ -94,8 +94,8 @@ index.
 The *Data Streams* view lists your data streams and lets you examine or delete
 them.
 
-To view statistics about a data stream, such as its generation or its current
-index lifecycle policy, click the stream's name.
+To view more information about a data stream, such as its generation or its
+current index lifecycle policy, click the stream's name.
 
 [role="screenshot"]
 image::images/management_index_data_stream_stats.png[Data stream stats]
