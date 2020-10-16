@@ -18,6 +18,7 @@ import { getOriginalRequestErrorMessage } from '../error_helper';
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
+  variables?: Record<string, unknown>;
   searchContext: ExecutionContextSearch;
   handleEvent: (event: ExpressionRendererEvent) => void;
 }
@@ -26,6 +27,7 @@ export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
   expression,
   searchContext,
+  variables,
   handleEvent,
 }: ExpressionWrapperProps) {
   return (
@@ -49,6 +51,7 @@ export function ExpressionWrapper({
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
             padding="m"
+            variables={variables}
             expression={expression}
             searchContext={searchContext}
             renderError={(errorMessage, error) => (
