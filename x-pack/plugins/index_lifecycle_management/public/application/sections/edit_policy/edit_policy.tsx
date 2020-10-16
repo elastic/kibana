@@ -440,6 +440,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
               {isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout
                   policyName={policy.name || ''}
+                  legacyPolicy={legacySerializePolicy(policy, existingPolicy?.policy)}
                   close={() => setIsShowingPolicyJsonFlyout(false)}
                 />
               ) : null}

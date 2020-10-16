@@ -27,11 +27,16 @@ import { SerializedPolicy } from '../../../../../common/types';
 import { useFormContext } from '../../../../shared_imports';
 
 interface Props {
+  legacyPolicy: SerializedPolicy;
   close: () => void;
   policyName: string;
 }
 
-export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
+export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
+  policyName,
+  close,
+  legacyPolicy,
+}) => {
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid
@@ -45,13 +50,20 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
     const subscription = form.subscribe(async (formUpdate) => {
       setPolicy(undefined);
       if (await formUpdate.validate()) {
-        setPolicy(formUpdate.data.format());
+        const p = formUpdate.data.format() as SerializedPolicy;
+        setPolicy({
+          ...legacyPolicy,
+          phases: {
+            ...legacyPolicy.phases,
+            hot: p.phases.hot,
+          },
+        });
       } else {
         setPolicy(null);
       }
     });
-    return subscription.unsubsribe;
-  }, [form]);
+    return subscription.unsubscribe;
+  }, [form, legacyPolicy]);
 
   let content: React.ReactNode;
   switch (policy) {
