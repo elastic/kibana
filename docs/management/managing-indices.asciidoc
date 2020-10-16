@@ -14,9 +14,9 @@ setting up your indices, you can create them automatically from a template,
 ensuring that your settings, mappings, and aliases are consistently defined.
 
 You can also use *Index Management* to view and manage
-{ref}/data-streams.html[data streams]. Data streams let you store time series
-data across multiple hidden indices while giving you a single named resource to
-use in requests.
+{ref}/data-streams.html[data streams]. A data stream gives you the simplicity
+of a single named resource to use in requests while letting you
+stored across multiple hidden indices.
 
 To get started, open the menu and go to *Stack Management > Index Management*.
 
@@ -134,19 +134,19 @@ In this example, you’ll create an index template for randomly generated log fi
 
 Open the *Create template* wizard, and enter `my-index-template` in the *Name*
 field.  Set *Index pattern* to `my-index-*` so the template matches any index
-with that index pattern. *Data Stream* *Priority*, *Version*, and *_meta field*
-are optional. Leave them blank or as-is for this example.
+with that index pattern. *Data Stream*, *Priority*, *Version*, and *_meta field*
+are optional. Leave them as-is or blank for this example.
 
 [role="screenshot"]
 image::images/management_index_create_wizard.png[Create wizard]
 
 In the second step of the *Create template* wizard, you can add component
-templates to your index template. Component templates are pre-configured sets of
+templates. Component templates are pre-configured sets of
 mappings, index settings, and index aliases you can reuse across multiple index
 templates. You can create component templates using the {es}
 {ref}/indices-component-template.html[put component template API].
 
-Badges indicate whether the component template contains mappings (*M*), index
+Badges indicate whether a component template contains mappings (*M*), index
 settings (*S*), index aliases (*A*), or a combination of the three.
 
 Component templates are optional, and this example skips this
@@ -160,7 +160,7 @@ These settings are optional, and this example skips this step.
 
 The example data set requires a
 mapping to label the latitude and longitude pairs as geographic locations
-by applying the geo_point type. In the forth step of the wizard, define this mapping
+by applying the geo_point type. In the fourth step of the wizard, define this mapping
 under the *Mapped fields* tab as follows:
 
 [role="screenshot"]
