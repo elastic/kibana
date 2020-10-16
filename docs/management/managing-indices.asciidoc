@@ -14,9 +14,9 @@ setting up your indices, you can create them automatically from a template,
 ensuring that your settings, mappings, and aliases are consistently defined.
 
 You can also use *Index Management* to view and manage
-{ref}/data-streams.html[data streams]. A data stream is a named resource used to
-ingest, search, and manage time series data. A data stream’s data is stored
-across multiple hidden, auto-generated indices.
+{ref}/data-streams.html[data streams]. Data streams let you store time series
+data across multiple hidden indices while giving you a single named resource to
+use in requests.
 
 To get started, open the menu and go to *Stack Management > Index Management*.
 
@@ -32,7 +32,7 @@ information.
 
 Before using this feature, you should be familiar with index management
 operations. Refer to the {ref}/indices.html[index management APIs], the
-{ref}/indices-templates.html[index template APIs], and the the
+{ref}/indices-templates.html[index template APIs], and the
 {ref}/data-streams.html[data streams documentation].
 
 [float]
