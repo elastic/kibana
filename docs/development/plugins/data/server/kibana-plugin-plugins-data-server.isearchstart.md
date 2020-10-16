@@ -16,6 +16,6 @@ export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest
 |  --- | --- | --- |
 |  [aggs](./kibana-plugin-plugins-data-server.isearchstart.aggs.md) | <code>AggsStart</code> |  |
 |  [getSearchStrategy](./kibana-plugin-plugins-data-server.isearchstart.getsearchstrategy.md) | <code>(name: string) =&gt; ISearchStrategy&lt;SearchStrategyRequest, SearchStrategyResponse&gt;</code> | Get other registered search strategies. For example, if a new strategy needs to use the already-registered ES search strategy, it can use this function to accomplish that. |
-|  [search](./kibana-plugin-plugins-data-server.isearchstart.search.md) | <code>(context: RequestHandlerContext, request: SearchStrategyRequest, options: ISearchOptions) =&gt; Promise&lt;SearchStrategyResponse&gt;</code> |  |
+|  [search](./kibana-plugin-plugins-data-server.isearchstart.search.md) | <code>ISearchStrategy['search']</code> |  |
 |  [searchSource](./kibana-plugin-plugins-data-server.isearchstart.searchsource.md) | <code>{</code><br/><code>        asScoped: (request: KibanaRequest) =&gt; Promise&lt;ISearchStartSearchSource&gt;;</code><br/><code>    }</code> |  |
 

@@ -647,12 +647,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 0
+                  <span>
+                    trusted app 0
+                  </span>
                 </span>
               </div>
             </td>
@@ -667,7 +669,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -693,12 +701,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -769,248 +779,239 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiPanel"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                    >
+                      <dl
+                        class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
+                      >
+                        <dt
+                          class="euiDescriptionList__title c1"
+                        >
+                          Name
+                        </dt>
+                        <dd
+                          class="euiDescriptionList__description c2"
+                        >
+                          <span
+                            class="euiToolTipAnchor"
+                          >
+                            <span>
+                              trusted app 0
+                            </span>
+                          </span>
+                        </dd>
+                        <dt
+                          class="euiDescriptionList__title c1"
+                        >
+                          OS
+                        </dt>
+                        <dd
+                          class="euiDescriptionList__description c2"
+                        >
+                          <span
+                            class="euiToolTipAnchor"
+                          >
+                            <span>
+                              Windows
+                            </span>
+                          </span>
+                        </dd>
+                        <dt
+                          class="euiDescriptionList__title c1"
+                        >
+                          Date Created
+                        </dt>
+                        <dd
+                          class="euiDescriptionList__description c2"
+                        >
+                          1 minute ago
+                        </dd>
+                        <dt
+                          class="euiDescriptionList__title c1"
+                        >
+                          Created By
+                        </dt>
+                        <dd
+                          class="euiDescriptionList__description c2"
+                        >
+                          <span
+                            class="euiToolTipAnchor"
+                          >
+                            <span>
+                              someone
+                            </span>
+                          </span>
+                        </dd>
+                        <dt
+                          class="euiDescriptionList__title c1"
+                        >
+                          Description
+                        </dt>
+                        <dd
+                          class="euiDescriptionList__description c2"
+                        >
+                          <span
+                            class="euiToolTipAnchor"
+                          >
+                            <span>
+                              Trusted App 0
+                            </span>
+                          </span>
+                        </dd>
+                      </dl>
+                    </div>
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrow5 c3"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                          class="euiFlexItem euiFlexItem--flexGrow1"
                         >
-                          <dl
-                            class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
-                          >
-                            <dt
-                              class="euiDescriptionList__title c1"
-                            >
-                              Name
-                            </dt>
-                            <dd
-                              class="euiDescriptionList__description c2"
-                            >
-                              <span
-                                title=""
-                              >
-                                trusted app 0
-                              </span>
-                            </dd>
-                            <dt
-                              class="euiDescriptionList__title c1"
-                            >
-                              OS
-                            </dt>
-                            <dd
-                              class="euiDescriptionList__description c2"
-                            >
-                              <span
-                                title=""
-                              >
-                                Windows
-                              </span>
-                            </dd>
-                            <dt
-                              class="euiDescriptionList__title c1"
-                            >
-                              Date Created
-                            </dt>
-                            <dd
-                              class="euiDescriptionList__description c2"
-                            >
-                              <span
-                                title=""
-                              >
-                                1 minute ago
-                              </span>
-                            </dd>
-                            <dt
-                              class="euiDescriptionList__title c1"
-                            >
-                              Created By
-                            </dt>
-                            <dd
-                              class="euiDescriptionList__description c2"
-                            >
-                              <span
-                                title=""
-                              >
-                                someone
-                              </span>
-                            </dd>
-                            <dt
-                              class="euiDescriptionList__title c1"
-                            >
-                              Description
-                            </dt>
-                            <dd
-                              class="euiDescriptionList__description c2"
-                            >
-                              <span
-                                title="Trusted App 0"
-                              >
-                                Trusted App 0
-                              </span>
-                            </dd>
-                          </dl>
-                        </div>
-                        <div
-                          class="euiFlexItem euiFlexItem--flexGrow5 c3"
-                        >
-                          <div
-                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
-                          >
+                          <div>
                             <div
-                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                              class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                             >
                               <div
-                                class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                class="euiFlexItem euiFlexItem--flexGrow1"
                               >
                                 <div
-                                  class="euiFlexItem euiFlexItem--flexGrow1"
+                                  class="euiBasicTable"
                                 >
-                                  <div
-                                    class="euiBasicTable"
-                                  >
-                                    <div>
+                                  <div>
+                                    <div
+                                      class="euiTableHeaderMobile"
+                                    >
                                       <div
-                                        class="euiTableHeaderMobile"
+                                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
                                       >
                                         <div
-                                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-                                        >
-                                          <div
-                                            class="euiFlexItem euiFlexItem--flexGrowZero"
-                                          />
-                                          <div
-                                            class="euiFlexItem euiFlexItem--flexGrowZero"
-                                          />
-                                        </div>
-                                      </div>
-                                      <table
-                                        class="euiTable euiTable--responsive"
-                                        id="mockId"
-                                        tabindex="-1"
-                                      >
-                                        <caption
-                                          class="euiScreenReaderOnly euiTableCaption"
+                                          class="euiFlexItem euiFlexItem--flexGrowZero"
                                         />
-                                        <thead>
-                                          <tr>
-                                            <th
-                                              class="euiTableHeaderCell"
-                                              data-test-subj="tableHeaderCell_field_0"
-                                              role="columnheader"
-                                              scope="col"
-                                              style="width: 30%;"
-                                            >
-                                              <div
-                                                class="euiTableCellContent"
-                                              >
-                                                <span
-                                                  class="euiTableCellContent__text"
-                                                >
-                                                  Field
-                                                </span>
-                                              </div>
-                                            </th>
-                                            <th
-                                              class="euiTableHeaderCell"
-                                              data-test-subj="tableHeaderCell_operator_1"
-                                              role="columnheader"
-                                              scope="col"
-                                              style="width: 20%;"
-                                            >
-                                              <div
-                                                class="euiTableCellContent"
-                                              >
-                                                <span
-                                                  class="euiTableCellContent__text"
-                                                >
-                                                  Operator
-                                                </span>
-                                              </div>
-                                            </th>
-                                            <th
-                                              class="euiTableHeaderCell"
-                                              data-test-subj="tableHeaderCell_value_2"
-                                              role="columnheader"
-                                              scope="col"
-                                              style="width: 60%;"
-                                            >
-                                              <div
-                                                class="euiTableCellContent"
-                                              >
-                                                <span
-                                                  class="euiTableCellContent__text"
-                                                >
-                                                  Value
-                                                </span>
-                                              </div>
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr
-                                            class="euiTableRow"
-                                          >
-                                            <td
-                                              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                                              colspan="3"
-                                            >
-                                              <div
-                                                class="euiTableCellContent euiTableCellContent--alignCenter"
-                                              >
-                                                <span
-                                                  class="euiTableCellContent__text"
-                                                >
-                                                  No items found
-                                                </span>
-                                              </div>
-                                            </td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
+                                        <div
+                                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                                        />
+                                      </div>
                                     </div>
+                                    <table
+                                      class="euiTable euiTable--responsive"
+                                      id="mockId"
+                                      tabindex="-1"
+                                    >
+                                      <caption
+                                        class="euiScreenReaderOnly euiTableCaption"
+                                      />
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            class="euiTableHeaderCell"
+                                            data-test-subj="tableHeaderCell_field_0"
+                                            role="columnheader"
+                                            scope="col"
+                                            style="width: 30%;"
+                                          >
+                                            <div
+                                              class="euiTableCellContent"
+                                            >
+                                              <span
+                                                class="euiTableCellContent__text"
+                                              >
+                                                Field
+                                              </span>
+                                            </div>
+                                          </th>
+                                          <th
+                                            class="euiTableHeaderCell"
+                                            data-test-subj="tableHeaderCell_operator_1"
+                                            role="columnheader"
+                                            scope="col"
+                                            style="width: 20%;"
+                                          >
+                                            <div
+                                              class="euiTableCellContent"
+                                            >
+                                              <span
+                                                class="euiTableCellContent__text"
+                                              >
+                                                Operator
+                                              </span>
+                                            </div>
+                                          </th>
+                                          <th
+                                            class="euiTableHeaderCell"
+                                            data-test-subj="tableHeaderCell_value_2"
+                                            role="columnheader"
+                                            scope="col"
+                                            style="width: 60%;"
+                                          >
+                                            <div
+                                              class="euiTableCellContent"
+                                            >
+                                              <span
+                                                class="euiTableCellContent__text"
+                                              >
+                                                Value
+                                              </span>
+                                            </div>
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr
+                                          class="euiTableRow"
+                                        >
+                                          <td
+                                            class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                                            colspan="3"
+                                          >
+                                            <div
+                                              class="euiTableCellContent euiTableCellContent--alignCenter"
+                                            >
+                                              <span
+                                                class="euiTableCellContent__text"
+                                              >
+                                                No items found
+                                              </span>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
                                   </div>
                                 </div>
                               </div>
                             </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          >
                             <div
-                              class="euiFlexItem euiFlexItem--flexGrow1"
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <div
-                                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              <button
+                                class="euiButton euiButton--danger euiButton--small"
+                                data-test-subj="trustedAppDeleteButton"
+                                type="button"
                               >
-                                <div
-                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                  style="height: auto;"
                                 >
-                                  <div
-                                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                                  <span
+                                    class="euiButton__text"
                                   >
-                                    <div
-                                      class="euiFlexItem euiFlexItem--flexGrowZero"
-                                    >
-                                      <button
-                                        class="euiButton euiButton--danger euiButton--small"
-                                        data-test-subj="trustedAppDeleteButton"
-                                        type="button"
-                                      >
-                                        <span
-                                          class="euiButtonContent euiButton__content"
-                                        >
-                                          <span
-                                            class="euiButton__text"
-                                          >
-                                            Remove
-                                          </span>
-                                        </span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                                    Remove
+                                  </span>
+                                </span>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -1033,12 +1034,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 1
+                  <span>
+                    trusted app 1
+                  </span>
                 </span>
               </div>
             </td>
@@ -1053,7 +1056,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1079,12 +1088,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1152,12 +1163,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 2
+                  <span>
+                    trusted app 2
+                  </span>
                 </span>
               </div>
             </td>
@@ -1172,7 +1185,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1198,12 +1217,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1271,12 +1292,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 3
+                  <span>
+                    trusted app 3
+                  </span>
                 </span>
               </div>
             </td>
@@ -1291,7 +1314,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1317,12 +1346,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1390,12 +1421,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 4
+                  <span>
+                    trusted app 4
+                  </span>
                 </span>
               </div>
             </td>
@@ -1410,7 +1443,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1436,12 +1475,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1509,12 +1550,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 5
+                  <span>
+                    trusted app 5
+                  </span>
                 </span>
               </div>
             </td>
@@ -1529,7 +1572,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1555,12 +1604,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1628,12 +1679,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 6
+                  <span>
+                    trusted app 6
+                  </span>
                 </span>
               </div>
             </td>
@@ -1648,7 +1701,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1674,12 +1733,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1747,12 +1808,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 7
+                  <span>
+                    trusted app 7
+                  </span>
                 </span>
               </div>
             </td>
@@ -1767,7 +1830,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1793,12 +1862,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1866,12 +1937,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 8
+                  <span>
+                    trusted app 8
+                  </span>
                 </span>
               </div>
             </td>
@@ -1886,7 +1959,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -1912,12 +1991,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -1985,12 +2066,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 9
+                  <span>
+                    trusted app 9
+                  </span>
                 </span>
               </div>
             </td>
@@ -2005,7 +2088,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2031,12 +2120,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2104,12 +2195,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 10
+                  <span>
+                    trusted app 10
+                  </span>
                 </span>
               </div>
             </td>
@@ -2124,7 +2217,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2150,12 +2249,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2223,12 +2324,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 11
+                  <span>
+                    trusted app 11
+                  </span>
                 </span>
               </div>
             </td>
@@ -2243,7 +2346,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2269,12 +2378,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2342,12 +2453,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 12
+                  <span>
+                    trusted app 12
+                  </span>
                 </span>
               </div>
             </td>
@@ -2362,7 +2475,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2388,12 +2507,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2461,12 +2582,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 13
+                  <span>
+                    trusted app 13
+                  </span>
                 </span>
               </div>
             </td>
@@ -2481,7 +2604,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2507,12 +2636,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2580,12 +2711,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 14
+                  <span>
+                    trusted app 14
+                  </span>
                 </span>
               </div>
             </td>
@@ -2600,7 +2733,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2626,12 +2765,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2699,12 +2840,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 15
+                  <span>
+                    trusted app 15
+                  </span>
                 </span>
               </div>
             </td>
@@ -2719,7 +2862,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2745,12 +2894,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2818,12 +2969,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 16
+                  <span>
+                    trusted app 16
+                  </span>
                 </span>
               </div>
             </td>
@@ -2838,7 +2991,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2864,12 +3023,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -2937,12 +3098,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 17
+                  <span>
+                    trusted app 17
+                  </span>
                 </span>
               </div>
             </td>
@@ -2957,7 +3120,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -2983,12 +3152,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -3056,12 +3227,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 18
+                  <span>
+                    trusted app 18
+                  </span>
                 </span>
               </div>
             </td>
@@ -3076,7 +3249,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -3102,12 +3281,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -3175,12 +3356,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 19
+                  <span>
+                    trusted app 19
+                  </span>
                 </span>
               </div>
             </td>
@@ -3195,7 +3378,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -3221,12 +3410,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -3654,12 +3845,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 0
+                  <span>
+                    trusted app 0
+                  </span>
                 </span>
               </div>
             </td>
@@ -3674,7 +3867,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -3700,12 +3899,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -3773,12 +3974,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 1
+                  <span>
+                    trusted app 1
+                  </span>
                 </span>
               </div>
             </td>
@@ -3793,7 +3996,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -3819,12 +4028,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -3892,12 +4103,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 2
+                  <span>
+                    trusted app 2
+                  </span>
                 </span>
               </div>
             </td>
@@ -3912,7 +4125,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -3938,12 +4157,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4011,12 +4232,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 3
+                  <span>
+                    trusted app 3
+                  </span>
                 </span>
               </div>
             </td>
@@ -4031,7 +4254,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4057,12 +4286,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4130,12 +4361,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 4
+                  <span>
+                    trusted app 4
+                  </span>
                 </span>
               </div>
             </td>
@@ -4150,7 +4383,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4176,12 +4415,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4249,12 +4490,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 5
+                  <span>
+                    trusted app 5
+                  </span>
                 </span>
               </div>
             </td>
@@ -4269,7 +4512,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4295,12 +4544,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4368,12 +4619,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 6
+                  <span>
+                    trusted app 6
+                  </span>
                 </span>
               </div>
             </td>
@@ -4388,7 +4641,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4414,12 +4673,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4487,12 +4748,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 7
+                  <span>
+                    trusted app 7
+                  </span>
                 </span>
               </div>
             </td>
@@ -4507,7 +4770,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4533,12 +4802,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4606,12 +4877,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 8
+                  <span>
+                    trusted app 8
+                  </span>
                 </span>
               </div>
             </td>
@@ -4626,7 +4899,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4652,12 +4931,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4725,12 +5006,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 9
+                  <span>
+                    trusted app 9
+                  </span>
                 </span>
               </div>
             </td>
@@ -4745,7 +5028,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4771,12 +5060,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4844,12 +5135,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 10
+                  <span>
+                    trusted app 10
+                  </span>
                 </span>
               </div>
             </td>
@@ -4864,7 +5157,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -4890,12 +5189,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -4963,12 +5264,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 11
+                  <span>
+                    trusted app 11
+                  </span>
                 </span>
               </div>
             </td>
@@ -4983,7 +5286,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5009,12 +5318,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5082,12 +5393,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 12
+                  <span>
+                    trusted app 12
+                  </span>
                 </span>
               </div>
             </td>
@@ -5102,7 +5415,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5128,12 +5447,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5201,12 +5522,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 13
+                  <span>
+                    trusted app 13
+                  </span>
                 </span>
               </div>
             </td>
@@ -5221,7 +5544,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5247,12 +5576,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5320,12 +5651,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 14
+                  <span>
+                    trusted app 14
+                  </span>
                 </span>
               </div>
             </td>
@@ -5340,7 +5673,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5366,12 +5705,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5439,12 +5780,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 15
+                  <span>
+                    trusted app 15
+                  </span>
                 </span>
               </div>
             </td>
@@ -5459,7 +5802,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5485,12 +5834,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5558,12 +5909,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 16
+                  <span>
+                    trusted app 16
+                  </span>
                 </span>
               </div>
             </td>
@@ -5578,7 +5931,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5604,12 +5963,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5677,12 +6038,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 17
+                  <span>
+                    trusted app 17
+                  </span>
                 </span>
               </div>
             </td>
@@ -5697,7 +6060,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5723,12 +6092,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5796,12 +6167,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 18
+                  <span>
+                    trusted app 18
+                  </span>
                 </span>
               </div>
             </td>
@@ -5816,7 +6189,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5842,12 +6221,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -5915,12 +6296,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 19
+                  <span>
+                    trusted app 19
+                  </span>
                 </span>
               </div>
             </td>
@@ -5935,7 +6318,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -5961,12 +6350,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -6552,12 +6943,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 0
+                  <span>
+                    trusted app 0
+                  </span>
                 </span>
               </div>
             </td>
@@ -6572,7 +6965,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -6598,12 +6997,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -6671,12 +7072,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 1
+                  <span>
+                    trusted app 1
+                  </span>
                 </span>
               </div>
             </td>
@@ -6691,7 +7094,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -6717,12 +7126,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -6790,12 +7201,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 2
+                  <span>
+                    trusted app 2
+                  </span>
                 </span>
               </div>
             </td>
@@ -6810,7 +7223,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -6836,12 +7255,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -6909,12 +7330,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 3
+                  <span>
+                    trusted app 3
+                  </span>
                 </span>
               </div>
             </td>
@@ -6929,7 +7352,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -6955,12 +7384,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7028,12 +7459,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 4
+                  <span>
+                    trusted app 4
+                  </span>
                 </span>
               </div>
             </td>
@@ -7048,7 +7481,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7074,12 +7513,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7147,12 +7588,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 5
+                  <span>
+                    trusted app 5
+                  </span>
                 </span>
               </div>
             </td>
@@ -7167,7 +7610,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7193,12 +7642,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7266,12 +7717,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 6
+                  <span>
+                    trusted app 6
+                  </span>
                 </span>
               </div>
             </td>
@@ -7286,7 +7739,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7312,12 +7771,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7385,12 +7846,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 7
+                  <span>
+                    trusted app 7
+                  </span>
                 </span>
               </div>
             </td>
@@ -7405,7 +7868,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7431,12 +7900,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7504,12 +7975,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 8
+                  <span>
+                    trusted app 8
+                  </span>
                 </span>
               </div>
             </td>
@@ -7524,7 +7997,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7550,12 +8029,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7623,12 +8104,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 9
+                  <span>
+                    trusted app 9
+                  </span>
                 </span>
               </div>
             </td>
@@ -7643,7 +8126,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7669,12 +8158,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7742,12 +8233,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 10
+                  <span>
+                    trusted app 10
+                  </span>
                 </span>
               </div>
             </td>
@@ -7762,7 +8255,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7788,12 +8287,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7861,12 +8362,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 11
+                  <span>
+                    trusted app 11
+                  </span>
                 </span>
               </div>
             </td>
@@ -7881,7 +8384,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -7907,12 +8416,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -7980,12 +8491,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 12
+                  <span>
+                    trusted app 12
+                  </span>
                 </span>
               </div>
             </td>
@@ -8000,7 +8513,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8026,12 +8545,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -8099,12 +8620,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 13
+                  <span>
+                    trusted app 13
+                  </span>
                 </span>
               </div>
             </td>
@@ -8119,7 +8642,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8145,12 +8674,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -8218,12 +8749,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 14
+                  <span>
+                    trusted app 14
+                  </span>
                 </span>
               </div>
             </td>
@@ -8238,7 +8771,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8264,12 +8803,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -8337,12 +8878,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 15
+                  <span>
+                    trusted app 15
+                  </span>
                 </span>
               </div>
             </td>
@@ -8357,7 +8900,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8383,12 +8932,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -8456,12 +9007,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 16
+                  <span>
+                    trusted app 16
+                  </span>
                 </span>
               </div>
             </td>
@@ -8476,7 +9029,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8502,12 +9061,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -8575,12 +9136,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 17
+                  <span>
+                    trusted app 17
+                  </span>
                 </span>
               </div>
             </td>
@@ -8595,7 +9158,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8621,12 +9190,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -8694,12 +9265,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 18
+                  <span>
+                    trusted app 18
+                  </span>
                 </span>
               </div>
             </td>
@@ -8714,7 +9287,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8740,12 +9319,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -8813,12 +9394,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 19
+                  <span>
+                    trusted app 19
+                  </span>
                 </span>
               </div>
             </td>
@@ -8833,7 +9416,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -8859,12 +9448,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -9292,12 +9883,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 0
+                  <span>
+                    trusted app 0
+                  </span>
                 </span>
               </div>
             </td>
@@ -9312,7 +9905,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -9338,12 +9937,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -9411,12 +10012,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 1
+                  <span>
+                    trusted app 1
+                  </span>
                 </span>
               </div>
             </td>
@@ -9431,7 +10034,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -9457,12 +10066,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -9530,12 +10141,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 2
+                  <span>
+                    trusted app 2
+                  </span>
                 </span>
               </div>
             </td>
@@ -9550,7 +10163,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -9576,12 +10195,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -9649,12 +10270,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 3
+                  <span>
+                    trusted app 3
+                  </span>
                 </span>
               </div>
             </td>
@@ -9669,7 +10292,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -9695,12 +10324,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -9768,12 +10399,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 4
+                  <span>
+                    trusted app 4
+                  </span>
                 </span>
               </div>
             </td>
@@ -9788,7 +10421,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -9814,12 +10453,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -9887,12 +10528,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 5
+                  <span>
+                    trusted app 5
+                  </span>
                 </span>
               </div>
             </td>
@@ -9907,7 +10550,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -9933,12 +10582,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10006,12 +10657,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 6
+                  <span>
+                    trusted app 6
+                  </span>
                 </span>
               </div>
             </td>
@@ -10026,7 +10679,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10052,12 +10711,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10125,12 +10786,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 7
+                  <span>
+                    trusted app 7
+                  </span>
                 </span>
               </div>
             </td>
@@ -10145,7 +10808,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10171,12 +10840,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10244,12 +10915,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 8
+                  <span>
+                    trusted app 8
+                  </span>
                 </span>
               </div>
             </td>
@@ -10264,7 +10937,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10290,12 +10969,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10363,12 +11044,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 9
+                  <span>
+                    trusted app 9
+                  </span>
                 </span>
               </div>
             </td>
@@ -10383,7 +11066,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10409,12 +11098,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10482,12 +11173,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 10
+                  <span>
+                    trusted app 10
+                  </span>
                 </span>
               </div>
             </td>
@@ -10502,7 +11195,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10528,12 +11227,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10601,12 +11302,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 11
+                  <span>
+                    trusted app 11
+                  </span>
                 </span>
               </div>
             </td>
@@ -10621,7 +11324,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10647,12 +11356,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10720,12 +11431,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 12
+                  <span>
+                    trusted app 12
+                  </span>
                 </span>
               </div>
             </td>
@@ -10740,7 +11453,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10766,12 +11485,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10839,12 +11560,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 13
+                  <span>
+                    trusted app 13
+                  </span>
                 </span>
               </div>
             </td>
@@ -10859,7 +11582,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -10885,12 +11614,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -10958,12 +11689,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 14
+                  <span>
+                    trusted app 14
+                  </span>
                 </span>
               </div>
             </td>
@@ -10978,7 +11711,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -11004,12 +11743,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -11077,12 +11818,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 15
+                  <span>
+                    trusted app 15
+                  </span>
                 </span>
               </div>
             </td>
@@ -11097,7 +11840,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -11123,12 +11872,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -11196,12 +11947,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 16
+                  <span>
+                    trusted app 16
+                  </span>
                 </span>
               </div>
             </td>
@@ -11216,7 +11969,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -11242,12 +12001,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -11315,12 +12076,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 17
+                  <span>
+                    trusted app 17
+                  </span>
                 </span>
               </div>
             </td>
@@ -11335,7 +12098,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Linux
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Linux
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -11361,12 +12130,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -11434,12 +12205,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 18
+                  <span>
+                    trusted app 18
+                  </span>
                 </span>
               </div>
             </td>
@@ -11454,7 +12227,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Windows
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Windows
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -11480,12 +12259,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
@@ -11553,12 +12334,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  trusted app 19
+                  <span>
+                    trusted app 19
+                  </span>
                 </span>
               </div>
             </td>
@@ -11573,7 +12356,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                Mac OS
+                <span
+                  class="euiToolTipAnchor eui-textTruncate"
+                >
+                  <span>
+                    Mac OS
+                  </span>
+                </span>
               </div>
             </td>
             <td
@@ -11599,12 +12388,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Created By
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor eui-textTruncate"
                 >
-                  someone
+                  <span>
+                    someone
+                  </span>
                 </span>
               </div>
             </td>
