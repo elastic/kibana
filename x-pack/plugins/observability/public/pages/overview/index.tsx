@@ -88,6 +88,8 @@ export function OverviewPage({ routeParams }: Props) {
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
+    } else if (id === 'ux') {
+      return !hasData[id]?.hasData;
     }
     return !hasData[id];
   });
