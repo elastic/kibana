@@ -17,21 +17,27 @@
  * under the License.
  */
 
-import * as legacyElasticsearch from 'elasticsearch';
+import { ApiError } from '@elastic/elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
 
-const esErrorsParent = legacyElasticsearch.errors._Abstract;
-
-interface RequestError extends Error {
-  statusCode?: number;
+interface EsErrorHandlerParams {
+  error: ApiError;
+  response: KibanaResponseFactory;
 }
 
 /*
- * @deprecated
- * Only works with legacy elasticsearch js client errors and will be removed after 7.x last
+ * For errors returned by the new elasticsearch js client.
  */
-export function isEsError(err: RequestError) {
-  const isInstanceOfEsError = err instanceof esErrorsParent;
-  const hasStatusCode = Boolean(err.statusCode);
-
-  return isInstanceOfEsError && hasStatusCode;
-}
+export const handleEsError = ({ error, response }: EsErrorHandlerParams): IKibanaResponse => {
+  // error.name is slightly better in terms of performance, since all errors now have name property
+  if (error.name === 'ResponseError') {
+    const { statusCode, body } = error as ResponseError;
+    return response.customError({
+      statusCode,
+      body: { message: body.error?.reason },
+    });
+  }
+  // Case: default
+  return response.internalError({ body: error });
+};

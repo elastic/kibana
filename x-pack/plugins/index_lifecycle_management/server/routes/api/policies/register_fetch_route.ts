@@ -57,7 +57,7 @@ const querySchema = schema.object({
   withIndices: schema.boolean({ defaultValue: false }),
 });
 
-export function registerFetchRoute({ router, license }: RouteDependencies) {
+export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/policies'), validate: { query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -75,15 +75,8 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
           await addLinkedIndices(asCurrentUser, policiesMap);
         }
         return response.ok({ body: formatPolicies(policiesMap) });
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );
