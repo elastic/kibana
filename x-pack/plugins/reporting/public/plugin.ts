@@ -5,9 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import React from 'react';
-import ReactDOM from 'react-dom';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import {
@@ -17,21 +14,21 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
+  HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { SharePluginSetup } from '../../../../src/plugins/share/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, ReportingConfigType } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
 import { JobSummarySet } from './';
 import { getGeneralErrorToast } from './components';
-import { ReportListing } from './components/report_listing';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
@@ -60,7 +57,25 @@ function handleError(notifications: NotificationsSetup, err: Error): Rx.Observab
   return Rx.of({ completed: [], failed: [] });
 }
 
-export class ReportingPublicPlugin implements Plugin<void, void> {
+export interface ReportingPublicPluginSetupDendencies {
+  home: HomePublicPluginSetup;
+  management: ManagementSetup;
+  licensing: LicensingPluginSetup;
+  uiActions: UiActionsSetup;
+  share: SharePluginSetup;
+}
+
+export interface ReportingPublicPluginStartDendencies {
+  home: HomePublicPluginStart;
+  management: ManagementStart;
+  licensing: LicensingPluginStart;
+  uiActions: UiActionsStart;
+  share: SharePluginStart;
+}
+
+export class ReportingPublicPlugin
+  implements
+    Plugin<void, void, ReportingPublicPluginSetupDendencies, ReportingPublicPluginStartDendencies> {
   private config: ClientConfigType;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
@@ -76,19 +91,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup,
-    {
-      home,
-      management,
-      licensing,
-      uiActions,
-      share,
-    }: {
-      home: HomePublicPluginSetup;
-      management: ManagementSetup;
-      licensing: LicensingPluginSetup;
-      uiActions: UiActionsSetup;
-      share: SharePluginSetup;
-    }
+    { home, management, licensing, uiActions, share }: ReportingPublicPluginSetupDendencies
   ) {
     const {
       http,
@@ -119,24 +122,19 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       title: this.title,
       order: 1,
       mount: async (params) => {
-        const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
-        ReactDOM.render(
-          <I18nProvider>
-            <ReportListing
-              toasts={toasts}
-              license$={license$}
-              pollConfig={this.config.poll}
-              redirect={start.application.navigateToApp}
-              apiClient={apiClient}
-            />
-          </I18nProvider>,
-          params.element
+        const [[start], { mountManagementSection }] = await Promise.all([
+          getStartServices(),
+          import('./mount_management_section'),
+        ]);
+        return await mountManagementSection(
+          core,
+          start,
+          license$,
+          this.config.poll,
+          apiClient,
+          params
         );
-
-        return () => {
-          ReactDOM.unmountComponentAtNode(params.element);
-        };
       },
     });
 
