@@ -8,13 +8,7 @@
 
 ```typescript
 export declare type ExpressionValueError = ExpressionValueBoxed<'error', {
-    error: {
-        message: string;
-        type?: string;
-        name?: string;
-        stack?: string;
-        original?: Error;
-    };
-    info?: unknown;
+    error: ErrorLike;
+    info?: SerializableState;
 }>;
 ```
