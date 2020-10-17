@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { lazy } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { AlertTypeModel } from '../../../../types';
 import { validateExpression } from './validation';
 import { IndexThresholdAlertParams } from './types';
@@ -17,6 +17,12 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
     iconClass: 'alert',
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
+    defaultActionMessage: i18n.translate(
+      'xpack.triggers_actions_ui.builtin_alert_types.threshold.alertDefaultActionMessage',
+      {
+        defaultMessage: `alert \\{\\{alertName\\}\\} group \\{\\{context.group\\}\\} value \\{\\{context.value\\}\\} exceeded threshold \\{\\{context.function\\}\\} over \\{\\{context.window\\}\\} on \\{\\{context.date\\}\\}`,
+      }
+    ),
     requiresAppContext: false,
   };
 }
