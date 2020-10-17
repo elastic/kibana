@@ -67,6 +67,7 @@ import {
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectEqlRuleType,
+  waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -200,12 +201,9 @@ describe('Detection rules, EQL', () => {
     goToRuleDetails();
     refreshPage();
     waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('eql', expectedNumberOfSequenceAlerts);
-      });
+    cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfSequenceAlerts);
     cy.get(ALERT_RULE_NAME).first().should('have.text', eqlSequenceRule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');

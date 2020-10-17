@@ -11,6 +11,7 @@ import {
   OverrideRule,
   ThresholdRule,
 } from '../objects/rule';
+import { NUMBER_OF_ALERTS } from '../screens/alerts';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -268,6 +269,15 @@ export const waitForTheRuleToBeExecuted = async () => {
   while (status !== 'succeeded') {
     cy.get(REFRESH_BUTTON).click();
     status = await cy.get(RULE_STATUS).invoke('text').promisify();
+  }
+};
+
+export const waitForAlertsToPopulate = async () => {
+  let alertCount = 0;
+  while (alertCount <= 0) {
+    cy.get(REFRESH_BUTTON).click();
+    const countText = await cy.get(NUMBER_OF_ALERTS).invoke('text').promisify();
+    alertCount = parseInt(countText, 10) || 0;
   }
 };
 
