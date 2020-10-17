@@ -8,7 +8,6 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
 import 'react-vis/dist/style.css';
 import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
@@ -16,18 +15,18 @@ import {
   KibanaContextProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '../../../../../src/plugins/kibana_react/public';
-import { APMRouteDefinition } from '../application/routes';
-import { renderAsRedirectTo } from '../components/app/Main/route_config';
-import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { ConfigSchema } from '../index';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { px, units } from '../style/variables';
+} from '../../../../../../src/plugins/kibana_react/public';
+import { APMRouteDefinition } from '../routes';
+import { renderAsRedirectTo } from '../../components/app/Main/route_config';
+import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
+import { RumHome, UX_LABEL } from '../../components/app/RumDashboard/RumHome';
+import { ApmPluginContext } from '../../context/ApmPluginContext';
+import { UrlParamsProvider } from '../../context/UrlParamsContext';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { ConfigSchema } from '../../index';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
+import { px, units } from '../../style/variables';
+import { createCallApmApi } from '../../services/rest/createCallApmApi';
 
 const CsmMainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -43,7 +42,7 @@ export const rumRoutes: APMRouteDefinition[] = [
   },
 ];
 
-function CsmApp() {
+function UxApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   useBreadcrumbs(rumRoutes);
@@ -64,7 +63,7 @@ function CsmApp() {
   );
 }
 
-export function CsmAppRoot({
+function UxAppRoot({
   core,
   deps,
   history,
@@ -77,6 +76,8 @@ export function CsmAppRoot({
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
 }) {
+  createCallApmApi(core.http);
+
   const i18nCore = core.i18n;
   const plugins = deps;
   const apmPluginContextValue = {
@@ -91,7 +92,7 @@ export function CsmAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
-                <CsmApp />
+                <UxApp />
               </UrlParamsProvider>
             </Router>
           </i18nCore.Context>
@@ -101,30 +102,5 @@ export function CsmAppRoot({
   );
 }
 
-/**
- * This module is rendered asynchronously in the Kibana platform.
- */
-
-export const renderApp = (
-  core: CoreStart,
-  deps: ApmPluginSetupDeps,
-  { element, history }: AppMountParameters,
-  config: ConfigSchema,
-  corePlugins: ApmPluginStartDeps
-) => {
-  createCallApmApi(core.http);
-
-  ReactDOM.render(
-    <CsmAppRoot
-      core={core}
-      deps={deps}
-      history={history}
-      config={config}
-      corePlugins={corePlugins}
-    />,
-    element
-  );
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
-};
+//  eslint-disable-next-line import/no-default-export
+export default UxAppRoot;
