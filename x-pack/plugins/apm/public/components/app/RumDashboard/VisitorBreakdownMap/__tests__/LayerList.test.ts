@@ -5,12 +5,12 @@
  */
 
 import { mockLayerList } from './__mocks__/regions_layer.mock';
-import { getLayerList } from '../LayerList';
+import { useLayerList } from '../LayerList';
 
 describe('LayerList', () => {
   describe('getLayerList', () => {
     test('it returns the region layer', () => {
-      const layerList = getLayerList();
+      const layerList = useLayerList();
       expect(layerList).toStrictEqual(mockLayerList);
     });
   });
