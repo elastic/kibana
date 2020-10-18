@@ -17,15 +17,13 @@
  * under the License.
  */
 import React from 'react';
-import { EuiCodeBlock, EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { DiscoverGridPopover } from './discover_grid_popover';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
-import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
-  rows: ElasticSearchHit[] | undefined,
-  onFilter: DocViewFilterFn
+  rows: ElasticSearchHit[] | undefined
 ) => ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
   const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
 
@@ -51,7 +49,7 @@ export const getRenderCellValueFn = (
       </dl>
     );
   };
-  // TODO Field formatters need to be fixed
+
   const value =
     field && field.type === '_source' ? (
       formatSource()
@@ -60,31 +58,8 @@ export const getRenderCellValueFn = (
       <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
     );
 
-  if (isDetails && field && (field.type === '_source' || typeof row[columnId] === 'object')) {
-    return (
-      <EuiCodeBlock language="json" paddingSize="none" transparentBackground={true}>
-        {JSON.stringify(row[columnId], null, 2)}
-      </EuiCodeBlock>
-    );
-  }
-  if (isDetails && indexPattern.fields.getByName(columnId)?.filterable) {
-    const createFilter = (fieldName: string, type: '-' | '+') => {
-      return onFilter(
-        indexPattern.fields.getByName(fieldName),
-        indexPattern.flattenHit(row)[fieldName],
-        type
-      );
-    };
-
-    return (
-      <DiscoverGridPopover
-        value={value}
-        onPositiveFilterClick={() => createFilter(columnId, '+')}
-        onNegativeFilterClick={() => createFilter(columnId, '-')}
-      />
-    );
-  } else if (indexPattern.fields.getByName(columnId)?.filterable) {
-    return value;
+  if (isDetails && field && field.type === '_source') {
+    return JSON.stringify(row[columnId], null, 2);
   }
   return value;
 };

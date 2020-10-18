@@ -157,10 +157,9 @@ export const DiscoverGrid = React.memo(
     /**
      * Cell rendering
      */
-    const renderCellValue = useMemo(() => getRenderCellValueFn(indexPattern, rows, onFilter), [
+    const renderCellValue = useMemo(() => getRenderCellValueFn(indexPattern, rows), [
       rows,
       indexPattern,
-      onFilter,
     ]);
 
     const toolbarVisibility = {

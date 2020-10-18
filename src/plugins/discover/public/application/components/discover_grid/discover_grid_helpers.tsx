@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { ReactNode } from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiCodeBlock, EuiDataGridColumn } from '@elastic/eui';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 
 const kibanaJSON = 'kibana-json';
@@ -87,14 +87,16 @@ export function buildEuiGridColumn(
       column.schema = 'numeric';
       break;
     case '_source':
+      column.schema = kibanaJSON;
+      break;
     case 'object':
-      column.schema = 'object';
+      column.schema = 'json';
       break;
     case 'geo_point':
       column.schema = geoPoint;
       break;
     default:
-      column.schema = undefined;
+      column.schema = 'json';
       break;
   }
 
@@ -108,7 +110,6 @@ export function buildEuiGridColumn(
   return column;
 }
 
-// TODO @dsnide can make edits here per type
 // Types [geoPoint], [kibanaJSON], numeric, datetime
 export function getSchemaDetectors() {
   return [
@@ -138,6 +139,13 @@ export function getPopoverContents() {
   return {
     [geoPoint]: ({ children }: { children: ReactNode }) => {
       return <span className="geo-point">{children}</span>;
+    },
+    [kibanaJSON]: ({ children }: { children: ReactNode }) => {
+      return (
+        <EuiCodeBlock language="json" paddingSize="none" transparentBackground={true}>
+          {children}
+        </EuiCodeBlock>
+      );
     },
   };
 }
