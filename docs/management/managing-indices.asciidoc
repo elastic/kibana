@@ -232,7 +232,7 @@ everything looks right, click *Create template*.
 You’re now ready to load the logs data and create new indices using your index
 template.
 
-. In the {kib} *Console*, index the following documents.
+. In the {kib} *Console*, index the following documents:
 +
 [source,js]
 ----
