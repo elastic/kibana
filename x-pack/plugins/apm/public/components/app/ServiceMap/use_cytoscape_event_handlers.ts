@@ -74,6 +74,16 @@ function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
   }
 }
 
+function resetConnectedEdgeStyle(
+  cytoscapeInstance: cytoscape.Core,
+  node?: cytoscape.NodeSingular
+) {
+  cytoscapeInstance.edges().removeClass('highlight');
+  if (node) {
+    node.connectedEdges().addClass('highlight');
+  }
+}
+
 export function useCytoscapeEventHandlers({
   cy,
   serviceName,
@@ -87,16 +97,6 @@ export function useCytoscapeEventHandlers({
 
   useEffect(() => {
     const nodeHeight = getNodeHeight(theme);
-
-    const resetConnectedEdgeStyle = (
-      cytoscapeInstance: cytoscape.Core,
-      node?: cytoscape.NodeSingular
-    ) => {
-      cytoscapeInstance.edges().removeClass('highlight');
-      if (node) {
-        node.connectedEdges().addClass('highlight');
-      }
-    };
 
     const dataHandler: cytoscape.EventHandler = (event, fit) => {
       if (serviceName) {
@@ -140,9 +140,7 @@ export function useCytoscapeEventHandlers({
       event.target.connectedEdges().addClass('nodeHover');
     };
     const mouseoutHandler: cytoscape.EventHandler = (event) => {
-      if (event.target.isNode()) {
-        setCursor('default', event);
-      }
+      setCursor('default', event);
 
       event.target.removeClass('hover');
       event.target.connectedEdges().removeClass('nodeHover');
