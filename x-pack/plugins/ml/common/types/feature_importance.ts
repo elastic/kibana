@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export type FeatureImportClassName = string | number | boolean;
+
 export interface ClassFeatureImportance {
-  class_name: string | number | boolean;
+  class_name: FeatureImportClassName;
   importance: number;
 }
 export interface FeatureImportance {
@@ -15,7 +17,7 @@ export interface FeatureImportance {
 }
 
 export interface TopClass {
-  class_name: string;
+  class_name: FeatureImportClassName;
   class_probability: number;
   class_score: number;
 }
@@ -23,7 +25,7 @@ export interface TopClass {
 export type TopClasses = TopClass[];
 
 export interface ClassFeatureImportanceSummary {
-  class_name: string;
+  class_name: FeatureImportClassName;
   importance: {
     max: number;
     min: number;
@@ -50,7 +52,7 @@ export type TotalFeatureImportance =
   | RegressionTotalFeatureImportance;
 
 export interface FeatureImportanceClassBaseline {
-  class_name: string | number | boolean;
+  class_name: FeatureImportClassName;
   baseline: number;
 }
 export interface ClassificationFeatureImportanceBaseline {
@@ -78,13 +80,17 @@ export function isRegressionTotalFeatureImportance(
 }
 
 export function isClassificationFeatureImportanceBaseline(
-  baselineData: ClassificationFeatureImportanceBaseline | RegressionFeatureImportanceBaseline
+  baselineData: any
 ): baselineData is ClassificationFeatureImportanceBaseline {
-  return (baselineData as ClassificationFeatureImportanceBaseline).classes !== undefined;
+  return (
+    typeof baselineData === 'object' &&
+    baselineData.hasOwnProperty('classes') &&
+    Array.isArray(baselineData.classes)
+  );
 }
 
 export function isRegressionFeatureImportanceBaseline(
-  baselineData: ClassificationFeatureImportanceBaseline | RegressionFeatureImportanceBaseline
+  baselineData: any
 ): baselineData is RegressionFeatureImportanceBaseline {
-  return (baselineData as RegressionFeatureImportanceBaseline).baseline !== undefined;
+  return typeof baselineData === 'object' && baselineData.hasOwnProperty('baseline');
 }

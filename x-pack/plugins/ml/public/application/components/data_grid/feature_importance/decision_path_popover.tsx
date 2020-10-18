@@ -20,6 +20,7 @@ import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
 import { ClassificationDecisionPath } from './decision_path_classification';
 import { useMlKibana } from '../../../contexts/kibana';
 import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
+import { getStringBasedClassName } from './use_classification_path_data';
 
 interface DecisionPathPopoverProps {
   featureImportance: FeatureImportance[];
@@ -36,7 +37,7 @@ enum DECISION_PATH_TABS {
 }
 
 export interface ExtendedFeatureImportance extends FeatureImportance {
-  absImportance?: number;
+  absImportance: number;
 }
 
 export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
@@ -116,23 +117,24 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
             />
           </EuiText>
           {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-            baseline &&
             isClassificationFeatureImportanceBaseline(baseline) && (
               <ClassificationDecisionPath
                 featureImportance={featureImportance}
                 topClasses={topClasses as TopClasses}
-                predictedValue={predictedValue as string}
+                predictedValue={getStringBasedClassName(predictedValue)}
                 predictionFieldName={predictionFieldName}
                 baseline={baseline}
               />
             )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION &&
-            baseline &&
-            isRegressionFeatureImportanceBaseline(baseline) && (
+            isRegressionFeatureImportanceBaseline(baseline) &&
+            predictedValue !== undefined && (
               <RegressionDecisionPath
                 featureImportance={featureImportance}
                 baseline={baseline}
-                predictedValue={predictedValue as number}
+                predictedValue={
+                  typeof predictedValue === 'string' ? parseFloat(predictedValue) : predictedValue
+                }
                 predictionFieldName={predictionFieldName}
               />
             )}

@@ -44,7 +44,7 @@ export const isDecisionPathData = (decisionPathData: any): boolean => {
 
 // cast to 'True' | 'False' | value to match Eui display
 export const getStringBasedClassName = (v: string | boolean | undefined | number): string => {
-  if (v === undefined) {
+  if (v === undefined || v === null) {
     return '';
   }
   if (typeof v === 'boolean') {
@@ -69,44 +69,24 @@ export const useDecisionPathData = ({
   predictedValue,
 }: UseDecisionPathDataParams): { decisionPathData: DecisionPathPlotData | undefined } => {
   const decisionPathData = useMemo(() => {
-    if (baseline !== undefined) {
-      if (isRegressionFeatureImportanceBaseline(baseline)) {
-        return buildRegressionDecisionPathData({
-          baseline: baseline.baseline,
-          featureImportance,
-          predictedValue: predictedValue as number | undefined,
-        });
-      }
-      if (isClassificationFeatureImportanceBaseline(baseline)) {
-        return buildClassificationDecisionPathData({
-          baselines: baseline.classes,
-          featureImportance,
-          currentClass: predictedValue as string | undefined,
-        });
-      }
+    if (baseline === undefined) return;
+    if (isRegressionFeatureImportanceBaseline(baseline)) {
+      return buildRegressionDecisionPathData({
+        baseline: baseline.baseline,
+        featureImportance,
+        predictedValue: predictedValue as number | undefined,
+      });
+    }
+    if (isClassificationFeatureImportanceBaseline(baseline)) {
+      return buildClassificationDecisionPathData({
+        baselines: baseline.classes,
+        featureImportance,
+        currentClass: predictedValue as string | undefined,
+      });
     }
   }, [baseline, featureImportance, predictedValue]);
 
   return { decisionPathData };
-};
-
-export const buildDecisionPathData = (featureImportance: ExtendedFeatureImportance[]) => {
-  const finalResult: DecisionPathPlotData = featureImportance
-    // sort by absolute importance so it goes from bottom (baseline) to top
-    .sort(
-      (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
-        b.absImportance! - a.absImportance!
-    )
-    .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
-
-  // start at the baseline and end at predicted value
-  // for regression, cumulativeSum should add up to baseline
-  let cumulativeSum = 0;
-  for (let i = featureImportance.length - 1; i >= 0; i--) {
-    cumulativeSum += finalResult[i][1];
-    finalResult[i][2] = cumulativeSum;
-  }
-  return finalResult;
 };
 
 /**
@@ -118,8 +98,7 @@ export const buildRegressionDecisionPathData = ({
   featureImportance,
   predictedValue,
 }: RegressionDecisionPathProps): DecisionPathPlotData | undefined => {
-  let mappedFeatureImportance: ExtendedFeatureImportance[] = featureImportance;
-  mappedFeatureImportance = mappedFeatureImportance.map((d) => ({
+  const mappedFeatureImportance: ExtendedFeatureImportance[] = featureImportance.map((d) => ({
     ...d,
     absImportance: Math.abs(d[FEATURE_IMPORTANCE] as number),
   }));
@@ -164,7 +143,103 @@ export const buildRegressionDecisionPathData = ({
     (f) => f !== undefined
   ) as ExtendedFeatureImportance[];
 
-  return buildDecisionPathData(filteredFeatureImportance);
+  const finalResult: DecisionPathPlotData = filteredFeatureImportance
+    // sort by absolute importance so it goes from bottom (baseline) to top
+    .sort(
+      (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
+        b.absImportance - a.absImportance
+    )
+    .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
+
+  // start at the baseline and end at predicted value
+  // for regression, cumulativeSum should add up to baseline
+  let cumulativeSum = 0;
+  for (let i = filteredFeatureImportance.length - 1; i >= 0; i--) {
+    cumulativeSum += finalResult[i][1];
+    finalResult[i][2] = cumulativeSum;
+  }
+  return finalResult;
+};
+
+export const buildBinaryClassificationDecisionPathData = ({
+  decisionPlotData,
+  startingBaseline,
+}: {
+  decisionPlotData: DecisionPathPlotData;
+  startingBaseline: number;
+}): DecisionPathPlotData | undefined => {
+  const finalResult = decisionPlotData;
+  // transform the numbers into the probability space
+  // starting with the baseline retrieved from trained_models metadata
+  let logOddSoFar = startingBaseline;
+  for (let i = finalResult.length - 1; i >= 0; i--) {
+    logOddSoFar += finalResult[i][1];
+    const predictionProbabilitySoFar = Math.exp(logOddSoFar) / (Math.exp(logOddSoFar) + 1);
+    finalResult[i][2] = predictionProbabilitySoFar;
+  }
+  return finalResult;
+};
+
+export const buildMultiClassClassificationDecisionPathData = ({
+  baselines,
+  decisionPlotData,
+  startingBaseline,
+  featureImportance,
+}: {
+  baselines: ClassificationFeatureImportanceBaseline['classes'];
+  decisionPlotData: DecisionPathPlotData;
+  startingBaseline: number;
+  featureImportance: FeatureImportance[];
+}): DecisionPathPlotData | undefined => {
+  const denominator = computeMultiClassImportanceDenominator({ baselines, featureImportance });
+
+  // calculate the probability path
+  // p_j = exp(baseline(A) + \sum_{i=0}^j feature_importance_i(A)) / denominator
+  const baseline = startingBaseline;
+  let featureImportanceRunningSum = 0;
+  for (let i = decisionPlotData.length - 1; i >= 0; i--) {
+    featureImportanceRunningSum += decisionPlotData[i][1];
+    const numerator = Math.exp(baseline + featureImportanceRunningSum);
+    decisionPlotData[i][2] = numerator / denominator;
+  }
+
+  return decisionPlotData;
+};
+
+/**
+ * Compute the denominator used for multiclass classification
+ * (\sum_{x\in{A,B,C}} exp(baseline(x) + \sum_{i=0}^j feature_importance_i(x)))
+ */
+export const computeMultiClassImportanceDenominator = ({
+  baselines,
+  featureImportance,
+}: {
+  baselines: ClassificationFeatureImportanceBaseline['classes'];
+  featureImportance: FeatureImportance[];
+}): number => {
+  let denominator = 0;
+  for (let x = 0; x < baselines.length; x++) {
+    let featureImportanceOfClassX = 0;
+    for (let i = 0; i < featureImportance.length; i++) {
+      const feature = featureImportance[i];
+      const classFeatureImportance = Array.isArray(feature.classes)
+        ? feature.classes.find(
+            (c) =>
+              getStringBasedClassName(c.class_name) ===
+              getStringBasedClassName(baselines[x].class_name)
+          )
+        : feature;
+      if (
+        classFeatureImportance &&
+        classFeatureImportance.importance !== undefined &&
+        typeof classFeatureImportance[FEATURE_IMPORTANCE] === 'number'
+      ) {
+        featureImportanceOfClassX += classFeatureImportance.importance;
+      }
+    }
+    denominator += Math.exp(baselines[x].baseline + featureImportanceOfClassX);
+  }
+  return denominator;
 };
 
 /**
@@ -204,11 +279,13 @@ export const buildClassificationDecisionPathData = ({
   const baselineClass = baselines.find(
     (bl) => getStringBasedClassName(bl.class_name) === getStringBasedClassName(currentClass)
   );
+  const startingBaseline = baselineClass?.baseline ? baselineClass?.baseline : 0;
+
   const filteredFeatureImportance = mappedFeatureImportance.filter(
     (f) => f !== undefined
   ) as ExtendedFeatureImportance[];
 
-  const finalResult: DecisionPathPlotData = filteredFeatureImportance
+  const decisionPlotData: DecisionPathPlotData = filteredFeatureImportance
     // sort by absolute importance so it goes from bottom (baseline) to top
     .sort(
       (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
@@ -216,70 +293,18 @@ export const buildClassificationDecisionPathData = ({
     )
     .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
 
-  /**
-   * For binary classification
-   */
+  // if binary classification
   if (baselines.length === 2) {
-    // transform the numbers into the probability space
-    // starting with the baseline retrieved from trained_models metadata
-    let logOddSoFar = baselineClass?.baseline ? baselineClass?.baseline : 0;
-    for (let i = featureImportance.length - 1; i >= 0; i--) {
-      logOddSoFar += finalResult[i][1];
-      const predictionProbabilitySoFar = Math.exp(logOddSoFar) / (Math.exp(logOddSoFar) + 1);
-      finalResult[i][2] = predictionProbabilitySoFar;
-    }
-    return finalResult;
+    return buildBinaryClassificationDecisionPathData({
+      startingBaseline,
+      decisionPlotData,
+    });
   }
-
-  /**
-   * For multiclass classification
-   */
-
-  // first calculate the denominator
-  // (\sum_{x\in{A,B,C}} exp(baseline(x) + \sum_{i=0}^j feature_importance_i(x)))
-  let denominator = 0;
-  for (let x = 0; x < baselines.length; x++) {
-    // grab the feature importance for class x
-    const _featureImportanceOfClassX: ExtendedFeatureImportance[] = featureImportance
-      .map((feature) => {
-        const classFeatureImportance = Array.isArray(feature.classes)
-          ? feature.classes.find(
-              (c) =>
-                getStringBasedClassName(c.class_name) ===
-                getStringBasedClassName(baselines[x].class_name)
-            )
-          : feature;
-        if (
-          classFeatureImportance &&
-          typeof classFeatureImportance[FEATURE_IMPORTANCE] === 'number'
-        ) {
-          return {
-            [FEATURE_NAME]: feature[FEATURE_NAME],
-            [FEATURE_IMPORTANCE]: classFeatureImportance[FEATURE_IMPORTANCE],
-            absImportance: Math.abs(classFeatureImportance[FEATURE_IMPORTANCE] as number),
-          };
-        }
-        return undefined;
-      })
-      .filter((d) => d !== undefined) as ExtendedFeatureImportance[];
-
-    const featureImportanceOfClassX = _featureImportanceOfClassX.reduce(
-      (acc, a) => acc + a.importance!,
-      0
-    );
-
-    denominator += Math.exp(baselines[x].baseline + featureImportanceOfClassX);
-  }
-
-  // calculate the probability path
-  // p_j = exp(baseline(A) + \sum_{i=0}^j feature_importance_i(A)) / denominator
-  const baseline = baselineClass?.baseline !== undefined ? baselineClass.baseline : 0;
-  let featureImportanceRunningSum = 0;
-  for (let i = featureImportance.length - 1; i >= 0; i--) {
-    featureImportanceRunningSum += finalResult[i][1];
-    const numerator = Math.exp(baseline + featureImportanceRunningSum);
-    finalResult[i][2] = numerator / denominator;
-  }
-
-  return finalResult;
+  // else if multiclass classification
+  return buildMultiClassClassificationDecisionPathData({
+    baselines,
+    decisionPlotData,
+    startingBaseline,
+    featureImportance,
+  });
 };
