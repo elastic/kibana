@@ -117,6 +117,13 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       this.esContext.initialize();
     }
 
+    // log an error if initialiization didn't succeed
+    this.esContext.waitTillReady().then((success) => {
+      if (!success) {
+        this.systemLogger.error(`initialization failed, events will not be indexed`);
+      }
+    });
+
     // will log the event after initialization
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
@@ -136,18 +143,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     return this.eventLogClientService;
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<unknown, unknown, unknown>,
-    'eventLog'
-  > => {
-    return async (context, request) => {
-      return {
-        getEventLogClient: () => this.eventLogClientService!.getClient(request),
-      };
-    };
-  };
-
-  stop() {
+  async stop(): Promise<void> {
     this.systemLogger.debug('stopping plugin');
 
     if (!this.eventLogger) throw new Error('eventLogger not initialized');
@@ -158,5 +154,20 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { action: ACTIONS.stopping },
       message: 'eventLog stopping',
     });
+
+    this.systemLogger.info('shutdown: waiting to finish');
+    await this.esContext?.shutdown();
+    this.systemLogger.info('shutdown: finished');
   }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    RequestHandler<unknown, unknown, unknown>,
+    'eventLog'
+  > => {
+    return async (context, request) => {
+      return {
+        getEventLogClient: () => this.eventLogClientService!.getClient(request),
+      };
+    };
+  };
 }
