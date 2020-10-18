@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import {
+  Logger,
+  LegacyAPICaller,
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
@@ -45,6 +51,25 @@ export type MakeSchemaFrom<Base> = {
     : RecursiveMakeSchemaFrom<Required<Base>[Key]>;
 };
 
+export interface CollectorFetchContext {
+  /**
+   * @depricated Scoped Legacy Elasticsearch client: use esClient instead
+   */
+  callCluster: LegacyAPICaller;
+  /**
+   * Request-scoped Elasticsearch client:
+   * - When users are requesting a sample of data, it is scoped to their role to avoid exposing data they should't read
+   * - When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user
+   */
+  esClient: ElasticsearchClient;
+  /**
+   * Request-scoped Saved Objects client:
+   * - When users are requesting a sample of data, it is scoped to their role to avoid exposing data they should't read
+   * - When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user
+   */
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository;
+}
+
 export interface CollectorOptions<T = unknown, U = T> {
   /**
    * Unique string identifier for the collector
@@ -59,14 +84,8 @@ export interface CollectorOptions<T = unknown, U = T> {
    * Schema definition of the output of the `fetch` method.
    */
   schema?: MakeSchemaFrom<T>;
-  /**
-   * Called whenever usage collection is requested. It should return the payload to be reported as usage for the `type` collector.
-   *
-   * @param callCluster {@Link LegacyAPICaller}
-   * @param esClient {@Link ElasticsearchClient}
-   */
-  fetch: (callCluster: LegacyAPICaller, esClient?: ElasticsearchClient) => Promise<T> | T;
-  /**
+  fetch: (collectorFetchContext: CollectorFetchContext) => Promise<T> | T;
+  /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for
    * a generic example.

@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function LoadingSpinner() {
   return (
-    <>
+    <div className="dscOverlay">
       <EuiTitle size="s" data-test-subj="loadingSpinnerText">
         <h2>
           <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
@@ -30,6 +30,6 @@ export function LoadingSpinner() {
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
-    </>
+    </div>
   );
 }

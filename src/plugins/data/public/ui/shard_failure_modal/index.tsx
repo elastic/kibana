@@ -18,14 +18,9 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
 import type { ShardFailureOpenModalButtonProps } from './shard_failure_open_modal_button';
 
-const Fallback = () => (
-  <EuiDelayRender>
-    <EuiLoadingContent lines={1} />
-  </EuiDelayRender>
-);
+const Fallback = () => <div />;
 
 const LazyShardFailureOpenModalButton = React.lazy(
   () => import('./shard_failure_open_modal_button')

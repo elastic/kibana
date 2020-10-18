@@ -122,9 +122,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   }, [onSubmit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.aboutRule, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   return isReadOnlyView ? (
