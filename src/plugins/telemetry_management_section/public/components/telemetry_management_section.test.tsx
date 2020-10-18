@@ -300,7 +300,8 @@ describe('TelemetryManagementSectionComponent', () => {
     );
 
     try {
-      const description = component.instance().renderDescription({ securityExampleEnabled: false });
+      const description = (component.instance() as TelemetryManagementSection).renderDescription();
+      expect(isSecurityExampleEnabled).toBeCalled();
       expect(description).toMatchSnapshot();
     } finally {
       component.unmount();

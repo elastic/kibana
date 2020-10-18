@@ -136,7 +136,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
                     defaultMessage: 'Provide usage statistics',
                   }),
                   value: enabled,
-                  description: this.renderDescription({ securityExampleEnabled }),
+                  description: this.renderDescription(),
                   defVal: true,
                   ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
                     defaultMessage: 'Provide usage statistics',
@@ -185,7 +185,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
     );
   };
 
-  renderDescription = ({ securityExampleEnabled }: { securityExampleEnabled: boolean }) => {
+  renderDescription = () => {
+    const { isSecurityExampleEnabled } = this.props;
+    const securityExampleEnabled = isSecurityExampleEnabled();
     const clusterDataLink = (
       <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
         <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
