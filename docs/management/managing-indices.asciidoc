@@ -227,11 +227,12 @@ You can create additional mapping configurations in the *Dynamic templates* and
 The *Review template* page displays a summary of your index template. If
 everything looks right, click *Create template*.
 
-*Load data*
+*Load the logs data*
 
-You’ve now created an index template. Use the {es} index API to load the data:
+You’re now ready to load the logs data and create new indices using your index
+template.
 
-. In the {kib} *Console*, index two documents:
+. In the {kib} *Console*, index the following documents.
 +
 [source,js]
 ----
@@ -250,7 +251,7 @@ POST /my-index-000001/_doc
   "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/charles-fullerton.jpg"
 }
 
-POST /my-index-000001/_doc
+POST /my-index-000002/_doc
 {
   "@timestamp": "2019-05-20T03:44:20.844Z",
   "ip": "198.247.165.49",
@@ -266,6 +267,8 @@ POST /my-index-000001/_doc
   "url": "https://theacademyofperformingartsandscience.org/people/type:astronauts/name:laurel-b-clark/profile"
 }
 ----
++
+These requests create two indices: `my-index-000001` and `my-index-000002`.
 
 . Use the {es} {ref}/indices-get-index.html#indices-get-index[get index API] to
 view one of the newly created indices. The index's mappings and alias are
