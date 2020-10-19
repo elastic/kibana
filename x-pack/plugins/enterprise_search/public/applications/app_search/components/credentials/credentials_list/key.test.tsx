@@ -29,24 +29,24 @@ describe('Key', () => {
 
   it('will call copy when the first button is clicked', () => {
     const wrapper = shallow(<Key {...props} />);
-    (wrapper.find(EuiButtonIcon).at(0).props() as any).onClick();
+    wrapper.find(EuiButtonIcon).first().simulate('click');
     expect(props.copy).toHaveBeenCalled();
   });
 
   it('will call hide when the second button is clicked', () => {
     const wrapper = shallow(<Key {...props} />);
-    (wrapper.find(EuiButtonIcon).at(1).props() as any).onClick();
+    wrapper.find(EuiButtonIcon).last().simulate('click');
     expect(props.toggleIsHidden).toHaveBeenCalled();
   });
 
   it('will render the "eye" icon when isHidden is true', () => {
     const wrapper = shallow(<Key {...props} />);
-    expect((wrapper.find(EuiButtonIcon).at(1).props() as any).iconType).toBe('eye');
+    expect(wrapper.find(EuiButtonIcon).last().prop('iconType')).toBe('eye');
   });
 
   it('will render the "eyeClosed" icon when isHidden is false', () => {
     const wrapper = shallow(<Key {...{ ...props, isHidden: false }} />);
-    expect((wrapper.find(EuiButtonIcon).at(1).props() as any).iconType).toBe('eyeClosed');
+    expect(wrapper.find(EuiButtonIcon).last().prop('iconType')).toBe('eyeClosed');
   });
 
   it('will render the provided text', () => {
