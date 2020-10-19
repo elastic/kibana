@@ -114,24 +114,21 @@ export const buildEntriesMappingFilter = ({
   threatList,
   chunkSize,
 }: BuildEntriesMappingFilterOptions): BooleanFilter => {
-  const combinedShould = threatList.hits.hits.reduce<BooleanFilter[]>(
-    (accum, threatListSearchItem) => {
-      const filteredEntries = filterThreatMapping({
-        threatMapping,
-        threatListItem: threatListSearchItem._source,
-      });
-      const queryWithAndOrClause = createAndOrClauses({
-        threatMapping: filteredEntries,
-        threatListItem: threatListSearchItem._source,
-      });
-      if (queryWithAndOrClause.bool.should.length !== 0) {
-        // These values can be 10k+ large, so using a push here for performance
-        accum.push(queryWithAndOrClause);
-      }
-      return accum;
-    },
-    []
-  );
+  const combinedShould = threatList.reduce<BooleanFilter[]>((accum, threatListSearchItem) => {
+    const filteredEntries = filterThreatMapping({
+      threatMapping,
+      threatListItem: threatListSearchItem,
+    });
+    const queryWithAndOrClause = createAndOrClauses({
+      threatMapping: filteredEntries,
+      threatListItem: threatListSearchItem,
+    });
+    if (queryWithAndOrClause.bool.should.length !== 0) {
+      // These values can be 10k+ large, so using a push here for performance
+      accum.push(queryWithAndOrClause);
+    }
+    return accum;
+  }, []);
   const should = splitShouldClauses({ should: combinedShould, chunkSize });
   return { bool: { should, minimum_should_match: 1 } };
 };

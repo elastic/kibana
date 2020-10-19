@@ -17,7 +17,7 @@ import {
 /**
  * This should not exceed 10000 (10k)
  */
-export const MAX_PER_PAGE = 100;
+export const MAX_PER_PAGE = 200;
 
 export const getThreatList = async ({
   callCluster,

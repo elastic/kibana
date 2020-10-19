@@ -113,12 +113,14 @@ export const createThreatSignals = async ({
       throttle,
       buildRuleMessage,
       name,
-      currentThreatList: threatList,
+      currentThreatList: threatList.hits.hits,
       currentResult: results,
     }));
     threatListCount -= threatList.hits.hits.length;
     logger.debug(
-      buildRuleMessage(`Approximate number of threat list items to check are ${threatListCount}`)
+      buildRuleMessage(
+        `Approximate number of threat list items to left to check are ${threatListCount}`
+      )
     );
 
     threatList = await getThreatList({

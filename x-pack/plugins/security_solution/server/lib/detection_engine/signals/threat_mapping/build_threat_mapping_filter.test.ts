@@ -19,20 +19,19 @@ import {
 } from './build_threat_mapping_filter';
 import {
   getThreatMappingMock,
-  getThreatListSearchResponseMock,
   getThreatListItemMock,
   getThreatMappingFilterMock,
   getFilterThreatMapping,
   getThreatMappingFiltersShouldMock,
   getThreatMappingFilterShouldMock,
 } from './build_threat_mapping_filter.mock';
-import { BooleanFilter } from './types';
+import { BooleanFilter, ThreatListItem } from './types';
 
 describe('build_threat_mapping_filter', () => {
   describe('buildThreatMappingFilter', () => {
     test('it should throw if given a chunk over 1024 in size', () => {
       const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       expect(() =>
         buildThreatMappingFilter({ threatMapping, threatList, chunkSize: 1025 })
       ).toThrow('chunk sizes cannot exceed 1024 in size');
@@ -40,7 +39,7 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should NOT throw if given a chunk under 1024 in size', () => {
       const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       expect(() =>
         buildThreatMappingFilter({ threatMapping, threatList, chunkSize: 1023 })
       ).not.toThrow();
@@ -48,23 +47,23 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should create the correct entries when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       const filter = buildThreatMappingFilter({ threatMapping, threatList });
       expect(filter).toEqual(getThreatMappingFilterMock());
     });
 
     test('it should not mutate the original threatMapping', () => {
       const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       buildThreatMappingFilter({ threatMapping, threatList });
       expect(threatMapping).toEqual(getThreatMappingMock());
     });
 
     test('it should not mutate the original threatListItem', () => {
       const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       buildThreatMappingFilter({ threatMapping, threatList });
-      expect(threatList).toEqual(getThreatListSearchResponseMock());
+      expect(threatList).toEqual([getThreatListItemMock()]);
     });
   });
 
@@ -312,7 +311,7 @@ describe('build_threat_mapping_filter', () => {
   describe('buildEntriesMappingFilter', () => {
     test('it should return all clauses given the entries', () => {
       const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
@@ -326,8 +325,7 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should return empty "should" given an empty threat list', () => {
       const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
-      threatList.hits.hits = [];
+      const threatList: ThreatListItem[] = [];
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
@@ -340,7 +338,7 @@ describe('build_threat_mapping_filter', () => {
     });
 
     test('it should return empty "should" given an empty threat mapping', () => {
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       const mapping = buildEntriesMappingFilter({
         threatMapping: [],
         threatList,
@@ -374,7 +372,7 @@ describe('build_threat_mapping_filter', () => {
           },
         ],
       ];
-      const threatList = getThreatListSearchResponseMock();
+      const threatList = [getThreatListItemMock()];
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,

@@ -5,7 +5,6 @@
  */
 
 import { Duration } from 'moment';
-import { SearchResponse } from 'elasticsearch';
 import { ListClient } from '../../../../../../lists/server';
 import {
   Type,
@@ -95,7 +94,7 @@ export interface CreateThreatSignalOptions {
   throttle: string;
   buildRuleMessage: BuildRuleMessage;
   name: string;
-  currentThreatList: SearchResponse<ThreatListItem>;
+  currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
 }
 
@@ -105,7 +104,7 @@ export interface ThreatSignalResults {
 
 export interface BuildThreatMappingFilterOptions {
   threatMapping: ThreatMapping;
-  threatList: SearchResponse<ThreatListItem>;
+  threatList: ThreatListItem[];
   chunkSize?: number;
 }
 
@@ -126,7 +125,7 @@ export interface CreateAndOrClausesOptions {
 
 export interface BuildEntriesMappingFilterOptions {
   threatMapping: ThreatMapping;
-  threatList: SearchResponse<ThreatListItem>;
+  threatList: ThreatListItem[];
   chunkSize: number;
 }
 
