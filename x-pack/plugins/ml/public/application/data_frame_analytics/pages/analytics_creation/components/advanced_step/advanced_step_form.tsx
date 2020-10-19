@@ -438,7 +438,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 onCreateOption={(input: string, flattenedOptions = []) => {
                   const normalizedInput = input.trim().toLowerCase();
 
-                  if (!normalizedInput) {
+                  if (normalizedInput === '') {
                     return;
                   }
 
@@ -448,7 +448,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
 
                   if (
                     flattenedOptions.findIndex(
-                      (option: any) => option.label.trim().toLowerCase() === normalizedInput
+                      (option) => option.label.trim().toLowerCase() === normalizedInput
                     ) === -1
                   ) {
                     setNumTopClassesOptions([...numTopClassesOptions, newOption]);
