@@ -64,16 +64,26 @@ export interface SavedObjectsTaggingApiUi {
    * Return the column definition to be used to display the tags in a EUI table.
    * The table's items must be of the `SavedObject` type (or at least have their references available
    * via the `references` field)
+   *
+   * @example
+   * ```ts
+   * // inside a react render
+   * const columns = [...myColumns, ...(taggingApi ? taggingApi.ui.getTableColumnDefinition() : [])];
+   * return (
+   *  <EuiBasicTable {...props} columns={columns} />
+   * )
+   * ```
    */
   getTableColumnDefinition(): EuiTableFieldDataColumnType<SavedObject>;
 
   /**
-   * Convert given tag name to a reference to be used to search using the `_find` API.
+   * Convert given tag name to a {@link SavedObjectsFindOptionsReference | reference }
+   * to be used to search using the savedObjects `_find` API.
    */
   convertNameToReference(tagName: string): SavedObjectsFindOptionsReference | undefined;
 
   /**
-   * Parse given query using EUI's `Query` syntax, and returns the search term and the tag references
+   * Parse given query using EUI's `Query` syntax, and return the search term and the tag references
    * to be used when using the `_find` API to retrieve the filtered objects.
    *
    * @param query The query to parse
@@ -108,6 +118,8 @@ export interface SavedObjectsTaggingApiUi {
 }
 
 /**
+ * UI components to be used to display the tagging feature in any application.
+ *
  * @public
  */
 export interface SavedObjectsTaggingApiUiComponent {
@@ -128,6 +140,8 @@ export interface SavedObjectsTaggingApiUiComponent {
 }
 
 /**
+ * Props type for the {@link SavedObjectsTaggingApiUiComponent.TagList | TagList component}
+ *
  * @public
  */
 export interface TagListComponentProps {
@@ -138,19 +152,41 @@ export interface TagListComponentProps {
 }
 
 /**
+ * Props type for the {@link SavedObjectsTaggingApiUiComponent.TagSelector | TagSelector component}
+ *
  * @public
  */
 export interface TagSelectorComponentProps {
+  /**
+   * Ids of the currently selected tags
+   */
   selected: string[];
-  setSelected: (ids: string[]) => void;
-}
-
-export interface SavedObjectSaveModalTagSelectorComponentProps {
-  initialSelection: string[];
+  /**
+   * tags selection callback
+   */
   setSelected: (ids: string[]) => void;
 }
 
 /**
+ * Props type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}
+ *
+ * @public
+ */
+export interface SavedObjectSaveModalTagSelectorComponentProps {
+  /**
+   * Ids of the initially selected tags.
+   * Changing the value of this prop after initial mount will not rerender the component (see component description for more details)
+   */
+  initialSelection: string[];
+  /**
+   * tags selection callback
+   */
+  setSelected: (ids: string[]) => void;
+}
+
+/**
+ * Options for the {@link SavedObjectsTaggingApiUi.getSearchBarFilter | getSearchBarFilter api}
+ *
  * @public
  */
 export interface GetSearchBarFilterOptions {
@@ -188,6 +224,8 @@ export interface ParsedSearchQuery {
 }
 
 /**
+ * Options for the {@link SavedObjectsTaggingApiUi.parseSearchQuery | parseSearchQuery api}
+ *
  * @public
  */
 export interface ParseSearchQueryOptions {
@@ -198,7 +236,7 @@ export interface ParseSearchQueryOptions {
    * Defaults to true.
    *
    * @remarks this must be set to to true if the filter is configured to use tag names instead of id in the query.
-   *           see {@link GetSearchBarFilterOptions.valueField} for more details.
+   *           see {@link GetSearchBarFilterOptions.useName} for more details.
    */
   useName?: boolean;
   /**
