@@ -2,7 +2,7 @@
 [[import-geospatial-data]]
 == Import geospatial data
 
-To import geospatical data into the Elasitc Stack, the data must be indexed as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
+To import geospatical data into the Elastic Stack, the data must be indexed as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 Geospatial data comes in many formats.
 Choose an import tool based on the format of your geospatial data.
 
