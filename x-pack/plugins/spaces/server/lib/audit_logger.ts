@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuditLogger } from '../../../security/server';
+import { LegacyAuditLogger } from '../../../security/server';
 
 export class SpacesAuditLogger {
-  private readonly auditLogger: AuditLogger;
+  private readonly auditLogger: LegacyAuditLogger;
 
-  constructor(auditLogger: AuditLogger = { log() {} }) {
+  constructor(auditLogger: LegacyAuditLogger = { log() {} }) {
     this.auditLogger = auditLogger;
   }
   public spacesAuthorizationFailure(username: string, action: string, spaceIds?: string[]) {
