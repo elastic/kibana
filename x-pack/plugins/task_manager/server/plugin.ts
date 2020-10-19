@@ -131,9 +131,12 @@ export class TaskManagerPlugin
     });
     this.taskPollingLifecycle = taskPollingLifecycle;
 
-    createMonitoringStats(taskPollingLifecycle, taskStore, this.config!, this.logger).subscribe(
-      this.monitoringStats$.next
-    );
+    createMonitoringStats(
+      taskPollingLifecycle,
+      taskStore,
+      this.config!,
+      this.logger
+    ).subscribe((stat) => this.monitoringStats$.next(stat));
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
