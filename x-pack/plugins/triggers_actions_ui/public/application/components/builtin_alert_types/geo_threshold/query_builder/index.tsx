@@ -28,7 +28,12 @@ import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 import { getTimeOptions } from '../../../../../common/lib/get_time_options';
-import { Query, QueryStringInput } from '../../../../../../../../../src/plugins/data/public';
+import {
+  esQuery,
+  Query,
+  QueryStringInput,
+} from '../../../../../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../../../../../src/plugins/data/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -65,6 +70,31 @@ const labelForDelayOffset = (
     />
   </>
 );
+
+function validateQuery(query: Query) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    query.language === 'kuery'
+      ? esKuery.fromKueryExpression(query.query)
+      : esQuery.luceneStringToDsl(query.query);
+  } catch (err) {
+    return false;
+  }
+  return true;
+}
+
+const getEsFormattedQuery = (query: Query, indexPattern: IIndexPattern) => {
+  let esFormattedQuery;
+
+  const queryLanguage = query.language;
+  if (queryLanguage === 'kuery') {
+    const ast = esKuery.fromKueryExpression(query.query);
+    esFormattedQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+  } else {
+    esFormattedQuery = esQuery.luceneStringToDsl(query.query);
+  }
+  return esFormattedQuery;
+};
 
 export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
   GeoThresholdAlertParams,
@@ -103,14 +133,10 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
-  const [tempIndexQuery, _setTempIndexQuery] = useState<Query>({
+  const [tempIndexQuery, setTempIndexQuery] = useState<Query>({
     query: indexQuery || '',
     language: 'kuery',
   });
-  const setTempIndexQuery = (_tempIndexQuery: Query) => {
-    setAlertParams('indexQuery', _tempIndexQuery.query);
-    _setTempIndexQuery(_tempIndexQuery);
-  };
   const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState<IIndexPattern>({
     id: '',
     fields: [],
@@ -127,14 +153,10 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
-  const [tempBoundaryIndexQuery, _setTempBoundaryIndexQuery] = useState<Query>({
+  const [tempBoundaryIndexQuery, setTempBoundaryIndexQuery] = useState<Query>({
     query: boundaryIndexQuery || '',
     language: 'kuery',
   });
-  const setTempBoundaryIndexQuery = (_tempBoundaryIndexQuery: Query) => {
-    setAlertParams('boundaryIndexQuery', _tempBoundaryIndexQuery.query);
-    _setTempBoundaryIndexQuery(_tempBoundaryIndexQuery);
-  };
   const [delayOffset, _setDelayOffset] = useState<number>(0);
   function setDelayOffset(_delayOffset: number) {
     setAlertParams('delayOffsetWithUnits', `${_delayOffset}${delayOffsetUnit}`);
@@ -272,7 +294,13 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           bubbleSubmitEvent
           indexPatterns={indexPattern ? [indexPattern] : []}
           query={tempIndexQuery}
-          onChange={setTempIndexQuery}
+          onChange={(query) => {
+            if (validateQuery(query)) {
+              const esFormattedQuery = getEsFormattedQuery(query, indexPattern);
+              setAlertParams('indexQuery', esFormattedQuery);
+            }
+            setTempIndexQuery(query);
+          }}
         />
       </EuiFlexItem>
 
@@ -350,7 +378,13 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           bubbleSubmitEvent
           indexPatterns={boundaryIndexPattern ? [boundaryIndexPattern] : []}
           query={tempBoundaryIndexQuery}
-          onChange={setTempBoundaryIndexQuery}
+          onChange={(query) => {
+            if (validateQuery(query)) {
+              const esFormattedQuery = getEsFormattedQuery(query, boundaryIndexPattern);
+              setAlertParams('boundaryIndexQuery', esFormattedQuery);
+            }
+            setTempBoundaryIndexQuery(query);
+          }}
         />
       </EuiFlexItem>
       <EuiSpacer size="l" />

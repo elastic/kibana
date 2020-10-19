@@ -21,7 +21,8 @@ export async function getShapesFilters(
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
   log: Logger,
   alertId: string,
-  boundaryNameField?: string
+  boundaryNameField?: string,
+  boundaryIndexQuery?: object
 ) {
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
@@ -30,6 +31,7 @@ export async function getShapesFilters(
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
+      ...(boundaryIndexQuery ? { query: boundaryIndexQuery } : {}),
     },
   });
   boundaryData.hits.hits.forEach(({ _index, _id }) => {
