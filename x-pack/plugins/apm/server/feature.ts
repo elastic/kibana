@@ -55,7 +55,7 @@ export const APM_FEATURE = {
         read: [],
       },
       alerting: {
-        all: Object.values(AlertType),
+        read: Object.values(AlertType),
       },
       management: {
         insightsAndAlerting: ['triggersActions'],

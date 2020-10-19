@@ -36,7 +36,11 @@ export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRender
     });
 
     render(
-      <VisualizationContainer className="mtrVis" showNoResult={!visData.rows?.length}>
+      <VisualizationContainer
+        className="mtrVis"
+        showNoResult={!visData.rows?.length}
+        handlers={handlers}
+      >
         <MetricVisComponent
           visData={visData}
           visParams={visConfig}

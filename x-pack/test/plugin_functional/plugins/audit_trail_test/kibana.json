@@ -1,9 +1,0 @@
-{
-  "id": "audit_trail_test",
-  "version": "1.0.0",
-  "kibanaVersion": "kibana",
-  "configPath": [],
-  "requiredPlugins": ["auditTrail"],
-  "server": true,
-  "ui": false
-}

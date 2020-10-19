@@ -131,7 +131,7 @@ describe.skip('Detection rules, EQL', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${eqlRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${eqlRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', eqlRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', eqlRule.severity);
@@ -145,7 +145,7 @@ describe.skip('Detection rules, EQL', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${eqlRule.customQuery} `);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', eqlRule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Event Correlation');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });

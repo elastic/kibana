@@ -49,14 +49,16 @@ export function registerSearchRoute(
       const [, , selfStart] = await getStartServices();
 
       try {
-        const response = await selfStart.search.search(
-          context,
-          { ...searchRequest, id },
-          {
-            abortSignal,
-            strategy,
-          }
-        );
+        const response = await selfStart.search
+          .search(
+            { ...searchRequest, id },
+            {
+              abortSignal,
+              strategy,
+            },
+            context
+          )
+          .toPromise();
 
         return res.ok({
           body: {

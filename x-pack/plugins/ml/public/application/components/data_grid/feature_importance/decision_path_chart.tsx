@@ -25,6 +25,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { DecisionPathPlotData } from './use_classification_path_data';
+import { formatSingleValue } from '../../../formatters/format_value';
 
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -79,7 +80,6 @@ interface DecisionPathChartProps {
 
 const DECISION_PATH_MARGIN = 125;
 const DECISION_PATH_ROW_HEIGHT = 10;
-const NUM_PRECISION = 3;
 const AnnotationBaselineMarker = <EuiIcon type="dot" size="m" />;
 
 export const DecisionPathChart = ({
@@ -95,7 +95,7 @@ export const DecisionPathChart = ({
     () => [
       {
         dataValue: baseline,
-        header: baseline ? baseline.toPrecision(NUM_PRECISION) : '',
+        header: baseline ? formatSingleValue(baseline).toString() : '',
         details: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
           {
@@ -110,7 +110,7 @@ export const DecisionPathChart = ({
   // if regression, guarantee up to num_precision significant digits without having it in scientific notation
   // if classification, hide the numeric values since we only want to show the path
   const tickFormatter = useCallback(
-    (d) => (showValues === false ? '' : Number(d.toPrecision(NUM_PRECISION)).toString()),
+    (d) => (showValues === false ? '' : formatSingleValue(d).toString()),
     []
   );
 
