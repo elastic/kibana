@@ -24,7 +24,7 @@ import {
 
 import { SerializedPolicy } from '../../../../../common/types';
 
-import { useFormContext } from '../../../../shared_imports';
+import { useFormContext, useFormData } from '../../../../shared_imports';
 
 interface Props {
   legacyPolicy: SerializedPolicy;
@@ -45,12 +45,13 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
   const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
 
   const form = useFormContext();
+  const [formData, getFormData] = useFormData();
 
   useEffect(() => {
-    const subscription = form.subscribe(async (formUpdate) => {
+    (async function checkPolicy() {
       setPolicy(undefined);
-      if (await formUpdate.validate()) {
-        const p = formUpdate.data.format() as SerializedPolicy;
+      if (await form.validate()) {
+        const p = getFormData() as SerializedPolicy;
         setPolicy({
           ...legacyPolicy,
           phases: {
@@ -61,9 +62,9 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
       } else {
         setPolicy(null);
       }
-    });
-    return subscription.unsubscribe;
-  }, [form, legacyPolicy]);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, legacyPolicy, formData]);
 
   let content: React.ReactNode;
   switch (policy) {
