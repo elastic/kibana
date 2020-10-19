@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ContextAppLegacy } from './context_app_legacy';
 
-export function createContextAppLegacy(reactDirective: any) {
-  return reactDirective(ContextAppLegacy, [
-    ['filter', { watchDepth: 'reference' }],
-    ['hits', { watchDepth: 'reference' }],
-    ['indexPattern', { watchDepth: 'reference' }],
-    ['sorting', { watchDepth: 'reference' }],
-    ['columns', { watchDepth: 'collection' }],
-    ['infiniteScroll', { watchDepth: 'reference' }],
-    ['minimumVisibleRows', { watchDepth: 'reference' }],
-    ['status', { watchDepth: 'reference' }],
-  ]);
-}
+export const FAILURE_REASONS = {
+  UNKNOWN: 'unknown',
+  INVALID_TIEBREAKER: 'invalid_tiebreaker',
+};
+
+export const LOADING_STATUS = {
+  FAILED: 'failed',
+  LOADED: 'loaded',
+  LOADING: 'loading',
+  UNINITIALIZED: 'uninitialized',
+};

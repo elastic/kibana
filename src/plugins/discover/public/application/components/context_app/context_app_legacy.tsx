@@ -17,11 +17,13 @@
  * under the License.
  */
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   DocTableLegacy,
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
 import { IIndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
+import { LOADING_STATUS } from './constants';
 
 export interface ContextAppProps {
   columns: string[];
@@ -29,18 +31,42 @@ export interface ContextAppProps {
   indexPattern: IIndexPattern;
   filter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   minimumVisibleRows: number;
-  sorting: string[][];
+  sorting: string[];
+  status: string;
 }
 
 export function ContextAppLegacy(renderProps: ContextAppProps) {
-  const { hits, filter, sorting } = renderProps;
+  const { hits, filter, sorting, status } = renderProps;
   const props = ({ ...renderProps } as unknown) as DocTableLegacyProps;
   props.rows = hits;
   props.onFilter = filter;
-  props.sort = sorting;
+  props.sort = sorting.map((el) => [el]);
+  const isLoaded = status === LOADING_STATUS.LOADED;
+  const loadingFeedback = () => {
+    if (status === LOADING_STATUS.UNINITIALIZED || status === LOADING_STATUS.LOADING) {
+      return (
+        <div className="kuiPanel kuiPanel--centered kuiVerticalRhythm">
+          <div className="kuiTableInfo">
+            <FormattedMessage
+              id="discover.context.loadingDescription"
+              defaultMessage="Loading..."
+            />
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
   return (
-    <div className="discover-table">
-      <DocTableLegacy {...props} />
-    </div>
+    <React.Fragment>
+      {loadingFeedback()}
+      {isLoaded ? (
+        <div className="kuiPanel kuiVerticalRhythm">
+          <div className="discover-table">
+            <DocTableLegacy {...props} />
+          </div>
+        </div>
+      ) : null}
+    </React.Fragment>
   );
 }
