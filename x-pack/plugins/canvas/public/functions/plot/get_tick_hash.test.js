@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTickHash } from './plot/get_tick_hash';
+import { getTickHash } from './get_tick_hash';
 
 describe('getTickHash', () => {
   it('creates a hash for tick marks for string columns only', () => {

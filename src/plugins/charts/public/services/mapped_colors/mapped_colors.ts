@@ -36,7 +36,10 @@ export class MappedColors {
   private _oldMap: any;
   private _mapping: any;
 
-  constructor(private uiSettings: CoreSetup['uiSettings']) {
+  constructor(
+    private uiSettings: CoreSetup['uiSettings'],
+    private colorPaletteFn: (num: number) => string[] = createColorPalette
+  ) {
     this._oldMap = {};
     this._mapping = {};
   }
@@ -93,7 +96,7 @@ export class MappedColors {
 
     // Generate a color palette big enough that all new keys can have unique color values
     const allColors = _(this._mapping).values().union(configColors).union(oldColors).value();
-    const colorPalette = createColorPalette(allColors.length + keysToMap.length);
+    const colorPalette = this.colorPaletteFn(allColors.length + keysToMap.length);
     let newColors = _.difference(colorPalette, allColors);
 
     while (keysToMap.length > newColors.length) {

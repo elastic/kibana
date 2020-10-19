@@ -9,8 +9,6 @@ import { groupBy, get, keyBy, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
 // @ts-expect-error untyped local
-import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
-// @ts-expect-error untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
@@ -146,7 +144,7 @@ export function plotFunctionFactory(
             data: sortBy(data, 'label'),
             options: {
               canvas: false,
-              colors: initialize.paletteService[args.palette.name].getColors(
+              colors: initialize.paletteService[args.palette.name || 'custom'].getColors(
                 data.length,
                 args.palette.params
               ),

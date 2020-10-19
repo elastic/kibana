@@ -25,7 +25,6 @@ export function toExpression(input: SavedLensInput, charts: ChartsPluginStart): 
     );
   }
 
-  // TODO pass charts plugin down here so we can build a proper expression
   if (input.palette) {
     expressionParts.push(
       `palette={${toExpressionString(

@@ -5,7 +5,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 import {
   CoreSetup,
   CoreStart,
@@ -52,6 +52,7 @@ export interface CanvasStartDeps {
   expressions: ExpressionsStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
+  charts: ChartsPluginStart;
 }
 
 /**

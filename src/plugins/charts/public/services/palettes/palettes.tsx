@@ -20,6 +20,7 @@
 // @ts-ignore
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'src/core/public';
 import {
   euiPaletteColorBlind,
   euiPaletteCool,
@@ -32,34 +33,66 @@ import {
 import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
 import { lightenColor } from './lighten_color';
 import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
-import { LegacyColorsService } from '../legacyColors';
+import { LegacyColorsService } from '../legacy_colors';
+import { MappedColors } from '../mapped_colors';
 
 function buildRoundRobinCategoricalWithMappedColors(
-  colorService: LegacyColorsService,
+  uiSettings: IUiSettingsClient
+): Omit<PaletteDefinition, 'title'> {
+  const mappedColors = new MappedColors(uiSettings, (num: number) =>
+    euiPaletteColorBlind({ rotations: Math.ceil(num / 10) })
+  );
+  const mappedBehindTextColors = new MappedColors(uiSettings, (num: number) =>
+    euiPaletteColorBlindBehindText({ rotations: Math.ceil(num / 10) })
+  );
+  function getColor(
+    series: SeriesLayer[],
+    chartConfiguration: ChartColorConfiguration = { behindText: false }
+  ) {
+    mappedColors.mapKeys([series[0].name]);
+    mappedBehindTextColors.mapKeys([series[0].name]);
+
+    const outputColor = chartConfiguration.behindText
+      ? mappedBehindTextColors.get(series[0].name)
+      : mappedColors.get(series[0].name);
+
+    if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
+      return outputColor;
+    }
+
+    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
+  }
+  return {
+    id: 'default',
+    getColor,
+    getColors: () => euiPaletteColorBlind(),
+    toExpression: () => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'system_palette',
+          arguments: {
+            name: ['default'],
+          },
+        },
+      ],
+    }),
+  };
+}
+
+function buildGradient(
   id: string,
-  colors: (n: number) => string[],
-  behindTextColors?: (n: number) => string[]
+  colors: (n: number) => string[]
 ): Omit<PaletteDefinition, 'title'> {
   function getColor(
     series: SeriesLayer[],
     chartConfiguration: ChartColorConfiguration = { behindText: false }
   ) {
-    const colorFromSettings = colorService.mappedColors.getColorFromConfig(series[0].name);
-    // default to 7 series at the current level of hierarchy
     const totalSeriesAtDepth = series[0].totalSeriesAtDepth;
-    // use total number of cached series colors so far as synthetic rank of current series
     const rankAtDepth = series[0].rankAtDepth;
     const actualColors = colors(totalSeriesAtDepth);
-    const actualBehindTextColors = behindTextColors && behindTextColors(totalSeriesAtDepth);
-    let outputColor = colorFromSettings || actualColors[rankAtDepth];
-
-    // translate the color to the behind text variant if possible
-    if (chartConfiguration.behindText && actualBehindTextColors) {
-      const colorIndex = actualColors.findIndex((color) => outputColor === color);
-      if (colorIndex !== -1) {
-        outputColor = actualBehindTextColors[colorIndex];
-      }
-    }
+    const outputColor = actualColors[rankAtDepth];
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
@@ -159,30 +192,15 @@ function buildCustomPalette(): PaletteDefinition {
 }
 
 export const buildPalettes: (
+  uiSettings: IUiSettingsClient,
   legacyColorsService: LegacyColorsService
-) => Record<string, PaletteDefinition> = (legacyColorsService) => {
-  const buildRoundRobinCategorical = (
-    id: string,
-    colors: (n: number) => string[],
-    behindTextColors?: (n: number) => string[]
-  ) => {
-    return buildRoundRobinCategoricalWithMappedColors(
-      legacyColorsService,
-      id,
-      colors,
-      behindTextColors
-    );
-  };
+) => Record<string, PaletteDefinition> = (uiSettings, legacyColorsService) => {
   return {
     default: {
       title: i18n.translate('charts.palettes.defaultPaletteLabel', {
         defaultMessage: 'default',
       }),
-      ...buildRoundRobinCategorical(
-        'default',
-        () => euiPaletteColorBlind(),
-        () => euiPaletteColorBlindBehindText()
-      ),
+      ...buildRoundRobinCategoricalWithMappedColors(uiSettings),
     },
     kibana_palette: {
       title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
@@ -192,23 +210,23 @@ export const buildPalettes: (
     },
     negative: {
       title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'negative' }),
-      ...buildRoundRobinCategorical('negative', euiPaletteNegative),
+      ...buildGradient('negative', euiPaletteNegative),
     },
     positive: {
       title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'positive' }),
-      ...buildRoundRobinCategorical('positive', euiPalettePositive),
+      ...buildGradient('positive', euiPalettePositive),
     },
     cool: {
       title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'cool' }),
-      ...buildRoundRobinCategorical('cool', euiPaletteCool),
+      ...buildGradient('cool', euiPaletteCool),
     },
     warm: {
       title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'warm' }),
-      ...buildRoundRobinCategorical('warm', euiPaletteWarm),
+      ...buildGradient('warm', euiPaletteWarm),
     },
     gray: {
       title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'gray' }),
-      ...buildRoundRobinCategorical('gray', euiPaletteGray),
+      ...buildGradient('gray', euiPaletteGray),
     },
     custom: buildCustomPalette() as PaletteDefinition<unknown>,
   };

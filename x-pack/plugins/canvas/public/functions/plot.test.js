@@ -9,7 +9,6 @@ import { testPlot } from '../../canvas_plugin_src/functions/common/__tests__/fix
 import {
   fontStyle,
   grayscalePalette,
-  gradientPalette,
   yAxisConfig,
   xAxisConfig,
   seriesStyle,
@@ -119,15 +118,20 @@ describe('plot', () => {
 
     describe('palette', () => {
       it('sets the color palette', () => {
-        const result = fn(testPlot, { palette: grayscalePalette }).value.options;
+        const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
+        const mockedFn = functionWrapper(
+          plotFunctionFactory({
+            paletteService: {
+              custom: {
+                getColors: mockedColors,
+              },
+            },
+          })
+        );
+        const result = mockedFn(testPlot, { palette: grayscalePalette }).value.options;
         expect(result).toHaveProperty('colors');
-        expect(result.colors).toEqual(grayscalePalette.colors);
-      });
-
-      it('creates a new set of colors from a color scale when gradient is true', () => {
-        const result = fn(testPlot, { palette: gradientPalette }).value.options;
-        expect(result).toHaveProperty('colors');
-        expect(result.colors).toEqual(['#ffffff', '#aaaaaa', '#555555', '#000000']);
+        expect(result.colors).toEqual(['#FFFFFF', '#888888', '#000000']);
+        expect(mockedColors).toHaveBeenCalledWith(4, grayscalePalette.params);
       });
 
       // TODO: write test when using an instance of the interpreter

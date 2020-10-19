@@ -6,6 +6,7 @@
 
 export const testPlot = {
   type: 'pointseries',
+  palette: { type: 'palette', name: 'custom' },
   columns: {
     x: { type: 'date', role: 'dimension', expression: 'time' },
     y: {
@@ -77,6 +78,7 @@ export const testPlot = {
 
 export const testPie = {
   type: 'pointseries',
+  palette: { type: 'palette', name: 'custom' },
   columns: {
     color: {
       type: 'string',

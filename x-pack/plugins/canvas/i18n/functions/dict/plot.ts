@@ -5,13 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { plot } from '../../../canvas_plugin_src/functions/common/plot';
+import { plotFunctionFactory } from '../../../public/functions/plot';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { Legend } from '../../../types';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
+export const help: FunctionHelp<FunctionFactory<ReturnType<typeof plotFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.plotHelpText', {
     defaultMessage: 'Configures a chart element.',
   }),

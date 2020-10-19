@@ -19,7 +19,7 @@
 
 import { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
-import { colorsServiceMock } from './services/legacyColors/mock';
+import { colorsServiceMock } from './services/legacy_colors/mock';
 import { paletteServiceMock } from './services/palettes/mock';
 
 export type Setup = jest.Mocked<ReturnType<ChartsPlugin['setup']>>;

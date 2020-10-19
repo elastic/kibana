@@ -56,9 +56,20 @@ describe('pie', () => {
   describe('args', () => {
     describe('palette', () => {
       it('sets the color palette', () => {
-        const result = fn(testPie, { palette: grayscalePalette }).value.options;
+        const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
+        const mockedFn = functionWrapper(
+          pieFunctionFactory({
+            paletteService: {
+              custom: {
+                getColors: mockedColors,
+              },
+            },
+          })
+        );
+        const result = mockedFn(testPie, { palette: grayscalePalette }).value.options;
         expect(result).toHaveProperty('colors');
-        expect(result.colors).toEqual(grayscalePalette.colors);
+        expect(result.colors).toEqual(['#FFFFFF', '#888888', '#000000']);
+        expect(mockedColors).toHaveBeenCalledWith(5, grayscalePalette.params);
       });
 
       // TODO: write test when using an instance of the interpreter

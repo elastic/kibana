@@ -8,8 +8,6 @@ import { get, keyBy, map, groupBy } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { InitializeArguments } from './';
 // @ts-expect-error untyped local
-import { getColorsFromPalette } from '../../common/lib/get_colors_from_palette';
-// @ts-expect-error untyped local
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
 import {
@@ -174,7 +172,7 @@ export function pieFunctionFactory(
             data,
             options: {
               canvas: false,
-              colors: initialize.paletteService[palette.name].getColors(
+              colors: initialize.paletteService[palette.name || 'custom'].getColors(
                 data.length,
                 palette.params
               ),

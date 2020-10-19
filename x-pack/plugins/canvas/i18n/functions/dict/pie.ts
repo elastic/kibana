@@ -5,13 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { pie } from '../../../canvas_plugin_src/functions/common/pie';
+import { pieFunctionFactory } from '../../../public/functions/pie';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { Legend } from '../../../types';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
+export const help: FunctionHelp<FunctionFactory<ReturnType<typeof pieFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {
     defaultMessage: 'Configures a pie chart element.',
   }),

@@ -17,23 +17,4 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
-import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
-import { buildPalettes } from './palettes';
-import { LegacyColorsService } from '../legacy_colors';
-
-export interface PaletteSetupPlugins {
-  expressions: ExpressionsSetup;
-  charts: ChartsPluginSetup;
-}
-
-export class PaletteService {
-  constructor() {}
-
-  public setup(core: CoreSetup, colorsService: LegacyColorsService) {
-    const palettes = buildPalettes(core.uiSettings, colorsService);
-
-    return palettes;
-  }
-}
+export * from './mapped_colors';
