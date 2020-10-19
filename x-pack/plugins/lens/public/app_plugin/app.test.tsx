@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance } from '../types';
-import { Document, DOC_TYPE } from '../persistence';
+import { Document } from '../persistence';
+import { DOC_TYPE } from '../../common';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -36,7 +37,7 @@ import {
   LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { mockAttributeService } from '../../../../../src/plugins/dashboard/public/mocks';
+import { mockAttributeService } from '../../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 

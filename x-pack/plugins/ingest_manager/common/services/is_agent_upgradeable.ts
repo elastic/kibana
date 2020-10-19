@@ -13,9 +13,13 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
   } else {
     return false;
   }
-  const kibanaVersionParsed = semver.parse(kibanaVersion);
-  const agentVersionParsed = semver.parse(agentVersion);
-  if (!agentVersionParsed || !kibanaVersionParsed) return false;
+  if (agent.unenrollment_started_at || agent.unenrolled_at) return false;
   if (!agent.local_metadata.elastic.agent.upgradeable) return false;
-  return semver.lt(agentVersionParsed, kibanaVersionParsed);
+
+  // make sure versions are only the number before comparison
+  const agentVersionNumber = semver.coerce(agentVersion);
+  if (!agentVersionNumber) throw new Error('agent version is invalid');
+  const kibanaVersionNumber = semver.coerce(kibanaVersion);
+  if (!kibanaVersionNumber) throw new Error('kibana version is invalid');
+  return semver.lt(agentVersionNumber, kibanaVersionNumber);
 }
