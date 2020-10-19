@@ -5,7 +5,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiCopy,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useActions, useValues } from 'kea';
 
@@ -118,7 +124,21 @@ export const CredentialsList: React.FC = () => {
     fetchCredentials(current + 1);
   };
 
-  return (
+  return items.length < 1 ? (
+    <EuiEmptyPrompt
+      iconType="editorStrike"
+      title={
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
+            defaultMessage: 'No API Keys have been created yet.',
+          })}
+        </h2>
+      }
+      body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
+        defaultMessage: 'Click the "Create a key" button to make your first one.',
+      })}
+    />
+  ) : (
     <EuiBasicTable
       columns={columns}
       items={items}

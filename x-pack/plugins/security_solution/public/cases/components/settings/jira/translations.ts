@@ -36,14 +36,14 @@ export const GET_ISSUE_API_ERROR = (id: string) =>
 export const SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.components.settings.jira.searchIssuesComboBoxAriaLabel',
   {
-    defaultMessage: 'Select parent issue',
+    defaultMessage: 'Type to search',
   }
 );
 
 export const SEARCH_ISSUES_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.components.settings.jira.searchIssuesComboBoxPlaceholder',
   {
-    defaultMessage: 'Select parent issue',
+    defaultMessage: 'Type to search',
   }
 );
 
