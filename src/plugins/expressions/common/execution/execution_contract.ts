@@ -62,7 +62,7 @@ export class ExecutionContract<
       return {
         type: 'error',
         error: {
-          type: e.type,
+          name: e.name,
           message: e.message,
           stack: e.stack,
         },
