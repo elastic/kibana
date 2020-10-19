@@ -93,7 +93,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ throttle: formThrottle }] = useFormData<Partial<ActionsStepRule>>({
+  const [{ throttle: formThrottle }] = useFormData<ActionsStepRule>({
     form,
     watch: ['throttle'],
   });

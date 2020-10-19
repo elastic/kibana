@@ -87,7 +87,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ severity: formSeverity }] = useFormData<Partial<AboutStepRule>>({
+  const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
     form,
     watch: ['severity'],
   });
