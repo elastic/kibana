@@ -12,6 +12,7 @@ import {
   EdgeLineMetadata,
   ProcessWithWidthMetadata,
   Matrix3,
+  LegacyIsometricTaxiLayout,
   IsometricTaxiLayout,
 } from '../../types';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -20,16 +21,67 @@ import * as vector2 from '../vector2';
 import * as indexedProcessTreeModel from './index';
 import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
 
+interface TaxiTree {
+  id: string;
+  // ordered children;
+  children: TaxiTree[];
+}
+
+export function isometricTaxiLayoutFactory(
+  tree: TaxiTree,
+  origin: Vector2 = [0, 0]
+): [layout: IsometricTaxiLayout, width: number] {
+  if (tree.children.length === 0) {
+    return [[{ type: 'node', position: origin }], 0];
+  } else if (tree.children.length === 1) {
+    const childOrigin = vector2.add(origin, [0, -1]);
+    const [childLayout, childWidth] = isometricTaxiLayoutFactory(tree.children[0], childOrigin);
+    return [
+      [
+        { type: 'node', position: origin },
+        // draw a straight line between the parent and child
+        { type: 'polyline', points: [origin, childOrigin] },
+        ...childLayout,
+      ],
+      childWidth,
+    ];
+  } else {
+    const layout: IsometricTaxiLayout = [{ type: 'node', position: origin }];
+    // layout all the children, but then they need to be moved?
+    let sumOfWidthOfChildren = 0;
+    const childLayoutsAndWidths: Array<[layout: IsometricTaxiLayout, width: number]> = [];
+    for (const child of tree.children) {
+      const layoutAndWidth = isometricTaxiLayoutFactory(child);
+      sumOfWidthOfChildren += layoutAndWidth[1];
+      childLayoutsAndWidths.push(layoutAndWidth);
+    }
+    // the width of this tree is the sum of its children plus a margin between each child (n - 1)
+    const width = sumOfWidthOfChildren + (tree.children.length - 1);
+    let cursor: Vector2 = origin;
+    // move to the left and down
+    cursor = vector2.add(cursor, [-width / 2, -1]);
+    for (const [childLayout, childWidth] of childLayoutsAndWidths) {
+      // move to the right by half the width of the child
+      cursor = vector2.add(cursor, [childWidth / 2, 0]);
+      layout.push(...childLayout);
+      // move over (margin)
+      cursor = vector2.add(cursor, [1, 0]);
+    }
+    return [layout, width];
+  }
+}
+
 /**
  * Graph the process tree
+ * @deprecated see `isometricTaxiLayoutFactory`
  */
-export function isometricTaxiLayoutFactory(
+export function legacyIsometricTaxiLayoutFactory(
   indexedProcessTree: LegacyIndexedProcessTree
-): IsometricTaxiLayout {
+): LegacyIsometricTaxiLayout {
   /**
    * Walk the tree in reverse level order, calculating the 'width' of subtrees.
    */
-  const widths: Map<SafeResolverEvent, number> = widthsOfProcessSubtrees(indexedProcessTree);
+  const widths: Map<SafeResolverEvent, number> = legacyWidthsOfProcessSubtrees(indexedProcessTree);
 
   /**
    * Walk the tree in level order. Using the precalculated widths, calculate the position of nodes.
@@ -145,7 +197,9 @@ function ariaLevels(indexedProcessTree: LegacyIndexedProcessTree): Map<SafeResol
  *                   H
  *
  */
-function widthsOfProcessSubtrees(indexedProcessTree: LegacyIndexedProcessTree): ProcessWidths {
+function legacyWidthsOfProcessSubtrees(
+  indexedProcessTree: LegacyIndexedProcessTree
+): ProcessWidths {
   const widths = new Map<SafeResolverEvent, number>();
 
   if (indexedProcessTreeModel.size(indexedProcessTree) === 0) {
@@ -510,13 +564,16 @@ const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
  * @deprecated use `nodePosition`
  */
 export function processPosition(
-  model: IsometricTaxiLayout,
+  model: LegacyIsometricTaxiLayout,
   node: SafeResolverEvent
 ): Vector2 | undefined {
   return model.processNodePositions.get(node);
 }
 
-export function nodePosition(model: IsometricTaxiLayout, nodeID: string): Vector2 | undefined {
+export function nodePosition(
+  model: LegacyIsometricTaxiLayout,
+  nodeID: string
+): Vector2 | undefined {
   // Find the indexed object matching the nodeID
   // NB: this is O(n) now, but we will be indexing the nodeIDs in the future.
   for (const candidate of model.processNodePositions.keys()) {
@@ -534,7 +591,10 @@ export function nodePosition(model: IsometricTaxiLayout, nodeID: string): Vector
  * translated(layout, [100, -200]) // return a copy of `layout`, thats been moved 100 to the right and 200 up
  * ```
  */
-export function translated(model: IsometricTaxiLayout, translation: Vector2): IsometricTaxiLayout {
+export function translated(
+  model: LegacyIsometricTaxiLayout,
+  translation: Vector2
+): LegacyIsometricTaxiLayout {
   return {
     processNodePositions: new Map(
       [...model.processNodePositions.entries()].map(([node, position]) => [

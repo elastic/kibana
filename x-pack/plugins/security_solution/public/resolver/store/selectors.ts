@@ -8,7 +8,7 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout } from '../types';
+import { ResolverState, LegacyIsometricTaxiLayout } from '../types';
 import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
@@ -81,7 +81,7 @@ export const processEventForID: (
 /**
  * The position of nodes and edges.
  */
-export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSelectors(
+export const layout: (state: ResolverState) => LegacyIsometricTaxiLayout = composeSelectors(
   dataStateSelector,
   dataSelectors.layout
 );

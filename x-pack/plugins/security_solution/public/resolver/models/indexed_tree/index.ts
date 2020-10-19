@@ -35,7 +35,6 @@ export class IndexedTree {
         const existingParent = childToParent.get(child);
         if (existingParent !== undefined && existingParent !== parent) {
           // `child` has at least two different parent, therefore this is not a tree.
-          // TODO, test that giving a node two parents results in null
           return null;
         }
         childToParent.set(child, parent);
@@ -80,7 +79,6 @@ export class IndexedTree {
       unvisited.delete(node);
     }
 
-    // TODO, return null if this isn't a tree? or is that a responsibility of the constructor?
     return new IndexedTree(nodeSet, childToParent, parentToChildren);
   }
 

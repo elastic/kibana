@@ -548,10 +548,23 @@ export type ResolverProcessType =
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
 
+export type IsometricTaxiLayout = IsometricTaxiLayoutEntity[];
+
+type IsometricTaxiLayoutEntity =
+  | {
+      type: 'node';
+      position: Vector2;
+    }
+  | {
+      type: 'polyline';
+      points: Vector2[];
+    };
+
 /**
  * Describes the basic Resolver graph layout.
+ * @deprecated see `IsometricTaxiLayout`
  */
-export interface IsometricTaxiLayout {
+export interface LegacyIsometricTaxiLayout {
   /**
    * A map of events to position. Each event represents its own node.
    */

@@ -72,40 +72,55 @@ describe('When `IndexedTree.fromIterable` is called with `nodes` and `edges` fun
       },
     ];
   }
-  function iterableWithARootThatHasTwoChildrenWhichShareASingleGrandchild(): Iterable<
-    SafeResolverEvent
-  > {
+  describe.each([
+    [iterableWithTwoDisconnectedNodes(), '(which represents two disconnected nodes)'],
+    [iterableWithTwoDisconnectedNodes(), '(which represents two disconnected nodes)'],
+  ])('and when the iterable is %p %s', (iterable) => {
+    let tree: IndexedTree | null;
+    beforeEach(() => {
+      tree = IndexedTree.fromIterable(iterable, processTreeNodes, processTreeEdges);
+    });
+    it(`should return null`, () => {
+      expect(tree).toBe(null);
+    });
+  });
+});
+
+describe('When `IndexedTree.fromIterable` is called with an and `edges` functions that can return edges that represent multiple parents for a given node', () => {
+  interface Item {
+    id: string;
+    parent?: string[];
+  }
+  function* nodes(item: Item): Iterable<string> {
+    yield item.id;
+  }
+  function* edges(item: Item): Iterable<[string, string]> {
+    if (item.parent) {
+      for (const parent of item.parent) {
+        yield [parent, item.id];
+      }
+    }
+  }
+  function iterableWithARootThatHasTwoChildrenWhichShareASingleGrandchild(): Iterable<Item> {
     return [
       {
-        process: {
-          entity_id: 'A',
-        },
+        id: 'A',
       },
       {
-        process: {
-          entity_id: 'B',
-        },
+        id: 'B',
       },
       {
-        process: {
-          entity_id: 'C',
-        },
+        id: 'C',
       },
       {
-        process: {
-          parent: {
-            entity_id: ['B', 'C'],
-          },
-          entity_id: 'D',
-        },
+        id: 'D',
+        parent: ['B', 'C'],
       },
     ];
   }
-  describe.each([
-    [iterableWithTwoDisconnectedNodes(), '(which represents two disconnected nodes)'],
-    [
-      iterableWithARootThatHasTwoChildrenWhichShareASingleGrandchild(),
-      `which represents a graph that looks like:
+  describe(`and when the iterable is ${JSON.stringify(
+    iterableWithARootThatHasTwoChildrenWhichShareASingleGrandchild()
+  )} which represents a graph that looks like:
            +---+
            |   |
            | A |
@@ -123,12 +138,14 @@ describe('When `IndexedTree.fromIterable` is called with `nodes` and `edges` fun
            |   |
            +---+
 
-               `,
-    ],
-  ])('and when the iterable is %p %s', (iterable) => {
+  `, () => {
     let tree: IndexedTree | null;
     beforeEach(() => {
-      tree = IndexedTree.fromIterable(iterable, processTreeNodes, processTreeEdges);
+      tree = IndexedTree.fromIterable(
+        iterableWithARootThatHasTwoChildrenWhichShareASingleGrandchild(),
+        nodes,
+        edges
+      );
     });
     it(`should return null`, () => {
       expect(tree).toBe(null);

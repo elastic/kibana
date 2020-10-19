@@ -16,7 +16,7 @@ import {
   AABB,
   VisibleEntites,
   TreeFetcherParameters,
-  IsometricTaxiLayout,
+  LegacyIsometricTaxiLayout,
 } from '../../types';
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
@@ -347,7 +347,7 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
-export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
+export const layout: (state: DataState) => LegacyIsometricTaxiLayout = createSelector(
   tree,
   originID,
   function processNodePositionsAndEdgeLineSegments(
@@ -357,7 +357,9 @@ export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
     /* eslint-enable no-shadow */
   ) {
     // use the isometric taxi layout as a base
-    const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
+    const taxiLayout = isometricTaxiLayoutModel.legacyIsometricTaxiLayoutFactory(
+      indexedProcessTree
+    );
 
     if (!originID) {
       // no data has loaded.

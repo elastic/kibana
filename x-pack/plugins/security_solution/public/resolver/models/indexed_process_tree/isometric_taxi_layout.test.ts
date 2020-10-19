@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IsometricTaxiLayout } from '../../types';
+import { LegacyIsometricTaxiLayout } from '../../types';
 import { LegacyEndpointEvent } from '../../../../common/endpoint/types';
-import { isometricTaxiLayoutFactory } from './isometric_taxi_layout';
+import { legacyIsometricTaxiLayoutFactory } from './isometric_taxi_layout';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { factory } from './index';
 
@@ -20,7 +20,7 @@ describe('resolver graph layout', () => {
   let processH: LegacyEndpointEvent;
   let processI: LegacyEndpointEvent;
   let events: LegacyEndpointEvent[];
-  let layout: () => IsometricTaxiLayout;
+  let layout: () => LegacyIsometricTaxiLayout;
 
   beforeEach(() => {
     /*
@@ -107,7 +107,7 @@ describe('resolver graph layout', () => {
         unique_ppid: 0,
       },
     });
-    layout = () => isometricTaxiLayoutFactory(factory(events));
+    layout = () => legacyIsometricTaxiLayoutFactory(factory(events));
     events = [];
   });
   describe('when rendering no nodes', () => {
