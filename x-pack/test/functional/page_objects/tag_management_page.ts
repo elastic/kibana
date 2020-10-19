@@ -236,6 +236,15 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       return rows[tagIndex];
     }
 
+    async clickOnConnectionsLink(tagName: string) {
+      const tagRow = await this.getRowByName(tagName);
+      const connectionLink = await testSubjects.findDescendant(
+        'tagsTableRowConnectionsLink',
+        tagRow
+      );
+      await connectionLink.click();
+    }
+
     /**
      * Return the info of all the tags currently displayed in the table (in table's order)
      */

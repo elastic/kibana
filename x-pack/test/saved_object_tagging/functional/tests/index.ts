@@ -19,6 +19,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./listing'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./edit'));
+    loadTestFile(require.resolve('./som_integration'));
     loadTestFile(require.resolve('./visualize_integration'));
     loadTestFile(require.resolve('./feature_control'));
   });
