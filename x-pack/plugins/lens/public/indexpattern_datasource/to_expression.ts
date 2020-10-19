@@ -107,8 +107,15 @@ function getExpressionForLayer(
 
         if (parentFormat) {
           base.arguments.format = [parentFormat.id];
+          const currentField = indexPattern.fields.find((field) => field.name === col.sourceField);
+          // If a format override is present use it,
+          // otherwise pick from either the field or indexPattern the set formatter when available
           if (format) {
             rangeParameters.nestedFormat = format.id;
+          } else if (currentField) {
+            const indexPatternFieldFormatter = indexPattern.fieldFormatMap?.[currentField.name];
+            if (indexPatternFieldFormatter || currentField.format)
+              rangeParameters.nestedFormat = (indexPatternFieldFormatter || currentField.format).id;
           }
         }
         if (parentFormat?.params?.template) {

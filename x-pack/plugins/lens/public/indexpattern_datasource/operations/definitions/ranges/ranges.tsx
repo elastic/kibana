@@ -15,6 +15,7 @@ import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
+import { IndexPattern, IndexPatternField } from '../../../types';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges
@@ -60,6 +61,21 @@ export const isValidRange = (range: RangeTypeLens): boolean => {
   }
   return true;
 };
+
+function getFieldDefaultFormat(
+  indexPattern: IndexPattern,
+  field: IndexPatternField | undefined
+): RangeIndexPatternColumn['params']['format'] {
+  if (field) {
+    if (field.format) {
+      return field.format;
+    }
+    if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
+      return indexPattern.fieldFormatMap[field.name] as RangeIndexPatternColumn['params']['format'];
+    }
+  }
+  return undefined;
+}
 
 function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
   if (params.type === MODES.Range) {
@@ -111,7 +127,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       };
     }
   },
-  buildColumn({ suggestedPriority, field }) {
+  buildColumn({ suggestedPriority, indexPattern, field }) {
     return {
       label: field.name,
       dataType: 'number', // string for Range
@@ -157,7 +173,12 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     };
   },
   paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
-    const numberFormat = currentColumn.params.format as
+    const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+    const currentField = indexPattern.fields.find(
+      (field) => field.name === currentColumn.sourceField
+    );
+    const numberFormat = (currentColumn.params.format ||
+      getFieldDefaultFormat(indexPattern, currentField)) as
       | undefined
       | {
           id: string;
@@ -166,7 +187,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     const numberFormatterPattern =
       numberFormat &&
       supportedFormats[numberFormat.id] &&
-      supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params.decimals);
+      supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params.decimals || 0);
 
     const rangeFormatter = data.fieldFormats.deserialize({
       ...currentColumn.params.parentFormat,
