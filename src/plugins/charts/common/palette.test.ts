@@ -41,12 +41,12 @@ describe('palette', () => {
     describe('color', () => {
       it('sets colors', () => {
         const result = fn(null, { color: ['red', 'green', 'blue'] });
-        expect(result.params.colors).toEqual(['red', 'green', 'blue']);
+        expect(result.params!.colors).toEqual(['red', 'green', 'blue']);
       });
 
       it('defaults to pault_tor_14 colors', () => {
         const result = fn(null);
-        expect(result.params.colors).toEqual(defaultCustomColors);
+        expect(result.params!.colors).toEqual(defaultCustomColors);
       });
     });
 
@@ -68,17 +68,17 @@ describe('palette', () => {
     describe('reverse', () => {
       it('reverses order of the colors', () => {
         const result = fn(null, { reverse: true });
-        expect(result.params.colors).toEqual(defaultCustomColors.reverse());
+        expect(result.params!.colors).toEqual(defaultCustomColors.reverse());
       });
 
       it('keeps the original order of the colors', () => {
         const result = fn(null, { reverse: false });
-        expect(result.params.colors).toEqual(defaultCustomColors);
+        expect(result.params!.colors).toEqual(defaultCustomColors);
       });
 
       it(`defaults to 'false`, () => {
         const result = fn(null);
-        expect(result.params.colors).toEqual(defaultCustomColors);
+        expect(result.params!.colors).toEqual(defaultCustomColors);
       });
     });
   });
