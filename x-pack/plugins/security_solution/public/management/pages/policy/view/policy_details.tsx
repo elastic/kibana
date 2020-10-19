@@ -49,13 +49,7 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyAdvanced } from './policy_advanced';
-import * as AdvancedPolicySchema from '../models/advanced_policy_schema.json';
-
-interface AdvancedPolicySchemaType {
-  key: string;
-  first_supported_version: string;
-  last_supported_version: string;
-}
+import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 const AdvancedPolicyForms = React.memo(() => {
   return (
@@ -75,19 +69,17 @@ const AdvancedPolicyForms = React.memo(() => {
       <EuiFlexItem>
         <FormattedMessage id="xpack.securitySolution.policyAdvanced.value" defaultMessage="Value" />
       </EuiFlexItem>
-      {((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
-        (advancedField, index) => {
-          const configPath = advancedField.key.split('.');
-          return (
-            <PolicyAdvanced
-              key={index}
-              configPath={configPath}
-              firstSupportedVersion={advancedField.first_supported_version}
-              lastSupportedVersion={advancedField.last_supported_version}
-            />
-          );
-        }
-      )}
+      {AdvancedPolicySchema.map((advancedField, index) => {
+        const configPath = advancedField.key.split('.');
+        return (
+          <PolicyAdvanced
+            key={index}
+            configPath={configPath}
+            firstSupportedVersion={advancedField.first_supported_version}
+            lastSupportedVersion={advancedField.last_supported_version}
+          />
+        );
+      })}
     </EuiFlexGrid>
   );
 });

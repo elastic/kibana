@@ -8,7 +8,6 @@ import {
   AppLocation,
   Immutable,
   MalwareFields,
-  AdvancedFields,
   PolicyData,
   UIPolicyConfig,
 } from '../../../../common/endpoint/types';
