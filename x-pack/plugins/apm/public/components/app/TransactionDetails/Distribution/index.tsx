@@ -4,21 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIconTip, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import d3 from 'd3';
-import { isEmpty } from 'lodash';
-import React, { useCallback } from 'react';
-import { ValuesType } from 'utility-types';
 import {
   Axis,
-  BarSeriesStyle,
   Chart,
-  DataSeriesDatum,
   ElementClickListener,
   GeometryValue,
   HistogramBarSeries,
-  PartialTheme,
   Position,
   RectAnnotation,
   ScaleType,
@@ -26,14 +17,20 @@ import {
   SettingsSpec,
   TooltipValue,
 } from '@elastic/charts';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { EuiIconTip, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import d3 from 'd3';
+import { isEmpty } from 'lodash';
+import React, { useCallback } from 'react';
+import { ValuesType } from 'utility-types';
 import { useTheme } from '../../../../../../observability/public';
-import { unit } from '../../../../style/variables';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { unit } from '../../../../style/variables';
 // @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';

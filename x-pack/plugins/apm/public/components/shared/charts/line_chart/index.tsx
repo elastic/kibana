@@ -25,7 +25,7 @@ import { Annotations } from '../annotations';
 
 interface Props {
   timeseries: TimeSeries[];
-  tickFormatY: (y: number) => React.ReactNode;
+  tickFormatY: (y: number) => string;
   id: string;
 }
 

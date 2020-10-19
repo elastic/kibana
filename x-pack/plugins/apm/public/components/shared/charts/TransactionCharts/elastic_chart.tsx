@@ -27,7 +27,7 @@ const XY_HEIGHT = unit * 16;
 
 interface Props {
   timeseries: TimeSeries[];
-  tickFormatY: (y: number) => React.ReactNode;
+  tickFormatY: (y: number) => string;
   id: string;
 }
 

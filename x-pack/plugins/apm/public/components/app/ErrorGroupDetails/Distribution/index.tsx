@@ -15,32 +15,15 @@ import {
   SettingsSpec,
   TooltipValue,
 } from '@elastic/charts';
-
 import { EuiTitle } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { scaleUtc } from 'd3-scale';
-import { mean } from 'lodash';
 import React from 'react';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ErrorDistributionAPIResponse } from '../../../../../server/lib/errors/distribution/get_distribution';
 import { useTheme } from '../../../../hooks/useTheme';
-import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
-// @ts-expect-error
-import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-
-interface IBucket {
-  key: number;
-  count: number | undefined;
-}
-
-// TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
-interface IDistribution {
-  noHits: boolean;
-  buckets: IBucket[];
-  bucketSize: number;
-}
 
 interface FormattedBucket {
   x0: number;
@@ -49,7 +32,7 @@ interface FormattedBucket {
 }
 
 export function getFormattedBuckets(
-  buckets: IBucket[],
+  buckets: ErrorDistributionAPIResponse['buckets'],
   bucketSize: number
 ): FormattedBucket[] | null {
   if (!buckets) {
@@ -66,12 +49,9 @@ export function getFormattedBuckets(
 }
 
 interface Props {
-  distribution: IDistribution;
+  distribution: ErrorDistributionAPIResponse;
   title: React.ReactNode;
 }
-
-const tooltipHeader = (bucket: FormattedBucket) =>
-  asRelativeDateTimeRange(bucket.x0, bucket.x);
 
 export function ErrorDistribution({ distribution, title }: Props) {
   const theme = useTheme();
@@ -90,10 +70,10 @@ export function ErrorDistribution({ distribution, title }: Props) {
     );
   }
 
-  const averageValue = mean(buckets.map((bucket) => bucket.y)) || 0;
+  // TODO: caue check it
+  // const averageValue = mean(buckets.map((bucket) => bucket.y)) || 0;
   const xMin = d3.min(buckets, (d) => d.x0);
-  const xMax = d3.max(buckets, (d) => d.x);
-  const tickFormat = scaleUtc().domain([xMin, xMax]).tickFormat();
+  const xMax = d3.max(buckets, (d) => d.x0);
 
   const xFormatter = niceTimeFormatter([xMin, xMax]);
 
@@ -112,48 +92,6 @@ export function ErrorDistribution({ distribution, title }: Props) {
       <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
-      <div>
-        <Histogram
-          height={180}
-          noHits={distribution.noHits}
-          tooltipHeader={tooltipHeader}
-          verticalLineHover={(bucket: FormattedBucket) => bucket.x}
-          xType="time-utc"
-          formatX={(value: Date) => {
-            const time = value.getTime();
-            return tickFormat(new Date(time - getTimezoneOffsetInMs(time)));
-          }}
-          buckets={buckets}
-          bucketSize={distribution.bucketSize}
-          formatYShort={(value: number) =>
-            i18n.translate(
-              'xpack.apm.errorGroupDetails.occurrencesShortLabel',
-              {
-                defaultMessage: '{occCount} occ.',
-                values: { occCount: value },
-              }
-            )
-          }
-          formatYLong={(value: number) =>
-            i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
-              defaultMessage:
-                '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
-              values: { occCount: value },
-            })
-          }
-          legends={[
-            {
-              color: theme.eui.euiColorVis1,
-              // 0a abbreviates large whole numbers with metric prefixes like: 1000 = 1k, 32000 = 32k, 1000000 = 1m
-              legendValue: numeral(averageValue).format('0a'),
-              title: i18n.translate('xpack.apm.errorGroupDetails.avgLabel', {
-                defaultMessage: 'Avg.',
-              }),
-              legendClickDisabled: true,
-            },
-          ]}
-        />
-      </div>
       <div style={{ height: 180 }}>
         <Chart>
           <Settings

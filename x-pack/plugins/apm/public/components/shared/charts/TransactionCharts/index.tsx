@@ -49,8 +49,7 @@ export function TransactionCharts({
   urlParams,
 }: TransactionChartProps) {
   const getTPMFormatter = (t: number) => {
-    const unit = tpmUnit(urlParams.transactionType);
-    return `${asDecimal(t)} ${unit}`;
+    return `${asDecimal(t)} ${tpmUnit(urlParams.transactionType)}`;
   };
 
   const getTPMTooltipFormatter = (p: Coordinate) => {

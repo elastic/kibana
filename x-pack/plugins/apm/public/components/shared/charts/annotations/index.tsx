@@ -12,9 +12,9 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { asAbsoluteDateTime } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useAnnotations } from '../../../../hooks/use_annotations';
-import { asAbsoluteDateTime } from '../../../../utils/formatters';
 
 export function Annotations() {
   const { annotations } = useAnnotations();
