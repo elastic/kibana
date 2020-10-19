@@ -52,7 +52,7 @@ export const EmailParamsFields = ({
               {!addCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
                   <FormattedMessage
-                    defaultMessage="Add Cc"
+                    defaultMessage="Cc"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
                   />
                 </EuiButtonEmpty>
@@ -60,9 +60,8 @@ export const EmailParamsFields = ({
               {!addBCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
                   <FormattedMessage
-                    defaultMessage="{titleBcc}"
+                    defaultMessage="Bcc"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton"
-                    values={{ titleBcc: !addCC ? '/ Bcc' : 'Add Bcc' }}
                   />
                 </EuiButtonEmpty>
               ) : null}
