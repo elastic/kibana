@@ -239,7 +239,7 @@ export async function getExploreSeriesLink(mlUrlGenerator, series) {
       jobIds: [series.jobId],
       refreshInterval: {
         display: 'Off',
-        pause: false,
+        pause: true,
         value: 0,
       },
       timeRange: {
