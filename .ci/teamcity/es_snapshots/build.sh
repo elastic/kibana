@@ -17,16 +17,13 @@ export BUILD_URL=""
 export JOB_NAME=""
 export NODE_NAME=""
 
-# TODO ES_BUILD_JAVA = openjdk14 -- .ci/java-versions.properties
-export ES_BUILD_JAVA="openjdk14"
+export "$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | xargs)"
 export PATH="$HOME/.java/$ES_BUILD_JAVA/bin:$PATH"
 export JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
 
 tc_start_block "Build Elasticsearch"
 ./gradlew -Dbuild.docker=true assemble --parallel
 tc_end_block "Build Elasticsearch"
-
-# mkdir -p ${destination}
 
 tc_start_block "Create distribution archives"
 find distribution -type f \( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \) -not -path '*no-jdk*' -not -path '*build-context*' -exec cp {} "$destination" \;
