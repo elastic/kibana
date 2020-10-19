@@ -19,7 +19,7 @@ dependencies {
   implementation 'org.jenkins-ci.main:jenkins-core:2.23'
   implementation 'org.jenkins-ci.plugins.workflow:workflow-step-api:2.19@jar'
   testImplementation 'com.lesfurets:jenkins-pipeline-unit:1.4'
-  testImplementation 'junit:junit:4.12'
+  testImplementation 'junit:junit:4.13.1'
   testImplementation 'org.mockito:mockito-core:2.+'
   testImplementation 'org.assertj:assertj-core:3.15+' // Temporary https://github.com/jenkinsci/JenkinsPipelineUnit/issues/209
 }
