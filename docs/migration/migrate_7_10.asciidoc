@@ -359,11 +359,14 @@ which was only used in the legacy Expressions APIs.
 ====
 
 [[breaking_plugin_v7.10.0_75368]]
-.Extract dependencies and pass them in from the service definition.
+.The search service's `getParamsFromSearchRequest` helper changed
 [%collapsible]
 ====
 
-The search service's `getParamsFromSearchRequest` helper has been changed to prepare for exposing `SearchSource` on the server. If your plugin relies on this helper, please update the dependencies passed to it as follows:
+The `getParamsFromSearchRequest` helper changed to
+prepare for exposing `SearchSource` on the server. If your plugin relies on this
+helper, update the dependencies passed to it as follows:
+
 ```diff
        import { getSearchParamsFromRequest } from '../../../src/plugins/data/public';
 
@@ -380,40 +383,51 @@ The search service's `getParamsFromSearchRequest` helper has been changed to pre
 ====
 
 [[breaking_plugin_v7.10.0_75185]]
-.Remove dependencies from index pattern field and index pattern list
+.Dependencies removed from index pattern list and field list
 [%collapsible]
 ====
 
-The index pattern `fields` class has the following changes
-- Its no longer created using a constructor. This produced odd side effects when array methods were used. In particular, removing the IndexPattern argument revealed that the FieldList constructor was being called when `filter` and similar were called, producing an error. Its only created once by IndexPattern.
-- IndexPattern object and onNotification are no longer provided to the creation function.
+The index pattern `fields` class has the following changes:
 
-The index pattern `field` class has the following changes
-- IndexPattern object and onNotification are no longer provided to the constructor.
+- The class is no longer created using a constructor. This produced odd side effects
+when array methods were used. In particular, removing the `IndexPattern` argument revealed that the
+`FieldList` constructor was being called when `filter` and similar were called, producing an error.
+Now, it's only created once by `IndexPattern`.
+- The `IndexPattern` object and `onNotification` are no longer provided to the creation function.
+
+The index pattern `field` class has the following changes:
+
+- The `IndexPattern` object and `onNotification` are no longer provided to the constructor.
 - The `format` attribute no longer exists. Use `IndexPattern.getFormatterForField` instead.
-- No longer uses a callback when an unknown field type is encountered, instead it throws `FieldTypeUnknownError`
-- `toSpec` now takes an optional argument, `{ getFormatterForField }` which takes the field as an argument and returns a formatter.
+- A callback is no longer used when an unknown field type is encountered.
+Instead it throws `FieldTypeUnknownError`.
+- `toSpec` now takes an optional argument, `{ getFormatterForField }`. This argument takes
+the field as an argument and returns a formatter.
 
 *via https://github.com/elastic/kibana/pull/75185[#75185]*
 
 ====
 
 [[breaking_plugin_v7.10.0_74914]]
-.Rename agent/package config(s) to agent/package policy(ies)
+.Agent and package configs renamed to agent and package policies
 [%collapsible]
 ====
 
-The following Ingest Manager API routes were changed:
+The following Ingest Manager API routes changed:
 
 - `/api/ingest_manager/agent_configs/*` renamed to `/api/fleet/agent_policies/*`
 - `/api/ingest_manager/package_configs/*` renamed to `/api/fleet/package_policies/*`
 
-All Ingest Manager routes with payload fields that were previously in reference to agent configs or package configs, have been renamed to agent policies and package policies. For example `configId` -> `policyId`, `package_configs` -> `package_policies`.
+All Ingest Manager routes with payload fields that were previously in
+reference to agent configs or package configs have been renamed to agent policies
+and package policies. For example `configId` -> `policyId`, `package_configs` -> `package_policies`.
 
-The following Ingest Manager app routes were changed:
+The following Ingest Manager app routes changed:
+
 - `/app/ingestManager#/configs` renamed to `/app/ingestManager#/policies`
 
-The following Ingest Manager settings were changed:
+The following Ingest Manager settings changed:
+
 - `xpack.ingestManager.fleet.agentConfigRolloutRateLimitIntervalMs` renamed to `xpack.fleet.agents.agentPolicyRolloutRateLimitIntervalMs`
 - `xpack.fleet.agents.agentConfigRolloutRateLimitRequestPerInterval` renamed to `xpack.fleet.agents.agentPolicyRolloutRateLimitRequestPerInterval`
 
@@ -422,22 +436,28 @@ The following Ingest Manager settings were changed:
 ====
 
 [[breaking_plugin_v7.10.0_74607]]
-.Move some SearchSource dependencies to the server.
+.SearchSource dependencies moved to the server
 [%collapsible]
 ====
 
-`getSearchErrorType` and the `SearchError` class have been removed from the static exports of the `data` plugin's contract. If you rely on these, please copy the code directly into your plugin. Note that the `SearchError` interface is still exposed.
+The `getSearchErrorType` and the `SearchError` class have been
+removed from the static exports of the `data` plugin's contract.
+If you rely on these, copy the code directly into your plugin.
+The `SearchError` interface is still exposed.
 
 *via https://github.com/elastic/kibana/pull/74607[#74607]*
 
 ====
 
 [[breaking_plugin_v7.10.0_74472]]
-.Make data.search.aggs available on the server.
+.`data.search.aggs` available on the server
 [%collapsible]
 ====
 
-The `search.aggs` service in the `data` plugin is now available on the server. Usage is the same as on the client, except that a scoped saved objects client must be provided on the server in order to retrieve the `start` contract:
+The `search.aggs` service in the `data` plugin is now available on the server.
+The usage is the same as on the client, except that a scoped saved objects client
+must be provided on the server to retrieve the `start` contract:
+
 ```ts
 const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
 // `aggs.asScopedToClient` will return the same contract as is available in the browser
@@ -445,9 +465,14 @@ const aggs = await data.search.aggs.asScopedToClient(savedObjectsClient);
 const allAggTypes = aggs.types.getAll();
 ```
 
-As part of this change, the `calculateAutoTimeExpression` method was removed from the `setup` contract, and now only exists on the `data` plugin's `start` contract. The method was unused in `setup` elsewhere in Kibana, so it was removed for simplicity.
+The `calculateAutoTimeExpression` method was removed from the `setup` contract,
+and now only exists on the `data` plugin's `start` contract. The method was
+was not used in `setup` elsewhere in {kib}, so it was removed for simplicity.
 
-In addition, the agg types registry has changed and now accepts a provider function which is used to inject dependencies which may be needed in the agg type definition, specifically a `getConfig` function which can be used to retrieve uiSettings:
+In addition, the agg types registry changed and now accepts a provider
+function, which is used to inject dependencies. This might be needed in the agg type definition,
+specifically a `getConfig` function used to retrieve uiSettings:
+
 ```ts
 const getMyAgg = ({ getConfig }) =>
   new MetricAggType({
@@ -469,49 +494,51 @@ const getMyAgg = ({ getConfig }) =>
 dataSetup.search.aggs.registerMetric('myAgg', getMyAgg);
 ```
 
-We expect more changes to the agg type definition over the next few minor releases, and will add release notes indicating any future updates.
-
 *via https://github.com/elastic/kibana/pull/74472[#74472]*
 
 ====
 
 [[breaking_plugin_v7.10.0_73730]]
-.Allow routes to specify the idle socket timeout in addition to the payload timeout
+.Routes can specify the idle socket timeout
 [%collapsible]
 ====
 
 Route definitions can now specify the `idleSocket` timeout in addition to the `payload` timeout.
 
-Resolves https://github.com/elastic/kibana/issues/73557
+Resolves https://github.com/elastic/kibana/issues/73557[#73557].
 
 *via https://github.com/elastic/kibana/pull/73730[#73730]*
 
 ====
 
 [[breaking_plugin_v7.10.0_73651]]
-.Expose new es client
+.New {es} client exposed
 [%collapsible]
 ====
 
-Kibana provides the new elasticsearch client as a part of the elasticsearch service on the server-side. The legacy client is deprecated on and subject for removal in `7.x`. Reference the provided  migration guide to refactor your code https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client
+{kib} provides the new {es} client
+as a part of the {es} service on the server-side.
+The legacy client is deprecated on and subject for removal in `7.x`. Reference
+the https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
 
 *via https://github.com/elastic/kibana/pull/73651[#73651]*
 
 ====
 
 [[breaking_plugin_v7.10.0_72093]]
-.Query Input String manager
+.Query input string manager added
 [%collapsible]
 ====
 
-This PR allows gracefully extracting the query string state, to be consumed by other services.
-One can now use the `data.query.state$` observable and receive all state updates in one place.
+This PR allows gracefully extracting of the query string state, to be consumed by other services.
+You can now use the `data.query.state$` observable and receive all state updates in one place.
 
 ```TypeScript
 data.query.state$.subscribe((queryState: QueryState) => {...})
 ```
 
-This PR also adds the `data.query.queryString` service, allowing to set the query string https://github.com/elastic/kibana/issues/52522[programmatically].
+This PR also adds the `data.query.queryString` service, allowing to you set the
+query string https://github.com/elastic/kibana/issues/52522[programmatically].
 ```TypeScript
 data.query.queryString.setQuery({query: 'abc', language: 'kuery'});
 ```
@@ -522,13 +549,15 @@ data.query.queryString.setQuery({query: 'abc', language: 'kuery'});
 ====
 
 [[breaking_plugin_v7.10.0_67157]]
-.Adds Role Based Access-Control to the Alerting & Action plugins based on Kibana Feature Controls
+.Role-based access control added to the Alerting & Action plugins
 [%collapsible]
 ====
 
-This PR allows you to assign privileges to the _Alerting_ framework when defining your feature in Kibana. When registering your feature you can add a list of AlertTypes under your `read` and `all` keys of the `privileges` object, like so:
+This PR allows you to assign privileges to the Alerting framework when
+defining your feature in *Kibana*. When registering your feature, you can add
+a list of AlertTypes under your `read` and `all` keys of the `privileges` object, as such:
 
-```
+```ts
 features.registerFeature({
       id: 'alertsExample',
       name: 'alertsExample',
@@ -548,16 +577,25 @@ features.registerFeature({
     });
 ```
 
-What this specifies, in detail, is that:
-1. If a user has been granted the `all` privilege to the `alertsExample` feature, then they are also granted `all` privileges to the `example.always-firing` and `example.people-in-space` AlertTypes under the `alertsExample` consumer
-2. If a user has been granted the `read` privilege to the `alertsExample` feature, then they are also granted `read` privileges to the `example.always-firing` and `example.people-in-space` AlertTypes under the `alertsExample` consumer
+This specifies:
 
-That means that an `all` user will be able to, for example, create an `example.always-firing` alert with the `alertsExample` as consumer. This will also automatically grant them the right to create an `example.always-firing` alert from within alerts management where `alerts` is the consumer (we special case Alerts management).
-What this **doesn't** grant the user is the ability to create an `example.always-firing` alert under any other consumer. For that the specific consumer will have to grant the user explicit rights through their privilege system.
+* If users AbortError granted the `all` privilege to the `alertsExample` feature,
+then they are also granted `all` privileges to the `example.always-firing` and `example.people-in-space` AlertTypes
+under the `alertsExample` consumer.
+* If users are granted the `read` privilege to the `alertsExample` feature,
+then they are also granted `read` privileges to the `example.always-firing` and `example.people-in-space`
+AlertTypes under the `alertsExample` consumer.
 
-For example, if Uptime wanted to allow users to create an `example.people-in-space`  alert inside of the Uptime solution, then they will have to do the following:
+For example, an `all` user will be able to create an `example.always-firing` alert
+with the `alertsExample` as consumer. This will also automatically grant the user the right to
+create an `example.always-firing` alert from within Alerts management, where `alerts` is the consumer.
+This **does not** grant the user the ability to create an `example.always-firing` alert under any other consumer.
+For that, the specific consumer will have to grant the user explicit rights through their privilege system.
 
-```
+For example, if Uptime wanted to allow users to create an `example.people-in-space`
+alert inside of the Uptime solution, then they will have to do the following:
+
+```ts
 features.registerFeature({
       id: 'uptime',
       name: 'Uptime',
@@ -577,14 +615,41 @@ features.registerFeature({
     });
 ```
 
-This, assuming it's added by Uptime, would grant uptime users the privilege to create both their own `xpack.uptime.alerts.actionGroups.tls` alert and the `example.people-in-space` alert with `uptime` as the consumer.
+This, assuming it's added by Uptime, would grant uptime users the privilege
+to create both their own `xpack.uptime.alerts.actionGroups.tls` alert and
+the `example.people-in-space` alert with `uptime` as the consumer.
 
-You might ask, will this allow any Uptime user with `all` privileges to create an `example.people-in-space` alert? No.
-In order to create an `example.people-in-space` alert the Uptime user needs both `all` in Uptime **and** in AlertsExample as we always check whether the user is privileged to execute an operation (create/enable/delete etc.) in both the alert's _consumer_ and its _producer_.
+This does not allow any Uptime user with `all` privileges to create an `example.people-in-space` alert.
+To create an `example.people-in-space` alert, the Uptime user needs both `all` in Uptime **and** in
+AlertsExample, as we always check whether the user is privileged to execute
+an operation (create/enable/delete etc.) in both the alert's _consumer_ and its _producer_.
 
-The one exception to this is when the _producer_ is `alerts`, which represents a `built-in` AlertType, in which case we only check for _consumer_ privileges as all users are privileged to create built-in types by definition.
+The one exception to this is when the _producer_ is `alerts`, which represents a `built-in` AlertType,
+in which case we only check for _consumer_ privileges as all users are privileged to create built-in types by definition.
 
 
 *via https://github.com/elastic/kibana/pull/67157[#67157]*
+
+====
+
+[[breaking_plugin_v7.10.0_73778]]
+.API changed for creating a Jira connector
+[%collapsible]
+====
+
+`casesConfiguration` was renamed to `incidentConfiguration`. Added optional `attributeisCaseOwned`.
+
+*via https://github.com/elastic/kibana/pull/73778[#73778]*
+
+====
+
+[[breaking_plugin_v7.10.0_74357]]
+.API changed for creating an IBM Resilient connector
+[%collapsible]
+====
+
+`casesConfiguration` was renamed to `incidentConfiguration`. Added optional `attributeisCaseOwned`.
+
+*via https://github.com/elastic/kibana/pull/74357[#74357]*
 
 ====
