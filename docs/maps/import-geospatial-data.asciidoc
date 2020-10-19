@@ -2,13 +2,14 @@
 [[import-geospatial-data]]
 == Import geospatial data
 
-Geospatial data in the Elastic Stack must be indexed as a {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
-Kibana makes it easy to import geospatial data into the Elastic Stack.
-Use *File Data Visualizer* to index CSV files with latitude and longitude columns as a geo_point.
-Use *Upload GeoJSON* to index GeoJSON features as a geo_point or geo_shape.
+To import geospatical data into the Elasitc Stack, the data must be indexed as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
+Geospatial data comes in many formats.
+Choose an import tool based on the format of your geospatial data.
 
 [discrete]
 === Upload CSV with latitude and longitude columns
+
+*File Data Visualizer* indexes CSV files with latitude and longitude columns as a geo_point.
 
 . Click *{kib} > Machine Learning* from the side navigation.
 . Select the *Data Visualizer* tab, then click *Upload file*.
@@ -23,8 +24,23 @@ Use *Upload GeoJSON* to index GeoJSON features as a geo_point or geo_shape.
 [discrete]
 === Upload a GeoJSON file
 
+*Upload GeoJSON* indexes GeoJSON features as a geo_point or geo_shape.
+
 . <<maps-create>>
 . Click *Add layer*.
 . Select *Upload GeoJSON*.
 . Use the file chooser to select a GeoJSON file.
 . Click *Import file*.
+
+[discrete]
+=== Upload data with IP addresses
+
+The GeoIP processor adds information about the geographical location of IP addresses.
+See {ref}/geoip-processor.html[GeoIP processor] for details.
+For private IP addresses, see [Enriching data with GeoIPs from internal, private IP addresses](https://www.elastic.co/blog/enriching-elasticsearch-data-geo-ips-internal-private-ip-addresses).
+
+[discrete]
+=== Upload data with GDAL
+
+[GDAL](https://www.gdal.org/) (Geospatial Data Abstraction Library) contains command line tools that can convert geospatial data between 75 different geospatial file formats and index that geospatial data into {es}.
+See [Ingest geospatial data into Elasticsearch with GDAL](https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal) for details.
