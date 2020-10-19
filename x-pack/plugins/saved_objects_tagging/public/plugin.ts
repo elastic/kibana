@@ -46,7 +46,7 @@ export class SavedObjectTaggingPlugin
     });
 
     savedObjectsTaggingOss.registerTaggingApi(
-      core.getStartServices().then(([c, d, startContract]) => startContract)
+      core.getStartServices().then(([_core, _deps, startContract]) => startContract)
     );
 
     return {};
