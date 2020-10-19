@@ -21,18 +21,24 @@ import { parseDependencyTree, parseCircular, prettyCircular } from 'dpdm';
 import { run } from '@kbn/dev-utils';
 
 run(async ({ log }) => {
-  const depTree = await parseDependencyTree('src/plugins/**/*', {
-    /* options, see below */
-    include: /src\/plugins\/.*/,
+  const depTree = await parseDependencyTree(['{src,x-pack}/plugins/**/*'], {
+    include: /(src|x-pack)\/plugins\/.*/,
   });
 
   const circulars = parseCircular(depTree);
-  const filteredCirculars = circulars.filter((circDeps) => {
-    const first = circDeps[0];
-    const last = circDeps[circDeps.length - 1];
-    const firstPlugin = first.match(/src\/plugins\/([^\/]*)\/.*/)[1];
-    const lastPlugin = last.match(/src\/plugins\/([^\/]*)\/.*/)[1];
-    return firstPlugin !== lastPlugin;
+  const filteredCirculars = circulars.filter((circularDeps) => {
+    const first = circularDeps[0];
+    const last = circularDeps[circularDeps.length - 1];
+    const firstMatch = first.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
+    const lastMatch = last.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
+
+    if (firstMatch && lastMatch && firstMatch.length === 3 && lastMatch.length === 3) {
+      const firstPlugin = `${firstMatch[1]}/plugins/${firstMatch[2]}`;
+      const lastPlugin = `${lastMatch[1]}/plugins/${lastMatch[2]}`;
+      return firstPlugin !== lastPlugin;
+    }
+
+    return false;
   });
 
   log.warning(prettyCircular(filteredCirculars));
