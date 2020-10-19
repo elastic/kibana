@@ -111,6 +111,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
+  private fetchIndexPatternsAbortController: AbortController = new AbortController();
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
@@ -127,17 +128,25 @@ export default class QueryStringInputUI extends Component<Props, State> {
       (indexPattern) => typeof indexPattern !== 'string'
     ) as IIndexPattern[];
 
+    this.fetchIndexPatternsAbortController = new AbortController();
+
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.services.savedObjects!.client,
       stringPatterns,
       this.services.uiSettings!
     )) as IIndexPattern[];
 
-    this.setState({
-      indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
-    });
+    if (!this.fetchIndexPatternsAbortController.signal.aborted) {
+      // abort the previous fetch to avoid overriding with outdated data
+      // issue https://github.com/elastic/kibana/issues/80831
+      this.fetchIndexPatternsAbortController.abort();
 
-    this.updateSuggestions();
+      this.setState({
+        indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+      });
+
+      this.updateSuggestions();
+    }
   }, 200);
 
   private getSuggestions = async () => {
