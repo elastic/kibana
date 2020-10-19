@@ -56,8 +56,6 @@ export interface IGroupActions {
 }
 
 export interface IGroupValues {
-  contentSources: IContentSourceDetails[];
-  users: IUser[];
   group: IGroupDetails;
   dataLoading: boolean;
   manageUsersModalVisible: boolean;
