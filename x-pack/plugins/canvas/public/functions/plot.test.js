@@ -15,10 +15,18 @@ import {
   seriesStyle,
   defaultStyle,
 } from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
-import { plot } from './plot';
+import { plotFunctionFactory } from './plot';
 
 describe('plot', () => {
-  const fn = functionWrapper(plot);
+  const fn = functionWrapper(
+    plotFunctionFactory({
+      paletteService: {
+        custom: {
+          getColors: () => ['red', 'black'],
+        },
+      },
+    })
+  );
 
   it('returns a render as plot', () => {
     const result = fn(testPlot);

@@ -11,10 +11,18 @@ import {
   grayscalePalette,
   seriesStyle,
 } from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
-import { pie } from './pie';
+import { pieFunctionFactory } from './pie';
 
 describe('pie', () => {
-  const fn = functionWrapper(pie);
+  const fn = functionWrapper(
+    pieFunctionFactory({
+      paletteService: {
+        custom: {
+          getColors: () => ['red', 'black'],
+        },
+      },
+    })
+  );
 
   it('returns a render as pie', () => {
     const result = fn(testPie);

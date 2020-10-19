@@ -40,25 +40,18 @@ function buildRoundRobinCategoricalWithMappedColors(
   colors: (n: number) => string[],
   behindTextColors?: (n: number) => string[]
 ): Omit<PaletteDefinition, 'title'> {
-  const colorCache: Partial<Record<string, string>> = {};
   function getColor(
     series: SeriesLayer[],
     chartConfiguration: ChartColorConfiguration = { behindText: false }
   ) {
     const colorFromSettings = colorService.mappedColors.getColorFromConfig(series[0].name);
     // default to 7 series at the current level of hierarchy
-    const totalSeriesAtDepth = series[0].totalSeriesAtDepth || 7;
+    const totalSeriesAtDepth = series[0].totalSeriesAtDepth;
     // use total number of cached series colors so far as synthetic rank of current series
-    const rankAtDepth =
-      (series[0].rankAtDepth ?? Object.keys(colorCache).length) % totalSeriesAtDepth;
+    const rankAtDepth = series[0].rankAtDepth;
     const actualColors = colors(totalSeriesAtDepth);
     const actualBehindTextColors = behindTextColors && behindTextColors(totalSeriesAtDepth);
-    let outputColor =
-      colorFromSettings ||
-      (chartConfiguration.retainColorChoice ? colorCache[series[0].name] : undefined) ||
-      actualColors[rankAtDepth];
-
-    colorCache[series[0].name] = outputColor;
+    let outputColor = colorFromSettings || actualColors[rankAtDepth];
 
     // translate the color to the behind text variant if possible
     if (chartConfiguration.behindText && actualBehindTextColors) {
@@ -126,7 +119,6 @@ function buildSyncedKibanaPalette(
 }
 
 function buildCustomPalette(): PaletteDefinition {
-  const colorCache: Partial<Record<string, string>> = {};
   return {
     id: 'custom',
     getColor: (
@@ -135,15 +127,9 @@ function buildCustomPalette(): PaletteDefinition {
       { colors, gradient }: { colors: string[]; gradient: boolean }
     ) => {
       const actualColors = gradient
-        ? chroma.scale(colors).colors(series[0].totalSeriesAtDepth || 7)
+        ? chroma.scale(colors).colors(series[0].totalSeriesAtDepth)
         : colors;
-      const outputColor =
-        (chartConfiguration.retainColorChoice ? colorCache[series[0].name] : undefined) ||
-        actualColors[
-          (series[0].rankAtDepth ?? Object.keys(colorCache).length) % actualColors.length
-        ];
-
-      colorCache[series[0].name] = outputColor;
+      const outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
 
       if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
         return outputColor;

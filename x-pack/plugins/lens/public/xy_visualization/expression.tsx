@@ -643,7 +643,6 @@ export function XYChart({
                   maxDepth: 1,
                   behindText: false,
                   totalSeries: totalSeriesCount,
-                  retainColorChoice: true,
                 },
                 palette.params
               );

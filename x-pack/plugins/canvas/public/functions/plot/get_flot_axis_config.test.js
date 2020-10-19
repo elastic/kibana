@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { xAxisConfig, yAxisConfig, hideAxis } from './__tests__/fixtures/test_styles';
-import { getFlotAxisConfig } from './plot/get_flot_axis_config';
+import {
+  xAxisConfig,
+  yAxisConfig,
+  hideAxis,
+} from '../../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
+import { getFlotAxisConfig } from './get_flot_axis_config';
 
 describe('getFlotAxisConfig', () => {
   const columns = {

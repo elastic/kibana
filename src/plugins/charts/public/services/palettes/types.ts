@@ -31,11 +31,11 @@ export interface SeriesLayer {
   /**
    * Rank of the series compared to siblings with the same ancestor
    */
-  rankAtDepth?: number;
+  rankAtDepth: number;
   /**
    * Total number of series with the same ancestor
    */
-  totalSeriesAtDepth?: number;
+  totalSeriesAtDepth: number;
 }
 
 /**
@@ -55,11 +55,6 @@ export interface ChartColorConfiguration {
    * adjust colors for better a11y. Might be ignored depending on the palette.
    */
   behindText?: boolean;
-  /**
-   * Flag whether to try and keep the color once assigned to a series name if the palette allows it.
-   * Depending on the way the palette assigns colors this might be ignored in some cases.
-   */
-  retainColorChoice?: boolean;
 }
 
 /**

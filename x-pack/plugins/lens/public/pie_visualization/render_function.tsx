@@ -148,7 +148,6 @@ export function PieComponent(
             {
               behindText: categoryDisplay !== 'hide',
               maxDepth: columnGroups.length,
-              retainColorChoice: true,
               totalSeries: totalSeriesCount,
             },
             palette.params

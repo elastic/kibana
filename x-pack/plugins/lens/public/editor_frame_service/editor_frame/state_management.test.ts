@@ -7,11 +7,12 @@
 import { getInitialState, reducer } from './state_management';
 import { EditorFrameProps } from './index';
 import { Datasource, Visualization } from '../../types';
-import { createExpressionRendererMock, createMockPaletteDefinition } from '../mocks';
+import { createExpressionRendererMock } from '../mocks';
 import { coreMock } from 'src/core/public/mocks';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 describe('editor_frame state management', () => {
   describe('initialization', () => {
@@ -31,7 +32,9 @@ describe('editor_frame state management', () => {
           uiActions: uiActionsPluginMock.createStartContract(),
           data: dataPluginMock.createStartContract(),
           expressions: expressionsPluginMock.createStartContract(),
+          charts: chartPluginMock.createStartContract(),
         },
+        palettes: chartPluginMock.createStartContract().palettes,
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
         filters: [],

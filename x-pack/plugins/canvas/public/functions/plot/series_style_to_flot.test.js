@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { seriesStyleToFlot } from './plot/series_style_to_flot';
+import { seriesStyleToFlot } from './series_style_to_flot';
 
 describe('seriesStyleToFlot', () => {
   it('returns an empty object if seriesStyle is not provided', () => {

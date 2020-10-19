@@ -175,7 +175,6 @@ describe('PieVisualization component', () => {
           maxDepth: 2,
           totalSeries: 5,
           behindText: true,
-          retainColorChoice: true,
         },
         undefined
       );
