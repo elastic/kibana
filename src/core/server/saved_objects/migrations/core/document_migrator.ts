@@ -361,14 +361,20 @@ function migrateProp(
 ): SavedObjectUnsanitizedDoc {
   const originalType = doc.type;
   let migrationVersion = _.clone(doc.migrationVersion) || {};
-  const typeChanged = () => !doc.hasOwnProperty(prop) || doc.type !== originalType;
 
   for (const { version, transform } of applicableTransforms(migrations, doc, prop)) {
+    const currentVersion = propVersion(doc, prop);
+    if (currentVersion && Semver.gt(currentVersion, version)) {
+      // the previous transform function increased the object's migrationVersion; break out of the loop
+      break;
+    }
+
     doc = transform(doc);
     migrationVersion = updateMigrationVersion(doc, migrationVersion, prop, version);
     doc.migrationVersion = _.clone(migrationVersion);
 
-    if (typeChanged()) {
+    if (doc.type !== originalType) {
+      // the transform function changed the object's type; break out of the loop
       break;
     }
   }

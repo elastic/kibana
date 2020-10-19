@@ -382,36 +382,26 @@ describe('DocumentMigrator', () => {
     it('allows props to be renamed', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
-        typeRegistry: createRegistry(
-          {
-            name: 'animal',
-            migrations: {
-              '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
-              '3.2.1': renameAttr('animal', 'dawg'),
-            },
+        typeRegistry: createRegistry({
+          name: 'dog',
+          migrations: {
+            '1.0.0': setAttr('attributes.name', (name: string) => `Name: ${name}`),
+            '1.0.1': renameAttr('attributes.name', 'attributes.title'),
+            '1.0.2': setAttr('attributes.title', (name: string) => `Title: ${name}`),
           },
-          {
-            name: 'dawg',
-            migrations: {
-              '2.2.4': renameAttr('dawg', 'animal'),
-              '3.2.0': setAttr('dawg', (name: string) => `Dawg3.x: ${name}`),
-            },
-          }
-        ),
+        }),
       });
       const actual = migrator.migrate({
         id: 'smelly',
-        type: 'foo',
+        type: 'dog',
         attributes: { name: 'Callie' },
-        dawg: 'Yo',
         migrationVersion: {},
-      } as SavedObjectUnsanitizedDoc);
+      });
       expect(actual).toEqual({
         id: 'smelly',
-        type: 'foo',
-        attributes: { name: 'Callie' },
-        dawg: 'Dawg3.x: Animal: Yo',
-        migrationVersion: { animal: '3.2.1', dawg: '3.2.0' },
+        type: 'dog',
+        attributes: { title: 'Title: Name: Callie' },
+        migrationVersion: { dog: '1.0.2' },
       });
     });
 
