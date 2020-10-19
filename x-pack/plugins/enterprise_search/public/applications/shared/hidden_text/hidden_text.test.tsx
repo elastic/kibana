@@ -10,16 +10,16 @@ import { shallow } from 'enzyme';
 import { HiddenText } from '.';
 
 describe('HiddenText', () => {
-  it('provides the passed "text" in a "hiddenText" field, with all characters replaced with stars by default', () => {
+  it('provides the passed "text" in a "hiddenText" field, with all characters obfuscated', () => {
     const wrapper = shallow(
       <HiddenText text="hidden_test">
         {({ hiddenText, isHidden, toggle }) => <div>{hiddenText}</div>}
       </HiddenText>
     );
-    expect(wrapper.text()).toEqual('***********');
+    expect(wrapper.text()).toEqual('•••••••••••');
   });
 
-  it('provides a "toggle" function, which when called, changes "hiddenText" from stars back to the original text', () => {
+  it('provides a "toggle" function, which when called, "hiddenText" to the original, unobfuscated, text', () => {
     let toggleFn = () => {};
 
     const wrapper = shallow(
@@ -31,14 +31,14 @@ describe('HiddenText', () => {
       </HiddenText>
     );
 
-    expect(wrapper.text()).toEqual('***********');
+    expect(wrapper.text()).toEqual('•••••••••••');
     toggleFn();
     expect(wrapper.text()).toEqual('hidden_test');
     toggleFn();
-    expect(wrapper.text()).toEqual('***********');
+    expect(wrapper.text()).toEqual('•••••••••••');
   });
 
-  it('provides a "hidden" boolean, which which tracks whether or not the text is starred or not', () => {
+  it('provides a "hidden" boolean, which which tracks whether or not the text is obfuscated or not', () => {
     let toggleFn = () => {};
     let isHiddenBool = false;
 

@@ -19,7 +19,7 @@ interface Props {
 
 export const HiddenText: React.FC<Props> = ({ text, children }) => {
   const [isHidden, toggleIsHidden] = useState(true);
-  const hiddenText = isHidden ? text.replace(/./g, '*') : text;
+  const hiddenText = isHidden ? text.replace(/./g, '•') : text;
 
   return children({
     hiddenText,
