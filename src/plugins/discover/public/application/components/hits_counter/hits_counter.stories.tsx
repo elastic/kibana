@@ -25,9 +25,12 @@ import { HitsCounter } from './hits_counter';
 export default {
   component: HitsCounter,
   title: 'Discover/Components/HitsCounter',
+  argTypes: {
+    onResetQuery: { action: 'onResetQuery' },
+  },
 };
 
-export function Default() {
+export function Example() {
   return (
     <HitsCounter
       hits={0}
@@ -47,12 +50,26 @@ export function WithResetButton() {
   );
 }
 
-export function ManyHits() {
+export function ManyHits(parameters: any) {
+  return <HitsCounter hits={10500} showResetButton onResetQuery={parameters.onResetQuery} />;
+}
+
+export function Interactive(parameters: any) {
   return (
     <HitsCounter
-      hits={10500}
-      showResetButton
-      onResetQuery={(...args) => console.log('onResetQuery', ...args)}
+      hits={parameters.hits}
+      showResetButton={parameters.showResetButton}
+      onResetQuery={parameters.onResetQuery}
     />
   );
 }
+
+Interactive.args = {
+  hits: 500,
+  showResetButton: true,
+};
+
+Interactive.argTypes = {
+  hits: { control: { type: 'range', min: 0, max: 1e6 } },
+  showResetButton: { control: { type: 'boolean' } },
+};
