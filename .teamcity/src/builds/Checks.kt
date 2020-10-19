@@ -20,6 +20,7 @@ object Checks : BuildType({
     "Test Hardening" to ".ci/teamcity/checks/test_hardening.sh",
     "Check Types" to ".ci/teamcity/checks/type_check.sh",
     "Check Doc API Changes" to ".ci/teamcity/checks/doc_api_changes.sh",
+    "Check Bundle Limits" to ".ci/teamcity/checks/bundle_limits.sh",
     "Check i18n" to ".ci/teamcity/checks/i18n.sh"
   )
 
