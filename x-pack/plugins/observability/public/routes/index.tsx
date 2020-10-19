@@ -28,10 +28,7 @@ export const routes = {
     handler: () => {
       return <HomePage />;
     },
-    params: {
-      query: t.partial({}),
-      path: t.partial({}),
-    },
+    params: {},
     breadcrumb: [
       {
         text: i18n.translate('xpack.observability.home.breadcrumb', {
@@ -44,10 +41,7 @@ export const routes = {
     handler: () => {
       return <LandingPage />;
     },
-    params: {
-      query: t.partial({}),
-      path: t.partial({}),
-    },
+    params: {},
     breadcrumb: [
       {
         text: i18n.translate('xpack.observability.landing.breadcrumb', {
@@ -57,8 +51,8 @@ export const routes = {
     ],
   },
   '/overview': {
-    handler: ({ query, path }: any) => {
-      return <OverviewPage routeParams={{ query, path }} />;
+    handler: ({ query }: any) => {
+      return <OverviewPage routeParams={{ query }} />;
     },
     params: {
       query: t.partial({
@@ -67,7 +61,6 @@ export const routes = {
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
       }),
-      path: t.partial({}),
     },
     breadcrumb: [
       {
