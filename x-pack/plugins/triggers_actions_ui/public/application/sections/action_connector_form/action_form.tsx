@@ -279,7 +279,7 @@ export const ActionForm = ({
                     }}
                   >
                     <FormattedMessage
-                      defaultMessage="Add new"
+                      defaultMessage="Add connector"
                       id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
                     />
                   </EuiButtonEmpty>
