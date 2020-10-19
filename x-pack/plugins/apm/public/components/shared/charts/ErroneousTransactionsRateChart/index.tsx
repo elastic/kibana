@@ -17,7 +17,7 @@ import { callApmApi } from '../../../../services/rest/createCallApmApi';
 // @ts-expect-error
 import CustomPlot from '../CustomPlot';
 
-const tickFormatY = (y?: number) => {
+const tickFormatY = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };
 

@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { Coordinate } from '../../../typings/timeseries';
+
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -32,7 +35,11 @@ export async function getErrorRate({
   transactionName?: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
-}) {
+}): Promise<{
+  noHits: boolean;
+  transactionErrorRate: Coordinate[];
+  average: number | null;
+}> {
   const { start, end, esFilter, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
