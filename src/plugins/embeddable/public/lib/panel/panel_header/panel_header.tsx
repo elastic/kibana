@@ -24,6 +24,7 @@ import {
   EuiToolTip,
   EuiScreenReaderOnly,
   EuiNotificationBadge,
+  EuiLink,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
@@ -32,6 +33,7 @@ import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
 import { uiToReactComponent } from '../../../../../kibana_react/public';
+import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -44,6 +46,7 @@ export interface PanelHeaderProps {
   embeddable: IEmbeddable;
   headerId?: string;
   showPlaceholderTitle?: boolean;
+  customizeTitle: CustomizePanelTitleAction;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -129,6 +132,7 @@ export function PanelHeader({
   notifications,
   embeddable,
   headerId,
+  customizeTitle,
 }: PanelHeaderProps) {
   const description = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title);
@@ -172,11 +176,18 @@ export function PanelHeader({
   }
 
   const renderTitle = () => {
-    const titleComponent = showTitle ? (
+    const titleSpan = showTitle ? (
       <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
         {title || placeholderTitle}
       </span>
     ) : undefined;
+    const titleComponent = isViewMode ? (
+      titleSpan
+    ) : (
+      <EuiLink color="text" onClick={() => customizeTitle.execute({ embeddable })}>
+        {titleSpan}
+      </EuiLink>
+    );
     return description ? (
       <EuiToolTip
         content={description}
