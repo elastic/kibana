@@ -120,7 +120,7 @@ describe('useCytoscapeEventHandlers', () => {
   });
 
   describe('when a drag ends', () => {
-    it('sets the cursor to pointer', () => {
+    it('changes the cursor to pointer', () => {
       const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
       const container = ({
         style: { cursor: 'grabbing' },
@@ -191,7 +191,7 @@ describe('useCytoscapeEventHandlers', () => {
       expect(node.hasClass('hover')).toEqual(false);
     });
 
-    it('sets the cursor to default', () => {
+    it('sets the cursor to the default', () => {
       const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
       const container = ({
         style: { cursor: 'pointer' },
@@ -201,7 +201,7 @@ describe('useCytoscapeEventHandlers', () => {
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
       cy.getElementById('test').trigger('mouseout');
 
-      expect(container.style.cursor).toEqual('default');
+      expect(container.style.cursor).toEqual('grab');
     });
   });
 
@@ -265,6 +265,66 @@ describe('useCytoscapeEventHandlers', () => {
       cy.getElementById('test').trigger('unselect');
 
       expect(cy.getElementById('edge').hasClass('highlight')).toEqual(true);
+    });
+  });
+
+  describe('when a tap starts', () => {
+    it('sets the cursor to grabbing', () => {
+      const cy = cytoscape({});
+      const container = ({
+        style: { cursor: 'grab' },
+      } as unknown) as HTMLElement;
+      jest.spyOn(cy, 'container').mockReturnValueOnce(container);
+
+      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      cy.trigger('tapstart');
+
+      expect(container.style.cursor).toEqual('grabbing');
+    });
+
+    describe('when the target is a node', () => {
+      it('does not change the cursor', () => {
+        const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
+        const container = ({
+          style: { cursor: 'grab' },
+        } as unknown) as HTMLElement;
+        jest.spyOn(cy, 'container').mockReturnValueOnce(container);
+
+        renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+        cy.getElementById('test').trigger('tapstart');
+
+        expect(container.style.cursor).toEqual('grab');
+      });
+    });
+  });
+
+  describe('when a tap ends', () => {
+    it('sets the cursor to the default', () => {
+      const cy = cytoscape({});
+      const container = ({
+        style: { cursor: 'grabbing' },
+      } as unknown) as HTMLElement;
+      jest.spyOn(cy, 'container').mockReturnValueOnce(container);
+
+      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      cy.trigger('tapend');
+
+      expect(container.style.cursor).toEqual('grab');
+    });
+
+    describe('when the target is a node', () => {
+      it('does not change the cursor', () => {
+        const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
+        const container = ({
+          style: { cursor: 'pointer' },
+        } as unknown) as HTMLElement;
+        jest.spyOn(cy, 'container').mockReturnValueOnce(container);
+
+        renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+        cy.getElementById('test').trigger('tapend');
+
+        expect(container.style.cursor).toEqual('pointer');
+      });
     });
   });
 

@@ -140,7 +140,7 @@ export function useCytoscapeEventHandlers({
       event.target.connectedEdges().addClass('nodeHover');
     };
     const mouseoutHandler: cytoscape.EventHandler = (event) => {
-      setCursor('default', event);
+      setCursor('grab', event);
 
       event.target.removeClass('hover');
       event.target.connectedEdges().removeClass('nodeHover');
@@ -162,23 +162,37 @@ export function useCytoscapeEventHandlers({
         console.debug('cytoscape:', event);
       }
     };
-
     const dragHandler: cytoscape.EventHandler = (event) => {
-      applyCubicBezierStyles(event.target.connectedEdges());
-
       setCursor('grabbing', event);
+
+      applyCubicBezierStyles(event.target.connectedEdges());
 
       if (!event.target.data('hasBeenDragged')) {
         event.target.data('hasBeenDragged', true);
       }
     };
-
     const dragfreeHandler: cytoscape.EventHandler = (event) => {
       setCursor('pointer', event);
     };
+    const tapstartHandler: cytoscape.EventHandler = (event) => {
+      // Onle set cursot to "grabbing" if the target doesn't have an "isNode"
+      // property (meaning it's the canvas) or if "isNode" is false (meaning
+      // it's an edge.)
+      if (!event.target.isNode || !event.target.isNode()) {
+        setCursor('grabbing', event);
+      }
+    };
+    const tapendHandler: cytoscape.EventHandler = (event) => {
+      if (!event.target.isNode || !event.target.isNode()) {
+        setCursor('grab', event);
+      }
+    };
 
     if (cy) {
-      cy.on('custom:data drag layoutstop select unselect', debugHandler);
+      cy.on(
+        'custom:data drag dragfree layoutstop select tapstart tapend unselect',
+        debugHandler
+      );
       cy.on('custom:data', dataHandler);
       cy.on('layoutstop', layoutstopHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
@@ -187,12 +201,14 @@ export function useCytoscapeEventHandlers({
       cy.on('unselect', 'node', unselectHandler);
       cy.on('drag', 'node', dragHandler);
       cy.on('dragfree', 'node', dragfreeHandler);
+      cy.on('tapstart', tapstartHandler);
+      cy.on('tapend', tapendHandler);
     }
 
     return () => {
       if (cy) {
         cy.removeListener(
-          'custom:data drag layoutstop select unselect',
+          'custom:data drag dragfree layoutstop select tapstart tapend unselect',
           undefined,
           debugHandler
         );
@@ -204,6 +220,8 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('unselect', 'node', unselectHandler);
         cy.removeListener('drag', 'node', dragHandler);
         cy.removeListener('dragfree', 'node', dragfreeHandler);
+        cy.removeListener('tapstart', undefined, tapstartHandler);
+        cy.removeListener('tapend', undefined, tapendHandler);
       }
     };
   }, [cy, serviceName, trackApmEvent, theme]);

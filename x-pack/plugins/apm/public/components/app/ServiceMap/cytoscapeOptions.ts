@@ -105,6 +105,11 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
+      selector: 'core',
+      // @ts-expect-error DefinitelyTyped does not recognize 'active-bg-opacity'
+      style: { 'active-bg-opacity': 0 },
+    },
+    {
       selector: 'node',
       style: {
         'background-color': theme.eui.euiColorGhost,
@@ -242,6 +247,7 @@ linear-gradient(
 center,
 ${theme.eui.euiColorLightShade}`,
   backgroundSize: `${theme.eui.euiSizeL} ${theme.eui.euiSizeL}`,
+  cursor: 'grab',
   margin: `-${theme.eui.gutterTypes.gutterLarge}`,
   marginTop: 0,
 });
