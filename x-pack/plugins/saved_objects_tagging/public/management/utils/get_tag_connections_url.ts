@@ -7,6 +7,10 @@
 import { IBasePath } from 'src/core/public';
 import { TagWithRelations } from '../../../common/types';
 
+/**
+ * Returns the url to use to redirect to the SavedObject management section with given tag
+ * already selected in the query/filter bar.
+ */
 export const getTagConnectionsUrl = (tag: TagWithRelations, basePath: IBasePath) => {
   const query = encodeURIComponent(`tag:(${tag.name})`);
   return basePath.prepend(`/app/management/kibana/objects?initialQuery=${query}`);
