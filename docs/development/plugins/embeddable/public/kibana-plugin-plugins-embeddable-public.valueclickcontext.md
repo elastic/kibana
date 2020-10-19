@@ -14,6 +14,6 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data](./kibana-plugin-plugins-embeddable-public.valueclickcontext.data.md) | <code>{</code><br/><code>        data: Array&lt;{</code><br/><code>            table: Pick&lt;KibanaDatatable, 'rows' &#124; 'columns'&gt;;</code><br/><code>            column: number;</code><br/><code>            row: number;</code><br/><code>            value: any;</code><br/><code>        }&gt;;</code><br/><code>        timeFieldName?: string;</code><br/><code>        negate?: boolean;</code><br/><code>    }</code> |  |
+|  [data](./kibana-plugin-plugins-embeddable-public.valueclickcontext.data.md) | <code>{</code><br/><code>        data: Array&lt;{</code><br/><code>            table: Pick&lt;Datatable, 'rows' &#124; 'columns'&gt;;</code><br/><code>            column: number;</code><br/><code>            row: number;</code><br/><code>            value: any;</code><br/><code>        }&gt;;</code><br/><code>        timeFieldName?: string;</code><br/><code>        negate?: boolean;</code><br/><code>    }</code> |  |
 |  [embeddable](./kibana-plugin-plugins-embeddable-public.valueclickcontext.embeddable.md) | <code>T</code> |  |
 
