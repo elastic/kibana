@@ -31,6 +31,7 @@ export const taskStoreMock = {
       get: jest.fn(),
       getLifecycle: jest.fn(),
       fetch: jest.fn(),
+      aggregate: jest.fn(),
       maxAttempts,
       index,
       taskManagerId,

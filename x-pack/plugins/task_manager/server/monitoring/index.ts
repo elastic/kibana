@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { Logger } from 'src/core/server';
+import { Observable } from 'rxjs';
+import { TaskManagerConfig } from '../config';
+import {
+  MonitoringStats,
+  createAggregators,
+  createMonitoringStatsStream,
+} from './monitoring_stats_stream';
+import { TaskStore } from '../task_store';
+import { TaskPollingLifecycle } from '../polling_lifecycle';
+
+export {
+  MonitoringStats,
+  HealthStatus,
+  RawMonitoringStats,
+  summarizeMonitoringStats,
+  createAggregators,
+  createMonitoringStatsStream,
+} from './monitoring_stats_stream';
+
+export function createMonitoringStats(
+  taskPollingLifecycle: TaskPollingLifecycle,
+  taskStore: TaskStore,
+  config: TaskManagerConfig,
+  logger: Logger
+): Observable<MonitoringStats> {
+  return createMonitoringStatsStream(
+    createAggregators(taskPollingLifecycle, taskStore, config, logger),
+    config
+  );
+}

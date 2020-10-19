@@ -9,6 +9,7 @@ import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr } from './lib/result_type';
@@ -21,6 +22,8 @@ import {
   TaskClaim,
   TaskRunRequest,
   asTaskRunRequestEvent,
+  TaskPollingCycle,
+  asTaskPollingCycleEvent,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -47,7 +50,12 @@ export type TaskPollingLifecycleOpts = {
   middleware: Middleware;
 } & ManagedConfiguration;
 
-export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRunRequest;
+export type TaskLifecycleEvent =
+  | TaskMarkRunning
+  | TaskRun
+  | TaskClaim
+  | TaskRunRequest
+  | TaskPollingCycle;
 
 /**
  * The public interface into the task manager system.
@@ -181,17 +189,23 @@ export class TaskPollingLifecycle {
    */
   public start() {
     if (!this.isStarted) {
-      this.pollingSubscription = this.poller$.subscribe(
-        mapErr((error: PollingError<string>) => {
-          if (error.type === PollingErrorType.RequestCapacityReached) {
-            pipe(
-              error.data,
-              mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
-            );
-          }
-          this.logger.error(error.message);
-        })
-      );
+      this.pollingSubscription = this.poller$
+        .pipe(
+          tap(
+            mapErr((error: PollingError<string>) => {
+              if (error.type === PollingErrorType.RequestCapacityReached) {
+                pipe(
+                  error.data,
+                  mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+                );
+              }
+              this.logger.error(error.message);
+            })
+          )
+        )
+        .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
+          this.emitEvent(asTaskPollingCycleEvent<string>(event));
+        });
     }
   }
 
