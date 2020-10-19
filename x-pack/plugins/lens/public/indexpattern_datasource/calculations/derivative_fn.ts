@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable } from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions';
 
 interface DerivativeArgs {
   groupBy: string[];
@@ -17,12 +17,12 @@ interface DerivativeArgs {
 
 export const derivativeFunction: ExpressionFunctionDefinition<
   'derivative',
-  KibanaDatatable,
+  Datatable,
   DerivativeArgs,
-  KibanaDatatable
+  Datatable
 > = {
   name: 'derivative',
-  type: 'kibana_datatable',
+  type: 'datatable',
   help: i18n.translate('xpack.lens.functions.derivativeFn.help', {
     defaultMessage: 'Takes the difference between sequential values in a sorted table',
   }),
@@ -54,7 +54,7 @@ export const derivativeFunction: ExpressionFunctionDefinition<
       help: '',
     },
   },
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   fn(
     data,
     { groupBy, inputColumn, outputColumnId, outputColumnName, outputColumnSerializedFormat }
@@ -62,7 +62,7 @@ export const derivativeFunction: ExpressionFunctionDefinition<
     const previousInGroup: Record<string, number | undefined> = {};
 
     return {
-      type: 'kibana_datatable',
+      type: 'datatable',
       rows: data.rows.map((row) => {
         const groupKey = groupBy.length ? groupBy.map((g) => row[g]).join(',') : 'all';
         const previous = previousInGroup[groupKey];
@@ -84,7 +84,10 @@ export const derivativeFunction: ExpressionFunctionDefinition<
         {
           id: outputColumnId,
           name: outputColumnName,
-          formatHint: JSON.parse(outputColumnSerializedFormat),
+          meta: {
+            type: 'number',
+            params: JSON.parse(outputColumnSerializedFormat),
+          },
         },
       ],
     };

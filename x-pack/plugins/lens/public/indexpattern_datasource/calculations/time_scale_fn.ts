@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable } from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions';
 
 interface TimescaleArgs {
   inputColumn: string;
@@ -20,12 +20,12 @@ const scaleToMultiple = {
 
 export const timescaleFunction: ExpressionFunctionDefinition<
   'time_scale',
-  KibanaDatatable,
+  Datatable,
   TimescaleArgs,
-  KibanaDatatable
+  Datatable
 > = {
   name: 'time_scale',
-  type: 'kibana_datatable',
+  type: 'datatable',
   help: i18n.translate('xpack.lens.functions.timescaleFn.help', {
     defaultMessage: 'Converts a column with date histogram data into a per-time-unit value',
   }),
@@ -40,7 +40,7 @@ export const timescaleFunction: ExpressionFunctionDefinition<
       help: '',
     },
   },
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   fn(data, { inputColumn, scale }) {
     return {
       ...data,
