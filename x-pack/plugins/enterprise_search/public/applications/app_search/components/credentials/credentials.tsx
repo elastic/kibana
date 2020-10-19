@@ -64,44 +64,35 @@ export const Credentials: React.FC = () => {
       </EuiPageHeader>
       <EuiPageContentBody>
         <EuiPanel className="eui-textCenter">
-          {!!dataLoading ? (
-            <EuiLoadingContent lines={3} />
-          ) : (
-            <>
-              <EuiTitle size="s">
-                <h2>
-                  {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiEndpoint', {
-                    defaultMessage: 'Endpoint',
-                  })}
-                </h2>
-              </EuiTitle>
-              <EuiCopy
-                textToCopy={externalUrl.enterpriseSearchUrl}
-                afterMessage={i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.credentials.copied',
-                  {
-                    defaultMessage: 'Copied',
-                  }
-                )}
-              >
-                {(copy) => (
-                  <>
-                    <EuiButtonIcon
-                      onClick={copy}
-                      iconType="copyClipboard"
-                      aria-label={i18n.translate(
-                        'xpack.enterpriseSearch.appSearch.credentials.copyApiEndpoint',
-                        {
-                          defaultMessage: 'Copy API Endpoint to clipboard.',
-                        }
-                      )}
-                    />
-                    {externalUrl.enterpriseSearchUrl}
-                  </>
-                )}
-              </EuiCopy>
-            </>
-          )}
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiEndpoint', {
+                defaultMessage: 'Endpoint',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiCopy
+            textToCopy={externalUrl.enterpriseSearchUrl}
+            afterMessage={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.copied', {
+              defaultMessage: 'Copied',
+            })}
+          >
+            {(copy) => (
+              <>
+                <EuiButtonIcon
+                  onClick={copy}
+                  iconType="copyClipboard"
+                  aria-label={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.credentials.copyApiEndpoint',
+                    {
+                      defaultMessage: 'Copy API Endpoint to clipboard.',
+                    }
+                  )}
+                />
+                {externalUrl.enterpriseSearchUrl}
+              </>
+            )}
+          </EuiCopy>
         </EuiPanel>
         <EuiSpacer size="xxl" />
         <EuiPageContentHeader responsive={false}>

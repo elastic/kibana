@@ -52,7 +52,7 @@ describe('Credentials', () => {
     setMockValues({ dataLoading: true });
     const wrapper = shallow(<Credentials />);
     expect(wrapper.find('[data-test-subj="CreateAPIKeyButton"]')).toHaveLength(0);
-    expect(wrapper.find(EuiLoadingContent)).toHaveLength(2);
+    expect(wrapper.find(EuiLoadingContent)).toHaveLength(1);
   });
 
   it('renders the API endpoint and a button to copy it', () => {
