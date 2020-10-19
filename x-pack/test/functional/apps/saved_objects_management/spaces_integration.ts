@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const spaceId = 'space_1';
 
-  describe('spaces integration', () => {
+  describe('TOTO spaces integration', () => {
     before(async () => {
       await esArchiver.load('saved_objects_management/spaces_integration');
     });
@@ -33,10 +33,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.security.login(undefined, undefined, {
-        expectSpaceSelector: true,
-      });
-      await PageObjects.spaceSelector.clickSpaceCard(spaceId);
       await PageObjects.common.navigateToApp('settings', { basePath: getSpacePrefix(spaceId) });
       await PageObjects.settings.clickKibanaSavedObjects();
     });
