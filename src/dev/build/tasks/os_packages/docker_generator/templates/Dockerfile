@@ -71,6 +71,9 @@ RUN ln -s /usr/share/kibana /opt/kibana
 ENV ELASTIC_CONTAINER true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
+# Create expected directory structure
+RUN install -o 1000 -g 0 --mode 775 -d /app
+
 # Set some Kibana configuration defaults.
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 

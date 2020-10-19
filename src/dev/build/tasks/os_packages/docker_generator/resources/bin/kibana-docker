@@ -282,4 +282,9 @@ umask 0002
 # Therefore, we set this value here so that cgroup statistics are
 # available for the container this process will run in.
 
-exec /usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"
+CUSTOM_STARTUP_SCRIPT=/app/kibana.sh
+if [[ -f "$CUSTOM_STARTUP_SCRIPT" ]]; then
+  exec "$CUSTOM_STARTUP_SCRIPT"
+else
+  exec /usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"
+fi
