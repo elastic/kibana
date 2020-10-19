@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './policy';
-
-export * from './ui_metric';
+export { HotPhase } from './hot_phase';
