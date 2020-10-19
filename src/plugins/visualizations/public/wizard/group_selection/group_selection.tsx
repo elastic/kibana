@@ -18,7 +18,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,
@@ -188,7 +188,9 @@ function GroupSelection(props: GroupSelectionProps) {
 }
 
 const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
-  const onClick = () => onVisTypeSelected(visType);
+  const onClick = useCallback(() => {
+    onVisTypeSelected(visType);
+  }, [onVisTypeSelected, visType]);
   const shouldDisplayBadge = isVisTypeAlias(visType) && visType.disabled;
   return (
     <EuiFlexItem>
@@ -224,11 +226,13 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
 };
 
 const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardProps) => {
+  const onClick = useCallback(() => {
+    onVisTypeSelected(visType);
+  }, [onVisTypeSelected, visType]);
   // hide the experimental visualization if lab mode is not enabled
   if (!showExperimental && visType.stage === 'experimental') {
     return null;
   }
-  const onClick = () => onVisTypeSelected(visType);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
