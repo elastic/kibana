@@ -73,7 +73,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       const promotedVisTypes: string[] = [];
       $('button')
         .toArray()
-        .map((chart) => {
+        .forEach((chart) => {
           const title = $(chart).findTestSubject('visTypeTitle').text().trim();
           if (title) {
             promotedVisTypes.push(title);

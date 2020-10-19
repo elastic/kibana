@@ -112,7 +112,7 @@ export class TypesService {
        * @param {VisGroups} group - group type (aggbased | other | tools)
        */
       getByGroup: (group: VisGroups) => {
-        return [...Object.values(this.types)].filter((type) => {
+        return Object.values(this.types).filter((type) => {
           return type.group === group;
         });
       },

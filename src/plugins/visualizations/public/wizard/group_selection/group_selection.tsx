@@ -189,22 +189,23 @@ function GroupSelection(props: GroupSelectionProps) {
 
 const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   const onClick = () => onVisTypeSelected(visType);
+  const shouldDisplayBadge = isVisTypeAlias(visType) && visType.disabled;
   return (
     <EuiFlexItem>
       <EuiCard
         titleSize="xs"
         title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
         onClick={onClick}
-        isDisabled={isVisTypeAlias(visType) && visType.disabled}
+        isDisabled={shouldDisplayBadge}
         betaBadgeLabel={
-          isVisTypeAlias(visType) && visType.disabled
+          shouldDisplayBadge
             ? i18n.translate('visualizations.newVisWizard.basicTitle', {
                 defaultMessage: 'Basic',
               })
             : undefined
         }
         betaBadgeTooltipContent={
-          isVisTypeAlias(visType) && visType.disabled
+          shouldDisplayBadge
             ? i18n.translate('visualizations.newVisWizard.basicLicenseRequired', {
                 defaultMessage: 'This feature requires a Basic License',
               })

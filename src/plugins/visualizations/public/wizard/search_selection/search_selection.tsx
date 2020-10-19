@@ -56,7 +56,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <DialogNavigation goBack={() => this.props.goBack()} />
+          <DialogNavigation goBack={this.props.goBack} />
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}

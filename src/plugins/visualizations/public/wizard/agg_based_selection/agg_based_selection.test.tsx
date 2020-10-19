@@ -65,7 +65,7 @@ describe('AggBasedSelection', () => {
 
   const visTypes: TypesStart = {
     get<T>(id: string): VisType<T> {
-      return (_visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
+      return _visTypes.find((vis) => vis.name === id) as VisType<T>;
     },
     all: () => {
       return (_visTypes as unknown) as VisType[];
