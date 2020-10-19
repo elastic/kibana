@@ -17,13 +17,7 @@
  * under the License.
  */
 
-// global setup for supported languages
-import './global';
+import { ID } from './constants';
+import { lexerRules } from './lexer_rules';
 
-export { monaco } from './monaco';
-export { XJsonLang } from './xjson';
-export { PainlessLang } from './painless';
-
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+export const EsqlLang = { ID, lexerRules };

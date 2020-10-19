@@ -18,13 +18,8 @@
  */
 
 import { monaco } from '../../monaco';
-import { ID } from '../constants';
-import './painless';
-import './esql';
 
 import { globals } from './shared';
-
-export { ID };
 
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   ...(globals as any),
@@ -124,11 +119,7 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
   },
 };
 
-monaco.languages.register({
-  id: ID,
-});
-monaco.languages.setMonarchTokensProvider(ID, lexerRules);
-monaco.languages.setLanguageConfiguration(ID, {
+export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   brackets: [
     ['{', '}'],
     ['[', ']'],
@@ -138,4 +129,4 @@ monaco.languages.setLanguageConfiguration(ID, {
     { open: '[', close: ']' },
     { open: '"', close: '"' },
   ],
-});
+};

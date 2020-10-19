@@ -19,8 +19,6 @@
 
 import { monaco } from '../../monaco';
 
-export const ID = 'esql';
-
 const brackets = [
   { open: '[', close: ']', token: 'delimiter.square' },
   { open: '(', close: ')', token: 'delimiter.parenthesis' },
