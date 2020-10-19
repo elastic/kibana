@@ -45,7 +45,7 @@ interface AlertContextMenuProps {
   disabled: boolean;
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
-  refreshRule: () => void;
+  onRuleChange?: () => void;
   timelineId: string;
 }
 
@@ -53,7 +53,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   disabled,
   ecsRowData,
   refetch,
-  refreshRule,
+  onRuleChange,
   timelineId,
 }) => {
   const dispatch = useDispatch();
@@ -387,7 +387,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
           alertStatus={alertStatus}
-          onRuleChange={refreshRule}
+          onRuleChange={onRuleChange}
         />
       )}
     </>

@@ -42,7 +42,7 @@ export interface OwnProps {
   start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
-  refreshRule: () => void;
+  onRuleChange?: () => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
@@ -65,7 +65,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   pageFilters,
   query,
-  refreshRule,
+  onRuleChange,
   removeColumn,
   start,
   scopeId,
@@ -155,7 +155,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           kqlMode={kqlMode}
           onChangeItemsPerPage={onChangeItemsPerPage}
           query={query}
-          refreshRule={refreshRule}
+          onRuleChange={onRuleChange}
           start={start}
           sort={sort}
           toggleColumn={toggleColumn}

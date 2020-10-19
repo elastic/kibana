@@ -57,7 +57,7 @@ export interface BodyProps {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   refetch: inputsModel.Refetch;
-  refreshRule: () => void;
+  onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   show: boolean;
@@ -102,7 +102,7 @@ export const Body = React.memo<BodyProps>(
     pinnedEventIds,
     rowRenderers,
     refetch,
-    refreshRule,
+    onRuleChange,
     selectedEventIds,
     show,
     showCheckboxes,
@@ -188,7 +188,7 @@ export const Body = React.memo<BodyProps>(
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
               rowRenderers={rowRenderers}
-              refreshRule={refreshRule}
+              onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
               toggleColumn={toggleColumn}
