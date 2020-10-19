@@ -1,5 +1,58 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`DiscoverNoResults props error message supports lucene and renders doc link 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem dscNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResultsError"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <div
+            aria-hidden="true"
+            class="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+          />
+          <span
+            class="euiCallOutHeader__title"
+          >
+            We encountered an error retrieving search results
+          </span>
+        </div>
+        <div
+          class="euiText euiText--small"
+        >
+          <button
+            class="euiButton euiButton--primary euiButton--small"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Show error message
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
 exports[`DiscoverNoResults props queryLanguage supports lucene and renders doc link 1`] = `
 Array [
   <div

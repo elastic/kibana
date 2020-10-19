@@ -52,8 +52,17 @@ describe('DiscoverNoResults', () => {
 
     describe('queryLanguage', () => {
       test('supports lucene and renders doc link', () => {
+        const component = renderWithIntl(<DiscoverNoResults queryLanguage="lucene" />);
+
+        expect(component).toMatchSnapshot();
+      });
+    });
+
+    describe('error message', () => {
+      test('supports lucene and renders doc link', () => {
+        const error = new Error('Not so awesome error');
         const component = renderWithIntl(
-          <DiscoverNoResults queryLanguage="lucene" getDocLink={() => 'documentation-link'} />
+          <DiscoverNoResults timeFieldName="awesome_time_field" error={error} />
         );
 
         expect(component).toMatchSnapshot();
