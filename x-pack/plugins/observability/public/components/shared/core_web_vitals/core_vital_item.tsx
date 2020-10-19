@@ -88,7 +88,7 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
-  if (value === undefined && ranks[0] === 100) {
+  if (value === undefined && ranks[0] === 100 && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
   return (
