@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const spaceId = 'space_1';
 
-  describe('TOTO spaces integration', () => {
+  describe('spaces integration', () => {
     before(async () => {
       await esArchiver.load('saved_objects_management/spaces_integration');
     });
@@ -33,8 +33,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('settings', { basePath: getSpacePrefix(spaceId) });
-      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
+        basePath: getSpacePrefix(spaceId),
+        shouldUseHashForSubUrl: false,
+      });
+      await PageObjects.savedObjects.waitTableIsLoaded();
     });
 
     it('redirects to correct url when inspecting an object from a non-default space', async () => {
@@ -43,9 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.savedObjects.clickInspectByTitle('A Pie');
 
-      await PageObjects.common.waitUntilUrlIncludes(
-        '/s/space_1/app/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed'
-      );
+      await PageObjects.common.waitUntilUrlIncludes(getSpacePrefix(spaceId));
 
       expect(await testSubjects.getAttribute(`savedObjects-editField-title`, 'value')).to.eql(
         'A Pie'
