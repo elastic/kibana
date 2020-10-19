@@ -45,6 +45,8 @@ export interface IExpressionLoaderParams {
   searchContext?: ExecutionContextSearch;
   context?: ExpressionValue;
   variables?: Record<string, any>;
+  // Enables debug tracking on each expression in the AST
+  debug?: boolean;
   disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
