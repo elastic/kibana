@@ -62,7 +62,8 @@ describe('HasDataContextProvider', () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasData: {},
-        hasAnyData: undefined,
+        hasAnyData: false,
+        isAllRequestsComplete: false,
       });
 
       await waitForNextUpdate();
@@ -76,6 +77,7 @@ describe('HasDataContextProvider', () => {
           ux: { hasData: undefined, status: 'success' },
         },
         hasAnyData: false,
+        isAllRequestsComplete: true,
       });
     });
 
@@ -97,7 +99,8 @@ describe('HasDataContextProvider', () => {
           const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
             hasData: {},
-            hasAnyData: undefined,
+            hasAnyData: false,
+            isAllRequestsComplete: false,
           });
 
           await waitForNextUpdate();
@@ -111,6 +114,7 @@ describe('HasDataContextProvider', () => {
               ux: { hasData: { hasData: false, serviceName: undefined }, status: 'success' },
             },
             hasAnyData: false,
+            isAllRequestsComplete: true,
           });
         });
       });
@@ -132,7 +136,8 @@ describe('HasDataContextProvider', () => {
           const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
             hasData: {},
-            hasAnyData: undefined,
+            hasAnyData: false,
+            isAllRequestsComplete: false,
           });
 
           await waitForNextUpdate();
@@ -146,6 +151,7 @@ describe('HasDataContextProvider', () => {
               ux: { hasData: { hasData: false, serviceName: undefined }, status: 'success' },
             },
             hasAnyData: true,
+            isAllRequestsComplete: true,
           });
         });
       });
@@ -167,7 +173,8 @@ describe('HasDataContextProvider', () => {
           const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
             hasData: {},
-            hasAnyData: undefined,
+            hasAnyData: false,
+            isAllRequestsComplete: false,
           });
 
           await waitForNextUpdate();
@@ -181,6 +188,7 @@ describe('HasDataContextProvider', () => {
               ux: { hasData: { hasData: true, serviceName: 'ux' }, status: 'success' },
             },
             hasAnyData: true,
+            isAllRequestsComplete: true,
           });
         });
       });
@@ -199,7 +207,8 @@ describe('HasDataContextProvider', () => {
             });
             expect(result.current).toEqual({
               hasData: {},
-              hasAnyData: undefined,
+              hasAnyData: false,
+              isAllRequestsComplete: false,
             });
 
             await waitForNextUpdate();
@@ -213,6 +222,7 @@ describe('HasDataContextProvider', () => {
                 ux: { hasData: undefined, status: 'success' },
               },
               hasAnyData: true,
+              isAllRequestsComplete: true,
             });
           });
         });
@@ -230,7 +240,8 @@ describe('HasDataContextProvider', () => {
             });
             expect(result.current).toEqual({
               hasData: {},
-              hasAnyData: undefined,
+              hasAnyData: false,
+              isAllRequestsComplete: false,
             });
 
             await waitForNextUpdate();
@@ -244,6 +255,7 @@ describe('HasDataContextProvider', () => {
                 ux: { hasData: undefined, status: 'success' },
               },
               hasAnyData: false,
+              isAllRequestsComplete: true,
             });
           });
         });
@@ -271,7 +283,8 @@ describe('HasDataContextProvider', () => {
           const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
             hasData: {},
-            hasAnyData: undefined,
+            hasAnyData: false,
+            isAllRequestsComplete: false,
           });
 
           await waitForNextUpdate();
@@ -285,6 +298,7 @@ describe('HasDataContextProvider', () => {
               ux: { hasData: { hasData: true, serviceName: 'ux' }, status: 'success' },
             },
             hasAnyData: true,
+            isAllRequestsComplete: true,
           });
         });
       });
@@ -331,7 +345,8 @@ describe('HasDataContextProvider', () => {
           const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
             hasData: {},
-            hasAnyData: undefined,
+            hasAnyData: false,
+            isAllRequestsComplete: false,
           });
 
           await waitForNextUpdate();
@@ -345,6 +360,7 @@ describe('HasDataContextProvider', () => {
               ux: { hasData: undefined, status: 'failure' },
             },
             hasAnyData: false,
+            isAllRequestsComplete: true,
           });
         });
       });

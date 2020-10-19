@@ -10,15 +10,15 @@ import { LoadingObservability } from '../overview/loading_observability';
 
 export function HomePage() {
   const history = useHistory();
-  const { hasAnyData } = useHasData();
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
 
   useEffect(() => {
     if (hasAnyData === true) {
       history.push({ pathname: '/overview' });
-    } else if (hasAnyData === false) {
+    } else if (hasAnyData === false && isAllRequestsComplete === true) {
       history.push({ pathname: '/landing' });
     }
-  }, [hasAnyData, history]);
+  }, [hasAnyData, isAllRequestsComplete, history]);
 
   return <LoadingObservability />;
 }

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
@@ -19,7 +18,8 @@ export type HasDataMap = Record<
 
 export interface HasDataContextValue {
   hasData: Partial<HasDataMap>;
-  hasAnyData: boolean | undefined;
+  hasAnyData: boolean;
+  isAllRequestsComplete: boolean;
 }
 
 export const HasDataContext = createContext({} as HasDataContextValue);
@@ -68,24 +68,19 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     []
   );
 
-  const allRequestCompleted = isEmpty(hasData)
-    ? false
-    : apps.every((app) => {
-        const appStatus = hasData[app]?.status;
-        return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
-      });
+  const isAllRequestsComplete = apps.every((app) => {
+    const appStatus = hasData[app]?.status;
+    return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
+  });
 
-  const hasSomeData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some(
+  const hasAnyData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some(
     (app) => hasData[app]?.hasData === true
   );
 
-  let hasAnyData;
-  if (hasSomeData === true) {
-    hasAnyData = true;
-    // Waits until all requests are complete to set hasAnyData to false
-  } else if (hasSomeData === false && allRequestCompleted === true) {
-    hasAnyData = false;
-  }
-
-  return <HasDataContext.Provider value={{ hasData, hasAnyData }} children={children} />;
+  return (
+    <HasDataContext.Provider
+      value={{ hasData, hasAnyData, isAllRequestsComplete }}
+      children={children}
+    />
+  );
 }
