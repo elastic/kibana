@@ -78,7 +78,7 @@ import { ExceptionsViewer } from '../../../../../common/components/exceptions/vi
 import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
-import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../shared_imports';
+import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
@@ -307,12 +307,12 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   const exceptionLists = useMemo((): {
-    lists: ExceptionIdentifiers[];
+    lists: ExceptionListIdentifiers[];
     allowedExceptionListTypes: ExceptionListTypeEnum[];
   } => {
     if (rule != null && rule.exceptions_list != null) {
       return rule.exceptions_list.reduce<{
-        lists: ExceptionIdentifiers[];
+        lists: ExceptionListIdentifiers[];
         allowedExceptionListTypes: ExceptionListTypeEnum[];
       }>(
         (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
