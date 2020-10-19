@@ -20,8 +20,8 @@
 jest.mock('node-fetch');
 // @ts-ignore
 import fetch from 'node-fetch';
-const { Response } = jest.requireActual('node-fetch');
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
+import { StatsGetterConfig } from 'src/plugins/telemetry_collection_manager/server';
 
 describe('sendTelemetryOptInStatus', () => {
   it('calls fetch with the opt in status returned from the telemetryCollectionManager', async () => {
@@ -41,7 +41,7 @@ describe('sendTelemetryOptInStatus', () => {
     const result = await sendTelemetryOptInStatus(
       mockTelemetryCollectionManager,
       mockConfig,
-      mockStatsGetterConfig
+      mockStatsGetterConfig as StatsGetterConfig
     );
     expect(result).toBeUndefined();
     expect(fetch).toBeCalledTimes(1);

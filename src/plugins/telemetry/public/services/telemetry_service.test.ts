@@ -43,9 +43,6 @@ jest.mock('moment', () => {
     };
   });
 });
-jest.mock('node-fetch');
-
-import fetch from 'node-fetch';
 
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
