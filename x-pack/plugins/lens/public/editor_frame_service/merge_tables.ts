@@ -6,9 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueSearchContext,
-  KibanaDatatable,
 } from 'src/plugins/expressions/public';
 import { search } from '../../../../../src/plugins/data/public';
 const { toAbsoluteDates } = search.aggs;
@@ -17,7 +17,7 @@ import { LensMultiTable } from '../types';
 
 interface MergeTables {
   layerIds: string[];
-  tables: KibanaDatatable[];
+  tables: Datatable[];
 }
 
 export const mergeTables: ExpressionFunctionDefinition<
@@ -38,14 +38,14 @@ export const mergeTables: ExpressionFunctionDefinition<
       multi: true,
     },
     tables: {
-      types: ['kibana_datatable'],
+      types: ['datatable'],
       help: '',
       multi: true,
     },
   },
   inputTypes: ['kibana_context', 'null'],
   fn(input, { layerIds, tables }) {
-    const resultTables: Record<string, KibanaDatatable> = {};
+    const resultTables: Record<string, Datatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
     });

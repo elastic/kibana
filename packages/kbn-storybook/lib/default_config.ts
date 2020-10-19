@@ -20,7 +20,12 @@
 import { StorybookConfig } from '@storybook/core/types';
 
 export const defaultConfig: StorybookConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
+  addons: [
+    '@kbn/storybook/preset',
+    '@storybook/addon-a11y',
+    '@storybook/addon-knobs',
+    '@storybook/addon-essentials',
+  ],
   stories: ['../**/*.stories.tsx'],
   typescript: {
     reactDocgen: false,
