@@ -89,6 +89,7 @@ export function OverviewPage({ routeParams }: Props) {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
     } else if (id === 'ux') {
+      // @ts-ignore see https://github.com/elastic/kibana/issues/81081
       return !hasData[id]?.hasData;
     }
     return !hasData[id];
