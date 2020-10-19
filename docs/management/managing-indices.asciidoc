@@ -2,7 +2,7 @@
 [[managing-indices]]
 == Index Management
 
-{kib}'s *Index Management* features are an easy, convenient way to manage your
+*Index Management* features are an easy, convenient way to manage your
 {es} cluster's indices, data streams, and index templates. Practicing good index
 management ensures your data is stored correctly and in the most cost-effective
 way possible.
@@ -10,7 +10,7 @@ way possible.
 [float]
 === What you'll learn
 
-This page shows you how to use {kib}'s *Index Management* features to:
+This page shows you how to use *Index Management* features to:
 
 * View and edit index settings.
 * View mappings and statistics for an index.
@@ -152,7 +152,7 @@ files. You'll then use the template to configure two new indices.
 [role="screenshot"]
 image::images/management_index_create_wizard.png[Create wizard]
 
-. Enter `my-index-template` in the *Name* field.
+. In the *Name* field, enter `my-index-template`.
 
 . Set *Index pattern* to `my-index-*` so the template matches any index
 with that index pattern.
