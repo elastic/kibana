@@ -81,6 +81,16 @@ export interface AggsCommonSetup {
 /** @internal */
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
+  /**
+   * Helper function returning meta data about use date intervals for a data table column.
+   * If the column is not a column created by a date histogram aggregation of the esaggs data source,
+   * this function will return undefined.
+   *
+   * Otherwise, it will return the following attributes in an object:
+   * * `timeZone` time zone used to create the buckets (important e.g. for DST),
+   * * `timeRange` total time range of the fetch data (to infer partial buckets at the beginning and end of the data)
+   * * `interval` Interval used on elasticsearch (`auto` resolved to the actual interval)
+   */
   getDateMetaByDatatableColumn: ReturnType<typeof getDateMetaByDatatableColumn>;
   createAggConfigs: (
     indexPattern: IndexPattern,

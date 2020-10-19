@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import moment from 'moment-timezone';
 import { DatatableColumn } from 'src/plugins/expressions/common';
 import { IndexPattern } from '../../../index_patterns';
 
 import { TimeRange } from '../../../types';
 import { AggParamsDateHistogram, BUCKET_TYPES } from '../buckets';
+import { inferTimeZone } from './infer_time_zone';
 
 export const getDateMetaByDatatableColumn = ({
   calculateAutoTimeExpression,
@@ -42,19 +42,13 @@ export const getDateMetaByDatatableColumn = ({
   const params = column.meta.sourceParams.params as AggParamsDateHistogram;
   const appliedTimeRange = column.meta.sourceParams.appliedTimeRange as TimeRange;
 
-  let tz = params.time_zone;
-  if (!tz && params.field) {
-    // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
-    // field requires a specific time_zone
-    tz = (await getIndexPattern(column.meta.sourceParams.indexPatternId as string)).typeMeta?.aggs
-      ?.date_histogram?.[params.field]?.time_zone;
-  }
-  if (!tz) {
-    // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
-    const detectedTimezone = moment.tz.guess();
-    const tzOffset = moment().format('Z');
-    tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
-  }
+  const tz = inferTimeZone(
+    params,
+    await getIndexPattern(column.meta.sourceParams.indexPatternId as string),
+    isDefaultTimezone,
+    getConfig
+  );
+
   return {
     timeZone: tz,
     timeRange: appliedTimeRange,

@@ -20,7 +20,6 @@
 import { pick } from 'lodash';
 
 import { UiSettingsServiceStart, SavedObjectsClientContract } from 'src/core/server';
-import { IndexPatternsContract } from 'src/plugins/data/common/index_patterns/index_patterns';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {
   AggsCommonService,
@@ -31,6 +30,7 @@ import {
   TimeRange,
 } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
+import { IndexPatternsServiceStart } from '../../index_patterns';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
@@ -42,7 +42,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: UiSettingsServiceStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: IndexPatternsServiceStart;
 }
 
 /**
@@ -82,7 +82,8 @@ export class AggsService {
           types,
         } = this.aggsCommonService.start({
           getConfig,
-          getIndexPattern: indexPatterns.get,
+          getIndexPattern: (await indexPatterns.indexPatternsServiceFactory(savedObjectsClient))
+            .get,
           isDefaultTimezone,
         });
 
