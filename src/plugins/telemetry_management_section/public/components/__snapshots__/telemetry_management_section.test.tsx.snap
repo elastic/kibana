@@ -230,6 +230,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
   showAppliesSettingMessage={true}
   telemetryService={
     TelemetryService {
+      "currentKibanaVersion": "mock_kibana_version",
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
         "banner": true,
