@@ -18,7 +18,7 @@ Choose an import tool based on the format of your geospatial data.
 . Select the *Advanced* tab.
 . Set *Index name*.
 . Click *Add combined field*, then click *Add geo point field*.
-. Fill out the *ADD GEO POINT FIELD* form and click *Add*.
+. Fill out the form and click *Add*.
 . Click *Import*.
 
 [discrete]
