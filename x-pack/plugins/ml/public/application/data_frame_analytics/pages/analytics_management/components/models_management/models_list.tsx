@@ -30,6 +30,7 @@ import { ModelsTableToConfigMapping } from './index';
 import { DeleteModelsModal } from './delete_models_modal';
 import { useMlKibana, useMlUrlGenerator, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
+import { getJobMapUrl } from '../analytics_list/common';
 import {
   TrainedModelConfigResponse,
   ModelPipelines,
@@ -297,6 +298,22 @@ export const ModelsList: FC = () => {
         await navigateToUrl(url);
       },
       isPrimary: true,
+    },
+    {
+      name: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
+        defaultMessage: 'Analytics map',
+      }),
+      description: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
+        defaultMessage: 'Analytics map',
+      }),
+      icon: 'graphApp',
+      type: 'icon',
+      isPrimary: true,
+      available: (item) => item.metadata?.analytics_config?.id,
+      onClick: async (item) => {
+        // TODO: update to use new navigation?
+        await navigateToUrl(getJobMapUrl(item.metadata?.analytics_config.id));
+      },
     },
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {

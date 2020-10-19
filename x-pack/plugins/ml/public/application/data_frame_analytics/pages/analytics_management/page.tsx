@@ -31,8 +31,11 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
+import { JobMap } from '../job_map';
 
-export const Page: FC = () => {
+export const Page: FC<{
+  jobId?: string;
+}> = ({ jobId }) => {
   const [blockRefresh, setBlockRefresh] = useState(false);
 
   useRefreshInterval(setBlockRefresh);
@@ -88,7 +91,7 @@ export const Page: FC = () => {
 
           <EuiPageContent>
             <AnalyticsNavigationBar selectedTabId={selectedTabId} />
-
+            {selectedTabId === 'map' && jobId && <JobMap analyticsId={jobId} />}
             {selectedTabId === 'data_frame_analytics' && (
               <DataFrameAnalyticsList blockRefresh={blockRefresh} />
             )}

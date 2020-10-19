@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './analytics_jobs_list';
-export * from './analytics_job_exploration';
-export * from './analytics_job_creation';
-export * from './models_list';
-export * from './analytics_map';
+export { Cytoscape, CytoscapeContext } from './cytoscape';
+export { Controls } from './controls';
+export { JobMapLegend } from './legend';
