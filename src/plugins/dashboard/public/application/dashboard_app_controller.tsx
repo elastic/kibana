@@ -144,7 +144,6 @@ export class DashboardAppController {
       notifications,
       overlays,
       chrome,
-      injectedMetadata,
       fatalErrors,
       uiSettings,
       savedObjects,
@@ -526,9 +525,6 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
       filterManager.getFilters()
     );
-
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
 
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
