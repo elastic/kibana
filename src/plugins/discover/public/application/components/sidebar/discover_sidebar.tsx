@@ -234,7 +234,7 @@ export function DiscoverSidebar({
                           id="dscSelectedFields"
                           initialIsOpen={true}
                           buttonContent={
-                            <EuiText size="xs">
+                            <EuiText size="xs" id="selected_fields">
                               <strong>
                                 <FormattedMessage
                                   id="discover.fieldChooser.filter.selectedFieldsTitle"
@@ -288,7 +288,7 @@ export function DiscoverSidebar({
                       id="dscAvailableFields"
                       initialIsOpen={true}
                       buttonContent={
-                        <EuiText size="xs">
+                        <EuiText size="xs" id="available_fields">
                           <strong>
                             <FormattedMessage
                               id="discover.fieldChooser.filter.availableFieldsTitle"
