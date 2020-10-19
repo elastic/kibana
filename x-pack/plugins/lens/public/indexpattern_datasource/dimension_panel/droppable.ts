@@ -108,8 +108,8 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     // Time to replace
     setState(
       mergeLayer({
-        state: state,
-        layerId: layerId,
+        state,
+        layerId,
         newLayer: {
           columnOrder: newColumnOrder,
           columns: newColumns,
@@ -163,9 +163,9 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
   setState(
     changeColumn({
-      state: state,
+      state,
       layerId,
-      columnId: columnId,
+      columnId,
       newColumn,
       // If the field has changed, the onFieldChange method needs to take care of everything including moving
       // over params. If we create a new column above we want changeColumn to move over params.

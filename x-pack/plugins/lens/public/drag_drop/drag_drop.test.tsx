@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { render, mount } from 'enzyme';
 import { DragDrop, ReorderableDragDrop } from './drag_drop';
 import { ChildDragDropProvider, ReorderProvider } from './providers';
@@ -367,7 +366,6 @@ describe('DragDrop', () => {
       let dragging: { id: '1' } | undefined = { id: '1' };
       const preventDefault = jest.fn();
       const stopPropagation = jest.fn();
-      const setDragging = jest.fn();
       const onDrop = jest.fn();
       const component = mount(
         <ChildDragDropProvider

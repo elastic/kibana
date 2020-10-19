@@ -459,8 +459,9 @@ describe('LayerPanel', () => {
       );
 
       expect(mockDatasource.canHandleDrop).not.toHaveBeenCalled();
-      const reorderableGroupElement = component.find('DragDrop[data-test-subj="lnsGroup"]').at(1);
-      reorderableGroupElement?.prop('onDrop')!((draggingOperation as unknown) as DroppableEvent)!;
+      component.find('DragDrop[data-test-subj="lnsGroup"]').at(1).prop('onDrop')!(
+        (draggingOperation as unknown) as DroppableEvent
+      );
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           isReorder: true,

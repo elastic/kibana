@@ -658,7 +658,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         layers: {
           myLayer: {
             ...testState.layers.myLayer,
-            columnOrder: columnOrder,
+            columnOrder,
             columns: {
               ...testState.layers.myLayer.columns,
             },
