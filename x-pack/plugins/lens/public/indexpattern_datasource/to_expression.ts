@@ -98,27 +98,36 @@ function getExpressionForLayer(
           arguments: {
             format: [(format || parentFormat!).id], // either one of the two is available
             columnId: [id],
+            rangeParameters: [''],
           },
         };
 
         // Handle nested formatter carefully one parameter at the time
+        const rangeParameters: Record<string, string | boolean> = {};
+
         if (parentFormat) {
           base.arguments.format = [parentFormat.id];
           if (format) {
-            base.arguments.nestedFormat = [format.id];
+            rangeParameters.nestedFormat = format.id;
           }
         }
         if (parentFormat?.params?.template) {
-          base.arguments.template = [parentFormat.params?.template];
+          rangeParameters.template = parentFormat.params?.template;
         }
 
         if (parentFormat?.params?.replaceInfinity) {
-          base.arguments.replaceInfinity = [parentFormat.params?.replaceInfinity];
+          rangeParameters.replaceInfinity = parentFormat.params?.replaceInfinity;
         }
 
         if (typeof format?.params?.decimals === 'number') {
           base.arguments.decimals = [format.params.decimals];
         }
+
+        // To avoid mapping too many ad-hoc arguments, this passes thru a JSON serialization
+        if (Object.keys(rangeParameters).length) {
+          base.arguments.rangeParameters = [JSON.stringify(rangeParameters)];
+        }
+
         return base;
       }
     );

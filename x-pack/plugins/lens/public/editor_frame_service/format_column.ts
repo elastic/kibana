@@ -10,9 +10,7 @@ interface FormatColumn {
   format: string;
   columnId: string;
   decimals?: number;
-  nestedFormat?: string;
-  template?: string;
-  replaceInfinity?: boolean;
+  rangeParameters?: string;
 }
 
 export const supportedFormats: Record<
@@ -69,25 +67,27 @@ export const formatColumn: ExpressionFunctionDefinition<
       types: ['number'],
       help: '',
     },
-    nestedFormat: {
+    rangeParameters: {
       types: ['string'],
-      help: '',
-    },
-    template: {
-      types: ['string'],
-      help: '',
-    },
-    replaceInfinity: {
-      types: ['boolean'],
       help: '',
     },
   },
   inputTypes: ['datatable'],
-  fn(input, { format, columnId, decimals, nestedFormat, template, replaceInfinity }: FormatColumn) {
+  fn(input, { format, columnId, decimals, rangeParameters }: FormatColumn) {
     return {
       ...input,
       columns: input.columns.map((col) => {
         if (col.id === columnId) {
+          const {
+            template,
+            replaceInfinity,
+            nestedFormat,
+          }: {
+            template?: string;
+            replaceInfinity?: boolean;
+            nestedFormat?: string;
+          } = rangeParameters ? JSON.parse(rangeParameters) : {};
+
           const extraParams = { template, replaceInfinity };
 
           if (supportedFormats[format]) {
