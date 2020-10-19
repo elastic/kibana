@@ -19,7 +19,7 @@ describe('Key', () => {
     copy: jest.fn(),
     toggleIsHidden: jest.fn(),
     isHidden: true,
-    text: '*****',
+    text: 'some-api-key',
   };
 
   it('renders', () => {
@@ -51,6 +51,6 @@ describe('Key', () => {
 
   it('will render the provided text', () => {
     const wrapper = shallow(<Key {...props} />);
-    expect(wrapper.text()).toContain('*****');
+    expect(wrapper.text()).toContain('some-api-key');
   });
 });
