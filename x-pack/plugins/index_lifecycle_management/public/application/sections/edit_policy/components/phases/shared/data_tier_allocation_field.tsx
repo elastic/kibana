@@ -8,11 +8,11 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { useKibana } from '../../../../../shared_imports';
-import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
-import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
-import { getAvailableNodeRoleForPhase } from '../../../../lib/data_tiers';
-import { isNodeRoleFirstPreference } from '../../../../lib/data_tiers/is_node_role_first_preference';
+import { useKibana } from '../../../../../../shared_imports';
+import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../../common/types';
+import { PhaseValidationErrors } from '../../../../../services/policies/policy_validation';
+import { getAvailableNodeRoleForPhase } from '../../../../../lib/data_tiers';
+import { isNodeRoleFirstPreference } from '../../../../../lib/data_tiers/is_node_role_first_preference';
 
 import {
   DataTierAllocation,
@@ -20,7 +20,7 @@ import {
   NoNodeAttributesWarning,
   NodesDataProvider,
   CloudDataTierCallout,
-} from '../../components/data_tier_allocation';
+} from '../../data_tier_allocation';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
