@@ -96,11 +96,8 @@ export function changeColumn<C extends IndexPatternColumn>({
 
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
-      // ...layer,
-      // columns: {
       ...layer.columns,
       [columnId]: updatedColumn,
-      // },
     },
     columnId
   );

@@ -19,6 +19,8 @@ import {
   SumIndexPatternColumn,
   maxOperation,
   MaxIndexPatternColumn,
+  medianOperation,
+  MedianIndexPatternColumn,
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
 import { countOperation, CountIndexPatternColumn } from './count';
@@ -51,6 +53,7 @@ export type IndexPatternColumn =
   | CardinalityIndexPatternColumn
   | SumIndexPatternColumn
   | CountIndexPatternColumn
+  | MedianIndexPatternColumn
   | DerivativeIndexPatternColumn;
 
 // List of all operation definitions registered to this data source.
@@ -65,6 +68,7 @@ const internalOperationDefinitions = [
   averageOperation,
   cardinalityOperation,
   sumOperation,
+  medianOperation,
   countOperation,
   rangeOperation,
   derivativeOperation,
@@ -274,16 +278,6 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
   none: FieldlessOperationDefinition<C>;
   reference: ReferenceBasedOperationDefinition<C>;
 }
-
-/**
- * Shape of an operation definition. If the type parameter of the definition
- * indicates a field based column, `getPossibleOperationForField` has to be
- * specified, otherwise `getPossibleOperation` has to be defined.
- */
-export type OperationDefinition<
-  C extends BaseIndexPatternColumn,
-  Input extends keyof OperationDefinitionMap<C>
-> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C>[Input];
 
 /**
  * Shape of an operation definition. If the type parameter of the definition

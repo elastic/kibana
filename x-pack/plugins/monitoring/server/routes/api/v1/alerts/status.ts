@@ -39,7 +39,7 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
         } = request.body;
         const alertsClient = context.alerting?.getAlertsClient();
         if (!alertsClient) {
-          return response.notFound();
+          return response.ok({ body: undefined });
         }
 
         const status = await fetchStatus(
