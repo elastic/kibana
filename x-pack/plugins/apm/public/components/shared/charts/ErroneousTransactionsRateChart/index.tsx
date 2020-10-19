@@ -56,7 +56,7 @@ export function ErroneousTransactionsRateChart() {
     [syncedChartsProps]
   );
 
-  const errorRates = data?.erroneousTransactionsRate || [];
+  const errorRates = data?.transactionErrorRate || [];
   const maxRate = max(errorRates.map((errorRate) => errorRate.y));
 
   return (

@@ -3,21 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AggregationResultOf } from '../../../typings/elasticsearch/aggregations';
-import { EventOutcome } from '../../../common/event_outcome';
 import {
+  EVENT_OUTCOME,
+  SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-  SERVICE_NAME,
-  EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  calculateTransactionErrorPercentage,
+  getOutcomeAggregation,
+  getTransactionErrorRateTimeSeries,
+} from '../helpers/transaction_error_rate';
 
 export async function getErrorRate({
   serviceName,
@@ -52,20 +53,7 @@ export async function getErrorRate({
     ...esFilter,
   ];
 
-  const outcomes = {
-    terms: {
-      field: EVENT_OUTCOME,
-    },
-    aggs: {
-      count: {
-        value_count: {
-          field: getTransactionDurationFieldForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        },
-      },
-    },
-  };
+  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
 
   const params = {
     apm: {
@@ -100,36 +88,16 @@ export async function getErrorRate({
   const noHits = resp.hits.total.value === 0;
 
   if (!resp.aggregations) {
-    return { noHits, erroneousTransactionsRate: [], average: null };
+    return { noHits, transactionErrorRate: [], average: null };
   }
 
-  function calculateTransactionErrorPercentage(
-    outcomeResponse: AggregationResultOf<typeof outcomes, {}>
-  ) {
-    const successfulTransactions =
-      outcomeResponse.buckets.find(
-        (bucket) => bucket.key === EventOutcome.success
-      )?.count.value ?? 0;
-    const failedTransactions =
-      outcomeResponse.buckets.find(
-        (bucket) => bucket.key === EventOutcome.failure
-      )?.count.value ?? 0;
-
-    return failedTransactions / (successfulTransactions + failedTransactions);
-  }
-
-  const erroneousTransactionsRate = resp.aggregations.timeseries.buckets.map(
-    (bucket) => {
-      return {
-        x: bucket.key,
-        y: calculateTransactionErrorPercentage(bucket.outcomes),
-      };
-    }
+  const transactionErrorRate = getTransactionErrorRateTimeSeries(
+    resp.aggregations.timeseries.buckets
   );
 
   const average = calculateTransactionErrorPercentage(
     resp.aggregations.outcomes
   );
 
-  return { noHits, erroneousTransactionsRate, average };
+  return { noHits, transactionErrorRate, average };
 }
