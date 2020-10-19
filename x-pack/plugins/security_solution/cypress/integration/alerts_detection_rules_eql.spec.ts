@@ -55,6 +55,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -94,6 +95,7 @@ describe.skip('Detection rules, EQL', () => {
   });
 
   afterEach(() => {
+    deleteRule();
     esArchiverUnload('timeline');
   });
 

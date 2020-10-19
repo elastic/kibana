@@ -73,6 +73,7 @@ import {
 import {
   changeToThreeHundredRowsPerPage,
   deleteFirstRule,
+  deleteRule,
   deleteSelectedRules,
   editFirstRule,
   filterByCustomRules,
@@ -120,6 +121,7 @@ describe('Custom detection rules creation', () => {
 
   after(() => {
     esArchiverUnload('timeline');
+    deleteRule();
   });
 
   it('Creates and activates a new rule', () => {

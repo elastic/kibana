@@ -44,6 +44,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -79,6 +80,7 @@ describe('Detection rules, machine learning', () => {
 
   after(() => {
     esArchiverUnload('prebuilt_rules_loaded');
+    deleteRule();
   });
 
   it('Creates and activates a new ml rule', () => {
