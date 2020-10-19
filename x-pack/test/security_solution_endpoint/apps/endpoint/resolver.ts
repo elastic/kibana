@@ -207,7 +207,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Resolver Tree events', function () {
-      let expectedData = [
+      const expectedData = [
         '17 authentication',
         '1 registry',
         '17 session',
@@ -262,12 +262,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
         await queryBar.setQuery('');
         await queryBar.submitQuery();
-        expectedData = ['329 network', '1 library', '1 library'];
+        const expectedLibraryData = ['329 network', '1 library', '1 library'];
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.library'
         );
-        await pageObjects.hosts.runNodeEvents(expectedData);
+        await pageObjects.hosts.runNodeEvents(expectedLibraryData);
       });
     });
   });
