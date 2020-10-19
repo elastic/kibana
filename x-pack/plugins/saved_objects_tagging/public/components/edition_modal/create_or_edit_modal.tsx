@@ -220,7 +220,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   ) : (
                     <FormattedMessage
                       id="xpack.savedObjectsTagging.management.createModal.createTagButtonLabel"
-                      defaultMessage="Create tag..."
+                      defaultMessage="Create tag"
                     />
                   )}
                 </EuiButton>
