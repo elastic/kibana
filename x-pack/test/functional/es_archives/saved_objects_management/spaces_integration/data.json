@@ -83,31 +83,6 @@
   "value": {
     "index": ".kibana",
     "type": "doc",
-    "id": "dashboard:i-exist",
-    "source": {
-      "dashboard": {
-        "title": "A Dashboard",
-        "hits": 0,
-        "description": "",
-        "panelsJSON": "[{\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"version\":\"7.0.0\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"id\":\"75c3e060-1e7c-11e9-8488-65449e65d0ed\",\"embeddableConfig\":{}}]",
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "version": 1,
-        "timeRestore": false,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
-        }
-      },
-      "type": "dashboard",
-      "updated_at": "2019-01-22T19:32:47.232Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "config:6.0.0",
     "source": {
       "config": {
