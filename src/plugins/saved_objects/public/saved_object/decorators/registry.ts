@@ -27,7 +27,7 @@ export interface SavedObjectDecoratorConfig<T extends SavedObject = SavedObject>
    */
   id: string;
   /**
-   * Higher priority means the decorator will be called **last**
+   * Highest priority will be called **last**
    * (the decoration will be at the highest level)
    */
   priority: number;
