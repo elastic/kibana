@@ -2,12 +2,15 @@
 [[managing-indices]]
 == Index Management
 
+{kib}'s *Index Management* features are an easy, convenient way to manage your
+{es} cluster's indices, data streams, and index templates. Practicing good index
+management ensures your data is stored correctly and in the most cost-effective
+way possible.
+
 [float]
 === What you'll learn
 
-Practicing good index management ensures your data is stored in the most
-cost-effective way possible. This page shows you how to use {kib}'s *Index
-Management* features to:
+This page shows you how to use {kib}'s *Index Management* features to:
 
 * View and edit index settings.
 * View mappings and statistics for an index.
@@ -139,11 +142,10 @@ template before you create the indices.
 [float]
 ==== Try it: Create an index template
 
-In this example, you’ll create an index template for randomly generated log
-files. Each step in the tutorial corresponds with a step in the *Create
-template* wizard. You'll then use the template to configure two new indices.
+In this tutorial, you’ll create an index template for randomly generated log
+files. You'll then use the template to configure two new indices.
 
-*Step 1: Logistics*
+*Step 1. Add a name and index pattern*
 
 . In the *Index Templates* view, open the *Create template* wizard.
 +
@@ -157,32 +159,29 @@ with that index pattern.
 
 . Leave *Data Stream*, *Priority*, *Version*, and *_meta field* as-is or blank.
 
-. Click *Next >*.
+. Click *Next*.
 
-*Step 2: component templates*
+*Step 2. Add settings, mappings, and index aliases*
 
-{ref}/indices-component-template.html[Component templates] are pre-configured sets of
-mappings, index settings, and index aliases you can reuse across multiple index
+. Add component templates to your index template.
++
+{ref}/indices-component-template.html[Component templates] are pre-configured
+sets of mappings, index settings, and index aliases you can reuse across
+multiple index templates. Badges indicate whether a component template contains
+mappings (*M*), index settings (*S*), index aliases (*A*), or a combination of
+the three.
++
+Component templates are optional. For this tutorial, do not add any component
 templates.
-
-Badges indicate whether a component template contains mappings (*M*), index
-settings (*S*), index aliases (*A*), or a combination of the three.
-
++
 [role="screenshot"]
 image::images/management_index_component_template.png[Component templates page]
 
-Component templates are optional. Click *Next >* to skip this
-step.
+. Define index settings. These are optional. For this tutorial, leave this
+section blank.
 
-*Step 3: Index settings*
-
-The third step in the *Create template* wizard allows you to define index
-settings. These settings are optional. Click *Next >* to skip this step.
-
-*Step 4: Mappings*
-
-. In the the *Mapped fields* tab, define a mapping that contains an object field
-named `geo` with a child geo-point field named `coordinates`:
+. Define a mapping that contains an object field named `geo` with a child
+geo-point field named `coordinates`:
 +
 [role="screenshot"]
 image::images/management-index-templates-mappings.png[Mapped fields page]
@@ -205,11 +204,7 @@ Alternatively, you can click the *Load JSON* link and define the mapping as JSON
 ----
 +
 You can create additional mapping configurations in the *Dynamic templates* and
-*Advanced options* tabs. No additional mappings are required for this example.
-
-. Click *Next >*.
-
-*Step 5: Aliases*
+*Advanced options* tabs. No additional mappings are required for this tutorial.
 
 . Define an index alias named `my-index`:
 +
@@ -220,14 +215,10 @@ You can create additional mapping configurations in the *Dynamic templates* and
 }
 ----
 
-. Click *Next >*.
+. On the review page, check the summary, and if everything looks right click
+*Create template*.
 
-*Step 6: Review template*
-
-The *Review template* page displays a summary of your index template. If
-everything looks right, click *Create template*.
-
-*Load the logs data*
+*Step 3. Create new indices*
 
 You’re now ready to load the logs data and create new indices using your index
 template.
