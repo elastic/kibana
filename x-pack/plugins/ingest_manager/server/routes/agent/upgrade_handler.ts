@@ -6,6 +6,7 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 import {
   AgentSOAttributes,
   PostAgentUpgradeResponse,
@@ -26,17 +27,18 @@ export const postAgentUpgradeHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const { version, source_uri: sourceUri } = request.body;
-
-  // temporarily only allow upgrading to the same version as the installed kibana version
   const kibanaVersion = appContextService.getKibanaVersion();
-  if (kibanaVersion !== version) {
+  try {
+    checkVersionIsSame(version, kibanaVersion);
+  } catch (err) {
     return response.customError({
       statusCode: 400,
       body: {
-        message: `cannot upgrade agent to ${version} because it is different than the installed kibana version ${kibanaVersion}`,
+        message: err.message,
       },
     });
   }
+
   const agentSO = await soClient.get<AgentSOAttributes>(
     AGENT_SAVED_OBJECT_TYPE,
     request.params.agentId
@@ -82,14 +84,14 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const { version, source_uri: sourceUri, agents } = request.body;
-
-  // temporarily only allow upgrading to the same version as the installed kibana version
   const kibanaVersion = appContextService.getKibanaVersion();
-  if (kibanaVersion !== version) {
+  try {
+    checkVersionIsSame(version, kibanaVersion);
+  } catch (err) {
     return response.customError({
       statusCode: 400,
       body: {
-        message: `cannot upgrade agent to ${version} because it is different than the installed kibana version ${kibanaVersion}`,
+        message: err.message,
       },
     });
   }
@@ -114,4 +116,18 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
+};
+
+export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
+  // get version number only in case "-SNAPSHOT" is in it
+  const kibanaVersionNumber = semver.coerce(kibanaVersion)?.version;
+  if (!kibanaVersionNumber) throw new Error(`kibanaVersion ${kibanaVersionNumber} is not valid`);
+  const versionToUpgradeNumber = semver.coerce(version)?.version;
+  if (!versionToUpgradeNumber)
+    throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
+  // temporarily only allow upgrading to the same version as the installed kibana version
+  if (kibanaVersionNumber !== versionToUpgradeNumber)
+    throw new Error(
+      `cannot upgrade agent to ${versionToUpgradeNumber} because it is different than the installed kibana version ${kibanaVersionNumber}`
+    );
 };

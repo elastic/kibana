@@ -7,7 +7,7 @@
 import { mount, ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
 import * as redux from 'react-redux';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
@@ -107,20 +107,19 @@ describe('EmbeddedMapComponent', () => {
 
     (createEmbeddable as jest.Mock).mockResolvedValue(mockCreateEmbeddable);
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
+    const wrapper: ReactWrapper = mount(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
     });
-
-    wrapper!.update();
-
-    expect(wrapper!.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
-    expect(wrapper!.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
   });
 
   test('renders IndexPatternsMissingPrompt', async () => {
@@ -132,20 +131,18 @@ describe('EmbeddedMapComponent', () => {
 
     (createEmbeddable as jest.Mock).mockResolvedValue(mockCreateEmbeddable);
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
+    const wrapper: ReactWrapper = mount(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
     });
-
-    wrapper!.update();
-
-    expect(wrapper!.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
-    expect(wrapper!.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
   });
 
   test('renders Loader', async () => {
@@ -154,19 +151,17 @@ describe('EmbeddedMapComponent', () => {
 
     (createEmbeddable as jest.Mock).mockResolvedValue(null);
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <EmbeddedMapComponent {...testProps} />
-        </TestProviders>
-      );
+    const wrapper: ReactWrapper = mount(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(true);
     });
-
-    wrapper!.update();
-
-    expect(wrapper!.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
-    expect(wrapper!.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
-    expect(wrapper!.find('[data-test-subj="loading-panel"]').exists()).toEqual(true);
   });
 });

@@ -27,7 +27,6 @@ import {
   IScopedClusterClient,
   LegacyScopedClusterClient,
 } from './elasticsearch';
-import { Auditor } from './audit_trail';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
 
 class CoreElasticsearchRouteHandlerContext {
@@ -99,8 +98,6 @@ class CoreUiSettingsRouteHandlerContext {
 }
 
 export class CoreRouteHandlerContext {
-  #auditor?: Auditor;
-
   readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
@@ -121,12 +118,5 @@ export class CoreRouteHandlerContext {
       this.coreStart.uiSettings,
       this.savedObjects
     );
-  }
-
-  public get auditor() {
-    if (this.#auditor == null) {
-      this.#auditor = this.coreStart.auditTrail.asScoped(this.request);
-    }
-    return this.#auditor;
   }
 }
