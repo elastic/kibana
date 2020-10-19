@@ -17,7 +17,14 @@ export const getFeatureCount = (resultsField: string, tableItems: DataGridItem[]
     return 0;
   }
 
-  return Object.keys(tableItems[0]).filter((key) =>
-    key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
-  ).length;
+  const fullItem = tableItems[0];
+
+  if (
+    fullItem[resultsField] !== undefined &&
+    Array.isArray(fullItem[resultsField][FEATURE_INFLUENCE])
+  ) {
+    return fullItem[resultsField][FEATURE_INFLUENCE].length;
+  }
+
+  return 0;
 };

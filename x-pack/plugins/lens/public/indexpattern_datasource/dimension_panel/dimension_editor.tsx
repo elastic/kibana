@@ -264,7 +264,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <EuiListGroup
           className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
           gutterSize="none"
-          listItems={sideNavItems}
+          listItems={
+            // add a padding item containing a non breakable space if the number of operations is not even
+            // otherwise the column layout will break within an element
+            sideNavItems.length % 2 === 1 ? [...sideNavItems, { label: '\u00a0' }] : sideNavItems
+          }
           maxWidth={false}
         />
       </div>
