@@ -33,7 +33,7 @@ import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import './discover.scss';
 import { esFilters, search } from '../../../../data/public';
-import { DiscoverSidebarResponsive } from './sidebar/discover_sidebar_responsive';
+import { DiscoverSidebarResponsive } from './sidebar';
 
 export function Discover({
   addColumn,
@@ -142,15 +142,7 @@ export function Discover({
                   />
                 )}
                 {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-                {resultState === 'loading' && (
-                  <>
-                    {!fetchError && (
-                      <div className="dscLoading">
-                        <LoadingSpinner />
-                      </div>
-                    )}
-                  </>
-                )}
+                {resultState === 'loading' && <>{!fetchError && <LoadingSpinner />}</>}
 
                 {resultState === 'ready' && (
                   <>
