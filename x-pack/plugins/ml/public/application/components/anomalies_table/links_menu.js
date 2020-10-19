@@ -191,7 +191,7 @@ class LinksMenuUI extends Component {
         jobIds: [record.job_id],
         refreshInterval: {
           display: 'Off',
-          pause: false,
+          pause: true,
           value: 0,
         },
         timeRange: {
@@ -307,7 +307,7 @@ class LinksMenuUI extends Component {
           const _g = rison.encode({
             refreshInterval: {
               display: 'Off',
-              pause: false,
+              pause: true,
               value: 0,
             },
             time: {
