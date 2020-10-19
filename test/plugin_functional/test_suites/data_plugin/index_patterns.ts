@@ -23,7 +23,9 @@ import '../../plugins/core_provider_plugin/types';
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
-  describe('index patterns', function () {
+  // skipping the tests as it deletes index patterns created by other test causing unexpected failures
+  // https://github.com/elastic/kibana/issues/79886
+  describe.skip('index patterns', function () {
     let indexPatternId = '';
 
     it('can get all ids', async () => {
