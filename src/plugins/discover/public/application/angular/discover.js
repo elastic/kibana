@@ -194,7 +194,7 @@ app.directive('discoverApp', function () {
 function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
-  const $fetchObservable = new Subject();
+  const refetch$ = new Subject();
   let inspectorRequest;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
@@ -268,7 +268,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         );
 
         if (changes.length) {
-          $fetchObservable.next();
+          refetch$.next();
         }
       });
     }
@@ -333,6 +333,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
+    data.search.session.clear();
     appStateUnsubscribe();
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
@@ -635,12 +636,18 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
-      const searchBarChanges = merge(data.query.state$, $fetchObservable).pipe(debounceTime(100));
+      const fetch$ = merge(
+        refetch$,
+        filterManager.getFetches$(),
+        timefilter.getFetch$(),
+        timefilter.getAutoRefreshFetch$(),
+        data.query.queryString.getUpdates$()
+      ).pipe(debounceTime(100));
 
       subscriptions.add(
         subscribeWithScope(
           $scope,
-          searchBarChanges,
+          fetch$,
           {
             next: $scope.fetch,
           },
@@ -719,7 +726,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
       init.complete = true;
       if (shouldSearchOnPageLoad()) {
-        $fetchObservable.next();
+        refetch$.next();
       }
     });
   });
@@ -790,6 +797,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     abortController = new AbortController();
 
+    const sessionId = data.search.session.start();
+
     $scope
       .updateDataSource()
       .then(setupVisualization)
@@ -798,6 +807,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         logInspectorRequest();
         return $scope.searchSource.fetch({
           abortSignal: abortController.signal,
+          sessionId,
         });
       })
       .then(onResults)
@@ -814,7 +824,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.handleRefresh = function (_payload, isUpdate) {
     if (isUpdate === false) {
-      $fetchObservable.next();
+      refetch$.next();
     }
   };
 

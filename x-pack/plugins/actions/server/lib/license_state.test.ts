@@ -55,6 +55,7 @@ describe('checkLicense()', () => {
 describe('isLicenseValidForActionType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
+  const mockNotifyUsage = jest.fn();
   const fooActionType: ActionType = {
     id: 'foo',
     name: 'Foo',
@@ -67,6 +68,7 @@ describe('isLicenseValidForActionType', () => {
   beforeEach(() => {
     license = new Subject();
     licenseState = new LicenseState(license);
+    licenseState.setNotifyUsage(mockNotifyUsage);
   });
 
   test('should return false when license not defined', () => {
@@ -113,11 +115,42 @@ describe('isLicenseValidForActionType', () => {
       isValid: true,
     });
   });
+
+  test('should not call notifyUsage by default', () => {
+    const goldLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'gold' },
+    });
+    license.next(goldLicense);
+    licenseState.isLicenseValidForActionType(fooActionType);
+    expect(mockNotifyUsage).not.toHaveBeenCalled();
+  });
+
+  test('should not call notifyUsage on basic action types', () => {
+    const basicLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'basic' },
+    });
+    license.next(basicLicense);
+    licenseState.isLicenseValidForActionType({
+      ...fooActionType,
+      minimumLicenseRequired: 'basic',
+    });
+    expect(mockNotifyUsage).not.toHaveBeenCalled();
+  });
+
+  test('should call notifyUsage when specified', () => {
+    const goldLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'gold' },
+    });
+    license.next(goldLicense);
+    licenseState.isLicenseValidForActionType(fooActionType, { notifyUsage: true });
+    expect(mockNotifyUsage).toHaveBeenCalledWith('Connector: Foo');
+  });
 });
 
 describe('ensureLicenseForActionType()', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
+  const mockNotifyUsage = jest.fn();
   const fooActionType: ActionType = {
     id: 'foo',
     name: 'Foo',
@@ -130,6 +163,7 @@ describe('ensureLicenseForActionType()', () => {
   beforeEach(() => {
     license = new Subject();
     licenseState = new LicenseState(license);
+    licenseState.setNotifyUsage(mockNotifyUsage);
   });
 
   test('should throw when license not defined', () => {
@@ -177,6 +211,15 @@ describe('ensureLicenseForActionType()', () => {
     });
     license.next(goldLicense);
     licenseState.ensureLicenseForActionType(fooActionType);
+  });
+
+  test('should call notifyUsage', () => {
+    const goldLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'gold' },
+    });
+    license.next(goldLicense);
+    licenseState.ensureLicenseForActionType(fooActionType);
+    expect(mockNotifyUsage).toHaveBeenCalledWith('Connector: Foo');
   });
 });
 
