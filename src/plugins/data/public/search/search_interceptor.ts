@@ -18,7 +18,6 @@
  */
 
 import { get, memoize, trimEnd } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';

@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class PainlessError extends KbnError 
+export declare class PainlessError extends EsError 
 ```
 
 ## Constructors

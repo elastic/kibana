@@ -17,7 +17,7 @@
  * under the License.
  */
 
-interface FailedShard {
+export interface FailedShard {
   shard: number;
   index: string;
   node: string;

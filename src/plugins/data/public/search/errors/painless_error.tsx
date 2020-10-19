@@ -24,7 +24,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import { IEsError, isEsError } from './types';
 import { EsError } from './es_error';
-import { getRootCause, IKibanaSearchRequest } from '..';
+import { getRootCause } from './utils';
+import { IKibanaSearchRequest } from '..';
 
 export class PainlessError extends EsError {
   painlessStack?: string;
