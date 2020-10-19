@@ -724,7 +724,10 @@ describe('ranges', () => {
         };
 
         // now set a format on the range operation
-        state.layers.first.columns.col1.params.format = { id: 'bytes', params: {} };
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
+          id: 'bytes',
+          params: { decimals: 0 },
+        };
 
         const instance = mount(
           <InlineOptions
