@@ -54,6 +54,7 @@ interface OwnProps {
   hasIndexWrite: boolean;
   from: string;
   loading: boolean;
+  refreshRule: () => void;
   showBuildingBlockAlerts: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   to: string;
@@ -75,6 +76,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   isSelectAllChecked,
   loading,
   loadingEventIds,
+  refreshRule,
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
@@ -330,6 +332,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       end={to}
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
+      refreshRule={refreshRule}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
