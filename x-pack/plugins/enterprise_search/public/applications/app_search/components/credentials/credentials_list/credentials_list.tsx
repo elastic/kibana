@@ -42,7 +42,7 @@ export const CredentialsList: React.FC = () => {
           </h2>
         }
         body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
-          defaultMessage: 'Click Create a key to make your first one.',
+          defaultMessage: 'Click the "Create a key" button to make your first one.',
         })}
       />
     );
