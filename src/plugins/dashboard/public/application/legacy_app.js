@@ -130,8 +130,6 @@ export function initDashboardApp(app, deps) {
               references = parsed.tagReferences;
             }
 
-            console.log('find: ', searchTerm, references);
-
             return service.find(searchTerm, {
               size: $scope.listingLimit,
               references: references,
