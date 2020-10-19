@@ -10,7 +10,8 @@ import { Tag } from '../../../common';
 
 type TagComboBoxOptions = EuiComboBoxOptionOption<Tag>;
 
-// TODO: add required props to pass down to EuiComboBox such as fullWidth, className, data-test-subj
+// we may need to add some props to pass down to EuiComboBox such as fullWidth or className
+// but it was not necessary for the initial usages.
 export interface TagSelectorProps {
   tags: Tag[];
   selected: string[];

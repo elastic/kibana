@@ -14,7 +14,7 @@ export const getConnectedTagSelectorComponent = (
   cache: ITagsCache
 ): FC<TagSelectorComponentProps> => {
   return (props: TagSelectorComponentProps) => {
-    const tags = useObservable(cache.getState$(), []);
+    const tags = useObservable(cache.getState$(), cache.getState());
     return <TagSelector {...props} tags={tags} />;
   };
 };

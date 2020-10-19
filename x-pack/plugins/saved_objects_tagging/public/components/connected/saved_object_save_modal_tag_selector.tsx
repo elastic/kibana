@@ -19,7 +19,7 @@ export const getConnectedSavedObjectModalTagSelectorComponent = (
     initialSelection,
     setSelected: notifySelectionChange,
   }: SavedObjectSaveModalTagSelectorComponentProps) => {
-    const tags = useObservable(cache.getState$(), []);
+    const tags = useObservable(cache.getState$(), cache.getState());
     const [selected, setSelected] = useState<string[]>(initialSelection);
 
     const setSelectedInternal = useCallback(
