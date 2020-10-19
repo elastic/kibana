@@ -14,6 +14,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
+import { IndexPatternColumn } from '../operations';
 
 jest.mock('../state_helpers');
 
@@ -602,5 +603,118 @@ describe('IndexPatternDimensionEditorPanel', () => {
         },
       },
     });
+  });
+
+  it('if dnd is reorder, it correctly reorders columns', () => {
+    const dragging = {
+      columnId: 'col1',
+      groupId: 'a',
+      layerId: 'myLayer',
+      id: 'col1',
+    };
+    const testState = {
+      ...dragDropState(),
+      layers: {
+        myLayer: {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2', 'col3'],
+          columns: {
+            col1: {
+              label: 'Date histogram of timestamp',
+              dataType: 'date',
+              isBucketed: true,
+            } as IndexPatternColumn,
+            col2: {
+              label: 'Top values of bar',
+              dataType: 'number',
+              isBucketed: true,
+            } as IndexPatternColumn,
+            col3: {
+              label: 'Top values of memory',
+              dataType: 'number',
+              isBucketed: true,
+            } as IndexPatternColumn,
+          },
+        },
+      },
+    };
+
+    const defaultReorderDropParams = {
+      ...defaultProps,
+      isReorder: true,
+      dragDropContext: {
+        ...dragDropContext,
+        dragging,
+      },
+      droppedItem: dragging,
+      state: testState,
+      filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      layerId: 'myLayer',
+    };
+
+    const stateWithColumnOrder = (columnOrder: string[]) => {
+      return {
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: columnOrder,
+            columns: {
+              ...testState.layers.myLayer.columns,
+            },
+          },
+        },
+      };
+    };
+
+    // first element to last
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col3',
+    });
+    expect(setState).toBeCalledTimes(1);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col2', 'col3', 'col1']));
+
+    // last element to first
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col1',
+      droppedItem: {
+        columnId: 'col3',
+        groupId: 'a',
+        layerId: 'myLayer',
+        id: 'col3',
+      },
+    });
+    expect(setState).toBeCalledTimes(2);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col3', 'col1', 'col2']));
+
+    // middle column to first
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col1',
+      droppedItem: {
+        columnId: 'col2',
+        groupId: 'a',
+        layerId: 'myLayer',
+        id: 'col2',
+      },
+    });
+    expect(setState).toBeCalledTimes(3);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col2', 'col1', 'col3']));
+
+    // middle column to last
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col3',
+      droppedItem: {
+        columnId: 'col2',
+        groupId: 'a',
+        layerId: 'myLayer',
+        id: 'col2',
+      },
+    });
+    expect(setState).toBeCalledTimes(4);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col1', 'col3', 'col2']));
   });
 });

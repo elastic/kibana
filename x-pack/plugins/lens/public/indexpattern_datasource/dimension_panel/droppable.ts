@@ -58,21 +58,21 @@ function reorderElements(items: string[], dest: string, src: string) {
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const operationSupportMatrix = getOperationSupportMatrix(props);
-  const droppedItem = props.droppedItem;
+  const { setState, state, layerId, columnId, droppedItem } = props;
 
   if (isDraggedOperation(droppedItem) && props.isReorder) {
-    const { setState, state, layerId, columnId } = props;
-
-    const dragged = droppedItem.columnId;
-    const dropped = columnId;
-    const layer = state.layers[layerId];
+    const dropEl = columnId;
 
     setState(
       mergeLayer({
         state,
         layerId,
         newLayer: {
-          columnOrder: reorderElements(layer.columnOrder, dropped, dragged),
+          columnOrder: reorderElements(
+            state.layers[layerId].columnOrder,
+            dropEl,
+            droppedItem.columnId
+          ),
         },
       })
     );
@@ -84,8 +84,8 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
 
-  if (isDraggedOperation(droppedItem) && droppedItem.layerId === props.layerId) {
-    const layer = props.state.layers[props.layerId];
+  if (isDraggedOperation(droppedItem) && droppedItem.layerId === layerId) {
+    const layer = state.layers[layerId];
     const op = { ...layer.columns[droppedItem.columnId] };
     if (!props.filterOperations(op)) {
       return false;
@@ -93,23 +93,23 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
     const newColumns = { ...layer.columns };
     delete newColumns[droppedItem.columnId];
-    newColumns[props.columnId] = op;
+    newColumns[columnId] = op;
 
     const newColumnOrder = [...layer.columnOrder];
     const oldIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
-    const newIndex = newColumnOrder.findIndex((c) => c === props.columnId);
+    const newIndex = newColumnOrder.findIndex((c) => c === columnId);
 
     if (newIndex === -1) {
-      newColumnOrder[oldIndex] = props.columnId;
+      newColumnOrder[oldIndex] = columnId;
     } else {
       newColumnOrder.splice(oldIndex, 1);
     }
 
     // Time to replace
-    props.setState(
+    setState(
       mergeLayer({
-        state: props.state,
-        layerId: props.layerId,
+        state: state,
+        layerId: layerId,
         newLayer: {
           columnOrder: newColumnOrder,
           columns: newColumns,
@@ -126,11 +126,8 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
   const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
 
-  const layerId = props.layerId;
-  const selectedColumn: IndexPatternColumn | null =
-    props.state.layers[layerId].columns[props.columnId] || null;
-  const currentIndexPattern =
-    props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  const selectedColumn: IndexPatternColumn | null = state.layers[layerId].columns[columnId] || null;
+  const currentIndexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
 
   // We need to check if dragging in a new field, was just a field change on the same
   // index pattern and on the same operations (therefore checking if the new field supports
@@ -152,7 +149,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
     : buildColumn({
         op: operationsForNewField[0],
-        columns: props.state.layers[props.layerId].columns,
+        columns: state.layers[layerId].columns,
         indexPattern: currentIndexPattern,
         layerId,
         suggestedPriority: props.suggestedPriority,
@@ -161,14 +158,14 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       });
 
   trackUiEvent('drop_onto_dimension');
-  const hasData = Object.values(props.state.layers).some(({ columns }) => columns.length);
+  const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
   trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
 
-  props.setState(
+  setState(
     changeColumn({
-      state: props.state,
+      state: state,
       layerId,
-      columnId: props.columnId,
+      columnId: columnId,
       newColumn,
       // If the field has changed, the onFieldChange method needs to take care of everything including moving
       // over params. If we create a new column above we want changeColumn to move over params.
