@@ -36,11 +36,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   const { columnsWithCharts, tableItems } = outlierData;
 
-  const colorRange = useColorRange(
-    COLOR_RANGE.BLUE,
-    COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
-  );
+  const featureCount = getFeatureCount(jobConfig?.dest?.results_field || '', tableItems);
+  const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
 
   return (
     <>
@@ -59,7 +56,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
       <ExpandableSectionResults
-        colorRange={colorRange}
+        colorRange={featureCount > 0 ? colorRange : undefined}
         indexData={outlierData}
         indexPattern={indexPattern}
         jobConfig={jobConfig}
