@@ -16,7 +16,6 @@ import {
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  placeholderAlertingFrameworkHealth,
 } from '../../alerts/common';
 export {
   Alert,
@@ -26,7 +25,6 @@ export {
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  placeholderAlertingFrameworkHealth,
 };
 export { ActionType };
 
