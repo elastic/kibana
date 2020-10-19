@@ -172,10 +172,9 @@ export function pieFunctionFactory(
             data,
             options: {
               canvas: false,
-              colors: initialize.paletteService[palette.name || 'custom'].getColors(
-                data.length,
-                palette.params
-              ),
+              colors: initialize.paletteService
+                .get(palette.name || 'custom')
+                .getColors(data.length, palette.params),
               legend: getLegendConfig(legend, data.length),
               grid: {
                 show: false,

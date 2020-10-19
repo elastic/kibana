@@ -30,6 +30,7 @@ export class PieVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const { getPieVisualization, pie, getPieRenderer } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
 
       expressions.registerFunction(() => pie);
 
@@ -40,7 +41,7 @@ export class PieVisualization {
           paletteService: charts.palettes,
         })
       );
-      return getPieVisualization({ paletteService: charts.palettes });
+      return getPieVisualization({ paletteService: palettes });
     });
   }
 }

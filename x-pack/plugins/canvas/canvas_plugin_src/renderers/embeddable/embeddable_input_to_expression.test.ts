@@ -25,7 +25,7 @@ describe('input to expression', () => {
     const expression = embeddableInputToExpression(
       input,
       newType,
-      chartPluginMock.createStartContract()
+      chartPluginMock.createPaletteRegistry()
     );
 
     expect(expression).toBe(mockReturn);

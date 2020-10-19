@@ -58,7 +58,7 @@ function getDefaultProps() {
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
     },
-    palettes: chartPluginMock.createSetupContract().palettes,
+    palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
   };
 }

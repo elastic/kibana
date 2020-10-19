@@ -20,7 +20,7 @@
 import { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
 import { colorsServiceMock } from './services/legacy_colors/mock';
-import { paletteServiceMock } from './services/palettes/mock';
+import { getPaletteRegistry, paletteServiceMock } from './services/palettes/mock';
 
 export type Setup = jest.Mocked<ReturnType<ChartsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
@@ -42,4 +42,5 @@ export { colorMapsMock } from './static/color_maps/mock';
 export const chartPluginMock = {
   createSetupContract,
   createStartContract,
+  createPaletteRegistry: getPaletteRegistry,
 };

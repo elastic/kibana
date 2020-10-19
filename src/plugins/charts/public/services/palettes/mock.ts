@@ -18,27 +18,39 @@
  */
 
 import { PaletteService } from './service';
+import { PaletteDefinition } from './types';
 
-export const paletteServiceMock: PaletteService = {
+export const getPaletteRegistry = () => {
+  const mockPalette: PaletteDefinition<unknown> = {
+    id: 'default',
+    title: 'My Palette',
+    getColor: () => 'black',
+    getColors: () => ['red', 'black'],
+    toExpression: () => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'system_palette',
+          arguments: {
+            name: ['default'],
+          },
+        },
+      ],
+    }),
+  };
+
+  return {
+    get: () => mockPalette,
+    getAll: () => [mockPalette],
+  };
+};
+
+export const paletteServiceMock: PublicMethodsOf<PaletteService> = {
   setup() {
     return {
-      default: {
-        id: 'default',
-        title: 'My Palette',
-        getColor: () => 'black',
-        getColors: () => ['red', 'black'],
-        toExpression: () => ({
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'system_palette',
-              arguments: {
-                name: ['default'],
-              },
-            },
-          ],
-        }),
+      getPalettes: async () => {
+        return getPaletteRegistry();
       },
     };
   },

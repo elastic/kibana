@@ -148,6 +148,8 @@ export class EditorFrameService {
 
           const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
 
+          const palettes = await plugins.charts.palettes.getPalettes();
+
           render(
             <I18nProvider>
               <EditorFrame
@@ -162,7 +164,7 @@ export class EditorFrameService {
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
-                palettes={plugins.charts.palettes}
+                palettes={palettes}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}

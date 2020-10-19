@@ -144,10 +144,9 @@ export function plotFunctionFactory(
             data: sortBy(data, 'label'),
             options: {
               canvas: false,
-              colors: initialize.paletteService[args.palette.name || 'custom'].getColors(
-                data.length,
-                args.palette.params
-              ),
+              colors: initialize.paletteService
+                .get(args.palette.name || 'custom')
+                .getColors(data.length, args.palette.params),
               legend: getLegendConfig(args.legend, data.length),
               grid: gridConfig,
               xaxis: getFlotAxisConfig('x', args.xaxis, {

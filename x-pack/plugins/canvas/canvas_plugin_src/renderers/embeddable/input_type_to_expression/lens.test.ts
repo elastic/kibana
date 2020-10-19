@@ -20,7 +20,7 @@ describe('toExpression', () => {
       ...baseEmbeddableInput,
     };
 
-    const expression = toExpression(input, chartPluginMock.createStartContract());
+    const expression = toExpression(input, chartPluginMock.createPaletteRegistry());
     const ast = fromExpression(expression);
 
     expect(ast.type).toBe('expression');
@@ -42,7 +42,7 @@ describe('toExpression', () => {
       },
     };
 
-    const expression = toExpression(input, chartPluginMock.createStartContract());
+    const expression = toExpression(input, chartPluginMock.createPaletteRegistry());
     const ast = fromExpression(expression);
 
     expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);
@@ -60,7 +60,7 @@ describe('toExpression', () => {
       title: '',
     };
 
-    const expression = toExpression(input, chartPluginMock.createStartContract());
+    const expression = toExpression(input, chartPluginMock.createPaletteRegistry());
     const ast = fromExpression(expression);
 
     expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);

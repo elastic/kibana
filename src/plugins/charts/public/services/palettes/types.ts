@@ -107,3 +107,8 @@ export interface PaletteDefinition<T = unknown> {
   ) => string | null;
   getColors: (size: number, state?: T) => string[];
 }
+
+export interface PaletteRegistry {
+  get: (name: string) => PaletteDefinition<unknown>;
+  getAll: () => Array<PaletteDefinition<unknown>>;
+}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { asset } from './asset';
 import { filtersFunctionFactory } from './filters';
 import { timelionFunctionFactory } from './timelion';
@@ -15,7 +15,7 @@ import { pieFunctionFactory } from './pie';
 
 export interface InitializeArguments {
   prependBasePath: CoreSetup['http']['basePath']['prepend'];
-  paletteService: ChartsPluginSetup['palettes'];
+  paletteService: PaletteRegistry;
   types: ReturnType<CanvasSetupDeps['expressions']['getTypes']>;
   timefilter: CanvasSetupDeps['data']['query']['timefilter']['timefilter'];
 }

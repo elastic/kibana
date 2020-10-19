@@ -20,9 +20,9 @@ describe('plot', () => {
   const fn = functionWrapper(
     plotFunctionFactory({
       paletteService: {
-        custom: {
+        get: () => ({
           getColors: () => ['red', 'black'],
-        },
+        }),
       },
     })
   );
@@ -122,9 +122,9 @@ describe('plot', () => {
         const mockedFn = functionWrapper(
           plotFunctionFactory({
             paletteService: {
-              custom: {
+              get: () => ({
                 getColors: mockedColors,
-              },
+              }),
             },
           })
         );

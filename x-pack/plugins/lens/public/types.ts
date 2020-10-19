@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { PaletteDefinition, PaletteOutput } from 'src/plugins/charts/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
@@ -430,7 +430,7 @@ export interface FramePublicAPI {
   /**
    * A map of all available palettes (keys being the ids).
    */
-  availablePalettes: Record<string, PaletteDefinition>;
+  availablePalettes: PaletteRegistry;
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;

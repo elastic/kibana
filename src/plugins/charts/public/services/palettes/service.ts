@@ -19,8 +19,11 @@
 
 import { CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
-import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
-import { buildPalettes } from './palettes';
+import {
+  ChartsPluginSetup,
+  PaletteDefinition,
+  PaletteRegistry,
+} from '../../../../../../src/plugins/charts/public';
 import { LegacyColorsService } from '../legacy_colors';
 
 export interface PaletteSetupPlugins {
@@ -29,11 +32,25 @@ export interface PaletteSetupPlugins {
 }
 
 export class PaletteService {
+  private palettes: Record<string, PaletteDefinition<unknown>> | undefined = undefined;
   constructor() {}
 
   public setup(core: CoreSetup, colorsService: LegacyColorsService) {
-    const palettes = buildPalettes(core.uiSettings, colorsService);
-
-    return palettes;
+    return {
+      getPalettes: async (): Promise<PaletteRegistry> => {
+        if (!this.palettes) {
+          const { buildPalettes } = await import('./palettes');
+          this.palettes = buildPalettes(core.uiSettings, colorsService);
+        }
+        return {
+          get: (name: string) => {
+            return this.palettes![name];
+          },
+          getAll: () => {
+            return Object.values(this.palettes!);
+          },
+        };
+      },
+    };
   }
 }

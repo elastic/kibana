@@ -17,9 +17,9 @@ describe('pie', () => {
   const fn = functionWrapper(
     pieFunctionFactory({
       paletteService: {
-        custom: {
+        get: () => ({
           getColors: () => ['red', 'black'],
-        },
+        }),
       },
     })
   );
@@ -60,9 +60,9 @@ describe('pie', () => {
         const mockedFn = functionWrapper(
           pieFunctionFactory({
             paletteService: {
-              custom: {
+              get: () => ({
                 getColors: mockedColors,
-              },
+              }),
             },
           })
         );

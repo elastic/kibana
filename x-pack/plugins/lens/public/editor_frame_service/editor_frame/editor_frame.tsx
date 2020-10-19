@@ -6,7 +6,7 @@
 
 import React, { useEffect, useReducer, useState } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { PaletteDefinition } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
@@ -32,7 +32,7 @@ export interface EditorFrameProps {
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
-  palettes: Record<string, PaletteDefinition>;
+  palettes: PaletteRegistry;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;
   plugins: EditorFrameStartPlugins;

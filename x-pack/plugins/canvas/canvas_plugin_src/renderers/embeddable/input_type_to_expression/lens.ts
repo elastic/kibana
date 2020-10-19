@@ -5,10 +5,10 @@
  */
 
 import { toExpression as toExpressionString } from '@kbn/interpreter/common';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedLensInput } from '../../../functions/external/saved_lens';
 
-export function toExpression(input: SavedLensInput, charts: ChartsPluginStart): string {
+export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedLens');
@@ -28,7 +28,7 @@ export function toExpression(input: SavedLensInput, charts: ChartsPluginStart): 
   if (input.palette) {
     expressionParts.push(
       `palette={${toExpressionString(
-        charts.palettes[input.palette.name].toExpression(input.palette.params)
+        palettes.get(input.palette.name).toExpression(input.palette.params)
       )}}`
     );
   }

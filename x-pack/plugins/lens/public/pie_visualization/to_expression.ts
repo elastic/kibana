@@ -5,7 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState } from './types';
@@ -13,7 +13,7 @@ import { PieVisualizationState } from './types';
 export function toExpression(
   state: PieVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: ChartsPluginSetup['palettes'],
+  paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ) {
   return expressionHelper(state, datasourceLayers, paletteService, {
@@ -25,7 +25,7 @@ export function toExpression(
 function expressionHelper(
   state: PieVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: ChartsPluginSetup['palettes'],
+  paletteService: PaletteRegistry,
   attributes: { isPreview: boolean; title?: string; description?: string } = { isPreview: false }
 ): Ast | null {
   const layer = state.layers[0];
@@ -68,7 +68,9 @@ function expressionHelper(
                         arguments: {
                           variable: ['palette'],
                           default: [
-                            paletteService[state.palette.name].toExpression(state.palette.params),
+                            paletteService
+                              .get(state.palette.name)
+                              .toExpression(state.palette.params),
                           ],
                         },
                       },
@@ -86,7 +88,7 @@ function expressionHelper(
 export function toPreviewExpression(
   state: PieVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: ChartsPluginSetup['palettes']
+  paletteService: PaletteRegistry
 ) {
   return expressionHelper(state, datasourceLayers, paletteService, { isPreview: true });
 }

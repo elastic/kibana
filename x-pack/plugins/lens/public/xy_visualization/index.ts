@@ -46,6 +46,7 @@ export class XyVisualization {
         getXyChartRenderer,
         getXyVisualization,
       } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
       expressions.registerFunction(() => tickLabelsConfig);
@@ -63,7 +64,7 @@ export class XyVisualization {
           histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
         })
       );
-      return getXyVisualization({ paletteService: charts.palettes });
+      return getXyVisualization({ paletteService: palettes });
     });
   }
 }

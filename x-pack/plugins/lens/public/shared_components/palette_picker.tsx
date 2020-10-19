@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { PaletteDefinition, PaletteOutput } from 'src/plugins/charts/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ export function PalettePicker({
   activePalette,
   setPalette,
 }: {
-  palettes: Record<string, PaletteDefinition>;
+  palettes: PaletteRegistry;
   activePalette?: PaletteOutput;
   setPalette: (palette: PaletteOutput) => void;
 }) {
@@ -30,14 +30,15 @@ export function PalettePicker({
     >
       <>
         <EuiColorPalettePicker
-          palettes={Object.entries(palettes)
-            .filter(([, { internal }]) => !internal)
-            .map(([id, palette]) => {
+          palettes={palettes
+            .getAll()
+            .filter(({ internal }) => !internal)
+            .map(({ id, title, getColors }) => {
               return {
                 value: id,
-                title: palette.title,
+                title,
                 type: 'fixed',
-                palette: palette.getColors(
+                palette: getColors(
                   10,
                   id === activePalette?.name ? activePalette?.params : undefined
                 ),
@@ -52,9 +53,9 @@ export function PalettePicker({
           valueOfSelected={activePalette?.name || 'default'}
           selectionDisplay={'palette'}
         />
-        {activePalette && palettes[activePalette.name].renderEditor && (
+        {activePalette && palettes.get(activePalette.name).renderEditor && (
           <NativeRenderer
-            render={palettes[activePalette.name].renderEditor!}
+            render={palettes.get(activePalette.name).renderEditor!}
             nativeProps={{
               state: activePalette.params,
               setState: (updater) => {

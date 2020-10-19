@@ -6,7 +6,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { State, LayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 
@@ -17,7 +17,7 @@ interface ValidLayer extends LayerConfig {
 export const toExpression = (
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: ChartsPluginSetup['palettes'],
+  paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   if (!state || !state.layers.length) {
@@ -40,7 +40,7 @@ export const toExpression = (
 export function toPreviewExpression(
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: ChartsPluginSetup['palettes']
+  paletteService: PaletteRegistry
 ) {
   return toExpression(
     {
@@ -88,7 +88,7 @@ export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: ChartsPluginSetup['palettes'],
+  paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
@@ -252,9 +252,9 @@ export const buildExpression = (
                                   arguments: {
                                     variable: ['palette'],
                                     default: [
-                                      paletteService[layer.palette.name].toExpression(
-                                        layer.palette.params
-                                      ),
+                                      paletteService
+                                        .get(layer.palette.name)
+                                        .toExpression(layer.palette.params),
                                     ],
                                   },
                                 },
