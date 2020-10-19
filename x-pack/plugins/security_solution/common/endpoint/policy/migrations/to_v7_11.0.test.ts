@@ -13,7 +13,12 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
   it('adds malware notification checkbox and optional message', () => {
     const doc = {
       attributes: {
-        name: 'endpoint',
+        name: 'Some Policy Name',
+        package: {
+          name: 'endpoint',
+          title: '',
+          version: '',
+        },
         id: 'endpoint',
         policy_id: '',
         enabled: true,
@@ -47,7 +52,12 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
       migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PackagePolicy>
     ).toEqual({
       attributes: {
-        name: 'endpoint',
+        name: 'Some Policy Name',
+        package: {
+          name: 'endpoint',
+          title: '',
+          version: '',
+        },
         id: 'endpoint',
         policy_id: '',
         enabled: true,
