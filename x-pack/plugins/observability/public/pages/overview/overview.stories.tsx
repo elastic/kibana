@@ -186,7 +186,7 @@ storiesOf('app/Overview', module)
       hasData: async () => false,
     });
 
-    return <OverviewPage routeParams={{ query: {}, path: {} }} />;
+    return <OverviewPage routeParams={{ query: {} }} />;
   })
   .add('Single Panel', () => {
     registerDataHandler({
@@ -199,7 +199,6 @@ storiesOf('app/Overview', module)
       <OverviewPage
         routeParams={{
           query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          path: {},
         }}
       />
     );
@@ -220,7 +219,6 @@ storiesOf('app/Overview', module)
       <OverviewPage
         routeParams={{
           query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          path: {},
         }}
       />
     );
@@ -243,7 +241,6 @@ storiesOf('app/Overview', module)
         <OverviewPage
           routeParams={{
             query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-            path: {},
           }}
         />
       );
@@ -273,7 +270,6 @@ storiesOf('app/Overview', module)
         <OverviewPage
           routeParams={{
             query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-            path: {},
           }}
         />
       );
@@ -306,7 +302,6 @@ storiesOf('app/Overview', module)
       <OverviewPage
         routeParams={{
           query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          path: {},
         }}
       />
     );
@@ -339,7 +334,6 @@ storiesOf('app/Overview', module)
         <OverviewPage
           routeParams={{
             query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-            path: {},
           }}
         />
       );
@@ -373,7 +367,6 @@ storiesOf('app/Overview', module)
         <OverviewPage
           routeParams={{
             query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-            path: {},
           }}
         />
       );
@@ -406,7 +399,6 @@ storiesOf('app/Overview', module)
       <OverviewPage
         routeParams={{
           query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          path: {},
         }}
       />
     );
@@ -446,7 +438,6 @@ storiesOf('app/Overview', module)
         <OverviewPage
           routeParams={{
             query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-            path: {},
           }}
         />
       );
@@ -492,7 +483,6 @@ storiesOf('app/Overview', module)
         <OverviewPage
           routeParams={{
             query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-            path: {},
           }}
         />
       );
@@ -537,7 +527,6 @@ storiesOf('app/Overview', module)
       <OverviewPage
         routeParams={{
           query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          path: {},
         }}
       />
     );
