@@ -5,6 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
+import { Option, none, some, fold } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
@@ -33,41 +35,35 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   waitForCheck = true,
 }) => {
   const { setLoadingHealthCheck } = useHealthContext();
-  const [alertingHealth, setAlertingHealth] = React.useState<AlertingFrameworkHealth | null>(null);
+  const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
-  /**
-   * if waitForCheck && no response from server, loading
-      if waitForcheck && response from server, go through logic
-    if !waitForCheck && no response from server, return child
-    if !waitForCheck && response from server, go through logic
-   */
   React.useEffect(() => {
     (async function () {
       setLoadingHealthCheck(true);
-      setAlertingHealth(await health({ http }));
+      setAlertingHealth(some(await health({ http })));
       setLoadingHealthCheck(false);
     })();
   }, [http, setLoadingHealthCheck]);
 
   const className = inFlyout ? 'alertingFlyoutHealthCheck' : 'alertingHealthCheck';
 
-  const healthLoadedButNotSecure =
-    alertingHealth &&
-    (!alertingHealth.isSufficientlySecure || !alertingHealth.hasPermanentEncryptionKey);
-
-  if (healthLoadedButNotSecure) {
-    return !alertingHealth?.isSufficientlySecure && !alertingHealth?.hasPermanentEncryptionKey ? (
-      <TlsAndEncryptionError docLinks={docLinks} className={className} />
-    ) : !alertingHealth?.hasPermanentEncryptionKey ? (
-      <EncryptionError docLinks={docLinks} className={className} />
-    ) : (
-      <TlsError docLinks={docLinks} className={className} />
-    );
-  } else if (waitForCheck && !alertingHealth) {
-    return <EuiLoadingSpinner size="m" />;
-  }
-
-  return <Fragment>{children}</Fragment>;
+  return pipe(
+    alertingHealth,
+    fold(
+      () => (waitForCheck ? <EuiLoadingSpinner size="m" /> : <Fragment>{children}</Fragment>),
+      (healthCheck) => {
+        return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
+          <Fragment>{children}</Fragment>
+        ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
+          <TlsAndEncryptionError docLinks={docLinks} className={className} />
+        ) : !healthCheck.hasPermanentEncryptionKey ? (
+          <EncryptionError docLinks={docLinks} className={className} />
+        ) : (
+          <TlsError docLinks={docLinks} className={className} />
+        );
+      }
+    )
+  );
 };
 
 type PromptErrorProps = Pick<Props, 'docLinks'> & {

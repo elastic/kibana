@@ -149,6 +149,10 @@ export const AlertForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
+  }, [alert, alertTypeRegistry]);
+
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
