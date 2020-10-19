@@ -161,7 +161,7 @@ export const buildRegressionDecisionPathData = ({
   return finalResult;
 };
 
-export const buildBinaryClassificationDecisionPathData = ({
+export const processBinaryClassificationDecisionPathData = ({
   decisionPlotData,
   startingBaseline,
 }: {
@@ -180,7 +180,7 @@ export const buildBinaryClassificationDecisionPathData = ({
   return finalResult;
 };
 
-export const buildMultiClassClassificationDecisionPathData = ({
+export const processMultiClassClassificationDecisionPathData = ({
   baselines,
   decisionPlotData,
   startingBaseline,
@@ -295,13 +295,13 @@ export const buildClassificationDecisionPathData = ({
 
   // if binary classification
   if (baselines.length === 2) {
-    return buildBinaryClassificationDecisionPathData({
+    return processBinaryClassificationDecisionPathData({
       startingBaseline,
       decisionPlotData,
     });
   }
   // else if multiclass classification
-  return buildMultiClassClassificationDecisionPathData({
+  return processMultiClassClassificationDecisionPathData({
     baselines,
     decisionPlotData,
     startingBaseline,
