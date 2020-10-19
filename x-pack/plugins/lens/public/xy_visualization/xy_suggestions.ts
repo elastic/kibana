@@ -126,8 +126,6 @@ function flipSeriesType(seriesType: SeriesType) {
       return 'bar_stacked';
     case 'bar':
       return 'bar_horizontal';
-    case 'bar_horizontal_stacked':
-      return 'bar_stacked';
     case 'bar_horizontal_percentage_stacked':
       return 'bar_percentage_stacked';
     case 'bar_percentage_stacked':
