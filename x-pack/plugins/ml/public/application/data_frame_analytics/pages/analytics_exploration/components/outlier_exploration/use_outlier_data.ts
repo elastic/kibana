@@ -52,17 +52,21 @@ export const useOutlierData = (
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
 
-  const columns: EuiDataGridColumn[] = [];
+  const columns = useMemo(() => {
+    const newColumns: EuiDataGridColumn[] = [];
 
-  if (jobConfig !== undefined && indexPattern !== undefined) {
-    const resultsField = jobConfig.dest.results_field;
-    const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
-    columns.push(
-      ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
-        sortExplorationResultsFields(a.id, b.id, jobConfig)
-      )
-    );
-  }
+    if (jobConfig !== undefined && indexPattern !== undefined) {
+      const resultsField = jobConfig.dest.results_field;
+      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+      newColumns.push(
+        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
+          sortExplorationResultsFields(a.id, b.id, jobConfig)
+        )
+      );
+    }
+
+    return newColumns;
+  }, [jobConfig, indexPattern]);
 
   const dataGrid = useDataGrid(
     columns,
@@ -124,7 +128,10 @@ export const useOutlierData = (
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,
-    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+    // Only trigger when search or the visible columns changes.
+    // We're only interested in the visible columns but not their order, that's
+    // why we sort for comparison (and copying it via spread to avoid sort in place).
+    JSON.stringify([searchQuery, [...dataGrid.visibleColumns].sort()]),
   ]);
 
   const colorRange = useColorRange(

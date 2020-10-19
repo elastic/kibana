@@ -31,14 +31,15 @@ import {
 interface SendTelemetryOptInStatusConfig {
   optInStatusUrl: string;
   newOptInStatus: boolean;
+  currentKibanaVersion: string;
 }
 
 export async function sendTelemetryOptInStatus(
-  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
+  telemetryCollectionManager: Pick<TelemetryCollectionManagerPluginSetup, 'getOptInStats'>,
   config: SendTelemetryOptInStatusConfig,
   statsGetterConfig: StatsGetterConfig
 ) {
-  const { optInStatusUrl, newOptInStatus } = config;
+  const { optInStatusUrl, newOptInStatus, currentKibanaVersion } = config;
   const optInStatus = await telemetryCollectionManager.getOptInStats(
     newOptInStatus,
     statsGetterConfig
@@ -47,6 +48,7 @@ export async function sendTelemetryOptInStatus(
   await fetch(optInStatusUrl, {
     method: 'post',
     body: optInStatus,
+    headers: { 'X-Elastic-Stack-Version': currentKibanaVersion },
   });
 }
 

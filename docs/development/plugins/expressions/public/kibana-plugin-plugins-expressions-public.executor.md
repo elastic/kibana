@@ -41,6 +41,6 @@ export declare class Executor<Context extends Record<string, unknown> = Record<s
 |  [inject(ast, references)](./kibana-plugin-plugins-expressions-public.executor.inject.md) |  |  |
 |  [registerFunction(functionDefinition)](./kibana-plugin-plugins-expressions-public.executor.registerfunction.md) |  |  |
 |  [registerType(typeDefinition)](./kibana-plugin-plugins-expressions-public.executor.registertype.md) |  |  |
-|  [run(ast, input, context)](./kibana-plugin-plugins-expressions-public.executor.run.md) |  | Execute expression and return result. |
+|  [run(ast, input, context, options)](./kibana-plugin-plugins-expressions-public.executor.run.md) |  | Execute expression and return result. |
 |  [telemetry(ast, telemetryData)](./kibana-plugin-plugins-expressions-public.executor.telemetry.md) |  |  |
 

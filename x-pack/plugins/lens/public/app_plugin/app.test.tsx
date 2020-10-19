@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance } from '../types';
-import { Document, DOC_TYPE } from '../persistence';
+import { Document } from '../persistence';
+import { DOC_TYPE } from '../../common';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
