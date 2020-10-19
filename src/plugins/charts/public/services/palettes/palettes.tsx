@@ -39,12 +39,16 @@ import { MappedColors } from '../mapped_colors';
 function buildRoundRobinCategoricalWithMappedColors(
   uiSettings: IUiSettingsClient
 ): Omit<PaletteDefinition, 'title'> {
-  const mappedColors = new MappedColors(uiSettings, (num: number) =>
-    euiPaletteColorBlind({ rotations: Math.ceil(num / 10) })
-  );
-  const mappedBehindTextColors = new MappedColors(uiSettings, (num: number) =>
-    euiPaletteColorBlindBehindText({ rotations: Math.ceil(num / 10) })
-  );
+  const mappedColors = new MappedColors(uiSettings, (num: number) => {
+    return euiPaletteColorBlind({ rotations: Math.ceil(num / 10) }).map((color) =>
+      color.toLowerCase()
+    );
+  });
+  const mappedBehindTextColors = new MappedColors(uiSettings, (num: number) => {
+    return euiPaletteColorBlindBehindText({ rotations: Math.ceil(num / 10) }).map((color) =>
+      color.toLowerCase()
+    );
+  });
   function getColor(
     series: SeriesLayer[],
     chartConfiguration: ChartColorConfiguration = { behindText: false }
