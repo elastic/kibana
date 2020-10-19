@@ -228,7 +228,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext): Promise<Output>;
+    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions): Promise<Output>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -609,12 +609,12 @@ export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | '
 //
 // @public
 export interface ExpressionsServiceStart {
-    execute: <Input = unknown, Output = unknown, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) => ExecutionContract<ExtraContext, Input, Output>;
+    execute: <Input = unknown, Output = unknown, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions) => ExecutionContract<ExtraContext, Input, Output>;
     fork: () => ExpressionsService;
     getFunction: (name: string) => ReturnType<Executor['getFunction']>;
     getRenderer: (name: string) => ReturnType<ExpressionRendererRegistry['get']>;
     getType: (name: string) => ReturnType<Executor['getType']>;
-    run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) => Promise<Output>;
+    run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions) => Promise<Output>;
 }
 
 // Warning: (ae-missing-release-tag) "ExpressionsSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -878,6 +878,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     customRenderers?: [];
     // (undocumented)
+    debug?: boolean;
+    // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
     inspectorAdapters?: Adapters;
@@ -1020,6 +1022,8 @@ export type PointSeriesRow = Record<string, any>;
 export interface Range {
     // (undocumented)
     from: number;
+    // (undocumented)
+    label?: string;
     // (undocumented)
     to: number;
     // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts

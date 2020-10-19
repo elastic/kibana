@@ -150,7 +150,15 @@ export const findMatchingIndexPatterns = ({
       const pattern = kip.attributes.title;
       return (
         !ignoredIndexPatterns.includes(pattern) &&
-        siemDefaultIndices.some((sdi) => minimatch(sdi, pattern))
+        siemDefaultIndices.some((sdi) => {
+          const splitPattern = pattern.split(',') ?? [];
+          return splitPattern.length > 1
+            ? splitPattern.some((p) => {
+                const isMatch = minimatch(sdi, p);
+                return isMatch && p.charAt(0) === '-' ? false : isMatch;
+              })
+            : minimatch(sdi, pattern);
+        })
       );
     });
   } catch {

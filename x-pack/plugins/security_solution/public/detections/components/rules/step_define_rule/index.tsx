@@ -190,9 +190,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [getFormData, submit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.defineRule, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   const handleResetIndices = useCallback(() => {

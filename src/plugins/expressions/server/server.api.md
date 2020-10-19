@@ -210,7 +210,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext): Promise<Output>;
+    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions): Promise<Output>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -845,6 +845,8 @@ export type PointSeriesRow = Record<string, any>;
 export interface Range {
     // (undocumented)
     from: number;
+    // (undocumented)
+    label?: string;
     // (undocumented)
     to: number;
     // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
