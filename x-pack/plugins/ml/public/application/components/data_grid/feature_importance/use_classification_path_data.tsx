@@ -289,7 +289,7 @@ export const buildClassificationDecisionPathData = ({
     // sort by absolute importance so it goes from bottom (baseline) to top
     .sort(
       (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
-        b.absImportance! - a.absImportance!
+        b.absImportance - a.absImportance
     )
     .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
 
