@@ -62,8 +62,6 @@ export function healthRoute(
           hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
         };
 
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-
         return res.ok({
           body: frameworkHealth,
         });
