@@ -9632,8 +9632,6 @@
     "xpack.lens.xyChart.seriesColor.label": "系列颜色",
     "xpack.lens.xyChart.splitSeries": "拆分序列",
     "xpack.lens.xyChart.title.help": "轴标题",
-    "xpack.lens.xyChart.xAxisLabel": "X 轴",
-    "xpack.lens.xyChart.yAxisLabel": "Y 轴",
     "xpack.lens.xySuggestions.barChartTitle": "条形图",
     "xpack.lens.xySuggestions.dateSuggestion": "{yTitle} / {xTitle}",
     "xpack.lens.xySuggestions.flipTitle": "翻转",

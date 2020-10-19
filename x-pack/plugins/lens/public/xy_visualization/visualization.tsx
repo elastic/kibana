@@ -156,13 +156,18 @@ export const xyVisualization: Visualization<State> = {
 
   getConfiguration(props) {
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    const isHorizontal = isHorizontalChart(props.state.layers);
     return {
       groups: [
         {
           groupId: 'x',
-          groupLabel: i18n.translate('xpack.lens.xyChart.xAxisLabel', {
-            defaultMessage: 'X-axis',
-          }),
+          groupLabel: isHorizontal
+            ? i18n.translate('xpack.lens.xyChart.VerticalAxisLabel', {
+                defaultMessage: 'Vertical Axis',
+              })
+            : i18n.translate('xpack.lens.xyChart.HorizontalAxisLabel', {
+                defaultMessage: 'Horizontal Axis',
+              }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
           filterOperations: isBucketed,
           suggestedPriority: 1,
@@ -172,9 +177,13 @@ export const xyVisualization: Visualization<State> = {
         },
         {
           groupId: 'y',
-          groupLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
-            defaultMessage: 'Y-axis',
-          }),
+          groupLabel: isHorizontal
+            ? i18n.translate('xpack.lens.xyChart.HorizontalAxisLabel', {
+                defaultMessage: 'Horizontal Axis',
+              })
+            : i18n.translate('xpack.lens.xyChart.VerticalAxisLabel', {
+                defaultMessage: 'Vertical Axis',
+              }),
           accessors: layer.accessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,

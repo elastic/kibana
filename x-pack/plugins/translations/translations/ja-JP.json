@@ -9626,8 +9626,6 @@
     "xpack.lens.xyChart.seriesColor.label": "系列色",
     "xpack.lens.xyChart.splitSeries": "系列を分割",
     "xpack.lens.xyChart.title.help": "軸のタイトル",
-    "xpack.lens.xyChart.xAxisLabel": "X 軸",
-    "xpack.lens.xyChart.yAxisLabel": "Y 軸",
     "xpack.lens.xySuggestions.barChartTitle": "棒グラフ",
     "xpack.lens.xySuggestions.dateSuggestion": "{xTitle} の {yTitle}",
     "xpack.lens.xySuggestions.flipTitle": "反転",
