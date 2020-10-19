@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { FormData, FormHook } from '../types';
 import { unflattenObject } from '../lib';
@@ -55,6 +55,15 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
   const isMounted = useRef(false);
   const [formData, setFormData] = useState<I>(() => unflattenObject<I>(previousRawData.current));
 
+  /**
+   * We do want to offer to the consumer a handler to serialize the form data that changes each time
+   * the formData **state** changes. This is why we added the "formData" dep to the array and added the eslint override.
+   */
+  const serializer = useCallback(() => {
+    return getFormData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getFormData, formData]);
+
   useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
       if (!isMounted.current && Object.keys(raw).length === 0) {
@@ -85,8 +94,8 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
 
   if (!isMounted.current && Object.keys(formData).length === 0) {
     // No field has mounted yet
-    return [formData, getFormData, false];
+    return [formData, serializer, false];
   }
 
-  return [formData, getFormData, true];
+  return [formData, serializer, true];
 };
