@@ -14,7 +14,7 @@ export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, 
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
     packagePolicyDoc
   );
-  if (packagePolicyDoc.attributes.name === 'endpoint') {
+  if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     const popup = {
       malware: {
