@@ -119,7 +119,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     return toUser(this.props.query.query);
   };
 
-  private fetchIndexPatterns = async () => {
+  private fetchIndexPatterns = debounce(async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
     ) as string[];
@@ -136,7 +136,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.setState({
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
     });
-  };
+
+    this.updateSuggestions();
+  }, 100);
 
   private getSuggestions = async () => {
     if (!this.inputRef) {
@@ -506,7 +508,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.fetchIndexPatterns();
     this.handleListUpdate();
 
     window.addEventListener('resize', this.handleAutoHeight);
@@ -525,7 +527,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.initPersistedLog();
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
-      this.fetchIndexPatterns().then(this.updateSuggestions);
+      this.fetchIndexPatterns();
     } else if (!isEqual(prevProps.query, this.props.query)) {
       this.updateSuggestions();
     }
