@@ -1046,7 +1046,7 @@ Array [
 ]
 `;
 
-exports[`Service Maps with a trial license when there is data with anomalies returns the correct anomaly stats 3`] = `
+exports[`Service Maps with a trial license when there is data with anomalies with the default apm user returns the correct anomaly stats 3`] = `
 Object {
   "elements": Array [
     Object {

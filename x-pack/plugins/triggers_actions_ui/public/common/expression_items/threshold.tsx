@@ -111,12 +111,17 @@ export const ThresholdExpression = ({
               data-test-subj="comparatorOptionsComboBox"
               value={thresholdComparator}
               onChange={(e) => {
+                const updateThresholdValue =
+                  comparators[thresholdComparator].requiredValues !==
+                  comparators[e.target.value].requiredValues;
                 onChangeSelectedThresholdComparator(e.target.value);
-                const thresholdValues = threshold.slice(
-                  0,
-                  comparators[e.target.value].requiredValues
-                );
-                onChangeSelectedThreshold(thresholdValues);
+                if (updateThresholdValue) {
+                  const thresholdValues = threshold.slice(
+                    0,
+                    comparators[e.target.value].requiredValues
+                  );
+                  onChangeSelectedThreshold(thresholdValues);
+                }
               }}
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };

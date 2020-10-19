@@ -17,6 +17,7 @@ import {
   ISavedObjectsRepository,
 } from '../../../../src/core/server';
 import { Result, asOk, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
+import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
 import { Logger } from './types';
@@ -149,6 +150,13 @@ export class TaskManager {
     // pipe store events into the TaskManager's event stream
     this.store.events.subscribe((event) => this.events$.next(event));
 
+    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger: this.logger,
+      errors$: this.store.errors$,
+      startingMaxWorkers: opts.config.max_workers,
+      startingPollInterval: opts.config.poll_interval,
+    });
+
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: opts.config.max_workers,
       logger: this.logger,
@@ -156,7 +164,7 @@ export class TaskManager {
 
     this.pool = new TaskPool({
       logger: this.logger,
-      maxWorkers: opts.config.max_workers,
+      maxWorkers$: maxWorkersConfiguration$,
     });
 
     const {
@@ -166,7 +174,8 @@ export class TaskManager {
     this.poller$ = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
       () =>
         createTaskPoller<string, FillPoolResult>({
-          pollInterval,
+          logger: this.logger,
+          pollInterval$: pollIntervalConfiguration$,
           bufferCapacity: opts.config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
           pollRequests$: this.claimRequests$,
