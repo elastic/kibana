@@ -39,7 +39,7 @@ interface FailedShard {
   };
 }
 
-export interface EsError {
+export interface IEsError {
   body: {
     statusCode: number;
     error: string;
@@ -68,6 +68,6 @@ export interface EsError {
   };
 }
 
-export function isEsError(e: any): e is EsError {
+export function isEsError(e: any): e is IEsError {
   return !!e.body?.attributes;
 }
