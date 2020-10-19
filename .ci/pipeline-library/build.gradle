@@ -17,7 +17,7 @@ repositories {
 dependencies {
   implementation 'org.codehaus.groovy:groovy-all:2.4.12'
   implementation 'org.jenkins-ci.main:jenkins-core:2.23'
-  implementation 'org.jenkins-ci.plugins.workflow:workflow-step-api:2.19@jar'
+  implementation 'org.jenkins-ci.plugins.workflow:workflow-step-api:2.23@jar'
   testImplementation 'com.lesfurets:jenkins-pipeline-unit:1.4'
   testImplementation 'junit:junit:4.12'
   testImplementation 'org.mockito:mockito-core:2.+'
