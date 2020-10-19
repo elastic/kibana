@@ -30,24 +30,6 @@ export const CredentialsList: React.FC = () => {
 
   const items = useMemo(() => apiTokens.slice().sort(apiTokenSort), [apiTokens]);
 
-  if (items.length < 1) {
-    return (
-      <EuiEmptyPrompt
-        iconType="editorStrike"
-        title={
-          <h2>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
-              defaultMessage: 'No API Keys have been created yet.',
-            })}
-          </h2>
-        }
-        body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
-          defaultMessage: 'Click the "Create a key" button to make your first one.',
-        })}
-      />
-    );
-  }
-
   const columns: Array<EuiBasicTableColumn<IApiToken>> = [
     {
       name: 'Name',
@@ -142,7 +124,21 @@ export const CredentialsList: React.FC = () => {
     fetchCredentials(current + 1);
   };
 
-  return (
+  return items.length < 1 ? (
+    <EuiEmptyPrompt
+      iconType="editorStrike"
+      title={
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
+            defaultMessage: 'No API Keys have been created yet.',
+          })}
+        </h2>
+      }
+      body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
+        defaultMessage: 'Click the "Create a key" button to make your first one.',
+      })}
+    />
+  ) : (
     <EuiBasicTable
       columns={columns}
       items={items}
