@@ -20,7 +20,7 @@
 import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
-import { UsageCollector } from './usage_collector';
+import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
