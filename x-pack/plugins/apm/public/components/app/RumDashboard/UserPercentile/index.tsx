@@ -6,7 +6,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 
-import { EuiSuperSelect } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -49,32 +49,29 @@ export function UserPercentile() {
   const options = [
     {
       value: '50',
-      inputDisplay: I18LABELS.percentile50thMedian,
+      text: I18LABELS.percentile50thMedian,
       dropdownDisplay: I18LABELS.percentile50thMedian,
       'data-test-subj': 'p50Percentile',
     },
     {
       value: '75',
-      inputDisplay: <StyledSpan>{I18LABELS.percentile75th}</StyledSpan>,
+      text: I18LABELS.percentile75th,
       dropdownDisplay: I18LABELS.percentile75th,
       'data-test-subj': 'p75Percentile',
     },
     {
       value: '90',
-      inputDisplay: <StyledSpan>{I18LABELS.percentile90th}</StyledSpan>,
-      dropdownDisplay: I18LABELS.percentile90th,
+      text: I18LABELS.percentile90th,
       'data-test-subj': 'p90Percentile',
     },
     {
       value: '95',
-      inputDisplay: <StyledSpan>{I18LABELS.percentile95th}</StyledSpan>,
-      dropdownDisplay: I18LABELS.percentile95th,
+      text: I18LABELS.percentile95th,
       'data-test-subj': 'p95Percentile',
     },
     {
       value: '99',
-      inputDisplay: <StyledSpan>{I18LABELS.percentile99th}</StyledSpan>,
-      dropdownDisplay: I18LABELS.percentile99th,
+      text: I18LABELS.percentile99th,
       'data-test-subj': 'p99Percentile',
     },
   ];
@@ -84,13 +81,12 @@ export function UserPercentile() {
   };
 
   return (
-    <EuiSuperSelect
+    <EuiSelect
       prepend={I18LABELS.percentile}
       data-test-subj="uxPercentileSelect"
       style={{ width: 150 }}
       options={options}
-      valueOfSelected={String(percentile ?? DEFAULT_P)}
-      onChange={(value) => onChange(value)}
+      onChange={(evt) => onChange(evt.target.value)}
     />
   );
 }
