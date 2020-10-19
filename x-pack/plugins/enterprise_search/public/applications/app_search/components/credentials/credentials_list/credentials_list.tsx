@@ -30,6 +30,24 @@ export const CredentialsList: React.FC = () => {
 
   const items = useMemo(() => apiTokens.slice().sort(apiTokenSort), [apiTokens]);
 
+  if (items.length < 1) {
+    return (
+      <EuiEmptyPrompt
+        iconType="editorStrike"
+        title={
+          <h2>
+            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
+              defaultMessage: 'No API Keys have been created yet.',
+            })}
+          </h2>
+        }
+        body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
+          defaultMessage: 'Click Create a key to make your first one.',
+        })}
+      />
+    );
+  }
+
   const columns: Array<EuiBasicTableColumn<IApiToken>> = [
     {
       name: 'Name',
@@ -118,24 +136,6 @@ export const CredentialsList: React.FC = () => {
     totalItemCount: meta.page ? meta.page.total_results : 0,
     hidePerPageOptions: true,
   };
-
-  if (items.length < 1) {
-    return (
-      <EuiEmptyPrompt
-        iconType="editorStrike"
-        title={
-          <h2>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
-              defaultMessage: 'No API Keys have been created yet.',
-            })}
-          </h2>
-        }
-        body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
-          defaultMessage: 'Click Create a key to make your first one.',
-        })}
-      />
-    );
-  }
 
   const onTableChange = ({ page }: CriteriaWithPagination<IApiToken>) => {
     const { index: current } = page;
