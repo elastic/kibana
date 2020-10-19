@@ -37,7 +37,7 @@ Choose an import tool based on the format of your geospatial data.
 
 The GeoIP processor adds information about the geographical location of IP addresses.
 See {ref}/geoip-processor.html[GeoIP processor] for details.
-For private IP addresses, see [Enriching data with GeoIPs from internal, private IP addresses](https://www.elastic.co/blog/enriching-elasticsearch-data-geo-ips-internal-private-ip-addresses).
+For private IP addresses, see https://www.elastic.co/blog/enriching-elasticsearch-data-geo-ips-internal-private-ip-addresses[Enriching data with GeoIPs from internal, private IP addresses].
 
 [discrete]
 === Upload data with GDAL
