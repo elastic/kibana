@@ -248,12 +248,13 @@ const DragDropInner = React.memo(function DragDropInner(
     value?.id
   ) {
     return (
-      <SortableDragDrop
+      <ReorderableDragDrop
         draggingProps={{
           className: classNames(children.props.className, classes),
           draggable,
           onDragEnd: dragEnd,
           onDragStart: dragStart,
+          ['data-test-subj']: props['data-test-subj'] || 'lnsDragDrop',
         }}
         dropProps={{
           onDrop: drop,
@@ -264,10 +265,9 @@ const DragDropInner = React.memo(function DragDropInner(
           itemsInGroup,
           id: value.id,
         }}
-        {...{ 'data-test-subj': props['data-test-subj'] || 'lnsDragDrop' }}
       >
         {children}
-      </SortableDragDrop>
+      </ReorderableDragDrop>
     );
   }
   return React.cloneElement(children, {
@@ -282,17 +282,17 @@ const DragDropInner = React.memo(function DragDropInner(
   });
 });
 
-const SortableDragDrop = ({
+export const ReorderableDragDrop = ({
   draggingProps,
   dropProps,
   children,
-  ...props
 }: {
   draggingProps: {
     className: string;
     draggable: Props['draggable'];
     onDragEnd: (e: DroppableEvent) => void;
     onDragStart: (e: DroppableEvent) => void;
+    ['data-test-subj']: string;
   };
   dropProps: {
     onDrop: (e: DroppableEvent) => void;
@@ -308,9 +308,8 @@ const SortableDragDrop = ({
 }) => {
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
-
   return (
-    <div data-test-subj={props['data-test-subj']} className="lnsDragDrop-reorderableContainer">
+    <div className="lnsDragDrop-reorderableContainer">
       {React.cloneElement(children, {
         ...draggingProps,
         className: classNames(
@@ -324,6 +323,7 @@ const SortableDragDrop = ({
         ),
       })}
       <div
+        data-test-subj="lnsDragDrop-reorderableDrop"
         className={classNames('lnsDragDrop', {
           'lnsDragDrop-reorderableDrop': dragging && droppable,
         })}

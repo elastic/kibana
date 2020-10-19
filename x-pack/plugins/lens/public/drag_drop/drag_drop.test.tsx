@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { render, mount } from 'enzyme';
-import { DragDrop } from './drag_drop';
-import { ChildDragDropProvider } from './providers';
+import { DragDrop, ReorderableDragDrop } from './drag_drop';
+import { ChildDragDropProvider, ReorderProvider } from './providers';
 
 jest.useFakeTimers();
 
@@ -192,5 +193,241 @@ describe('DragDrop', () => {
     component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragover');
     component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('drop');
     expect(component.find('.additional')).toHaveLength(0);
+  });
+
+  describe('reordering', () => {
+    test(`ReorderableDragDrop component doesn't appear for groups of 1 or less`, () => {
+      let dragging: { id: '1' } | undefined;
+      const component = mount(
+        <ChildDragDropProvider
+          dragging={dragging}
+          setDragging={() => {
+            dragging = { id: '1' };
+          }}
+        >
+          <ReorderProvider>
+            <DragDrop
+              label="1"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1']}
+              value={{ id: '1' }}
+              onDrop={jest.fn()}
+            >
+              <div />
+            </DragDrop>
+          </ReorderProvider>
+        </ChildDragDropProvider>
+      );
+      expect(component.find(ReorderableDragDrop)).toHaveLength(0);
+    });
+    test(`Reorderable component renders properly`, () => {
+      let dragging: { id: '1' } | undefined;
+      const component = mount(
+        <ChildDragDropProvider
+          dragging={dragging}
+          setDragging={() => {
+            dragging = { id: '1' };
+          }}
+        >
+          <ReorderProvider>
+            <DragDrop
+              label="1"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{ id: '1' }}
+              onDrop={jest.fn()}
+            >
+              <div />
+            </DragDrop>
+            <DragDrop
+              label="2"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{
+                id: '2',
+              }}
+              onDrop={jest.fn()}
+            >
+              <div />
+            </DragDrop>
+            <DragDrop
+              label="3"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{
+                id: '3',
+              }}
+              onDrop={jest.fn()}
+            >
+              <div />
+            </DragDrop>
+          </ReorderProvider>
+        </ChildDragDropProvider>
+      );
+
+      expect(component.find(ReorderableDragDrop)).toHaveLength(3);
+    });
+    test(`Elements between dragged and drop get extra class to show the reorder effect when dragging`, () => {
+      let dragging = { id: '1' };
+      const component = mount(
+        <ChildDragDropProvider
+          dragging={dragging}
+          setDragging={() => {
+            dragging = { id: '1' };
+          }}
+        >
+          <ReorderProvider>
+            <DragDrop
+              label="1"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{ id: '1' }}
+              onDrop={jest.fn()}
+            >
+              <div />
+            </DragDrop>
+            <DragDrop
+              label="2"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{
+                id: '2',
+              }}
+              onDrop={jest.fn()}
+            >
+              <div />
+            </DragDrop>
+            <DragDrop
+              label="3"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{
+                id: '3',
+              }}
+              onDrop={jest.fn()}
+            >
+              <div />
+            </DragDrop>
+          </ReorderProvider>
+        </ChildDragDropProvider>
+      );
+
+      const dataTransfer = {
+        setData: jest.fn(),
+        getData: jest.fn(),
+      };
+      component
+        .find(ReorderableDragDrop)
+        .first()
+        .find('[data-test-subj="lnsDragDrop"]')
+        .simulate('dragstart', { dataTransfer });
+      jest.runAllTimers();
+
+      component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragover');
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(0).prop('className')).toEqual(
+        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
+      );
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('className')).toEqual(
+        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable--up lnsDragDrop-isReorderable'
+      );
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('className')).toEqual(
+        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable--up lnsDragDrop-isReorderable'
+      );
+
+      component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragleave');
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('className')).toEqual(
+        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
+      );
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('className')).toEqual(
+        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
+      );
+    });
+    test(`dropping an item runs onDrop function`, () => {
+      let dragging: { id: '1' } | undefined = { id: '1' };
+      const preventDefault = jest.fn();
+      const stopPropagation = jest.fn();
+      const setDragging = jest.fn();
+      const onDrop = jest.fn();
+      const component = mount(
+        <ChildDragDropProvider
+          dragging={dragging}
+          setDragging={() => {
+            dragging = { id: '1' };
+          }}
+        >
+          <ReorderProvider>
+            <DragDrop
+              label="1"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{ id: '1' }}
+              onDrop={onDrop}
+            >
+              <div />
+            </DragDrop>
+            <DragDrop
+              label="2"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{
+                id: '2',
+              }}
+              onDrop={onDrop}
+            >
+              <div />
+            </DragDrop>
+            <DragDrop
+              label="3"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              itemsInGroup={['1', '2', '3']}
+              value={{
+                id: '3',
+              }}
+              onDrop={onDrop}
+            >
+              <div />
+            </DragDrop>
+          </ReorderProvider>
+        </ChildDragDropProvider>
+      );
+
+      component
+        .find('[data-test-subj="lnsDragDrop-reorderableDrop"]')
+        .at(1)
+        .simulate('drop', { preventDefault, stopPropagation });
+      expect(preventDefault).toBeCalled();
+      expect(stopPropagation).toBeCalled();
+      expect(onDrop).toBeCalledWith({ id: '1' });
+    });
   });
 });
