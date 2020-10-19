@@ -7,19 +7,10 @@
 import React from 'react';
 
 import { HeaderPage, HeaderPageProps } from '../../../common/components/header_page';
-import * as i18n from './translations';
 
 const DetectionEngineHeaderPageComponent: React.FC<HeaderPageProps> = (props) => (
   <HeaderPage hideSourcerer={true} {...props} />
 );
-
-DetectionEngineHeaderPageComponent.defaultProps = {
-  badgeOptions: {
-    beta: true,
-    text: i18n.PAGE_BADGE_LABEL,
-    tooltip: i18n.PAGE_BADGE_TOOLTIP,
-  },
-};
 
 export const DetectionEngineHeaderPage = React.memo(DetectionEngineHeaderPageComponent);
 

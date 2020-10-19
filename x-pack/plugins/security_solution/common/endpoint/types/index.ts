@@ -301,6 +301,15 @@ export interface HostResultList {
 }
 
 /**
+ * The data_stream fields in an elasticsearch document.
+ */
+export interface DataStream {
+  dataset: string;
+  namespace: string;
+  type: string;
+}
+
+/**
  * Operating System metadata.
  */
 export interface OSFields {
@@ -556,6 +565,7 @@ export type HostMetadata = Immutable<{
     version: string;
   };
   host: Host;
+  data_stream: DataStream;
 }>;
 
 export interface LegacyEndpointEvent {
@@ -674,6 +684,11 @@ export type SafeEndpointEvent = Partial<{
     id: ECSField<string>;
     version: ECSField<string>;
     type: ECSField<string>;
+  }>;
+  data_stream: Partial<{
+    type: ECSField<string>;
+    dataset: ECSField<string>;
+    namespace: ECSField<string>;
   }>;
   ecs: Partial<{
     version: ECSField<string>;
@@ -1002,6 +1017,7 @@ interface HostPolicyResponseAppliedArtifact {
  */
 export interface HostPolicyResponse {
   '@timestamp': number;
+  data_stream: DataStream;
   elastic: {
     agent: {
       id: string;
