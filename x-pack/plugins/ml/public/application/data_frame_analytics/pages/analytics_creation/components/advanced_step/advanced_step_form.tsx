@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -138,7 +139,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { form, isJobCreated } = state;
+  const { form, isJobCreated, estimatedModelMemoryLimit, cloneJob } = state;
   const {
     computeFeatureInfluence,
     eta,
@@ -160,6 +161,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     predictionFieldName,
     randomizeSeed,
   } = form;
+
+  const [useEstimatedMml, setUseEstimatedMml] = useState<boolean>(cloneJob === undefined);
 
   const [numTopClassesOptions, setNumTopClassesOptions] = useState<EuiComboBoxOptionOption[]>([
     defaultNumTopClassesOption,
@@ -204,7 +207,9 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       if (success) {
         if (modelMemoryLimit !== expectedMemory) {
           setEstimatedModelMemoryLimit(expectedMemory);
-          setFormState({ modelMemoryLimit: expectedMemory });
+          if (useEstimatedMml === true) {
+            setFormState({ modelMemoryLimit: expectedMemory });
+          }
         }
       } else {
         // Check which field is invalid
@@ -481,18 +486,31 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               }
             )}
           >
-            <EuiFieldText
-              placeholder={
-                jobType !== undefined
-                  ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
-                  : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection
-              }
-              disabled={isJobCreated}
-              value={modelMemoryLimit || ''}
-              onChange={(e) => setFormState({ modelMemoryLimit: e.target.value })}
-              isInvalid={modelMemoryLimitValidationResult !== null}
-              data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
-            />
+            <>
+              <EuiFieldText
+                placeholder={
+                  jobType !== undefined
+                    ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+                    : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection
+                }
+                disabled={isJobCreated || useEstimatedMml}
+                value={useEstimatedMml ? estimatedModelMemoryLimit : modelMemoryLimit || ''}
+                onChange={(e) => setFormState({ modelMemoryLimit: e.target.value })}
+                isInvalid={modelMemoryLimitValidationResult !== null}
+                data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
+              />
+              <EuiSpacer size="xs" />
+              <EuiSwitch
+                disabled={isJobCreated}
+                name="mlDataFrameAnalyticsUseEstimatedMml"
+                label={i18n.translate('xpack.ml.dataframe.analytics.create.UseEstimatedMmlLabel', {
+                  defaultMessage: 'Use estimated model memory limit',
+                })}
+                checked={useEstimatedMml === true}
+                onChange={() => setUseEstimatedMml(!useEstimatedMml)}
+                data-test-subj="mlAnalyticsCreateJobWizardUseEstimatedMml"
+              />
+            </>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
