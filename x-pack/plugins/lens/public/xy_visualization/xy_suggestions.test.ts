@@ -13,9 +13,14 @@ import {
 } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
-import { xyVisualization } from './xy_visualization';
+import { getXyVisualization } from './xy_visualization';
+import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
 
 jest.mock('../id_generator');
+
+const xyVisualization = getXyVisualization({
+  paletteService: { default: createMockPaletteDefinition() },
+});
 
 describe('xy_suggestions', () => {
   function numCol(columnId: string): TableSuggestionColumn {

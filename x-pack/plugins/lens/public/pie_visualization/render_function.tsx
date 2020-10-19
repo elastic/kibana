@@ -126,11 +126,8 @@ export function PieComponent(
           while (tempParent.parent && tempParent.depth > 0) {
             seriesLayers.unshift({
               name: String(tempParent.parent.children[tempParent.sortIndex][0]),
-              maxDepth: columnGroups.length,
               rankAtDepth: tempParent.sortIndex,
-              totalSeries: totalSeriesCount,
               totalSeriesAtDepth: tempParent.parent.children.length,
-              behindText: categoryDisplay !== 'hide',
             });
             tempParent = tempParent.parent;
           }
@@ -146,7 +143,16 @@ export function PieComponent(
             }
           }
 
-          const outputColor = paletteService[palette.name].getColor(seriesLayers, palette.params);
+          const outputColor = paletteService[palette.name].getColor(
+            seriesLayers,
+            {
+              behindText: categoryDisplay !== 'hide',
+              maxDepth: columnGroups.length,
+              retainColorChoice: true,
+              totalSeries: totalSeriesCount,
+            },
+            palette.params
+          );
 
           return outputColor || 'rgba(0,0,0,0)';
         },

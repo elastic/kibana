@@ -158,22 +158,27 @@ describe('PieVisualization component', () => {
         [] as HierarchyOfArrays
       );
 
-      expect(defaultArgs.paletteService.mock.getColor).toHaveBeenCalledWith([
+      expect(defaultArgs.paletteService.mock.getColor).toHaveBeenCalledWith(
+        [
+          {
+            name: 'css',
+            rankAtDepth: 1,
+            totalSeriesAtDepth: 3,
+          },
+          {
+            name: 'third',
+            rankAtDepth: 2,
+            totalSeriesAtDepth: 3,
+          },
+        ],
         {
-          name: 'css',
           maxDepth: 2,
-          rankAtDepth: 1,
           totalSeries: 5,
-          totalSeriesAtDepth: 3,
+          behindText: true,
+          retainColorChoice: true,
         },
-        {
-          name: 'third',
-          maxDepth: 2,
-          rankAtDepth: 2,
-          totalSeries: 5,
-          totalSeriesAtDepth: 3,
-        },
-      ]);
+        undefined
+      );
     });
 
     test('it hides legend with 2 groups for treemap', () => {

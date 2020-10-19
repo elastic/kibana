@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { xyVisualization } from './visualization';
+import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State, SeriesType } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import {
+  createMockDatasource,
+  createMockFramePublicAPI,
+  createMockPaletteDefinition,
+} from '../editor_frame_service/mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 
 function exampleState(): State {
@@ -26,6 +30,10 @@ function exampleState(): State {
     ],
   };
 }
+
+const xyVisualization = getXyVisualization({
+  paletteService: { default: createMockPaletteDefinition() },
+});
 
 describe('xy_visualization', () => {
   describe('#getDescription', () => {
@@ -134,6 +142,7 @@ describe('xy_visualization', () => {
             Object {
               "accessors": Array [],
               "layerId": "",
+              "palette": undefined,
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,

@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
 import { lightenColor } from './lighten_color';
-import { PaletteDefinition, SeriesLayer } from './types';
+import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
 import { LegacyColorsService } from '../legacyColors';
 
 function buildRoundRobinCategoricalWithMappedColors(
@@ -41,31 +41,38 @@ function buildRoundRobinCategoricalWithMappedColors(
   behindTextColors?: (n: number) => string[]
 ): Omit<PaletteDefinition, 'title'> {
   const colorCache: Partial<Record<string, string>> = {};
-  function getColor(series: SeriesLayer[]) {
+  function getColor(
+    series: SeriesLayer[],
+    chartConfiguration: ChartColorConfiguration = { behindText: false }
+  ) {
     const colorFromSettings = colorService.mappedColors.getColorFromConfig(series[0].name);
-    const actualColors = colors(series[0].totalSeriesAtDepth);
-    const actualBehindTextColors =
-      behindTextColors && behindTextColors(series[0].totalSeriesAtDepth);
+    // default to 7 series at the current level of hierarchy
+    const totalSeriesAtDepth = series[0].totalSeriesAtDepth || 7;
+    // use total number of cached series colors so far as synthetic rank of current series
+    const rankAtDepth =
+      (series[0].rankAtDepth ?? Object.keys(colorCache).length) % totalSeriesAtDepth;
+    const actualColors = colors(totalSeriesAtDepth);
+    const actualBehindTextColors = behindTextColors && behindTextColors(totalSeriesAtDepth);
     let outputColor =
       colorFromSettings ||
-      colorCache[series[0].name] ||
-      actualColors[series[0].rankAtDepth % actualColors.length];
+      (chartConfiguration.retainColorChoice ? colorCache[series[0].name] : undefined) ||
+      actualColors[rankAtDepth];
 
     colorCache[series[0].name] = outputColor;
 
     // translate the color to the behind text variant if possible
-    if (series[0].behindText && actualBehindTextColors) {
+    if (chartConfiguration.behindText && actualBehindTextColors) {
       const colorIndex = actualColors.findIndex((color) => outputColor === color);
       if (colorIndex !== -1) {
         outputColor = actualBehindTextColors[colorIndex];
       }
     }
 
-    if (series[0].maxDepth === 1) {
+    if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
     }
 
-    return lightenColor(outputColor, series.length, series[0].maxDepth);
+    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
     id,
@@ -89,11 +96,15 @@ function buildRoundRobinCategoricalWithMappedColors(
 function buildSyncedKibanaPalette(
   colors: ChartsPluginSetup['legacyColors']
 ): Omit<PaletteDefinition, 'title'> {
-  function getColor(series: SeriesLayer[]) {
+  function getColor(series: SeriesLayer[], chartConfiguration: ChartColorConfiguration = {}) {
     colors.mappedColors.mapKeys([series[0].name]);
     const outputColor = colors.mappedColors.get(series[0].name);
 
-    return lightenColor(outputColor, series.length, series[0].maxDepth);
+    if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
+      return outputColor;
+    }
+
+    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
     id: 'kibana_palette',
@@ -112,6 +123,53 @@ function buildSyncedKibanaPalette(
       ],
     }),
   };
+}
+
+function buildCustomPalette(): PaletteDefinition {
+  const colorCache: Partial<Record<string, string>> = {};
+  return {
+    id: 'custom',
+    getColor: (
+      series: SeriesLayer[],
+      chartConfiguration: ChartColorConfiguration = { behindText: false },
+      { colors, gradient }: { colors: string[]; gradient: boolean }
+    ) => {
+      const actualColors = gradient
+        ? chroma.scale(colors).colors(series[0].totalSeriesAtDepth || 7)
+        : colors;
+      const outputColor =
+        (chartConfiguration.retainColorChoice ? colorCache[series[0].name] : undefined) ||
+        actualColors[
+          (series[0].rankAtDepth ?? Object.keys(colorCache).length) % actualColors.length
+        ];
+
+      colorCache[series[0].name] = outputColor;
+
+      if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
+        return outputColor;
+      }
+
+      return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
+    },
+    internal: true,
+    title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'custom' }),
+    getColors: (size: number, { colors, gradient }: { colors: string[]; gradient: boolean }) => {
+      return gradient ? chroma.scale(colors).colors(size) : colors;
+    },
+    toExpression: ({ colors, gradient }: { colors: string[]; gradient: boolean }) => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'palette',
+          arguments: {
+            color: colors,
+            gradient: [gradient],
+          },
+        },
+      ],
+    }),
+  } as PaletteDefinition<unknown>;
 }
 
 export const buildPalettes: (
@@ -166,41 +224,6 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'gray' }),
       ...buildRoundRobinCategorical('gray', euiPaletteGray),
     },
-    custom: {
-      id: 'custom',
-      getColor: (
-        series: SeriesLayer[],
-        { colors, gradient }: { colors: string[]; gradient: boolean }
-      ) => {
-        const actualColors = gradient
-          ? chroma.scale(colors).colors(series[0].totalSeriesAtDepth)
-          : colors;
-        const outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
-
-        if (series[0].maxDepth === 1) {
-          return outputColor;
-        }
-
-        return lightenColor(outputColor, series.length, series[0].maxDepth);
-      },
-      internal: true,
-      title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'custom' }),
-      getColors: (size: number, { colors, gradient }: { colors: string[]; gradient: boolean }) => {
-        return gradient ? chroma.scale(colors).colors(size) : colors;
-      },
-      toExpression: ({ colors, gradient }: { colors: string[]; gradient: boolean }) => ({
-        type: 'expression',
-        chain: [
-          {
-            type: 'function',
-            function: 'palette',
-            arguments: {
-              color: colors,
-              gradient: [gradient],
-            },
-          },
-        ],
-      }),
-    } as PaletteDefinition<unknown>,
+    custom: buildCustomPalette() as PaletteDefinition<unknown>,
   };
 };

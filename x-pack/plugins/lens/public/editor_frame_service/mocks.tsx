@@ -126,14 +126,8 @@ export function createMockFramePublicAPI(): FrameMock {
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
     filters: [],
-    globalPalette: {
-      state: {},
-      setState: jest.fn(),
-      availablePalettes: {
-        default: palette,
-      },
-      activePalette: palette,
-      setActivePalette: jest.fn(),
+    availablePalettes: {
+      default: palette,
     },
   };
 }

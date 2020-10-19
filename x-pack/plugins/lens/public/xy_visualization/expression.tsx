@@ -631,16 +631,22 @@ export function XYChart({
               const seriesLayers: SeriesLayer[] = [
                 {
                   name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
-                  totalSeries: totalSeriesCount,
                   totalSeriesAtDepth: totalSeriesCount,
                   rankAtDepth:
                     (splitAccessor ? splits.indexOf(seriesKeys[0]) * accessors.length : 0) +
                     accessors.indexOf(String(yAccessor)),
-                  maxDepth: 1,
-                  behindText: false,
                 },
               ];
-              return paletteService[palette.name].getColor(seriesLayers, palette.params);
+              return paletteService[palette.name].getColor(
+                seriesLayers,
+                {
+                  maxDepth: 1,
+                  behindText: false,
+                  totalSeries: totalSeriesCount,
+                  retainColorChoice: true,
+                },
+                palette.params
+              );
             },
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)

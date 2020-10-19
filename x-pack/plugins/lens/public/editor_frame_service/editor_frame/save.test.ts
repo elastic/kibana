@@ -35,10 +35,6 @@ describe('save editor frame state', () => {
       },
       activeDatasourceId: 'indexpattern',
       visualization: { activeId: '2', state: {} },
-      globalPalette: {
-        activePaletteId: 'default',
-        state: undefined,
-      },
     },
     framePublicAPI: {
       ...createMockFramePublicAPI(),
@@ -81,10 +77,6 @@ describe('save editor frame state', () => {
         },
         activeDatasourceId: 'indexpattern',
         visualization: { activeId: '3', state: '4' },
-        globalPalette: {
-          activePaletteId: 'default',
-          state: undefined,
-        },
       },
       visualization,
     });
@@ -107,10 +99,6 @@ describe('save editor frame state', () => {
             exists: { field: '@timestamp' },
           },
         ],
-        globalPalette: {
-          activePaletteId: 'default',
-          state: undefined,
-        },
       },
       references: [
         {

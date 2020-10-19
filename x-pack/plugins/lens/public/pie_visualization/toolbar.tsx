@@ -20,7 +20,7 @@ import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
-import { PalettePicker } from '../editor_frame_service/editor_frame/palette_picker';
+import { PalettePicker } from '../shared_components';
 
 const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
   {
@@ -247,9 +247,6 @@ const DecimalPlaceSlider = ({
 };
 
 export function DimensionEditor(props: VisualizationDimensionEditorProps<PieVisualizationState>) {
-  if (props.state.layers.length === 0 || props.state.layers[0].groups[0] !== props.accessor)
-    return null;
-
   return (
     <>
       <PalettePicker

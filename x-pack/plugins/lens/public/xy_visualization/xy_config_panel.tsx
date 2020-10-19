@@ -35,7 +35,7 @@ import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
-import { PalettePicker } from '../editor_frame_service/editor_frame/palette_picker';
+import { PalettePicker } from '../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
