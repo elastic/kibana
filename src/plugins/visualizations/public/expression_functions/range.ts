@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable, Range } from '../../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Range } from '../../../expressions/public';
 
 interface Arguments {
   from: number;
@@ -27,7 +27,7 @@ interface Arguments {
 
 export const range = (): ExpressionFunctionDefinition<
   'range',
-  KibanaDatatable | null,
+  Datatable | null,
   Arguments,
   Range
 > => ({

@@ -168,7 +168,7 @@ describe('Custom detection rules creation', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${newRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newRule.severity);
@@ -328,7 +328,7 @@ describe('Custom detection rules deletion and edition', () => {
       fillAboutRule(editedRule);
       saveEditedRule();
 
-      cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name} Beta`);
+      cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', editedRule.description);
       cy.get(ABOUT_DETAILS).within(() => {
         getDetails(SEVERITY_DETAILS).should('have.text', editedRule.severity);
