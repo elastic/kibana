@@ -37,15 +37,12 @@ export function calculateTransactionErrorPercentage(
     {}
   >
 ) {
-  const successfulTransactions =
-    outcomeResponse.buckets.find(
-      (bucket) => bucket.key === EventOutcome.success
-    )?.count.value ?? 0;
+  const outcomes = Object.fromEntries(
+    outcomeResponse.buckets.map(({ key, count }) => [key, count.value])
+  );
 
-  const failedTransactions =
-    outcomeResponse.buckets.find(
-      (bucket) => bucket.key === EventOutcome.failure
-    )?.count.value ?? 0;
+  const failedTransactions = outcomes[EventOutcome.failure] ?? 0;
+  const successfulTransactions = outcomes[EventOutcome.success] ?? 0;
 
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
