@@ -260,7 +260,7 @@ export async function getExploreSeriesLink(mlUrlGenerator, series) {
         },
       },
     },
-    excludeBasePath: true,
+    excludeBasePath: false,
   });
   return url;
 }
