@@ -11,21 +11,7 @@
     </span>
   </span>
   <!-- Local nav. -->
-  <kbn-top-nav 
-    app-name="'timelion'"
-    config="topNavMenu"
-    show-search-bar="true"
-    show-search-bar-inline="true"
-    show-filter-bar="false"
-    show-query-input="false"
-    date-range-from="model.timeRange.from"
-    date-range-to="model.timeRange.to"
-    is-refresh-paused="model.refreshInterval.pause"
-    refresh-interval="model.refreshInterval.value"
-    on-refresh-change="onRefreshChange"
-    on-query-submit="onTimeUpdate">
-  </kbn-top-nav>
-
+  <timelion-top-nav top-nav-menu="topNavMenu" on-time-update="onTimeUpdate"></timelion-top-nav>
 
   <div class="timApp__menus">
     <timelion-deprecation></timelion-deprecation>

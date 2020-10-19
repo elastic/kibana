@@ -21,7 +21,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -175,7 +175,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -217,7 +217,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 <div
                   className="euiCard__top"
                 >
-                  <div
+                  <span
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
@@ -322,7 +322,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -476,7 +476,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -627,7 +627,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -781,7 +781,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -823,7 +823,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 <div
                   className="euiCard__top"
                 >
-                  <div
+                  <span
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
@@ -927,7 +927,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -1081,7 +1081,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                         className="euiFilePicker__prompt"
                         id="generated-id-filePicker__prompt"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
@@ -1123,7 +1123,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 <div
                   className="euiCard__top"
                 >
-                  <div
+                  <span
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
