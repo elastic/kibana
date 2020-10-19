@@ -24,7 +24,7 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
   </p>
   <p>
     <FormattedMessage
-      defaultMessage="See example of the {clusterData} that we collect."
+      defaultMessage="See an example of the {clusterData} that we collect."
       id="telemetry.seeExampleOfClusterData"
       values={
         Object {
