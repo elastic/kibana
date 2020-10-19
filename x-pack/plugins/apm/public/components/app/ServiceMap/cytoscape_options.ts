@@ -5,17 +5,18 @@
  */
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
-import {
-  getServiceHealthStatusColor,
-  ServiceHealthStatus,
-} from '../../../../common/service_health_status';
+import { EuiTheme } from '../../../../../observability/public';
+import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { EuiTheme } from '../../../../../observability/public';
+import {
+  getServiceHealthStatusColor,
+  ServiceHealthStatus,
+} from '../../../../common/service_health_status';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { defaultIcon, iconForNode } from './icons';
-import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 
 export const popoverWidth = 280;
 
@@ -231,7 +232,10 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
 
 // The CSS styles for the div containing the cytoscape element. Makes a
 // background grid of dots.
-export const getCytoscapeDivStyle = (theme: EuiTheme): CSSProperties => ({
+export const getCytoscapeDivStyle = (
+  theme: EuiTheme,
+  status: FETCH_STATUS
+): CSSProperties => ({
   background: `linear-gradient(
   90deg,
   ${theme.eui.euiPageBackgroundColor}
@@ -247,7 +251,7 @@ linear-gradient(
 center,
 ${theme.eui.euiColorLightShade}`,
   backgroundSize: `${theme.eui.euiSizeL} ${theme.eui.euiSizeL}`,
-  cursor: 'grab',
+  cursor: `${status === FETCH_STATUS.LOADING ? 'wait' : 'grab'}`,
   margin: `-${theme.eui.gutterTypes.gutterLarge}`,
   marginTop: 0,
 });

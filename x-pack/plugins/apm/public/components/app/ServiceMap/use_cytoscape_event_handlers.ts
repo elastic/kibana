@@ -8,7 +8,7 @@ import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
 import { useEffect } from 'react';
 import { EuiTheme, useUiTracker } from '../../../../../observability/public';
-import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
+import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 /*
  * @notice
