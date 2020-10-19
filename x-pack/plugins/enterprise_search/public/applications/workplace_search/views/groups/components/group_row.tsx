@@ -24,13 +24,13 @@ import { GroupSources } from './group_sources';
 import { GroupUsers } from './group_users';
 
 const DAYS_CUTOFF = 8;
-const NO_SOURCES_MESSAGE = i18n.translate(
+export const NO_SOURCES_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.noSourcesMessage',
   {
     defaultMessage: 'No shared content sources',
   }
 );
-const NO_USERS_MESSAGE = i18n.translate(
+export const NO_USERS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.noUsersMessage',
   {
     defaultMessage: 'No users',
