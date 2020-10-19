@@ -118,12 +118,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
 
-    core.http.registerRouteHandlerContext('search', (context) => {
-      return this.getSearchClient({
-        savedObjectsClient: context.core.savedObjects.client,
-        esClient: context.core.elasticsearch.client,
-        uiSettingsClient: context.core.uiSettings.client,
-      });
+    core.http.registerRouteHandlerContext('search', async (context, request) => {
+      const [coreStart] = await core.getStartServices();
+      return this.asScopedProvider(coreStart)(request);
     });
 
     this.registerSearchStrategy(
@@ -166,23 +163,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { elasticsearch, savedObjects, uiSettings }: CoreStart,
+    core: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const getSearchClientAsScoped = (request: KibanaRequest) => {
-      const savedObjectsClient = savedObjects.getScopedClient(request);
-      const deps = {
-        savedObjectsClient,
-        esClient: elasticsearch.client.asScoped(request),
-        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
-      };
-      return this.getSearchClient(deps);
-    };
-
+    const { elasticsearch, savedObjects, uiSettings } = core;
+    const asScoped = this.asScopedProvider(core);
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       getSearchStrategy: this.getSearchStrategy,
-      asScoped: getSearchClientAsScoped,
+      asScoped,
       searchSource: {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
@@ -200,7 +189,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: getSearchClientAsScoped(request).search,
+            search: asScoped(request).search,
             // onResponse isn't used on the server, so we just return the original value
             onResponse: (req, res) => res,
             legacy: {
@@ -255,13 +244,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.cancel ? strategy.cancel(deps, id) : Promise.resolve();
   };
 
-  private getSearchClient = (deps: SearchStrategyDependencies): ISearchClient => {
-    return {
-      search: (searchRequest, options?) => this.search(deps, searchRequest, options),
-      cancel: (id: string, options?: ISearchOptions) => this.cancel(deps, id, options),
-    };
-  };
-
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
@@ -274,5 +256,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       throw new Error(`Search strategy ${name} not found`);
     }
     return strategy;
+  };
+
+  private asScopedProvider = ({ elasticsearch, savedObjects, uiSettings }: CoreStart) => {
+    return (request: KibanaRequest): ISearchClient => {
+      const savedObjectsClient = savedObjects.getScopedClient(request);
+      const deps = {
+        savedObjectsClient,
+        esClient: elasticsearch.client.asScoped(request),
+        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+      };
+      return {
+        search: (searchRequest, options) => this.search(deps, searchRequest, options),
+        cancel: (id, options) => this.cancel(deps, id, options),
+      };
+    };
   };
 }
