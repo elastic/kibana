@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { DragContext, DragContextState, ReorderContext } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
-type DroppableEvent = React.DragEvent<HTMLElement>;
+export type DroppableEvent = React.DragEvent<HTMLElement>;
 
 /**
  * A function that handles a drop event.

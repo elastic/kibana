@@ -12,7 +12,7 @@ import {
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
-import { ChildDragDropProvider } from '../../../drag_drop';
+import { ChildDragDropProvider, DroppableEvent } from '../../../drag_drop';
 import { EuiFormRow } from '@elastic/eui';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Visualization } from '../../../types';
@@ -343,7 +343,7 @@ describe('LayerPanel', () => {
 
       mockDatasource.canHandleDrop.mockReturnValue(true);
 
-      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: 'dragged' };
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
 
       const component = mountWithIntl(
         <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
@@ -459,15 +459,13 @@ describe('LayerPanel', () => {
       );
 
       expect(mockDatasource.canHandleDrop).not.toHaveBeenCalled();
-
-      component.find('DragDrop[data-test-subj="lnsGroup"]').at(0).simulate('drop');
-      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
-
-      component.find('DragDrop[data-test-subj="lnsGroup"]').at(1).simulate('drop');
-      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
-
-      component.find('DragDrop[data-test-subj="lnsGroup"]').at(2).simulate('drop');
-      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
+      const reorderableGroupElement = component.find('DragDrop[data-test-subj="lnsGroup"]').at(1);
+      reorderableGroupElement?.prop('onDrop')!((draggingOperation as unknown) as DroppableEvent)!;
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isReorder: true,
+        })
+      );
     });
   });
 });
