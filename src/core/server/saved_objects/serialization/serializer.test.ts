@@ -968,6 +968,99 @@ describe('#isRawSavedObject', () => {
     });
   });
 
+  describe('multi-namespace type with a namespace', () => {
+    test('is true if the id is prefixed with type and the type matches', () => {
+      expect(
+        multiNamespaceSerializer.isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            type: 'hello',
+            hello: {},
+            namespace: 'foo',
+          },
+        })
+      ).toBeTruthy();
+    });
+
+    test('is false if the id is not prefixed', () => {
+      expect(
+        multiNamespaceSerializer.isRawSavedObject({
+          _id: 'world',
+          _source: {
+            type: 'hello',
+            hello: {},
+            namespace: 'foo',
+          },
+        })
+      ).toBeFalsy();
+    });
+
+    test('is false if the id is prefixed with type and namespace', () => {
+      expect(
+        multiNamespaceSerializer.isRawSavedObject({
+          _id: 'foo:hello:world',
+          _source: {
+            type: 'hello',
+            hello: {},
+            namespace: 'foo',
+          },
+        })
+      ).toBeFalsy();
+    });
+
+    test(`is false if the type prefix omits the :`, () => {
+      expect(
+        namespaceAgnosticSerializer.isRawSavedObject({
+          _id: 'helloworld',
+          _source: {
+            type: 'hello',
+            hello: {},
+            namespace: 'foo',
+          },
+        })
+      ).toBeFalsy();
+    });
+
+    test('is false if the type attribute is missing', () => {
+      expect(
+        multiNamespaceSerializer.isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            hello: {},
+            namespace: 'foo',
+          } as any,
+        })
+      ).toBeFalsy();
+    });
+
+    test('is false if the type attribute does not match the id', () => {
+      expect(
+        multiNamespaceSerializer.isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            type: 'jam',
+            jam: {},
+            hello: {},
+            namespace: 'foo',
+          },
+        })
+      ).toBeFalsy();
+    });
+
+    test('is false if there is no [type] attribute', () => {
+      expect(
+        multiNamespaceSerializer.isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            type: 'hello',
+            jam: {},
+            namespace: 'foo',
+          },
+        })
+      ).toBeFalsy();
+    });
+  });
+
   describe('namespace-agnostic type with a namespace', () => {
     test('is true if the id is prefixed with type and the type matches', () => {
       expect(
@@ -1084,6 +1177,18 @@ describe('#generateRawId', () => {
     test('uses the id that is specified and prefixes the namespace', () => {
       const id = singleNamespaceSerializer.generateRawId('foo', 'hello', 'world');
       expect(id).toEqual('foo:hello:world');
+    });
+  });
+
+  describe('multi-namespace type with a namespace', () => {
+    test(`generates an id if none is specified and doesn't prefix namespace`, () => {
+      const id = multiNamespaceSerializer.generateRawId('foo', 'goodbye');
+      expect(id).toMatch(/^goodbye\:[\w-]+$/);
+    });
+
+    test(`uses the id that is specified and doesn't prefix the namespace`, () => {
+      const id = multiNamespaceSerializer.generateRawId('foo', 'hello', 'world');
+      expect(id).toEqual('hello:world');
     });
   });
 
