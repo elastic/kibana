@@ -5,15 +5,18 @@
  */
 
 import { ESFilter } from '../../../../typings/elasticsearch';
+import { SignificantTermsScoring } from './scoring_rt';
 
 export function getSignificantTermsAgg({
   fieldNames,
   backgroundFilters,
   backgroundIsSuperset = true,
+  scoring = 'percentage',
 }: {
   fieldNames: string[];
   backgroundFilters: ESFilter[];
   backgroundIsSuperset?: boolean;
+  scoring: SignificantTermsScoring;
 }) {
   return fieldNames.reduce((acc, fieldName) => {
     return {
@@ -24,11 +27,11 @@ export function getSignificantTermsAgg({
           field: fieldName,
           background_filter: { bool: { filter: backgroundFilters } },
 
-          // range comparison is not a superset
-          background_is_superset: backgroundIsSuperset,
+          // indicate whether background is a superset of the foreground
+          mutual_information: { background_is_superset: backgroundIsSuperset },
 
-          // percentage calculation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-significantterms-aggregation.html#_percentage
-          percentage: {},
+          // different scorings https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-significantterms-aggregation.html#significantterms-aggregation-parameters
+          [scoring]: {},
           min_doc_count: 5,
           shard_min_doc_count: 5,
         },

@@ -16,11 +16,13 @@ import {
   getSignificantTermsAgg,
   formatAggregationResponse,
 } from './get_significant_terms_agg';
+import { SignificantTermsScoring } from './scoring_rt';
 
 export async function getCorrelationsForRanges({
   serviceName,
   transactionType,
   transactionName,
+  scoring,
   gapBetweenRanges,
   fieldNames,
   setup,
@@ -28,6 +30,7 @@ export async function getCorrelationsForRanges({
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
+  scoring: SignificantTermsScoring;
   gapBetweenRanges: number;
   fieldNames: string[];
   setup: Setup & SetupTimeRange;
@@ -67,6 +70,7 @@ export async function getCorrelationsForRanges({
         fieldNames,
         backgroundFilters,
         backgroundIsSuperset: false,
+        scoring,
       }),
     },
   };

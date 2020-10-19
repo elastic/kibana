@@ -20,6 +20,7 @@ import {
   formatAggregationResponse,
   getSignificantTermsAgg,
 } from './get_significant_terms_agg';
+import { SignificantTermsScoring } from './scoring_rt';
 
 export async function getCorrelationsForSlowTransactions({
   serviceName,
@@ -27,11 +28,13 @@ export async function getCorrelationsForSlowTransactions({
   transactionName,
   durationPercentile,
   fieldNames,
+  scoring,
   setup,
 }: {
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
+  scoring: SignificantTermsScoring;
   durationPercentile: number;
   fieldNames: string[];
   setup: Setup & SetupTimeRange;
@@ -76,7 +79,7 @@ export async function getCorrelationsForSlowTransactions({
           ],
         },
       },
-      aggs: getSignificantTermsAgg({ fieldNames, backgroundFilters }),
+      aggs: getSignificantTermsAgg({ fieldNames, backgroundFilters, scoring }),
     },
   };
 
