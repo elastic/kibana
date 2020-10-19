@@ -26,7 +26,11 @@ uiRoutes
     resolve: {
       clusters: (Private) => {
         const routeInit = Private(routeInitProvider);
-        return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true }).then((clusters) => {
+        return routeInit({
+          codePaths: CODE_PATHS,
+          fetchAllClusters: true,
+          unsetGlobalState: true,
+        }).then((clusters) => {
           if (!clusters || !clusters.length) {
             window.location.hash = '#/no-data';
             return Promise.reject();
