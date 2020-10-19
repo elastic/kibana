@@ -18,6 +18,7 @@ import {
   CasesPatchRequestRt,
   ESCasePatchRequest,
   CasePatchRequest,
+  CasesResponse,
 } from '../../common/api';
 import { buildCaseUserActions } from '../services/user_actions/helpers';
 import { getCaseToUpdate, transformCaseConnectorToEsConnector } from '../routes/api/cases/helpers';
@@ -28,7 +29,10 @@ export const update = ({
   savedObjectsClient,
   caseService,
   userActionService,
-}: CaseClientFactoryArguments) => async ({ request, theCase }: CaseClientUpdate) => {
+}: CaseClientFactoryArguments) => async ({
+  request,
+  theCase,
+}: CaseClientUpdate): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(theCase),
     fold(throwErrors(Boom.badRequest), identity)

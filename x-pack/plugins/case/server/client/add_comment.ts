@@ -11,7 +11,13 @@ import { identity } from 'fp-ts/lib/function';
 
 import { flattenCaseSavedObject, transformNewComment } from '../routes/api/utils';
 
-import { throwErrors, excess, CaseResponseRt, CommentRequestRt } from '../../common/api';
+import {
+  throwErrors,
+  excess,
+  CaseResponseRt,
+  CommentRequestRt,
+  CaseResponse,
+} from '../../common/api';
 import { buildCommentUserActionItem } from '../services/user_actions/helpers';
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from './types';
@@ -21,7 +27,11 @@ export const addComment = ({
   savedObjectsClient,
   caseService,
   userActionService,
-}: CaseClientFactoryArguments) => async ({ request, caseId, comment }: CaseClientAddComment) => {
+}: CaseClientFactoryArguments) => async ({
+  request,
+  caseId,
+  comment,
+}: CaseClientAddComment): Promise<CaseResponse> => {
   const query = pipe(
     excess(CommentRequestRt).decode(comment),
     fold(throwErrors(Boom.badRequest), identity)

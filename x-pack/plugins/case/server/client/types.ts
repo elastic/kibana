@@ -5,7 +5,13 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { CasePostRequest, CasesPatchRequest, CommentRequest } from '../../common/api';
+import {
+  CasePostRequest,
+  CasesPatchRequest,
+  CommentRequest,
+  CaseResponse,
+  CasesResponse,
+} from '../../common/api';
 import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
@@ -37,9 +43,9 @@ export interface CaseClientFactoryArguments {
 }
 
 export interface CaseClient {
-  create: (args: CaseClientCreate) => void;
-  update: (args: CaseClientUpdate) => void;
-  addComment: (args: CaseClientAddComment) => void;
+  create: (args: CaseClientCreate) => Promise<CaseResponse>;
+  update: (args: CaseClientUpdate) => Promise<CasesResponse>;
+  addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
 }
 
 export interface CaseClientFactoryArguments {
