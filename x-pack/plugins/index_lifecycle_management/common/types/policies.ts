@@ -107,10 +107,9 @@ export interface ForcemergeAction {
   index_codec?: 'best_compression';
 }
 
-export interface Policy {
+export interface LegacyPolicy {
   name: string;
   phases: {
-    hot: HotPhase;
     warm: WarmPhase;
     cold: ColdPhase;
     delete: DeletePhase;
@@ -153,18 +152,6 @@ export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
   bestCompressionEnabled: boolean;
-}
-
-export interface HotPhase
-  extends CommonPhaseSettings,
-    PhaseWithIndexPriority,
-    PhaseWithForcemergeAction {
-  rolloverEnabled: boolean;
-  selectedMaxSizeStored: string;
-  selectedMaxSizeStoredUnits: string;
-  selectedMaxDocuments: string;
-  selectedMaxAge: string;
-  selectedMaxAgeUnits: string;
 }
 
 export interface WarmPhase
