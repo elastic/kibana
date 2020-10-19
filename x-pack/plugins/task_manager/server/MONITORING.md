@@ -42,7 +42,7 @@ An `Error` status in any section will cause the whole system to display as `Erro
 A `Warning` status in any section will cause the whole system to display as `Warning`.
 An `OK` status will only be displayed when all sections are marked as `OK`.
 
-The root `timestamp` is the time in which the summary was exposed (either to the DEBUG logger or the http api) and the `lastUpdate` is the last time any one of the sections was updated.
+The root `timestamp` is the time in which the summary was exposed (either to the DEBUG logger or the http api) and the `last_update` is the last time any one of the sections was updated.
 
 #### The Configuration Section
 The `configuration` section summarizes Task Manager's current configuration, including dynamic configurations which change over time, such as `poll_interval` and `max_workers` which adjust in reaction to changing load on the system.
@@ -74,169 +74,169 @@ These are "Hot" stats which are updated reactively as Tasks are executed and int
 For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might get these stats:
 ```
 {
-	 /* the time these stats were returned by the api */
-	"timestamp": "2020-10-05T18:26:11.346Z",
-	 /* the overall status of the system */
-	"status": "OK",
-	 /* last time any stat was updated in this output */
-	"lastUpdate": "2020-10-05T17:57:55.411Z",    
-	"stats": {
-		"configuration": {      /* current configuration of TM */
-			"timestamp": "2020-10-05T17:56:06.507Z",
-			"status": "OK",
-			"value": {
-				"max_workers": 10,
-				"poll_interval": 3000,
-				"request_capacity": 1000,
-				"max_poll_inactivity_cycles": 10,
-				"monitored_aggregated_stats_refresh_rate": 60000,
-				"monitored_stats_running_average_window": 50
-			}
-		},
-		"workload": {  /* The workload of this deployment */
-			"timestamp": "2020-10-05T17:57:06.534Z",
-			"status": "OK",
-			"value": {
-				"count": 6,        /* count of tasks in the system */
-				"taskTypes": {   /* what tasks are there and what status are they in */
-					"actions_telemetry": {
-						"count": 1,
-						"status": {
-							"idle": 1
-						}
-					},
-					"alerting_telemetry": {
-						"count": 1,
-						"status": {
-							"idle": 1
-						}
-					},
-					"apm-telemetry-task": {
-						"count": 1,
-						"status": {
-							"idle": 1
-						}
-					},
-					"endpoint:user-artifact-packager": {
-						"count": 1,
-						"status": {
-							"idle": 1
-						}
-					},
-					"lens_telemetry": {
-						"count": 1,
-						"status": {
-							"idle": 1
-						}
-					},
-					"session_cleanup": {
-						"count": 1,
-						"status": {
-							"idle": 1
-						}
-					}
-				},
+     /* the time these stats were returned by the api */
+    "timestamp": "2020-10-05T18:26:11.346Z",
+     /* the overall status of the system */
+    "status": "OK",
+     /* last time any stat was updated in this output */
+    "last_update": "2020-10-05T17:57:55.411Z",    
+    "stats": {
+        "configuration": {      /* current configuration of TM */
+            "timestamp": "2020-10-05T17:56:06.507Z",
+            "status": "OK",
+            "value": {
+                "max_workers": 10,
+                "poll_interval": 3000,
+                "request_capacity": 1000,
+                "max_poll_inactivity_cycles": 10,
+                "monitored_aggregated_stats_refresh_rate": 60000,
+                "monitored_stats_running_average_window": 50
+            }
+        },
+        "workload": {  /* The workload of this deployment */
+            "timestamp": "2020-10-05T17:57:06.534Z",
+            "status": "OK",
+            "value": {
+                "count": 6,        /* count of tasks in the system */
+                "task_types": {   /* what tasks are there and what status are they in */
+                    "actions_telemetry": {
+                        "count": 1,
+                        "status": {
+                            "idle": 1
+                        }
+                    },
+                    "alerting_telemetry": {
+                        "count": 1,
+                        "status": {
+                            "idle": 1
+                        }
+                    },
+                    "apm-telemetry-task": {
+                        "count": 1,
+                        "status": {
+                            "idle": 1
+                        }
+                    },
+                    "endpoint:user-artifact-packager": {
+                        "count": 1,
+                        "status": {
+                            "idle": 1
+                        }
+                    },
+                    "lens_telemetry": {
+                        "count": 1,
+                        "status": {
+                            "idle": 1
+                        }
+                    },
+                    "session_cleanup": {
+                        "count": 1,
+                        "status": {
+                            "idle": 1
+                        }
+                    }
+                },
 
-				/* Frequency of recurring tasks schedules */
-				"schedule": [  
-					["60s", 1],   /* 1 task, every 60s */
-					["3600s", 3],  /* 3 tasks every hour */
-					["720m", 1]
-				],
-				/* There are no overdue tasks in this system at the moment */
-				"overdue": 0, 
-				/* This is the schedule density, it shows a histogram of all the  polling intervals in the next minute (or, if 
-				    pollInterval is configured unusually high it will show a min of 2 refresh intervals into the future, and a max of 50 buckets).
-				    Here we see that on the 3rd polling interval from *now* (which is ~9 seconds from now, as pollInterval is `3s`) there is one task due to run.
-				    We also see that there are 5 due two intervals later, which is fine as we have a max workers of `10`
-				 */
-				"estimatedScheduleDensity": [0, 0, 1, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-			}
-		},
-		"runtime": {
-			"timestamp": "2020-10-05T17:57:55.411Z",
-			"status": "OK",
-			"value": {
-				"polling": {
-				        /* When was the last polling cycle? */
-					"lastSuccessfulPoll": "2020-10-05T17:57:55.411Z",
-				        /* What is the frequency of polling cycle result?
-				            Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
-					"resultFrequency": {
-						"NoTasksClaimed": 94,
-						"RanOutOfCapacity": 0, /* This is a legacy result, we might want to rename - it tells us when a polling cycle resulted in claiming more tasks than we had workers for, butt he name doesn't make much sense outside of the context of the code */
-						"PoolFilled": 6
-					}
-				},
-				/* on average, the tasks in this deployment run 1.7s after their scheduled time */
-				"drift": {
-					"mean": 1720,
-					"median": 2276
-				},
-				"execution": {
-					"duration": {
-   					        /* on average, the `endpoint:user-artifact-packager` tasks take 15ms to run */
-						"endpoint:user-artifact-packager": {
-							"mean": 15,
-							"median": 14.5
-						},
-						"session_cleanup": {
-							"mean": 28,
-							"median": 28
-						},
-						"lens_telemetry": {
-							"mean": 100,
-							"median": 100
-						},
-						"actions_telemetry": {
-							"mean": 135,
-							"median": 135
-						},
-						"alerting_telemetry": {
-							"mean": 197,
-							"median": 197
-						},
-						"apm-telemetry-task": {
-							"mean": 1347,
-							"median": 1347
-						}
-					},
-					"resultFrequency": {
-   					        /* and 100% of `endpoint:user-artifact-packager` have completed in success (within the running average window, so the past 50 runs (by default, configrable by `monitored_stats_running_average_window`) */
-						"endpoint:user-artifact-packager": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0
-						},
-						"session_cleanup": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0
-						},
-						"lens_telemetry": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0
-						},
-						"actions_telemetry": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0
-						},
-						"alerting_telemetry": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0
-						},
-						"apm-telemetry-task": {
-							"Success": 100,
-							"RetryScheduled": 0,
-							"Failed": 0
-						}
-					}
-				}
-			}
-		}
-	}
+                /* Frequency of recurring tasks schedules */
+                "schedule": [  
+                    ["60s", 1],   /* 1 task, every 60s */
+                    ["3600s", 3],  /* 3 tasks every hour */
+                    ["720m", 1]
+                ],
+                /* There are no overdue tasks in this system at the moment */
+                "overdue": 0, 
+                /* This is the schedule density, it shows a histogram of all the  polling intervals in the next minute (or, if 
+                    pollInterval is configured unusually high it will show a min of 2 refresh intervals into the future, and a max of 50 buckets).
+                    Here we see that on the 3rd polling interval from *now* (which is ~9 seconds from now, as pollInterval is `3s`) there is one task due to run.
+                    We also see that there are 5 due two intervals later, which is fine as we have a max workers of `10`
+                 */
+                "estimated_schedule_density": [0, 0, 1, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            }
+        },
+        "runtime": {
+            "timestamp": "2020-10-05T17:57:55.411Z",
+            "status": "OK",
+            "value": {
+                "polling": {
+                        /* When was the last polling cycle? */
+                    "last_successful_poll": "2020-10-05T17:57:55.411Z",
+                        /* What is the frequency of polling cycle result?
+                            Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
+                    "result_frequency_percent_as_number": {
+                        "NoTasksClaimed": 94,
+                        "RanOutOfCapacity": 0, /* This is a legacy result, we might want to rename - it tells us when a polling cycle resulted in claiming more tasks than we had workers for, butt he name doesn't make much sense outside of the context of the code */
+                        "PoolFilled": 6
+                    }
+                },
+                /* on average, the tasks in this deployment run 1.7s after their scheduled time */
+                "drift": {
+                    "mean": 1720,
+                    "median": 2276
+                },
+                "execution": {
+                    "duration": {
+                               /* on average, the `endpoint:user-artifact-packager` tasks take 15ms to run */
+                        "endpoint:user-artifact-packager": {
+                            "mean": 15,
+                            "median": 14.5
+                        },
+                        "session_cleanup": {
+                            "mean": 28,
+                            "median": 28
+                        },
+                        "lens_telemetry": {
+                            "mean": 100,
+                            "median": 100
+                        },
+                        "actions_telemetry": {
+                            "mean": 135,
+                            "median": 135
+                        },
+                        "alerting_telemetry": {
+                            "mean": 197,
+                            "median": 197
+                        },
+                        "apm-telemetry-task": {
+                            "mean": 1347,
+                            "median": 1347
+                        }
+                    },
+                    "result_frequency_percent_as_number": {
+                               /* and 100% of `endpoint:user-artifact-packager` have completed in success (within the running average window, so the past 50 runs (by default, configrable by `monitored_stats_running_average_window`) */
+                        "endpoint:user-artifact-packager": {
+                            "Success": 100,
+                            "RetryScheduled": 0,
+                            "Failed": 0
+                        },
+                        "session_cleanup": {
+                            "Success": 100,
+                            "RetryScheduled": 0,
+                            "Failed": 0
+                        },
+                        "lens_telemetry": {
+                            "Success": 100,
+                            "RetryScheduled": 0,
+                            "Failed": 0
+                        },
+                        "actions_telemetry": {
+                            "Success": 100,
+                            "RetryScheduled": 0,
+                            "Failed": 0
+                        },
+                        "alerting_telemetry": {
+                            "Success": 100,
+                            "RetryScheduled": 0,
+                            "Failed": 0
+                        },
+                        "apm-telemetry-task": {
+                            "Success": 100,
+                            "RetryScheduled": 0,
+                            "Failed": 0
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 ```
