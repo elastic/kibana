@@ -5,7 +5,7 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { Logger, PluginInitializerContext } from 'kibana/server';
+import { IContextProvider, Logger, PluginInitializerContext, RequestHandler } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -18,7 +18,15 @@ import {
   caseCommentSavedObjectType,
   caseUserActionSavedObjectType,
 } from './saved_object_types';
-import { CaseConfigureService, CaseService, CaseUserActionService } from './services';
+import {
+  CaseConfigureService,
+  CaseConfigureServiceSetup,
+  CaseService,
+  CaseServiceSetup,
+  CaseUserActionService,
+  CaseUserActionServiceSetup,
+} from './services';
+import { createCaseClient } from './client';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map((config) => config));
@@ -30,9 +38,15 @@ export interface PluginsSetup {
 
 export class CasePlugin {
   private readonly log: Logger;
+  private caseService: CaseService;
+  private caseConfigureService: CaseConfigureService;
+  private userActionService: CaseUserActionService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
+    this.caseService = new CaseService(this.log);
+    this.caseConfigureService = new CaseConfigureService(this.log);
+    this.userActionService = new CaseUserActionService(this.log);
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
@@ -47,26 +61,27 @@ export class CasePlugin {
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
-    const caseServicePlugin = new CaseService(this.log);
-    const caseConfigureServicePlugin = new CaseConfigureService(this.log);
-    const userActionServicePlugin = new CaseUserActionService(this.log);
-
     this.log.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    const caseService = await caseServicePlugin.setup({
+    const caseService = await this.caseService.setup({
       authentication: plugins.security != null ? plugins.security.authc : null,
     });
-    const caseConfigureService = await caseConfigureServicePlugin.setup();
-    const userActionService = await userActionServicePlugin.setup();
+    const caseConfigureService = await this.caseConfigureService.setup();
+    const userActionService = await this.userActionService.setup();
+
+    core.http.registerRouteHandlerContext(
+      'case',
+      this.createRouteHandlerContext({ caseService, caseConfigureService, userActionService })
+    );
 
     const router = core.http.createRouter();
     initCaseApi({
-      caseConfigureService,
       caseService,
+      caseConfigureService,
       userActionService,
       router,
     });
@@ -79,4 +94,26 @@ export class CasePlugin {
   public stop() {
     this.log.debug(`Stopping Case Workflow`);
   }
+
+  private createRouteHandlerContext = ({
+    caseService,
+    caseConfigureService,
+    userActionService,
+  }: {
+    caseService: CaseServiceSetup;
+    caseConfigureService: CaseConfigureServiceSetup;
+    userActionService: CaseUserActionServiceSetup;
+  }): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'case'> => {
+    return async (context, request) => {
+      return {
+        getCaseClient: () => {
+          return createCaseClient({
+            caseService,
+            caseConfigureService,
+            userActionService,
+          });
+        },
+      };
+    };
+  };
 }
