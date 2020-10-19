@@ -25,6 +25,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
