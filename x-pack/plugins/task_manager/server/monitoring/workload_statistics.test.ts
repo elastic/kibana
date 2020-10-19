@@ -6,7 +6,6 @@
 
 import { first, take, bufferCount } from 'rxjs/operators';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { Logger } from '../../../../../src/core/server';
 import {
   WorkloadAggregation,
   createWorkloadAggregator,
