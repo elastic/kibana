@@ -82,10 +82,11 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('feature controls', () => {
-    let isProd = false;
+    let isProdOrCi = false;
     before(() => {
       const kbnConfig = config.get('servers.kibana');
-      isProd = kbnConfig.hostname === 'localhost' && kbnConfig.port === 5620 ? false : true;
+      isProdOrCi =
+        !!process.env.CI || !(kbnConfig.hostname === 'localhost' && kbnConfig.port === 5620);
     });
     it(`APIs can't be accessed by user with no privileges`, async () => {
       const username = 'logstash_read';
@@ -135,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password);
-        if (!isProd) {
+        if (!isProdOrCi) {
           expectGraphIQLResponse(graphQLIResult);
         } else {
           expectGraphIQL404(graphQLIResult);
@@ -234,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password, space1Id);
-        if (!isProd) {
+        if (!isProdOrCi) {
           expectGraphIQLResponse(graphQLIResult);
         } else {
           expectGraphIQL404(graphQLIResult);
