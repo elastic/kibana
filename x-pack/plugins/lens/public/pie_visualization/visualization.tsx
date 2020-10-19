@@ -97,7 +97,7 @@ export const getPieVisualization = ({
     );
   },
 
-  getMainPalette: (state) => state.palette,
+  getMainPalette: (state) => (state ? state.palette : undefined),
 
   getSuggestions: suggestions,
 

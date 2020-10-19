@@ -53,15 +53,15 @@ describe('palette', () => {
     describe('gradient', () => {
       it('sets gradient', () => {
         let result = fn(null, { gradient: true });
-        expect(result).toHaveProperty('gradient', true);
+        expect(result.params).toHaveProperty('gradient', true);
 
         result = fn(null, { gradient: false });
-        expect(result).toHaveProperty('gradient', false);
+        expect(result.params).toHaveProperty('gradient', false);
       });
 
       it('defaults to false', () => {
         const result = fn(null);
-        expect(result).toHaveProperty('gradient', false);
+        expect(result.params).toHaveProperty('gradient', false);
       });
     });
 

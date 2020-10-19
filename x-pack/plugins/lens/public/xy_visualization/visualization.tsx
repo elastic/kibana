@@ -206,7 +206,7 @@ export const getXyVisualization = ({
   },
 
   getMainPalette: (state) => {
-    if (state.layers.length === 0) return;
+    if (!state || state.layers.length === 0) return;
     return state.layers[0].palette;
   },
 

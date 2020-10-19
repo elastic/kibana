@@ -97,7 +97,7 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { colors, theme: themeService } = getChartsSetup();
+  const { legacyColors: colors, theme: themeService } = getChartsSetup();
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
