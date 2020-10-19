@@ -41,7 +41,7 @@ export const CredentialsList: React.FC = () => {
       name: 'Key',
       width: '36%',
       render: (token: IApiToken) => {
-        const key = token.key;
+        const { key } = token;
         if (!key) return null;
         return (
           <EuiCopy
