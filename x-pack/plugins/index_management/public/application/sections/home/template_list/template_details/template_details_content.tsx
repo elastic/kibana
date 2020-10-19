@@ -31,10 +31,9 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { UseRequestResponse } from '../../../../../shared_imports';
+import { attemptToURIDecode, UseRequestResponse } from '../../../../../shared_imports';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
-import { decodePathFromReactRouter } from '../../../../services/routing';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
 import { TemplateTypeIndicator } from '../components';
@@ -103,7 +102,7 @@ export const TemplateDetailsContent = ({
   reload,
 }: Props) => {
   const { uiMetricService } = useServices();
-  const decodedTemplateName = decodePathFromReactRouter(templateName);
+  const decodedTemplateName = attemptToURIDecode(templateName);
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(
     decodedTemplateName,
     isLegacy

@@ -20,6 +20,7 @@ export {
   NotAuthorizedSection,
   Forms,
   GlobalFlyout,
+  attemptToURIDecode,
 } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 export {

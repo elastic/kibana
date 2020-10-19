@@ -35,7 +35,7 @@ import {
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { reactRouterNavigate } from '../../../../../shared_imports';
+import { reactRouterNavigate, attemptToURIDecode } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { encodePathForReactRouter } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
@@ -107,7 +107,7 @@ export class IndexTable extends Component {
     const { location, filterChanged } = this.props;
     const { filter } = qs.parse((location && location.search) || '');
     if (filter) {
-      const decodedFilter = decodeURIComponent(filter);
+      const decodedFilter = attemptToURIDecode(filter);
 
       try {
         const filter = EuiSearchBar.Query.parse(decodedFilter);
