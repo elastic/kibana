@@ -20,7 +20,7 @@
 import { SearchResponse } from 'elasticsearch';
 import _ from 'lodash';
 import { IndexPattern } from '../../index_patterns/index_patterns';
-import { DatatableColumn } from '../../../../expressions/common/expression_types/specs';
+import { Datatable, DatatableColumn } from '../../../../expressions/common';
 
 export function flattenHit(
   hit: Record<string, any>,
@@ -77,7 +77,7 @@ export const tabifyDocs = (
   esResponse: SearchResponse<unknown>,
   index?: IndexPattern,
   params: TabifyDocsOptions = {}
-) => {
+): Datatable => {
   const columns: DatatableColumn[] = [];
 
   const rows = esResponse.hits.hits

@@ -44,7 +44,6 @@ function create(id: string) {
 
   return new IndexPattern({
     spec: { id, type, version, timeFieldName, fields, title },
-    savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -200,7 +199,6 @@ describe('IndexPattern', () => {
       const spec = indexPattern.toSpec();
       const restoredPattern = new IndexPattern({
         spec,
-        savedObjectsClient: {} as any,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,
         metaFields: [],
