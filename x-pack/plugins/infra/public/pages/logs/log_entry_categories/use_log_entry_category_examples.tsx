@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 
 import { LogEntryCategoryExample } from '../../../../common/http_api';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { ignoreCanceledPromise, useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryCategoryExamplesAPI } from './service_calls/get_log_entry_category_examples';
 
 export const useLogEntryCategoryExamples = ({
@@ -48,7 +48,6 @@ export const useLogEntryCategoryExamples = ({
       onResolve: ({ data: { examples } }) => {
         setLogEntryCategoryExamples(examples);
       },
-      onReject: ignoreCanceledPromise,
     },
     [categoryId, endTime, exampleCount, sourceId, startTime]
   );

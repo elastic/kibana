@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { TimeKey } from '../../../../common/time';
-import { ignoreCanceledPromise, useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';
 import { LogEntry, LogEntriesHighlightsResponse } from '../../../../common/http_api';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -50,7 +50,6 @@ export const useLogEntryHighlights = (
       onResolve: (response) => {
         setLogEntryHighlights(response.data);
       },
-      onReject: ignoreCanceledPromise,
     },
     [sourceId, startTimestamp, endTimestamp, centerPoint, size, filterQuery, highlightTerms]
   );

@@ -5,7 +5,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useMountedState } from 'react-use';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
@@ -20,7 +19,6 @@ export const useLogAnalysisModule = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const isMounted = useMountedState();
   const { spaceId, sourceId, timestampField } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
@@ -32,19 +30,15 @@ export const useLogAnalysisModule = <JobType extends string>({
         return await moduleDescriptor.getJobSummary(spaceId, sourceId, services.http.fetch);
       },
       onResolve: (jobResponse) => {
-        if (isMounted()) {
-          dispatchModuleStatus({
-            type: 'fetchedJobStatuses',
-            payload: jobResponse,
-            spaceId,
-            sourceId,
-          });
-        }
+        dispatchModuleStatus({
+          type: 'fetchedJobStatuses',
+          payload: jobResponse,
+          spaceId,
+          sourceId,
+        });
       },
       onReject: () => {
-        if (isMounted()) {
-          dispatchModuleStatus({ type: 'failedFetchingJobStatuses' });
-        }
+        dispatchModuleStatus({ type: 'failedFetchingJobStatuses' });
       },
     },
     [spaceId, sourceId]

@@ -6,11 +6,7 @@
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import { useMount } from 'react-use';
-import {
-  useTrackedPromise,
-  CanceledPromiseError,
-  ignoreCanceledPromise,
-} from '../../../utils/use_tracked_promise';
+import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
 import {
@@ -216,7 +212,6 @@ export const useLogEntryAnomaliesResults = ({
         }
         setLogEntryAnomalies(anomalies);
       },
-      onReject: ignoreCanceledPromise,
     },
     [
       sourceId,

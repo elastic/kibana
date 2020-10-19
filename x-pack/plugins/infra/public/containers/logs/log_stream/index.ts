@@ -7,7 +7,7 @@
 import { useState, useMemo } from 'react';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
-import { ignoreCanceledPromise, useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { LogEntry, LogEntriesCursor } from '../../../../common/http_api';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
@@ -63,7 +63,6 @@ export function useLogStream({
       onResolve: ({ data }) => {
         setEntries(data.entries);
       },
-      onReject: ignoreCanceledPromise,
     },
     [sourceId, startTimestamp, endTimestamp, query]
   );

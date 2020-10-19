@@ -14,7 +14,7 @@ import {
   LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
 } from '../../../../common/http_api/log_sources';
-import { ignoreCanceledPromise, useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
@@ -47,7 +47,6 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
 
         setSourceConfiguration(data);
       },
-      onReject: ignoreCanceledPromise,
     },
     [sourceId, fetch]
   );
@@ -66,7 +65,6 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
         setSourceConfiguration(data);
         loadSourceStatus();
       },
-      onReject: ignoreCanceledPromise,
     },
     [sourceId, fetch]
   );
@@ -84,7 +82,6 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
 
         setSourceStatus(data);
       },
-      onReject: ignoreCanceledPromise,
     },
     [sourceId, fetch]
   );
@@ -142,9 +139,7 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
   );
 
   const loadSource = useCallback(() => {
-    return Promise.all([loadSourceConfiguration(), loadSourceStatus()]).catch(
-      ignoreCanceledPromise
-    );
+    return Promise.all([loadSourceConfiguration(), loadSourceStatus()]);
   }, [loadSourceConfiguration, loadSourceStatus]);
 
   const initialize = useCallback(async () => {

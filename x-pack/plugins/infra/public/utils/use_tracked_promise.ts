@@ -284,15 +284,4 @@ export class CanceledPromiseError extends Error {
 
 export class SilentCanceledPromiseError extends CanceledPromiseError {}
 
-// Ideally we want `error: Error`, but a promise might be rejected with anything.
-export function ignoreCanceledPromise(error: unknown) {
-  if (error instanceof CanceledPromiseError) {
-    return;
-  }
-  if (error instanceof Error) {
-    throw error;
-  }
-  return error;
-}
-
 const noOp = () => undefined;

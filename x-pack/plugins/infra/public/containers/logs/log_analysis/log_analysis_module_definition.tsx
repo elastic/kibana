@@ -5,7 +5,6 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useMountedState } from 'react-use';
 import { getJobId } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
@@ -21,7 +20,6 @@ export const useLogAnalysisModuleDefinition = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const isMounted = useMountedState();
   const [moduleDefinition, setModuleDefinition] = useState<
     GetMlModuleResponsePayload | undefined
   >();
@@ -47,14 +45,10 @@ export const useLogAnalysisModuleDefinition = <JobType extends string>({
         return await moduleDescriptor.getModuleDefinition(services.http.fetch);
       },
       onResolve: (response) => {
-        if (isMounted()) {
-          setModuleDefinition(response);
-        }
+        setModuleDefinition(response);
       },
       onReject: () => {
-        if (isMounted()) {
-          setModuleDefinition(undefined);
-        }
+        setModuleDefinition(undefined);
       },
     },
     [moduleDescriptor.getModuleDefinition, spaceId, sourceId]

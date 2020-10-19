@@ -6,7 +6,7 @@
 
 import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
-import { ignoreCanceledPromise, useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
@@ -31,7 +31,6 @@ export const useLogAnalysisCapabilities = () => {
       onResolve: (response) => {
         setMlCapabilities(response);
       },
-      onReject: ignoreCanceledPromise,
     },
     []
   );

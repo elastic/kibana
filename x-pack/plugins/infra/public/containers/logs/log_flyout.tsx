@@ -11,7 +11,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { LogEntriesItem } from '../../../common/http_api';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { UrlStateContainer } from '../../utils/url_state';
-import { ignoreCanceledPromise, useTrackedPromise } from '../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { fetchLogEntriesItem } from './log_entries/api/fetch_log_entries_item';
 import { useLogSourceContext } from './log_source';
 
@@ -49,7 +49,6 @@ export const useLogFlyout = () => {
           setFlyoutItem(data || null);
         }
       },
-      onReject: ignoreCanceledPromise,
     },
     [sourceId, flyoutId]
   );
