@@ -242,11 +242,17 @@ export class ApplicationService {
       appId,
       { path, state, replace = false }: NavigateToAppOptions = {}
     ) => {
-      if (await this.shouldNavigate(overlays)) {
+      const currentAppId = this.currentAppId$.value;
+      const navigatingToSameApp = currentAppId === appId;
+      const shouldNavigate = navigatingToSameApp ? true : await this.shouldNavigate(overlays);
+
+      if (shouldNavigate) {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
-        this.appInternalStates.delete(this.currentAppId$.value!);
+        if (!navigatingToSameApp) {
+          this.appInternalStates.delete(this.currentAppId$.value!);
+        }
         this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         this.currentAppId$.next(appId);
       }

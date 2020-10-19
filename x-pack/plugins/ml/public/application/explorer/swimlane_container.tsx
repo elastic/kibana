@@ -213,7 +213,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     // Persists container height during loading to prevent page from jumping
     return isLoading
       ? containerHeightRef.current
-      : rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + (showTimeline ? Y_AXIS_HEIGHT : 0);
+      : // TODO update when elastic charts X label will be fixed
+        rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + (true ? Y_AXIS_HEIGHT : 0);
   }, [isLoading, rowsCount, showTimeline]);
 
   useEffect(() => {
@@ -282,7 +283,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
       },
       xAxisLabel: {
-        visible: showTimeline,
+        visible: true,
         // eui color subdued
         fill: `#98A2B3`,
         formatter: (v: number) => {
