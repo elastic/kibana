@@ -83,11 +83,6 @@ handlebars.registerHelper('uppercase', (rawValue: unknown) => String(rawValue).t
 handlebars.registerHelper('trim', (rawValue: unknown) => String(rawValue).trim());
 handlebars.registerHelper('trimLeft', (rawValue: unknown) => String(rawValue).trimLeft());
 handlebars.registerHelper('trimRight', (rawValue: unknown) => String(rawValue).trimRight());
-handlebars.registerHelper('concat', (...args) => {
-  const values = args.slice(0, -1) as unknown[];
-  return values.join('');
-});
-
 handlebars.registerHelper('left', (rawValue: unknown, numberOfChars: number) => {
   if (typeof numberOfChars !== 'number')
     throw new Error('[left]: expected "number of characters to extract" to be a number');
@@ -102,6 +97,15 @@ handlebars.registerHelper('mid', (rawValue: unknown, start: number, length: numb
   if (typeof start !== 'number') throw new Error('[left]: expected "start" to be a number');
   if (typeof length !== 'number') throw new Error('[left]: expected "length" to be a number');
   return String(rawValue).substr(start, length);
+});
+handlebars.registerHelper('concat', (...args) => {
+  const values = args.slice(0, -1) as unknown[];
+  return values.join('');
+});
+handlebars.registerHelper('split', (...args) => {
+  const [str, splitter] = args.slice(0, -1) as [string, string];
+  if (typeof splitter !== 'string') throw new Error('[split] "splitter" expected to be a string');
+  return String(str).split(splitter);
 });
 handlebars.registerHelper('replace', (...args) => {
   const [str, searchString, valueString] = args.slice(0, -1) as [string, string, string];

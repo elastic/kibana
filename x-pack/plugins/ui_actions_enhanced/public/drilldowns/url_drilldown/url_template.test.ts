@@ -281,4 +281,19 @@ describe('basic string formatting helpers', () => {
       compile(`https://elastic.co/{{concat valueArray}}`, { valueArray: ['1', '2', '3'] })
     ).toMatchInlineSnapshot(`"https://elastic.co/1,2,3"`);
   });
+
+  test('split', () => {
+    expect(
+      compile(
+        `https://elastic.co/{{lookup (split value ",") 0 }}&{{lookup (split value ",") 1 }}`,
+        {
+          value: '47.766201,-122.257057',
+        }
+      )
+    ).toMatchInlineSnapshot(`"https://elastic.co/47.766201&-122.257057"`);
+
+    expect(() =>
+      compile(`https://elastic.co/{{split value}}`, { value: '47.766201,-122.257057' })
+    ).toThrowErrorMatchingInlineSnapshot(`"[split] \\"splitter\\" expected to be a string"`);
+  });
 });
