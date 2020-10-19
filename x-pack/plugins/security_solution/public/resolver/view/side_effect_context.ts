@@ -19,6 +19,12 @@ const sideEffectors: SideEffectors = {
     return window.cancelAnimationFrame(...args);
   },
   ResizeObserver,
+  writeTextToClipboard(text: string): Promise<void> {
+    return navigator.clipboard.writeText(text);
+  },
+  getBoundingClientRect(element: Element): DOMRect {
+    return element.getBoundingClientRect();
+  },
 };
 
 /**

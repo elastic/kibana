@@ -280,7 +280,10 @@ export function useCamera(): {
  * tracked. So if the element's position moves for some reason, be sure to
  * handle that.
  */
-export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
+function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
+  // Access `getBoundingClientRect` via the `SideEffectContext` (for testing.)
+  const { getBoundingClientRect } = useContext(SideEffectContext);
+
   // This hooks returns `rect`.
   const [rect, setRect] = useState<DOMRect | null>(null);
 
@@ -302,9 +305,9 @@ export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | n
   useEffect(() => {
     if (currentNode !== null) {
       // When the DOM node is received, immedaiately calculate its DOM Rect and return that
-      setRect(currentNode.getBoundingClientRect());
+      setRect(getBoundingClientRect(currentNode));
     }
-  }, [currentNode]);
+  }, [currentNode, getBoundingClientRect]);
 
   /**
    * When scroll events occur, recalculate the DOMRect. DOMRect represents the position of an element relative to the viewport, so that may change during scroll (depending on the layout.)
@@ -322,7 +325,7 @@ export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | n
         const currentY = window.scrollY;
 
         if (currentNode !== null && (previousX !== currentX || previousY !== currentY)) {
-          setRect(currentNode.getBoundingClientRect());
+          setRect(getBoundingClientRect(currentNode));
         }
 
         previousX = currentX;
@@ -334,13 +337,13 @@ export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | n
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [currentNode, requestAnimationFrame]);
+  }, [currentNode, requestAnimationFrame, getBoundingClientRect]);
 
   useEffect(() => {
     if (currentNode !== null) {
       const resizeObserver = new ResizeObserver((entries) => {
         if (currentNode !== null && currentNode === entries[0].target) {
-          setRect(currentNode.getBoundingClientRect());
+          setRect(getBoundingClientRect(currentNode));
         }
       });
       resizeObserver.observe(currentNode);
@@ -348,6 +351,6 @@ export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | n
         resizeObserver.disconnect();
       };
     }
-  }, [ResizeObserver, currentNode]);
+  }, [ResizeObserver, currentNode, getBoundingClientRect]);
   return [rect, ref];
 }
