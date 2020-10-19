@@ -61,6 +61,7 @@ export const useNetworkTopCountries = ({
   filterQuery,
   flowTarget,
   indexNames,
+  ip,
   skip,
   startDate,
   type,
@@ -86,6 +87,7 @@ export const useNetworkTopCountries = ({
           filterQuery: createFilter(filterQuery),
           flowTarget,
           id: queryId,
+          ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
           timerange: {
@@ -203,6 +205,7 @@ export const useNetworkTopCountries = ({
         filterQuery: createFilter(filterQuery),
         flowTarget,
         id: queryId,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {
@@ -221,6 +224,7 @@ export const useNetworkTopCountries = ({
     indexNames,
     endDate,
     filterQuery,
+    ip,
     limit,
     startDate,
     sort,

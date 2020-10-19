@@ -5,13 +5,12 @@
  */
 import moment from 'moment';
 import { Unit } from '@elastic/datemath';
+import { inputsModel } from '../../../common/store';
 
-import * as i18n from '../../../detections/components/rules/query_preview/translations';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { InspectResponse } from '../../../types';
 import { EqlPreviewResponse, Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { HITS_THRESHOLD } from '../../../detections/components/rules/query_preview/helpers';
 
 type EqlAggBuckets = Record<string, { timestamp: string; total: number }>;
 
@@ -33,37 +32,16 @@ export const calculateBucketForDay = (eventTimestamp: number, relativeNow: numbe
   return Math.ceil(minutes / 60);
 };
 
-export const constructWarnings = (timestampIssue: boolean, hits: number, range: Unit): string[] => {
-  let warnings: string[] = [];
-
-  if (timestampIssue) {
-    warnings = [i18n.PREVIEW_WARNING_TIMESTAMP];
-  }
-
-  if (hits === EQL_QUERY_EVENT_SIZE) {
-    warnings = [...warnings, i18n.PREVIEW_WARNING_CAP_HIT(EQL_QUERY_EVENT_SIZE)];
-  }
-
-  if (hits > HITS_THRESHOLD[range]) {
-    warnings = [...warnings, i18n.QUERY_PREVIEW_NOISE_WARNING];
-  }
-
-  return warnings;
-};
-
 export const formatInspect = (
   response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>
 ): InspectResponse => {
-  if (response != null) {
-    return {
-      dsl: [JSON.stringify(response.rawResponse.meta.request.params, null, 2)] ?? [],
-      response: [JSON.stringify(response.rawResponse.body, null, 2)] ?? [],
-    };
-  }
-
+  const body = response.rawResponse.meta.request.params.body;
+  const bodyParse = typeof body === 'string' ? JSON.parse(body) : body;
   return {
-    dsl: [],
-    response: [],
+    dsl: [
+      JSON.stringify({ ...response.rawResponse.meta.request.params, body: bodyParse }, null, 2),
+    ],
+    response: [JSON.stringify(response.rawResponse.body, null, 2)],
   };
 };
 
@@ -74,24 +52,22 @@ export const getEqlAggsData = (
   response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
   range: Unit,
   to: string,
-  from: string
+  refetch: inputsModel.Refetch
 ): EqlPreviewResponse => {
   const { dsl, response: inspectResponse } = formatInspect(response);
   // The upper bound of the timestamps
-  const relativeNow: number = Date.parse(from);
-  const accumulator: EqlAggBuckets = getInterval(range, relativeNow);
+  const relativeNow = Date.parse(to);
+  const accumulator = getInterval(range, relativeNow);
   const events = response.rawResponse.body.hits.events ?? [];
   const totalCount = response.rawResponse.body.hits.total.value;
-  let timestampNotFound = false;
 
   const buckets = events.reduce<EqlAggBuckets>((acc, hit) => {
     const timestamp = hit._source['@timestamp'];
     if (timestamp == null) {
-      timestampNotFound = true;
       return acc;
     }
 
-    const eventTimestamp: number = Date.parse(timestamp);
+    const eventTimestamp = Date.parse(timestamp);
     const bucket =
       range === 'h'
         ? calculateBucketForHour(eventTimestamp, relativeNow)
@@ -107,18 +83,14 @@ export const getEqlAggsData = (
 
   const isAllZeros = data.every(({ y }) => y === 0);
 
-  const warnings = constructWarnings(timestampNotFound, totalCount, range);
-
   return {
     data,
     totalCount: isAllZeros ? 0 : totalCount,
-    lte: from,
-    gte: to,
     inspect: {
       dsl,
       response: inspectResponse,
     },
-    warnings,
+    refetch,
   };
 };
 
@@ -151,19 +123,15 @@ export const getInterval = (range: Unit, relativeNow: number): EqlAggBuckets => 
 
 export const getSequenceAggs = (
   response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
-  range: Unit,
-  to: string,
-  from: string
+  refetch: inputsModel.Refetch
 ): EqlPreviewResponse => {
   const { dsl, response: inspectResponse } = formatInspect(response);
   const sequences = response.rawResponse.body.hits.sequences ?? [];
   const totalCount = response.rawResponse.body.hits.total.value;
-  let timestampNotFound = false;
 
   const data = sequences.map((sequence, i) => {
     return sequence.events.map((seqEvent) => {
       if (seqEvent._source['@timestamp'] == null) {
-        timestampNotFound = true;
         return {};
       }
       return {
@@ -174,17 +142,13 @@ export const getSequenceAggs = (
     });
   });
 
-  const warnings = constructWarnings(timestampNotFound, totalCount, range);
-
   return {
     data: data.flat(),
     totalCount,
-    lte: from,
-    gte: to,
     inspect: {
       dsl,
       response: inspectResponse,
     },
-    warnings,
+    refetch,
   };
 };

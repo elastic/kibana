@@ -129,7 +129,7 @@ describe('Uncommon Process Table Component', () => {
       );
 
       expect(wrapper.find('.euiTableRow').at(2).find('.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-world,hello-world-2 '
+        'Host nameshello-worldhello-world-2 '
       );
     });
 
@@ -214,7 +214,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
       expect(wrapper.find('.euiTableRow').at(4).find('.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-world,hello-world-2 '
+        'Host nameshello-worldhello-world-2 '
       );
     });
   });

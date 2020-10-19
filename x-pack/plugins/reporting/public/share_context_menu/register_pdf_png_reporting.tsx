@@ -13,7 +13,7 @@ import { LicensingPluginSetup } from '../../../licensing/public';
 import { LayoutParams } from '../../common/types';
 import { JobParamsPNG } from '../../server/export_types/png/types';
 import { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
-import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
+import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 

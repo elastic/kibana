@@ -23,7 +23,6 @@ import { error } from './error';
 import { filter } from './filter';
 import { image } from './image';
 import { kibanaContext } from './kibana_context';
-import { kibanaDatatable } from './kibana_datatable';
 import { nullType } from './null';
 import { num } from './num';
 import { number } from './number';
@@ -42,7 +41,6 @@ export const typeSpecs: AnyExpressionTypeDefinition[] = [
   filter,
   image,
   kibanaContext,
-  kibanaDatatable,
   nullType,
   num,
   number,
@@ -60,7 +58,6 @@ export * from './error';
 export * from './filter';
 export * from './image';
 export * from './kibana_context';
-export * from './kibana_datatable';
 export * from './null';
 export * from './num';
 export * from './number';
