@@ -39,7 +39,7 @@ export const getRedirectToTransactionDetailPageUrl = ({
   });
 };
 
-export function roundToNearestMinute({
+function roundToNearestMinute({
   timestamp,
   diff = 0,
   direction = 'up',

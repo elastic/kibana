@@ -4,44 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { roundToNearestMinute } from './get_redirect_to_transaction_detail_page_url';
+import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
+import { parse } from 'url';
 
-describe('roundToNearestMinute', () => {
-  it('should round up to nearest 5 minute', () => {
-    expect(
-      roundToNearestMinute({
-        timestamp: '2020-01-01T00:00:40.000Z',
-        direction: 'up',
-      })
-    ).toBe('2020-01-01T00:05:00.000Z');
+describe('getRedirectToTransactionDetailPageUrl', () => {
+  const transaction = ({
+    '@timestamp': '2020-01-01T00:01:00.000Z',
+    service: { name: 'opbeans-node' },
+    trace: { id: 'trace_id' },
+    transaction: {
+      id: 'transaction_id',
+      name: 'transaction_name',
+      type: 'request',
+      duration: { us: 5000 },
+    },
+  } as unknown) as any;
+
+  const url = getRedirectToTransactionDetailPageUrl({ transaction });
+
+  it('rounds the start time down', () => {
+    expect(parse(url, true).query.rangeFrom).toBe('2020-01-01T00:00:00.000Z');
   });
 
-  it('should round down to nearest 5 minute', () => {
-    expect(
-      roundToNearestMinute({
-        timestamp: '2020-01-01T00:00:40.000Z',
-        direction: 'down',
-      })
-    ).toBe('2020-01-01T00:00:00.000Z');
+  it('rounds the end time up', () => {
+    expect(parse(url, true).query.rangeTo).toBe('2020-01-01T00:05:00.000Z');
   });
 
-  it('should add diff and round up', () => {
-    expect(
-      roundToNearestMinute({
-        timestamp: '2020-01-01T00:00:40.000Z',
-        diff: 1000 * 60 * 7, // 7 minutes
-        direction: 'up',
-      })
-    ).toBe('2020-01-01T00:10:00.000Z');
-  });
-
-  it('should add diff and round down', () => {
-    expect(
-      roundToNearestMinute({
-        timestamp: '2020-01-01T00:00:40.000Z',
-        diff: 1000 * 60 * 7, // 7 minutes
-        direction: 'down',
-      })
-    ).toBe('2020-01-01T00:05:00.000Z');
+  it('formats url correctly', () => {
+    expect(url).toBe(
+      '/services/opbeans-node/transactions/view?traceId=trace_id&transactionId=transaction_id&transactionName=transaction_name&transactionType=request&rangeFrom=2020-01-01T00%3A00%3A00.000Z&rangeTo=2020-01-01T00%3A05%3A00.000Z'
+    );
   });
 });
