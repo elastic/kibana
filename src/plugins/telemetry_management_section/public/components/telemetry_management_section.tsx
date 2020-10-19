@@ -232,7 +232,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
           ) : (
             <FormattedMessage
               id="telemetry.seeExampleOfClusterData"
-              defaultMessage="See example of the {clusterData} that we collect."
+              defaultMessage="See an example of the {clusterData} that we collect."
               values={{
                 clusterData: clusterDataLink,
               }}
