@@ -60,7 +60,7 @@ export interface IGroupValues {
   dataLoading: boolean;
   manageUsersModalVisible: boolean;
   managerModalFormErrors: string[];
-  sharedSourcesModalModalVisible: boolean;
+  sharedSourcesModalVisible: boolean;
   confirmDeleteModalVisible: boolean;
   groupNameInputValue: string;
   selectedGroupSources: string[];
@@ -136,7 +136,7 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
         hideManageUsersModal: () => [],
       },
     ],
-    sharedSourcesModalModalVisible: [
+    sharedSourcesModalVisible: [
       false,
       {
         showSharedSourcesModal: () => true,

@@ -29,7 +29,7 @@ export const GroupRouter: React.FC = () => {
   const { messages } = useValues(FlashMessagesLogic);
   const { initializeGroup, resetGroup } = useActions(GroupLogic);
   const {
-    sharedSourcesModalModalVisible,
+    sharedSourcesModalVisible,
     manageUsersModalVisible,
     group: { name },
   } = useValues(GroupLogic);
@@ -55,7 +55,7 @@ export const GroupRouter: React.FC = () => {
           <GroupOverview />
         </Route>
       </Switch>
-      {sharedSourcesModalModalVisible && <SharedSourcesModal />}
+      {sharedSourcesModalVisible && <SharedSourcesModal />}
       {manageUsersModalVisible && <ManageUsersModal />}
     </>
   );
