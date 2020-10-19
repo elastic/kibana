@@ -108,16 +108,29 @@ export const useEqlPreview = (): [
                 if (!didCancel.current) {
                   setLoading(false);
 
-                  setResponse(
-                    getEqlAggsData(
+                  setResponse((prev) => {
+                    const { inspect, ...rest } = getEqlAggsData(
                       res,
                       interval,
                       to,
                       refetch.current,
                       index,
                       hasEqlSequenceQuery(query)
-                    )
-                  );
+                    );
+                    const inspectDsl = prev.inspect.dsl[0] ? prev.inspect.dsl : inspect.dsl;
+                    const inspectResp = prev.inspect.response[0]
+                      ? prev.inspect.response
+                      : inspect.response;
+
+                    return {
+                      ...prev,
+                      ...rest,
+                      inspect: {
+                        dsl: inspectDsl,
+                        response: inspectResp,
+                      },
+                    };
+                  });
                 }
 
                 unsubscribeStream.current.next();
