@@ -63,10 +63,6 @@
 |  [Font](./kibana-plugin-plugins-expressions-server.font.md) | An interface representing a font in Canvas, with a textual label and the CSS <code>font-value</code>. |
 |  [IInterpreterRenderHandlers](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.md) |  |
 |  [IRegistry](./kibana-plugin-plugins-expressions-server.iregistry.md) |  |
-|  [KibanaDatatable](./kibana-plugin-plugins-expressions-server.kibanadatatable.md) |  |
-|  [KibanaDatatableColumn](./kibana-plugin-plugins-expressions-server.kibanadatatablecolumn.md) |  |
-|  [KibanaDatatableColumnMeta](./kibana-plugin-plugins-expressions-server.kibanadatatablecolumnmeta.md) |  |
-|  [KibanaDatatableRow](./kibana-plugin-plugins-expressions-server.kibanadatatablerow.md) |  |
 |  [PointSeriesColumn](./kibana-plugin-plugins-expressions-server.pointseriescolumn.md) | Column in a PointSeries |
 |  [Range](./kibana-plugin-plugins-expressions-server.range.md) |  |
 |  [SerializedDatatable](./kibana-plugin-plugins-expressions-server.serializeddatatable.md) |  |
@@ -79,7 +75,7 @@
 |  [AnyExpressionFunctionDefinition](./kibana-plugin-plugins-expressions-server.anyexpressionfunctiondefinition.md) | Type to capture every possible expression function definition. |
 |  [AnyExpressionTypeDefinition](./kibana-plugin-plugins-expressions-server.anyexpressiontypedefinition.md) |  |
 |  [ArgumentType](./kibana-plugin-plugins-expressions-server.argumenttype.md) | This type represents all of the possible combinations of properties of an Argument in an Expression Function. The presence or absence of certain fields influence the shape and presence of others within each <code>arg</code> in the specification. |
-|  [DatatableColumnType](./kibana-plugin-plugins-expressions-server.datatablecolumntype.md) | This type represents the <code>type</code> of any <code>DatatableColumn</code> in a <code>Datatable</code>. |
+|  [DatatableColumnType](./kibana-plugin-plugins-expressions-server.datatablecolumntype.md) | This type represents the <code>type</code> of any <code>DatatableColumn</code> in a <code>Datatable</code>. its duplicated from KBN\_FIELD\_TYPES |
 |  [DatatableRow](./kibana-plugin-plugins-expressions-server.datatablerow.md) | This type represents a row in a <code>Datatable</code>. |
 |  [ExecutionContainer](./kibana-plugin-plugins-expressions-server.executioncontainer.md) |  |
 |  [ExecutorContainer](./kibana-plugin-plugins-expressions-server.executorcontainer.md) |  |
