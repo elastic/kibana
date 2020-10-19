@@ -215,7 +215,7 @@ You can create additional mapping configurations in the *Dynamic templates* and
 }
 ----
 
-. On the review page, check the summary, and if everything looks right click
+. On the review page, check the summary. If everything looks right, click
 *Create template*.
 
 *Step 3. Create new indices*
