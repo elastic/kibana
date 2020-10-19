@@ -133,8 +133,8 @@ function hasExpiredHotTimestamps(
   return (
     now -
       getOldestTimestamp(
-        monitoringStats.lastUpdate,
-        monitoringStats.stats.runtime?.value.polling.lastSuccessfulPoll
+        monitoringStats.last_update,
+        monitoringStats.stats.runtime?.value.polling.last_successful_poll
       ) >
     requiredFreshness
   );

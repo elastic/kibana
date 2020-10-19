@@ -29,10 +29,10 @@ interface TaskTypeStat extends JsonObject {
 
 export interface WorkloadStat extends JsonObject {
   count: number;
-  taskTypes: TaskTypeStat;
+  task_types: TaskTypeStat;
   schedule: Array<[string, number]>;
   overdue: number;
-  estimatedScheduleDensity: number[];
+  estimated_schedule_density: number[];
 }
 
 export interface WorkloadAggregation {
@@ -204,7 +204,7 @@ export function createWorkloadAggregator(
 
       const summary: WorkloadStat = {
         count,
-        taskTypes: mapValues(keyBy(taskTypes, 'key'), ({ doc_count: docCount, status }) => {
+        task_types: mapValues(keyBy(taskTypes, 'key'), ({ doc_count: docCount, status }) => {
           return {
             count: docCount,
             status: mapValues(keyBy(status.buckets, 'key'), 'doc_count'),
@@ -218,7 +218,11 @@ export function createWorkloadAggregator(
           )
           .map((schedule) => [schedule.key as string, schedule.doc_count]),
         overdue,
-        estimatedScheduleDensity: padBuckets(scheduleDensityBuckets, pollInterval, scheduleDensity),
+        estimated_schedule_density: padBuckets(
+          scheduleDensityBuckets,
+          pollInterval,
+          scheduleDensity
+        ),
       };
       return {
         key: 'workload',

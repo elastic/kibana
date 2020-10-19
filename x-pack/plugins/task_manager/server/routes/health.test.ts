@@ -103,7 +103,7 @@ describe('healthRoute', () => {
 
     stats$.next(
       mockHealthStats({
-        lastUpdate: new Date(Date.now() - 1500).toISOString(),
+        last_update: new Date(Date.now() - 1500).toISOString(),
       })
     );
 
@@ -112,7 +112,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
-            lastUpdate: expect.any(String),
+            last_update: expect.any(String),
             stats: {
               configuration: {
                 timestamp: expect.any(String),
@@ -124,7 +124,7 @@ describe('healthRoute', () => {
                 timestamp: expect.any(String),
                 value: {
                   polling: {
-                    lastSuccessfulPoll: expect.any(String),
+                    last_successful_poll: expect.any(String),
                   },
                 },
               },
@@ -141,7 +141,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
-            lastUpdate: expect.any(String),
+            last_update: expect.any(String),
             stats: {
               configuration: {
                 timestamp: expect.any(String),
@@ -153,7 +153,7 @@ describe('healthRoute', () => {
                 timestamp: expect.any(String),
                 value: {
                   polling: {
-                    lastSuccessfulPoll: expect.any(String),
+                    last_successful_poll: expect.any(String),
                   },
                 },
               },
@@ -195,7 +195,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
-            lastUpdate: expect.any(String),
+            last_update: expect.any(String),
             stats: {
               configuration: {
                 timestamp: expect.any(String),
@@ -207,7 +207,7 @@ describe('healthRoute', () => {
                 timestamp: expect.any(String),
                 value: {
                   polling: {
-                    lastSuccessfulPoll: expect.any(String),
+                    last_successful_poll: expect.any(String),
                   },
                 },
               },
@@ -226,14 +226,15 @@ describe('healthRoute', () => {
 
     await sleep(0);
 
-    const lastSuccessfulPoll = new Date(Date.now() - 2000).toISOString();
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const last_successful_poll = new Date(Date.now() - 2000).toISOString();
     stats$.next(
       mockHealthStats({
         stats: {
           runtime: {
             value: {
               polling: {
-                lastSuccessfulPoll,
+                last_successful_poll,
               },
             },
           },
@@ -250,7 +251,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
-            lastUpdate: expect.any(String),
+            last_update: expect.any(String),
             stats: {
               configuration: {
                 timestamp: expect.any(String),
@@ -262,7 +263,7 @@ describe('healthRoute', () => {
                 timestamp: expect.any(String),
                 value: {
                   polling: {
-                    lastSuccessfulPoll,
+                    last_successful_poll,
                   },
                 },
               },
@@ -277,7 +278,7 @@ describe('healthRoute', () => {
 function mockHealthStats(overrides = {}) {
   return (merge(
     {
-      lastUpdate: new Date().toISOString(),
+      last_update: new Date().toISOString(),
       stats: {
         configuration: {
           timestamp: new Date().toISOString(),
@@ -312,11 +313,15 @@ function mockHealthStats(overrides = {}) {
             drift: [1000, 60000],
             execution: {
               duration: [],
-              resultFrequency: [],
+              result_frequency_percent_as_number: [],
             },
             polling: {
-              lastSuccessfulPoll: new Date().toISOString(),
-              resultFrequency: ['NoTasksClaimed', 'NoTasksClaimed', 'NoTasksClaimed'],
+              last_successful_poll: new Date().toISOString(),
+              result_frequency_percent_as_number: [
+                'NoTasksClaimed',
+                'NoTasksClaimed',
+                'NoTasksClaimed',
+              ],
             },
           },
         },

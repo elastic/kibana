@@ -244,7 +244,10 @@ describe('Task Run Statistics', () => {
              * In the tests this is ocnfiugured to a window size of 5
              */
             expect(
-              taskStats.map((taskStat) => taskStat.value.execution.resultFrequency['alerting:test'])
+              taskStats.map(
+                (taskStat) =>
+                  taskStat.value.execution.result_frequency_percent_as_number['alerting:test']
+              )
             ).toEqual([
               // Success
               { Success: 100, RetryScheduled: 0, Failed: 0 },
@@ -320,15 +323,17 @@ describe('Task Run Statistics', () => {
         )
         .subscribe((taskStats: Array<AggregatedStat<SummarizedTaskRunStat>>) => {
           try {
-            expect(taskStats.map((taskStat) => taskStat.value.polling.lastSuccessfulPoll)).toEqual(
-              expectedTimestamp
-            );
+            expect(
+              taskStats.map((taskStat) => taskStat.value.polling.last_successful_poll)
+            ).toEqual(expectedTimestamp);
 
             /**
              * At any given time we only keep track of the last X Polling Results
              * In the tests this is ocnfiugured to a window size of 5
              */
-            expect(taskStats.map((taskStat) => taskStat.value.polling.resultFrequency)).toEqual([
+            expect(
+              taskStats.map((taskStat) => taskStat.value.polling.result_frequency_percent_as_number)
+            ).toEqual([
               // NoTasksClaimed
               { NoTasksClaimed: 100, RanOutOfCapacity: 0, PoolFilled: 0 },
               // NoTasksClaimed, NoTasksClaimed,

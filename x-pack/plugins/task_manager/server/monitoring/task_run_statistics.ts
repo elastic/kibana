@@ -33,24 +33,24 @@ import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 
 interface FillPoolStat extends JsonObject {
-  lastSuccessfulPoll: string;
-  resultFrequency: FillPoolResult[];
+  last_successful_poll: string;
+  result_frequency_percent_as_number: FillPoolResult[];
 }
 
 interface ExecutionStat extends JsonObject {
   duration: Record<string, number[]>;
-  resultFrequency: Record<string, TaskRunResult[]>;
+  result_frequency_percent_as_number: Record<string, TaskRunResult[]>;
 }
 
 export interface TaskRunStat extends JsonObject {
   drift: number[];
   execution: ExecutionStat;
-  polling: FillPoolStat | Omit<FillPoolStat, 'lastSuccessfulPoll'>;
+  polling: FillPoolStat | Omit<FillPoolStat, 'last_successful_poll'>;
 }
 
 interface FillPoolRawStat extends JsonObject {
-  lastSuccessfulPoll: string;
-  resultFrequency: {
+  last_successful_poll: string;
+  result_frequency_percent_as_number: {
     [FillPoolResult.NoTasksClaimed]: number;
     [FillPoolResult.RanOutOfCapacity]: number;
     [FillPoolResult.PoolFilled]: number;
@@ -61,7 +61,7 @@ export interface SummarizedTaskRunStat extends JsonObject {
   drift: AveragedStat;
   execution: {
     duration: Record<string, AveragedStat>;
-    resultFrequency: Record<
+    result_frequency_percent_as_number: Record<
       string,
       {
         [TaskRunResult.Success]: number;
@@ -71,7 +71,7 @@ export interface SummarizedTaskRunStat extends JsonObject {
       }
     >;
   };
-  polling: FillPoolRawStat | Omit<FillPoolRawStat, 'lastSuccessfulPoll'>;
+  polling: FillPoolRawStat | Omit<FillPoolRawStat, 'last_successful_poll'>;
 }
 
 export function createTaskRunAggregator(
@@ -99,8 +99,8 @@ export function createTaskRunAggregator(
     map((taskEvent: TaskLifecycleEvent) => {
       return {
         polling: {
-          lastSuccessfulPoll: new Date().toISOString(),
-          resultFrequency: resultFrequencyQueue(
+          last_successful_poll: new Date().toISOString(),
+          result_frequency_percent_as_number: resultFrequencyQueue(
             ((taskEvent.event as unknown) as Ok<FillPoolResult>).value
           ),
         },
@@ -109,10 +109,12 @@ export function createTaskRunAggregator(
   );
 
   return combineLatest([
-    taskRunEvents$.pipe(startWith({ drift: [], execution: { duration: {}, resultFrequency: {} } })),
+    taskRunEvents$.pipe(
+      startWith({ drift: [], execution: { duration: {}, result_frequency_percent_as_number: {} } })
+    ),
     taskPollingEvents$.pipe(
       startWith({
-        polling: { resultFrequency: [] },
+        polling: { result_frequency_percent_as_number: [] },
       })
     ),
   ]).pipe(
@@ -146,7 +148,7 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
     drift: driftQueue(timing!.start - task.runAt.getTime()),
     execution: {
       duration: taskRunDurationQueue(task.taskType, timing!.stop - timing!.start),
-      resultFrequency: resultFrequencyQueue(task.taskType, result),
+      result_frequency_percent_as_number: resultFrequencyQueue(task.taskType, result),
     },
   });
 }
@@ -164,15 +166,16 @@ const DEFAULT_POLLING_FREQUENCIES = {
 };
 
 export function summarizeTaskRunStat({
-  polling: { lastSuccessfulPoll, resultFrequency: pollingResultFrequency },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  polling: { last_successful_poll, result_frequency_percent_as_number: pollingResultFrequency },
   drift,
-  execution: { duration, resultFrequency: executionResultFrequency },
+  execution: { duration, result_frequency_percent_as_number: executionResultFrequency },
 }: TaskRunStat): { value: SummarizedTaskRunStat; status: HealthStatus } {
   return {
     value: {
       polling: {
-        ...(lastSuccessfulPoll ? { lastSuccessfulPoll } : {}),
-        resultFrequency: {
+        ...(last_successful_poll ? { last_successful_poll } : {}),
+        result_frequency_percent_as_number: {
           ...DEFAULT_POLLING_FREQUENCIES,
           ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
         },
@@ -180,10 +183,13 @@ export function summarizeTaskRunStat({
       drift: calculateRunningAverage(drift),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
-        resultFrequency: mapValues(executionResultFrequency, (typedResultFrequencies) => ({
-          ...DEFAULT_TASK_RUN_FREQUENCIES,
-          ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
-        })),
+        result_frequency_percent_as_number: mapValues(
+          executionResultFrequency,
+          (typedResultFrequencies) => ({
+            ...DEFAULT_TASK_RUN_FREQUENCIES,
+            ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
+          })
+        ),
       },
     },
     status: HealthStatus.OK,

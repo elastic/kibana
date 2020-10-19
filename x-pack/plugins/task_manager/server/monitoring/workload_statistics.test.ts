@@ -241,7 +241,7 @@ describe('Workload Statistics Aggregator', () => {
         expect(result.key).toEqual('workload');
         expect(result.value).toMatchObject({
           count: 4,
-          taskTypes: {
+          task_types: {
             actions_telemetry: { count: 2, status: { idle: 2 } },
             alerting_telemetry: { count: 1, status: { idle: 1 } },
             session_cleanup: { count: 1, status: { idle: 1 } },
@@ -294,7 +294,7 @@ describe('Workload Statistics Aggregator', () => {
           //  0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57
           // [0, 0, 0, 0,  0,  0,  0,  2,  2,  5,  0,  0,  0,  0,  0,  0,  1,  0,  0, 0 ]
           //  Above you see each bucket and the number of scheduled tasks we expect to have in them
-          estimatedScheduleDensity: [0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+          estimated_schedule_density: [0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
         });
         resolve();
       });
@@ -399,7 +399,7 @@ describe('Workload Statistics Aggregator', () => {
         expect(results[0].key).toEqual('workload');
         expect(results[0].value).toMatchObject({
           count: 5,
-          taskTypes: {
+          task_types: {
             actions_telemetry: { count: 2, status: { idle: 2 } },
             alerting_telemetry: { count: 2, status: { idle: 2 } },
             session_cleanup: { count: 1, status: { idle: 1 } },
@@ -408,7 +408,7 @@ describe('Workload Statistics Aggregator', () => {
         expect(results[1].key).toEqual('workload');
         expect(results[1].value).toMatchObject({
           count: 5,
-          taskTypes: {
+          task_types: {
             actions_telemetry: { count: 2, status: { idle: 2 } },
             alerting_telemetry: { count: 2, status: { idle: 1, failed: 1 } },
             session_cleanup: { count: 1, status: { idle: 1 } },

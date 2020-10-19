@@ -39,7 +39,7 @@ const CONFIG_FIELDS_TO_EXPOSE = [
 type ConfigStat = Pick<TaskManagerConfig, typeof CONFIG_FIELDS_TO_EXPOSE[number]>;
 
 export interface MonitoringStats {
-  lastUpdate: string;
+  last_update: string;
   stats: {
     configuration: MonitoredStat<ConfigStat>;
     workload?: MonitoredStat<WorkloadStat>;
@@ -62,7 +62,7 @@ type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
 };
 
 export interface RawMonitoringStats {
-  lastUpdate: string;
+  last_update: string;
   stats: {
     configuration: RawMonitoredStat<JsonObject>;
     workload?: RawMonitoredStat<WorkloadStat>;
@@ -106,7 +106,7 @@ export function createMonitoringStatsStream(
       scan((monitoringStats: MonitoringStats, { key, value }) => {
         // incrementally merge stats as they come in
         set(monitoringStats.stats, key, value);
-        monitoringStats.lastUpdate = new Date().toISOString();
+        monitoringStats.last_update = new Date().toISOString();
         return monitoringStats;
       }, initialStats)
     )
@@ -114,11 +114,12 @@ export function createMonitoringStatsStream(
 }
 
 export function summarizeMonitoringStats({
-  lastUpdate,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  last_update,
   stats: { runtime, workload, configuration },
 }: MonitoringStats): RawMonitoringStats {
   return {
-    lastUpdate,
+    last_update,
     stats: {
       configuration: {
         ...configuration,
@@ -148,7 +149,7 @@ const initializeStats = (
   initialisationTimestamp: string,
   config: TaskManagerConfig
 ): MonitoringStats => ({
-  lastUpdate: initialisationTimestamp,
+  last_update: initialisationTimestamp,
   stats: {
     configuration: {
       timestamp: initialisationTimestamp,

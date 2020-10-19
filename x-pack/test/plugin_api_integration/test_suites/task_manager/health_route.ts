@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 interface MonitoringStats {
-  lastUpdate: string;
+  last_update: string;
   status: string;
   stats: {
     configuration: {
@@ -23,10 +23,10 @@ interface MonitoringStats {
       timestamp: string;
       value: {
         count: number;
-        taskTypes: Record<string, object>;
+        task_types: Record<string, object>;
         schedule: Array<[string, number]>;
         overdue: number;
-        estimatedScheduleDensity: number[];
+        estimated_schedule_density: number[];
       };
     };
     runtime: {
@@ -35,11 +35,11 @@ interface MonitoringStats {
         drift: Record<string, object>;
         execution: {
           duration: Record<string, Record<string, object>>;
-          resultFrequency: Record<string, Record<string, object>>;
+          result_frequency_percent_as_number: Record<string, Record<string, object>>;
         };
         polling: {
-          lastSuccessfulPoll: string;
-          resultFrequency: Record<string, number>;
+          last_successful_poll: string;
+          result_frequency_percent_as_number: Record<string, number>;
         };
       };
     };
@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(status).to.eql('OK');
 
       const sumSampleTaskInWorkload =
-        (workload.value.taskTypes as {
+        (workload.value.task_types as {
           sampleTask?: { count: number };
         }).sampleTask?.count ?? 0;
       const scheduledWorkload = (mapValues(
@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
         const workloadAfterScheduling = (await getHealth()).stats.workload.value;
 
         expect(
-          (workloadAfterScheduling.taskTypes as { sampleTask: { count: number } }).sampleTask.count
+          (workloadAfterScheduling.task_types as { sampleTask: { count: number } }).sampleTask.count
         ).to.eql(sumSampleTaskInWorkload + 2);
 
         const schedulesWorkloadAfterScheduling = (mapValues(
@@ -148,11 +148,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(typeof workload.overdue).to.eql('number');
 
-      expect(Array.isArray(workload.estimatedScheduleDensity)).to.eql(true);
+      expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
 
       // test run with the default poll_interval of 3s and a monitored_aggregated_stats_refresh_rate of 5s,
-      // so we expect the estimatedScheduleDensity to span a minute (which means 20 buckets, as 60s / 3s = 20)
-      expect(workload.estimatedScheduleDensity.length).to.eql(20);
+      // so we expect the estimated_schedule_density to span a minute (which means 20 buckets, as 60s / 3s = 20)
+      expect(workload.estimated_schedule_density.length).to.eql(20);
     });
 
     it('should return the task manager runtime stats', async () => {
@@ -167,10 +167,10 @@ export default function ({ getService }: FtrProviderContext) {
         },
       } = (await getHealth()).stats;
 
-      expect(isNaN(Date.parse(polling.lastSuccessfulPoll as string))).to.eql(false);
-      expect(typeof polling.resultFrequency.NoTasksClaimed).to.eql('number');
-      expect(typeof polling.resultFrequency.RanOutOfCapacity).to.eql('number');
-      expect(typeof polling.resultFrequency.PoolFilled).to.eql('number');
+      expect(isNaN(Date.parse(polling.last_successful_poll as string))).to.eql(false);
+      expect(typeof polling.result_frequency_percent_as_number.NoTasksClaimed).to.eql('number');
+      expect(typeof polling.result_frequency_percent_as_number.RanOutOfCapacity).to.eql('number');
+      expect(typeof polling.result_frequency_percent_as_number.PoolFilled).to.eql('number');
 
       expect(typeof drift.p50).to.eql('number');
       expect(typeof drift.p90).to.eql('number');
@@ -182,9 +182,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof execution.duration.sampleTask.p95).to.eql('number');
       expect(typeof execution.duration.sampleTask.p99).to.eql('number');
 
-      expect(typeof execution.resultFrequency.sampleTask.Success).to.eql('number');
-      expect(typeof execution.resultFrequency.sampleTask.RetryScheduled).to.eql('number');
-      expect(typeof execution.resultFrequency.sampleTask.Failed).to.eql('number');
+      expect(typeof execution.result_frequency_percent_as_number.sampleTask.Success).to.eql(
+        'number'
+      );
+      expect(typeof execution.result_frequency_percent_as_number.sampleTask.RetryScheduled).to.eql(
+        'number'
+      );
+      expect(typeof execution.result_frequency_percent_as_number.sampleTask.Failed).to.eql(
+        'number'
+      );
     });
   });
 }
