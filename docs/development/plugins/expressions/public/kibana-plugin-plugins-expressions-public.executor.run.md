@@ -9,7 +9,7 @@ Execute expression and return result.
 <b>Signature:</b>
 
 ```typescript
-run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext): Promise<Output>;
+run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions): Promise<Output>;
 ```
 
 ## Parameters
@@ -19,6 +19,7 @@ run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string,
 |  ast | <code>string &#124; ExpressionAstExpression</code> |  |
 |  input | <code>Input</code> |  |
 |  context | <code>ExtraContext</code> |  |
+|  options | <code>ExpressionExecOptions</code> |  |
 
 <b>Returns:</b>
 
