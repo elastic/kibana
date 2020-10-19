@@ -138,7 +138,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     });
 
     this.updateSuggestions();
-  }, 100);
+  }, 200);
 
   private getSuggestions = async () => {
     if (!this.inputRef) {
