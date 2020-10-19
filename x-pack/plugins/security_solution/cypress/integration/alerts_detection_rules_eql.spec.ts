@@ -160,14 +160,10 @@ describe('Detection rules, EQL', () => {
       );
     });
 
-    refreshPage();
     waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('eql', expectedNumberOfAlerts);
-      });
+    cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
     cy.get(ALERT_RULE_NAME).first().should('have.text', eqlRule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
@@ -199,7 +195,6 @@ describe('Detection rules, EQL', () => {
 
     filterByCustomRules();
     goToRuleDetails();
-    refreshPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
