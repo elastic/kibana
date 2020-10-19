@@ -223,8 +223,7 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
           }
         );
 
-        const error = e.response.status === 404 ? NOT_FOUND_MESSAGE : e;
-
+        const error = e.response?.status === 404 ? NOT_FOUND_MESSAGE : e;
         FlashMessagesLogic.actions.setQueuedMessages({
           type: 'error',
           message: error,
@@ -319,7 +318,7 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
         const GROUP_USERS_UPDATED_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.groupUsersUpdated',
           {
-            defaultMessage: 'Successfully updated the users of this group',
+            defaultMessage: 'Successfully updated the users of this group.',
           }
         );
         setSuccessMessage(GROUP_USERS_UPDATED_MESSAGE);
@@ -351,7 +350,7 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
         const GROUP_PRIORITIZATION_UPDATED_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.groupPrioritizationUpdated',
           {
-            defaultMessage: 'Successfully updated shared source prioritization',
+            defaultMessage: 'Successfully updated shared source prioritization.',
           }
         );
 
