@@ -9,6 +9,7 @@ import { IContextProvider, Logger, PluginInitializerContext, RequestHandler } fr
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
+import { APP_ID } from '../common/constants';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
@@ -74,7 +75,7 @@ export class CasePlugin {
     const userActionService = await this.userActionService.setup();
 
     core.http.registerRouteHandlerContext(
-      'case',
+      APP_ID,
       this.createRouteHandlerContext({ core, caseService, caseConfigureService, userActionService })
     );
 
@@ -105,7 +106,7 @@ export class CasePlugin {
     caseService: CaseServiceSetup;
     caseConfigureService: CaseConfigureServiceSetup;
     userActionService: CaseUserActionServiceSetup;
-  }): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'case'> => {
+  }): IContextProvider<RequestHandler<unknown, unknown, unknown>, typeof APP_ID> => {
     return async (context, request) => {
       const [{ savedObjects }] = await core.getStartServices();
       return {
