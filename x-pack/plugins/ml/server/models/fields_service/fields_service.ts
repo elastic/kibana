@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { duration } from 'moment';
+import { merge } from 'lodash';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 
@@ -193,11 +194,11 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     });
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
-      obj.start.epoch = aggregations.earliest.value;
-      obj.start.string = aggregations.earliest.value_as_string;
+      obj.start.epoch = aggregations.earliest.value ?? 0;
+      obj.start.string = aggregations.earliest.value_as_string ?? '';
 
-      obj.end.epoch = aggregations.latest.value;
-      obj.end.string = aggregations.latest.value_as_string;
+      obj.end.epoch = aggregations.latest.value ?? 0;
+      obj.end.string = aggregations.latest.value_as_string ?? '';
     }
     return obj;
   }
@@ -328,16 +329,20 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         },
       },
       size: 0,
-      aggs: {
-        [dateHistogramAggKey]: {
-          date_histogram: {
-            field: timeFieldName,
-            fixed_interval: interval,
+      // use merge instead of spread, to have a type for [key:string] access
+      // see https://github.com/microsoft/TypeScript/issues/27273
+      aggs: merge(
+        {
+          [dateHistogramAggKey]: {
+            date_histogram: {
+              field: timeFieldName,
+              fixed_interval: interval,
+            },
+            aggs: fieldsCardinalityAggs,
           },
-          aggs: fieldsCardinalityAggs,
         },
-        ...maxBucketCardinalitiesAggs,
-      },
+        maxBucketCardinalitiesAggs
+      ),
     };
 
     const {

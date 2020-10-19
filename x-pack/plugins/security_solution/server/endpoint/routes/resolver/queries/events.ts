@@ -3,9 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { PaginationBuilder } from '../utils/pagination';
@@ -54,9 +52,9 @@ export class EventsQuery {
     if (kql) {
       kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
     }
-    const response: ApiResponse<SearchResponse<
-      SafeResolverEvent
-    >> = await client.asCurrentUser.search(this.buildSearch(kqlQuery));
+    const response = await client.asCurrentUser.search<SafeResolverEvent>(
+      this.buildSearch(kqlQuery)
+    );
     return response.body.hits.hits.map((hit) => hit._source);
   }
 }

@@ -68,7 +68,7 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       });
     }
 
-    const { body } = await asInternalUser.search({
+    const { body } = await asInternalUser.search<Message>({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: SIZE,
@@ -78,9 +78,9 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       },
     });
 
-    let messages = [];
+    let messages: Message[] = [];
     if (body.hits.total.value > 0) {
-      messages = body.hits.hits.map((hit: Message) => hit._source);
+      messages = body.hits.hits.map((hit) => hit._source);
       messages.reverse();
     }
     return messages;

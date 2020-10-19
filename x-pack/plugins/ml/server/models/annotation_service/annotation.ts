@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { each, get } from 'lodash';
+import { each } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
@@ -27,10 +27,6 @@ import {
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
-interface EsResult {
-  _source: Annotation;
-  _id: string;
-}
 
 export interface FieldToBucket {
   field: string;
@@ -260,7 +256,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       ];
     }
 
-    const params: GetParams = {
+    const params = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
       body: {
@@ -287,14 +283,15 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     };
 
     try {
-      const { body } = await asInternalUser.search(params);
+      const { body } = await asInternalUser.search<Annotation, typeof params['body']>(params);
+      // TODO: clarify if search can throw
 
-      if (body.error !== undefined && body.message !== undefined) {
-        // No need to translate, this will not be exposed in the UI.
-        throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
-      }
+      // if (body.error !== undefined && body.message !== undefined) {
+      //   // No need to translate, this will not be exposed in the UI.
+      //   throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
+      // }
 
-      const docs: Annotations = get(body, ['hits', 'hits'], []).map((d: EsResult) => {
+      const docs = body.hits.hits.map((d) => {
         // get the original source document and the document id, we need it
         // to identify the annotation when editing/deleting it.
         // if original `event` is undefined then substitute with 'user` by default
@@ -303,19 +300,19 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
           ...d._source,
           event: d._source?.event ?? ANNOTATION_EVENT_USER,
           _id: d._id,
-        } as Annotation;
+        };
       });
 
-      const aggregations = get(body, ['aggregations'], {}) as EsAggregationResult;
+      const { aggregations } = body;
       if (fields) {
-        obj.aggregations = aggregations;
+        obj.aggregations = aggregations ?? {};
       }
       if (isAnnotations(docs) === false) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations didn't pass integrity check.`);
       }
 
-      docs.forEach((doc: Annotation) => {
+      docs.forEach((doc) => {
         const jobId = doc.job_id;
         if (typeof obj.annotations[jobId] === 'undefined') {
           obj.annotations[jobId] = [];

@@ -58,7 +58,7 @@ export function analyticsFeatureImportanceProvider({
     let baseline;
     const { body: aggregationResult } = await asCurrentUser.search(params);
     if (aggregationResult) {
-      baseline = aggregationResult.aggregations.featureImportanceBaseline.value;
+      baseline = aggregationResult.aggregations?.featureImportanceBaseline.value ?? undefined;
     }
     return baseline;
   }

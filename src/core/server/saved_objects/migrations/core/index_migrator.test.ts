@@ -418,14 +418,23 @@ function withIndex(
   const { index = defaultIndex } = opts;
   const { docs = [] } = opts;
   const searchResult = (i: number) => ({
-    _scroll_id: i,
+    _scroll_id: i.toString(),
     _shards: {
       successful: 1,
       total: 1,
+      failed: 0,
+      skipped: 0,
     },
     hits: {
       hits: docs[i] || [],
+      total: {
+        value: 0,
+        relation: 'eq' as const,
+      },
+      max_score: 0,
     },
+    took: 0,
+    timed_out: false,
   });
 
   let scrollCallCounter = 1;

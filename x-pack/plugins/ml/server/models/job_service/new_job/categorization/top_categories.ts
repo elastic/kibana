@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { CategoryId, Category } from '../../../../../common/types/categories';
 
 export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) {
   async function getTotalCategories(jobId: string): Promise<number> {
-    const { body } = await asInternalUser.search<SearchResponse<any>>({
+    const { body } = await asInternalUser.search({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -33,12 +32,11 @@ export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) 
         },
       },
     });
-    // @ts-ignore total is an object here
     return body?.hits?.total?.value ?? 0;
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const { body } = await asInternalUser.search<SearchResponse<any>>({
+    const { body } = await asInternalUser.search({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -74,13 +72,11 @@ export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) 
       },
     });
 
-    const catCounts: Array<{
-      id: CategoryId;
-      count: number;
-    }> = body.aggregations?.cat_count?.buckets.map((c: any) => ({
-      id: c.key,
-      count: c.doc_count,
-    }));
+    const catCounts =
+      body.aggregations?.cat_count?.buckets.map((c) => ({
+        id: c.key as CategoryId,
+        count: c.doc_count,
+      })) ?? [];
     return catCounts || [];
   }
 
@@ -100,7 +96,8 @@ export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) 
             field: 'category_id',
           },
         };
-    const { body } = await asInternalUser.search<SearchResponse<any>>({
+
+    const { body } = await asInternalUser.search<Category>({
       index: ML_RESULTS_INDEX_PATTERN,
       size,
       body: {
@@ -119,7 +116,7 @@ export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) 
       },
     });
 
-    return body.hits.hits?.map((c: { _source: Category }) => c._source) || [];
+    return body.hits.hits?.map((c) => c._source) || [];
   }
 
   async function topCategories(jobId: string, numberOfCategories: number) {

@@ -19,12 +19,7 @@
 
 import { omit } from 'lodash';
 import uuid from 'uuid';
-import {
-  ElasticsearchClient,
-  DeleteDocumentResponse,
-  GetResponse,
-  SearchResponse,
-} from '../../../elasticsearch/';
+import { ElasticsearchClient, DeleteDocumentResponse, GetResponse } from '../../../elasticsearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -795,9 +790,10 @@ export class SavedObjectsRepository {
       },
     };
 
-    const { body, statusCode } = await this.client.search<SearchResponse<any>>(esOptions, {
+    const { body, statusCode } = await this.client.search<SavedObjectsRawDocSource>(esOptions, {
       ignore: [404],
     });
+
     if (statusCode === 404) {
       // 404 is only possible here if the index is missing, which
       // we don't want to leak, see "404s from missing index" above
@@ -812,11 +808,11 @@ export class SavedObjectsRepository {
     return {
       page,
       per_page: perPage,
-      total: body.hits.total,
+      total: body.hits.total.value,
       saved_objects: body.hits.hits.map(
-        (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
+        (hit): SavedObjectsFindResult => ({
           ...this._rawToSavedObject(hit),
-          score: (hit as any)._score,
+          score: hit._score,
         })
       ),
     } as SavedObjectsFindResponse<T>;
@@ -1056,7 +1052,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
-      // @ts-expect-error update doesn't have _seq_no, _primary_term as Record<string, any> / any in LP
+      // @ts-expect-error
       version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),

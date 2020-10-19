@@ -118,7 +118,7 @@ export interface FieldToBucket {
 }
 
 export interface FieldToBucketResult {
-  key: string;
+  key: string | number;
   doc_count: number;
 }
 

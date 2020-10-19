@@ -84,7 +84,7 @@ export function reader(
           scroll,
           scroll_id: scrollId,
         })
-      : client.search<SearchResponse<SavedObjectsRawDocSource>>({
+      : client.search<SavedObjectsRawDocSource>({
           body: { size: batchSize },
           index,
           scroll,
@@ -94,6 +94,7 @@ export function reader(
 
   return async function read() {
     const result = await nextBatch();
+
     assertResponseIncludeAllShards(result.body);
 
     scrollId = result.body._scroll_id;

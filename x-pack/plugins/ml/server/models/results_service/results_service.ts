@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy, slice, get } from 'lodash';
+import { sortBy, slice } from 'lodash';
 import moment from 'moment';
-import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import Boom from 'boom';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
@@ -142,7 +141,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
       });
     }
 
-    const { body } = await asInternalUser.search({
+    const { body } = await asInternalUser.search<AnomalyRecordDoc>({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxRecords,
       body: {
@@ -177,7 +176,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     };
     if (body.hits.total.value > 0) {
       let records: AnomalyRecordDoc[] = [];
-      body.hits.hits.forEach((hit: any) => {
+      body.hits.hits.forEach((hit) => {
         records.push(hit._source);
       });
 
@@ -197,7 +196,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
 
       // Load examples for any categorization anomalies.
       const categoryAnomalies = tableData.anomalies.filter(
-        (item: any) => item.entityName === 'mlcategory'
+        (item) => item.entityName === 'mlcategory'
       );
       if (categoryAnomalies.length > 0) {
         tableData.examplesByJobId = {};
@@ -296,7 +295,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     };
 
     const { body } = await asInternalUser.search(query);
-    const maxScore = get(body, ['aggregations', 'max_score', 'value'], null);
+    const maxScore = body.aggregations?.max_score.value ?? null;
 
     return { maxScore };
   }
@@ -360,14 +359,11 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
       },
     });
 
-    const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
-      body,
-      ['aggregations', 'byJobId', 'buckets'],
-      []
-    );
+    const bucketsByJobId = body.aggregations?.byJobId.buckets ?? [];
+
     const timestampByJobId: { [key: string]: number | undefined } = {};
     bucketsByJobId.forEach((bucket) => {
-      timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
+      timestampByJobId[bucket.key] = bucket.maxTimestamp.value ?? undefined;
     });
 
     return timestampByJobId;
@@ -377,7 +373,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
   // from the given index and job ID.
   // Returned response consists of a list of examples against category ID.
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
-    const { body } = await asInternalUser.search({
+    const { body } = await asInternalUser.search<any>({
       index: ML_RESULTS_INDEX_PATTERN,
       size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
       body: {
@@ -391,7 +387,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
 
     const examplesByCategoryId: { [key: string]: any } = {};
     if (body.hits.total.value > 0) {
-      body.hits.hits.forEach((hit: any) => {
+      body.hits.hits.forEach((hit) => {
         if (maxExamples) {
           examplesByCategoryId[hit._source.category_id] = slice(
             hit._source.examples,
@@ -411,7 +407,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
   async function getCategoryDefinition(jobId: string, categoryId: string) {
-    const { body } = await asInternalUser.search({
+    const { body } = await asInternalUser.search<any>({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 1,
       body: {
@@ -451,7 +447,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
         },
       });
     }
-    const { body } = await asInternalUser.search<SearchResponse<AnomalyCategorizerStatsDoc>>({
+    const { body } = await asInternalUser.search<AnomalyCategorizerStatsDoc>({
       index: ML_RESULTS_INDEX_PATTERN,
       body: {
         query: {
@@ -495,33 +491,31 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
       )
       .map((j) => j.job_id);
 
-    let aggs: any;
-    if (fieldToBucket === JOB_ID) {
-      // if bucketing by job_id, then return list of job_ids with at least one stopped_partitions
-      aggs = {
-        unique_terms: {
-          terms: {
-            field: JOB_ID,
-          },
-        },
-      };
-    } else {
-      // if bucketing by partition field value, then return list of unique stopped_partitions for each job
-      aggs = {
-        jobs: {
-          terms: {
-            field: JOB_ID,
-          },
-          aggs: {
-            unique_stopped_partitions: {
+    const aggs =
+      fieldToBucket === JOB_ID
+        ? // if bucketing by job_id, then return list of job_ids with at least one stopped_partitions
+          {
+            unique_terms: {
               terms: {
-                field: PARTITION_FIELD_VALUE,
+                field: JOB_ID,
               },
             },
-          },
-        },
-      };
-    }
+          }
+        : // if bucketing by partition field value, then return list of unique stopped_partitions for each job
+          {
+            jobs: {
+              terms: {
+                field: JOB_ID,
+              },
+              aggs: {
+                unique_stopped_partitions: {
+                  terms: {
+                    field: PARTITION_FIELD_VALUE,
+                  },
+                },
+              },
+            },
+          };
 
     if (jobIdsWithStopOnWarnSet.length > 0) {
       // search for categorizer_stats documents for the current job where the categorization_status is warn
@@ -538,7 +532,8 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
           },
         },
       ];
-      const { body: results } = await asInternalUser.search<SearchResponse<any>>({
+
+      const { body: results } = await asInternalUser.search({
         index: ML_RESULTS_INDEX_PATTERN,
         size: 0,
         body: {
@@ -557,11 +552,11 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
           aggs,
         },
       });
+
       if (fieldToBucket === JOB_ID) {
         finalResults = {
-          jobs: results.aggregations?.unique_terms?.buckets.map(
-            (b: { key: string; doc_count: number }) => b.key
-          ),
+          jobs:
+            results.aggregations?.unique_terms?.buckets.map((bucket) => bucket.key as string) ?? [],
         };
       } else if (fieldToBucket === PARTITION_FIELD_VALUE) {
         const jobs: Record<string, string[]> = jobIdsWithStopOnWarnSet.reduce(
@@ -571,11 +566,9 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
           },
           {}
         );
-        results.aggregations.jobs.buckets.forEach(
-          (bucket: { key: string | number; unique_stopped_partitions: { buckets: any[] } }) => {
-            jobs[bucket.key] = bucket.unique_stopped_partitions.buckets.map((b) => b.key);
-          }
-        );
+        results.aggregations?.jobs?.buckets.forEach((bucket) => {
+          jobs[bucket.key] = bucket.unique_stopped_partitions.buckets.map((b) => b.key as string);
+        });
         finalResults.jobs = jobs;
       }
     }

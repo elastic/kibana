@@ -106,11 +106,14 @@ export const enhancedEsSearchStrategyProvider = (
 
     const esResponse = await shimAbortSignal(promise, options?.abortSignal);
     const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
+
+    const rawResponse = shimHitsTotal(response) as any;
+
     return {
       id,
       isPartial,
       isRunning,
-      rawResponse: shimHitsTotal(response),
+      rawResponse,
       ...getTotalLoaded(response._shards),
     };
   }

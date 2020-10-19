@@ -19,10 +19,9 @@
 import { Observable, from } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchUsage } from '../collectors/usage';
 import { toSnakeCase } from './to_snake_case';
+import { shimHitsTotal } from '../routes';
 import {
   ISearchStrategy,
   getDefaultSearchParams,
@@ -67,17 +66,17 @@ export const esSearchStrategyProvider = (
               context.core.elasticsearch.client.asCurrentUser.search(params),
               options?.abortSignal
             );
-            const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
+            const { body: response } = await promise;
 
-            if (usage) usage.trackSuccess(rawResponse.took);
+            if (usage) usage.trackSuccess(response.took);
 
             // The above query will either complete or timeout and throw an error.
             // There is no progress indication on this api.
             resolve({
               isPartial: false,
               isRunning: false,
-              rawResponse,
-              ...getTotalLoaded(rawResponse._shards),
+              rawResponse: shimHitsTotal(response),
+              ...getTotalLoaded(response._shards),
             });
           } catch (e) {
             if (usage) usage.trackError();

@@ -18,11 +18,14 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import {
+  ElasticsearchClientMock,
+  elasticsearchClientMock,
+} from '../../../elasticsearch/client/mocks';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let client: ElasticsearchClientMock;
 
   beforeEach(() => {
     client = elasticsearchClientMock.createElasticsearchClient();

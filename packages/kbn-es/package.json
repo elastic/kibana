@@ -12,7 +12,7 @@
     "kbn:watch": "node scripts/build --watch"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "7.9.1",
+    "@elastic/elasticsearch": "https://github.com/dgieselaar/elasticsearch-js.git",
     "@kbn/dev-utils": "1.0.0",
     "abort-controller": "^3.0.0",
     "chalk": "^4.1.0",
@@ -28,8 +28,8 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "1.0.0",
     "@babel/cli": "^7.10.5",
+    "@kbn/babel-preset": "1.0.0",
     "del": "^5.1.0"
   }
 }

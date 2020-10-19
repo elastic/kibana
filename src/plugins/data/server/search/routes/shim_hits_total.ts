@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SearchResponse } from 'elasticsearch';
+import { Assign } from '@kbn/utility-types';
 
 /**
  * Temporary workaround until https://github.com/elastic/kibana/issues/26356 is addressed.
@@ -26,8 +25,12 @@ import { SearchResponse } from 'elasticsearch';
  *
  * @internal
  */
-export function shimHitsTotal(response: SearchResponse<any>) {
-  const total = (response.hits?.total as any)?.value ?? response.hits?.total;
+export function shimHitsTotal<
+  TResponse extends {
+    hits: { total: number } | { total: { value: number } };
+  }
+>(response: TResponse): Assign<TResponse, { hits: TResponse['hits'] & { total: number } }> {
+  const total: number = (response.hits?.total as any)?.value ?? response.hits?.total;
   const hits = { ...response.hits, total };
   return { ...response, hits };
 }
