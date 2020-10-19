@@ -7,8 +7,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const delay = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
-
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
