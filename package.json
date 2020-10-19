@@ -101,7 +101,7 @@
     "@elastic/datemath": "link:packages/elastic-datemath",
     "@elastic/elasticsearch": "7.9.1",
     "@elastic/ems-client": "7.10.0",
-    "@elastic/eui": "29.3.0",
+    "@elastic/eui": "29.5.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/node-crypto": "1.2.1",

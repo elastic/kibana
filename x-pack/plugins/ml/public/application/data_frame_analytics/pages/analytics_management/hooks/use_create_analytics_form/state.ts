@@ -147,7 +147,7 @@ export const getInitialState = (): State => ({
     nNeighbors: undefined,
     numTopFeatureImportanceValues: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
     numTopFeatureImportanceValuesValid: true,
-    numTopClasses: 2,
+    numTopClasses: -1,
     outlierFraction: undefined,
     predictionFieldName: undefined,
     previousJobType: null,

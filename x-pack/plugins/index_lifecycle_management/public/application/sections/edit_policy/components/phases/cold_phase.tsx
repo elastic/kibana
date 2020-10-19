@@ -10,8 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFieldNumber, EuiDescribedFormGroup, EuiSwitch, EuiTextColor } from '@elastic/eui';
 
-import { ColdPhase as ColdPhaseInterface, Phases } from '../../../../../common/types';
-import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
+import { ColdPhase as ColdPhaseInterface, Phases } from '../../../../../../common/types';
+
+import { useFormData } from '../../../../../shared_imports';
+
+import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 
 import {
   LearnMoreLink,
@@ -22,9 +25,9 @@ import {
   SetPriorityInput,
   MinAgeInput,
   DescribedFormField,
-} from '../components';
+} from '../';
 
-import { DataTierAllocationField } from './shared';
+import { DataTierAllocationField, useRolloverPath } from './shared';
 
 const i18nTexts = {
   freezeLabel: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
@@ -46,15 +49,17 @@ interface Props {
   phaseData: ColdPhaseInterface;
   isShowingErrors: boolean;
   errors?: PhaseValidationErrors<ColdPhaseInterface>;
-  hotPhaseRolloverEnabled: boolean;
 }
 export const ColdPhase: FunctionComponent<Props> = ({
   setPhaseData,
   phaseData,
   errors,
   isShowingErrors,
-  hotPhaseRolloverEnabled,
 }) => {
+  const [{ [useRolloverPath]: hotPhaseRolloverEnabled }] = useFormData({
+    watch: [useRolloverPath],
+  });
+
   return (
     <div id="coldPhaseContent" aria-live="polite" role="region">
       <>

@@ -18,8 +18,12 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
-import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../common/types';
-import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
+import { useFormData } from '../../../../../shared_imports';
+import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../../common/types';
+import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
+
+import { useRolloverPath } from './shared';
+
 import {
   LearnMoreLink,
   ActiveBadge,
@@ -30,7 +34,8 @@ import {
   MinAgeInput,
   DescribedFormField,
   Forcemerge,
-} from '../components';
+} from '../';
+
 import { DataTierAllocationField } from './shared';
 
 const i18nTexts = {
@@ -61,15 +66,16 @@ interface Props {
   phaseData: WarmPhaseInterface;
   isShowingErrors: boolean;
   errors?: PhaseValidationErrors<WarmPhaseInterface>;
-  hotPhaseRolloverEnabled: boolean;
 }
 export const WarmPhase: FunctionComponent<Props> = ({
   setPhaseData,
   phaseData,
   errors,
   isShowingErrors,
-  hotPhaseRolloverEnabled,
 }) => {
+  const [{ [useRolloverPath]: hotPhaseRolloverEnabled }] = useFormData({
+    watch: [useRolloverPath],
+  });
   return (
     <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
       <>
@@ -132,7 +138,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                     />
                   </EuiFormRow>
                 ) : null}
-                {!phaseData.warmPhaseOnRollover ? (
+                {!phaseData.warmPhaseOnRollover || !hotPhaseRolloverEnabled ? (
                   <Fragment>
                     <EuiSpacer size="m" />
                     <MinAgeInput<WarmPhaseInterface>
