@@ -19,7 +19,7 @@ describe('HiddenText', () => {
     expect(wrapper.text()).toEqual('•••••••••••');
   });
 
-  it('provides a "toggle" function, which when called, "hiddenText" to the original, unobfuscated, text', () => {
+  it('provides a "toggle" function, which when called, changes "hiddenText" to the original unobfuscated text', () => {
     let toggleFn = () => {};
 
     const wrapper = shallow(
