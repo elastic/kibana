@@ -205,6 +205,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={handleSaveIndices}
+                disabled={selectedOptions.length === 0}
                 data-test-subj="add-index"
                 fill
                 fullWidth
