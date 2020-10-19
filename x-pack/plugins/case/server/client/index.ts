@@ -10,13 +10,19 @@ import { update } from './update';
 import { addComment } from './add_comment';
 
 export const createCaseClient = ({
+  savedObjectsClient,
   caseConfigureService,
   caseService,
   userActionService,
 }: CaseClientFactoryArguments): CaseClient => {
   return {
-    create: create({ caseConfigureService, caseService, userActionService }),
-    update: update({ caseConfigureService, caseService, userActionService }),
-    addComment: addComment({ caseConfigureService, caseService, userActionService }),
+    create: create({ savedObjectsClient, caseConfigureService, caseService, userActionService }),
+    update: update({ savedObjectsClient, caseConfigureService, caseService, userActionService }),
+    addComment: addComment({
+      savedObjectsClient,
+      caseConfigureService,
+      caseService,
+      userActionService,
+    }),
   };
 };

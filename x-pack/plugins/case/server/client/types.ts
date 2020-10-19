@@ -14,7 +14,6 @@ import {
 
 export interface CaseClientFunctionArguments {
   request: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface CaseClientCreate extends CaseClientFunctionArguments {
@@ -31,6 +30,7 @@ export interface CaseClientAddComment extends CaseClientFunctionArguments {
 }
 
 export interface CaseClientFactoryArguments {
+  savedObjectsClient: SavedObjectsClientContract;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;

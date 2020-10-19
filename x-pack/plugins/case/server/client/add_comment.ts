@@ -18,14 +18,10 @@ import { CaseClientAddComment, CaseClientFactoryArguments } from './types';
 import { CASE_SAVED_OBJECT } from '../saved_object_types';
 
 export const addComment = ({
+  savedObjectsClient,
   caseService,
   userActionService,
-}: CaseClientFactoryArguments) => async ({
-  request,
-  savedObjectsClient,
-  caseId,
-  comment,
-}: CaseClientAddComment) => {
+}: CaseClientFactoryArguments) => async ({ request, caseId, comment }: CaseClientAddComment) => {
   const query = pipe(
     excess(CommentRequestRt).decode(comment),
     fold(throwErrors(Boom.badRequest), identity)

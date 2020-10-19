@@ -75,7 +75,7 @@ export class CasePlugin {
 
     core.http.registerRouteHandlerContext(
       'case',
-      this.createRouteHandlerContext({ caseService, caseConfigureService, userActionService })
+      this.createRouteHandlerContext({ core, caseService, caseConfigureService, userActionService })
     );
 
     const router = core.http.createRouter();
@@ -96,18 +96,22 @@ export class CasePlugin {
   }
 
   private createRouteHandlerContext = ({
+    core,
     caseService,
     caseConfigureService,
     userActionService,
   }: {
+    core: CoreSetup;
     caseService: CaseServiceSetup;
     caseConfigureService: CaseConfigureServiceSetup;
     userActionService: CaseUserActionServiceSetup;
   }): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'case'> => {
     return async (context, request) => {
+      const [{ savedObjects }] = await core.getStartServices();
       return {
         getCaseClient: () => {
           return createCaseClient({
+            savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,
             caseConfigureService,
             userActionService,

@@ -24,11 +24,11 @@ import { getCaseToUpdate, transformCaseConnectorToEsConnector } from '../routes/
 
 import { CaseClientUpdate, CaseClientFactoryArguments } from './types';
 
-export const update = ({ caseService, userActionService }: CaseClientFactoryArguments) => async ({
-  request,
+export const update = ({
   savedObjectsClient,
-  theCase,
-}: CaseClientUpdate) => {
+  caseService,
+  userActionService,
+}: CaseClientFactoryArguments) => async ({ request, theCase }: CaseClientUpdate) => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(theCase),
     fold(throwErrors(Boom.badRequest), identity)

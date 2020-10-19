@@ -21,14 +21,11 @@ import {
 import { CaseClientCreate, CaseClientFactoryArguments } from './types';
 
 export const create = ({
+  savedObjectsClient,
   caseService,
   caseConfigureService,
   userActionService,
-}: CaseClientFactoryArguments) => async ({
-  request,
-  savedObjectsClient,
-  theCase,
-}: CaseClientCreate) => {
+}: CaseClientFactoryArguments) => async ({ request, theCase }: CaseClientCreate) => {
   const query = pipe(
     excess(CasePostRequestRt).decode(theCase),
     fold(throwErrors(Boom.badRequest), identity)
