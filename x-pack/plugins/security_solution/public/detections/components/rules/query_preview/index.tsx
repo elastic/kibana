@@ -117,7 +117,7 @@ export const PreviewQuery = ({
     indexNames: index,
     histogramType: MatrixHistogramType.events,
     stackByField: 'event.category',
-    threshold,
+    threshold: ruleType === 'threshold' ? threshold : undefined,
     skip: true,
   });
 
