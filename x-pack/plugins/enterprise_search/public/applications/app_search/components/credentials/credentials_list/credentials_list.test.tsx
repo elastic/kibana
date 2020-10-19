@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { CredentialsList } from './credentials_list';
-import { EuiBasicTable, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 import { IApiToken } from '../types';
 import { ApiTokenTypes } from '../constants';
 
@@ -26,7 +26,7 @@ describe('Credentials', () => {
 
   // Kea mocks
   const values = {
-    apiTokens: [],
+    apiTokens: [apiToken],
     meta: {
       page: {
         current: 1,
@@ -75,6 +75,19 @@ describe('Credentials', () => {
       const wrapper = shallow(<CredentialsList />);
       const { items } = wrapper.find(EuiBasicTable).props();
       expect(items.map((i: IApiToken) => i.id)).toEqual([undefined, 1, 2]);
+    });
+  });
+
+  describe('empty state', () => {
+    it('renders an EuiEmptyState when no credentials are available', () => {
+      setMockValues({
+        ...values,
+        apiTokens: [],
+      });
+
+      const wrapper = shallow(<CredentialsList />);
+      expect(wrapper.exists(EuiEmptyPrompt)).toBe(true);
+      expect(wrapper.exists(EuiBasicTable)).toBe(false);
     });
   });
 
