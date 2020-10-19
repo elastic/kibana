@@ -62,7 +62,6 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 
@@ -77,7 +76,6 @@ import {
 
 export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
 
-export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
 export {
@@ -381,7 +379,6 @@ export { CoreUsageDataStart } from './core_usage_data';
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
- *    - {@link Auditor | uiSettings.auditor} - AuditTrail client scoped to the incoming request
  *
  * @public
  */
@@ -400,7 +397,6 @@ export interface RequestHandlerContext {
     uiSettings: {
       client: IUiSettingsClient;
     };
-    auditor: Auditor;
   };
 }
 
@@ -437,8 +433,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   uiSettings: UiSettingsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-  /** {@link AuditTrailSetup} */
-  auditTrail: AuditTrailSetup;
 }
 
 /**
@@ -472,8 +466,6 @@ export interface CoreStart {
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
   uiSettings: UiSettingsServiceStart;
-  /** {@link AuditTrailSetup} */
-  auditTrail: AuditTrailStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
 }
@@ -486,7 +478,6 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
-  AuditTrailStart,
 };
 
 /**
