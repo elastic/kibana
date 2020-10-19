@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect, useCallback } from 'react';
 import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
@@ -48,26 +48,15 @@ export const DatePickerWrapper: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
 
-  const [refreshInterval, setRefreshInterval] = useState<RefreshInterval>(
-    globalState?.refreshInterval ?? timefilter.getRefreshInterval()
+  const refreshInterval: RefreshInterval =
+    globalState?.refreshInterval ?? timefilter.getRefreshInterval();
+
+  const setRefreshInterval = useCallback(
+    (refreshIntervalUpdate: RefreshInterval) => {
+      setGlobalState('refreshInterval', refreshIntervalUpdate);
+    },
+    [setGlobalState]
   );
-
-  useEffect(() => {
-    if (
-      globalState?.refreshInterval?.value === refreshInterval?.value &&
-      globalState?.refreshInterval?.pause === refreshInterval?.pause
-    ) {
-      return;
-    }
-
-    setGlobalState({ refreshInterval });
-    timefilter.setRefreshInterval(refreshInterval);
-  }, [
-    globalState?.refreshInterval,
-    refreshInterval?.pause,
-    refreshInterval?.value,
-    setGlobalState,
-  ]);
 
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
