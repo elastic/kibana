@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import {
+  Logger,
+  LegacyAPICaller,
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
@@ -56,7 +62,14 @@ export interface CollectorFetchContext {
    * - When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user
    */
   esClient: ElasticsearchClient;
+  /**
+   * Request-scoped Saved Objects client:
+   * - When users are requesting a sample of data, it is scoped to their role to avoid exposing data they should't read
+   * - When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user
+   */
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }
+
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
