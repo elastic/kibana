@@ -14,11 +14,13 @@ import {
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
+  analyticsMapQuerySchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
   jobsExistSchema,
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
@@ -31,6 +33,16 @@ function getIndexPatternId(context: RequestHandlerContext, patternName: string) 
 function deleteDestIndexPatternById(context: RequestHandlerContext, indexPatternId: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
   return iph.deleteIndexPatternById(indexPatternId);
+}
+
+function getAnalyticsMap(client: IScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(client.asInternalUser);
+  return analytics.getAnalyticsMap(analyticsId);
+}
+
+function getExtendedMap(client: IScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(client.asInternalUser);
+  return analytics.extendAnalyticsMapForAnalyticsJob(analyticsId);
 }
 
 /**
@@ -598,4 +610,39 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       }
     })
   );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/map/:analyticsId Get objects leading up to analytics job
+   * @apiName GetDataFrameAnalyticsIdMap
+   * @apiDescription Returns map of objects leading up to analytics job.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/map/{analyticsId}',
+      validate: {
+        params: analyticsIdSchema,
+        query: analyticsMapQuerySchema,
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const treatAsRoot = request.query?.treatAsRoot;
+        const caller =
+          treatAsRoot === 'true' || treatAsRoot === true ? getExtendedMap : getAnalyticsMap;
+        const results = await caller(mlClient, client, analyticsId);
+
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+}
 }
