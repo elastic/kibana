@@ -162,10 +162,10 @@ export const xyVisualization: Visualization<State> = {
         {
           groupId: 'x',
           groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.VerticalAxisLabel', {
+            ? i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
                 defaultMessage: 'Vertical axis',
               })
-            : i18n.translate('xpack.lens.xyChart.HorizontalAxisLabel', {
+            : i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
                 defaultMessage: 'Horizontal axis',
               }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
@@ -178,10 +178,10 @@ export const xyVisualization: Visualization<State> = {
         {
           groupId: 'y',
           groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.HorizontalAxisLabel', {
+            ? i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
                 defaultMessage: 'Horizontal axis',
               })
-            : i18n.translate('xpack.lens.xyChart.VerticalAxisLabel', {
+            : i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
                 defaultMessage: 'Vertical axis',
               }),
           accessors: layer.accessors,
