@@ -169,21 +169,6 @@ export function registerTransactionDurationAnomalyAlertType({
         },
       };
 
-      // const response = ((await mlAnomalySearch(
-      //   anomalySearchParams
-      // )) as unknown) as {
-      //   hits: { total: { value: number } };
-      //   aggregations?: {
-      //     services: {
-      //       buckets: Array<{
-      //         key: string;
-      //         record_avg: { value: number };
-      //         transaction_types: { buckets: Array<{ key: string }> };
-      //       }>;
-      //     };
-      //   };
-      // };
-
       const response = ((await mlAnomalySearch(
         anomalySearchParams,
         jobIds

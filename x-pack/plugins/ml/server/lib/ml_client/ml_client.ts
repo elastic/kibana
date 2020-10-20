@@ -178,7 +178,7 @@ export function getMlClient(
       return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
     },
     async getDataFrameAnalyticsStats(...p: Parameters<MlClient['getDataFrameAnalyticsStats']>) {
-      // this should use DataFrameAnalyticsStats, but needs a refactor !!!!!!!!!!!!!!
+      // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
       await jobIdsCheck('data-frame-analytics', p);
       const { body } = await mlClient.getDataFrameAnalyticsStats<{
         data_frame_analytics: DataFrameAnalyticsConfig[];
