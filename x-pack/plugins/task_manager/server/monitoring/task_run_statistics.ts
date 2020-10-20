@@ -78,7 +78,6 @@ export interface SummarizedTaskRunStat extends JsonObject {
   polling: FillPoolRawStat | Omit<FillPoolRawStat, 'last_successful_poll'>;
 }
 
-const DEFAULT_EXECUTION_ERROR_THRESHOLD = 90;
 export function createTaskRunAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
   runningAverageWindowSize: number

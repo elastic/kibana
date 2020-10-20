@@ -14,6 +14,7 @@ import {
 } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
 
 export {
   MonitoringStats,
@@ -28,10 +29,11 @@ export function createMonitoringStats(
   taskPollingLifecycle: TaskPollingLifecycle,
   taskStore: TaskStore,
   config: TaskManagerConfig,
+  managedConfig: ManagedConfiguration,
   logger: Logger
 ): Observable<MonitoringStats> {
   return createMonitoringStatsStream(
-    createAggregators(taskPollingLifecycle, taskStore, config, logger),
+    createAggregators(taskPollingLifecycle, taskStore, config, managedConfig, logger),
     config
   );
 }

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { of } from 'rxjs';
-import { pick } from 'lodash';
+import { combineLatest, of } from 'rxjs';
+import { pick, merge } from 'lodash';
+import { map, startWith } from 'rxjs/operators';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { TaskManagerConfig } from '../config';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
-  'max_workers',
-  'poll_interval',
   'request_capacity',
   'max_poll_inactivity_cycles',
   'monitored_aggregated_stats_refresh_rate',
@@ -19,14 +19,33 @@ const CONFIG_FIELDS_TO_EXPOSE = [
   'monitored_task_execution_thresholds',
 ] as const;
 
-export type ConfigStat = Pick<TaskManagerConfig, typeof CONFIG_FIELDS_TO_EXPOSE[number]>;
+export type ConfigStat = Pick<
+  TaskManagerConfig,
+  'max_workers' | 'poll_interval' | typeof CONFIG_FIELDS_TO_EXPOSE[number]
+>;
 
 export function createConfigurationAggregator(
-  config: TaskManagerConfig
+  config: TaskManagerConfig,
+  managedConfig: ManagedConfiguration
 ): AggregatedStatProvider<ConfigStat> {
-  const picked: ConfigStat = pick(config, ...CONFIG_FIELDS_TO_EXPOSE);
-  return of({
-    key: 'configuration',
-    value: picked,
-  });
+  return combineLatest([
+    of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
+    managedConfig.pollIntervalConfiguration$.pipe(
+      startWith(config.poll_interval),
+      map<number, Pick<TaskManagerConfig, 'poll_interval'>>((pollInterval) => ({
+        poll_interval: pollInterval,
+      }))
+    ),
+    managedConfig.maxWorkersConfiguration$.pipe(
+      startWith(config.max_workers),
+      map<number, Pick<TaskManagerConfig, 'max_workers'>>((maxWorkers) => ({
+        max_workers: maxWorkers,
+      }))
+    ),
+  ]).pipe(
+    map((configurations) => ({
+      key: 'configuration',
+      value: merge({}, ...configurations),
+    }))
+  );
 }

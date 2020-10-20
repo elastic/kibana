@@ -24,6 +24,7 @@ import {
 import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
 
 export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
@@ -63,10 +64,11 @@ export function createAggregators(
   taskPollingLifecycle: TaskPollingLifecycle,
   taskStore: TaskStore,
   config: TaskManagerConfig,
+  managedConfig: ManagedConfiguration,
   logger: Logger
 ): AggregatedStatProvider {
   return merge(
-    createConfigurationAggregator(config),
+    createConfigurationAggregator(config, managedConfig),
     createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
     createWorkloadAggregator(
       taskStore,

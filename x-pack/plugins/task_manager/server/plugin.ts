@@ -109,7 +109,7 @@ export class TaskManagerPlugin
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
 
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+    const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
       startingMaxWorkers: this.config!.max_workers,
@@ -122,8 +122,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
+      ...managedConfiguration,
     });
     this.taskPollingLifecycle = taskPollingLifecycle;
 
@@ -131,6 +130,7 @@ export class TaskManagerPlugin
       taskPollingLifecycle,
       taskStore,
       this.config!,
+      managedConfiguration,
       this.logger
     ).subscribe((stat) => this.monitoringStats$.next(stat));
 
