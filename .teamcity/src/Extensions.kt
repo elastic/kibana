@@ -137,3 +137,34 @@ fun BuildSteps.failedTestReporter(init: ScriptBuildStep.() -> Unit = {}) {
     init()
   }
 }
+
+fun BuildSteps.runbld(stepName: String, script: String) {
+  script {
+    name = stepName
+    scriptContent =
+      """
+        #!/bin/bash
+        branchName="${'$'}GIT_BRANCH"
+        if [[ "${'$'}GITHUB_PR_NUMBER" ]]; then
+          branchName=pull-request
+        fi
+
+        project=kibana
+        if [[ "${'$'}ES_SNAPSHOT_MANIFEST" ]]; then
+          project=kibana-es-snapshot-verify
+        fi
+
+        # These parameters are only for runbld reporting
+        export JENKINS_HOME="${'$'}HOME"
+        export BUILD_URL="%teamcity.serverUrl%/build/%teamcity.build.id%"
+        export branch_specifier=${'$'}branchName
+        export NODE_LABELS='teamcity'
+        export BUILD_NUMBER="%build.number%"
+        export EXECUTOR_NUMBER=''
+        export NODE_NAME=''
+
+        /usr/local/bin/runbld -d "${'$'}(pwd)" --job-name="elastic+${'$'}project+${'$'}branchName" $script
+      """.trimIndent()
+    executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
+  }
+}
