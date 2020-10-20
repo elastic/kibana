@@ -31,25 +31,16 @@ and processes the data, with {kib} sitting on top.
 
 From the home page, {kib} provides these options for adding data:
 
-* Import data using the
-https://www.elastic.co/blog/importing-csv-and-log-data-into-elasticsearch-with-file-data-visualizer[File Data visualizer].
-* Set up a data flow to Elasticsearch using our built-in tutorials.
-If a tutorial doesn’t exist for your data, go to the
-{beats-ref}/beats-reference.html[Beats overview] to learn about other data shippers
-in the {beats} family.
-* <<add-sample-data, Add a sample data set>> and take {kib} for a test drive without loading data yourself.
-* Index your data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
- or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
-+
+* Set up a data flow using popular apps and services
+* Collect data using Elastic Agent
+* Upload data using the
+https://www.elastic.co/blog/importing-csv-and-log-data-into-elasticsearch-with-file-data-visualizer[File Data visualizer]
+
+If you're not ready to use your own data, you can add a <<get-started, sample data set>>
+to give {kib} a test drive.
+
 [role="screenshot"]
-image::images/intro-data-tutorial.png[Ways to get data in from the home page]
-
-
-{kib} uses an
-<<index-patterns, index pattern>> to tell it which {es} indices to explore.
-If you add upload a file, run a built-in tutorial, or add sample data, you get an index pattern for free,
-and are good to start exploring. If you load your own data, you can create
-an index pattern in <<management, Stack Management>>.
+image::setup/images/add-data-home.png[Ways to get data in from the home page]
 
 [float]
 [[explore-and-query]]
@@ -94,7 +85,7 @@ and dynamic client-side styling.
 
 * <<tsvb, TSVB>> allows you to combine
 an infinite number of aggregations to display complex data.
-With TSVB, you can analyze multiple index patterns and customize
+With TSVB, you can customize
 every aspect of your visualization. Choose your own date format and color
 gradients, and easily switch your data view between time series, metric,
 top N, gauge, and markdown.
@@ -124,7 +115,7 @@ dashboards in one space, but full access to all of Kibana’s features in anothe
 === Manage all things Elastic Stack
 
 <<management, Stack Management>> provides guided processes for managing all
-things Elastic Stack &mdash; indices, clusters, licenses, UI settings, index patterns,
+things Elastic Stack &mdash; indices, clusters, licenses, UI settings,
 and more. Want to update your {es} indices? Set user roles and privileges?
 Turn on dark mode? Kibana has UIs for all that.
 

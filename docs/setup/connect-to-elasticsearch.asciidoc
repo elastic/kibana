@@ -1,34 +1,57 @@
 [[connect-to-elasticsearch]]
 == Add data to {kib}
 
-To start working with your data in {kib}, you can:
+The fastet way to add data to {kib} is to use one of the built-in options,
+available from the home page. You can:
 
-* Upload a CSV, JSON, or log file with the File Data Visualizer.
+* Add data from popular apps and services
+* Add data using an Elastic Agent
+* Upload a file
 
-* Upload geospatial data with the GeoJSON Upload feature.
-
-* Index logs, metrics, events, or application data by setting up a Beats module.
-
-* Connect {kib} with existing {es} indices.
+[role="screenshot"]
+image::images/add-data-home.png[Built-in options for adding data to Kibana]
 
 If you're not ready to use your own data, you can add a <<get-started, sample data set>>
-to see all that you can do in {kib}.
+to give {kib} a test drive.
+
+[float]
+[[add-data-tutorial-kibana]]
+===  Add data tutorials
+
+These tutorials guide you through installing and configuring a
+Beats data shipper to collect metrics, logs, security events, and application data and send it to {es}.
+You can then use the pre-built dashboards to explore and analyze the data.
+
+If a tutorial doesn’t exist for your data, go to the {beats-ref}/beats-reference.html[Beats overview]
+to learn about other data shippers in the Beats family.
+
+[role="screenshot"]
+image::images/add-data-tutorials.png[Add Data tutorials]
+
+
+[discrete]
+[[add-data-fleet-kibana]]
+===  Add an Elatic Agent
+
+beta[]
+
+Fleet is a single, unified way to collect logs and metrics from systems
+and services across your organization. You don't have to install multiple
+Beats and other agents, making easier to deploy policies across your infrastructure.
+For more information, see
+
+[role="screenshot"]
+image::images/add-data-fleet.png[Add data using Fleet]
 
 [float]
 [[upload-data-kibana]]
-=== Upload a CSV, JSON, or log file
+=== Upload a file
 
 experimental[]
 
 To visualize data in a CSV, JSON, or log file, you can upload it using the File
-Data Visualizer. On the home page, click *Import a CSV, NDSON, or log file*, and
-then drag your file into the File Data Visualizer. Alternatively, you can open
-it by navigating to *Machine Learning* from the side navigation and selecting
-*Data Visualizer*.
-
-[role="screenshot"]
-image::images/data-viz-homepage.jpg[File Data Visualizer on the home page]
-
+Data Visualizer. On the home page, click *Upload a file*, and
+then drag your file into the *File Data Visualizer*.
 You can upload a file up to 100 MB. This value is configurable up to 1 GB in
 <<kibana-ml-settings, Advanced Settings>>.
 
@@ -41,67 +64,11 @@ the uploaded file and to suggest ingest pipelines and mappings for your data.
 NOTE: This feature is not intended for use as part of a
 repeated production process, but rather for the initial exploration of your data.
 
-[float]
-[[upload-geoipdata-kibana]]
-=== Upload geospatial data
+To visualize geospatial data in a point or shape file, use the <<import-geospatial-data, GeoJSON Upload>>
+feature in *Maps*.
 
-To visualize geospatial data in a point or shape file, you can upload it using the <<import-geospatial-data, GeoJSON Upload>>
-feature in Maps, and then use that data as a layer in a map.
-The data is also available for use in the broader Kibana ecosystem, for example,
-in visualizations and Canvas workpads.
-With GeoJSON Upload, you can upload a file up to 50 MB.
+[discrete]
+=== Or, load your data yourself
 
-[float]
-[[add-data-tutorial-kibana]]
-===  Index metrics, log, security, and application data
-
-The built-in data tutorials can help you quickly get up and running with
-metrics data, log analytics, security events, and application data.
-These tutorials walk you through installing and configuring a
-Beats data shipper to periodically collect and send data to {es}.
-You can then use the pre-built dashboards to explore and analyze the data.
-
-You access the tutorials from the home page.
-If a tutorial doesn’t exist for your data, go to the {beats-ref}/beats-reference.html[Beats overview]
-to learn about other data shippers in the Beats family.
-
-[role="screenshot"]
-image::images/add-data-tutorials.png[Add Data tutorials]
-
-
-[float]
-[[connect-to-es]]
-=== Connect with {es} indices
-
-To visualize data in existing {es} indices, you must
-create an index pattern that matches the names of the indices that you want to explore.
-When you add data with the File Data Visualizer, GeoJSON Upload feature,
-or built-in tutorial, an index pattern is created for you.
-
-. Go to *Stack Management*, and then click *Index Patterns*.
-
-. Click *Create index pattern*.
-
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices.
-+
-For example, an index pattern can point to your Apache data from yesterday,
-`filebeat-apache-4-3-2022`, or any index that matches the pattern, `filebeat-*`.
-Using a wildcard is the more popular approach.
-
-
-. Click *Next Step*, and then select the index field that contains the timestamp you want to use to perform time-based
-comparisons.
-+
-Kibana reads the index mapping and lists all fields that contain a timestamp. If your
-index doesn't have time-based data, choose *I don't want to use the time filter*.
-+
-You must select a time field to use global time filters on your dashboards.
-
-. Click *Create index pattern*.
-+
-{kib} is now configured to access your {es} indices.
-You’ll see a list of fields configured for the matching index.
-You can designate your index pattern as the default by clicking the star icon on this page.
-+
-When searching in *Discover* and creating visualizations, you choose a pattern
-from the index pattern menu to specify the {es} indices that contain the data you want to explore.
+You can also index your data into Elasticsearch with REST APIs or client libraries.
+After you add your data, you'll need to create an <<index-patterns,index pattern>>.
