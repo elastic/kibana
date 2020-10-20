@@ -40,7 +40,10 @@ export interface QueryBarTimelineComponentProps {
   timelineId: string;
 }
 
-const timelineFilterDropArea = 'timeline-filter-drop-area';
+export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
+
+const getNonDropAreaFilters = (filters: Filter[] = []) =>
+  filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
 
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({ browserFields, filterManager, kqlMode, indexPattern, timelineId }) => {
@@ -50,7 +53,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
     const dispatch = useDispatch();
     const { dataProviders, filters, savedQueryId } = useShallowEqualSelector(
-      (state: State) => getTimeline(state, timelineId) ?? { ...timelineDefaults }
+      (state: State) => getTimeline(state, timelineId) ?? timelineDefaults
     );
     const {
       timerange: { to, toStr, from, fromStr },
@@ -130,9 +133,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
-              const filterWithoutDropArea = filterManager
-                .getFilters()
-                .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+              const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
               setFilters(filterWithoutDropArea);
             }
           },
@@ -147,9 +148,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     }, []);
 
     useEffect(() => {
-      const filterWithoutDropArea = filterManager
-        .getFilters()
-        .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+      const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
       if (!deepEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters!);
       }
@@ -197,7 +196,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                 ...mySavedQuery,
                 attributes: {
                   ...mySavedQuery.attributes,
-                  filters: filters!.filter((f) => f.meta.controlledBy !== timelineFilterDropArea),
+                  filters: getNonDropAreaFilters(filters),
                 },
               });
             }
@@ -249,7 +248,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             const dataProviderFilterExists =
               newSavedQuery.attributes.filters != null
                 ? newSavedQuery.attributes.filters.findIndex(
-                    (f) => f.meta.controlledBy === timelineFilterDropArea
+                    (f) => f.meta.controlledBy === TIMELINE_FILTER_DROP_AREA
                   )
                 : -1;
             savedQueryServices.saveQuery(
@@ -291,7 +290,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
         filterManager={filterManager}
-        filters={filterManager.getFilters() ?? []}
+        filters={filters}
         onSubmitQuery={onSubmitQuery}
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}
@@ -308,8 +307,8 @@ export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
   return {
     ...dslObject,
     meta: {
-      alias: timelineFilterDropArea,
-      controlledBy: timelineFilterDropArea,
+      alias: TIMELINE_FILTER_DROP_AREA,
+      controlledBy: TIMELINE_FILTER_DROP_AREA,
       negate: false,
       disabled: false,
       type: 'custom',

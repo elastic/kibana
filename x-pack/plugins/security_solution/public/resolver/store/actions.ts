@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
- * When the user wants to bring a process node front-and-center on the map.
+ * When the user wants to bring a node front-and-center on the map.
  */
-interface UserBroughtProcessIntoView {
-  readonly type: 'userBroughtProcessIntoView';
+interface UserBroughtNodeIntoView {
+  readonly type: 'userBroughtNodeIntoView';
   readonly payload: {
     /**
-     * Used to identify the process node that should be brought into view.
+     * Used to identify the node that should be brought into view.
      */
-    readonly process: SafeResolverEvent;
+    readonly nodeID: string;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
      */
@@ -97,7 +96,7 @@ export type ResolverAction =
   | CameraAction
   | DataAction
   | AppReceivedNewExternalProperties
-  | UserBroughtProcessIntoView
+  | UserBroughtNodeIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData;

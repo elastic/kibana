@@ -117,6 +117,62 @@ describe('OnPreRouting', () => {
     expect(urlAfterForwarding).toBe('/redirectUrl');
   });
 
+  it('provides original request url', async () => {
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/login', validate: false }, (context, req, res) => {
+      return res.ok({ body: { rewrittenUrl: req.rewrittenUrl?.path } });
+    });
+
+    registerOnPreRouting((req, res, t) => t.rewriteUrl('/login'));
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/initial?name=foo')
+      .expect(200, { rewrittenUrl: '/initial?name=foo' });
+  });
+
+  it('provides original request url if rewritten several times', async () => {
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/reroute-2', validate: false }, (context, req, res) => {
+      return res.ok({ body: { rewrittenUrl: req.rewrittenUrl?.path } });
+    });
+
+    registerOnPreRouting((req, res, t) => t.rewriteUrl('/reroute-1'));
+    registerOnPreRouting((req, res, t) => t.rewriteUrl('/reroute-2'));
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/initial?name=foo')
+      .expect(200, { rewrittenUrl: '/initial?name=foo' });
+  });
+
+  it('does not provide request url if interceptor does not rewrite url', async () => {
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/login', validate: false }, (context, req, res) => {
+      return res.ok({ body: { rewrittenUrl: req.rewrittenUrl?.path } });
+    });
+
+    registerOnPreRouting((req, res, t) => t.next());
+
+    await server.start();
+
+    await supertest(innerServer.listener).get('/login').expect(200, {});
+  });
+
   it('supports redirection from the interceptor', async () => {
     const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
       setupDeps

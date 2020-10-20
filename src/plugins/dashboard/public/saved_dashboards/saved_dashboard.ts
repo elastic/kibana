@@ -16,11 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  createSavedObjectClass,
-  SavedObject,
-  SavedObjectKibanaServices,
-} from '../../../../plugins/saved_objects/public';
+import { SavedObject, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
@@ -45,10 +41,9 @@ export interface SavedObjectDashboard extends SavedObject {
 
 // Used only by the savedDashboards service, usually no reason to change this
 export function createSavedDashboardClass(
-  services: SavedObjectKibanaServices
+  savedObjectStart: SavedObjectsStart
 ): new (id: string) => SavedObjectDashboard {
-  const SavedObjectClass = createSavedObjectClass(services);
-  class SavedDashboard extends SavedObjectClass {
+  class SavedDashboard extends savedObjectStart.SavedObjectClass {
     // save these objects with the 'dashboard' type
     public static type = 'dashboard';
 

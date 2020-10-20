@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { act, waitFor } from '@testing-library/react';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
@@ -13,12 +14,12 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
 import { QueryBar } from '../../../../common/components/query_bar';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
-import { QueryBarTimeline, getDataProviderFilter } from './index';
+import { QueryBarTimeline, getDataProviderFilter, TIMELINE_FILTER_DROP_AREA } from './index';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -26,6 +27,22 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
 
 describe('Timeline QueryBar ', () => {
+  const filters = [
+    {
+      $state: { store: esFilters.FilterStateStore.APP_STATE },
+      meta: {
+        alias: null,
+        controlledBy: TIMELINE_FILTER_DROP_AREA,
+        disabled: false,
+        index: undefined,
+        key: 'event.category',
+        negate: true,
+        params: { query: 'file' },
+        type: 'phrase',
+      },
+      query: { match: { 'event.category': { query: 'file', type: 'phrase' } } },
+    },
+  ];
   const state = {
     dataProviders: [],
     timerange: {
@@ -36,7 +53,7 @@ describe('Timeline QueryBar ', () => {
     },
     kind: 'kuery',
     expression: 'here: query',
-    filters: [],
+    filters,
     savedQueryId: undefined,
     duration: '',
   };
@@ -46,14 +63,15 @@ describe('Timeline QueryBar ', () => {
   });
 
   test('check if we format the appropriate props to QueryBar', () => {
+    const filterManager = new FilterManager(mockUiSettingsForFilterManager);
     const wrapper = mount(
       <TestProviders>
         <QueryBarTimeline
           browserFields={mockBrowserFields}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filterManager={filterManager}
           kqlMode="search"
           indexPattern={mockIndexPattern}
-          timelineId="timline-real-id"
+          timelineId="timeline-real-id"
         />
       </TestProviders>
     );
@@ -63,6 +81,7 @@ describe('Timeline QueryBar ', () => {
     expect(queryBarProps.dateRangeTo).toEqual('now');
     expect(queryBarProps.filterQuery).toEqual({ query: 'here: query', language: 'kuery' });
     expect(queryBarProps.savedQuery).toEqual(undefined);
+    expect(queryBarProps.filters).toHaveLength(1);
   });
 
   describe('#getDataProviderFilter', () => {

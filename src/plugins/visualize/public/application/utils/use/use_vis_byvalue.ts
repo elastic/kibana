@@ -41,7 +41,7 @@ export const useVisByValue = (
   useEffect(() => {
     const { chrome } = services;
     const getVisInstance = async () => {
-      if (!valueInput || loaded.current) {
+      if (!valueInput || loaded.current || !visEditorRef.current) {
         return;
       }
       const byValueVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
