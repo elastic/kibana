@@ -18,3 +18,5 @@
  */
 
 export type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
+
+export function PrivateProvider(): void;

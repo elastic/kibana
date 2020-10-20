@@ -3,7 +3,9 @@
   "references": [
     { "path": "./src/test_utils/tsconfig.json" },
     { "path": "./src/core/tsconfig.json" },
-    { "path": "./src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "./src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "./src/plugins/kibana_react/tsconfig.json" },
+    { "path": "./src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "./src/plugins/url_forwarding/tsconfig.json" }
   ]
 }
