@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
-import { RunContext, TaskDictionary, TaskDefinition } from '../task';
-import { sanitizeTaskDefinitions } from './sanitize_task_definitions';
+import { RunContext, TaskDefinition } from './task';
+import { sanitizeTaskDefinitions } from './task_type_dictionary';
 
 interface Opts {
   numTasks: number;
@@ -35,39 +35,40 @@ const getMockTaskDefinitions = (opts: Opts) => {
       },
     };
   }
-  return (tasks as unknown) as TaskDictionary<TaskDefinition>;
+  return (tasks as unknown) as Record<string, TaskDefinition>;
 };
 
-describe('sanitizeTaskDefinitions', () => {
+describe('taskTypeDictionary', () => {
+  describe('sanitizeTaskDefinitions', () => {});
   it('provides tasks with defaults', () => {
     const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
     const result = sanitizeTaskDefinitions(taskDefinitions);
 
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "test_task_type_0": Object {
-    "createTaskRunner": [Function],
-    "description": "one super cool task",
-    "timeout": "5m",
-    "title": "Test",
-    "type": "test_task_type_0",
-  },
-  "test_task_type_1": Object {
-    "createTaskRunner": [Function],
-    "description": "one super cool task",
-    "timeout": "5m",
-    "title": "Test",
-    "type": "test_task_type_1",
-  },
-  "test_task_type_2": Object {
-    "createTaskRunner": [Function],
-    "description": "one super cool task",
-    "timeout": "5m",
-    "title": "Test",
-    "type": "test_task_type_2",
-  },
-}
-`);
+      Array [
+        Object {
+          "createTaskRunner": [Function],
+          "description": "one super cool task",
+          "timeout": "5m",
+          "title": "Test",
+          "type": "test_task_type_0",
+        },
+        Object {
+          "createTaskRunner": [Function],
+          "description": "one super cool task",
+          "timeout": "5m",
+          "title": "Test",
+          "type": "test_task_type_1",
+        },
+        Object {
+          "createTaskRunner": [Function],
+          "description": "one super cool task",
+          "timeout": "5m",
+          "title": "Test",
+          "type": "test_task_type_2",
+        },
+      ]
+    `);
   });
 
   it('throws a validation exception for invalid task definition', () => {
