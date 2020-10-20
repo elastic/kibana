@@ -269,7 +269,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -743,7 +743,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -1222,7 +1222,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -1737,7 +1737,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                         size="xxl"
                         type="securityApp"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="securityApp"
                           size="xxl"
