@@ -3,16 +3,12 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./build/tsbuildinfo/kibana"
   },
-  "include": [
-    "kibana.d.ts",
-    "src/**/*",
-    "typings/**/*",
-    "test_utils/**/*"
-  ],
+  "include": ["kibana.d.ts", "src/**/*", "typings/**/*", "test_utils/**/*"],
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/test_utils/**/*",
     "src/core/**/*",
+    "src/plugins/kibana_legacy/**/*",
     "src/plugins/kibana_utils/**/*",
     "src/plugins/kibana_react/**/*",
     "src/plugins/usage_collection/**/*",

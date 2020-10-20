@@ -276,7 +276,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await actionsButton.click();
         const menuPanel = await testSubjects.find('endpointActionsMenuPanel');
         const actionItems = await menuPanel.findAllByTagName<'button'>('button');
-        const expectedItems = ['Edit Security Policy', 'View Trusted Applications'];
+        const expectedItems = ['Edit Policy', 'Edit Trusted Applications'];
 
         for (const action of actionItems) {
           const buttonText = await action.getVisibleText();
