@@ -7,6 +7,8 @@
 import Boom from 'boom';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
+
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
@@ -20,9 +22,13 @@ import {
   convertToSnakeCase,
   SiemResponseFactory,
   mergeStatuses,
+  getFailingRules,
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
+import { getResult } from './__mocks__/request_responses';
+
+let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -354,7 +360,7 @@ describe('utils', () => {
   });
 
   describe('mergeStatuses', () => {
-    it('merges statuses', () => {
+    it('merges statuses and converts from camelCase saved object to snake_case HTTP response', () => {
       const statusOne = exampleRuleStatus();
       const statusTwo = exampleRuleStatus();
       const statusToAdd = exampleRuleStatus();
@@ -438,6 +444,45 @@ describe('utils', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('getFailingRules', () => {
+    beforeEach(() => {
+      alertsClient = alertsClientMock.create();
+    });
+    it('getFailingRules finds no failing rules', async () => {
+      alertsClient.get.mockResolvedValue(getResult());
+      const res = await getFailingRules(['my-fake-id'], alertsClient);
+      expect(res).toEqual({});
+    });
+    it('getFailingRules finds a failing rule', async () => {
+      const foundRule = getResult();
+      foundRule.executionStatus = {
+        status: 'error',
+        lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
+        error: {
+          reason: 'read',
+          message: 'oops',
+        },
+      };
+      alertsClient.get.mockResolvedValue(foundRule);
+      const res = await getFailingRules([foundRule.id], alertsClient);
+      expect(res).toEqual({ [foundRule.id]: foundRule });
+    });
+    it('getFailingRules throws an error', async () => {
+      alertsClient.get.mockImplementation(() => {
+        throw new Error('my test error');
+      });
+      let error;
+      try {
+        await getFailingRules(['my-fake-id'], alertsClient);
+      } catch (exc) {
+        error = exc;
+      }
+      expect(error.message).toEqual(
+        'Failed to get executionStatus with AlertsClient: my test error'
+      );
     });
   });
 });
