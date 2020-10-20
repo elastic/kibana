@@ -38,15 +38,21 @@ export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
-  sourceQuery: MapQuery;
+  sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
+};
+
+export type VectorJoinSourceRequestMeta = MapFilters & {
+  applyGlobalQuery: boolean;
+  fieldNames: string[];
+  sourceQuery: MapQuery;
 };
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
   sourceQuery: MapQuery;
-  timeFilters: unknown;
+  timeFilters: TimeRange;
 };
 
 export type ESSearchSourceResponseMeta = {
@@ -59,9 +65,12 @@ export type ESSearchSourceResponseMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<VectorSourceRequestMeta> &
-  Partial<VectorStyleRequestMeta> &
-  Partial<ESSearchSourceResponseMeta>;
+export type DataMeta = Partial<
+  VectorSourceRequestMeta &
+    VectorJoinSourceRequestMeta &
+    VectorStyleRequestMeta &
+    ESSearchSourceResponseMeta
+>;
 
 type NumericalStyleFieldData = {
   avg: number;

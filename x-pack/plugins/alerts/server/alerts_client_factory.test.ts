@@ -20,7 +20,7 @@ import { securityMock } from '../../security/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '../../actions/server';
 import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
-import { AuditLogger } from '../../security/server';
+import { LegacyAuditLogger } from '../../security/server';
 import { ALERTS_FEATURE_ID } from '../common';
 import { eventLogMock } from '../../event_log/server/mocks';
 
@@ -44,6 +44,7 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   actions: actionsMock.createStart(),
   features,
   eventLog: eventLogMock.createStart(),
+  kibanaVersion: '7.10.0',
 };
 const fakeRequest = ({
   app: {},
@@ -84,7 +85,7 @@ test('creates an alerts client with proper constructor arguments when security i
 
   const logger = {
     log: jest.fn(),
-  } as jest.Mocked<AuditLogger>;
+  } as jest.Mocked<LegacyAuditLogger>;
   securityPluginSetup.audit.getLogger.mockReturnValue(logger);
 
   factory.create(request, savedObjectsService);
@@ -126,6 +127,7 @@ test('creates an alerts client with proper constructor arguments when security i
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
+    kibanaVersion: '7.10.0',
   });
 });
 
@@ -169,6 +171,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
+    kibanaVersion: '7.10.0',
   });
 });
 

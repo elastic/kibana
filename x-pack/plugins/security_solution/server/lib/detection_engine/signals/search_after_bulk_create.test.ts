@@ -22,6 +22,7 @@ import uuid from 'uuid';
 import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { BulkResponse } from './types';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -129,6 +130,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -254,6 +256,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -333,6 +336,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -393,6 +397,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -451,6 +456,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -534,6 +540,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -559,7 +566,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
-      'sortIds was empty on filteredEvents'
+      'sortIds was empty on searchResult name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -614,6 +621,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [],
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -663,6 +671,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -718,6 +727,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -759,7 +769,7 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockImplementation(() => {
-        throw Error('Fake Error');
+        throw Error('Fake Error'); // throws the exception we are testing
       });
     listClient.getListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
@@ -789,6 +799,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
+      eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
@@ -810,5 +821,116 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
     expect(lastLookBackDate).toEqual(null);
+  });
+
+  test('it returns error array when singleSearchAfter returns errors', async () => {
+    const sampleParams = sampleRuleAlertParams(30);
+    const bulkItem: BulkResponse = {
+      took: 100,
+      errors: true,
+      items: [
+        {
+          create: {
+            _version: 1,
+            _index: 'index-123',
+            _id: 'id-123',
+            status: 201,
+            error: {
+              type: 'network',
+              reason: 'error on creation',
+              shard: 'shard-123',
+              index: 'index-123',
+            },
+          },
+        },
+      ],
+    };
+    mockService.callCluster
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce(bulkItem) // adds the response with errors we are testing
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
+    const {
+      success,
+      createdSignalsCount,
+      lastLookBackDate,
+      errors,
+    } = await searchAfterAndBulkCreate({
+      ruleParams: sampleParams,
+      gap: null,
+      previousStartedAt: new Date(),
+      listClient,
+      exceptionsList: [],
+      services: mockService,
+      logger: mockLogger,
+      eventsTelemetry: undefined,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+    expect(success).toEqual(false);
+    expect(errors).toEqual(['error on creation']);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(9);
+    expect(createdSignalsCount).toEqual(4);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 });

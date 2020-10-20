@@ -6,6 +6,7 @@
 
 import nodeCrypto from '@elastic/node-crypto';
 import { ElasticsearchServiceSetup, IUiSettingsClient } from 'kibana/server';
+import moment from 'moment';
 // @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
@@ -73,6 +74,7 @@ describe('CSV Execute Job', function () {
 
   beforeEach(async function () {
     configGetStub = sinon.stub();
+    configGetStub.withArgs('queue', 'timeout').returns(moment.duration('2m'));
     configGetStub.withArgs('index').returns('.reporting-foo-test');
     configGetStub.withArgs('encryptionKey').returns(encryptionKey);
     configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB

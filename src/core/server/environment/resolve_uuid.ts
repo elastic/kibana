@@ -19,8 +19,8 @@
 
 import uuid from 'uuid';
 import { join } from 'path';
+import { PathConfigType } from '@kbn/utils';
 import { readFile, writeFile } from './fs';
-import { PathConfigType } from '../path';
 import { HttpConfigType } from '../http';
 import { Logger } from '../logging';
 

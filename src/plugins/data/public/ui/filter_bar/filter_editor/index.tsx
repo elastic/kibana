@@ -106,7 +106,11 @@ class FilterEditorUI extends Component<Props, State> {
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="editQueryDSL"
+                onClick={this.toggleCustomEditor}
+              >
                 {this.state.isCustomEditorOpen ? (
                   <FormattedMessage
                     id="data.filter.filterEditor.editFilterValuesButtonLabel"
@@ -133,6 +137,7 @@ class FilterEditorUI extends Component<Props, State> {
 
             <EuiSwitch
               id="filterEditorCustomLabelSwitch"
+              data-test-subj="createCustomLabel"
               label={this.props.intl.formatMessage({
                 id: 'data.filter.filterEditor.createCustomLabelSwitchLabel',
                 defaultMessage: 'Create custom label?',
@@ -240,7 +245,7 @@ class FilterEditorUI extends Component<Props, State> {
   private renderRegularEditor() {
     return (
       <div>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={true} gutterSize="s">
           <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
           <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
             {this.renderOperatorInput()}

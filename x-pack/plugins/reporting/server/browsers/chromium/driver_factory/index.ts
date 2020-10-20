@@ -21,6 +21,7 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { BROWSER_TYPE } from '../../../../common/constants';
+import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
@@ -63,7 +64,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone: string },
+    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
@@ -90,7 +91,7 @@ export class HeadlessChromiumDriverFactory {
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
-        page.setDefaultTimeout(this.captureConfig.timeouts.openUrl);
+        page.setDefaultTimeout(durationToNumber(this.captureConfig.timeouts.openUrl));
 
         logger.debug(`Browser page driver created`);
       } catch (err) {

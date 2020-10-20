@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
 
 import { getUpgradeAssistantStatus } from './es_migration_apis';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
@@ -33,6 +34,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   beforeEach(() => {
+    // @ts-expect-error mock data is too loosely typed
     deprecationsResponse = _.cloneDeep(fakeDeprecations);
   });
 

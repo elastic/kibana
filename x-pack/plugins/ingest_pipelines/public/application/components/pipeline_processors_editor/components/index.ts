@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ManageProcessorForm,
-  ManageProcessorFormOnSubmitArg,
-  OnSubmitHandler,
-} from './manage_processor_form';
+export { ProcessorForm, ProcessorFormOnSubmitArg, OnSubmitHandler } from './processor_form';
 
 export { ProcessorsTree, ProcessorInfo, OnActionHandler } from './processors_tree';
 
@@ -22,6 +18,10 @@ export { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';
 
 export { TestPipelineActions } from './test_pipeline';
 
-export { DocumentsDropdown } from './documents_dropdown';
-
 export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';
+
+export { ProcessorsEmptyPrompt } from './processors_empty_prompt';
+
+export { ProcessorsHeader } from './processors_header';
+
+export { OnFailureProcessorsTitle } from './on_failure_processors_title';

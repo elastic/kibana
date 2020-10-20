@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
-import { newJobCapsService } from '../../../services/new_job_capabilities_service';
 import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
@@ -62,8 +61,6 @@ export const Page: FC<Props> = ({ jobId }) => {
 
     if (currentIndexPattern) {
       (async function () {
-        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
-
         if (jobId !== undefined) {
           const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
           if (

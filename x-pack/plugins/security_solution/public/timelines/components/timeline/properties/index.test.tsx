@@ -22,8 +22,7 @@ import { useThrottledResizeObserver } from '../../../../common/components/utils'
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '../../../../../../../test_utils';
-
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -372,18 +371,16 @@ describe('Properties', () => {
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
 
-    await act(async () => {
-      await Promise.resolve({});
+    await waitFor(() => {
+      expect(mockNavigateToApp).toBeCalledWith('securitySolution:case', { path: '/create' });
+      expect(mockDispatch).toBeCalledWith(
+        setInsertTimeline({
+          timelineId: defaultProps.timelineId,
+          timelineSavedObjectId: '1',
+          timelineTitle: 'coolness',
+        })
+      );
     });
-
-    expect(mockNavigateToApp).toBeCalledWith('securitySolution:case', { path: '/create' });
-    expect(mockDispatch).toBeCalledWith(
-      setInsertTimeline({
-        timelineId: defaultProps.timelineId,
-        timelineSavedObjectId: '1',
-        timelineTitle: 'coolness',
-      })
-    );
   });
 
   test('insert timeline - existing case', async () => {
@@ -397,9 +394,8 @@ describe('Properties', () => {
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-existing-case"]').first().simulate('click');
 
-    await act(async () => {
-      await Promise.resolve({});
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="all-cases-modal"]').exists()).toBeTruthy();
     });
-    expect(wrapper.find('[data-test-subj="all-cases-modal"]').exists()).toBeTruthy();
   });
 });

@@ -19,7 +19,11 @@
 
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PathConfigType } from '@kbn/utils';
 
+// @ts-expect-error legacy config class
+import { Config as LegacyConfigClass } from '../../../legacy/server/config';
 import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
@@ -27,18 +31,7 @@ import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
-import { PathConfigType } from '../path';
-import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
-import {
-  ILegacyInternals,
-  LegacyServiceSetupDeps,
-  LegacyServiceStartDeps,
-  LegacyPlugins,
-  LegacyServiceDiscoverPlugins,
-  LegacyConfig,
-  LegacyVars,
-} from './types';
-import { LegacyInternals } from './legacy_internals';
+import { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig, LegacyVars } from './types';
 import { CoreSetup, CoreStart } from '..';
 
 interface LegacyKbnServer {
@@ -80,9 +73,7 @@ export class LegacyService implements CoreService {
   private setupDeps?: LegacyServiceSetupDeps;
   private update$?: ConnectableObservable<[Config, PathConfigType]>;
   private legacyRawConfig?: LegacyConfig;
-  private legacyPlugins?: LegacyPlugins;
   private settings?: LegacyVars;
-  public legacyInternals?: ILegacyInternals;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService } = coreContext;
@@ -97,11 +88,11 @@ export class LegacyService implements CoreService {
     ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
   }
 
-  public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
-    this.update$ = combineLatest(
+  public async setupLegacyConfig() {
+    this.update$ = combineLatest([
       this.coreContext.configService.getConfig$(),
-      this.coreContext.configService.atPath<PathConfigType>('path')
-    ).pipe(
+      this.coreContext.configService.atPath<PathConfigType>('path'),
+    ]).pipe(
       tap(([config, pathConfig]) => {
         if (this.kbnServer !== undefined) {
           this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
@@ -120,74 +111,33 @@ export class LegacyService implements CoreService {
       )
       .toPromise();
 
-    const {
-      pluginSpecs,
-      pluginExtendedConfig,
-      disabledPluginSpecs,
-      uiExports,
-      navLinks,
-    } = await findLegacyPluginSpecs(
-      this.settings,
-      this.coreContext.logger,
-      this.coreContext.env.packageInfo
-    );
-
-    logLegacyThirdPartyPluginDeprecationWarning({
-      specs: pluginSpecs,
-      log: this.log,
-    });
-
-    this.legacyPlugins = {
-      pluginSpecs,
-      disabledPluginSpecs,
-      uiExports,
-      navLinks,
-    };
-
-    this.legacyRawConfig = pluginExtendedConfig;
-
-    // check for unknown uiExport types
-    if (uiExports.unknown && uiExports.unknown.length > 0) {
-      throw new Error(
-        `Unknown uiExport types: ${uiExports.unknown
-          .map(({ pluginSpec, type }) => `${type} from ${pluginSpec.getId()}`)
-          .join(', ')}`
-      );
-    }
+    this.legacyRawConfig = LegacyConfigClass.withDefaultSchema(this.settings);
 
     return {
-      pluginSpecs,
-      disabledPluginSpecs,
-      uiExports,
-      navLinks,
-      pluginExtendedConfig,
       settings: this.settings,
+      legacyConfig: this.legacyRawConfig!,
     };
   }
 
   public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.log.debug('setting up legacy service');
 
-    if (!this.legacyPlugins) {
+    if (!this.legacyRawConfig) {
       throw new Error(
-        'Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()'
+        'Legacy config not initialized yet. Ensure LegacyService.setupLegacyConfig() is called before LegacyService.setup()'
       );
     }
 
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
     this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
+
     this.setupDeps = setupDeps;
-    this.legacyInternals = new LegacyInternals(
-      this.legacyPlugins.uiExports,
-      this.legacyRawConfig!,
-      setupDeps.core.http.server
-    );
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
 
-    if (!setupDeps || !this.legacyPlugins) {
+    if (!setupDeps || !this.legacyRawConfig) {
       throw new Error('Legacy service is not setup yet.');
     }
 
@@ -201,8 +151,7 @@ export class LegacyService implements CoreService {
         this.settings!,
         this.legacyRawConfig!,
         setupDeps,
-        startDeps,
-        this.legacyPlugins!
+        startDeps
       );
     }
   }
@@ -233,7 +182,7 @@ export class LegacyService implements CoreService {
       : EMPTY;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { ClusterManager } = require('../../../cli/cluster/cluster_manager');
+    const { ClusterManager } = require('./cluster_manager');
     return new ClusterManager(
       this.coreContext.env.cliArgs,
       config,
@@ -245,8 +194,7 @@ export class LegacyService implements CoreService {
     settings: LegacyVars,
     config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
-    startDeps: LegacyServiceStartDeps,
-    legacyPlugins: LegacyPlugins
+    startDeps: LegacyServiceStartDeps
   ) {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
@@ -268,7 +216,11 @@ export class LegacyService implements CoreService {
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
-      auditTrail: startDeps.core.auditTrail,
+      coreUsageData: {
+        getCoreUsageData: () => {
+          throw new Error('core.start.coreUsageData.getCoreUsageData is unsupported in legacy');
+        },
+      },
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -302,6 +254,10 @@ export class LegacyService implements CoreService {
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
+      metrics: {
+        collectionInterval: setupDeps.core.metrics.collectionInterval,
+        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
@@ -309,6 +265,7 @@ export class LegacyService implements CoreService {
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       status: {
+        isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,
         core$: setupDeps.core.status.core$,
         overall$: setupDeps.core.status.overall$,
         set: () => {
@@ -326,49 +283,38 @@ export class LegacyService implements CoreService {
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
-      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
-    const kbnServer: LegacyKbnServer = new KbnServer(
-      settings,
-      config,
-      {
-        env: {
-          mode: this.coreContext.env.mode,
-          packageInfo: this.coreContext.env.packageInfo,
-        },
-        setupDeps: {
-          core: coreSetup,
-          plugins: setupDeps.plugins,
-        },
-        startDeps: {
-          core: coreStart,
-          plugins: startDeps.plugins,
-        },
-        __internals: {
-          http: {
-            registerStaticDir: setupDeps.core.http.registerStaticDir,
-          },
-          hapiServer: setupDeps.core.http.server,
-          uiPlugins: setupDeps.uiPlugins,
-          elasticsearch: setupDeps.core.elasticsearch,
-          rendering: setupDeps.core.rendering,
-          legacy: this.legacyInternals,
-        },
-        logger: this.coreContext.logger,
+    const kbnServer: LegacyKbnServer = new KbnServer(settings, config, {
+      env: {
+        mode: this.coreContext.env.mode,
+        packageInfo: this.coreContext.env.packageInfo,
       },
-      legacyPlugins
-    );
+      setupDeps: {
+        core: coreSetup,
+        plugins: setupDeps.plugins,
+      },
+      startDeps: {
+        core: coreStart,
+        plugins: startDeps.plugins,
+      },
+      __internals: {
+        hapiServer: setupDeps.core.http.server,
+        uiPlugins: setupDeps.uiPlugins,
+        rendering: setupDeps.core.rendering,
+      },
+      logger: this.coreContext.logger,
+    });
 
     // The kbnWorkerType check is necessary to prevent the repl
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../cli/repl').startRepl(kbnServer);
+      require('./cli').startRepl(kbnServer);
     }
 
     const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();

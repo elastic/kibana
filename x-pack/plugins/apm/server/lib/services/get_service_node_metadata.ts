@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID,
@@ -24,7 +20,7 @@ export async function getServiceNodeMetadata({
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const { apmEventClient } = setup;
 

@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LogRecord } from 'kibana/server';
+
+import { LogRecord } from '@kbn/logging';
 
 export interface Conversion {
   pattern: RegExp;

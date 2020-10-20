@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import d3 from 'd3';
 import _ from 'lodash';
+import { hsl } from 'color';
 
 import { seedColors } from './seed_colors';
 
@@ -49,7 +49,7 @@ const fraction = function (goal: number) {
  * If the number is greater than the length of seed colors available,
  * new colors are generated up to the value of the input number.
  */
-export function createColorPalette(num?: any): string[] {
+export function createColorPalette(num: number): string[] {
   if (!_.isNumber(num)) {
     throw new TypeError('ColorPaletteUtilService expects a number');
   }
@@ -58,7 +58,7 @@ export function createColorPalette(num?: any): string[] {
   const seedLength = seedColors.length;
 
   _.times(num - seedLength, function (i) {
-    colors.push(d3.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).toString());
+    colors.push(hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 50, 50).hex());
   });
 
   return colors;

@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./build/tsbuildinfo/kibana",
+    "tsBuildInfoFile": "./build/tsbuildinfo/kibana"
   },
   "include": [
     "kibana.d.ts",
@@ -11,7 +11,10 @@
   ],
   "exclude": [
     "src/**/__fixtures__/**/*",
-    "src/test_utils/**/*"
+    "src/test_utils/**/*",
+    "src/core/**/*",
+    "src/plugins/kibana_utils/**/*",
+    "src/plugins/kibana_react/**/*"
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find
@@ -19,6 +22,9 @@
     // "src/**/public/**/*"
   ],
   "references": [
-    { "path": "./src/test_utils/tsconfig.json" }
+    { "path": "./src/test_utils/tsconfig.json" },
+    { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "./src/plugins/kibana_react/tsconfig.json" }
   ]
 }

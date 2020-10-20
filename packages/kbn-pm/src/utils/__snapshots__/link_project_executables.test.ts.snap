@@ -18,6 +18,7 @@ Object {
   "mkdirp": Array [],
   "readFile": Array [],
   "unlink": Array [],
+  "writeFile": Array [],
 }
 `;
 
@@ -66,5 +67,6 @@ Object {
   ],
   "readFile": Array [],
   "unlink": Array [],
+  "writeFile": Array [],
 }
 `;

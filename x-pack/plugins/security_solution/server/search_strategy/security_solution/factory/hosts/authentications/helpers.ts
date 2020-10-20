@@ -6,7 +6,7 @@
 import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
-import { toArray } from '../../../../helpers/to_array';
+import { toStringArray } from '../../../../helpers/to_array';
 import {
   AuthenticationsEdges,
   AuthenticationHit,
@@ -15,7 +15,7 @@ import {
   StrategyResponseType,
 } from '../../../../../../common/search_strategy/security_solution';
 
-export const authenticationFields = [
+export const authenticationsFields = [
   '_id',
   'failures',
   'successes',
@@ -31,7 +31,7 @@ export const authenticationFields = [
 ];
 
 export const formatAuthenticationData = (
-  fields: readonly string[] = authenticationFields,
+  fields: readonly string[] = authenticationsFields,
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
 ): AuthenticationsEdges =>
@@ -53,7 +53,7 @@ export const formatAuthenticationData = (
       const fieldPath = `node.${fieldName}`;
       const fieldValue = get(fieldPath, mergedResult);
       if (!isEmpty(fieldValue)) {
-        return set(fieldPath, toArray(fieldValue), mergedResult);
+        return set(fieldPath, toStringArray(fieldValue), mergedResult);
       } else {
         return mergedResult;
       }

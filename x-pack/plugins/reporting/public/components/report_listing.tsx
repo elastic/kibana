@@ -6,8 +6,8 @@
 
 import {
   EuiBasicTable,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -23,6 +23,7 @@ import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
+import { durationToNumber } from '../../common/schema_utils';
 import { JobStatuses } from '../../constants';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
@@ -40,17 +41,17 @@ export interface Job {
   type: string;
   object_type: string;
   object_title: string;
-  created_by?: string;
+  created_by?: string | false;
   created_at: string;
   started_at?: string;
   completed_at?: string;
   status: string;
   statusLabel: string;
-  max_size_reached: boolean;
+  max_size_reached?: boolean;
   attempts: number;
   max_attempts: number;
   csv_contains_formulas: boolean;
-  warnings: string[];
+  warnings?: string[];
 }
 
 export interface Props {
@@ -153,7 +154,7 @@ class ReportListingUi extends Component<Props, State> {
                 <p>
                   <FormattedMessage
                     id="xpack.reporting.listing.reports.subtitle"
-                    defaultMessage="Find reports generated in Kibana applications here"
+                    defaultMessage="Get reports generated in Kibana applications."
                   />
                 </p>
               </EuiText>
@@ -183,17 +184,19 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
+    const { pollConfig, license$ } = this.props;
+    const pollFrequencyInMillis = durationToNumber(pollConfig.jobsRefresh.interval);
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
       },
-      pollFrequencyInMillis: this.props.pollConfig.jobsRefresh.interval,
+      pollFrequencyInMillis,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier: this.props.pollConfig.jobsRefresh.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: pollConfig.jobsRefresh.intervalErrorMultiplier,
     });
     this.poller.start();
-    this.licenseSubscription = this.props.license$.subscribe(this.licenseHandler);
+    this.licenseSubscription = license$.subscribe(this.licenseHandler);
   }
 
   private licenseHandler = (license: ILicense) => {

@@ -68,7 +68,7 @@ export interface DiscoverSidebarProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern: IndexPattern;
+  selectedIndexPattern?: IndexPattern;
   /**
    * Callback function to select another index pattern
    */

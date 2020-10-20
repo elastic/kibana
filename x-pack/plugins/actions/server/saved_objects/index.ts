@@ -5,10 +5,12 @@
  */
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
-import mappings from './mappings.json';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import mappings from './mappings.json';
+import { getMigrations } from './migrations';
 
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
+export const ALERT_SAVED_OBJECT_TYPE = 'alert';
 export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
 
 export function setupSavedObjects(
@@ -20,6 +22,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action,
+    migrations: getMigrations(encryptedSavedObjects),
   });
 
   // Encrypted attributes

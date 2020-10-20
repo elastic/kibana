@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/shallow_usecontext.mock';
+import '../../../__mocks__/enterprise_search_url.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';

@@ -19,15 +19,16 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { rawConfigServiceMock } from '../config/raw_config_service.mock';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 const logger = loggingSystemMock.create();
 
@@ -58,7 +59,7 @@ describe('createPluginInitializerContext', () => {
     instanceInfo = {
       uuid: 'instance-uuid',
     };
-    env = Env.createDefault(getEnvOptions());
+    env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
     await server.setupCoreConfig();
@@ -90,9 +91,9 @@ describe('createPluginInitializerContext', () => {
         shardTimeout: duration(30, 's'),
         requestTimeout: duration(30, 's'),
         pingTimeout: duration(30, 's'),
-        startupTimeout: duration(5, 's'),
       },
       path: { data: fromRoot('data') },
+      savedObjects: { maxImportPayloadBytes: new ByteSizeValue(10485760) },
     });
   });
 

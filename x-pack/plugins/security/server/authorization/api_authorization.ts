@@ -29,7 +29,7 @@ export function initAPIAuthorization(
 
     const apiActions = actionTags.map((tag) => actions.api.get(tag.substring(tagPrefix.length)));
     const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-    const checkPrivilegesResponse = await checkPrivileges(apiActions);
+    const checkPrivilegesResponse = await checkPrivileges({ kibana: apiActions });
 
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
@@ -37,7 +37,7 @@ export function initAPIAuthorization(
       return toolkit.next();
     }
 
-    logger.warn(`User not authorized for "${request.url.path}": responding with 404`);
-    return response.notFound();
+    logger.warn(`User not authorized for "${request.url.path}": responding with 403`);
+    return response.forbidden();
   });
 }

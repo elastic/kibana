@@ -17,7 +17,10 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
   SUBTITLE: i18n.translate('xpack.enterpriseSearch.featureCatalogue.subtitle', {
     defaultMessage: 'Search everything',
   }),
-  DESCRIPTIONS: [
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.FeatureCatalogue.description', {
+    defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
+  }),
+  APP_DESCRIPTIONS: [
     i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription1', {
       defaultMessage: 'Build a powerful search experience.',
     }),
@@ -29,6 +32,7 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
     }),
   ],
   URL: '/app/enterprise_search/overview',
+  LOGO: 'logoEnterpriseSearch',
 };
 
 export const APP_SEARCH_PLUGIN = {
@@ -74,5 +78,7 @@ export const JSON_HEADER = {
   'Content-Type': 'application/json', // This needs specific casing or Chrome throws a 415 error
   Accept: 'application/json', // Required for Enterprise Search APIs
 };
+
+export const READ_ONLY_MODE_HEADER = 'x-ent-search-read-only-mode';
 
 export const ENGINES_PAGE_SIZE = 10;

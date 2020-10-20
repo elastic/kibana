@@ -5,11 +5,7 @@
  */
 
 import { getBucketSize } from '../../../helpers/get_bucket_size';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import { timeseriesFetcher } from './fetcher';
 import { timeseriesTransformer } from './transform';
 
@@ -17,10 +13,11 @@ export async function getApmTimeseriesData(options: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end } = options.setup;
-  const { bucketSize } = getBucketSize(start, end, 'auto');
+  const { bucketSize } = getBucketSize(start, end);
   const durationAsMinutes = (end - start) / 1000 / 60;
 
   const timeseriesResponse = await timeseriesFetcher(options);

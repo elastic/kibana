@@ -16,7 +16,7 @@ export function getFieldNames(results) {
   // there may be fields in the mappings which do not exist in the field_stats
   // e.g. the message field for a semi-structured log file, as they have no stats.
   // add any extra fields to the list
-  const differenceFields = difference(Object.keys(mappings), tempFields);
+  const differenceFields = difference(Object.keys(mappings.properties), tempFields);
 
   // except @timestamp
   const timestampIndex = differenceFields.indexOf('@timestamp');

@@ -9,7 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -29,10 +29,13 @@ import { LoadMapAndRender } from './routes/maps_app/load_map_and_render';
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
 
-export async function renderApp(
-  context: AppMountContext,
-  { appBasePath, element, history, onAppLeave }: AppMountParameters
-) {
+export async function renderApp({
+  appBasePath,
+  element,
+  history,
+  onAppLeave,
+  setHeaderActionMenu,
+}: AppMountParameters) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -40,7 +43,15 @@ export async function renderApp(
     ...withNotifyOnErrors(getToasts()),
   });
 
-  render(<App history={history} appBasePath={appBasePath} onAppLeave={onAppLeave} />, element);
+  render(
+    <App
+      history={history}
+      appBasePath={appBasePath}
+      onAppLeave={onAppLeave}
+      setHeaderActionMenu={setHeaderActionMenu}
+    />,
+    element
+  );
 
   return () => {
     unmountComponentAtNode(element);
@@ -51,9 +62,10 @@ interface Props {
   history: AppMountParameters['history'] | RouteComponentProps['history'];
   appBasePath: AppMountParameters['appBasePath'];
   onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const App: React.FC<Props> = ({ history, appBasePath, onAppLeave }) => {
+const App: React.FC<Props> = ({ history, appBasePath, onAppLeave, setHeaderActionMenu }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
@@ -87,6 +99,7 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave }) => {
                 <LoadMapAndRender
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
+                  setHeaderActionMenu={setHeaderActionMenu}
                   stateTransfer={stateTransfer}
                   originatingApp={originatingApp}
                 />
@@ -98,6 +111,7 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave }) => {
               render={() => (
                 <LoadMapAndRender
                   onAppLeave={onAppLeave}
+                  setHeaderActionMenu={setHeaderActionMenu}
                   stateTransfer={stateTransfer}
                   originatingApp={originatingApp}
                 />

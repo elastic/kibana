@@ -94,6 +94,9 @@ export interface AggregationOptionsByType {
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
+  stats: {
+    field: string;
+  };
   extended_stats: {
     field: string;
   };
@@ -150,6 +153,11 @@ export interface AggregationOptionsByType {
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
+  bucket_sort: {
+    sort?: SortOptions;
+    from?: number;
+    size?: number;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -173,7 +181,7 @@ export interface AggregationInputMap {
   [key: string]: AggregationOptionsMap;
 }
 
-type BucketSubAggregationResponse<
+type SubAggregationResponseOf<
   TAggregationInputMap extends AggregationInputMap | undefined,
   TDocument
 > = TAggregationInputMap extends AggregationInputMap
@@ -189,10 +197,7 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: string | number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   histogram: {
@@ -200,28 +205,32 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   date_histogram: {
     buckets: Array<
       DateHistogramBucket &
-        BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+        SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   avg: MetricsAggregationResponsePart;
   sum: MetricsAggregationResponsePart;
   max: MetricsAggregationResponsePart;
   min: MetricsAggregationResponsePart;
-  value_count: MetricsAggregationResponsePart;
+  value_count: { value: number };
   cardinality: {
     value: number;
   };
   percentiles: {
     values: Record<string, number | null>;
+  };
+  stats: {
+    count: number;
+    min: number | null;
+    max: number | null;
+    avg: number | null;
+    sum: number | null;
   };
   extended_stats: {
     count: number;
@@ -251,7 +260,7 @@ interface AggregationResponsePart<
   };
   filter: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
     ? Array<
         { doc_count: number } & AggregationResponseMap<
@@ -268,13 +277,16 @@ interface AggregationResponsePart<
         buckets: {
           [key in keyof TAggregationOptionsMap['filters']['filters']]: {
             doc_count: number;
-          } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+          } & SubAggregationResponseOf<
+            TAggregationOptionsMap['aggs'],
+            TDocument
+          >;
         };
       }
     : never;
   sampler: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
   derivative:
     | {
         value: number;
@@ -293,10 +305,7 @@ interface AggregationResponsePart<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;
         doc_count: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   diversified_sampler: {
@@ -325,6 +334,7 @@ interface AggregationResponsePart<
       ? Array<{ key: number; value: number }>
       : Record<string, number>;
   };
+  bucket_sort: undefined;
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap
@@ -345,6 +355,12 @@ interface AggregationResponsePart<
 export type ValidAggregationKeysOf<
   T extends Record<string, any>
 > = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+
+export type AggregationResultOf<
+  TAggregationOptionsMap extends AggregationOptionsMap,
+  TDocument
+> = AggregationResponsePart<TAggregationOptionsMap, TDocument>[AggregationType &
+  ValidAggregationKeysOf<TAggregationOptionsMap>];
 
 export type AggregationResponseMap<
   TAggregationInputMap extends AggregationInputMap | undefined,

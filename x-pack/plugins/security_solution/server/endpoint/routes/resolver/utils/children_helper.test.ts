@@ -10,7 +10,7 @@ import {
   TreeNode,
 } from '../../../../../common/endpoint/generate_data';
 import { ChildrenNodesHelper } from './children_helper';
-import { eventId, isProcessRunning } from '../../../../../common/endpoint/models/event';
+import { eventIDSafeVersion, isProcessRunning } from '../../../../../common/endpoint/models/event';
 
 function getStartEvents(events: Event[]): Event[] {
   const startEvents: Event[] = [];
@@ -179,7 +179,9 @@ describe('Children helper', () => {
 
     childrenNodes.childNodes.forEach((node) => {
       node.lifecycle.forEach((event) => {
-        expect(childrenEvents.find((child) => child.event.id === eventId(event))).toEqual(event);
+        expect(
+          childrenEvents.find((child) => eventIDSafeVersion(child) === eventIDSafeVersion(event))
+        ).toEqual(event);
       });
     });
   });
@@ -191,7 +193,9 @@ describe('Children helper', () => {
     const childrenNodes = helper.getNodes();
     childrenNodes.childNodes.forEach((node) => {
       node.lifecycle.forEach((event) => {
-        expect(childrenEvents.find((child) => child.event.id === eventId(event))).toEqual(event);
+        expect(
+          childrenEvents.find((child) => eventIDSafeVersion(child) === eventIDSafeVersion(event))
+        ).toEqual(event);
       });
     });
   });

@@ -5,29 +5,27 @@
  */
 
 import {
-  ResolverEvent,
-  ResolverAncestry,
-  ResolverLifecycleNode,
-  ResolverRelatedEvents,
-  ResolverTree,
-  ResolverChildNode,
+  SafeResolverAncestry,
+  SafeResolverTree,
   ResolverRelatedAlerts,
-  ResolverChildren,
+  SafeResolverChildren,
+  SafeResolverLifecycleNode,
+  SafeResolverEvent,
+  SafeResolverChildNode,
+  ResolverPaginatedEvents,
 } from '../../../../../common/endpoint/types';
 
 /**
- * Creates a related event object that the related events handler would return
+ * Creates an object that the events handler would return
  *
- * @param entityID the entity_id for these related events
- * @param events array of related events
- * @param nextEvent the cursor to retrieve the next related event
+ * @param events array of events
+ * @param nextEvent the cursor to retrieve the next event
  */
-export function createRelatedEvents(
-  entityID: string,
-  events: ResolverEvent[] = [],
+export function createEvents(
+  events: SafeResolverEvent[] = [],
   nextEvent: string | null = null
-): ResolverRelatedEvents {
-  return { entityID, events, nextEvent };
+): ResolverPaginatedEvents {
+  return { events, nextEvent };
 }
 
 /**
@@ -39,7 +37,7 @@ export function createRelatedEvents(
  */
 export function createRelatedAlerts(
   entityID: string,
-  alerts: ResolverEvent[] = [],
+  alerts: SafeResolverEvent[] = [],
   nextAlert: string | null = null
 ): ResolverRelatedAlerts {
   return { entityID, alerts, nextAlert };
@@ -50,7 +48,7 @@ export function createRelatedAlerts(
  *
  * @param entityID the entity_id of the child
  */
-export function createChild(entityID: string): ResolverChildNode {
+export function createChild(entityID: string): SafeResolverChildNode {
   const lifecycle = createLifecycle(entityID, []);
   return {
     ...lifecycle,
@@ -60,7 +58,7 @@ export function createChild(entityID: string): ResolverChildNode {
 /**
  * Creates an empty ancestry response structure.
  */
-export function createAncestry(): ResolverAncestry {
+export function createAncestry(): SafeResolverAncestry {
   return { ancestors: [], nextAncestor: null };
 }
 
@@ -72,8 +70,8 @@ export function createAncestry(): ResolverAncestry {
  */
 export function createLifecycle(
   entityID: string,
-  lifecycle: ResolverEvent[]
-): ResolverLifecycleNode {
+  lifecycle: SafeResolverEvent[]
+): SafeResolverLifecycleNode {
   return { entityID, lifecycle };
 }
 
@@ -84,9 +82,9 @@ export function createLifecycle(
  * @param nextChild the cursor for the response
  */
 export function createChildren(
-  nodes: ResolverChildNode[] = [],
+  nodes: SafeResolverChildNode[] = [],
   nextChild: string | null = null
-): ResolverChildren {
+): SafeResolverChildren {
   return { childNodes: nodes, nextChild };
 }
 
@@ -95,16 +93,12 @@ export function createChildren(
  *
  * @param entityID the entity_id of the tree's origin node
  */
-export function createTree(entityID: string): ResolverTree {
+export function createTree(entityID: string): SafeResolverTree {
   return {
     entityID,
     children: {
       childNodes: [],
       nextChild: null,
-    },
-    relatedEvents: {
-      events: [],
-      nextEvent: null,
     },
     relatedAlerts: {
       alerts: [],

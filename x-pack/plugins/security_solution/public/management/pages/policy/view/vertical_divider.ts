@@ -5,7 +5,7 @@
  */
 
 import styled from 'styled-components';
-import { EuiTheme } from '../../../../../../../legacy/common/eui_styled_components';
+import { EuiTheme } from '../../../../../../xpack_legacy/common';
 
 type SpacingOptions = keyof EuiTheme['eui']['spacerSizes'];
 

@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../../__mocks__/kea.mock';
+
 import React from 'react';
+import { useValues } from 'kea';
 import { shallow } from 'enzyme';
 
 import { EuiCard } from '@elastic/eui';
@@ -32,7 +35,7 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButton);
     expect(button.prop('to')).toEqual('/app/enterprise_search/app_search');
-    expect(button.prop('data-test-subj')).toEqual('LaunchAppSearchButton');
+    expect(button.prop('children')).toEqual('Launch App Search');
 
     button.simulate('click');
     expect(sendTelemetry).toHaveBeenCalledWith(expect.objectContaining({ metric: 'app_search' }));
@@ -47,11 +50,21 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButton);
     expect(button.prop('to')).toEqual('/app/enterprise_search/workplace_search');
-    expect(button.prop('data-test-subj')).toEqual('LaunchWorkplaceSearchButton');
+    expect(button.prop('children')).toEqual('Launch Workplace Search');
 
     button.simulate('click');
     expect(sendTelemetry).toHaveBeenCalledWith(
       expect.objectContaining({ metric: 'workplace_search' })
     );
+  });
+
+  it('renders correct button text when host not present', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({ config: { host: '' } }));
+
+    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
+    const card = wrapper.find(EuiCard).dive().shallow();
+    const button = card.find(EuiButton);
+
+    expect(button.prop('children')).toEqual('Setup Workplace Search');
   });
 });

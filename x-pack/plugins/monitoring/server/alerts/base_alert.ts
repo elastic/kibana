@@ -9,6 +9,7 @@ import {
   ILegacyCustomClusterClient,
   Logger,
   IUiSettingsClient,
+  LegacyCallAPIOptions,
 } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,6 +37,8 @@ import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
 import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
 import { MonitoringLicenseService } from '../types';
+import { mbSafeQuery } from '../lib/mb_safe_query';
+import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 
 export class BaseAlert {
   public type!: string;
@@ -195,6 +198,15 @@ export class BaseAlert {
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
         if (alertInstance && this.filterAlertInstance(alertInstance, filters)) {
           accum[instanceId] = alertInstance;
+          if (alertInstance.state) {
+            accum[instanceId].state = {
+              alertStates: (alertInstance.state as AlertInstanceState).alertStates.filter(
+                (alertState: AlertState) => {
+                  return this.filterAlertState(alertState, filters);
+                }
+              ),
+            };
+          }
         }
         return accum;
       },
@@ -206,29 +218,54 @@ export class BaseAlert {
     return true;
   }
 
+  protected filterAlertState(alertState: AlertState, filters: CommonAlertFilter[]) {
+    return true;
+  }
+
   protected async execute({ services, params, state }: AlertExecutorOptions): Promise<any> {
     const logger = this.getLogger(this.type);
     logger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
-    const callCluster = this.monitoringCluster
+    const _callCluster = this.monitoringCluster
       ? this.monitoringCluster.callAsInternalUser
       : services.callCluster;
+    const callCluster = async (
+      endpoint: string,
+      clientParams?: Record<string, unknown>,
+      options?: LegacyCallAPIOptions
+    ) => {
+      return await mbSafeQuery(async () => _callCluster(endpoint, clientParams, options));
+    };
     const availableCcs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
-    // Support CCS use cases by querying to find available remote clusters
-    // and then adding those to the index pattern we are searching against
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-    const clusters = await fetchClusters(callCluster, esIndexPattern);
+    const clusters = await this.fetchClusters(callCluster, availableCcs, params);
     const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
       services.savedObjectsClient
     );
 
     const data = await this.fetchData(params, callCluster, clusters, uiSettings, availableCcs);
-    this.processData(data, clusters, services, logger);
+    return await this.processData(data, clusters, services, logger, state);
+  }
+
+  protected async fetchClusters(
+    callCluster: any,
+    availableCcs: string[] | undefined = undefined,
+    params: CommonAlertParams
+  ) {
+    let ccs;
+    if (!availableCcs) {
+      ccs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : undefined;
+    } else {
+      ccs = availableCcs;
+    }
+    // Support CCS use cases by querying to find available remote clusters
+    // and then adding those to the index pattern we are searching against
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    if (ccs) {
+      esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
+    }
+    return await fetchClusters(callCluster, esIndexPattern);
   }
 
   protected async fetchData(
@@ -242,12 +279,13 @@ export class BaseAlert {
     throw new Error('Child classes must implement `fetchData`');
   }
 
-  protected processData(
+  protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
     services: AlertServices,
-    logger: Logger
-  ) {
+    logger: Logger,
+    instanceState: unknown
+  ): Promise<void | Record<string, any>> {
     for (const item of data) {
       const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
       if (!cluster) {
@@ -338,5 +376,13 @@ export class BaseAlert {
     cluster: AlertCluster
   ) {
     throw new Error('Child classes must implement `executeActions`');
+  }
+
+  protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
+    const globalState = [`cluster_uuid:${clusterUuid}`];
+    if (ccs) {
+      globalState.push(`ccs:${ccs}`);
+    }
+    return `${this.kibanaUrl}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }

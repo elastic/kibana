@@ -22,7 +22,7 @@ export const SecureSpaceMessage = (props: SecureSpaceMessageProps) => {
   return (
     <Fragment>
       <EuiHorizontalRule />
-      <EuiText className="eui-textCenter">
+      <EuiText>
         <p>
           <FormattedMessage
             id="xpack.spaces.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"

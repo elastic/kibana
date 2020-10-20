@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flow } from 'lodash';
 import {
   ExternalServiceParams,
   PushToServiceApiHandlerArgs,
@@ -14,15 +13,14 @@ import {
   Incident,
   GetFieldsByIssueTypeHandlerArgs,
   GetIssueTypesHandlerArgs,
+  GetIssuesHandlerArgs,
   PushToServiceApiParams,
+  PushToServiceResponse,
+  GetIssueHandlerArgs,
 } from './types';
 
 // TODO: to remove, need to support Case
-import { transformers } from '../case/transformers';
-import { TransformFieldsArgs, Comment, EntityInformation } from '../case/common_types';
-
-import { PushToServiceResponse } from './types';
-import { prepareFieldsForTransformation } from '../case/utils';
+import { prepareFieldsForTransformation, transformFields, transformComments } from '../case/utils';
 
 const handshakeHandler = async ({
   externalService,
@@ -47,6 +45,18 @@ const getFieldsByIssueTypeHandler = async ({
 }: GetFieldsByIssueTypeHandlerArgs) => {
   const { id } = params;
   const res = await externalService.getFieldsByIssueType(id);
+  return res;
+};
+
+const getIssuesHandler = async ({ externalService, params }: GetIssuesHandlerArgs) => {
+  const { title } = params;
+  const res = await externalService.getIssues(title);
+  return res;
+};
+
+const getIssueHandler = async ({ externalService, params }: GetIssueHandlerArgs) => {
+  const { id } = params;
+  const res = await externalService.getIssue(id);
   return res;
 };
 
@@ -81,14 +91,28 @@ const pushToServiceHandler = async ({
       defaultPipes,
     });
 
-    incident = transformFields({
+    const transformedFields = transformFields<
+      PushToServiceApiParams,
+      ExternalServiceParams,
+      Incident
+    >({
       params,
       fields,
       currentIncident,
     });
+
+    const { priority, labels, issueType, parent } = params;
+    incident = {
+      summary: transformedFields.summary,
+      description: transformedFields.description,
+      priority,
+      labels,
+      issueType,
+      parent,
+    };
   } else {
-    const { title, description, priority, labels, issueType } = params;
-    incident = { summary: title, description, priority, labels, issueType };
+    const { title, description, priority, labels, issueType, parent } = params;
+    incident = { summary: title, description, priority, labels, issueType, parent };
   }
 
   if (externalId != null) {
@@ -132,51 +156,12 @@ const pushToServiceHandler = async ({
   return res;
 };
 
-export const transformFields = ({
-  params,
-  fields,
-  currentIncident,
-}: TransformFieldsArgs<PushToServiceApiParams, ExternalServiceParams>): Incident => {
-  return fields.reduce((prev, cur) => {
-    const transform = flow(...cur.pipes.map((p) => transformers[p]));
-    return {
-      ...prev,
-      [cur.key]: transform({
-        value: cur.value,
-        date: params.updatedAt ?? params.createdAt,
-        user: getEntity(params),
-        previousValue: currentIncident ? currentIncident[cur.key] : '',
-      }).value,
-    };
-  }, {} as Incident);
-};
-
-export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
-  return comments.map((c) => ({
-    ...c,
-    comment: flow(...pipes.map((p) => transformers[p]))({
-      value: c.comment,
-      date: c.updatedAt ?? c.createdAt,
-      user: getEntity(c),
-    }).value,
-  }));
-};
-
-export const getEntity = (entity: EntityInformation): string =>
-  (entity.updatedBy != null
-    ? entity.updatedBy.fullName
-      ? entity.updatedBy.fullName
-      : entity.updatedBy.username
-    : entity.createdBy != null
-    ? entity.createdBy.fullName
-      ? entity.createdBy.fullName
-      : entity.createdBy.username
-    : '') ?? '';
-
 export const api: ExternalServiceApi = {
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,
   issueTypes: getIssueTypesHandler,
   fieldsByIssueType: getFieldsByIssueTypeHandler,
+  issues: getIssuesHandler,
+  issue: getIssueHandler,
 };

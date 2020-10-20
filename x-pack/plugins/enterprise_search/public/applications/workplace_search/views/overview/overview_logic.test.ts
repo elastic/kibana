@@ -9,7 +9,7 @@ import { resetContext } from 'kea';
 jest.mock('../../../shared/http', () => ({ HttpLogic: { values: { http: { get: jest.fn() } } } }));
 import { HttpLogic } from '../../../shared/http';
 
-import { mockValues } from './__mocks__';
+import { mockOverviewValues } from './__mocks__';
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {
@@ -20,32 +20,19 @@ describe('OverviewLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(OverviewLogic.values).toEqual(mockValues);
+    expect(OverviewLogic.values).toEqual(mockOverviewValues);
   });
 
   describe('setServerData', () => {
     const feed = [{ foo: 'bar' }] as any;
-    const account = {
-      id: '1243',
-      groups: ['Default'],
-      isAdmin: true,
-      isCurated: false,
-      canCreatePersonalSources: true,
-      viewedOnboardingPage: false,
-    };
-    const org = { name: 'ACME', defaultOrgName: 'Org' };
 
     const data = {
       accountsCount: 1,
       activityFeed: feed,
       canCreateContentSources: true,
-      canCreateInvitations: true,
-      fpAccount: account,
       hasOrgSources: true,
       hasUsers: true,
-      isFederatedAuth: false,
       isOldAccount: true,
-      organization: org,
       pendingInvitationsCount: 1,
       personalSourcesCount: 1,
       sourcesCount: 1,
@@ -60,10 +47,6 @@ describe('OverviewLogic', () => {
     });
 
     it('will set server values', () => {
-      expect(OverviewLogic.values.organization).toEqual(org);
-      expect(OverviewLogic.values.isFederatedAuth).toEqual(false);
-      expect(OverviewLogic.values.fpAccount).toEqual(account);
-      expect(OverviewLogic.values.canCreateInvitations).toEqual(true);
       expect(OverviewLogic.values.hasUsers).toEqual(true);
       expect(OverviewLogic.values.hasOrgSources).toEqual(true);
       expect(OverviewLogic.values.canCreateContentSources).toEqual(true);

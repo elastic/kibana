@@ -18,8 +18,18 @@
  */
 
 import { Vis } from '../types';
-import { VisualizeInput, VisualizeEmbeddable } from './visualize_embeddable';
-import { IContainer, ErrorEmbeddable } from '../../../../plugins/embeddable/public';
+import {
+  VisualizeInput,
+  VisualizeEmbeddable,
+  VisualizeByValueInput,
+  VisualizeByReferenceInput,
+  VisualizeSavedObjectAttributes,
+} from './visualize_embeddable';
+import {
+  IContainer,
+  ErrorEmbeddable,
+  AttributeService,
+} from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
   getSavedVisualizationsLoader,
@@ -30,10 +40,17 @@ import {
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { SavedVisualizationsLoader } from '../saved_visualizations';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
   input: Partial<VisualizeInput> & { id: string },
+  savedVisualizationsLoader?: SavedVisualizationsLoader,
+  attributeService?: AttributeService<
+    VisualizeSavedObjectAttributes,
+    VisualizeByValueInput,
+    VisualizeByReferenceInput
+  >,
   parent?: IContainer
 ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
   const savedVisualizations = getSavedVisualizationsLoader();
@@ -55,6 +72,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
     const indexPattern = vis.data.indexPattern;
     const indexPatterns = indexPattern ? [indexPattern] : [];
     const editable = getCapabilities().visualize.save as boolean;
+
     return new VisualizeEmbeddable(
       getTimeFilter(),
       {
@@ -66,6 +84,8 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
         deps,
       },
       input,
+      attributeService,
+      savedVisualizationsLoader,
       parent
     );
   } catch (e) {

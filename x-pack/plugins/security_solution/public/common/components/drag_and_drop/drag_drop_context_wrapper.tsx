@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -125,8 +126,7 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
           }
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [dataProviders, activeTimelineDataProviders, browserFields]
+      [activeTimelineDataProviders, browserFields, dataProviders, dispatch, onAddedToTimeline]
     );
     return (
       <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture} sensors={sensors}>
@@ -134,13 +134,11 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
       </DragDropContext>
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.children === nextProps.children &&
-      prevProps.dataProviders === nextProps.dataProviders &&
-      prevProps.activeTimelineDataProviders === nextProps.activeTimelineDataProviders
-    ); // prevent re-renders when data providers are added or removed, but all other props are the same
-  }
+  // prevent re-renders when data providers are added or removed, but all other props are the same
+  (prevProps, nextProps) =>
+    prevProps.children === nextProps.children &&
+    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+    prevProps.activeTimelineDataProviders === nextProps.activeTimelineDataProviders
 );
 
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';

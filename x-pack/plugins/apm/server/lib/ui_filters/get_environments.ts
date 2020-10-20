@@ -13,11 +13,17 @@ import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ESFilter } from '../../../typings/elasticsearch';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
-export async function getEnvironments(
-  setup: Setup & SetupTimeRange,
-  serviceName?: string
-) {
+export async function getEnvironments({
+  setup,
+  serviceName,
+  searchAggregatedTransactions,
+}: {
+  setup: Setup & SetupTimeRange;
+  serviceName?: string;
+  searchAggregatedTransactions: boolean;
+}) {
   const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [{ range: rangeFilter(start, end) }];
@@ -31,7 +37,9 @@ export async function getEnvironments(
   const params = {
     apm: {
       events: [
-        ProcessorEvent.transaction,
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ProcessorEvent.metric,
         ProcessorEvent.error,
       ],

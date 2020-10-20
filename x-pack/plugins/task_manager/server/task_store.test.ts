@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import uuid from 'uuid';
-import { filter } from 'rxjs/operators';
+import { filter, take, first } from 'rxjs/operators';
 import { Option, some, none } from 'fp-ts/lib/Option';
 
 import {
@@ -66,8 +66,21 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
 describe('TaskStore', () => {
   describe('schedule', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
     async function testSchedule(task: unknown) {
-      const callCluster = jest.fn();
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
         id: 'testid',
         type,
@@ -75,15 +88,6 @@ describe('TaskStore', () => {
         references: [],
         version: '123',
       }));
-      const store = new TaskStore({
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        callCluster,
-        maxAttempts: 2,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-      });
       const result = await store.schedule(task as TaskInstance);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -176,12 +180,28 @@ describe('TaskStore', () => {
         /Unsupported task type "nope"/i
       );
     });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.create.mockRejectedValue(new Error('Failure'));
+      await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
   });
 
   describe('fetch', () => {
-    async function testFetch(opts?: SearchOpts, hits: unknown[] = []) {
-      const callCluster = sinon.spy(async (name: string, params?: unknown) => ({ hits: { hits } }));
-      const store = new TaskStore({
+    let store: TaskStore;
+    const callCluster = jest.fn();
+
+    beforeAll(() => {
+      store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -190,15 +210,19 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
+    });
+
+    async function testFetch(opts?: SearchOpts, hits: unknown[] = []) {
+      callCluster.mockResolvedValue({ hits: { hits } });
 
       const result = await store.fetch(opts);
 
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'search');
+      expect(callCluster).toHaveBeenCalledTimes(1);
+      expect(callCluster).toHaveBeenCalledWith('search', expect.anything());
 
       return {
         result,
-        args: callCluster.args[0][1],
+        args: callCluster.mock.calls[0][1],
       };
     }
 
@@ -229,6 +253,13 @@ describe('TaskStore', () => {
           },
         },
       });
+    });
+
+    test('pushes error from call cluster to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      callCluster.mockRejectedValue(new Error('Failure'));
+      await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
 
@@ -633,7 +664,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'aaa',
+          _id: 'task:aaa',
           _source: {
             type: 'task',
             task: {
@@ -654,7 +685,104 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
+          // this is invalid as it doesn't have the `type` prefix
           _id: 'bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const {
+        result: { docs },
+        args: {
+          search: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: 10,
+        },
+        hits: tasks,
+      });
+
+      expect(query.bool.must).toContainEqual({
+        bool: {
+          must: [
+            {
+              term: {
+                'task.ownerId': taskManagerId,
+              },
+            },
+            { term: { 'task.status': 'claiming' } },
+          ],
+        },
+      });
+
+      expect(docs).toMatchObject([
+        {
+          attempts: 0,
+          id: 'aaa',
+          schedule: undefined,
+          params: { hello: 'world' },
+          runAt,
+          scope: ['reporting'],
+          state: { baby: 'Henhen' },
+          status: 'claiming',
+          taskType: 'foo',
+          user: 'jimbo',
+          ownerId: taskManagerId,
+        },
+      ]);
+    });
+
+    test('it filters out invalid tasks that arent SavedObjects', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'task:aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'task:bbb',
           _source: {
             type: 'task',
             task: {
@@ -729,7 +857,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'aaa',
+          _id: 'task:aaa',
           _source: {
             type: 'task',
             task: {
@@ -750,7 +878,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
-          _id: 'bbb',
+          _id: 'task:bbb',
           _source: {
             type: 'task',
             task: {
@@ -831,9 +959,46 @@ if (doc['task.runAt'].size()!=0) {
         },
       ]);
     });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const callCluster = jest.fn();
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster,
+        definitions: taskDefinitions,
+        maxAttempts: 2,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      callCluster.mockRejectedValue(new Error('Failure'));
+      await expect(
+        store.claimAvailableTasks({
+          claimOwnershipUntil: new Date(),
+          size: 10,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
   });
 
   describe('update', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
     test('refreshes the index, handles versioning', async () => {
       const task = {
         runAt: mockedDate,
@@ -861,16 +1026,6 @@ if (doc['task.runAt'].size()!=0) {
           };
         }
       );
-
-      const store = new TaskStore({
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        callCluster: jest.fn(),
-        maxAttempts: 2,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-      });
 
       const result = await store.update(task);
 
@@ -905,28 +1060,116 @@ if (doc['task.runAt'].size()!=0) {
         version: '123',
       });
     });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.update.mockRejectedValue(new Error('Failure'));
+      await expect(store.update(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
   });
 
-  describe('remove', () => {
-    test('removes the task with the specified id', async () => {
-      const id = `id-${_.random(1, 20)}`;
-      const callCluster = jest.fn();
-      const store = new TaskStore({
+  describe('bulkUpdate', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        callCluster,
+        callCluster: jest.fn(),
         maxAttempts: 2,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkUpdate([task])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
+  describe('remove', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
+    test('removes the task with the specified id', async () => {
+      const id = `id-${_.random(1, 20)}`;
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
     });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const id = `id-${_.random(1, 20)}`;
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.delete.mockRejectedValue(new Error('Failure'));
+      await expect(store.remove(id)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
   });
 
   describe('get', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
     test('gets the task with the specified id', async () => {
       const id = `id-${_.random(1, 20)}`;
       const task = {
@@ -944,7 +1187,6 @@ if (doc['task.runAt'].size()!=0) {
         ownerId: null,
       };
 
-      const callCluster = jest.fn();
       savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({
         id: objectId,
         type,
@@ -956,21 +1198,19 @@ if (doc['task.runAt'].size()!=0) {
         version: '123',
       }));
 
-      const store = new TaskStore({
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        callCluster,
-        maxAttempts: 2,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-      });
-
       const result = await store.get(id);
 
       expect(result).toEqual(task);
 
       expect(savedObjectsClient.get).toHaveBeenCalledWith('task', id);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const id = `id-${_.random(1, 20)}`;
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.get.mockRejectedValue(new Error('Failure'));
+      await expect(store.get(id)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
 
@@ -1069,7 +1309,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'claimed-by-id',
+          _id: 'task:claimed-by-id',
           _source: {
             type: 'task',
             task: {
@@ -1093,7 +1333,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
-          _id: 'claimed-by-schedule',
+          _id: 'task:claimed-by-schedule',
           _source: {
             type: 'task',
             task: {
@@ -1117,7 +1357,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['b', 2],
         },
         {
-          _id: 'already-running',
+          _id: 'task:already-running',
           _source: {
             type: 'task',
             task: {
@@ -1145,7 +1385,7 @@ if (doc['task.runAt'].size()!=0) {
       return { taskManagerId, runAt, tasks };
     }
 
-    test('emits an event when a task is succesfully claimed by id', async (done) => {
+    test('emits an event when a task is succesfully claimed by id', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1165,49 +1405,47 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'claimed-by-id'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(
-              asTaskClaimEvent(
-                'claimed-by-id',
-                asOk({
-                  id: 'claimed-by-id',
-                  runAt,
-                  taskType: 'foo',
-                  schedule: undefined,
-                  attempts: 0,
-                  status: 'claiming' as TaskStatus,
-                  params: { hello: 'world' },
-                  state: { baby: 'Henhen' },
-                  user: 'jimbo',
-                  scope: ['reporting'],
-                  ownerId: taskManagerId,
-                  startedAt: null,
-                  retryAt: null,
-                  scheduledAt: new Date(),
-                })
-              )
-            );
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(
+        asTaskClaimEvent(
+          'claimed-by-id',
+          asOk({
+            id: 'claimed-by-id',
+            runAt,
+            taskType: 'foo',
+            schedule: undefined,
+            attempts: 0,
+            status: 'claiming' as TaskStatus,
+            params: { hello: 'world' },
+            state: { baby: 'Henhen' },
+            user: 'jimbo',
+            scope: ['reporting'],
+            ownerId: taskManagerId,
+            startedAt: null,
+            retryAt: null,
+            scheduledAt: new Date(),
+          })
+        )
+      );
     });
 
-    test('emits an event when a task is succesfully by scheduling', async (done) => {
+    test('emits an event when a task is succesfully by scheduling', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1227,49 +1465,47 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'claimed-by-schedule'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(
-              asTaskClaimEvent(
-                'claimed-by-schedule',
-                asOk({
-                  id: 'claimed-by-schedule',
-                  runAt,
-                  taskType: 'bar',
-                  schedule: { interval: '5m' },
-                  attempts: 2,
-                  status: 'claiming' as TaskStatus,
-                  params: { shazm: 1 },
-                  state: { henry: 'The 8th' },
-                  user: 'dabo',
-                  scope: ['reporting', 'ceo'],
-                  ownerId: taskManagerId,
-                  startedAt: null,
-                  retryAt: null,
-                  scheduledAt: new Date(),
-                })
-              )
-            );
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(
+        asTaskClaimEvent(
+          'claimed-by-schedule',
+          asOk({
+            id: 'claimed-by-schedule',
+            runAt,
+            taskType: 'bar',
+            schedule: { interval: '5m' },
+            attempts: 2,
+            status: 'claiming' as TaskStatus,
+            params: { shazm: 1 },
+            state: { henry: 'The 8th' },
+            user: 'dabo',
+            scope: ['reporting', 'ceo'],
+            ownerId: taskManagerId,
+            startedAt: null,
+            retryAt: null,
+            scheduledAt: new Date(),
+          })
+        )
+      );
     });
 
-    test('emits an event when the store fails to claim a required task by id', async (done) => {
+    test('emits an event when the store fails to claim a required task by id', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1289,51 +1525,49 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'already-running'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(
-              asTaskClaimEvent(
-                'already-running',
-                asErr(
-                  some({
-                    id: 'already-running',
-                    runAt,
-                    taskType: 'bar',
-                    schedule: { interval: '5m' },
-                    attempts: 2,
-                    status: 'running' as TaskStatus,
-                    params: { shazm: 1 },
-                    state: { henry: 'The 8th' },
-                    user: 'dabo',
-                    scope: ['reporting', 'ceo'],
-                    ownerId: taskManagerId,
-                    startedAt: null,
-                    retryAt: null,
-                    scheduledAt: new Date(),
-                  })
-                )
-              )
-            );
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['already-running'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(
+        asTaskClaimEvent(
+          'already-running',
+          asErr(
+            some({
+              id: 'already-running',
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'running' as TaskStatus,
+              params: { shazm: 1 },
+              state: { henry: 'The 8th' },
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+              startedAt: null,
+              retryAt: null,
+              scheduledAt: new Date(),
+            })
+          )
+        )
+      );
     });
 
-    test('emits an event when the store fails to find a task which was required by id', async (done) => {
+    test('emits an event when the store fails to find a task which was required by id', async () => {
       const { taskManagerId, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1353,33 +1587,31 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'unknown-task'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(asTaskClaimEvent('unknown-task', asErr(none)));
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['unknown-task'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(asTaskClaimEvent('unknown-task', asErr(none)));
     });
   });
 });
 
 function generateFakeTasks(count: number = 1) {
-  return _.times(count, () => ({
-    _id: 'aaa',
+  return _.times(count, (index) => ({
+    _id: `task:id-${index}`,
     _source: {
       type: 'task',
       task: {},

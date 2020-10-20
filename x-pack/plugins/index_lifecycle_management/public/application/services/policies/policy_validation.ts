@@ -8,17 +8,13 @@ import { i18n } from '@kbn/i18n';
 import {
   ColdPhase,
   DeletePhase,
-  FrozenPhase,
-  HotPhase,
-  Policy,
+  LegacyPolicy,
   PolicyFromES,
   WarmPhase,
 } from '../../../../common/types';
-import { validateHotPhase } from './hot_phase';
 import { validateWarmPhase } from './warm_phase';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
-import { validateFrozenPhase } from './frozen_phase';
 
 export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
 
@@ -34,27 +30,6 @@ export const positiveNumberRequiredMessage = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.positiveNumberRequiredError',
   {
     defaultMessage: 'Only positive numbers are allowed.',
-  }
-);
-
-export const maximumAgeRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError',
-  {
-    defaultMessage: 'A maximum age is required.',
-  }
-);
-
-export const maximumSizeRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError',
-  {
-    defaultMessage: 'A maximum index size is required.',
-  }
-);
-
-export const maximumDocumentsRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.maximumDocumentsMissingError',
-  {
-    defaultMessage: 'Maximum documents is required.',
   }
 );
 
@@ -114,17 +89,15 @@ export type PhaseValidationErrors<T> = {
 };
 
 export interface ValidationErrors {
-  hot: PhaseValidationErrors<HotPhase>;
   warm: PhaseValidationErrors<WarmPhase>;
   cold: PhaseValidationErrors<ColdPhase>;
-  frozen: PhaseValidationErrors<FrozenPhase>;
   delete: PhaseValidationErrors<DeletePhase>;
   policyName: string[];
 }
 
 export const validatePolicy = (
   saveAsNew: boolean,
-  policy: Policy,
+  policy: LegacyPolicy,
   policies: PolicyFromES[],
   originalPolicyName: string
 ): [boolean, ValidationErrors] => {
@@ -155,26 +128,20 @@ export const validatePolicy = (
     }
   }
 
-  const hotPhaseErrors = validateHotPhase(policy.phases.hot);
   const warmPhaseErrors = validateWarmPhase(policy.phases.warm);
   const coldPhaseErrors = validateColdPhase(policy.phases.cold);
-  const frozenPhaseErrors = validateFrozenPhase(policy.phases.frozen);
   const deletePhaseErrors = validateDeletePhase(policy.phases.delete);
   const isValid =
     policyNameErrors.length === 0 &&
-    Object.keys(hotPhaseErrors).length === 0 &&
     Object.keys(warmPhaseErrors).length === 0 &&
     Object.keys(coldPhaseErrors).length === 0 &&
-    Object.keys(frozenPhaseErrors).length === 0 &&
     Object.keys(deletePhaseErrors).length === 0;
   return [
     isValid,
     {
       policyName: [...policyNameErrors],
-      hot: hotPhaseErrors,
       warm: warmPhaseErrors,
       cold: coldPhaseErrors,
-      frozen: frozenPhaseErrors,
       delete: deletePhaseErrors,
     },
   ];
@@ -189,9 +156,6 @@ export const findFirstError = (errors?: ValidationErrors): string | undefined =>
     return propertyof<ValidationErrors>('policyName');
   }
 
-  if (Object.keys(errors.hot).length > 0) {
-    return `${propertyof<ValidationErrors>('hot')}.${Object.keys(errors.hot)[0]}`;
-  }
   if (Object.keys(errors.warm).length > 0) {
     return `${propertyof<ValidationErrors>('warm')}.${Object.keys(errors.warm)[0]}`;
   }

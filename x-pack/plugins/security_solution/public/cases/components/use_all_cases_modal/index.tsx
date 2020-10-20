@@ -5,13 +5,13 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../common/components/link_to';
-import { State } from '../../../common/store';
 import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 
@@ -34,7 +34,7 @@ export const useAllCasesModal = ({
 }: UseAllCasesModalProps): UseAllCasesModalReturnedValues => {
   const dispatch = useDispatch();
   const { navigateToApp } = useKibana().services.application;
-  const timeline = useSelector((state: State) =>
+  const timeline = useShallowEqualSelector((state) =>
     timelineSelectors.selectTimeline(state, timelineId)
   );
 

@@ -24,3 +24,27 @@ export interface ActionResult {
   config: Record<string, any>;
   isPreconfigured: boolean;
 }
+
+// the result returned from an action type executor function
+const ActionTypeExecutorResultStatusValues = ['ok', 'error'] as const;
+type ActionTypeExecutorResultStatus = typeof ActionTypeExecutorResultStatusValues[number];
+
+export interface ActionTypeExecutorResult<Data> {
+  actionId: string;
+  status: ActionTypeExecutorResultStatus;
+  message?: string;
+  serviceMessage?: string;
+  data?: Data;
+  retry?: null | boolean | Date;
+}
+
+export function isActionTypeExecutorResult(
+  result: unknown
+): result is ActionTypeExecutorResult<unknown> {
+  const unsafeResult = result as ActionTypeExecutorResult<unknown>;
+  return (
+    unsafeResult &&
+    typeof unsafeResult?.actionId === 'string' &&
+    ActionTypeExecutorResultStatusValues.includes(unsafeResult?.status)
+  );
+}

@@ -4,6 +4,8 @@
 
 ## IndexPatternField.lang property
 
+Script field language
+
 <b>Signature:</b>
 
 ```typescript

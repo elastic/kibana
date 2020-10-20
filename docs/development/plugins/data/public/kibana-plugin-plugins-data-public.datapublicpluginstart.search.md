@@ -4,6 +4,8 @@
 
 ## DataPublicPluginStart.search property
 
+search service [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md)
+
 <b>Signature:</b>
 
 ```typescript

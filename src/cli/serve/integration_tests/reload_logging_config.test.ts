@@ -26,8 +26,7 @@ import Del from 'del';
 import * as Rx from 'rxjs';
 import { map, filter, take } from 'rxjs/operators';
 import { safeDump } from 'js-yaml';
-
-import { getConfigFromFiles } from '../../../core/server/config/read_config';
+import { getConfigFromFiles } from '@kbn/config';
 
 const legacyConfig = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const configFileLogConsole = follow(

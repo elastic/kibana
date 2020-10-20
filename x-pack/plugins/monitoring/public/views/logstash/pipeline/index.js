@@ -142,6 +142,14 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
           if (!data || !data.pipeline) {
             return;
           }
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.pipeline.pageTitle', {
+              defaultMessage: 'Logstash pipeline: {pipeline}',
+              values: {
+                pipeline: data.pipeline.id,
+              },
+            })
+          );
           this.pipelineState = new PipelineState(data.pipeline);
           this.detailVertex = data.vertex ? vertexFactory(null, data.vertex) : null;
           this.renderReact(

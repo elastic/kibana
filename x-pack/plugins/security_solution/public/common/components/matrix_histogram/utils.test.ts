@@ -13,7 +13,7 @@ import {
 } from './utils';
 import { UpdateDateRange } from '../charts/common';
 import { Position } from '@elastic/charts';
-import { MatrixOverTimeHistogramData } from '../../../graphql/types';
+import { MatrixHistogramData } from '../../../../common/search_strategy';
 import { BarchartConfigs } from './types';
 
 describe('utils', () => {
@@ -77,7 +77,7 @@ describe('utils', () => {
 
   describe('formatToChartDataItem', () => {
     test('it should format data correctly', () => {
-      const data: [string, MatrixOverTimeHistogramData[]] = [
+      const data: [string, MatrixHistogramData[]] = [
         'g1',
         [
           { x: 1, y: 2, g: 'g1' },

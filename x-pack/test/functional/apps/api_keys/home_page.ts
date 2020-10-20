@@ -24,10 +24,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // https://www.elastic.co/guide/en/kibana/7.6/api-keys.html#api-keys-security-privileges
-    it('Shows required privileges ', async () => {
-      log.debug('Checking for required privileges method section header');
-      const message = await pageObjects.apiKeys.apiKeysPermissionDeniedMessage();
-      expect(message).to.be('You need permission to manage API keys');
+    it('Hides management link if user is not authorized', async () => {
+      await testSubjects.missingOrFail('apiKeys');
     });
 
     it('Loads the app', async () => {

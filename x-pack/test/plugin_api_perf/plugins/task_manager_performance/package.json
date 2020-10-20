@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "uuid": "3.3.2",
-    "stats-lite": "2.2.0",
+    "stats-lite": "^2.2.0",
     "pretty-ms": "5.0.0"
   },
   "devDependencies": {

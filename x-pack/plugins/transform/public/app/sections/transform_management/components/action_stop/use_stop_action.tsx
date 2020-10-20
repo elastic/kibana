@@ -6,7 +6,7 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';
@@ -20,9 +20,10 @@ export const useStopAction = (forceDisable: boolean) => {
 
   const stopTransforms = useStopTransforms();
 
-  const clickHandler = useCallback((item: TransformListRow) => stopTransforms([item]), [
-    stopTransforms,
-  ]);
+  const clickHandler = useCallback(
+    (i: TransformListRow) => stopTransforms([{ id: i.id, state: i.stats.state }]),
+    [stopTransforms]
+  );
 
   const action: TransformListAction = useMemo(
     () => ({

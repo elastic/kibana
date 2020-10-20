@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../../../package.json', () => mockPackage);
+export const mockPackage = {
+  raw: {},
+};
+
+jest.doMock('load-json-file', () => ({
+  sync: () => mockPackage.raw,
+}));

@@ -6,7 +6,7 @@
 
 import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
 
-import { MapRecord } from '../case/common_types';
+import { MapRecord } from '../case/types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
@@ -60,6 +60,18 @@ const createMock = (): jest.Mocked<ExternalService> => {
         ],
         defaultValue: { name: 'Medium', id: '3' },
       },
+    })),
+    getIssues: jest.fn().mockImplementation(() => [
+      {
+        id: '10267',
+        key: 'RJ-107',
+        title: 'Test title',
+      },
+    ]),
+    getIssue: jest.fn().mockImplementation(() => ({
+      id: '10267',
+      key: 'RJ-107',
+      title: 'Test title',
     })),
   };
 
@@ -120,6 +132,7 @@ const executorParams: ExecutorSubActionPushParams = {
   labels: ['kibana', 'elastic'],
   priority: 'High',
   issueType: '10006',
+  parent: null,
   comments: [
     {
       commentId: 'case-comment-1',

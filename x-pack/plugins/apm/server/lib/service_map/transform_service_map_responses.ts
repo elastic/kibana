@@ -16,9 +16,11 @@ import {
   ConnectionNode,
   ServiceConnectionNode,
   ExternalConnectionNode,
+  ConnectionElement,
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
+import { groupResourceNodes } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -213,9 +215,12 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
   }, []);
 
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodes].map((element) => ({
+  const elements: ConnectionElement[] = [
+    ...dedupedConnections,
+    ...dedupedNodes,
+  ].map((element) => ({
     data: element,
   }));
 
-  return { elements };
+  return groupResourceNodes({ elements });
 }

@@ -14,6 +14,7 @@ import { getServicesProjection } from '../../projections/services';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
@@ -27,6 +28,7 @@ export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
+  searchAggregatedTransactions: boolean;
   logger: Logger;
 }
 
@@ -77,13 +79,26 @@ async function getConnectionData({
 }
 
 async function getServicesData(options: IEnvOptions) {
-  const { setup } = options;
+  const { setup, searchAggregatedTransactions } = options;
 
   const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] },
+    setup: { ...setup, esFilter: [] },
+    searchAggregatedTransactions,
   });
 
-  const { filter } = projection.body.query.bool;
+  let { filter } = projection.body.query.bool;
+
+  if (options.serviceName) {
+    filter = filter.concat({
+      term: {
+        [SERVICE_NAME]: options.serviceName,
+      },
+    });
+  }
+
+  if (options.environment) {
+    filter = filter.concat(getEnvironmentUiFilterES(options.environment));
+  }
 
   const params = mergeProjection(projection, {
     body: {
@@ -91,13 +106,7 @@ async function getServicesData(options: IEnvOptions) {
       query: {
         bool: {
           ...projection.body.query.bool,
-          filter: options.serviceName
-            ? filter.concat({
-                term: {
-                  [SERVICE_NAME]: options.serviceName,
-                },
-              })
-            : filter,
+          filter,
         },
       },
       aggs: {

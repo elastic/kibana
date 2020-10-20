@@ -5,6 +5,9 @@
   "license": "Apache-2.0",
   "main": "target",
   "types": "target/index.d.ts",
+  "kibana": {
+    "devOnly": true
+  },
   "scripts": {
     "build": "tsc",
     "kbn:bootstrap": "tsc",
@@ -16,7 +19,7 @@
     "utility-types": "^3.10.0"
   },
   "devDependencies": {
-    "del-cli": "^3.0.0",
-    "tsd": "^0.7.4"
+    "del-cli": "^3.0.1",
+    "tsd": "^0.13.1"
   }
 }

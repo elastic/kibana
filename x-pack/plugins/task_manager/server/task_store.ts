@@ -121,6 +121,7 @@ export class TaskStore {
   public readonly maxAttempts: number;
   public readonly index: string;
   public readonly taskManagerId: string;
+  public readonly errors$ = new Subject<Error>();
 
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<TaskDefinition>;
@@ -171,11 +172,17 @@ export class TaskStore {
       );
     }
 
-    const savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
-      'task',
-      taskInstanceToAttributes(taskInstance),
-      { id: taskInstance.id, refresh: false }
-    );
+    let savedObject;
+    try {
+      savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
+        'task',
+        taskInstanceToAttributes(taskInstance),
+        { id: taskInstance.id, refresh: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
 
     return savedObjectToConcreteTaskInstance(savedObject);
   }
@@ -333,12 +340,22 @@ export class TaskStore {
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const attributes = taskInstanceToAttributes(doc);
-    const updatedSavedObject = await this.savedObjectsRepository.update<
-      SerializedConcreteTaskInstance
-    >('task', doc.id, attributes, {
-      refresh: false,
-      version: doc.version,
-    });
+
+    let updatedSavedObject;
+    try {
+      updatedSavedObject = await this.savedObjectsRepository.update<SerializedConcreteTaskInstance>(
+        'task',
+        doc.id,
+        attributes,
+        {
+          refresh: false,
+          version: doc.version,
+        }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
 
     return savedObjectToConcreteTaskInstance(
       // The SavedObjects update api forces a Partial on the `attributes` on the response,
@@ -362,8 +379,11 @@ export class TaskStore {
       return attrsById;
     }, new Map());
 
-    const updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error> = (
-      await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+    let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
+    try {
+      ({ saved_objects: updatedSavedObjects } = await this.savedObjectsRepository.bulkUpdate<
+        SerializedConcreteTaskInstance
+      >(
         docs.map((doc) => ({
           type: 'task',
           id: doc.id,
@@ -373,8 +393,11 @@ export class TaskStore {
         {
           refresh: false,
         }
-      )
-    ).saved_objects;
+      ));
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
 
     return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
       isSavedObjectsUpdateResponse(updatedSavedObject)
@@ -404,7 +427,12 @@ export class TaskStore {
    * @returns {Promise<void>}
    */
   public async remove(id: string): Promise<void> {
-    await this.savedObjectsRepository.delete('task', id);
+    try {
+      await this.savedObjectsRepository.delete('task', id);
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
   }
 
   /**
@@ -414,7 +442,14 @@ export class TaskStore {
    * @returns {Promise<void>}
    */
   public async get(id: string): Promise<ConcreteTaskInstance> {
-    return savedObjectToConcreteTaskInstance(await this.savedObjectsRepository.get('task', id));
+    let result;
+    try {
+      result = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+    return savedObjectToConcreteTaskInstance(result);
   }
 
   /**
@@ -438,19 +473,26 @@ export class TaskStore {
   private async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
-    const result = await this.callCluster('search', {
-      index: this.index,
-      ignoreUnavailable: true,
-      body: {
-        ...opts,
-        query,
-      },
-    });
+    let result;
+    try {
+      result = await this.callCluster('search', {
+        index: this.index,
+        ignoreUnavailable: true,
+        body: {
+          ...opts,
+          query,
+        },
+      });
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
 
     const rawDocs = (result as SearchResponse<unknown>).hits.hits;
 
     return {
       docs: (rawDocs as SavedObjectsRawDoc[])
+        .filter((doc) => this.serializer.isRawSavedObject(doc))
         .map((doc) => this.serializer.rawToSavedObject(doc))
         .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map(savedObjectToConcreteTaskInstance),
@@ -463,17 +505,23 @@ export class TaskStore {
     { max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
-    const result = await this.callCluster('updateByQuery', {
-      index: this.index,
-      ignoreUnavailable: true,
-      refresh: true,
-      max_docs,
-      conflicts: 'proceed',
-      body: {
-        ...opts,
-        query,
-      },
-    });
+    let result;
+    try {
+      result = await this.callCluster('updateByQuery', {
+        index: this.index,
+        ignoreUnavailable: true,
+        refresh: true,
+        max_docs,
+        conflicts: 'proceed',
+        body: {
+          ...opts,
+          query,
+        },
+      });
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { total, updated, version_conflicts } = result as UpdateDocumentByQueryResponse;

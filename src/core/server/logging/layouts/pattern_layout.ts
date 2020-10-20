@@ -18,9 +18,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { LogRecord, Layout } from '@kbn/logging';
 
-import { LogRecord } from '../log_record';
-import { Layout } from './layouts';
 import {
   Conversion,
   LoggerConversion,

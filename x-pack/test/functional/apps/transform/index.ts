@@ -37,5 +37,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./creation_saved_search'));
     loadTestFile(require.resolve('./cloning'));
     loadTestFile(require.resolve('./editing'));
+    loadTestFile(require.resolve('./feature_controls'));
   });
 }

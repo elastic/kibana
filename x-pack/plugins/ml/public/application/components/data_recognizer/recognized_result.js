@@ -9,11 +9,16 @@ import PropTypes from 'prop-types';
 
 import { EuiIcon, EuiFlexItem } from '@elastic/eui';
 import { CreateJobLinkCard } from '../create_job_link_card';
+import { useMlKibana } from '../../contexts/kibana';
 
 export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
   const id = savedSearch === null ? `index=${indexPattern.id}` : `savedSearchId=${savedSearch.id}`;
-
-  const href = `#/jobs/new_job/recognize?id=${config.id}&${id}`;
+  const href = `${basePath.get()}/app/ml/jobs/new_job/recognize?id=${config.id}&${id}`;
 
   let logo = null;
   // if a logo is available, use that, otherwise display the id

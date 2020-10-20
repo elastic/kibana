@@ -132,8 +132,8 @@ export class InfraServerPlugin {
       ...domainLibs,
     };
 
-    plugins.features.registerFeature(METRICS_FEATURE);
-    plugins.features.registerFeature(LOGS_FEATURE);
+    plugins.features.registerKibanaFeature(METRICS_FEATURE);
+    plugins.features.registerKibanaFeature(LOGS_FEATURE);
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {

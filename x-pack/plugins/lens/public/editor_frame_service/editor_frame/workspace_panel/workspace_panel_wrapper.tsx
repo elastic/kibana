@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './workspace_panel_wrapper.scss';
+
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -67,8 +69,14 @@ export function WorkspacePanelWrapper({
   );
   return (
     <>
-      <div className="lnsWorkspacePanelWrapper__toolbar">
-        <EuiFlexGroup gutterSize="s" direction="row" responsive={false}>
+      <div>
+        <EuiFlexGroup
+          gutterSize="m"
+          direction="row"
+          responsive={false}
+          wrap={true}
+          className="lnsWorkspacePanelWrapper__toolbar"
+        >
           <EuiFlexItem grow={false}>
             <ChartSwitch
               data-test-subj="lnsChartSwitcher"
@@ -82,7 +90,7 @@ export function WorkspacePanelWrapper({
             />
           </EuiFlexItem>
           {activeVisualization && activeVisualization.renderToolbar && (
-            <EuiFlexItem grow>
+            <EuiFlexItem grow={false}>
               <NativeRenderer
                 render={activeVisualization.renderToolbar}
                 nativeProps={{

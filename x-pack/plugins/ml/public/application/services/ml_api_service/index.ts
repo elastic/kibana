@@ -62,7 +62,7 @@ export interface BucketSpanEstimatorResponse {
   name: string;
   ms: number;
   error?: boolean;
-  message?: { msg: string } | string;
+  message?: string;
 }
 
 export interface GetTimeFieldRangeResponse {

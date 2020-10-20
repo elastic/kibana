@@ -9,21 +9,19 @@ import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { ValuesType } from 'utility-types';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { getDurationFormatter } from '../../../../utils/formatters';
 // @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
 interface IChartPoint {
-  samples: IBucket['samples'];
   x0: number;
   x: number;
   y: number;
@@ -32,7 +30,10 @@ interface IChartPoint {
   };
 }
 
-export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
+export function getFormattedBuckets(
+  buckets: DistributionBucket[],
+  bucketSize: number
+) {
   if (!buckets) {
     return [];
   }
@@ -40,7 +41,6 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
   return buckets.map(
     ({ samples, count, key }): IChartPoint => {
       return {
-        samples,
         x0: key,
         x: key + bucketSize,
         y: count,
@@ -97,6 +97,9 @@ interface Props {
   urlParams: IUrlParams;
   isLoading: boolean;
   bucketIndex: number;
+  onBucketClick: (
+    bucket: ValuesType<TransactionDistributionAPIResponse['buckets']>
+  ) => void;
 }
 
 export function TransactionDistribution(props: Props) {
@@ -105,8 +108,8 @@ export function TransactionDistribution(props: Props) {
     urlParams: { transactionType },
     isLoading,
     bucketIndex,
+    onBucketClick,
   } = props;
-  const history = useHistory();
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatYShort = useCallback(getFormatYShort(transactionType), [
@@ -132,6 +135,14 @@ export function TransactionDistribution(props: Props) {
         })}
       />
     );
+  }
+
+  function getBucketFromChartPoint(chartPoint: IChartPoint) {
+    const clickedBucket = distribution?.buckets.find((bucket) => {
+      return bucket.key === chartPoint.x0;
+    });
+
+    return clickedBucket;
   }
 
   const buckets = getFormattedBuckets(
@@ -175,31 +186,29 @@ export function TransactionDistribution(props: Props) {
         buckets={buckets}
         bucketSize={distribution.bucketSize}
         bucketIndex={bucketIndex}
-        onClick={(bucket: IChartPoint) => {
-          if (!isEmpty(bucket.samples)) {
-            const sample = bucket.samples[0];
-            history.push({
-              ...history.location,
-              search: fromQuery({
-                ...toQuery(history.location.search),
-                transactionId: sample.transactionId,
-                traceId: sample.traceId,
-              }),
-            });
+        onClick={(chartPoint: IChartPoint) => {
+          const clickedBucket = getBucketFromChartPoint(chartPoint);
+
+          if (clickedBucket) {
+            onBucketClick(clickedBucket);
           }
         }}
         formatX={(time: number) => timeFormatter(time).formatted}
         formatYShort={formatYShort}
         formatYLong={formatYLong}
-        verticalLineHover={(bucket: IChartPoint) => isEmpty(bucket.samples)}
-        backgroundHover={(bucket: IChartPoint) => !isEmpty(bucket.samples)}
-        tooltipHeader={(bucket: IChartPoint) => {
-          const xFormatted = timeFormatter(bucket.x);
-          const x0Formatted = timeFormatter(bucket.x0);
+        verticalLineHover={(point: IChartPoint) =>
+          isEmpty(getBucketFromChartPoint(point)?.samples)
+        }
+        backgroundHover={(point: IChartPoint) =>
+          !isEmpty(getBucketFromChartPoint(point)?.samples)
+        }
+        tooltipHeader={(point: IChartPoint) => {
+          const xFormatted = timeFormatter(point.x);
+          const x0Formatted = timeFormatter(point.x0);
           return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
         }}
-        tooltipFooter={(bucket: IChartPoint) =>
-          isEmpty(bucket.samples) &&
+        tooltipFooter={(point: IChartPoint) =>
+          isEmpty(getBucketFromChartPoint(point)?.samples) &&
           i18n.translate(
             'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
             {

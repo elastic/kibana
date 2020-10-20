@@ -11,13 +11,14 @@ import { useCore } from './use_core';
 const BASE_BREADCRUMB: ChromeBreadcrumb = {
   href: pagePathGetters.overview(),
   text: i18n.translate('xpack.ingestManager.breadcrumbs.appTitle', {
-    defaultMessage: 'Ingest Manager',
+    defaultMessage: 'Fleet',
   }),
 };
 
 const breadcrumbGetters: {
   [key in Page]: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
 } = {
+  base: () => [BASE_BREADCRUMB],
   overview: () => [
     BASE_BREADCRUMB,
     {
@@ -155,21 +156,15 @@ const breadcrumbGetters: {
   fleet: () => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.fleetPageTitle', {
-        defaultMessage: 'Fleet',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.agentsPageTitle', {
+        defaultMessage: 'Agents',
       }),
     },
   ],
   fleet_agent_list: () => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.fleet(),
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.fleetPageTitle', {
-        defaultMessage: 'Fleet',
-      }),
-    },
-    {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.fleetAgentsPageTitle', {
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.agentsPageTitle', {
         defaultMessage: 'Agents',
       }),
     },
@@ -178,12 +173,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.fleet(),
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.fleetPageTitle', {
-        defaultMessage: 'Fleet',
-      }),
-    },
-    {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.fleetAgentsPageTitle', {
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.agentsPageTitle', {
         defaultMessage: 'Agents',
       }),
     },
@@ -193,12 +183,12 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.fleet(),
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.fleetPageTitle', {
-        defaultMessage: 'Fleet',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.agentsPageTitle', {
+        defaultMessage: 'Agents',
       }),
     },
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.fleetEnrollmentTokensPageTitle', {
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.enrollmentTokensPageTitle', {
         defaultMessage: 'Enrollment tokens',
       }),
     },

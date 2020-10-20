@@ -13,7 +13,6 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HeaderSection } from '../../../common/components/header_section';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
@@ -45,6 +44,8 @@ import {
   displaySuccessToast,
   displayErrorToast,
 } from '../../../common/components/toasters';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -55,7 +56,6 @@ interface OwnProps {
   loading: boolean;
   showBuildingBlockAlerts: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
-  signalsIndex: string;
   to: string;
 }
 
@@ -80,19 +80,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   setEventsLoading,
   showBuildingBlockAlerts,
   onShowBuildingBlockAlertsChanged,
-  signalsIndex,
   to,
 }) => {
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-  const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
-    signalsIndex !== '' ? [signalsIndex] : [],
-    'alerts_table'
-  );
+  const {
+    browserFields,
+    indexPattern: indexPatterns,
+    loading: indexPatternsLoading,
+    selectedPatterns,
+  } = useSourcererScope(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const { initializeTimeline, setSelectAll, setIndexToAdd } = useManageTimeline();
+  const { initializeTimeline, setSelectAll } = useManageTimeline();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -284,7 +285,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
-  const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
   const defaultFiltersMemo = useMemo(() => {
     if (isEmpty(defaultFilters)) {
       return buildAlertStatusFilter(filterGroup);
@@ -301,7 +301,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       id: timelineId,
-      indexToAdd: defaultIndices,
       loadingText: i18n.LOADING_ALERTS,
       selectAll: false,
       queryFields: requiredFieldsForActions,
@@ -310,16 +309,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    setIndexToAdd({ id: timelineId, indexToAdd: defaultIndices });
-  }, [timelineId, defaultIndices, setIndexToAdd]);
-
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
     [onFilterGroupChangedCallback]
   );
 
-  if (loading || indexPatternsLoading || isEmpty(signalsIndex)) {
+  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
     return (
       <EuiPanel>
         <HeaderSection title="" />
@@ -330,12 +325,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   return (
     <StatefulEventsViewer
-      defaultIndices={defaultIndices}
       pageFilters={defaultFiltersMemo}
       defaultModel={alertsDefaultModel}
       end={to}
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
+      scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
     />

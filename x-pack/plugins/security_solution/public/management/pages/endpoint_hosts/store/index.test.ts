@@ -52,9 +52,17 @@ describe('EndpointList store concerns', () => {
         policyItemsLoading: false,
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
+        agentPolicies: {},
         endpointsExist: true,
+        patterns: [],
+        patternsError: undefined,
         isAutoRefreshEnabled: true,
         autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+        agentsWithEndpointsTotal: 0,
+        endpointsTotal: 0,
+        agentsWithEndpointsTotalError: undefined,
+        endpointsTotalError: undefined,
+        queryStrategyVersion: undefined,
       });
     });
 

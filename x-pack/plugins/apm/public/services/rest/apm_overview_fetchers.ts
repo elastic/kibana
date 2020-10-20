@@ -32,7 +32,7 @@ export const fetchOverviewPageData = async ({
   const { serviceCount, transactionCoordinates } = data;
 
   return {
-    appLink: `/app/apm#/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
+    appLink: `/app/apm/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
     stats: {
       services: {
         type: 'number',

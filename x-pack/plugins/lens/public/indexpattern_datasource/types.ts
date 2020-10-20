@@ -12,7 +12,7 @@ export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
   title: string;
-  timeFieldName?: string | null;
+  timeFieldName?: string;
   fieldFormatMap?: Record<
     string,
     {
@@ -26,6 +26,7 @@ export interface IndexPattern {
 export type IndexPatternField = IFieldType & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
+  meta?: boolean;
 };
 
 export interface IndexPatternLayer {

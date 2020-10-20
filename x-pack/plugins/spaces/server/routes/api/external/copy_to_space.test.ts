@@ -30,10 +30,10 @@ import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
 jest.mock('../../../../../../../src/core/server', () => {
   return {
+    ...(jest.requireActual('../../../../../../../src/core/server') as Record<string, unknown>),
     exportSavedObjectsToStream: jest.fn(),
     importSavedObjectsFromStream: jest.fn(),
     resolveSavedObjectsImportErrors: jest.fn(),
-    kibanaResponseFactory: jest.requireActual('src/core/server').kibanaResponseFactory,
   };
 });
 import {
@@ -71,7 +71,8 @@ describe('copy to space', () => {
     const log = loggingSystemMock.create().get('spaces');
 
     const coreStart = coreMock.createStart();
-    coreStart.savedObjects = createMockSavedObjectsService(spaces);
+    const { savedObjects } = createMockSavedObjectsService(spaces);
+    coreStart.savedObjects = savedObjects;
 
     const service = new SpacesService(log);
     const spacesService = await service.setup({
@@ -102,6 +103,7 @@ describe('copy to space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
+      authorization: null, // not needed for this route
     });
 
     const [

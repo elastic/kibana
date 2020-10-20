@@ -24,11 +24,12 @@ export interface RefreshInterval {
   value: number;
 }
 
-export interface TimeRange {
+// eslint-disable-next-line
+export type TimeRange = {
   from: string;
   to: string;
   mode?: 'absolute' | 'relative';
-}
+};
 
 export interface TimeRangeBounds {
   min: Moment | undefined;

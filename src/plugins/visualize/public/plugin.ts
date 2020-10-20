@@ -40,7 +40,7 @@ import {
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup } from '../../share/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
@@ -49,7 +49,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
-import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
 import {
   setUISettings,
   setApplication,
@@ -66,17 +66,17 @@ export interface VisualizePluginStartDependencies {
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
-  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
-  uiActions: UiActionsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export class VisualizePlugin
@@ -90,7 +90,7 @@ export class VisualizePlugin
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, kibanaLegacy, data, share }: VisualizePluginSetupDependencies
+    { home, urlForwarding, data, share, uiActions }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -135,12 +135,13 @@ export class VisualizePlugin
       );
     }
     setUISettings(core.uiSettings);
+    uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
     core.application.register({
       id: 'visualize',
       title: 'Visualize',
       order: 8000,
-      euiIconType: 'visualizeApp',
+      euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appStateUpdater.asObservable(),
@@ -177,7 +178,7 @@ export class VisualizePlugin
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
-          kibanaLegacy: pluginsStart.kibanaLegacy,
+          urlForwarding: pluginsStart.urlForwarding,
           pluginInitializerContext: this.initializerContext,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
@@ -196,12 +197,14 @@ export class VisualizePlugin
           scopedHistory: params.history,
           restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
+          setHeaderActionMenu: params.setHeaderActionMenu,
         };
 
         params.element.classList.add('visAppWrapper');
         const { renderApp } = await import('./application');
         const unmount = renderApp(params, services);
         return () => {
+          params.element.classList.remove('visAppWrapper');
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -209,7 +212,7 @@ export class VisualizePlugin
       },
     });
 
-    kibanaLegacy.forwardApp('visualize', 'visualize');
+    urlForwarding.forwardApp('visualize', 'visualize');
 
     if (home) {
       home.featureCatalogue.register({
@@ -234,7 +237,6 @@ export class VisualizePlugin
     if (plugins.share) {
       setShareService(plugins.share);
     }
-    plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
   }
 
   stop() {

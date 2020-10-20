@@ -116,7 +116,7 @@ export async function parseManifest(
     );
   }
 
-  if (!isCamelCase(manifest.id)) {
+  if (!packageInfo.dist && !isCamelCase(manifest.id)) {
     log.warn(`Expect plugin "id" in camelCase, but found: ${manifest.id}`);
   }
 

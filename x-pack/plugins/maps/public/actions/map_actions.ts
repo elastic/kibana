@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { Dispatch } from 'redux';
+import { AnyAction, Dispatch } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 
@@ -54,7 +55,7 @@ import {
   MapRefreshConfig,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { scaleBounds } from '../../common/elasticsearch_geo_utils';
+import { scaleBounds } from '../../common/elasticsearch_util';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -90,7 +91,10 @@ export function updateMapSetting(
 }
 
 export function mapReady() {
-  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: MAP_READY,
     });
@@ -102,12 +106,12 @@ export function mapReady() {
 
     if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        dispatch<any>(addLayerWithoutDataSync(layerDescriptor));
+        dispatch(addLayerWithoutDataSync(layerDescriptor));
       });
-      dispatch<any>(autoFitToBounds());
+      dispatch(autoFitToBounds());
     } else {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        dispatch<any>(addLayer(layerDescriptor));
+        dispatch(addLayer(layerDescriptor));
       });
     }
   };
@@ -120,7 +124,10 @@ export function mapDestroyed() {
 }
 
 export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExtent }) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     const state = getState();
     const dataFilters = getDataFilters(state);
     const { extent, zoom: newZoom } = newMapConstants;
@@ -157,7 +164,7 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
         ...newMapConstants,
       },
     });
-    await dispatch<any>(syncDataForAllLayers());
+    await dispatch(syncDataForAllLayers());
   };
 }
 
@@ -212,7 +219,10 @@ export function setQuery({
   timeFilters?: TimeRange;
   forceRefresh?: boolean;
 }) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     const prevQuery = getQuery(getState());
     const prevTriggeredAt =
       prevQuery && prevQuery.queryLastTriggeredAt
@@ -246,9 +256,9 @@ export function setQuery({
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
-      dispatch<any>(autoFitToBounds());
+      dispatch(autoFitToBounds());
     } else {
-      await dispatch<any>(syncDataForAllLayers());
+      await dispatch(syncDataForAllLayers());
     }
   };
 }
@@ -262,12 +272,12 @@ export function setRefreshConfig({ isPaused, interval }: MapRefreshConfig) {
 }
 
 export function triggerRefreshTimer() {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
       type: TRIGGER_REFRESH_TIMER,
     });
 
-    await dispatch<any>(syncDataForAllLayers());
+    await dispatch(syncDataForAllLayers());
   };
 }
 

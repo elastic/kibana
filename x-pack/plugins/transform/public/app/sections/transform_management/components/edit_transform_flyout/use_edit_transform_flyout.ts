@@ -5,15 +5,69 @@
  */
 
 import { isEqual } from 'lodash';
+import { merge } from 'lodash';
+
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { TransformPivotConfig } from '../../../../common';
+import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
+
+// This custom hook uses nested reducers to provide a generic framework to manage form state
+// and apply it to a final possibly nested configuration object suitable for passing on
+// directly to an API call. For now this is only used for the transform edit form.
+// Once we apply the functionality to other places, e.g. the transform creation wizard,
+// the generic framework code in this file should be moved to a dedicated location.
+
+// The outer most level reducer defines a flat structure of names for form fields.
+// This is a flat structure regardless of whether the final request object will be nested.
+// For example, `destinationIndex` and `destinationPipeline` will later be nested under `dest`.
+interface EditTransformFlyoutFieldsState {
+  [key: string]: FormField;
+  description: FormField;
+  destinationIndex: FormField;
+  destinationPipeline: FormField;
+  frequency: FormField;
+  docsPerSecond: FormField;
+}
+
+// The inner reducers apply validation based on supplied attributes of each field.
+export interface FormField {
+  formFieldName: string;
+  configFieldName: string;
+  defaultValue: string;
+  dependsOn: string[];
+  errorMessages: string[];
+  isNullable: boolean;
+  isOptional: boolean;
+  validator: keyof typeof validate;
+  value: string;
+  valueParser: (value: string) => any;
+}
+
+// The reducers and utility functions in this file provide the following features:
+// - getDefaultState()
+//   Sets up the initial form state. It supports overrides to apply a pre-existing configuration.
+//   The implementation of this function is the only one that's specifically required to define
+//   the features of the transform edit form. All other functions are generic and could be reused
+//   in the future for other forms.
+//
+// - formReducerFactory() / formFieldReducer()
+//   These nested reducers take care of updating and validating the form state.
+//
+// - applyFormFieldsToTransformConfig() (iterates over getUpdateValue())
+//   Once a user hits the update button, these functions take care of extracting the information
+//   necessary to create the update request. They take into account whether a field needs to
+//   be included at all in the request (for example, if it hadn't been changed).
+//   The code is also able to identify relationships/dependencies between form fields.
+//   For example, if the `pipeline` field was changed, it's necessary to make the `index`
+//   field part of the request, otherwise the update would fail.
 
 // A Validator function takes in a value to check and returns an array of error messages.
 // If no messages (empty array) get returned, the value is valid.
-type Validator = (arg: any) => string[];
+type Validator = (value: any, isOptional?: boolean) => string[];
 
 // Note on the form validation and input components used:
 // All inputs use `EuiFieldText` which means all form values will be treated as strings.
@@ -24,22 +78,48 @@ type Validator = (arg: any) => string[];
 const numberAboveZeroNotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberNotValidErrorMessage',
   {
-    defaultMessage: 'Value needs to be a number above zero.',
+    defaultMessage: 'Value needs to be an integer above zero.',
   }
 );
-export const numberAboveZeroValidator: Validator = (arg) =>
-  !isNaN(arg) && parseInt(arg, 10) > 0 ? [] : [numberAboveZeroNotValidErrorMessage];
+export const integerAboveZeroValidator: Validator = (value) =>
+  !isNaN(value) && Number.isInteger(+value) && +value > 0 && !(value + '').includes('.')
+    ? []
+    : [numberAboveZeroNotValidErrorMessage];
 
-// The way the current form is set up, this validator is just a sanity check,
-// it should never trigger an error, because `EuiFieldText` always returns a string.
+const numberRange10To10000NotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
+  {
+    defaultMessage: 'Value needs to be an integer between 10 and 10000.',
+  }
+);
+export const integerRange10To10000Validator: Validator = (value) =>
+  integerAboveZeroValidator(value).length === 0 && +value >= 10 && +value <= 10000
+    ? []
+    : [numberRange10To10000NotValidErrorMessage];
+
+const requiredErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormRequiredErrorMessage',
+  {
+    defaultMessage: 'Required field.',
+  }
+);
 const stringNotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormStringNotValidErrorMessage',
   {
     defaultMessage: 'Value needs to be of type string.',
   }
 );
-const stringValidator: Validator = (arg) =>
-  typeof arg === 'string' ? [] : [stringNotValidErrorMessage];
+export const stringValidator: Validator = (value, isOptional = true) => {
+  if (typeof value !== 'string') {
+    return [stringNotValidErrorMessage];
+  }
+
+  if (value.length === 0 && !isOptional) {
+    return [requiredErrorMessage];
+  }
+
+  return [];
+};
 
 // Only allow frequencies in the form of 1s/1h etc.
 const frequencyNotValidErrorMessage = i18n.translate(
@@ -56,54 +136,58 @@ export const frequencyValidator: Validator = (arg) => {
   // split string by groups of numbers and letters
   const regexStr = arg.match(/[a-z]+|[^a-z]+/gi);
 
-  return (
-    // only valid if one group of numbers and one group of letters
-    regexStr !== null &&
-      regexStr.length === 2 &&
-      // only valid if time unit is one of s/m/h
-      ['s', 'm', 'h'].includes(regexStr[1]) &&
-      // only valid if number is between 1 and 59
-      parseInt(regexStr[0], 10) > 0 &&
-      parseInt(regexStr[0], 10) < 60 &&
-      // if time unit is 'h' then number must not be higher than 1
-      !(parseInt(regexStr[0], 10) > 1 && regexStr[1] === 'h')
-      ? []
-      : [frequencyNotValidErrorMessage]
-  );
+  // only valid if one group of numbers and one group of letters
+  if (regexStr === null || (Array.isArray(regexStr) && regexStr.length !== 2)) {
+    return [frequencyNotValidErrorMessage];
+  }
+
+  const valueNumber = +regexStr[0];
+  const valueTimeUnit = regexStr[1];
+
+  // only valid if number is an integer above 0
+  if (isNaN(valueNumber) || !Number.isInteger(valueNumber) || valueNumber === 0) {
+    return [frequencyNotValidErrorMessage];
+  }
+
+  // only valid if value is up to 1 hour
+  return (valueTimeUnit === 's' && valueNumber <= 3600) ||
+    (valueTimeUnit === 'm' && valueNumber <= 60) ||
+    (valueTimeUnit === 'h' && valueNumber === 1)
+    ? []
+    : [frequencyNotValidErrorMessage];
 };
 
-type Validators = 'string' | 'frequency' | 'numberAboveZero';
-
-type Validate = {
-  [key in Validators]: Validator;
-};
-
-const validate: Validate = {
+const validate = {
   string: stringValidator,
   frequency: frequencyValidator,
-  numberAboveZero: numberAboveZeroValidator,
+  integerAboveZero: integerAboveZeroValidator,
+  integerRange10To10000: integerRange10To10000Validator,
+} as const;
+
+export const initializeField = (
+  formFieldName: string,
+  configFieldName: string,
+  config: TransformPivotConfig,
+  overloads?: Partial<FormField>
+): FormField => {
+  const defaultValue = overloads?.defaultValue !== undefined ? overloads.defaultValue : '';
+  const rawValue = getNestedProperty(config, configFieldName, undefined);
+  const value = rawValue !== null && rawValue !== undefined ? rawValue.toString() : '';
+
+  return {
+    formFieldName,
+    configFieldName,
+    defaultValue,
+    dependsOn: [],
+    errorMessages: [],
+    isNullable: false,
+    isOptional: true,
+    validator: 'string',
+    value,
+    valueParser: (v) => v,
+    ...(overloads !== undefined ? { ...overloads } : {}),
+  };
 };
-
-export interface FormField {
-  errorMessages: string[];
-  isOptional: boolean;
-  validator: keyof Validate;
-  value: string;
-}
-
-const defaultField: FormField = {
-  errorMessages: [],
-  isOptional: true,
-  validator: 'string',
-  value: '',
-};
-
-interface EditTransformFlyoutFieldsState {
-  [key: string]: FormField;
-  description: FormField;
-  frequency: FormField;
-  docsPerSecond: FormField;
-}
 
 export interface EditTransformFlyoutState {
   formFields: EditTransformFlyoutFieldsState;
@@ -118,66 +202,95 @@ interface Action {
   value: string;
 }
 
-// Some attributes can have a value of `null` to trigger
-// a reset to the default value, or in the case of `docs_per_second`
-// `null` is used to disable throttling.
-interface UpdateTransformPivotConfig {
-  description: string;
-  frequency: string;
-  settings: {
-    docs_per_second: number | null;
-  };
-}
+// Takes a value from form state and applies it to the structure
+// of the expected final configuration request object.
+// Considers options like if a value is nullable or optional.
+const getUpdateValue = (
+  attribute: keyof EditTransformFlyoutFieldsState,
+  config: TransformPivotConfig,
+  formState: EditTransformFlyoutFieldsState,
+  enforceFormValue = false
+) => {
+  const formStateAttribute = formState[attribute];
+  const fallbackValue = formStateAttribute.isNullable ? null : formStateAttribute.defaultValue;
+
+  const formValue =
+    formStateAttribute.value !== ''
+      ? formStateAttribute.valueParser(formStateAttribute.value)
+      : fallbackValue;
+
+  const configValue = getNestedProperty(config, formStateAttribute.configFieldName, fallbackValue);
+
+  // only get depending values if we're not already in a call to get depending values.
+  const dependsOnConfig: PostTransformsUpdateRequestSchema =
+    enforceFormValue === false
+      ? formStateAttribute.dependsOn.reduce((_dependsOnConfig, dependsOnField) => {
+          return merge(
+            { ..._dependsOnConfig },
+            getUpdateValue(dependsOnField, config, formState, true)
+          );
+        }, {})
+      : {};
+
+  if (formValue === formStateAttribute.defaultValue && formStateAttribute.isOptional) {
+    return formValue !== configValue ? dependsOnConfig : {};
+  }
+
+  return formValue !== configValue || enforceFormValue
+    ? setNestedProperty(dependsOnConfig, formStateAttribute.configFieldName, formValue)
+    : {};
+};
 
 // Takes in the form configuration and returns a
 // request object suitable to be sent to the
 // transform update API endpoint.
 export const applyFormFieldsToTransformConfig = (
   config: TransformPivotConfig,
-  { description, docsPerSecond, frequency }: EditTransformFlyoutFieldsState
-): Partial<UpdateTransformPivotConfig> => {
-  const updateConfig: Partial<UpdateTransformPivotConfig> = {};
-
-  // set the values only if they changed from the default
-  // and actually differ from the previous value.
-  if (
-    !(config.frequency === undefined && frequency.value === '') &&
-    config.frequency !== frequency.value
-  ) {
-    updateConfig.frequency = frequency.value;
-  }
-
-  if (
-    !(config.description === undefined && description.value === '') &&
-    config.description !== description.value
-  ) {
-    updateConfig.description = description.value;
-  }
-
-  // if the input field was left empty,
-  // fall back to the default value of `null`
-  // which will disable throttling.
-  const docsPerSecondFormValue =
-    docsPerSecond.value !== '' ? parseInt(docsPerSecond.value, 10) : null;
-  const docsPerSecondConfigValue = config.settings?.docs_per_second ?? null;
-  if (docsPerSecondFormValue !== docsPerSecondConfigValue) {
-    updateConfig.settings = { docs_per_second: docsPerSecondFormValue };
-  }
-
-  return updateConfig;
-};
+  formState: EditTransformFlyoutFieldsState
+): PostTransformsUpdateRequestSchema =>
+  // Iterates over all form fields and only if necessary applies them to
+  // the request object used for updating the transform.
+  Object.keys(formState).reduce(
+    (updateConfig, field) => merge({ ...updateConfig }, getUpdateValue(field, config, formState)),
+    {}
+  );
 
 // Takes in a transform configuration and returns
 // the default state to populate the form.
 export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyoutState => ({
   formFields: {
-    description: { ...defaultField, value: config?.description ?? '' },
-    frequency: { ...defaultField, value: config?.frequency ?? '', validator: 'frequency' },
-    docsPerSecond: {
-      ...defaultField,
-      value: config?.settings?.docs_per_second?.toString() ?? '',
-      validator: 'numberAboveZero',
-    },
+    // top level attributes
+    description: initializeField('description', 'description', config),
+    frequency: initializeField('frequency', 'frequency', config, {
+      defaultValue: '1m',
+      validator: 'frequency',
+    }),
+
+    // dest.*
+    destinationIndex: initializeField('destinationIndex', 'dest.index', config, {
+      dependsOn: ['destinationPipeline'],
+      isOptional: false,
+    }),
+    destinationPipeline: initializeField('destinationPipeline', 'dest.pipeline', config, {
+      dependsOn: ['destinationIndex'],
+    }),
+
+    // settings.*
+    docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
+      isNullable: true,
+      validator: 'integerAboveZero',
+      valueParser: (v) => (v === '' ? null : +v),
+    }),
+    maxPageSearchSize: initializeField(
+      'maxPageSearchSize',
+      'settings.max_page_search_size',
+      config,
+      {
+        defaultValue: '500',
+        validator: 'integerRange10To10000',
+        valueParser: (v) => +v,
+      }
+    ),
   },
   isFormTouched: false,
   isFormValid: true,
@@ -197,7 +310,7 @@ const formFieldReducer = (state: FormField, value: string): FormField => {
     errorMessages:
       state.isOptional && typeof value === 'string' && value.length === 0
         ? []
-        : validate[state.validator](value),
+        : validate[state.validator](value, state.isOptional),
     value,
   };
 };
@@ -208,6 +321,8 @@ const formFieldReducer = (state: FormField, value: string): FormField => {
 // - sets `isFormValid` to have a flag if any of the form fields contains an error.
 export const formReducerFactory = (config: TransformPivotConfig) => {
   const defaultState = getDefaultState(config);
+  const defaultFieldValues = Object.values(defaultState.formFields).map((f) => f.value);
+
   return (state: EditTransformFlyoutState, { field, value }: Action): EditTransformFlyoutState => {
     const formFields = {
       ...state.formFields,
@@ -217,7 +332,10 @@ export const formReducerFactory = (config: TransformPivotConfig) => {
     return {
       ...state,
       formFields,
-      isFormTouched: !isEqual(defaultState.formFields, formFields),
+      isFormTouched: !isEqual(
+        defaultFieldValues,
+        Object.values(formFields).map((f) => f.value)
+      ),
       isFormValid: isFormValid(formFields),
     };
   };

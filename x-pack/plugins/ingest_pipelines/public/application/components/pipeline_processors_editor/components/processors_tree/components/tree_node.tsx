@@ -70,6 +70,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         />
         <AddProcessorButton
           data-test-subj={stringSelector}
+          renderButtonAsLink
           onClick={() =>
             onAction({
               type: 'addProcessor',

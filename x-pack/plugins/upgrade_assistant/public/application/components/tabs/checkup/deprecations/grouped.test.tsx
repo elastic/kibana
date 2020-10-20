@@ -7,10 +7,10 @@
 import { range } from 'lodash';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-
 import { EuiBadge, EuiPagination } from '@elastic/eui';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption, LevelFilterOption } from '../../../types';
 import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped';

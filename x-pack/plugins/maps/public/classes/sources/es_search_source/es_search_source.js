@@ -10,7 +10,7 @@ import rison from 'rison-node';
 
 import { AbstractESSource } from '../es_source';
 import { getSearchService, getHttp } from '../../../kibana_services';
-import { hitsToGeoJson } from '../../../../common/elasticsearch_geo_utils';
+import { hitsToGeoJson, getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
@@ -31,7 +31,7 @@ import uuid from 'uuid/v4';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-import { getField, addFieldToDSL } from '../../util/es_agg_utils';
+
 import { registerSource } from '../source_registry';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
@@ -614,7 +614,9 @@ export class ESSearchSource extends AbstractESSource {
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
     );
 
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}`;
+    const geoField = await this._getGeoField();
+
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}&geoFieldType=${geoField.type}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),

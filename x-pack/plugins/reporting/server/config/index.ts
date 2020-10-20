@@ -17,6 +17,8 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('capture.concurrency'),
     unused('capture.settleTime'),
     unused('capture.timeout'),
+    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
+    unused('poll.jobsRefresh.intervalErrorMultiplier'),
     unused('kibanaApp'),
   ],
 };

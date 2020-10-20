@@ -222,9 +222,11 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "indexPatterns": Array [
             Object {
               "id": "1",
+              "title": undefined,
             },
             Object {
               "id": "2",
+              "title": undefined,
             },
           ],
           "isLegacyFile": false,

@@ -7,12 +7,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiButton, EuiLink, EuiInMemoryTable } from '@elastic/eui';
-
+import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
+import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
+import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 
 export const CalendarsListTable = ({
   calendarsList,
@@ -24,6 +26,8 @@ export const CalendarsListTable = ({
   mlNodesAvailable,
   itemsSelected,
 }) => {
+  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
+
   const sorting = {
     sort: {
       field: 'calendar_id',
@@ -46,12 +50,9 @@ export const CalendarsListTable = ({
       truncateText: true,
       scope: 'row',
       render: (id) => (
-        <EuiLink
-          href={`#/settings/calendars_list/edit_calendar/${id}`}
-          data-test-subj="mlEditCalendarLink"
-        >
+        <Link to={`/${ML_PAGES.CALENDARS_EDIT}/${id}`} data-test-subj="mlEditCalendarLink">
           {id}
-        </EuiLink>
+        </Link>
       ),
       'data-test-subj': 'mlCalendarListColumnId',
     },
@@ -101,7 +102,7 @@ export const CalendarsListTable = ({
         size="s"
         data-test-subj="mlCalendarButtonCreate"
         key="new_calendar_button"
-        href="#/settings/calendars_list/new_calendar"
+        onClick={redirectToNewCalendarPage}
         isDisabled={canCreateCalendar === false || mlNodesAvailable === false}
       >
         <FormattedMessage id="xpack.ml.calendarsList.table.newButtonLabel" defaultMessage="New" />
@@ -115,6 +116,7 @@ export const CalendarsListTable = ({
           canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false
         }
         data-test-subj="mlCalendarButtonDelete"
+        key="delete_calendar_button"
       >
         <FormattedMessage
           id="xpack.ml.calendarsList.table.deleteButtonLabel"
@@ -140,7 +142,7 @@ export const CalendarsListTable = ({
         loading={loading}
         selection={tableSelection}
         isSelectable={true}
-        data-test-subj="mlCalendarTable"
+        data-test-subj={loading ? 'mlCalendarTable loading' : 'mlCalendarTable loaded'}
         rowProps={(item) => ({
           'data-test-subj': `mlCalendarListRow row-${item.calendar_id}`,
         })}

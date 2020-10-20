@@ -9,13 +9,21 @@
     "data",
     "navigation",
     "kibanaLegacy",
-    "triggers_actions_ui",
+    "observability"
+  ],
+  "optionalPlugins": [
+    "infra",
+    "telemetryCollectionManager",
+    "usageCollection",
+    "home",
+    "cloud",
+    "triggersActionsUi",
     "alerts",
     "actions",
+    "encryptedSavedObjects",
     "encryptedSavedObjects"
   ],
-  "optionalPlugins": ["infra", "telemetryCollectionManager", "usageCollection", "home", "cloud"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement"]
+  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement", "triggersActionsUi"]
 }

@@ -81,7 +81,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
   }
 
   previewScript = async (searchContext?: { query?: Query | undefined }) => {
-    const { indexPattern, lang, name, script, executeScript } = this.props;
+    const { indexPattern, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
       return;
@@ -104,7 +104,6 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     const scriptResponse = await executeScript({
       name: name as string,
-      lang,
       script,
       indexPatternTitle: indexPattern.title,
       query,
@@ -122,7 +121,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     this.setState({
       isLoading: false,
-      previewData: scriptResponse.hits.hits.map((hit: any) => ({
+      previewData: scriptResponse.hits?.hits.map((hit: any) => ({
         _id: hit._id,
         ...hit._source,
         ...hit.fields,

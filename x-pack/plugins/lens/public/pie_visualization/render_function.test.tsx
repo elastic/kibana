@@ -12,6 +12,7 @@ import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { LensIconChartDonut } from '../assets/chart_donut';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -30,11 +31,11 @@ describe('PieVisualization component', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'kibana_datatable',
+          type: 'datatable',
           columns: [
-            { id: 'a', name: 'a' },
-            { id: 'b', name: 'b' },
-            { id: 'c', name: 'c' },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
           ],
           rows: [
             { a: 6, b: 2, c: 'I', d: 'Row 1' },
@@ -137,14 +138,23 @@ describe('PieVisualization component', () => {
                 "columns": Array [
                   Object {
                     "id": "a",
+                    "meta": Object {
+                      "type": "number",
+                    },
                     "name": "a",
                   },
                   Object {
                     "id": "b",
+                    "meta": Object {
+                      "type": "number",
+                    },
                     "name": "b",
                   },
                   Object {
                     "id": "c",
+                    "meta": Object {
+                      "type": "string",
+                    },
                     "name": "c",
                   },
                 ],
@@ -162,7 +172,7 @@ describe('PieVisualization component', () => {
                     "d": "Row 2",
                   },
                 ],
-                "type": "kibana_datatable",
+                "type": "datatable",
               },
               "value": 6,
             },
@@ -189,7 +199,7 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
-      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visPie');
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDonut);
     });
   });
 });

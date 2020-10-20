@@ -3,22 +3,23 @@
 ## Plugin
 
 - The plugin is enabled by default. See the TypeScript type for the [the available plugin configuration options](https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/common/types/index.ts#L9-L27)
-- Adding `xpack.ingestManager.enabled=false` will disable the plugin including the EPM and Fleet features. It will also remove the `PACKAGE_POLICY_API_ROUTES` and `AGENT_POLICY_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
-- Adding `--xpack.ingestManager.fleet.enabled=false` will disable the Fleet API & UI
+- Adding `xpack.fleet.enabled=false` will disable the plugin including the EPM and Fleet features. It will also remove the `PACKAGE_POLICY_API_ROUTES` and `AGENT_POLICY_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
+- Adding `--xpack.fleet.agents.enabled=false` will disable the Fleet API & UI
   - [code for adding the routes](https://github.com/elastic/kibana/blob/1f27d349533b1c2865c10c45b2cf705d7416fb36/x-pack/plugins/ingest_manager/server/plugin.ts#L115-L133)
   - [Integration tests](server/integration_tests/router.test.ts)
 - Both EPM and Fleet require `ingestManager` be enabled. They are not standalone features.
-- For Gold+ license, a custom package registry URL can be used by setting `xpack.ingestManager.registryUrl=http://localhost:8080`
+- For Enterprise license, a custom package registry URL can be used by setting `xpack.fleet.registryUrl=http://localhost:8080`
+  - This property is currently only for internal Elastic development and is unsupported
 
 ## Fleet Requirements
 
-Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag `--xpack.ingestManager.fleet.tlsCheckDisabled=false`)
+Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag `--xpack.fleet.agents.tlsCheckDisabled=false`)
 
 Also you need to configure the hosts your agent is going to use to comunication with Elasticsearch and Kibana (Not needed if you use Elastic cloud). You can use the following flags:
 
 ```
---xpack.ingestManager.fleet.elasticsearch.host=http://localhost:9200
---xpack.ingestManager.fleet.kibana.host=http://localhost:5601
+--xpack.fleet.agents.elasticsearch.host=http://localhost:9200
+--xpack.fleet.agents.kibana.host=http://localhost:5601
 ```
 
 ## Development
@@ -39,7 +40,7 @@ One common development workflow is:
   ```
 - Start Kibana in another shell
   ```
-  yarn start --xpack.ingestManager.enabled=true --no-base-path
+  yarn start --xpack.fleet.enabled=true --no-base-path
   ```
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
