@@ -174,7 +174,7 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-reset"]`).first().simulate('click');
     expect(wrapper.find(`[data-test-subj="config-option"]`).first().exists()).toBeFalsy();
   });
-  it('disables saving when no index patterns are selected', async () => {
+  it('disables saving when no index patterns are selected', () => {
     store = createStore(
       {
         ...state,
