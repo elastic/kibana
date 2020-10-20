@@ -28,7 +28,6 @@ export function disableUICapabilitiesFactory(
 ) {
   // nav links are sourced from the apps property.
   // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
-  // This behavior is replacing the `navLinkId` property.
   const featureNavLinkIds = features
     .flatMap((feature) => feature.app)
     .filter((navLinkId) => navLinkId != null);
