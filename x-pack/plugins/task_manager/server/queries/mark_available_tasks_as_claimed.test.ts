@@ -24,11 +24,11 @@ import {
 } from './mark_available_tasks_as_claimed';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { mockLogger } from '../test_utils';
 
 describe('mark_available_tasks_as_claimed', () => {
   test('generates query matching tasks to be claimed when polling for tasks', () => {
-    const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
+    const definitions = new TaskTypeDictionary(mockLogger());
     definitions.registerTaskDefinitions({
       sampleTask: {
         title: 'title',

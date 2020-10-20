@@ -122,36 +122,7 @@ export class TaskScheduling {
             mapErr(async (error: Option<ConcreteTaskInstance>) => {
               // reject if any error event takes place for the requested task
               subscription.unsubscribe();
-              return reject(
-                map(
-                  await pipe(
-                    error,
-                    mapOptional(async (taskReturnedBySweep) => asOk(taskReturnedBySweep.status)),
-                    getOrElse(() =>
-                      // if the error happened in the Claim phase - we try to provide better insight
-                      // into why we failed to claim by getting the task's current lifecycle status
-                      promiseResult<TaskLifecycle, Error>(this.store.getLifecycle(taskId))
-                    )
-                  ),
-                  (taskLifecycleStatus: TaskLifecycle) => {
-                    if (taskLifecycleStatus === TaskLifecycleResult.NotFound) {
-                      return new Error(`Failed to run task "${taskId}" as it does not exist`);
-                    } else if (
-                      taskLifecycleStatus === TaskStatus.Running ||
-                      taskLifecycleStatus === TaskStatus.Claiming
-                    ) {
-                      return new Error(`Failed to run task "${taskId}" as it is currently running`);
-                    }
-                    return new Error(
-                      `Failed to run task "${taskId}" for unknown reason (Current Task Lifecycle is "${taskLifecycleStatus}")`
-                    );
-                  },
-                  (getLifecycleError: Error) =>
-                    new Error(
-                      `Failed to run task "${taskId}" and failed to get current Status:${getLifecycleError}`
-                    )
-                )
-              );
+              return reject(await this.identifyTaskFailureReason(taskId, error));
             }, taskEvent.event);
           } else {
             either<
@@ -171,12 +142,12 @@ export class TaskScheduling {
                 subscription.unsubscribe();
                 return reject(
                   new Error(
-                    `Failed to run task "${taskId}"${
+                    `Failed to run task "${taskId}": ${
                       isTaskRunRequestEvent(taskEvent)
-                        ? `: Task Manager is at capacity, please try again later`
+                        ? `Task Manager is at capacity, please try again later`
                         : isTaskRunEvent(taskEvent)
-                        ? `: ${(errorResult as ErroredTask).error}`
-                        : `: ${errorResult}`
+                        ? `${(errorResult as ErroredTask).error}`
+                        : `${errorResult}`
                     }`
                   )
                 );
@@ -185,5 +156,36 @@ export class TaskScheduling {
           }
         });
     });
+  }
+
+  private async identifyTaskFailureReason(taskId: string, error: Option<ConcreteTaskInstance>) {
+    return map(
+      await pipe(
+        error,
+        mapOptional(async (taskReturnedBySweep) => asOk(taskReturnedBySweep.status)),
+        getOrElse(() =>
+          // if the error happened in the Claim phase - we try to provide better insight
+          // into why we failed to claim by getting the task's current lifecycle status
+          promiseResult<TaskLifecycle, Error>(this.store.getLifecycle(taskId))
+        )
+      ),
+      (taskLifecycleStatus: TaskLifecycle) => {
+        if (taskLifecycleStatus === TaskLifecycleResult.NotFound) {
+          return new Error(`Failed to run task "${taskId}" as it does not exist`);
+        } else if (
+          taskLifecycleStatus === TaskStatus.Running ||
+          taskLifecycleStatus === TaskStatus.Claiming
+        ) {
+          return new Error(`Failed to run task "${taskId}" as it is currently running`);
+        }
+        return new Error(
+          `Failed to run task "${taskId}" for unknown reason (Current Task Lifecycle is "${taskLifecycleStatus}")`
+        );
+      },
+      (getLifecycleError: Error) =>
+        new Error(
+          `Failed to run task "${taskId}" and failed to get current Status:${getLifecycleError}`
+        )
+    );
   }
 }

@@ -8,14 +8,13 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
-import { ConcreteTaskInstance, TaskStatus, TaskDefinition, RunResult } from './task';
 import { TaskManagerRunner, TaskRunResult } from './task_runner';
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
-import { Logger } from '../../../../src/core/server';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from './task_events';
+import { ConcreteTaskInstance, TaskStatus, TaskDefinition, RunResult } from './task';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { mockLogger } from './test_utils';
 
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
@@ -71,8 +70,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               throw new Error('Dangit!');
@@ -102,8 +100,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               return { state: {} };
@@ -132,8 +129,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `1m`,
           createTaskRunner: () => ({
             async run() {
@@ -160,8 +156,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `1m`,
           createTaskRunner: () => ({
             async run() {
@@ -183,8 +178,7 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               return { runAt, state: {} };
@@ -208,8 +202,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               return { runAt, state: {} };
@@ -234,8 +227,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               return undefined;
@@ -256,8 +248,7 @@ describe('TaskManagerRunner', () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               const promise = new Promise((r) => setTimeout(r, 1000));
@@ -285,8 +276,7 @@ describe('TaskManagerRunner', () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             run: async () => undefined,
           }),
@@ -313,8 +303,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           createTaskRunner: () => ({
             run: async () => undefined,
@@ -349,8 +338,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -382,8 +370,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -416,8 +403,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -451,8 +437,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -488,8 +473,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -524,8 +508,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -558,8 +541,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -595,8 +577,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -632,8 +613,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -667,8 +647,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -699,8 +678,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           maxAttempts: 3,
           createTaskRunner: () => ({
             run: async () => {
@@ -734,8 +712,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           maxAttempts: 3,
           createTaskRunner: () => ({
             run: async () => {
@@ -768,10 +745,8 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
-            type: 'bar',
-            title: 'bar',
+            title: 'Bar!',
             timeout: `1m`,
-            // getRetry: () => {},
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -798,10 +773,8 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
-            type: 'bar',
-            title: 'bar',
+            title: 'Bar!',
             timeout: `1m`,
-            // getRetry: () => {},
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -829,8 +802,7 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
-            type: 'bar',
-            title: 'bar',
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
                 return { state: {} };
@@ -859,8 +831,7 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
-            type: 'bar',
-            title: 'bar',
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
                 return { runAt, state: {} };
@@ -888,8 +859,7 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
-            type: 'bar',
-            title: 'bar',
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
                 throw error;
@@ -921,8 +891,7 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
-            type: 'bar',
-            title: 'bar',
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
                 return { error, state: {} };
@@ -954,8 +923,7 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
-            type: 'bar',
-            title: 'bar',
+            title: 'Bar!',
             getRetry: () => false,
             createTaskRunner: () => ({
               async run() {
@@ -989,7 +957,7 @@ describe('TaskManagerRunner', () => {
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definitions?: Record<string, TaskDefinition>;
+    definitions?: Record<string, Omit<TaskDefinition, 'type'>>;
     onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
   }
 
@@ -1003,7 +971,7 @@ describe('TaskManagerRunner', () => {
   function testOpts(opts: TestOpts) {
     const callCluster = sinon.stub();
     const createTaskRunner = sinon.stub();
-    const logger = loggingSystemMock.create().get();
+    const logger = mockLogger();
 
     const instance = Object.assign(
       {
@@ -1069,8 +1037,7 @@ describe('TaskManagerRunner', () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
-          type: 'bar',
-          title: 'bar',
+          title: 'Bar!',
           createTaskRunner: () => ({
             run: async () => result as RunResult,
           }),
@@ -1084,7 +1051,7 @@ describe('TaskManagerRunner', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     } else {
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0]).toMatch(/invalid task result/i);
+      expect(logger.warn.mock.calls[0][0]).toMatch(/invalid task result/i);
     }
   }
 

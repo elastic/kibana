@@ -41,16 +41,15 @@ export class TaskManagerPlugin
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
-    this.logger = initContext.logger.get('taskManager');
+    this.logger = initContext.logger.get();
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
   public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    const { logger, monitoringStats$ } = this;
-    const config = (this.config = await this.initContext.config
+    this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
-      .toPromise());
+      .toPromise();
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -68,10 +67,10 @@ export class TaskManagerPlugin
     const router = core.http.createRouter();
     const serviceStatus$ = healthRoute(
       router,
-      monitoringStats$,
-      logger,
+      this.monitoringStats$,
+      this.logger,
       this.taskManagerId,
-      config
+      this.config!
     );
 
     core.getStartServices().then(async () => {

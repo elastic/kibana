@@ -6,16 +6,16 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import {
   createManagedConfiguration,
   ADJUST_THROUGHPUT_INTERVAL,
 } from './create_managed_configuration';
+import { mockLogger } from '../test_utils';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
-  const logger = loggingSystemMock.create().get();
+  const logger = mockLogger();
 
   beforeEach(() => {
     jest.resetAllMocks();
