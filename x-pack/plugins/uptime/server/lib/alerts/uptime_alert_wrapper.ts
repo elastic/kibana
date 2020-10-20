@@ -23,13 +23,13 @@ export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
   producer: 'uptime',
   executor: async (options: AlertExecutorOptions) => {
     const {
-      services: { callCluster: callES, esClient },
+      services: { callCluster: callES, scopedClusterClient },
     } = options;
 
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
       options.services.savedObjectsClient
     );
 
-    return uptimeAlert.executor(options, callES, esClient, dynamicSettings);
+    return uptimeAlert.executor(options, callES, scopedClusterClient, dynamicSettings);
   },
 });
