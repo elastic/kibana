@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 
 import React from 'react';
 import styled from 'styled-components';
-import { Description, Name, NotesButton, StarIcon } from './helpers';
+import { Description, Name, NotesButton, SaveTimeline, StarIcon } from './helpers';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
 import { Note } from '../../../../common/lib/note';
@@ -16,6 +16,7 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
+import { SaveTimelineButton } from '../header/save_timeline';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -33,8 +34,10 @@ interface Props {
   updateDescription: UpdateDescription;
   showNotes: boolean;
   status: TimelineStatusLiteral;
+  saveTimeline: SaveTimeline;
   associateNote: AssociateNote;
   showNotesFromWidth: boolean;
+  showSaveTimelineOverlay: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   onToggleShowNotes: () => void;
   noteIds: string[];
@@ -42,6 +45,7 @@ interface Props {
   isDatepickerLocked: boolean;
   toggleLock: () => void;
   datePickerWidth: number;
+  onToggleSaveTimeline: () => void;
 }
 
 export const PropertiesLeftStyle = styled(EuiFlexGroup)`
@@ -80,13 +84,16 @@ export const PropertiesLeft = React.memo<Props>(
     updateIsFavorite,
     showDescription,
     description,
+    onToggleSaveTimeline,
     title,
     timelineType,
     updateTitle,
     updateDescription,
     status,
+    saveTimeline,
     showNotes,
     showNotesFromWidth,
+    showSaveTimelineOverlay,
     associateNote,
     getNotesByIds,
     noteIds,
@@ -121,6 +128,15 @@ export const PropertiesLeft = React.memo<Props>(
           />
         </EuiFlexItem>
       ) : null}
+
+      <SaveTimelineButton
+        timelineId={timelineId}
+        showOverlay={showSaveTimelineOverlay}
+        toggleSaveTimeline={onToggleSaveTimeline}
+        onSaveTimeline={saveTimeline}
+        updateTitle={updateTitle}
+        updateDescription={updateDescription}
+      />
 
       {showNotesFromWidth ? (
         <EuiFlexItem grow={false}>

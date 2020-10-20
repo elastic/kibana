@@ -21,3 +21,35 @@ export const CALL_OUT_IMMUTABLE = i18n.translate(
       'This prebuilt timeline template cannot be modified. To make changes, please duplicate this template and make modifications to the duplicate template.',
   }
 );
+
+export const SAVE_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.header',
+  {
+    defaultMessage: 'Save Timeline',
+  }
+);
+
+export const SAVE = i18n.translate('xpack.securitySolution.timeline.nameTimeline.modal.header', {
+  defaultMessage: 'Save',
+});
+
+export const NAME_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.nameTimeline.modal.header',
+  {
+    defaultMessage: 'Name Timeline',
+  }
+);
+
+export const DISCARD_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.discard.title',
+  {
+    defaultMessage: 'Discard Timeline',
+  }
+);
+
+export const CLOSE_SAVE_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.close.title',
+  {
+    defaultMessage: 'Close',
+  }
+);

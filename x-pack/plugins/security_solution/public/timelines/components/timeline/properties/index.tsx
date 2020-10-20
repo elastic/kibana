@@ -17,6 +17,7 @@ import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
 import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
+import { SaveTimeline } from './helpers';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -35,6 +36,7 @@ interface Props {
   timelineId: string;
   timelineType: TimelineTypeLiteral;
   status: TimelineStatusLiteral;
+  saveTimeline: SaveTimeline;
   title: string;
   toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
@@ -66,6 +68,7 @@ export const Properties = React.memo<Props>(
     isDatepickerLocked,
     isFavorite,
     noteIds,
+    saveTimeline,
     status,
     timelineId,
     timelineType,
@@ -81,6 +84,7 @@ export const Properties = React.memo<Props>(
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [showTimelineModal, setShowTimelineModal] = useState(false);
+    const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState(false);
 
     const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
     const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
@@ -92,6 +96,10 @@ export const Properties = React.memo<Props>(
       setShowTimelineModal(true);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    const onToggleSaveTimeline = useCallback(
+      () => setShowSaveTimelineOverlay(!showSaveTimelineOverlay),
+      [setShowSaveTimelineOverlay, showSaveTimelineOverlay]
+    );
     const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 
     const datePickerWidth = useMemo(
@@ -119,10 +127,13 @@ export const Properties = React.memo<Props>(
           isFavorite={isFavorite}
           noteIds={noteIds}
           onToggleShowNotes={onToggleShowNotes}
+          onToggleSaveTimeline={onToggleSaveTimeline}
           status={status}
+          saveTimeline={saveTimeline}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
+          showSaveTimelineOverlay={showSaveTimelineOverlay}
           timelineId={timelineId}
           timelineType={timelineType}
           title={title}

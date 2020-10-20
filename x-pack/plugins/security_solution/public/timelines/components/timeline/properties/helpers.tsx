@@ -41,7 +41,14 @@ import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
 import { NOTES_PANEL_WIDTH } from './notes_size';
-import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
+import {
+  ButtonContainer,
+  DescriptionContainer,
+  LabelText,
+  NameField,
+  NameWrapper,
+  StyledStar,
+} from './styles';
 import * as i18n from './translations';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
@@ -66,8 +73,9 @@ type CreateTimeline = ({
   timelineType?: TimelineTypeLiteral;
 }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
-type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
+export type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
+export type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
+export type SaveTimeline = ({ id }: { id: string }) => void;
 
 export const StarIcon = React.memo<{
   isFavorite: boolean;
@@ -108,8 +116,11 @@ interface DescriptionProps {
 
 export const Description = React.memo<DescriptionProps>(
   ({ description, timelineId, updateDescription }) => (
-    <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
-      <DescriptionContainer data-test-subj="description-container">
+    <DescriptionContainer data-test-subj="description-container">
+      <EuiToolTip
+        data-test-subj="timeline-description-tool-tip"
+        content={i18n.DESCRIPTION_TOOL_TIP}
+      >
         <EuiFieldText
           aria-label={i18n.TIMELINE_DESCRIPTION}
           data-test-subj="timeline-description"
@@ -119,8 +130,8 @@ export const Description = React.memo<DescriptionProps>(
           spellCheck={true}
           value={description}
         />
-      </DescriptionContainer>
-    </EuiToolTip>
+      </EuiToolTip>
+    </DescriptionContainer>
   )
 );
 Description.displayName = 'Description';
@@ -130,29 +141,39 @@ interface NameProps {
   timelineType: TimelineType;
   title: string;
   updateTitle: UpdateTitle;
+  width?: string;
+  marginRight?: number;
 }
 
-export const Name = React.memo<NameProps>(({ timelineId, timelineType, title, updateTitle }) => {
-  const handleChange = useCallback((e) => updateTitle({ id: timelineId, title: e.target.value }), [
-    timelineId,
-    updateTitle,
-  ]);
+export const Name = React.memo<NameProps>(
+  ({ timelineId, timelineType, title, updateTitle, width, marginRight }) => {
+    const handleChange = useCallback(
+      (e) => updateTitle({ id: timelineId, title: e.target.value }),
+      [timelineId, updateTitle]
+    );
 
-  return (
-    <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-      <NameField
-        aria-label={i18n.TIMELINE_TITLE}
-        data-test-subj="timeline-title"
-        onChange={handleChange}
-        placeholder={
-          timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
-        }
-        spellCheck={true}
-        value={title}
-      />
-    </EuiToolTip>
-  );
-});
+    return (
+      <NameWrapper>
+        <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
+          <NameField
+            aria-label={i18n.TIMELINE_TITLE}
+            data-test-subj="timeline-title"
+            onChange={handleChange}
+            placeholder={
+              timelineType === TimelineType.template
+                ? i18n.UNTITLED_TEMPLATE
+                : i18n.UNTITLED_TIMELINE
+            }
+            spellCheck={true}
+            value={title}
+            width={width}
+            marginRight={marginRight}
+          />
+        </EuiToolTip>
+      </NameWrapper>
+    );
+  }
+);
 Name.displayName = 'Name';
 
 interface NewCaseProps {

@@ -39,6 +39,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
     noteIds,
     notesById,
     status,
+    saveTimeline,
     timelineId,
     timelineType,
     title,
@@ -64,6 +65,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
         isFavorite={isFavorite}
         noteIds={noteIds}
         status={status}
+        saveTimeline={saveTimeline}
         timelineId={timelineId}
         timelineType={timelineType}
         title={title}
@@ -134,6 +136,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
     dispatch(timelineActions.updateTitle({ id, title })),
   toggleLock: ({ linkToId }: { linkToId: InputsModelId }) =>
     dispatch(inputsActions.toggleTimelineLinkTo({ linkToId })),
+  saveTimeline: ({ id }: { id: string }) => dispatch(timelineActions.startTimelineSaving({ id })),
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
