@@ -74,7 +74,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       defaultMessage: 'Security',
     });
 
-    initTelemetry(plugins.usageCollection, APP_ID);
+    initTelemetry(
+      {
+        usageCollection: plugins.usageCollection,
+        telemetryManagementSection: plugins.telemetryManagementSection,
+      },
+      APP_ID
+    );
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
