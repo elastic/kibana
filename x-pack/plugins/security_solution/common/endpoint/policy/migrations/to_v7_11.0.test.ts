@@ -101,4 +101,68 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
       type: ' nested',
     });
   });
+
+  it('does not modify non-endpoint package policies', () => {
+    const doc = {
+      attributes: {
+        name: 'Some Policy Name',
+        package: {
+          name: 'notEndpoint',
+          title: '',
+          version: '',
+        },
+        id: 'notEndpoint',
+        policy_id: '',
+        enabled: true,
+        namespace: '',
+        output_id: '',
+        revision: 0,
+        updated_at: '',
+        updated_by: '',
+        created_at: '',
+        created_by: '',
+        inputs: [
+          {
+            type: 'notEndpoint',
+            enabled: true,
+            streams: [],
+            config: {},
+          },
+        ],
+      },
+      type: ' nested',
+    };
+
+    expect(
+      migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PackagePolicy>
+    ).toEqual({
+      attributes: {
+        name: 'Some Policy Name',
+        package: {
+          name: 'notEndpoint',
+          title: '',
+          version: '',
+        },
+        id: 'notEndpoint',
+        policy_id: '',
+        enabled: true,
+        namespace: '',
+        output_id: '',
+        revision: 0,
+        updated_at: '',
+        updated_by: '',
+        created_at: '',
+        created_by: '',
+        inputs: [
+          {
+            type: 'notEndpoint',
+            enabled: true,
+            streams: [],
+            config: {},
+          },
+        ],
+      },
+      type: ' nested',
+    });
+  });
 });
