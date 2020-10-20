@@ -6,7 +6,9 @@
 
 import React, { useState, FC } from 'react';
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import {
   useColorRange,
@@ -15,7 +17,8 @@ import {
 } from '../../../../../components/color_range_legend';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { defaultSearchQuery, useResultsViewConfig } from '../../../../common';
+import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
 import { ExpandableSectionAnalytics, ExpandableSectionResults } from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
@@ -39,6 +42,24 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   const featureCount = getFeatureCount(jobConfig?.dest?.results_field || '', tableItems);
   const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
 
+  // Show the color range only if feature influence is enabled and there's more than 0 features.
+  const showColorRange =
+    featureCount > 0 &&
+    isOutlierAnalysis(jobConfig?.analysis) &&
+    jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
+
+  const resultsField = jobConfig?.dest.results_field ?? '';
+
+  // Identify if the results index has a legacy feature influence format.
+  // If feature influence was enabled for the legacy job we'll show a callout
+  // with some additional information for a workaround.
+  const showLegacyFeatureInfluenceFormatCallout =
+    isOutlierAnalysis(jobConfig?.analysis) &&
+    jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
+    columnsWithCharts.findIndex(
+      (d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}.feature_name`
+    ) === -1;
+
   return (
     <>
       {typeof jobConfig?.description !== 'undefined' && (
@@ -55,8 +76,26 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+      {showLegacyFeatureInfluenceFormatCallout && (
+        <>
+          <EuiCallOut
+            size="s"
+            title={i18n.translate(
+              'xpack.ml.dataframe.analytics.outlierExploration.legacyFeatureInfluenceFormatCalloutTitle',
+              {
+                defaultMessage:
+                  'Color coded table cells based on feature influence are not available, because this results index uses an unsupported legacy format. Please clone an rerun the job to enable support for color coding.',
+              }
+            )}
+            iconType="pin"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <ExpandableSectionResults
-        colorRange={featureCount > 0 ? colorRange : undefined}
+        colorRange={
+          showColorRange && !showLegacyFeatureInfluenceFormatCallout ? colorRange : undefined
+        }
         indexData={outlierData}
         indexPattern={indexPattern}
         jobConfig={jobConfig}
