@@ -298,7 +298,7 @@ export const mergeStatuses = (
   id: string,
   failures: Array<SavedObjectsFindResult<IRuleStatusAttributes>>,
   acc: RuleStatusResponse
-) => {
+): RuleStatusResponse => {
   if (failures.length === 0) {
     return {
       ...acc,
@@ -309,24 +309,30 @@ export const mergeStatuses = (
     ...acc,
     [id]: {
       current_status: convertedCurrentStatus,
-      failures: failures.map((errorItem) =>
-        convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes)
-      ),
+      failures: failures
+        .slice(1)
+        .map((errorItem) => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes)),
     },
   } as RuleStatusResponse;
 };
 
-export const getFailingRules = (ids: string[], alertsClient: AlertsClient) =>
-  Promise.all(
-    ids.map(async (id) =>
-      alertsClient.get({
-        id,
-      })
-    )
-  )
-    .then((rules) => rules.filter((rule) => rule.executionStatus.status === 'error'))
-    .then((rules) =>
-      rules.reduce((acc, failingRule) => {
+export type GetFailingRulesResult = Record<string, SanitizedAlert>;
+
+export const getFailingRules = async (
+  ids: string[],
+  alertsClient: AlertsClient
+): Promise<GetFailingRulesResult> => {
+  try {
+    const errorRules = await Promise.all(
+      ids.map(async (id) =>
+        alertsClient.get({
+          id,
+        })
+      )
+    );
+    return errorRules
+      .filter((rule) => rule.executionStatus.status === 'error')
+      .reduce<GetFailingRulesResult>((acc, failingRule) => {
         const accum = acc;
         const theRule = failingRule;
         return {
@@ -335,5 +341,8 @@ export const getFailingRules = (ids: string[], alertsClient: AlertsClient) =>
           },
           ...accum,
         };
-      }, {} as Record<string, SanitizedAlert>)
-    );
+      }, {});
+  } catch (exc) {
+    throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
+  }
+};

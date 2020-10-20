@@ -19,8 +19,10 @@ import {
   transformImportError,
   convertToSnakeCase,
   SiemResponseFactory,
+  mergeStatuses,
 } from './utils';
 import { responseMock } from './__mocks__';
+import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -348,6 +350,94 @@ describe('utils', () => {
           status_code: 400,
         })
       );
+    });
+  });
+
+  describe('mergeStatuses', () => {
+    it('merges statuses', () => {
+      const statusOne = exampleRuleStatus();
+      const statusTwo = exampleRuleStatus();
+      const statusToAdd = exampleRuleStatus();
+      const thing2 = exampleFindRuleStatusResponse([statusToAdd, statusOne, statusTwo]);
+      const res = mergeStatuses(statusToAdd.attributes.alertId, thing2.saved_objects, {
+        'myfakealertid-8cfac': {
+          current_status: {
+            alert_id: 'myfakealertid-8cfac',
+            status_date: '2020-03-27T22:55:59.517Z',
+            status: 'succeeded',
+            last_failure_at: null,
+            last_success_at: '2020-03-27T22:55:59.517Z',
+            last_failure_message: null,
+            last_success_message: 'succeeded',
+            gap: null,
+            bulk_create_time_durations: [],
+            search_after_time_durations: [],
+            last_look_back_date: null,
+          },
+          failures: [],
+        },
+      });
+      expect(res).toEqual({
+        'myfakealertid-8cfac': {
+          current_status: {
+            alert_id: 'myfakealertid-8cfac',
+            status_date: '2020-03-27T22:55:59.517Z',
+            status: 'succeeded',
+            last_failure_at: null,
+            last_success_at: '2020-03-27T22:55:59.517Z',
+            last_failure_message: null,
+            last_success_message: 'succeeded',
+            gap: null,
+            bulk_create_time_durations: [],
+            search_after_time_durations: [],
+            last_look_back_date: null,
+          },
+          failures: [],
+        },
+        'f4b8e31d-cf93-4bde-a265-298bde885cd7': {
+          current_status: {
+            alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+            status_date: '2020-03-27T22:55:59.517Z',
+            status: 'succeeded',
+            last_failure_at: null,
+            last_success_at: '2020-03-27T22:55:59.517Z',
+            last_failure_message: null,
+            last_success_message: 'succeeded',
+            gap: null,
+            bulk_create_time_durations: [],
+            search_after_time_durations: [],
+            last_look_back_date: null,
+          },
+          failures: [
+            {
+              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+              status_date: '2020-03-27T22:55:59.517Z',
+              status: 'succeeded',
+              last_failure_at: null,
+              last_success_at: '2020-03-27T22:55:59.517Z',
+              last_failure_message: null,
+              last_success_message: 'succeeded',
+              gap: null,
+              bulk_create_time_durations: [],
+              search_after_time_durations: [],
+              last_look_back_date: null,
+            },
+            {
+              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+              status_date: '2020-03-27T22:55:59.517Z',
+              status: 'succeeded',
+              last_failure_at: null,
+              last_success_at: '2020-03-27T22:55:59.517Z',
+              last_failure_message: null,
+              last_success_message: 'succeeded',
+              gap: null,
+              bulk_create_time_durations: [],
+              search_after_time_durations: [],
+              last_look_back_date: null,
+            },
+          ],
+        },
+      });
     });
   });
 });

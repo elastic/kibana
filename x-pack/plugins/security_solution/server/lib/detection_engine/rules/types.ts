@@ -119,10 +119,24 @@ export interface IRuleStatusAttributes extends Record<string, any> {
   searchAfterTimeDurations: string[] | null | undefined;
 }
 
+export interface IRuleStatusResponseAttributes {
+  alert_id: string; // created alert id.
+  status_date: StatusDate;
+  last_failure_at: LastFailureAt | null | undefined;
+  last_failure_message: LastFailureMessage | null | undefined;
+  last_success_at: LastSuccessAt | null | undefined;
+  last_success_message: LastSuccessMessage | null | undefined;
+  status: JobStatus | null | undefined;
+  last_look_back_date: string | null | undefined;
+  gap: string | null | undefined;
+  bulk_create_time_durations: string[] | null | undefined;
+  search_after_time_durations: string[] | null | undefined;
+}
+
 export interface RuleStatusResponse {
   [key: string]: {
-    current_status: IRuleStatusAttributes | null | undefined;
-    failures: IRuleStatusAttributes[] | null | undefined;
+    current_status: IRuleStatusResponseAttributes | null | undefined;
+    failures: IRuleStatusResponseAttributes[] | null | undefined;
   };
 }
 
