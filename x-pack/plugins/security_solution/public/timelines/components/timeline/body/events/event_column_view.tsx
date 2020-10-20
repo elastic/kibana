@@ -13,7 +13,7 @@ import { TimelineNonEcsData } from '../../../../../../common/search_strategy/tim
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
+import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { DataDrivenColumns } from '../data_driven_columns';

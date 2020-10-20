@@ -30,7 +30,7 @@ describe('DraggableWrapper', () => {
       const wrapper = shallow(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper dataProvider={dataProvider}>{message}</DraggableWrapper>
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -42,7 +42,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper dataProvider={dataProvider}>{message}</DraggableWrapper>
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -54,7 +54,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper dataProvider={dataProvider}>{message}</DraggableWrapper>
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -66,7 +66,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper dataProvider={dataProvider}>{message}</DraggableWrapper>
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -86,7 +86,9 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
+            <DraggableWrapper dataProvider={dataProvider} truncate>
+              {message}
+            </DraggableWrapper>
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -100,7 +102,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper dataProvider={dataProvider}>{message}</DraggableWrapper>
           </DragDropContextWrapper>
         </TestProviders>
       );

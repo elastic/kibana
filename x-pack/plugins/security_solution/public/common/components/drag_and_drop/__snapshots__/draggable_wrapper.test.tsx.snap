@@ -17,6 +17,7 @@ exports[`DraggableWrapper rendering it renders against the snapshot 1`] = `
       },
     }
   }
-  render={[Function]}
-/>
+>
+  draggable wrapper content
+</DraggableWrapper>
 `;

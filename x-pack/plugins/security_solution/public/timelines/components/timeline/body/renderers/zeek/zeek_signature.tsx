@@ -66,36 +66,44 @@ export const DraggableZeekElement = React.memo<{
   stringRenderer?: StringRenderer;
 }>(({ id, field, value, stringRenderer = defaultStringRenderer }) => {
   const dataProviderProp = useMemo(
-    () => ({
-      and: [],
-      enabled: true,
-      id: escapeDataProviderId(`draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`),
-      name: value!,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field,
-        value: value!,
-        operator: IS_OPERATOR as QueryOperator,
-      },
-    }),
+    () =>
+      !value
+        ? value
+        : {
+            and: [],
+            enabled: true,
+            id: escapeDataProviderId(
+              `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
+            ),
+            name: value!,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field,
+              value: value!,
+              operator: IS_OPERATOR as QueryOperator,
+            },
+          },
     [field, id, value]
   );
 
   const content = useMemo(
-    () => (
-      <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-        <Badge iconType="tag" color="hollow" title="">
-          {stringRenderer(value!)}
-        </Badge>
-      </EuiToolTip>
-    ),
+    () =>
+      !value ? (
+        value
+      ) : (
+        <EuiToolTip data-test-subj="badge-tooltip" content={field}>
+          <Badge iconType="tag" color="hollow" title="">
+            {stringRenderer(value!)}
+          </Badge>
+        </EuiToolTip>
+      ),
     [field, stringRenderer, value]
   );
 
   return value != null ? (
     <TokensFlexItem grow={false}>
-      <DraggableWrapper dataProvider={dataProviderProp}>{content}</DraggableWrapper>
+      <DraggableWrapper dataProvider={dataProviderProp!}>{content}</DraggableWrapper>
     </TokensFlexItem>
   ) : null;
 });
@@ -156,7 +164,7 @@ TotalVirusLinkSha.displayName = 'TotalVirusLinkSha';
 
 // English Text for these codes are shortened from
 // https://docs.zeek.org/en/stable/scripts/base/protocols/conn/main.bro.html
-export const zeekConnLogDictionay: Readonly<Record<string, string>> = {
+export const zeekConnLogDictionary: Readonly<Record<string, string>> = {
   S0: i18n.S0,
   S1: i18n.S1,
   S2: i18n.S2,
@@ -174,7 +182,7 @@ export const zeekConnLogDictionay: Readonly<Record<string, string>> = {
 
 export const extractStateLink = (state: string | null | undefined) => {
   if (state != null) {
-    const lookup = zeekConnLogDictionay[state];
+    const lookup = zeekConnLogDictionary[state];
     if (lookup != null) {
       return `${state} ${lookup}`;
     } else {
@@ -186,7 +194,7 @@ export const extractStateLink = (state: string | null | undefined) => {
 };
 
 export const extractStateValue = (state: string | null | undefined): string | null =>
-  state != null && zeekConnLogDictionay[state] != null ? zeekConnLogDictionay[state] : null;
+  state != null && zeekConnLogDictionary[state] != null ? zeekConnLogDictionary[state] : null;
 
 export const constructDroppedValue = (dropped: boolean | null | undefined): string | null =>
   dropped != null ? String(dropped) : null;

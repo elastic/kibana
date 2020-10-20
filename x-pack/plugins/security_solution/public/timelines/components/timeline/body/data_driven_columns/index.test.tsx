@@ -29,6 +29,6 @@ describe('Columns', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[data-test-subj="data-driven-columns"]')).toHaveLength(1);
   });
 });
