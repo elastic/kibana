@@ -43,4 +43,5 @@ export declare enum ES_FIELD_TYPES
 |  STRING | <code>&quot;string&quot;</code> |  |
 |  TEXT | <code>&quot;text&quot;</code> |  |
 |  TOKEN\_COUNT | <code>&quot;token_count&quot;</code> |  |
+|  UNSIGNED\_LONG | <code>&quot;unsigned_long&quot;</code> |  |
 

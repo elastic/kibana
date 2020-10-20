@@ -976,7 +976,7 @@ Every NP plugin artifact contains all plugin dependencies required to run the pl
 It means that NP plugin artifacts tend to have a bigger size than the legacy platform version.
 To understand the current size of your plugin artifact, run `@kbn/optimizer` as
 ```bash
-node scripts/build_kibana_platform_plugins.js --dist --no-examples
+node scripts/build_kibana_platform_plugins.js --dist --profile --focus=my_plugin
 ```
 and check the output in the `target` sub-folder of your plugin folder
 ```bash

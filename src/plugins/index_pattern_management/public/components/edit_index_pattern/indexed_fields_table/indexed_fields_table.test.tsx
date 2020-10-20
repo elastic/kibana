@@ -44,6 +44,7 @@ const helpers = {
 
 const indexPattern = ({
   getNonScriptedFields: () => fields,
+  getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
 } as unknown) as IndexPattern;
 
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {

@@ -28,12 +28,12 @@ This page has moved. Please see the new section in the {heartbeat-ref}/securing-
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see the new section in the {metrics-guide}/configure-metrics-source.html[Metrics Monitoring Guide].
+This page has moved. Please see {observability-guide}/configure-settings.html[configure settings].
 
 [role="exclude",id="logs-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see {logs-guide}/configure-logs-source.html[logs configuration].
+This page has moved. Please see {observability-guide}/configure-data-sources.html[configure data sources].
 
 [role="exclude",id="creating-df-kib"]
 == Creating {transforms}
