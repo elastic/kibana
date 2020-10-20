@@ -21,7 +21,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
-import Http from 'http';
 import supertest from 'supertest';
 
 import { HttpService } from '../http_service';
@@ -312,81 +311,6 @@ describe('KibanaRequest', () => {
       expect(resp2.body).toEqual({ requestId: 'beta' });
       const resp3 = await st.get('/').set({ 'X-OPAQUE-ID': 'gamma' }).expect(200);
       expect(resp3.body).toEqual({ requestId: 'gamma' });
-    });
-  });
-
-  describe('request uuid', () => {
-    it('generates a UUID', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
-      const router = createRouter('/');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({ body: { requestUuid: req.uuid } });
-      });
-      await server.start();
-
-      const st = supertest(innerServer.listener);
-
-      const resp1 = await st.get('/').expect(200);
-      expect(resp1.body.requestUuid).toBe('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
-    });
-  });
-
-  describe('issue-73849', () => {
-    it('headers timeout is handled correctly', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
-      const router = createRouter('/');
-
-      router.get({ path: '/', validate: false }, async (context, request, res) => {
-        return res.ok({ body: 'ok' });
-      });
-
-      await server.start();
-
-      const agent = new Http.Agent({
-        keepAlive: true,
-      });
-
-      const oneSec = 1_000;
-
-      function performRequest() {
-        return new Promise((resolve, reject) => {
-          const req = Http.request(
-            {
-              protocol: 'http:',
-              host: 'localhost',
-              port: 5601,
-              path: '/',
-              method: 'GET',
-              agent,
-            },
-            function (res) {
-              let data = '';
-              res.on('data', (chunk) => {
-                data += chunk;
-              });
-              res.on('end', () => resolve(data));
-            }
-          );
-
-          req.on('socket', (socket) => {
-            socket.write('GET / HTTP/1.1\r\n');
-            setTimeout(() => {
-              socket.write('Host: localhost\r\n');
-            }, oneSec);
-            setTimeout(() => {
-              // headersTimeout doesn't seem to fire if request headers are sent in one packet.
-              socket.write('\r\n');
-              req.end();
-            }, 2 * oneSec);
-          });
-
-          req.on('error', reject);
-        });
-      }
-
-      await performRequest();
-      await delay(innerServer.listener.headersTimeout + oneSec);
-      await performRequest();
     });
   });
 });
