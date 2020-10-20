@@ -37,7 +37,7 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
-    attributeService: LensAttributeService;
+    attributeService: () => Promise<LensAttributeService>;
   }
 ) {
   const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
@@ -54,7 +54,7 @@ export async function mountApp(
     data,
     storage,
     navigation,
-    attributeService,
+    attributeService: await attributeService(),
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
