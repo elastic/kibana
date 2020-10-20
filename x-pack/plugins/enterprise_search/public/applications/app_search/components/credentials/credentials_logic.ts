@@ -15,6 +15,7 @@ import {
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
+import { AppLogic } from '../../app_logic';
 
 import { IMeta } from '../../../../../common/types';
 import { IEngine } from '../../types';
@@ -204,7 +205,10 @@ export const CredentialsLogic = kea<
     ],
   }),
   selectors: ({ selectors }) => ({
-    // TODO fullEngineAccessChecked from ent-search
+    fullEngineAccessChecked: [
+      () => [AppLogic.selectors.myRole, selectors.activeApiToken],
+      (myRole, activeApiToken) => myRole.canAccessAllEngines && !!activeApiToken.access_all_engines,
+    ],
     dataLoading: [
       () => [selectors.isCredentialsDetailsComplete, selectors.isCredentialsDataComplete],
       (isCredentialsDetailsComplete, isCredentialsDataComplete) => {

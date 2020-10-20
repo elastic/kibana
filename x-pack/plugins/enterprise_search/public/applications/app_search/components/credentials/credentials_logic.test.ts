@@ -13,6 +13,7 @@ jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: { http: { get: jest.fn(), delete: jest.fn() } } },
 }));
 import { HttpLogic } from '../../../shared/http';
+
 jest.mock('../../../shared/flash_messages', () => ({
   FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn() } },
   setSuccessMessage: jest.fn(),
@@ -23,6 +24,13 @@ import {
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
+
+jest.mock('../../app_logic', () => ({
+  AppLogic: {
+    selectors: { myRole: jest.fn(() => ({})) },
+  },
+}));
+import { AppLogic } from '../../app_logic';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -1174,6 +1182,50 @@ describe('CredentialsLogic', () => {
   });
 
   describe('selectors', () => {
+    describe('fullEngineAccessChecked', () => {
+      it('should be true if active token is set to access all engines and the user can access all engines', () => {
+        (AppLogic.selectors.myRole as jest.Mock).mockReturnValueOnce({
+          canAccessAllEngines: true,
+        });
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            access_all_engines: true,
+          },
+        });
+
+        expect(CredentialsLogic.values.fullEngineAccessChecked).toEqual(true);
+      });
+
+      it('should be false if the token is not set to access all engines', () => {
+        (AppLogic.selectors.myRole as jest.Mock).mockReturnValueOnce({
+          canAccessAllEngines: true,
+        });
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            access_all_engines: false,
+          },
+        });
+
+        expect(CredentialsLogic.values.fullEngineAccessChecked).toEqual(false);
+      });
+
+      it('should be false if the user cannot acess all engines', () => {
+        (AppLogic.selectors.myRole as jest.Mock).mockReturnValueOnce({
+          canAccessAllEngines: false,
+        });
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            access_all_engines: true,
+          },
+        });
+
+        expect(CredentialsLogic.values.fullEngineAccessChecked).toEqual(false);
+      });
+    });
+
     describe('activeApiTokenExists', () => {
       it('should be false if the token has no id', () => {
         mount({
