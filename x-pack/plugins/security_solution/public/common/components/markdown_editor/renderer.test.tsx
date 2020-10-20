@@ -35,7 +35,9 @@ describe('Markdown', () => {
         <MarkdownRenderer disableLinks={true}>{markdownWithLink}</MarkdownRenderer>
       );
 
-      expect(wrapper.find('[data-test-subj="markdown-link"]').exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()
+      ).not.toHaveProperty('href');
     });
 
     test('it opens links in a new tab via target="_blank"', () => {

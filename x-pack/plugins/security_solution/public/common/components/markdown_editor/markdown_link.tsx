@@ -5,9 +5,12 @@
  */
 
 import React, { memo } from 'react';
-import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiLinkAnchorProps, EuiToolTip } from '@elastic/eui';
 
 type MarkdownLinkProps = { disableLinks?: boolean } & EuiLinkAnchorProps;
+
+/** prevents search engine manipulation by noting the linked document is not trusted or endorsed by us */
+const REL_NOFOLLOW = 'nofollow';
 
 const MarkdownLinkComponent: React.FC<MarkdownLinkProps> = ({
   disableLinks,
@@ -16,21 +19,16 @@ const MarkdownLinkComponent: React.FC<MarkdownLinkProps> = ({
   children,
   ...props
 }) => (
-  <>
-    {disableLinks ? (
-      <span>{children}</span>
-    ) : (
-      <EuiLink
-        {...props}
-        target="_blank"
-        data-test-subj="markdown-link"
-        href={disableLinks ? undefined : href}
-        rel="nofollow"
-      >
-        {children}
-      </EuiLink>
-    )}
-  </>
+  <EuiToolTip content={href}>
+    <EuiLink
+      href={disableLinks ? undefined : href}
+      data-test-subj="markdown-link"
+      rel={`${REL_NOFOLLOW}`}
+      target="_blank"
+    >
+      {children}
+    </EuiLink>
+  </EuiToolTip>
 );
 
 export const MarkdownLink = memo(MarkdownLinkComponent);
