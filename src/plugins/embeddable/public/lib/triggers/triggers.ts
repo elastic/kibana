@@ -53,14 +53,6 @@ export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickContext<T>
   | RangeSelectContext<T>;
 
-export const isValueClickTriggerContext = (
-  context: ChartActionContext
-): context is ValueClickContext => context.data && 'data' in context.data;
-
-export const isRangeSelectTriggerContext = (
-  context: ChartActionContext
-): context is RangeSelectContext => context.data && 'range' in context.data;
-
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
   id: CONTEXT_MENU_TRIGGER,
@@ -81,3 +73,17 @@ export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
   title: 'Panel notifications',
   description: 'Actions appear in top-right corner of a panel.',
 };
+
+export const isValueClickTriggerContext = (
+  context: ChartActionContext
+): context is ValueClickContext => context.data && 'data' in context.data;
+
+export const isRangeSelectTriggerContext = (
+  context: ChartActionContext
+): context is RangeSelectContext => context.data && 'range' in context.data;
+
+export const isContextMenuTriggerContext = (context: unknown): context is EmbeddableContext =>
+  !!context &&
+  typeof context === 'object' &&
+  !!(context as EmbeddableContext).embeddable &&
+  typeof (context as EmbeddableContext).embeddable === 'object';

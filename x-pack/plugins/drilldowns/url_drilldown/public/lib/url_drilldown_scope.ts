@@ -14,6 +14,7 @@ import {
   IEmbeddable,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isContextMenuTriggerContext,
   RangeSelectContext,
   ValueClickContext,
 } from '../../../../../../src/plugins/embeddable/public';
@@ -101,7 +102,10 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
  * URL drilldown event scope,
  * available as {{event.$}}
  */
-export type UrlDrilldownEventScope = ValueClickTriggerEventScope | RangeSelectTriggerEventScope;
+export type UrlDrilldownEventScope =
+  | ValueClickTriggerEventScope
+  | RangeSelectTriggerEventScope
+  | ContextMenuTriggerEventScope;
 export type EventScopeInput = ActionContext;
 export interface ValueClickTriggerEventScope {
   key?: string;
@@ -115,11 +119,15 @@ export interface RangeSelectTriggerEventScope {
   to?: string | number;
 }
 
+export type ContextMenuTriggerEventScope = object;
+
 export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEventScope {
   if (isRangeSelectTriggerContext(eventScopeInput)) {
     return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
   } else if (isValueClickTriggerContext(eventScopeInput)) {
     return getEventScopeFromValueClickTriggerContext(eventScopeInput);
+  } else if (isContextMenuTriggerContext(eventScopeInput)) {
+    return {};
   } else {
     throw new Error("UrlDrilldown [getEventScope] can't build scope from not supported trigger");
   }

@@ -12,7 +12,10 @@ import {
   isEnhancedEmbeddable,
   embeddableEnhancedContextMenuDrilldownGrouping,
 } from '../../../../../../embeddable_enhanced/public';
-import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableContext,
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { ensureNestedTriggers } from '../drilldown_shared';
@@ -83,7 +86,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           onClose={() => handle.close()}
           viewMode={'create'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          triggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          triggers={[CONTEXT_MENU_TRIGGER, ...ensureNestedTriggers(embeddable.supportedTriggers())]}
           placeContext={{ embeddable }}
         />
       ),
