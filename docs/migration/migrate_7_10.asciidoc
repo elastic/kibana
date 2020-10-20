@@ -632,6 +632,109 @@ in which case we only check for _consumer_ privileges as all users are privilege
 
 ====
 
+[[breaking_plugin_v7.10.0_73257]]
+.The EventLog Setup contract now exposes a `registerSavedObjectProvider`
+[%collapsible]
+====
+
+The EventLog Setup contract now exposes a registerSavedObjectProvider method
+which can be used to register a Saved Object provider.
+
+```ts
+export interface IEventLogService {
+   isEnabled(): boolean;
+   isLoggingEntries(): boolean;
+   isIndexingEntries(): boolean;
+   registerProviderActions(provider: string, actions: string[]): void;
+   isProviderActionRegistered(provider: string, action: string): boolean;
+   getProviderActions(): Map<string, Set<string>>;
+   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
+   getLogger(properties: IEvent): IEventLogger;
+ }
+```
+
+This API specifies the Saved Object type and a "provider"
+callback that is called whenever a new request asks for that type of Saved Object.
+
+This example shows a provider for the alert SavedObject type,
+which creates a new AlertsClient for the request and returns a getter
+that attempts to get the SavedObject by its id.
+
+*via https://github.com/elastic/kibana/pull/73257[#73257]*
+
+```ts
+eventLogService.registerSavedObjectProvider('alert', (request: KibanaRequest) => {
+    const client = getAlertsClientWithRequest(request);
+    return (type: string, id: string) => client.get({ id });
+});
+```
+
+The EventLog maintains a registry of each provider,
+and creates a getter on demand when the user actually requests an object of a
+certain type. An AlertsClient is only instantiated if
+the user requests to the events reference an Alert.
+Once a getter is created for a specific request,
+it is cached for the remainder of the lifecycle of that request.
+This means a single provider is used for multiple gets made by the request.
+
+====
+
+[[breaking_plugin_v7.10.0_72289]]
+.New {es} client in SO service
+[%collapsible]
+====
+
+The SO service was refactored to use https://github.com/elastic/elasticsearch-js[elasticsearch-js]
+under the hood. This change might affect plugins reading the response status field
+from the SO error bubbled to the Solutions code because the {es} error no longer
+provides the status field (statusCode is still provided).
+
+Several plugins were adjusted to check SO errors with `SavedObjectsErrorHelpers`.
+Plugins must use this because we are going to stop wrapping errors in the Boom object.
+
+*via https://github.com/elastic/kibana/pull/72289[#72289]*
+
+====
+
+[[breaking_plugin_v7.10.0_72029]]
+.Alerts Management now controlled via Feature Controls and privileges
+[%collapsible]
+====
+
+If you want your plugin to grant a user access to Alerts Management,
+you must specify it under Management in your feature configuration:
+
+```ts
+management: {
+    insightsAndAlerting: ['triggersActions'],
+},
+```
+You can specify it in three places:
+
+* Directly on the feature. When security is disabled, this grants access
+to every role granted access to the Feature via Feature Controls.
+When security is enabled, this specifies that the feature has access to
+this management section and is required before you can grant this to a specific role.
+
+* Under the `all` privilege. When security is enabled, this grants access
+to every role granted the `all` privilege to the Feature via Feature Controls.
+
+* Under the `read` privilege. When security is enabled, this grants access
+to every role granted the `read` privilege to the Feature via Feature Controls.
+
+You're likely to have to specify this in 3 places in your plugin
+to cover all 3 scenarios. Although this is more verbose than before,
+it aligns with the rest of {kib}.
+It also means that the Triggers and Actions plugin no longer needs to
+know about each plugin that wants to gain access
+(which means {kib} can more easily support future alerting usage).
+
+
+*via https://github.com/elastic/kibana/pull/72029[#72029]*
+
+====
+
+[discrete]
 [[breaking_plugin_v7.10.0_73778]]
 .API changed for creating a Jira connector
 [%collapsible]
@@ -643,6 +746,7 @@ in which case we only check for _consumer_ privileges as all users are privilege
 
 ====
 
+[discrete]
 [[breaking_plugin_v7.10.0_74357]]
 .API changed for creating an IBM Resilient connector
 [%collapsible]
