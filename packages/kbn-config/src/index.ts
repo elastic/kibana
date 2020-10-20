@@ -35,3 +35,4 @@ export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env, RawPackageInfo } from './env';
 export { EnvironmentMode, PackageInfo } from './types';
 export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
+export { getPluginSearchPaths } from './plugins';
