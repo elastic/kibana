@@ -415,41 +415,6 @@ describe('TaskStore', () => {
                             ],
                           },
                         },
-                        {
-                          bool: {
-                            should: [
-                              { exists: { field: 'task.schedule' } },
-                              {
-                                bool: {
-                                  must: [
-                                    { term: { 'task.taskType': 'foo' } },
-                                    {
-                                      range: {
-                                        'task.attempts': {
-                                          lt: maxAttempts,
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              {
-                                bool: {
-                                  must: [
-                                    { term: { 'task.taskType': 'bar' } },
-                                    {
-                                      range: {
-                                        'task.attempts': {
-                                          lt: customMaxAttempts,
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        },
                       ],
                     },
                   },
@@ -557,41 +522,6 @@ describe('TaskStore', () => {
                                 ],
                               },
                             },
-                            {
-                              bool: {
-                                should: [
-                                  { exists: { field: 'task.schedule' } },
-                                  {
-                                    bool: {
-                                      must: [
-                                        { term: { 'task.taskType': 'foo' } },
-                                        {
-                                          range: {
-                                            'task.attempts': {
-                                              lt: maxAttempts,
-                                            },
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                  {
-                                    bool: {
-                                      must: [
-                                        { term: { 'task.taskType': 'bar' } },
-                                        {
-                                          range: {
-                                            'task.attempts': {
-                                              lt: customMaxAttempts,
-                                            },
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                ],
-                              },
-                            },
                           ],
                         },
                       },
@@ -646,6 +576,10 @@ if (doc['task.runAt'].size()!=0) {
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
+      const fieldUpdates = {
+        ownerId: taskManagerId,
+        retryAt: claimOwnershipUntil,
+      };
       const {
         args: {
           updateByQuery: { body: { script } = {} },
@@ -660,12 +594,23 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
       expect(script).toMatchObject({
-        source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+        source: `
+  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType]) {
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
+  } else {
+    ctx._source.task.status = "failed";
+  }
+  `,
         lang: 'painless',
         params: {
-          ownerId: taskManagerId,
-          retryAt: claimOwnershipUntil,
-          status: 'claiming',
+          fieldUpdates,
+          taskMaxAttempts: {
+            dernstraight: 2,
+            report: 2,
+            yawn: 2,
+          },
         },
       });
     });

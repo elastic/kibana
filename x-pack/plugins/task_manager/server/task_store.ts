@@ -254,7 +254,7 @@ export class TaskStore {
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
     const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
-      return { ...accumulator, [type]: maxAttempts };
+      return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
     }, {});
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or

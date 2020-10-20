@@ -117,7 +117,7 @@ export const updateFieldsAndMarkAsFailed = (
   taskMaxAttempts: { [field: string]: number }
 ): ScriptClause => ({
   source: `
-  if (params.taskMaxAttempts[ctx._source.task.taskType] == null || (params.taskMaxAttempts[ctx._source.task.taskType] != null && ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType])) {
+  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType]) {
     ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
       .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
       .join(' ')}
