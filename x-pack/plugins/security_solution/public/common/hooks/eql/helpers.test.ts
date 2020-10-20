@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import dateMath from '@elastic/datemath';
 import moment from 'moment';
 
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
@@ -26,8 +25,8 @@ describe('eql/helpers', () => {
   describe('calculateBucketForHour', () => {
     test('returns 2 if event occurred within 2 minutes of "now"', () => {
       const diff = calculateBucketForHour(
-        Number(dateMath.parse('now-1m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T05:56:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(2);
@@ -35,8 +34,8 @@ describe('eql/helpers', () => {
 
     test('returns 10 if event occurred within 8-10 minutes of "now"', () => {
       const diff = calculateBucketForHour(
-        Number(dateMath.parse('now-9m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T05:48:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(10);
@@ -44,8 +43,8 @@ describe('eql/helpers', () => {
 
     test('returns 16 if event occurred within 10-15 minutes of "now"', () => {
       const diff = calculateBucketForHour(
-        Number(dateMath.parse('now-15m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T05:42:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(16);
@@ -53,8 +52,8 @@ describe('eql/helpers', () => {
 
     test('returns 60 if event occurred within 58-60 minutes of "now"', () => {
       const diff = calculateBucketForHour(
-        Number(dateMath.parse('now-59m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T04:58:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(60);
@@ -62,8 +61,8 @@ describe('eql/helpers', () => {
 
     test('returns exact time difference if it is a multiple of 2', () => {
       const diff = calculateBucketForHour(
-        Number(dateMath.parse('now-20m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T05:37:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(20);
@@ -71,8 +70,8 @@ describe('eql/helpers', () => {
 
     test('returns 0 if times are equal', () => {
       const diff = calculateBucketForHour(
-        Number(dateMath.parse('now')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T05:57:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(0);
@@ -80,8 +79,8 @@ describe('eql/helpers', () => {
 
     test('returns 2 if event occurred within 2 minutes of "now" but arguments are flipped', () => {
       const diff = calculateBucketForHour(
-        Number(dateMath.parse('now')?.format('x')),
-        Number(dateMath.parse('now-1m')?.format('x'))
+        Date.parse('2020-02-20T05:57:54.037Z'),
+        Date.parse('2020-02-20T05:56:54.037Z')
       );
 
       expect(diff).toEqual(2);
@@ -91,8 +90,8 @@ describe('eql/helpers', () => {
   describe('calculateBucketForDay', () => {
     test('returns 0 if two dates are equivalent', () => {
       const diff = calculateBucketForDay(
-        Number(dateMath.parse('now')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T05:57:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(0);
@@ -100,8 +99,8 @@ describe('eql/helpers', () => {
 
     test('returns 1 if event occurred within 60 minutes of "now"', () => {
       const diff = calculateBucketForDay(
-        Number(dateMath.parse('now-40m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T05:17:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(1);
@@ -109,8 +108,8 @@ describe('eql/helpers', () => {
 
     test('returns 2 if event occurred 60-120 minutes from "now"', () => {
       const diff = calculateBucketForDay(
-        Number(dateMath.parse('now-120m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T03:57:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(2);
@@ -118,8 +117,8 @@ describe('eql/helpers', () => {
 
     test('returns 3 if event occurred 120-180 minutes from "now', () => {
       const diff = calculateBucketForDay(
-        Number(dateMath.parse('now-121m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T03:56:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(3);
@@ -127,8 +126,8 @@ describe('eql/helpers', () => {
 
     test('returns 4 if event occurred 180-240 minutes from "now', () => {
       const diff = calculateBucketForDay(
-        Number(dateMath.parse('now-220m')?.format('x')),
-        Number(dateMath.parse('now')?.format('x'))
+        Date.parse('2020-02-20T02:15:54.037Z'),
+        Date.parse('2020-02-20T05:57:54.037Z')
       );
 
       expect(diff).toEqual(4);
@@ -136,8 +135,8 @@ describe('eql/helpers', () => {
 
     test('returns 2 if event occurred 60-120 minutes of "now" but arguments are flipped', () => {
       const diff = calculateBucketForDay(
-        Number(dateMath.parse('now')?.format('x')),
-        Number(dateMath.parse('now-118m')?.format('x'))
+        Date.parse('2020-02-20T05:57:54.037Z'),
+        Date.parse('2020-02-20T03:59:54.037Z')
       );
 
       expect(diff).toEqual(2);
