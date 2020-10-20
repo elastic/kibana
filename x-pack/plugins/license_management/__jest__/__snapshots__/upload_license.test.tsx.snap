@@ -120,7 +120,9 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -171,7 +173,9 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -213,7 +217,9 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               "calls": Array [
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
               ],
@@ -1035,22 +1041,30 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -1113,22 +1127,30 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -1182,22 +1204,30 @@ exports[`UploadLicense should display an error when ES says license is expired 1
               "calls": Array [
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
               ],
@@ -1723,22 +1753,30 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -1801,22 +1839,30 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -1870,22 +1916,30 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
               "calls": Array [
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
               ],
@@ -2411,22 +2465,30 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -2489,22 +2551,30 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -2558,22 +2628,30 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
               "calls": Array [
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
               ],
@@ -3099,22 +3177,30 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -3177,22 +3263,30 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             "calls": Array [
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
               Array [
                 Object {
+                  "hash": "",
                   "pathname": "/home",
+                  "search": "",
                 },
               ],
             ],
@@ -3246,22 +3340,30 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
               "calls": Array [
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
                 Array [
                   Object {
+                    "hash": "",
                     "pathname": "/home",
+                    "search": "",
                   },
                 ],
               ],
