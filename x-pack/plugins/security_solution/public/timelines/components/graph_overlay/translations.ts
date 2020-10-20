@@ -6,9 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_EVENTS = i18n.translate(
-  'xpack.securitySolution.timeline.graphOverlay.backToEventsButton',
+export const CLOSE_ANALYZER = i18n.translate(
+  'xpack.securitySolution.timeline.graphOverlay.closeAnalyzerButton',
   {
-    defaultMessage: '< Back to events',
+    defaultMessage: 'Close analyzer',
   }
 );

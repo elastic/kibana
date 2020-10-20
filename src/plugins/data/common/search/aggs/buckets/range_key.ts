@@ -19,14 +19,36 @@
 
 const id = Symbol('id');
 
+type Ranges = Array<
+  Partial<{
+    from: string | number;
+    to: string | number;
+    label: string;
+  }>
+>;
+
 export class RangeKey {
   [id]: string;
   gte: string | number;
   lt: string | number;
+  label?: string;
 
-  constructor(bucket: any) {
+  private findCustomLabel(
+    from: string | number | undefined | null,
+    to: string | number | undefined | null,
+    ranges?: Ranges
+  ) {
+    return (ranges || []).find(
+      (range) =>
+        ((from == null && range.from == null) || range.from === from) &&
+        ((to == null && range.to == null) || range.to === to)
+    )?.label;
+  }
+
+  constructor(bucket: any, allRanges?: Ranges) {
     this.gte = bucket.from == null ? -Infinity : bucket.from;
     this.lt = bucket.to == null ? +Infinity : bucket.to;
+    this.label = this.findCustomLabel(bucket.from, bucket.to, allRanges);
 
     this[id] = RangeKey.idBucket(bucket);
   }
