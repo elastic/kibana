@@ -294,24 +294,30 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
   }, {});
 };
 
+/**
+ *
+ * @param id rule id
+ * @param currentStatusAndFailures array of rule statuses where the 0th status is the current status and 1-5 positions are the historical failures
+ * @param acc accumulated rule id : statuses
+ */
 export const mergeStatuses = (
   id: string,
-  failures: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
+  currentStatusAndFailures: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
   acc: RuleStatusResponse
 ): RuleStatusResponse => {
-  if (failures.length === 0) {
+  if (currentStatusAndFailures.length === 0) {
     return {
       ...acc,
     };
   }
   const convertedCurrentStatus = convertToSnakeCase<IRuleStatusSOAttributes>(
-    failures[0].attributes
+    currentStatusAndFailures[0].attributes
   );
   return {
     ...acc,
     [id]: {
       current_status: convertedCurrentStatus,
-      failures: failures
+      failures: currentStatusAndFailures
         .slice(1)
         .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem.attributes)),
     },

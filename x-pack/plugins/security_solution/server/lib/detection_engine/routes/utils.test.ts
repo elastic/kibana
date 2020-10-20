@@ -362,10 +362,12 @@ describe('utils', () => {
   describe('mergeStatuses', () => {
     it('merges statuses and converts from camelCase saved object to snake_case HTTP response', () => {
       const statusOne = exampleRuleStatus();
+      statusOne.attributes.status = 'failed';
       const statusTwo = exampleRuleStatus();
-      const statusToAdd = exampleRuleStatus();
-      const thing2 = exampleFindRuleStatusResponse([statusToAdd, statusOne, statusTwo]);
-      const res = mergeStatuses(statusToAdd.attributes.alertId, thing2.saved_objects, {
+      statusTwo.attributes.status = 'failed';
+      const currentStatus = exampleRuleStatus();
+      const foundRules = exampleFindRuleStatusResponse([currentStatus, statusOne, statusTwo]);
+      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules.saved_objects, {
         'myfakealertid-8cfac': {
           current_status: {
             alert_id: 'myfakealertid-8cfac',
@@ -418,7 +420,7 @@ describe('utils', () => {
             {
               alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
-              status: 'succeeded',
+              status: 'failed',
               last_failure_at: null,
               last_success_at: '2020-03-27T22:55:59.517Z',
               last_failure_message: null,
@@ -431,7 +433,7 @@ describe('utils', () => {
             {
               alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
-              status: 'succeeded',
+              status: 'failed',
               last_failure_at: null,
               last_success_at: '2020-03-27T22:55:59.517Z',
               last_failure_message: null,
