@@ -29,6 +29,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('renders as expected', () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -51,6 +52,7 @@ describe('TelemetryManagementSectionComponent', () => {
           onQueryMatchChange={onQueryMatchChange}
           showAppliesSettingMessage={true}
           enableSaving={true}
+          isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
         />
       )
@@ -59,6 +61,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('renders null because query does not match the SEARCH_TERMS', () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -81,6 +84,7 @@ describe('TelemetryManagementSectionComponent', () => {
           onQueryMatchChange={onQueryMatchChange}
           showAppliesSettingMessage={false}
           enableSaving={true}
+          isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
         />
       </React.Suspense>
@@ -96,6 +100,7 @@ describe('TelemetryManagementSectionComponent', () => {
             showAppliesSettingMessage={false}
             enableSaving={true}
             toasts={coreStart.notifications.toasts}
+            isSecurityExampleEnabled={isSecurityExampleEnabled}
           />
         </React.Suspense>
       );
@@ -108,6 +113,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('renders because query matches the SEARCH_TERMS', () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -128,6 +134,7 @@ describe('TelemetryManagementSectionComponent', () => {
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
+        isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
       />
@@ -152,6 +159,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('renders null because allowChangingOptInStatus is false', () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -173,6 +181,7 @@ describe('TelemetryManagementSectionComponent', () => {
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={true}
         enableSaving={true}
+        isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
       />
     );
@@ -187,6 +196,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('shows the OptInExampleFlyout', () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -208,6 +218,7 @@ describe('TelemetryManagementSectionComponent', () => {
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
         enableSaving={true}
+        isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
       />
     );
@@ -223,6 +234,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('shows the OptInSecurityExampleFlyout', () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -243,6 +255,7 @@ describe('TelemetryManagementSectionComponent', () => {
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
+        isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
       />
@@ -257,8 +270,48 @@ describe('TelemetryManagementSectionComponent', () => {
     }
   });
 
+  it('does not show the endpoint link when isSecurityExampleEnabled returns false', () => {
+    const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(false);
+    const telemetryService = new TelemetryService({
+      config: {
+        enabled: true,
+        url: '',
+        banner: true,
+        allowChangingOptInStatus: true,
+        optIn: false,
+        optInStatusUrl: '',
+        sendUsageFrom: 'browser',
+      },
+      reportOptInStatusChange: false,
+      currentKibanaVersion: 'mock_kibana_version',
+      notifications: coreStart.notifications,
+      http: coreSetup.http,
+    });
+
+    const component = mountWithIntl(
+      <TelemetryManagementSection
+        telemetryService={telemetryService}
+        onQueryMatchChange={onQueryMatchChange}
+        showAppliesSettingMessage={false}
+        isSecurityExampleEnabled={isSecurityExampleEnabled}
+        enableSaving={true}
+        toasts={coreStart.notifications.toasts}
+      />
+    );
+
+    try {
+      const description = (component.instance() as TelemetryManagementSection).renderDescription();
+      expect(isSecurityExampleEnabled).toBeCalled();
+      expect(description).toMatchSnapshot();
+    } finally {
+      component.unmount();
+    }
+  });
+
   it('toggles the OptIn button', async () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -280,6 +333,7 @@ describe('TelemetryManagementSectionComponent', () => {
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
         enableSaving={true}
+        isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
       />
     );
@@ -304,6 +358,7 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('test the wrapper (for coverage purposes)', () => {
     const onQueryMatchChange = jest.fn();
+    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
@@ -327,6 +382,7 @@ describe('TelemetryManagementSectionComponent', () => {
           onQueryMatchChange={onQueryMatchChange}
           enableSaving={true}
           toasts={coreStart.notifications.toasts}
+          isSecurityExampleEnabled={isSecurityExampleEnabled}
         />
       ).html()
     ).toMatchSnapshot();
