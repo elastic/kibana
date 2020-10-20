@@ -54,11 +54,7 @@ export function ServiceStatsList({
       title: i18n.translate(
         'xpack.apm.serviceMap.avgTransactionRatePopoverMetric',
         {
-          defaultMessage:
-            'Trans. per {unit, select, minute {m} second {s}} (avg.)',
-          values: {
-            unit,
-          },
+          defaultMessage: 'Trans. rate (avg.)',
         }
       ),
       description: isNumber(transactionStats.avgTransactionRate)
