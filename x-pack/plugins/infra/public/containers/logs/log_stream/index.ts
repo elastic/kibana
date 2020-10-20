@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useSetState } from 'react-use';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
@@ -21,9 +22,25 @@ interface LogStreamProps {
 
 interface LogStreamState {
   entries: LogEntry[];
+  topCursor: LogEntriesCursor | null;
+  bottomCursor: LogEntriesCursor | null;
+  hasMoreBefore?: boolean;
+  hasMoreAfter?: boolean;
+}
+
+interface LogStreamReturn extends LogStreamState {
   fetchEntries: () => void;
   loadingState: 'uninitialized' | 'loading' | 'success' | 'error';
 }
+
+const INITIAL_STATE: LogStreamState = {
+  entries: [],
+  topCursor: null,
+  bottomCursor: null,
+  // Assume there are pages available until the API proves us wrong
+  hasMoreBefore: true,
+  hasMoreAfter: true,
+};
 
 export function useLogStream({
   sourceId,
@@ -31,9 +48,9 @@ export function useLogStream({
   endTimestamp,
   query,
   center,
-}: LogStreamProps): LogStreamState {
+}: LogStreamProps): LogStreamReturn {
   const { services } = useKibanaContextForPlugin();
-  const [entries, setEntries] = useState<LogStreamState['entries']>([]);
+  const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
 
   const parsedQuery = useMemo(() => {
     return query
@@ -46,7 +63,7 @@ export function useLogStream({
     {
       cancelPreviousOn: 'creation',
       createPromise: () => {
-        setEntries([]);
+        setState(INITIAL_STATE);
         const fetchPosition = center ? { center } : { before: 'last' };
 
         return fetchLogEntries(
@@ -61,7 +78,11 @@ export function useLogStream({
         );
       },
       onResolve: ({ data }) => {
-        setEntries(data.entries);
+        setState((prevState) => ({
+          ...data,
+          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
+          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+        }));
       },
     },
     [sourceId, startTimestamp, endTimestamp, query]
@@ -72,7 +93,7 @@ export function useLogStream({
   ]);
 
   return {
-    entries,
+    ...state,
     fetchEntries,
     loadingState,
   };
@@ -80,7 +101,7 @@ export function useLogStream({
 
 function convertPromiseStateToLoadingState(
   state: 'uninitialized' | 'pending' | 'resolved' | 'rejected'
-): LogStreamState['loadingState'] {
+): LogStreamReturn['loadingState'] {
   switch (state) {
     case 'uninitialized':
       return 'uninitialized';
