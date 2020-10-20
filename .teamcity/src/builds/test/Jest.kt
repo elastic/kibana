@@ -2,8 +2,8 @@ package builds.test
 
 import addTestSettings
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import kibanaAgent
+import runbld
 
 object Jest : BuildType({
   name = "Jest Unit"
@@ -12,14 +12,7 @@ object Jest : BuildType({
   kibanaAgent(8)
 
   steps {
-    script {
-      name = "Jest Unit"
-      scriptContent =
-        """
-                #!/bin/bash
-                yarn run grunt run:test_jest
-        """.trimIndent()
-    }
+    runbld("Jest Unit", "yarn run grunt run:test_jest")
   }
 
   addTestSettings()

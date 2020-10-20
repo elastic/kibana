@@ -1,19 +1,12 @@
 package builds.default
 
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import runbld
 
 object DefaultFirefox : DefaultFunctionalBase({
   id("DefaultFirefox")
   name = "Firefox"
 
   steps {
-    script {
-      name = "Default Firefox"
-      scriptContent =
-        """
-                #!/bin/bash
-                ./.ci/teamcity/default/firefox.sh
-        """.trimIndent()
-    }
+    runbld("Default Firefox", "./.ci/teamcity/default/firefox.sh")
   }
 })

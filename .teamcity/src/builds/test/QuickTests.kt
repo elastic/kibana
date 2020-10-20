@@ -2,7 +2,6 @@ package builds.test
 
 import addTestSettings
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import kibanaAgent
 import runbld
 
@@ -23,13 +22,6 @@ object QuickTests : BuildType({
   steps {
     for (testScript in testScripts) {
       runbld(testScript.key, testScript.value)
-//      script {
-//        name = testScript.key
-//        scriptContent = """
-//          #!/bin/bash
-//          ${testScript.value}
-//        """.trimIndent()
-//      }
     }
   }
 

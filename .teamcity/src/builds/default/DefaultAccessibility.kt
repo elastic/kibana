@@ -1,19 +1,12 @@
 package builds.default
 
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import runbld
 
 object DefaultAccessibility : DefaultFunctionalBase({
   id("DefaultAccessibility")
   name = "Accessibility"
 
   steps {
-    script {
-      name = "Default Accessibility"
-      scriptContent =
-        """
-                #!/bin/bash
-                ./.ci/teamcity/default/accessibility.sh
-        """.trimIndent()
-    }
+    runbld("Default Accessibility", "./.ci/teamcity/default/accessibility.sh")
   }
 })
