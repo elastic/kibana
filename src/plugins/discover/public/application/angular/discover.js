@@ -638,6 +638,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     config: config,
     setHeaderActionMenu: getHeaderActionMenuMounter(),
     filterManager,
+    setAppState,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -751,9 +752,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     await $scope.updateDataSource();
 
     savedSearch.columns = $scope.state.columns;
-    savedSearch.grid = {
-      columnsWidth: $scope.state.columnsWidth,
-    };
+    savedSearch.grid = $scope.state.grid;
     savedSearch.sort = $scope.state.sort;
 
     try {
@@ -1050,12 +1049,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   $scope.setColumns = function setColumns(columns) {
     $scope.state = { ...$scope.state, columns };
     setAppState({ columns });
-  };
-
-  $scope.setColumnsResize = (col) => {
-    const colSize = $scope.state.columnsWidth ? { ...$scope.state.columnsWidth } : {};
-    colSize[col.columnId] = Math.round(col.width);
-    setAppState({ columnsWidth: colSize });
   };
 
   async function setupVisualization() {

@@ -43,17 +43,18 @@ import { getSortForSearchSource } from '../angular/doc_table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
-  getServices,
   IndexPattern,
   ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DiscoverServices } from '../../build_services';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
-  columnsWidth?: any;
+  settings?: DiscoverGridSettings;
   description?: string;
   sort?: SortOrder[];
   sharedItemTitle?: string;
@@ -67,7 +68,7 @@ interface SearchScope extends ng.IScope {
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
-  grid?: any;
+  showTimeCol?: boolean;
 }
 
 interface SearchEmbeddableConfig {
@@ -79,6 +80,7 @@ interface SearchEmbeddableConfig {
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
+  services: DiscoverServices;
 }
 
 export class SearchEmbeddable
@@ -97,6 +99,7 @@ export class SearchEmbeddable
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
   private abortController?: AbortController;
+  private services: DiscoverServices;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -112,6 +115,7 @@ export class SearchEmbeddable
       indexPatterns,
       editable,
       filterManager,
+      services,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
@@ -129,7 +133,7 @@ export class SearchEmbeddable
       },
       parent
     );
-
+    this.services = services;
     this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
@@ -139,8 +143,8 @@ export class SearchEmbeddable
     };
     this.initializeSearchScope();
 
-    this.autoRefreshFetchSubscription = getServices()
-      .timefilter.getAutoRefreshFetch$()
+    this.autoRefreshFetchSubscription = this.services.timefilter
+      .getAutoRefreshFetch$()
       .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -169,7 +173,7 @@ export class SearchEmbeddable
       throw new Error('Search scope not defined');
     }
     this.searchInstance = this.$compile(
-      getServices().uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
     )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
@@ -247,12 +251,9 @@ export class SearchEmbeddable
     };
 
     if (this.savedSearch.grid) {
-      searchScope.grid = this.savedSearch.grid;
-      searchScope.columnsWidth =
-        this.savedSearch.grid && this.savedSearch.grid.columnsWidth
-          ? this.savedSearch.grid.columnsWidth
-          : undefined;
+      searchScope.settings = this.savedSearch.grid;
     }
+    searchScope.showTimeCol = !this.services.uiSettings.get('doc_table:hideTimeColumn', false);
 
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
@@ -287,13 +288,13 @@ export class SearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
+    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 

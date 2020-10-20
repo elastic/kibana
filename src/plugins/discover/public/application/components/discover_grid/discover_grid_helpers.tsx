@@ -19,28 +19,39 @@
 import React, { ReactNode } from 'react';
 import { EuiCodeBlock, EuiDataGridColumn } from '@elastic/eui';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
+import { DiscoverGridSettings } from './types';
 
 const kibanaJSON = 'kibana-json';
 const geoPoint = 'geo-point';
 
 export function getEuiGridColumns(
   columns: string[],
-  columnsWidth: any = {},
+  settings: DiscoverGridSettings | undefined,
   indexPattern: IndexPattern,
   showTimeCol: boolean,
   timeString: string
 ) {
   const timeFieldName = indexPattern.timeFieldName;
+  const getColWidth = (column: string) => {
+    if (settings?.columns && settings.columns[column]) {
+      return settings.columns[column].width || 0;
+    }
+    return 0;
+  };
 
-  if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
+  if (
+    showTimeCol !== false &&
+    indexPattern.timeFieldName &&
+    !columns.find((col) => col === timeFieldName)
+  ) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(column, columnsWidth ? columnsWidth[column] : 0, indexPattern, timeString)
+      buildEuiGridColumn(column, getColWidth(column), indexPattern, timeString)
     );
   }
 
   return columns.map((column) =>
-    buildEuiGridColumn(column, columnsWidth ? columnsWidth[column] : 0, indexPattern, timeString)
+    buildEuiGridColumn(column, getColWidth(column), indexPattern, timeString)
   );
 }
 
@@ -60,7 +71,7 @@ export function getVisibleColumns(
 
 export function buildEuiGridColumn(
   columnName: string,
-  columnWidth: any,
+  columnWidth: number | undefined = 0,
   indexPattern: IndexPattern,
   timeString: string
 ) {

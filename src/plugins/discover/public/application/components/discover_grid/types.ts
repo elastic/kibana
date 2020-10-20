@@ -17,22 +17,13 @@
  * under the License.
  */
 
-import { ISearchSource } from '../../../data/public';
-import { DiscoverGridSettings } from '../application/components/discover_grid/types';
-
-export type SortOrder = [string, string];
-export interface SavedSearch {
-  readonly id: string;
-  title: string;
-  searchSource: ISearchSource;
-  description?: string;
-  columns: string[];
-  sort: SortOrder[];
-  grid: DiscoverGridSettings;
-  destroy: () => void;
-  lastSavedTitle?: string;
+/**
+ * User configureable state of data grid, persisted in saved search
+ */
+export interface DiscoverGridSettings {
+  columns?: Record<string, DiscoverGridSettingsColumn>;
 }
-export interface SavedSearchLoader {
-  get: (id: string) => Promise<SavedSearch>;
-  urlFor: (id: string) => string;
+
+export interface DiscoverGridSettingsColumn {
+  width?: number;
 }

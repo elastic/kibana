@@ -44,6 +44,7 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { DiscoverGridSelectButton } from './discover_grid_select_button';
 import { ViewButton } from './discover_grid_view_button';
 import { getRenderCellValueFn } from './get_render_cell_value';
+import { DiscoverGridSettings } from './types';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
@@ -55,7 +56,6 @@ interface SortObj {
 interface Props {
   ariaLabelledBy: string;
   columns: string[];
-  columnsWidth: any;
   getContextAppHref: (id: string) => string;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
@@ -66,6 +66,7 @@ interface Props {
   onSort: (props: any) => void;
   rows?: ElasticSearchHit[];
   sampleSize: number;
+  settings?: DiscoverGridSettings;
   searchDescription?: string;
   searchTitle?: string;
   showTimeCol: boolean;
@@ -88,8 +89,8 @@ export const DiscoverGrid = React.memo(
   ({
     rows,
     columns,
-    columnsWidth,
     sort,
+    settings,
     indexPattern,
     ariaLabelledBy,
     searchTitle,
@@ -182,8 +183,8 @@ export const DiscoverGrid = React.memo(
 
     const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
     const euiGridColumns = useMemo(
-      () => getEuiGridColumns(columns, columnsWidth, indexPattern, showTimeCol, timeString),
-      [columns, indexPattern, showTimeCol, timeString, columnsWidth]
+      () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol, timeString),
+      [columns, indexPattern, showTimeCol, timeString, settings]
     );
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const popoverContents = useMemo(() => getPopoverContents(), []);

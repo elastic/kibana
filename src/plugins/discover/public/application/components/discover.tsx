@@ -49,7 +49,6 @@ export function Discover({
   onRemoveColumn,
   onSetColumns,
   onSort,
-  onResize,
   opts,
   resetQuery,
   resultState,
@@ -210,7 +209,6 @@ export function Discover({
                             <DiscoverGrid
                               ariaLabelledBy="documentsAriaLabel"
                               columns={state.columns}
-                              columnsWidth={state.columnsWidth}
                               indexPattern={indexPattern}
                               rows={rows}
                               sort={state.sort}
@@ -218,13 +216,22 @@ export function Discover({
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
                               showTimeCol={showTimeCol}
+                              settings={state.grid}
                               getContextAppHref={getContextAppHref}
                               onAddColumn={addColumn}
                               onFilter={onAddFilter}
                               onRemoveColumn={onRemoveColumn}
                               onSetColumns={onSetColumns}
                               onSort={onSort}
-                              onResize={onResize}
+                              onResize={(colSettings: { columnId: string; width: number }) => {
+                                const grid = { ...state.grid } || {};
+                                const newColumns = { ...grid.columns } || {};
+                                newColumns[colSettings.columnId] = {
+                                  width: colSettings.width,
+                                };
+                                const newGrid = { ...grid, columns: newColumns };
+                                opts.setAppState({ grid: newGrid });
+                              }}
                               useDocSelector={enhanced}
                             />
                           </div>

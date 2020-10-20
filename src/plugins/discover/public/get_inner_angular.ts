@@ -40,6 +40,7 @@ import { createTableRowDirective } from './application/angular/doc_table/compone
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
+import { createDiscoverGridDirective } from './application/components/create_discover_grid_directive';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
@@ -192,5 +193,6 @@ function createDocTableModule() {
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
-    .directive('docViewer', createDocViewerDirective);
+    .directive('docViewer', createDocViewerDirective)
+    .directive('discoverGrid', createDiscoverGridDirective);
 }

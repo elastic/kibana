@@ -79,6 +79,7 @@ export interface DiscoverLegacyProps {
     timefield: string;
     sampleSize: number;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    setAppState: (state: Partial<AppState>) => void;
   };
   resetQuery: () => void;
   resultState: string;

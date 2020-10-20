@@ -32,6 +32,7 @@ import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 import { getSortArray } from './doc_table';
 import { DEFAULT_COLUMNS_SETTING } from '../../../common';
 import { SavedSearch } from '../../saved_searches';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
 
 export interface AppState {
   /**
@@ -39,13 +40,13 @@ export interface AppState {
    */
   columns?: string[];
   /**
-   * Width of data grid columns
-   */
-  columnsWidth?: { [key: string]: number };
-  /**
    * Array of applied filters
    */
   filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
   /**
    * id of the used index pattern
    */
@@ -219,8 +220,8 @@ export function getStateDefaults(
     interval: 'auto',
     filters: _.cloneDeep(searchSource.getOwnField('filter')) as Filter[],
   };
-  if (savedSearch.grid && savedSearch.grid.columnsWidth) {
-    defaultState.columnsWidth = savedSearch.grid.columnsWidth;
+  if (savedSearch.grid && savedSearch.grid) {
+    defaultState.grid = savedSearch.grid;
   }
   return defaultState;
 }
