@@ -22,6 +22,24 @@ const ClFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
+function formatTitle(unit: string, value?: number) {
+  if (typeof value === 'undefined') return I18LABELS.dataMissing;
+  return formatToSec(value, unit);
+}
+
+function PageViewsTotalTitle({ pageViews }: { pageViews?: number }) {
+  if (typeof pageViews === 'undefined') {
+    return <>{I18LABELS.dataMissing}</>;
+  }
+  return pageViews < 10000 ? (
+    <>{numeral(pageViews).format('0,0')}</>
+  ) : (
+    <EuiToolTip content={numeral(pageViews).format('0,0')}>
+      <>{numeral(pageViews).format('0 a')}</>
+    </EuiToolTip>
+  );
+}
+
 export function ClientMetrics() {
   const uxQuery = useUxQuery();
 
@@ -50,14 +68,12 @@ export function ClientMetrics() {
 
   const STAT_STYLE = { width: '240px' };
 
-  const pageViewsTotal = data?.pageViews?.value ?? 0;
-
   return (
     <ClFlexGroup responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={formatToSec(data?.backEnd?.value ?? 0, 'ms')}
+          title={formatTitle('ms', data?.backEnd?.value)}
           description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
@@ -65,7 +81,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={formatToSec(data?.frontEnd?.value ?? 0, 'ms')}
+          title={formatTitle('ms', data?.frontEnd?.value)}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
@@ -73,15 +89,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={
-            pageViewsTotal < 10000 ? (
-              numeral(pageViewsTotal).format('0,0')
-            ) : (
-              <EuiToolTip content={numeral(pageViewsTotal).format('0,0')}>
-                <>{numeral(pageViewsTotal).format('0 a')}</>
-              </EuiToolTip>
-            )
-          }
+          title={<PageViewsTotalTitle pageViews={data?.pageViews?.value} />}
           description={I18LABELS.pageViews}
           isLoading={status !== 'success'}
         />
