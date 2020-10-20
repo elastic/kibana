@@ -14,6 +14,7 @@ export interface ViewZoomWidthHeight {
 
 export abstract class Layout {
   public id: string = '';
+  public groupCount: number = 0;
 
   constructor(id: string) {
     this.id = id;

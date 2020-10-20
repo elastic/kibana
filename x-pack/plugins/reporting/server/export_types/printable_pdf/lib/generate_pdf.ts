@@ -12,7 +12,6 @@ import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
 import { ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
-// @ts-ignore untyped module
 import { pdf } from './pdf';
 import { getTracker } from './tracker';
 
