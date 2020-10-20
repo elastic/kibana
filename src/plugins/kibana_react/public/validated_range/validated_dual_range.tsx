@@ -108,7 +108,6 @@ export class ValidatedDualRange extends Component<Props> {
 
     return (
       <EuiFormRow
-        compressed={compressed}
         fullWidth={fullWidth}
         isInvalid={!this.state.isValid}
         error={this.state.errorMessage ? [this.state.errorMessage] : []}
