@@ -9,7 +9,7 @@ import { render, RenderResult } from '@testing-library/react';
 import { useFormattedDate } from './use_formatted_date';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { uiSettings } from '../../mocks/ui_settings';
+import { uiSetting } from '../../mocks/ui_setting';
 
 describe('useFormattedDate', () => {
   let element: HTMLElement;
@@ -20,7 +20,7 @@ describe('useFormattedDate', () => {
 
   beforeEach(async () => {
     const mockCoreStart = coreMock.createStart();
-    mockCoreStart.uiSettings.get.mockImplementation(uiSettings);
+    mockCoreStart.uiSettings.get.mockImplementation(uiSetting);
 
     function Test({ date }: { date: ConstructorParameters<typeof Date>[0] | Date | undefined }) {
       const formattedDate = useFormattedDate(date);
@@ -35,9 +35,6 @@ describe('useFormattedDate', () => {
           <Test date={date} />
         </KibanaContextProvider>
       );
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   describe('when the provided date is undefined', () => {

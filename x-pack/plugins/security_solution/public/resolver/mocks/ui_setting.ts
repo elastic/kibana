@@ -7,7 +7,7 @@
 /**
  * A mock for Kibana UI settings.
  */
-export function uiSettings(key: string): string | undefined {
+export function uiSetting(key: string): string | undefined {
   if (key === 'dateFormat') {
     return 'MMM D, YYYY @ HH:mm:ss.SSS';
   }
