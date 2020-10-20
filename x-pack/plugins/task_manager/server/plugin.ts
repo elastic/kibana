@@ -37,7 +37,7 @@ export class TaskManagerPlugin
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
-    this.logger = initContext.logger.get('taskManager');
+    this.logger = initContext.logger.get();
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
