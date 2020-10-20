@@ -11381,7 +11381,6 @@
     "xpack.maps.layerWizardSelect.solutionsCategoryLabel": "解决方案",
     "xpack.maps.loadMap.errorAttemptingToLoadSavedMap": "无法加载地图",
     "xpack.maps.map.initializeErrorTitle": "无法初始化地图",
-    "xpack.maps.mapController.mapsBreadcrumbLabel": "Maps",
     "xpack.maps.mapEmbeddableFactory.invalidLayerList": "无法加载地图，图层列表格式不正确",
     "xpack.maps.mapEmbeddableFactory.invalidSavedObject": "无法加载地图，已保存对象格式错误",
     "xpack.maps.mapListing.advancedSettingsLinkText": "高级设置",
