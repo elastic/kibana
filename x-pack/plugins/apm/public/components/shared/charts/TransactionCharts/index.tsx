@@ -14,30 +14,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ChartsSyncContextProvider2 } from '../../../../context/charts_sync_context';
-import { unit } from '../../../../style/variables';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
+import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
+import { ChartsSyncContextProvider2 } from '../../../../context/charts_sync_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { ErroneousTransactionsRateChart } from '../ErroneousTransactionsRateChart';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
-import {
-  getResponseTimeTickFormatter,
-  getResponseTimeTooltipFormatter,
-} from './helper';
-import { MLHeader } from './ml_header';
-import { TransactionLineChart } from './TransactionLineChart';
-import { useFormatter } from './use_formatter';
+import { ErroneousTransactionsRateChart } from '../ErroneousTransactionsRateChart';
 import { LineChart } from '../line_chart';
+import { getResponseTimeTickFormatter } from './helper';
+import { MLHeader } from './ml_header';
+import { useFormatter } from './use_formatter';
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
@@ -52,10 +47,8 @@ export function TransactionCharts({
     return `${asDecimal(t)} ${tpmUnit(urlParams.transactionType)}`;
   };
 
-  const getTPMTooltipFormatter = (p: Coordinate) => {
-    return isValidCoordinateValue(p.y)
-      ? getTPMFormatter(p.y)
-      : NOT_AVAILABLE_LABEL;
+  const getTPMTooltipFormatter = (y: Coordinate['y']) => {
+    return isValidCoordinateValue(y) ? getTPMFormatter(y) : NOT_AVAILABLE_LABEL;
   };
 
   const { transactionType } = urlParams;
@@ -106,7 +99,7 @@ export function TransactionCharts({
               <LineChart
                 id="requestPerMinutes"
                 timeseries={tpmSeries}
-                tickFormatY={getTPMFormatter}
+                tickFormatY={getTPMTooltipFormatter}
               />
             </EuiPanel>
           </EuiFlexItem>
