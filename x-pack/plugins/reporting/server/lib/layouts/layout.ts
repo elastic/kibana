@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ContextPageSize } from 'pdfmake/interfaces';
 import { PageSizeParams, PdfImageSize, Size } from './';
 
 export interface ViewZoomWidthHeight {
@@ -22,9 +23,9 @@ export abstract class Layout {
 
   public abstract getPdfImageSize(): PdfImageSize;
 
-  public abstract getPdfPageOrientation(): string | undefined;
+  public abstract getPdfPageOrientation(): 'portrait' | 'landscape' | undefined;
 
-  public abstract getPdfPageSize(pageSizeParams: PageSizeParams): string | Size;
+  public abstract getPdfPageSize(pageSizeParams: PageSizeParams): ContextPageSize;
 
   public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
 

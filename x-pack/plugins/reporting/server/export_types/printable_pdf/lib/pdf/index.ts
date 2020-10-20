@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import concat from 'concat-stream';
 import _ from 'lodash';
 import path from 'path';
-// @ts-ignore: no module definition
 import Printer from 'pdfmake';
+import { Content } from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../../lib/layouts';
 import { getDocOptions } from './get_doc_options';
 import { getFont } from './get_font';
@@ -23,9 +23,9 @@ class PdfMaker {
   private _layout: LayoutInstance;
   private _logo: string | undefined;
   private _title: string;
-  private _content: Array<Array<{ text: string; pageBreak: string }>>;
-  private _printer: any;
-  private _pdfDoc: any;
+  private _content: Content[];
+  private _printer: Printer;
+  private _pdfDoc: PDFKit.PDFDocument | undefined;
 
   constructor(layout: LayoutInstance, logo: string | undefined) {
     const fontPath = (filename: string) => path.resolve(assetPath, 'fonts', filename);
@@ -52,7 +52,7 @@ class PdfMaker {
     this._printer = new Printer(fonts);
   }
 
-  _addContents(contents: Array<{ text: string; pageBreak: string }>) {
+  _addContents(contents: Content[]) {
     const groupCount = this._content.length;
 
     // inject a page break for every 2 groups on the page
@@ -61,14 +61,14 @@ class PdfMaker {
         {
           text: '',
           pageBreak: 'after',
-        },
+        } as Content,
       ].concat(contents);
     }
     this._content.push(contents);
   }
 
   addImage(base64EncodedData: string, { title = '', description = '' }) {
-    const contents: any = [];
+    const contents: Content[] = [];
 
     if (title && title.length > 0) {
       contents.push({
@@ -108,23 +108,13 @@ class PdfMaker {
     this._addContents(contents);
   }
 
-  addHeading(headingText: string, opts: any = {}) {
-    const contents: any = [];
-    contents.push({
-      text: headingText,
-      style: ['heading'].concat(opts.styles || []),
-      font: getFont(headingText),
-    });
-    this._addContents(contents);
-  }
-
   setTitle(title: string) {
     this._title = title;
   }
 
   generate() {
     const docTemplate = _.assign(
-      getTemplate(this._layout, this._logo, this._title, tableBorderWidth),
+      getTemplate(this._layout, this._logo, this._title, tableBorderWidth, assetPath),
       {
         content: this._content,
       }
@@ -134,17 +124,18 @@ class PdfMaker {
   }
 
   getBuffer(): Promise<Buffer | null> {
-    if (!this._pdfDoc) {
-      throw new Error(
-        i18n.translate(
-          'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
-          {
-            defaultMessage: 'Document stream has not been generated',
-          }
-        )
-      );
-    }
     return new Promise((resolve, reject) => {
+      if (!this._pdfDoc) {
+        throw new Error(
+          i18n.translate(
+            'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
+            {
+              defaultMessage: 'Document stream has not been generated',
+            }
+          )
+        );
+      }
+
       const concatStream = concat(function (pdfBuffer: Buffer) {
         resolve(pdfBuffer);
       });

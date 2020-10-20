@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import path from 'path';
+import { Style, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../../lib/layouts';
 import { getFont } from './get_font';
 
@@ -13,8 +14,9 @@ export function getTemplate(
   layout: LayoutInstance,
   logo: string | undefined,
   title: string,
-  tableBorderWidth: number
-) {
+  tableBorderWidth: number,
+  assetPath: string
+): Partial<TDocumentDefinitions> {
   const pageMarginTop = 40;
   const pageMarginBottom = 80;
   const pageMarginWidth = 40;
@@ -53,7 +55,7 @@ export function getTemplate(
       };
     },
 
-    footer(currentPage: number, pageCount: number, assetPath: string) {
+    footer(currentPage: number, pageCount: number) {
       const logoPath = path.resolve(assetPath, 'img', 'logo-grey.png');
       return {
         margin: [pageMarginWidth, pageMarginBottom / 4, pageMarginWidth, 0],
@@ -109,14 +111,14 @@ export function getTemplate(
         bold: true,
         marginTop: headingMarginTop,
         marginBottom: headingMarginBottom,
-      },
+      } as Style,
       subheading: {
         alignment: 'left',
         fontSize: subheadingFontSize,
         italics: true,
         marginLeft: 20,
         marginBottom: subheadingMarginBottom,
-      },
+      } as Style,
       warning: {
         color: '#f39c12', // same as @brand-warning in Kibana colors.less
       },
