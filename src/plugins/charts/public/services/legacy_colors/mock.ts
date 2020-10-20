@@ -25,4 +25,8 @@ colors.init(coreMock.createSetup().uiSettings);
 
 export const colorsServiceMock: LegacyColorsService = {
   createColorLookupFunction: jest.fn(colors.createColorLookupFunction.bind(colors)),
+  mappedColors: {
+    mapKeys: jest.fn(),
+    get: jest.fn(),
+  },
 } as any;
