@@ -68,7 +68,7 @@ export const DraggableZeekElement = React.memo<{
   const dataProviderProp = useMemo(
     () =>
       !value
-        ? value
+        ? null
         : {
             and: [],
             enabled: true,
@@ -89,9 +89,7 @@ export const DraggableZeekElement = React.memo<{
 
   const content = useMemo(
     () =>
-      !value ? (
-        value
-      ) : (
+      !value ? null : (
         <EuiToolTip data-test-subj="badge-tooltip" content={field}>
           <Badge iconType="tag" color="hollow" title="">
             {stringRenderer(value!)}

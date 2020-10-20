@@ -42,8 +42,9 @@ const DropTargetDataProvidersContainer = styled.div`
     }
   }
 
-  .euiDroppable__placeholder {
-    display: none;
+  .euiDroppable {
+    display: flex;
+    flex-direction: row;
   }
 `;
 
