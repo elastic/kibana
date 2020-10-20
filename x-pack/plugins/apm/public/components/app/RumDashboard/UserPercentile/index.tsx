@@ -8,16 +8,11 @@ import React, { useCallback, useEffect } from 'react';
 
 import { EuiSelect } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { I18LABELS } from '../translations';
 
 const DEFAULT_P = 50;
-
-const StyledSpan = styled.span`
-  font-weight: 600;
-`;
 
 export function UserPercentile() {
   const history = useHistory();
