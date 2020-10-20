@@ -17,6 +17,6 @@
  * under the License.
  */
 export const APP_NAME = 'lens';
-export const PLUGIN_ID = 'lensOss';
+export const PLUGIN_ID_OSS = 'lensOss';
 export const APP_PATH = '#/';
 export const APP_ICON = 'lensApp';
