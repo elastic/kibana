@@ -18,7 +18,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import _ from 'lodash';
+import { first, each, isPlainObject } from 'lodash';
 import { IndexPattern } from '../../index_patterns/index_patterns';
 import { Datatable, DatatableColumn } from '../../../../expressions/common';
 
@@ -37,9 +37,9 @@ export function flattenHit(
 
       if (!shallow) {
         const isNestedField = field?.type === 'nested';
-        const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
+        const isArrayOfObjects = Array.isArray(val) && isPlainObject(first(val));
         if (isArrayOfObjects && !isNestedField) {
-          _.each(val as object, (v) => flatten(v, key + '.'));
+          each(val as object, (v) => flatten(v, key + '.'));
           continue;
         }
       } else if (flat[key] !== void 0) {
@@ -47,7 +47,7 @@ export function flattenHit(
       }
 
       const hasValidMapping = field?.type !== 'conflict';
-      const isValue = !_.isPlainObject(val);
+      const isValue = !isPlainObject(val);
 
       if (hasValidMapping || isValue) {
         if (!flat[key]) {
