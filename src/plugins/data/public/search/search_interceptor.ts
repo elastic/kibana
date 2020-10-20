@@ -113,18 +113,24 @@ export class SearchInterceptor {
    */
   protected runSearch(
     request: IKibanaSearchRequest,
-    signal: AbortSignal,
-    strategy?: string
+    options?: ISearchOptions
   ): Observable<IKibanaSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
-    const body = JSON.stringify(searchRequest);
+    const path = trimEnd(
+      `/internal/search/${options?.strategy ?? ES_SEARCH_STRATEGY}/${id ?? ''}`,
+      '/'
+    );
+    const body = JSON.stringify({
+      sessionId: options?.sessionId,
+      isStored: options?.isStored,
+      ...searchRequest,
+    });
     return from(
       this.deps.http.fetch({
         method: 'POST',
         path,
         body,
-        signal,
+        signal: options?.abortSignal,
       })
     );
   }
@@ -220,7 +226,7 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+      return this.runSearch(request, { ...options, abortSignal: combinedSignal }).pipe(
         catchError((e: Error) => {
           return throwError(this.handleSearchError(e, request, timeoutSignal, options));
         }),

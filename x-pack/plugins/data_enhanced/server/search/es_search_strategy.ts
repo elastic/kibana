@@ -85,6 +85,7 @@ export const enhancedEsSearchStrategyProvider = (
     if (!request.id) {
       const submitOptions = toSnakeCase({
         batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+        keepOnCompletion: true, // Return an ID even when the search returns in the first response
         ...(await getDefaultSearchParams(uiSettingsClient)),
         ...asyncOptions,
         ...request.params,

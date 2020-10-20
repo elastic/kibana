@@ -92,4 +92,9 @@ export interface ISearchOptions {
    * A session ID, grouping multiple search requests into a single session.
    */
   sessionId?: string;
+
+  /**
+   * Whether the session is already saved (i.e. sent to background)
+   */
+  isStored?: boolean;
 }

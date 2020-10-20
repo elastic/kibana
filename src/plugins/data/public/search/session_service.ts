@@ -19,7 +19,7 @@
 
 import uuid from 'uuid';
 import { Subject, Subscription } from 'rxjs';
-import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
+import { HttpStart, PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { ISessionService } from '../../common/search';
 import { ConfigSchema } from '../../config';
 
@@ -28,6 +28,8 @@ export class SessionService implements ISessionService {
   private session$: Subject<string | undefined> = new Subject();
   private appChangeSubscription$?: Subscription;
   private curApp?: string;
+  private http: HttpStart;
+  private _isStored: boolean = false;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -37,6 +39,8 @@ export class SessionService implements ISessionService {
       Make sure that apps don't leave sessions open.
      */
     getStartServices().then(([coreStart]) => {
+      this.http = coreStart.http;
+
       this.appChangeSubscription$ = coreStart.application.currentAppId$.subscribe((appName) => {
         if (this.sessionId) {
           const message = `Application '${this.curApp}' had an open session while navigating`;
@@ -67,14 +71,29 @@ export class SessionService implements ISessionService {
     return this.session$.asObservable();
   }
 
+  public isStored() {
+    return this._isStored;
+  }
+
   public start() {
+    this._isStored = false;
     this.sessionId = uuid.v4();
     this.session$.next(this.sessionId);
     return this.sessionId;
   }
 
   public clear() {
+    this._isStored = false;
     this.sessionId = undefined;
     this.session$.next(this.sessionId);
+  }
+
+  public async save() {
+    await this.http.post(`/internal/session`, {
+      body: JSON.stringify({
+        sessionId: this.sessionId,
+      }),
+    });
+    this._isStored = true;
   }
 }

@@ -19,55 +19,24 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { getRequestAbortedSignal } from '../../lib';
-import { shimHitsTotal } from './shim_hits_total';
 
-export function registerSearchRoute(router: IRouter): void {
+export function registerSessionRoutes(router: IRouter): void {
   router.post(
     {
-      path: '/internal/search/{strategy}/{id?}',
+      path: '/internal/session',
       validate: {
-        params: schema.object({
-          strategy: schema.string(),
-          id: schema.maybe(schema.string()),
+        body: schema.object({
+          sessionId: schema.string(),
         }),
-
-        query: schema.object({}, { unknowns: 'allow' }),
-
-        body: schema.object(
-          {
-            sessionId: schema.maybe(schema.string()),
-            isStored: schema.maybe(schema.boolean()),
-          },
-          { unknowns: 'allow' }
-        ),
       },
     },
     async (context, request, res) => {
-      const { sessionId, isStored, ...searchRequest } = request.body;
-      const { strategy, id } = request.params;
-      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-
+      const { sessionId } = request.body;
       try {
-        const response = await context
-          .search!.search(
-            { ...searchRequest, id },
-            {
-              abortSignal,
-              strategy,
-              sessionId,
-              isStored,
-            }
-          )
-          .toPromise();
+        const response = await context.search!.session.save(sessionId);
 
         return res.ok({
-          body: {
-            ...response,
-            ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
-            },
-          },
+          body: response,
         });
       } catch (err) {
         return res.customError({
@@ -83,31 +52,30 @@ export function registerSearchRoute(router: IRouter): void {
     }
   );
 
-  router.delete(
+  router.get(
     {
-      path: '/internal/search/{strategy}/{id}',
+      path: '/internal/session/{id}',
       validate: {
         params: schema.object({
-          strategy: schema.string(),
           id: schema.string(),
         }),
-
-        query: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, res) => {
-      const { strategy, id } = request.params;
-
+      const { id } = request.params;
       try {
-        await context.search!.cancel(id, { strategy });
-        return res.ok();
+        const response = await context.search!.session.get(id);
+
+        return res.ok({
+          body: response,
+        });
       } catch (err) {
         return res.customError({
-          statusCode: err.statusCode,
+          statusCode: err.statusCode || 500,
           body: {
             message: err.message,
             attributes: {
-              error: err.body.error,
+              error: err.body?.error || err.message,
             },
           },
         });

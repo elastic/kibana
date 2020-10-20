@@ -17,30 +17,28 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
+import { SavedObjectsType } from 'kibana/server';
 
-export interface ISessionService {
-  /**
-   * Returns the active session ID
-   * @returns The active session ID
-   */
-  getSessionId: () => string | undefined;
-  /**
-   * Returns the observable that emits an update every time the session ID changes
-   * @returns `Observable`
-   */
-  getSession$: () => Observable<string | undefined>;
-  /**
-   * Starts a new session
-   */
-  start: () => string;
-  /**
-   * Clears the active session.
-   */
-  clear: () => void;
+export const BACKGROUND_SESSION_TYPE = 'background-session';
 
-  /**
-   * Whether the active session is already saved (i.e. sent to background)
-   */
-  isStored: () => boolean;
+export const backgroundSessionMapping: SavedObjectsType = {
+  name: BACKGROUND_SESSION_TYPE,
+  namespaceType: 'single',
+  hidden: true,
+  mappings: {
+    properties: {
+      expires: {
+        type: 'date',
+      },
+      idMapping: {
+        type: 'object',
+        enabled: false,
+      },
+    },
+  },
+};
+
+export interface BackgroundSessionSavedObjectAttributes {
+  expires: string;
+  idMapping: Record<string, string>;
 }
