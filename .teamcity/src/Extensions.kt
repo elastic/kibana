@@ -165,7 +165,15 @@ fun BuildSteps.runbld(stepName: String, script: String) {
         export EXECUTOR_NUMBER=''
         export NODE_NAME=''
 
-        /usr/local/bin/runbld -d "${'$'}(pwd)" --job-name="elastic+${'$'}project+${'$'}branchName" $script
+        export OLD_PATH="${'$'}PATH"
+
+        file=${'$'}(mktemp)
+
+        echo '#!/bin/bash' > ${'$'}file
+        echo 'export PATH="${'$'}OLD_PATH"' >> ${'$'}file
+        echo 'bash $script' > ${'$'}' >> file
+
+        /usr/local/bin/runbld -d "${'$'}(pwd)" --job-name="elastic+${'$'}project+${'$'}branchName" ${'$'}file
       """.trimIndent()
     executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
   }
