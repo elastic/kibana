@@ -25,6 +25,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
       searchFields: [],
       search: '',
       perPage: 10000,
+      namespaces: ['*'],
     };
 
     const allJobs = jobId === undefined && datafeedId === undefined;
