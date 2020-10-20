@@ -16,36 +16,42 @@ import {
 } from '../../../../common/store/test_utils';
 import { Immutable, HostResultList } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
-import { mockHostResultList } from './mock_host_result_list';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { listData } from './selectors';
-import { HostState } from '../types';
-import { hostListReducer } from './reducer';
-import { hostMiddlewareFactory } from './middleware';
-import { getHostListPath } from '../../../common/routing';
+import { EndpointState } from '../types';
+import { endpointListReducer } from './reducer';
+import { endpointMiddlewareFactory } from './middleware';
+import { getEndpointListPath } from '../../../common/routing';
 
-describe('host list middleware', () => {
+jest.mock('../../policy/store/policy_list/services/ingest', () => ({
+  sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
+  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+}));
+
+describe('endpoint list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  type HostListStore = Store<Immutable<HostState>, Immutable<AppAction>>;
-  let store: HostListStore;
-  let getState: HostListStore['getState'];
-  let dispatch: HostListStore['dispatch'];
+  type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
+  let store: EndpointListStore;
+  let getState: EndpointListStore['getState'];
+  let dispatch: EndpointListStore['dispatch'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let actionSpyMiddleware;
 
   let history: History<never>;
   const getEndpointListApiResponse = (): HostResultList => {
-    return mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
+    return mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
   };
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
-    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
     store = createStore(
-      hostListReducer,
-      applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
+      endpointListReducer,
+      applyMiddleware(endpointMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
     );
     getState = store.getState;
     dispatch = store.dispatch;
@@ -60,13 +66,43 @@ describe('host list middleware', () => {
       type: 'userChangedUrl',
       payload: {
         ...history.location,
-        pathname: getHostListPath({ name: 'hostList' }),
+        pathname: getEndpointListPath({ name: 'endpointList' }),
       },
     });
-    await waitForAction('serverReturnedHostList');
+    await waitForAction('serverReturnedEndpointList');
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+        filters: { kql: '' },
+      }),
+    });
+    expect(listData(getState())).toEqual(apiResponse.hosts);
+  });
+
+  it('handles `appRequestedEndpointList`', async () => {
+    const apiResponse = getEndpointListApiResponse();
+    fakeHttpServices.post.mockResolvedValue(apiResponse);
+    expect(fakeHttpServices.post).not.toHaveBeenCalled();
+
+    // First change the URL
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        ...history.location,
+        pathname: getEndpointListPath({ name: 'endpointList' }),
+      },
+    });
+    await waitForAction('serverReturnedEndpointList');
+
+    // Then request the Endpoint List
+    dispatch({
+      type: 'appRequestedEndpointList',
+    });
+    await waitForAction('serverReturnedEndpointList');
+    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
+      body: JSON.stringify({
+        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+        filters: { kql: '' },
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts);

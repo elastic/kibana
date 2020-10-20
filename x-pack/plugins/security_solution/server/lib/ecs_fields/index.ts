@@ -85,6 +85,7 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
 
 export const agentFieldsMap: Readonly<Record<string, string>> = {
   'agent.type': 'agent.type',
+  'agent.id': 'agent.id',
 };
 
 export const userFieldsMap: Readonly<Record<string, string>> = {
@@ -324,6 +325,7 @@ export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.rule.note': 'signal.rule.note',
   'signal.rule.threshold': 'signal.rule.threshold',
   'signal.rule.exceptions_list': 'signal.rule.exceptions_list',
+  'signal.status': 'signal.status',
 };
 
 export const ruleFieldsMap: Readonly<Record<string, string>> = {

@@ -17,7 +17,7 @@ export type MapExtent = {
 };
 
 export type MapQuery = Query & {
-  queryLastTriggeredAt: string;
+  queryLastTriggeredAt?: string;
 };
 
 export type MapRefreshConfig = {
@@ -53,6 +53,7 @@ export type TooltipState = {
 };
 
 export type DrawState = {
+  actionId: string;
   drawType: DRAW_TYPE;
   filterLabel?: string; // point radius filter alias
   geoFieldName?: string;

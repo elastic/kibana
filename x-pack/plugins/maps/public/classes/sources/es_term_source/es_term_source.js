@@ -16,7 +16,11 @@ import {
 import { getJoinAggKey } from '../../../../common/get_agg_key';
 import { ESDocField } from '../../fields/es_doc_field';
 import { AbstractESAggSource } from '../es_agg_source';
-import { getField, addFieldToDSL, extractPropertiesFromBucket } from '../../util/es_agg_utils';
+import {
+  getField,
+  addFieldToDSL,
+  extractPropertiesFromBucket,
+} from '../../../../common/elasticsearch_util';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -115,9 +119,7 @@ export class ESTermSource extends AbstractESAggSource {
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
-    return {
-      propertiesMap: extractPropertiesMap(rawEsData, countPropertyName),
-    };
+    return extractPropertiesMap(rawEsData, countPropertyName);
   }
 
   isFilterByMapBounds() {
@@ -127,10 +129,6 @@ export class ESTermSource extends AbstractESAggSource {
   async getDisplayName() {
     //no need to localize. this is never rendered.
     return `es_table ${this.getIndexPatternId()}`;
-  }
-
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 
   getFieldNames() {

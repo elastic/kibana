@@ -27,7 +27,6 @@ import {
   EuiBadge,
   EuiText,
   EuiLink,
-  EuiIcon,
   EuiCallOut,
   EuiPanel,
 } from '@elastic/eui';
@@ -93,14 +92,16 @@ export const EditIndexPattern = withRouter(
     } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
-      indexPattern.fields.filter((field) => field.type === 'conflict')
+      indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
-      setConflictedFields(indexPattern.fields.filter((field) => field.type === 'conflict'));
+      setConflictedFields(
+        indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
+      );
     }, [indexPattern]);
 
     useEffect(() => {
@@ -120,7 +121,8 @@ export const EditIndexPattern = withRouter(
     const refreshFields = () => {
       overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
         if (isConfirmed) {
-          await indexPattern.init(true);
+          await data.indexPatterns.refreshFields(indexPattern);
+          await data.indexPatterns.updateSavedObject(indexPattern);
           setFields(indexPattern.getNonScriptedFields());
         }
       });
@@ -160,7 +162,7 @@ export const EditIndexPattern = withRouter(
     const timeFilterHeader = i18n.translate(
       'indexPatternManagement.editIndexPattern.timeFilterHeader',
       {
-        defaultMessage: "Time Filter field name: '{timeFieldName}'",
+        defaultMessage: "Time field: '{timeFieldName}'",
         values: { timeFieldName: indexPattern.timeFieldName },
       }
     );
@@ -185,62 +187,61 @@ export const EditIndexPattern = withRouter(
     return (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <IndexHeader
-                indexPattern={indexPattern}
-                setDefault={setDefaultPattern}
-                refreshFields={refreshFields}
-                deleteIndexPatternClick={removePattern}
-                defaultIndex={defaultIndex}
-              />
-              <EuiSpacer size="s" />
-              {showTagsSection && (
-                <EuiFlexGroup wrap>
-                  {Boolean(indexPattern.timeFieldName) && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  {tags.map((tag: any) => (
-                    <EuiFlexItem grow={false} key={tag.key}>
-                      <EuiBadge color="hollow">{tag.name}</EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
+          <IndexHeader
+            indexPattern={indexPattern}
+            setDefault={setDefaultPattern}
+            refreshFields={refreshFields}
+            deleteIndexPatternClick={removePattern}
+            defaultIndex={defaultIndex}
+          />
+          <EuiSpacer size="s" />
+          {showTagsSection && (
+            <EuiFlexGroup wrap>
+              {Boolean(indexPattern.timeFieldName) && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
+                </EuiFlexItem>
               )}
-              <EuiSpacer size="m" />
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                    defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
-                    values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
-                  />{' '}
-                  <EuiLink
-                    href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html"
-                    target="_blank"
-                  >
-                    {mappingAPILink}
-                    <EuiIcon type="link" />
-                  </EuiLink>
-                </p>
-              </EuiText>
-              {conflictedFields.length > 0 && (
-                <EuiCallOut title={mappingConflictHeader} color="warning" iconType="alert">
-                  <p>{mappingConflictLabel}</p>
-                </EuiCallOut>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Tabs
-                indexPattern={indexPattern}
-                fields={fields}
-                history={history}
-                location={location}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              {tags.map((tag: any) => (
+                <EuiFlexItem grow={false} key={tag.key}>
+                  <EuiBadge color="hollow">{tag.name}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          )}
+          <EuiSpacer size="m" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
+                defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
+                values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
+              />{' '}
+              <EuiLink
+                href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html"
+                target="_blank"
+                external
+              >
+                {mappingAPILink}
+              </EuiLink>
+            </p>
+          </EuiText>
+          {conflictedFields.length > 0 && (
+            <>
+              <EuiSpacer />
+              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="alert">
+                <p>{mappingConflictLabel}</p>
+              </EuiCallOut>
+            </>
+          )}
+          <EuiSpacer />
+          <Tabs
+            indexPattern={indexPattern}
+            saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
+            fields={fields}
+            history={history}
+            location={location}
+          />
         </div>
       </EuiPanel>
     );

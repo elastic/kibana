@@ -22,6 +22,9 @@ uiActionsPlugin.setup.registerDrilldown({
   isConfigValid: () => true,
   execute: async () => {},
   getDisplayName: () => 'test',
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 });
 
 const actionParams: FlyoutEditDrilldownParams = {

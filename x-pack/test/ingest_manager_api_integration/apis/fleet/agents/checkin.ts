@@ -53,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 401 if this a not a valid checkin access', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/checkin`)
+        .post(`/api/fleet/agents/agent1/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
         .send({
@@ -64,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 if for a malformed request payload', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/checkin`)
+        .post(`/api/fleet/agents/agent1/checkin`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -79,7 +79,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 200 if this a valid checkin access', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/checkin`)
+        .post(`/api/fleet/agents/agent1/checkin`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -102,7 +102,6 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.action).to.be('checkin');
-      expect(apiResponse.success).to.be(true);
     });
   });
 }

@@ -21,6 +21,7 @@ import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from
 import Hoek from 'hoek';
 import { ServerOptions as TLSOptions } from 'https';
 import { ValidationError } from 'joi';
+import uuid from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
 
@@ -168,4 +169,13 @@ export function defaultValidationErrorHandler(
   }
 
   throw err;
+}
+
+export function getRequestId(request: Request, options: HttpConfig['requestId']): string {
+  return options.allowFromAnyIp ||
+    // socket may be undefined in integration tests that connect via the http listener directly
+    (request.raw.req.socket?.remoteAddress &&
+      options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
+    ? request.headers['x-opaque-id'] ?? uuid.v4()
+    : uuid.v4();
 }

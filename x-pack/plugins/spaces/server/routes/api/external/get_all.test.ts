@@ -67,6 +67,7 @@ describe('GET /spaces/space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
+      authorization: null, // not needed for this route
     });
 
     return {
@@ -109,6 +110,22 @@ describe('GET /spaces/space', () => {
     const request = httpServerMock.createKibanaRequest({
       query: {
         purpose: 'copySavedObjectsIntoSpace',
+      },
+      method: 'get',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual(spaces);
+  });
+
+  it(`returns all available spaces with the 'shareSavedObjectsIntoSpace' purpose`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      query: {
+        purpose: 'shareSavedObjectsIntoSpace',
       },
       method: 'get',
     });

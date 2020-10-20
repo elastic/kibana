@@ -26,8 +26,10 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'share', 'timePicker']);
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
-  describe('shared links', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/80104
+  describe.skip('shared links', function describeIndexTests() {
     let baseUrl;
 
     async function setup({ storeStateInSessionStorage }) {
@@ -132,28 +134,47 @@ export default function ({ getService, getPageObjects }) {
         await teardown();
       });
 
-      describe('permalink', function () {
-        it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-          const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
-          await PageObjects.share.checkShortenUrl();
-          let actualUrl;
-          await retry.try(async () => {
-            actualUrl = await PageObjects.share.getSharedUrl();
-            expect(actualUrl).to.match(re);
-          });
+      it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
+        const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+        await PageObjects.share.checkShortenUrl();
+        let actualUrl;
+        await retry.try(async () => {
+          actualUrl = await PageObjects.share.getSharedUrl();
+          expect(actualUrl).to.match(re);
+        });
 
-          const actualTime = await PageObjects.timePicker.getTimeConfig();
+        const actualTime = await PageObjects.timePicker.getTimeConfig();
 
-          await browser.clearSessionStorage();
-          await browser.get(actualUrl, false);
-          await retry.waitFor('shortUrl resolves and opens', async () => {
-            const resolvedUrl = await browser.getCurrentUrl();
-            expect(resolvedUrl).to.match(/discover/);
-            const resolvedTime = await PageObjects.timePicker.getTimeConfig();
-            expect(resolvedTime.start).to.equal(actualTime.start);
-            expect(resolvedTime.end).to.equal(actualTime.end);
-            return true;
-          });
+        await browser.clearSessionStorage();
+        await browser.get(actualUrl, false);
+        await retry.waitFor('shortUrl resolves and opens', async () => {
+          const resolvedUrl = await browser.getCurrentUrl();
+          expect(resolvedUrl).to.match(/discover/);
+          const resolvedTime = await PageObjects.timePicker.getTimeConfig();
+          expect(resolvedTime.start).to.equal(actualTime.start);
+          expect(resolvedTime.end).to.equal(actualTime.end);
+          return true;
+        });
+      });
+
+      it("sharing hashed url shouldn't crash the app", async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        const timeBeforeReload = await PageObjects.timePicker.getTimeConfig();
+        await browser.clearSessionStorage();
+        await browser.get(currentUrl, false);
+        await retry.waitFor('discover to open', async () => {
+          const resolvedUrl = await browser.getCurrentUrl();
+          expect(resolvedUrl).to.match(/discover/);
+          const { message } = await toasts.getErrorToast();
+          expect(message).to.contain(
+            'Unable to completely restore the URL, be sure to use the share functionality.'
+          );
+          await toasts.dismissAllToasts();
+          const timeAfterReload = await PageObjects.timePicker.getTimeConfig();
+          expect(timeBeforeReload.start).not.to.be(timeAfterReload.start);
+          expect(timeBeforeReload.end).not.to.be(timeAfterReload.end);
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          return true;
         });
       });
     });

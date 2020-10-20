@@ -34,7 +34,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             <span
               className="euiFormControlLayoutCustomIcon"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="search"
@@ -63,16 +63,15 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             className="euiPopover__anchor"
           >
             <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton--hasIcon"
+              className="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
               onClick={[Function]}
               type="button"
             >
               <span
-                className="euiButtonEmpty__content"
+                className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
               >
-                <div
-                  aria-hidden="true"
-                  className="euiButtonEmpty__icon"
+                <span
+                  className="euiButtonContent__icon"
                   data-euiicon-type="arrowDown"
                   size="m"
                 />
@@ -128,16 +127,15 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   className="euiPopover__anchor"
                 >
                   <button
-                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
                     onClick={[Function]}
                     type="button"
                   >
                     <span
-                      className="euiButtonEmpty__content"
+                      className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                     >
-                      <div
-                        aria-hidden="true"
-                        className="euiButtonEmpty__icon"
+                      <span
+                        className="euiButtonContent__icon"
                         data-euiicon-type="arrowDown"
                         size="m"
                       />
@@ -196,7 +194,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   >
                     Template name
                   </span>
-                  <div
+                  <span
                     aria-label="Sorted in ascending order"
                     className="euiTableSortIcon"
                     data-euiicon-type="sortUp"
@@ -281,7 +279,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   type="button"
                 >
                   <span
-                    className="euiButtonEmpty__content"
+                    className="euiButtonContent euiButtonEmpty__content"
                   >
                     <span
                       className="euiButtonEmpty__text"
@@ -340,7 +338,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -361,7 +359,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -402,7 +400,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   type="button"
                 >
                   <span
-                    className="euiButtonEmpty__content"
+                    className="euiButtonContent euiButtonEmpty__content"
                   >
                     <span
                       className="euiButtonEmpty__text"
@@ -461,7 +459,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -482,7 +480,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -521,7 +519,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowLeft"
@@ -537,14 +535,14 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             <button
               aria-current={true}
               aria-label="Page 1 of 1"
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
               data-test-subj="pagination-button-0"
               disabled={true}
               onClick={[Function]}
               type="button"
             >
               <span
-                className="euiButtonEmpty__content"
+                className="euiButtonContent euiButtonEmpty__content"
               >
                 <span
                   className="euiButtonEmpty__text"
@@ -563,7 +561,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowRight"

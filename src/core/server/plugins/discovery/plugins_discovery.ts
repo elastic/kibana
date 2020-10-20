@@ -24,7 +24,7 @@ import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
 import { PluginWrapper } from '../plugin';
-import { createPluginInitializerContext } from '../plugin_context';
+import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
@@ -49,7 +49,11 @@ interface PluginSearchPathEntry {
  * @param coreContext Kibana core values.
  * @internal
  */
-export function discover(config: PluginsConfig, coreContext: CoreContext) {
+export function discover(
+  config: PluginsConfig,
+  coreContext: CoreContext,
+  instanceInfo: InstanceInfo
+) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
@@ -65,7 +69,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   ).pipe(
     mergeMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, coreContext)
+        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo)
         : [pluginPathOrError];
     }),
     shareReplay()
@@ -180,7 +184,12 @@ function mapSubdirectories(
  * @param log Plugin discovery logger instance.
  * @param coreContext Kibana core context.
  */
-function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
+function createPlugin$(
+  path: string,
+  log: Logger,
+  coreContext: CoreContext,
+  instanceInfo: InstanceInfo
+) {
   return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
     map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
@@ -189,7 +198,12 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
         path,
         manifest,
         opaqueId,
-        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+        initializerContext: createPluginInitializerContext(
+          coreContext,
+          opaqueId,
+          manifest,
+          instanceInfo
+        ),
       });
     }),
     catchError((err) => [err])

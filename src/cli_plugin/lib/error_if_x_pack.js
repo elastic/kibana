@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isOSS } from './is_oss';
+import { isOss } from './is_oss';
 
 function isXPack(plugin) {
   return /x-pack/.test(plugin);
@@ -25,7 +25,7 @@ function isXPack(plugin) {
 
 export function errorIfXPackInstall(settings) {
   if (isXPack(settings.plugin)) {
-    if (isOSS()) {
+    if (isOss()) {
       throw new Error(
         'You are using the OSS-only distribution of Kibana.  ' +
           'As of version 6.3+ X-Pack is bundled in the standard distribution of this software by default; ' +
@@ -40,7 +40,7 @@ export function errorIfXPackInstall(settings) {
 }
 
 export function errorIfXPackRemove(settings) {
-  if (isXPack(settings.plugin) && !isOSS()) {
+  if (isXPack(settings.plugin) && !isOss()) {
     throw new Error(
       'You are using the standard distribution of Kibana.  Please install the OSS-only distribution to remove X-Pack features.'
     );

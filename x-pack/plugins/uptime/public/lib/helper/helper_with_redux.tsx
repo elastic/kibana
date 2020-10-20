@@ -6,12 +6,13 @@
 
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
+import { AppState } from '../../state';
 
-export const MountWithReduxProvider: React.FC = ({ children }) => (
+export const MountWithReduxProvider: React.FC<{ store?: AppState }> = ({ children, store }) => (
   <ReduxProvider
     store={{
       dispatch: jest.fn(),
-      getState: jest.fn().mockReturnValue({ selectedFilters: null }),
+      getState: jest.fn().mockReturnValue(store || { selectedFilters: null }),
       subscribe: jest.fn(),
       replaceReducer: jest.fn(),
     }}

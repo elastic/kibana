@@ -7,28 +7,35 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer, EuiFilterButton } from '@elastic/eui';
 
+import { noop } from 'lodash/fp';
 import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import { TimelineTabsStyle, TimelineTab } from './types';
 
-export const useTimelineTypes = ({
-  defaultTimelineCount,
-  templateTimelineCount,
-}: {
+export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;
   templateTimelineCount?: number | null;
-}): {
+}
+
+export interface UseTimelineTypesResult {
   timelineType: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
   timelineFilters: JSX.Element[];
-} => {
+}
+
+export const useTimelineTypes = ({
+  defaultTimelineCount,
+  templateTimelineCount,
+}: UseTimelineTypesArgs): UseTimelineTypesResult => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.timelines);
-  const { tabName } = useParams<{ pageName: string; tabName: string }>();
+  const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [timelineType, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
-    tabName === TimelineType.default || tabName === TimelineType.template ? tabName : null
+    tabName === TimelineType.default || tabName === TimelineType.template
+      ? tabName
+      : TimelineType.default
   );
 
   const goToTimeline = useCallback(
@@ -61,7 +68,7 @@ export const useTimelineTypes = ({
           timelineTabsStyle === TimelineTabsStyle.filter
             ? defaultTimelineCount ?? undefined
             : undefined,
-        onClick: goToTimeline,
+        onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTimeline : noop,
       },
       {
         id: TimelineType.template,
@@ -76,7 +83,7 @@ export const useTimelineTypes = ({
           timelineTabsStyle === TimelineTabsStyle.filter
             ? templateTimelineCount ?? undefined
             : undefined,
-        onClick: goToTemplateTimeline,
+        onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTemplateTimeline : noop,
       },
     ],
     [
@@ -93,7 +100,7 @@ export const useTimelineTypes = ({
     (tabId, tabStyle: TimelineTabsStyle) => {
       setTimelineTypes((prevTimelineTypes) => {
         if (tabId === prevTimelineTypes && tabStyle === TimelineTabsStyle.filter) {
-          return null;
+          return tabId === TimelineType.default ? TimelineType.template : TimelineType.default;
         } else if (prevTimelineTypes !== tabId) {
           setTimelineTypes(tabId);
         }
@@ -106,9 +113,10 @@ export const useTimelineTypes = ({
   const timelineTabs = useMemo(() => {
     return (
       <>
-        <EuiTabs>
+        <EuiTabs data-test-subj="open-timeline-subtabs">
           {getFilterOrTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
             <EuiTab
+              data-test-subj={`timeline-${TimelineTabsStyle.tab}-${tab.id}`}
               isSelected={tab.id === tabName}
               disabled={tab.disabled}
               key={`timeline-${TimelineTabsStyle.tab}-${tab.id}`}
@@ -131,6 +139,7 @@ export const useTimelineTypes = ({
   const timelineFilters = useMemo(() => {
     return getFilterOrTabs(TimelineTabsStyle.filter).map((tab: TimelineTab) => (
       <EuiFilterButton
+        data-test-subj={`open-timeline-modal-body-${TimelineTabsStyle.filter}-${tab.id}`}
         hasActiveFilters={tab.id === timelineType}
         key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
         numFilters={tab.count}

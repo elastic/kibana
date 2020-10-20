@@ -17,22 +17,8 @@
  * under the License.
  */
 
-import os from 'os';
-
 import execa from 'execa';
-
-async function getBuildNumber() {
-  if (/^win/.test(os.platform())) {
-    // Windows does not have the wc process and `find /C /V ""` does not consistently work
-    const log = await execa('git', ['log', '--format="%h"']);
-    return log.stdout.split('\n').length;
-  }
-
-  const wc = await execa.command('git log --format="%h" | wc -l', {
-    shell: true,
-  });
-  return parseFloat(wc.stdout.trim());
-}
+import { getBuildNumber } from './get_build_number';
 
 interface Options {
   isRelease: boolean;

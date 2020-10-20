@@ -23,7 +23,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
 
   class GraphPage {
@@ -36,6 +36,9 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         'aria-disabled',
         'false'
       );
+      // Need document focus to not be on `graphDatasourceButton` so its tooltip does not
+      // obscure the next intended click area. Focus the adjaecnt input instead.
+      await testSubjects.click('queryInput');
     }
 
     async clickAddField() {
@@ -197,7 +200,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async getSearchFilter() {
-      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      const searchFilter = await find.allByCssSelector('main .euiFieldSearch');
       return searchFilter[0];
     }
 

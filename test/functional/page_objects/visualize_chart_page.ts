@@ -244,7 +244,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         const firstCount = await this.getVisualizationRenderingCount();
         log.debug(`-- firstCount=${firstCount}`);
 
-        await common.sleep(1000);
+        await common.sleep(2000);
 
         const secondCount = await this.getVisualizationRenderingCount();
         log.debug(`-- secondCount=${secondCount}`);

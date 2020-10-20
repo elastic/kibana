@@ -1,17 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SuggestionsComponent Passing the index should control which suggestion is selected 1`] = `
-<div
-  className="reactSuggestionTypeahead"
+<styled.div
+  queryBarRect={
+    Object {
+      "top": 0,
+    }
+  }
+  verticalListPosition="bottom: 768px;"
 >
   <div
     className="kbnTypeahead"
   >
     <div
-      className="kbnTypeahead__popover"
+      className="kbnTypeahead__popover kbnTypeahead__popover--top"
     >
       <div
-        className="kbnTypeahead__items"
         id="kbnTypeahead__items"
         onScroll={[Function]}
         role="listbox"
@@ -23,6 +27,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={false}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is not a helpful suggestion",
@@ -40,6 +45,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={true}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is another unhelpful suggestion",
@@ -53,21 +59,25 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
       </div>
     </div>
   </div>
-</div>
+</styled.div>
 `;
 
 exports[`SuggestionsComponent Should display given suggestions if the show prop is true 1`] = `
-<div
-  className="reactSuggestionTypeahead"
+<styled.div
+  queryBarRect={
+    Object {
+      "top": 0,
+    }
+  }
+  verticalListPosition="bottom: 768px;"
 >
   <div
     className="kbnTypeahead"
   >
     <div
-      className="kbnTypeahead__popover"
+      className="kbnTypeahead__popover kbnTypeahead__popover--top"
     >
       <div
-        className="kbnTypeahead__items"
         id="kbnTypeahead__items"
         onScroll={[Function]}
         role="listbox"
@@ -79,6 +89,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={true}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is not a helpful suggestion",
@@ -96,6 +107,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={false}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is another unhelpful suggestion",
@@ -109,5 +121,5 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
       </div>
     </div>
   </div>
-</div>
+</styled.div>
 `;

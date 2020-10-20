@@ -5,21 +5,21 @@
  */
 
 import { omit } from 'lodash';
-import { useFetcher } from './useFetcher';
+import { useHistory } from 'react-router-dom';
+import { Projection } from '../../common/projections';
+import { pickKeys } from '../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';
-import { useUrlParams } from './useUrlParams';
 import {
-  LocalUIFilterName,
   localUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/ui_filters/local_ui_filters/config';
-import { history } from '../utils/history';
-import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
-import { PROJECTION } from '../../common/projections/typings';
-import { pickKeys } from '../../common/utils/pick_keys';
 import { useCallApi } from './useCallApi';
+import { useFetcher } from './useFetcher';
+import { useUrlParams } from './useUrlParams';
+import { LocalUIFilterName } from '../../common/ui_filter';
 
 const getInitialData = (
   filterNames: LocalUIFilterName[]
@@ -35,10 +35,11 @@ export function useLocalUIFilters({
   filterNames,
   params,
 }: {
-  projection: PROJECTION;
+  projection: Projection;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
 }) {
+  const history = useHistory();
   const { uiFilters, urlParams } = useUrlParams();
   const callApi = useCallApi();
 

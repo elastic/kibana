@@ -14,9 +14,10 @@ export interface SearchInterceptorDeps
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [application](./kibana-plugin-plugins-data-public.searchinterceptordeps.application.md) | <code>ApplicationStart</code> |  |
-|  [http](./kibana-plugin-plugins-data-public.searchinterceptordeps.http.md) | <code>CoreStart['http']</code> |  |
-|  [toasts](./kibana-plugin-plugins-data-public.searchinterceptordeps.toasts.md) | <code>ToastsStart</code> |  |
-|  [uiSettings](./kibana-plugin-plugins-data-public.searchinterceptordeps.uisettings.md) | <code>CoreStart['uiSettings']</code> |  |
+|  [http](./kibana-plugin-plugins-data-public.searchinterceptordeps.http.md) | <code>CoreSetup['http']</code> |  |
+|  [session](./kibana-plugin-plugins-data-public.searchinterceptordeps.session.md) | <code>ISessionService</code> |  |
+|  [startServices](./kibana-plugin-plugins-data-public.searchinterceptordeps.startservices.md) | <code>Promise&lt;[CoreStart, any, unknown]&gt;</code> |  |
+|  [toasts](./kibana-plugin-plugins-data-public.searchinterceptordeps.toasts.md) | <code>ToastsSetup</code> |  |
+|  [uiSettings](./kibana-plugin-plugins-data-public.searchinterceptordeps.uisettings.md) | <code>CoreSetup['uiSettings']</code> |  |
 |  [usageCollector](./kibana-plugin-plugins-data-public.searchinterceptordeps.usagecollector.md) | <code>SearchUsageCollector</code> |  |
 

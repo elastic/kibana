@@ -16,7 +16,7 @@
   "scripts": {
     "lint": "dependency-check --no-dev package.json set.js setWith.js fp/*.js",
     "test": "npm run lint && tape test/*.js && npm run test:types",
-    "test:types": "./scripts/tsd.sh",
+    "test:types": "tsc --noEmit",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"
   },
@@ -42,8 +42,5 @@
     "ignore": [
       "/lodash/"
     ]
-  },
-  "tsd": {
-    "directory": "test"
   }
 }

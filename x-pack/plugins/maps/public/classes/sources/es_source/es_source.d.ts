@@ -6,12 +6,14 @@
 
 import { AbstractVectorSource } from '../vector_source';
 import { IVectorSource } from '../vector_source';
+import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import { IndexPattern, ISearchSource } from '../../../../../../../src/plugins/data/public';
 import {
   DynamicStylePropertyOptions,
+  MapQuery,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { VectorStyle } from '../../styles/vector/vector_style';
+import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
 export interface IESSource extends IVectorSource {
@@ -25,13 +27,21 @@ export interface IESSource extends IVectorSource {
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource>;
-  loadStylePropsMeta(
-    layerName: string,
-    style: VectorStyle,
-    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
-    searchFilters: VectorSourceRequestMeta
-  ): Promise<unknown>;
+  loadStylePropsMeta({
+    layerName,
+    style,
+    dynamicStyleProps,
+    registerCancelCallback,
+    sourceQuery,
+    timeFilters,
+  }: {
+    layerName: string;
+    style: IVectorStyle;
+    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
+    registerCancelCallback: (callback: () => void) => void;
+    sourceQuery?: MapQuery;
+    timeFilters: TimeRange;
+  }): Promise<object>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -45,11 +55,32 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource>;
-  loadStylePropsMeta(
-    layerName: string,
-    style: VectorStyle,
-    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
-    searchFilters: VectorSourceRequestMeta
-  ): Promise<unknown>;
+  loadStylePropsMeta({
+    layerName,
+    style,
+    dynamicStyleProps,
+    registerCancelCallback,
+    sourceQuery,
+    timeFilters,
+  }: {
+    layerName: string;
+    style: IVectorStyle;
+    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
+    registerCancelCallback: (callback: () => void) => void;
+    sourceQuery?: MapQuery;
+    timeFilters: TimeRange;
+  }): Promise<object>;
+  _runEsQuery: ({
+    requestId,
+    requestName,
+    requestDescription,
+    searchSource,
+    registerCancelCallback,
+  }: {
+    requestId: string;
+    requestName: string;
+    requestDescription: string;
+    searchSource: ISearchSource;
+    registerCancelCallback: () => void;
+  }) => Promise<unknown>;
 }

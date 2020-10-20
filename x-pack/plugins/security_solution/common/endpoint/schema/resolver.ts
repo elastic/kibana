@@ -24,15 +24,19 @@ export const validateTree = {
 };
 
 /**
- * Used to validate GET requests for non process events for a specific event.
+ * Used to validate POST requests for `/resolver/events` api.
  */
 export const validateEvents = {
-  params: schema.object({ id: schema.string({ minLength: 1 }) }),
   query: schema.object({
-    events: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
+    // keeping the max as 10k because the limit in ES for a single query is also 10k
+    limit: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterEvent: schema.maybe(schema.string()),
-    legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
+  body: schema.nullable(
+    schema.object({
+      filter: schema.maybe(schema.string()),
+    })
+  ),
 };
 
 /**
@@ -45,6 +49,11 @@ export const validateAlerts = {
     afterAlert: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
+  body: schema.nullable(
+    schema.object({
+      filter: schema.maybe(schema.string()),
+    })
+  ),
 };
 
 /**

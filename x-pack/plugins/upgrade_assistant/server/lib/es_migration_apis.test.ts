@@ -6,33 +6,26 @@
 
 import _ from 'lodash';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { getUpgradeAssistantStatus } from './es_migration_apis';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
 
-import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
+import { getUpgradeAssistantStatus } from './es_migration_apis';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
+const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
+
 describe('getUpgradeAssistantStatus', () => {
+  const resolvedIndices = {
+    indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
+  };
   let deprecationsResponse: DeprecationAPIResponse;
 
   const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path, index }) => {
+  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;
-    } else if (api === 'cluster.state') {
-      return {
-        metadata: {
-          indices: {
-            ...index.reduce((acc: any, i: any) => {
-              return {
-                ...acc,
-                [i]: {
-                  state: 'open',
-                },
-              };
-            }, {}),
-          },
-        },
-      };
+    } else if (path === '/_resolve/index/*') {
+      return resolvedIndices;
     } else if (api === 'indices.getMapping') {
       return {};
     } else {
@@ -41,6 +34,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   beforeEach(() => {
+    // @ts-expect-error mock data is too loosely typed
     deprecationsResponse = _.cloneDeep(fakeDeprecations);
   });
 

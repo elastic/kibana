@@ -5,6 +5,22 @@
         "flat": {
           "type": "keyword"
         },
+        "my_index_signature_prop": {
+          "properties": {
+            "avg": {
+              "type": "number"
+            },
+            "count": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "min": {
+              "type": "number"
+            }
+          }
+        },
         "my_str": {
           "type": "text"
         },
@@ -19,16 +35,19 @@
           }
         },
         "my_array": {
-          "properties": {
-            "total": {
-              "type": "number"
-            },
-            "type": {
-              "type": "boolean"
+          "type": "array",
+          "items": {
+            "properties": {
+              "total": {
+                "type": "number"
+              },
+              "type": {
+                "type": "boolean"
+              }
             }
           }
         },
-        "my_str_array": { "type": "keyword" }
+        "my_str_array": { "type": "array", "items": { "type": "keyword" } }
       }
     }
   }

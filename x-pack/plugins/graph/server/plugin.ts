@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
@@ -41,12 +42,13 @@ export class GraphPlugin implements Plugin {
     }
 
     if (features) {
-      features.registerFeature({
+      features.registerKibanaFeature({
         id: 'graph',
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
           defaultMessage: 'Graph',
         }),
-        order: 1200,
+        order: 600,
+        category: DEFAULT_APP_CATEGORIES.kibana,
         icon: 'graphApp',
         navLinkId: 'graph',
         app: ['graph', 'kibana'],

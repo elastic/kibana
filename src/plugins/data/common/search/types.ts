@@ -17,7 +17,23 @@
  * under the License.
  */
 
-export interface IKibanaSearchResponse {
+import { Observable } from 'rxjs';
+import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common/search';
+
+export type ISearch = (
+  request: IKibanaSearchRequest,
+  options?: ISearchOptions
+) => Observable<IKibanaSearchResponse>;
+
+export type ISearchGeneric = <
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+>(
+  request: SearchStrategyRequest,
+  options?: ISearchOptions
+) => Observable<SearchStrategyResponse>;
+
+export interface IKibanaSearchResponse<RawResponse = any> {
   /**
    * Some responses may contain a unique id to identify the request this response came from.
    */
@@ -34,16 +50,25 @@ export interface IKibanaSearchResponse {
    * that represents how progress is indicated.
    */
   loaded?: number;
+
+  /**
+   * Indicates whether search is still in flight
+   */
+  isRunning?: boolean;
+
+  /**
+   * Indicates whether the results returned are complete or partial
+   */
+  isPartial?: boolean;
+
+  rawResponse: RawResponse;
 }
 
-export interface IKibanaSearchRequest {
+export interface IKibanaSearchRequest<Params = any> {
   /**
    * An id can be used to uniquely identify this request.
    */
   id?: string;
 
-  /**
-   * Optionally tell search strategies to output debug information.
-   */
-  debug?: boolean;
+  params?: Params;
 }

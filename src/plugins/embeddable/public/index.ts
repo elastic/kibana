@@ -24,11 +24,11 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export {
   ACTION_ADD_PANEL,
-  ACTION_APPLY_FILTER,
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
-  AttributeService,
+  ReferenceOrValueEmbeddable,
+  isReferenceOrValueEmbeddable,
   ChartActionContext,
   Container,
   ContainerInput,
@@ -76,6 +76,10 @@ export {
   EmbeddableRenderer,
   EmbeddableRendererProps,
 } from './lib';
+
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
+
+export { EnhancementRegistryDefinition } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

@@ -10,15 +10,17 @@
     "data",
     "cloud",
     "features",
-    "home",
     "licensing",
     "usageCollection",
     "share",
     "embeddable",
     "uiActions",
-    "kibanaLegacy"
+    "kibanaLegacy",
+    "indexPatternManagement",
+    "discover"
   ],
   "optionalPlugins": [
+    "home",
     "security",
     "spaces",
     "management",
@@ -31,6 +33,10 @@
     "kibanaUtils",
     "kibanaReact",
     "dashboard",
-    "savedObjects"
+    "savedObjects",
+    "home"
+  ],
+  "extraPublicDirs": [
+    "common"
   ]
 }

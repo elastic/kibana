@@ -25,6 +25,7 @@ import { reactToUiComponent } from './react_to_ui_component';
 
 const UiComp: UiComponent<{ cnt?: number }> = () => ({
   render: (el, { cnt = 0 }) => {
+    // eslint-disable-next-line no-unsanitized/property
     el.innerHTML = `cnt: ${cnt}`;
   },
 });
@@ -64,6 +65,7 @@ describe('uiToReactComponent', () => {
   test('does not crash if .unmount() not provided', () => {
     const UiComp2: UiComponent<{ cnt?: number }> = () => ({
       render: (el, { cnt = 0 }) => {
+        // eslint-disable-next-line no-unsanitized/property
         el.innerHTML = `cnt: ${cnt}`;
       },
     });
@@ -80,6 +82,7 @@ describe('uiToReactComponent', () => {
     const unmount = jest.fn();
     const UiComp2: UiComponent<{ cnt?: number }> = () => ({
       render: (el, { cnt = 0 }) => {
+        // eslint-disable-next-line no-unsanitized/property
         el.innerHTML = `cnt: ${cnt}`;
       },
       unmount,
@@ -100,6 +103,7 @@ describe('uiToReactComponent', () => {
 
   test('calls .render() method only once when components mounts, and once on every re-render', () => {
     const render = jest.fn((el, { cnt = 0 }) => {
+      // eslint-disable-next-line no-unsanitized/property
       el.innerHTML = `cnt: ${cnt}`;
     });
     const UiComp2: UiComponent<{ cnt?: number }> = () => ({

@@ -14,12 +14,12 @@ export default function ({ getService }: FtrProviderContext) {
   const dockerServers = getService('dockerServers');
   const log = getService('log');
 
-  const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
-  };
-
   const mappingsPackage = 'overrides-0.1.0';
   const server = dockerServers.get('registry');
+
+  const deletePackage = async (pkgkey: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  };
 
   describe('installs packages that include settings and mappings overrides', async () => {
     after(async () => {
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should install the overrides package correctly', async function () {
       if (server.enabled) {
         let { body } = await supertest
-          .post(`/api/ingest_manager/epm/packages/${mappingsPackage}`)
+          .post(`/api/fleet/epm/packages/${mappingsPackage}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 

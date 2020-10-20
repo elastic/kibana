@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { setHttpClient, sendRequest, useRequest } from './use_request';
-export * from './agent_config';
-export * from './package_config';
+export * from './agent_policy';
+export * from './package_policy';
 export * from './data_stream';
 export * from './agents';
 export * from './enrollment_api_keys';

@@ -19,7 +19,11 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
       validate: {
         query: schema.object({
           purpose: schema.oneOf(
-            [schema.literal('any'), schema.literal('copySavedObjectsIntoSpace')],
+            [
+              schema.literal('any'),
+              schema.literal('copySavedObjectsIntoSpace'),
+              schema.literal('shareSavedObjectsIntoSpace'),
+            ],
             {
               defaultValue: 'any',
             }

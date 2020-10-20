@@ -11,16 +11,15 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore no-exported-member
   EuiSearchBar,
 } from '@elastic/eui';
 import { EuiSearchBarQuery } from '../../../../../timelines/components/open_timeline/types';
 import * as i18n from './translations';
-import { JobsFilters, SiemJob } from '../../types';
+import { JobsFilters, SecurityJob } from '../../types';
 import { GroupsFilterPopover } from './groups_filter_popover';
 
 interface JobsTableFiltersProps {
-  siemJobs: SiemJob[];
+  securityJobs: SecurityJob[];
   onFilterChanged: Dispatch<SetStateAction<JobsFilters>>;
 }
 
@@ -28,10 +27,13 @@ interface JobsTableFiltersProps {
  * Collection of filters for filtering data within the JobsTable. Contains search bar, Elastic/Custom
  * Jobs filter button toggle, and groups selection
  *
- * @param siemJobs jobs to fetch groups from to display for filtering
+ * @param securityJobs jobs to fetch groups from to display for filtering
  * @param onFilterChanged change listener to be notified on filter changes
  */
-export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTableFiltersProps) => {
+export const JobsTableFiltersComponent = ({
+  securityJobs,
+  onFilterChanged,
+}: JobsTableFiltersProps) => {
   const [filterQuery, setFilterQuery] = useState<string>('');
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [showCustomJobs, setShowCustomJobs] = useState<boolean>(false);
@@ -72,7 +74,10 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <GroupsFilterPopover siemJobs={siemJobs} onSelectedGroupsChanged={setSelectedGroups} />
+          <GroupsFilterPopover
+            securityJobs={securityJobs}
+            onSelectedGroupsChanged={setSelectedGroups}
+          />
         </EuiFilterGroup>
       </EuiFlexItem>
 

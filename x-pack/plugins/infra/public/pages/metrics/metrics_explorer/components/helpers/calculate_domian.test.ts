@@ -7,7 +7,7 @@
 import { calculateDomain } from './calculate_domain';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
-import { MetricsExplorerColor } from '../../../../../../common/color_palette';
+import { Color } from '../../../../../../common/color_palette';
 describe('calculateDomain()', () => {
   const series: MetricsExplorerSeries = {
     id: 'test-01',
@@ -29,12 +29,12 @@ describe('calculateDomain()', () => {
     {
       aggregation: 'avg',
       field: 'system.memory.free',
-      color: MetricsExplorerColor.color0,
+      color: Color.color0,
     },
     {
       aggregation: 'avg',
       field: 'system.memory.used.bytes',
-      color: MetricsExplorerColor.color1,
+      color: Color.color1,
     },
   ];
   it('should return the min and max across 2 metrics', () => {

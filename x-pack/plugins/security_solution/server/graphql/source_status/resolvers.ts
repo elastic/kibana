@@ -32,26 +32,33 @@ export const createSourceStatusResolvers = (libs: {
   };
 } => ({
   SourceStatus: {
-    async indicesExist(source, args, { req }) {
-      if (
-        args.defaultIndex.length === 1 &&
-        (args.defaultIndex[0] === '' || args.defaultIndex[0] === '_all')
-      ) {
+    async indicesExist(_, args, { req }) {
+      const indexes = filterIndexes(args.defaultIndex);
+      if (indexes.length !== 0) {
+        return libs.sourceStatus.hasIndices(req, indexes);
+      } else {
         return false;
       }
-      return libs.sourceStatus.hasIndices(req, args.defaultIndex);
     },
-    async indexFields(source, args, { req }) {
-      if (
-        args.defaultIndex.length === 1 &&
-        (args.defaultIndex[0] === '' || args.defaultIndex[0] === '_all')
-      ) {
+    async indexFields(_, args, { req }) {
+      const indexes = filterIndexes(args.defaultIndex);
+      if (indexes.length !== 0) {
+        return libs.fields.getFields(req, indexes);
+      } else {
         return [];
       }
-      return libs.fields.getFields(req, args.defaultIndex);
     },
   },
 });
+
+/**
+ * Given a set of indexes this will remove anything that is:
+ *   - blank or empty strings are removed as not valid indexes
+ *   - _all is removed as that is not a valid index
+ * @param indexes Indexes with invalid values removed
+ */
+export const filterIndexes = (indexes: string[]): string[] =>
+  indexes.filter((index) => index.trim() !== '' && index.trim() !== '_all');
 
 export const toIFieldSubTypeNonNullableScalar = new GraphQLScalarType({
   name: 'IFieldSubType',

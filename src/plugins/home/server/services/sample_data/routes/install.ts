@@ -154,7 +154,7 @@ export function createInstallRoute(
       let createResults;
       try {
         createResults = await context.core.savedObjects.client.bulkCreate(
-          sampleDataset.savedObjects,
+          sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
       } catch (err) {

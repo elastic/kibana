@@ -22,7 +22,7 @@ import { TaskContext } from './task_context';
 import { checkMatchingMapping } from '../check_collector_integrity';
 import { readFileAsync } from '../utils';
 
-export function checkMatchingSchemasTask({ roots }: TaskContext) {
+export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: boolean) {
   return roots.map((root) => ({
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
@@ -31,8 +31,16 @@ export function checkMatchingSchemasTask({ roots }: TaskContext) {
 
       if (root.parsedCollections) {
         const differences = checkMatchingMapping(root.parsedCollections, esMapping);
-
         root.esMappingDiffs = Object.keys(differences);
+        if (root.esMappingDiffs.length && throwOnDiff) {
+          throw Error(
+            `The following changes must be persisted in ${fullPath} file. Use '--fix' to update.\n${JSON.stringify(
+              differences,
+              null,
+              2
+            )}`
+          );
+        }
       }
     },
     title: `Checking in ${root.config.root}`,

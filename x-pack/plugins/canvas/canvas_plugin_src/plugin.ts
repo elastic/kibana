@@ -12,7 +12,6 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
-// @ts-expect-error: untyped local
 import { renderFunctions, renderFunctionFactories } from './renderers';
 import { initializeElements } from './elements';
 // @ts-expect-error untyped local

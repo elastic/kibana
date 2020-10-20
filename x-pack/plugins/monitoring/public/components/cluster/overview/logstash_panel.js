@@ -15,6 +15,7 @@ import {
   LOGSTASH,
   LOGSTASH_SYSTEM_ID,
   ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 
 import {
@@ -37,14 +38,18 @@ import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
+import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
-const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
+const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA];
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
   const nodesCount = props.node_count || 0;
   const queueTypes = props.queue_types || {};
   const alerts = props.alerts;
+  const setupModeContext = React.useContext(SetupModeContext);
 
   // Do not show if we are not in setup mode
   if (!nodesCount && !setupMode.enabled) {
@@ -56,17 +61,18 @@ export function LogstashPanel(props) {
   const goToPipelines = () => getSafeForExternalLink('#/logstash/pipelines');
 
   const setupModeData = get(setupMode.data, 'logstash');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={LOGSTASH_SYSTEM_ID}
-        badgeClickLink={goToNodes()}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={LOGSTASH_SYSTEM_ID}
+      badgeClickLink={goToNodes()}
+    />
+  ) : null;
 
   let nodesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
@@ -108,7 +114,7 @@ export function LogstashPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column" data-test-subj="logstash_overview">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.eventsReceivedLabel"
                   defaultMessage="Events Received"
@@ -117,7 +123,7 @@ export function LogstashPanel(props) {
               <EuiDescriptionListDescription data-test-subj="lsEventsReceived">
                 {formatNumber(props.events_in_total, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.eventsEmittedLabel"
                   defaultMessage="Events Emitted"
@@ -162,14 +168,14 @@ export function LogstashPanel(props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {setupModeTooltip}
+                  {setupModeMetricbeatMigrationTooltip}
                   {nodesAlertStatus}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.uptimeLabel"
                   defaultMessage="Uptime"
@@ -178,7 +184,7 @@ export function LogstashPanel(props) {
               <EuiDescriptionListDescription data-test-subj="lsUptime">
                 {props.max_uptime ? formatNumber(props.max_uptime, 'time_since') : 0}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.jvmHeapLabel"
                   defaultMessage="{javaVirtualMachine} Heap"
@@ -245,7 +251,7 @@ export function LogstashPanel(props) {
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.withMemoryQueuesLabel"
                   defaultMessage="With Memory Queues"
@@ -254,7 +260,7 @@ export function LogstashPanel(props) {
               <EuiDescriptionListDescription>
                 {queueTypes[LOGSTASH.QUEUE_TYPES.MEMORY] || 0}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.withPersistentQueuesLabel"
                   defaultMessage="With Persistent Queues"

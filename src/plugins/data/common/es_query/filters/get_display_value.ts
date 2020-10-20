@@ -17,37 +17,33 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IIndexPattern, IFieldType } from '../..';
+import { IIndexPattern } from '../..';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 import { Filter } from '../filters';
 
 function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
-  if (!indexPattern || !key) return;
+  // checking getFormatterForField exists because there is at least once case where an index pattern
+  // is an object rather than an IndexPattern class
+  if (!indexPattern || !indexPattern.getFormatterForField || !key) return;
 
-  let format = get(indexPattern, ['fields', 'byName', key, 'format']);
-  if (!format && (indexPattern.fields as any).getByName) {
-    // TODO: Why is indexPatterns sometimes a map and sometimes an array?
-    const field: IFieldType = (indexPattern.fields as any).getByName(key);
-    if (!field) {
-      throw new Error(
-        i18n.translate('data.filter.filterBar.fieldNotFound', {
-          defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
-          values: { key, indexPattern: indexPattern.title },
-        })
-      );
-    }
-    format = field.format;
+  const field = indexPattern.fields.find((f) => f.name === key);
+  if (!field) {
+    throw new Error(
+      i18n.translate('data.filter.filterBar.fieldNotFound', {
+        defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
+        values: { key, indexPattern: indexPattern.title },
+      })
+    );
   }
-  return format;
+  return indexPattern.getFormatterForField(field);
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexPattern[]): string {
   if (typeof filter.meta.value === 'function') {
     const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
     const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
-    return filter.meta.value(valueFormatter);
+    return (filter.meta.value as any)(valueFormatter);
   } else {
     return filter.meta.value || '';
   }

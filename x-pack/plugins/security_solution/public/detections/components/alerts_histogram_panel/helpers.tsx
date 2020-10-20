@@ -18,6 +18,7 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
 
     return [
       ...acc,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       ...alertsBucket.map(({ key, doc_count }: AlertsBucket) => ({
         x: key,
         y: doc_count,

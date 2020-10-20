@@ -70,7 +70,7 @@ export const transformSavedObjectToExceptionList = ({
   const {
     version: _version,
     attributes: {
-      _tags,
+      /* eslint-disable @typescript-eslint/naming-convention */
       created_at,
       created_by,
       description,
@@ -78,11 +78,13 @@ export const transformSavedObjectToExceptionList = ({
       list_id,
       meta,
       name,
+      os_types,
       tags,
       tie_breaker_id,
       type,
       updated_by,
       version,
+      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,
@@ -91,7 +93,6 @@ export const transformSavedObjectToExceptionList = ({
   // TODO: Change this to do a decode and throw if the saved object is not as expected.
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
-    _tags,
     _version,
     created_at,
     created_by,
@@ -102,6 +103,7 @@ export const transformSavedObjectToExceptionList = ({
     meta,
     name,
     namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
+    os_types,
     tags,
     tie_breaker_id,
     type: exceptionListType.is(type) ? type : 'detection',
@@ -122,11 +124,11 @@ export const transformSavedObjectUpdateToExceptionList = ({
   const {
     version: _version,
     attributes: {
-      _tags,
       description,
       immutable,
       meta,
       name,
+      os_types: osTypes,
       tags,
       type,
       updated_by: updatedBy,
@@ -139,7 +141,6 @@ export const transformSavedObjectUpdateToExceptionList = ({
   // TODO: Change this to do a decode and throw if the saved object is not as expected.
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
-    _tags: _tags ?? exceptionList._tags,
     _version,
     created_at: exceptionList.created_at,
     created_by: exceptionList.created_by,
@@ -150,6 +151,7 @@ export const transformSavedObjectUpdateToExceptionList = ({
     meta: meta ?? exceptionList.meta,
     name: name ?? exceptionList.name,
     namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
+    os_types: osTypes ?? exceptionList.os_types,
     tags: tags ?? exceptionList.tags,
     tie_breaker_id: exceptionList.tie_breaker_id,
     type: exceptionListType.is(type) ? type : exceptionList.type,
@@ -168,7 +170,7 @@ export const transformSavedObjectToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
-      _tags,
+      /* eslint-disable @typescript-eslint/naming-convention */
       comments,
       created_at,
       created_by,
@@ -178,10 +180,12 @@ export const transformSavedObjectToExceptionListItem = ({
       list_id,
       meta,
       name,
+      os_types,
       tags,
       tie_breaker_id,
       type,
       updated_by,
+      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,
@@ -190,7 +194,6 @@ export const transformSavedObjectToExceptionListItem = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: item"
   // TODO: Do a throw if item_id or entries is not defined.
   return {
-    _tags,
     _version,
     comments: comments ?? [],
     created_at,
@@ -203,6 +206,7 @@ export const transformSavedObjectToExceptionListItem = ({
     meta,
     name,
     namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
+    os_types,
     tags,
     tie_breaker_id,
     type: exceptionListItemType.is(type) ? type : 'simple',
@@ -222,12 +226,12 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
-      _tags,
       comments,
       description,
       entries,
       meta,
       name,
+      os_types: osTypes,
       tags,
       type,
       updated_by: updatedBy,
@@ -241,7 +245,6 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   // TODO: Update exception list and item types (perhaps separating out) so as to avoid
   // defaulting
   return {
-    _tags: _tags ?? exceptionListItem._tags,
     _version,
     comments: comments ?? exceptionListItem.comments,
     created_at: exceptionListItem.created_at,
@@ -254,6 +257,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
     meta: meta ?? exceptionListItem.meta,
     name: name ?? exceptionListItem.name,
     namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
+    os_types: osTypes ?? exceptionListItem.os_types,
     tags: tags ?? exceptionListItem.tags,
     tie_breaker_id: exceptionListItem.tie_breaker_id,
     type: exceptionListItemType.is(type) ? type : exceptionListItem.type,

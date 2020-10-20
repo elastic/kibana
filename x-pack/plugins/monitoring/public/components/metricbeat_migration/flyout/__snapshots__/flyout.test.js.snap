@@ -156,7 +156,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -215,7 +215,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -282,7 +282,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -495,7 +495,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -591,7 +591,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -658,7 +658,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -860,7 +860,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1211,7 +1211,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1545,7 +1545,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1822,7 +1822,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1918,7 +1918,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1985,7 +1985,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage

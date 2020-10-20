@@ -10,7 +10,7 @@ import * as api from './api';
 
 jest.mock('./api');
 
-describe('usePersistRule', () => {
+describe('usePrePackagedRules', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -32,6 +32,10 @@ describe('usePersistRule', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
+        getLoadPrebuiltRulesAndTemplatesButton:
+          result.current.getLoadPrebuiltRulesAndTemplatesButton,
+        getReloadPrebuiltRulesAndTemplatesButton:
+          result.current.getReloadPrebuiltRulesAndTemplatesButton,
         createPrePackagedRules: null,
         loading: true,
         loadingCreatePrePackagedRules: false,
@@ -63,6 +67,10 @@ describe('usePersistRule', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
+        getLoadPrebuiltRulesAndTemplatesButton:
+          result.current.getLoadPrebuiltRulesAndTemplatesButton,
+        getReloadPrebuiltRulesAndTemplatesButton:
+          result.current.getReloadPrebuiltRulesAndTemplatesButton,
         createPrePackagedRules: result.current.createPrePackagedRules,
         loading: false,
         loadingCreatePrePackagedRules: false,
@@ -100,6 +108,10 @@ describe('usePersistRule', () => {
       expect(resp).toEqual(true);
       expect(spyOnCreatePrepackagedRules).toHaveBeenCalled();
       expect(result.current).toEqual({
+        getLoadPrebuiltRulesAndTemplatesButton:
+          result.current.getLoadPrebuiltRulesAndTemplatesButton,
+        getReloadPrebuiltRulesAndTemplatesButton:
+          result.current.getReloadPrebuiltRulesAndTemplatesButton,
         createPrePackagedRules: result.current.createPrePackagedRules,
         loading: false,
         loadingCreatePrePackagedRules: false,

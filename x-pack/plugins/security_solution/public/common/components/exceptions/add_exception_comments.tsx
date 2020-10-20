@@ -112,7 +112,7 @@ export const AddExceptionComments = memo(function AddExceptionComments({
         <EuiFlexItem grow={1}>
           <EuiTextArea
             placeholder={i18n.ADD_COMMENT_PLACEHOLDER}
-            aria-label="Use aria labels when no actual label is in use"
+            aria-label="Comment Input"
             value={newCommentValue}
             onChange={handleOnChange}
             fullWidth={true}

@@ -18,7 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { ScopedHistory, ApplicationStart } from '../../../../../core/public';
+import { ScopedHistory, ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,
@@ -35,8 +35,15 @@ import {
 export class EmbeddableStateTransfer {
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
-    private scopedHistory?: ScopedHistory
+    private scopedHistory?: ScopedHistory,
+    private appList?: ReadonlyMap<string, PublicAppInfo> | undefined
   ) {}
+
+  /**
+   * Fetches an internationalized app title when given an appId.
+   * @param appId - The id of the app to fetch the title for
+   */
+  public getAppNameFromId = (appId: string): string | undefined => this.appList?.get(appId)?.title;
 
   /**
    * Fetches an {@link EmbeddableEditorState | originating app} argument from the scoped

@@ -42,20 +42,20 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('does not have agent config api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(404);
+    it('does not have agent policy api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/agent_policies').expect(404);
     });
 
-    it('does not have package configs api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(404);
+    it('does not have package policies api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/package_policies').expect(404);
     });
 
     it('does not have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/epm/packages').expect(404);
     });
 
     it('does not have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/fleet/setup').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(404);
     });
   });
 
@@ -75,24 +75,24 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
+    it('has agent policy api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/agent_policies').expect(200);
     });
 
-    it('has package configs api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
+    it('has package policies api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/package_policies').expect(200);
     });
 
     it('does not have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/epm/packages').expect(404);
     });
 
     it('does not have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/fleet/setup').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(404);
     });
   });
 
-  // For now, only the manager routes (/agent_configs & /package_configs) are added
+  // For now, only the manager routes (/agent_policies & /package_policies) are added
   // EPM and ingest will be conditionally added when we enable these lines
   // https://github.com/jfsiii/kibana/blob/f73b54ebb7e0f6fc00efd8a6800a01eb2d9fb772/x-pack/plugins/ingest_manager/server/plugin.ts#L84
   // adding tests to confirm the Fleet & EPM routes are never added
@@ -114,20 +114,20 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
+    it('has agent policy api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/agent_policies').expect(200);
     });
 
-    it('has package configs api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
+    it('has package policies api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/package_policies').expect(200);
     });
 
     it('does have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(500);
+      await kbnTestServer.request.get(root, '/api/fleet/epm/packages').expect(500);
     });
 
     it('does not have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/fleet/setup').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(404);
     });
   });
 
@@ -148,20 +148,20 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
+    it('has agent policy api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/agent_policies').expect(200);
     });
 
-    it('has package configs api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
+    it('has package policies api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/package_policies').expect(200);
     });
 
     it('does not have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(404);
+      await kbnTestServer.request.get(root, '/api/fleet/epm/packages').expect(404);
     });
 
     it('does have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/fleet/setup').expect(200);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(200);
     });
   });
 
@@ -183,20 +183,20 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
+    it('has agent policy api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/agent_policies').expect(200);
     });
 
-    it('has package configs api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
+    it('has package policies api', async () => {
+      await kbnTestServer.request.get(root, '/api/fleet/package_policies').expect(200);
     });
 
     it('does have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(500);
+      await kbnTestServer.request.get(root, '/api/fleet/epm/packages').expect(500);
     });
 
     it('does have Fleet api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/fleet/setup').expect(200);
+      await kbnTestServer.request.get(root, '/api/fleet/agents/setup').expect(200);
     });
   });
 });

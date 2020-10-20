@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSeverity } from '../Popover/getSeverity';
-
-export function generateServiceMapElements(size: number): any[] {
+export function generateServiceMapElements({
+  size,
+  hasAnomalies,
+}: {
+  size: number;
+  hasAnomalies: boolean;
+}): any[] {
   const services = range(size).map((i) => {
     const name = getName();
     const anomalyScore = randn(101);
@@ -15,11 +19,14 @@ export function generateServiceMapElements(size: number): any[] {
       'service.environment': 'production',
       'service.name': name,
       'agent.name': getAgentName(),
-      anomaly_score: anomalyScore,
-      anomaly_severity: getSeverity(anomalyScore),
-      actual_value: Math.random() * 2000000,
-      typical_value: Math.random() * 1000000,
-      ml_job_id: `${name}-request-high_mean_response_time`,
+      serviceAnomalyStats: hasAnomalies
+        ? {
+            transactionType: 'request',
+            anomalyScore,
+            actualValue: Math.random() * 2000000,
+            jobId: `${name}-request-high_mean_response_time`,
+          }
+        : undefined,
     };
   });
 
@@ -146,7 +153,7 @@ const NAMES = [
   'leech',
   'loki',
   'longshot',
-  'lumpkin,',
+  'lumpkin',
   'madame-web',
   'magician',
   'magneto',

@@ -45,7 +45,7 @@ export const mapping = {
   priority: { type: 'byte' },
   timeout: { type: 'long' },
   process_expiration: { type: 'date' },
-  created_by: { type: 'keyword' },
+  created_by: { type: 'keyword' }, // `null` if security is disabled
   created_at: { type: 'date' },
   started_at: { type: 'date' },
   completed_at: { type: 'date' },

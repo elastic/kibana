@@ -25,5 +25,5 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   name,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
-  requiresAppContext: false,
+  requiresAppContext: true,
 });

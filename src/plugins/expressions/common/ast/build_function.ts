@@ -183,8 +183,10 @@ export function buildExpressionFunction<
       acc[key] = value.map((v) => {
         return isExpressionAst(v) ? buildExpression(v) : v;
       });
-    } else {
+    } else if (value !== undefined) {
       acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
+    } else {
+      delete acc[key];
     }
     return acc;
   }, initialArgs as FunctionBuilderArguments<FnDef>);
@@ -195,10 +197,12 @@ export function buildExpressionFunction<
     arguments: args,
 
     addArgument(key, value) {
-      if (!args.hasOwnProperty(key)) {
-        args[key] = [];
+      if (value !== undefined) {
+        if (!args.hasOwnProperty(key)) {
+          args[key] = [];
+        }
+        args[key].push(value);
       }
-      args[key].push(value);
       return this;
     },
 

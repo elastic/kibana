@@ -6,13 +6,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
+
+  const VALIDATED_SEPARATELY = 'this value is not validated directly';
 
   describe('ValidateCardinality', function () {
     before(async () => {
@@ -95,10 +96,32 @@ export default ({ getService }: FtrProviderContext) => {
         .send(requestBody)
         .expect(200);
 
-      expect(body).to.eql([
-        { id: 'cardinality_model_plot_high', modelPlotCardinality: 4711 },
+      const expectedResponse = [
+        {
+          id: 'cardinality_model_plot_high',
+          modelPlotCardinality: VALIDATED_SEPARATELY,
+        },
         { id: 'cardinality_partition_field', fieldName: 'order_id' },
-      ]);
+      ];
+
+      expect(body.length).to.eql(
+        expectedResponse.length,
+        `Response body should have ${expectedResponse.length} entries (got ${body})`
+      );
+      for (const entry of expectedResponse) {
+        const responseEntry = body.find((obj: any) => obj.id === entry.id);
+        expect(responseEntry).to.not.eql(
+          undefined,
+          `Response entry with id '${entry.id}' should exist`
+        );
+
+        if (entry.id === 'cardinality_model_plot_high') {
+          // don't check the exact value of modelPlotCardinality as this is an approximation
+          expect(responseEntry).to.have.property('modelPlotCardinality');
+        } else {
+          expect(responseEntry).to.eql(entry);
+        }
+      }
     });
 
     it('should not validate cardinality in case request payload is invalid', async () => {
@@ -163,10 +186,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.eql('Not Found');
-      expect(body.message).to.eql('Not Found');
+      expect(body.error).to.eql('Forbidden');
+      expect(body.message).to.eql('Forbidden');
     });
   });
 };

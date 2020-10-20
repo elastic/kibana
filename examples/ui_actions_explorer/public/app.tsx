@@ -37,6 +37,7 @@ import { UiActionsStart, createAction } from '../../../src/plugins/ui_actions/pu
 import { AppMountParameters, OverlayStart } from '../../../src/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '../../ui_action_examples/public';
 import { TriggerContextExample } from './trigger_context_example';
+import { ContextMenuExamples } from './context_menu_examples';
 
 interface Props {
   uiActionsApi: UiActionsStart;
@@ -97,9 +98,9 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                   });
                   uiActionsApi.addTriggerAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
                   setConfirmationText(
-                    `You've successfully added a new action: ${dynamicAction.getDisplayName(
-                      {}
-                    )}. Refresh the page to reset state.  It's up to the user of the system to persist state like this.`
+                    `You've successfully added a new action: ${dynamicAction.getDisplayName({
+                      trigger: uiActionsApi.getTrigger(HELLO_WORLD_TRIGGER_ID),
+                    })}. Refresh the page to reset state.  It's up to the user of the system to persist state like this.`
                   );
                 }}
               >
@@ -109,7 +110,12 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
             </EuiText>
 
             <EuiSpacer />
+
             <TriggerContextExample uiActionsApi={uiActionsApi} />
+
+            <EuiSpacer />
+
+            <ContextMenuExamples />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

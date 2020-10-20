@@ -44,18 +44,23 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
           },
           "axes": Object {
-            "axisLineStyle": Object {
+            "axisLine": Object {
               "stroke": "#eaeaea",
               "strokeWidth": 1,
+              "visible": true,
             },
-            "axisTitleStyle": Object {
+            "axisTitle": Object {
               "fill": "#333",
               "fontFamily": "sans-serif",
               "fontSize": 12,
               "fontStyle": "bold",
-              "padding": 8,
+              "padding": Object {
+                "inner": 8,
+                "outer": 0,
+              },
+              "visible": true,
             },
-            "gridLineStyle": Object {
+            "gridLine": Object {
               "horizontal": Object {
                 "dash": Array [
                   0,
@@ -64,7 +69,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "opacity": 1,
                 "stroke": "#D3DAE6",
                 "strokeWidth": 1,
-                "visible": true,
+                "visible": false,
               },
               "vertical": Object {
                 "dash": Array [
@@ -74,17 +79,30 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "opacity": 1,
                 "stroke": "#D3DAE6",
                 "strokeWidth": 1,
-                "visible": true,
+                "visible": false,
               },
             },
-            "tickLabelStyle": Object {
+            "tickLabel": Object {
+              "alignment": Object {
+                "horizontal": "near",
+                "vertical": "near",
+              },
               "fill": "#777",
               "fontFamily": "sans-serif",
               "fontSize": 10,
               "fontStyle": "normal",
-              "padding": 4,
+              "offset": Object {
+                "reference": "local",
+                "x": 0,
+                "y": 0,
+              },
+              "padding": 0,
+              "rotation": 0,
+              "visible": true,
             },
-            "tickLineStyle": Object {
+            "tickLine": Object {
+              "padding": 10,
+              "size": 10,
               "stroke": "#eaeaea",
               "strokeWidth": 1,
               "visible": true,
@@ -164,6 +182,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
           },
           "legend": Object {
             "horizontalHeight": 64,
+            "margin": 0,
             "spacingBuffer": 10,
             "verticalWidth": 200,
           },
@@ -217,17 +236,20 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
           },
           "axes": Object {
-            "axisLineStyle": Object {
+            "axisLine": Object {
               "stroke": "rgba(238, 240, 243, 1)",
             },
-            "axisTitleStyle": Object {
+            "axisTitle": Object {
               "fill": "rgba(52, 55, 65, 1)",
               "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
               "fontSize": 12,
-              "padding": 10,
+              "padding": Object {
+                "inner": 10,
+                "outer": 0,
+              },
             },
-            "gridLineStyle": Object {
+            "gridLine": Object {
               "horizontal": Object {
                 "dash": Array [
                   0,
@@ -249,14 +271,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
             },
-            "tickLabelStyle": Object {
+            "tickLabel": Object {
               "fill": "rgba(105, 112, 125, 1)",
               "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
               "fontSize": 10,
-              "padding": 8,
+              "padding": Object {
+                "inner": 10,
+                "outer": 8,
+              },
             },
-            "tickLineStyle": Object {
+            "tickLine": Object {
               "stroke": "rgba(238, 240, 243, 1)",
               "strokeWidth": 1,
               "visible": false,
@@ -452,7 +477,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#bd271e"
                   data-euiicon-type="dot"
                 />
@@ -493,7 +518,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#d3dae6"
                   data-euiicon-type="dot"
                 />
@@ -579,7 +604,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
         class="echContainer"
       />
     </div>
-    <div
+    <span
       class="c0 greenCheckIcon"
       data-euiicon-type="checkInCircleFilled"
     />
@@ -605,7 +630,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#bd271e"
                   data-euiicon-type="dot"
                 />
@@ -646,7 +671,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#d3dae6"
                   data-euiicon-type="dot"
                 />

@@ -14,7 +14,7 @@ import {
   exportTimelinesQuerySchema,
   exportTimelinesRequestBodySchema,
 } from './schemas/export_timelines_schema';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
 
@@ -27,8 +27,8 @@ export const exportTimelinesRoute = (
     {
       path: TIMELINE_EXPORT_URL,
       validate: {
-        query: buildRouteValidation(exportTimelinesQuerySchema),
-        body: buildRouteValidation(exportTimelinesRequestBodySchema),
+        query: buildRouteValidationWithExcess(exportTimelinesQuerySchema),
+        body: buildRouteValidationWithExcess(exportTimelinesRequestBodySchema),
       },
       options: {
         tags: ['access:securitySolution'],

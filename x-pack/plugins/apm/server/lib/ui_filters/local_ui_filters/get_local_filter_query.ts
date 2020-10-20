@@ -5,11 +5,12 @@
  */
 
 import { omit } from 'lodash';
-import { mergeProjection } from '../../../../common/projections/util/merge_projection';
-import { Projection } from '../../../../common/projections/typings';
+import { mergeProjection } from '../../../projections/util/merge_projection';
+import { Projection } from '../../../projections/typings';
 import { UIFilters } from '../../../../typings/ui_filters';
-import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
-import { localUIFilters, LocalUIFilterName } from './config';
+import { getEsFilter } from '../../helpers/convert_ui_filters/get_es_filter';
+import { localUIFilters } from './config';
+import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 export const getLocalFilterQuery = ({
   uiFilters,
@@ -21,7 +22,7 @@ export const getLocalFilterQuery = ({
   localUIFilterName: LocalUIFilterName;
 }) => {
   const field = localUIFilters[localUIFilterName];
-  const filter = getUiFiltersES(omit(uiFilters, field.name));
+  const filter = getEsFilter(omit(uiFilters, field.name));
 
   const bucketCountAggregation = projection.body.aggs
     ? {

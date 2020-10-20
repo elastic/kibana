@@ -424,6 +424,7 @@ export const ecsSchema = gql`
   type SignalField {
     rule: RuleField
     original_time: ToStringArray
+    status: ToStringArray
   }
 
   type RuleEcsField {

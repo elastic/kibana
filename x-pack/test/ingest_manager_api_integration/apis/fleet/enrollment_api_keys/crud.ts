@@ -33,10 +33,10 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET /fleet/enrollment-api-keys', async () => {
       it('should list existing api keys', async () => {
         const { body: apiResponse } = await supertest
-          .get(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .get(`/api/fleet/enrollment-api-keys`)
           .expect(200);
 
-        expect(apiResponse.total).to.be(2);
+        expect(apiResponse.total).to.be(3);
         expect(apiResponse.list[0]).to.have.keys('id', 'api_key_id', 'name');
       });
     });
@@ -44,7 +44,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET /fleet/enrollment-api-keys/{id}', async () => {
       it('should allow to retrieve existing api keys', async () => {
         const { body: apiResponse } = await supertest
-          .get(`/api/ingest_manager/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
           .expect(200);
 
         expect(apiResponse.item).to.have.keys('id', 'api_key_id', 'name');
@@ -56,10 +56,10 @@ export default function (providerContext: FtrProviderContext) {
       let esApiKeyId: string;
       before(async () => {
         const { body: apiResponse } = await supertest
-          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'config1',
+            policy_id: 'policy1',
           })
           .expect(200);
         keyId = apiResponse.item.id;
@@ -67,12 +67,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should invalide an existing api keys', async () => {
-        const { body: apiResponse } = await supertest
-          .delete(`/api/ingest_manager/fleet/enrollment-api-keys/${keyId}`)
+        await supertest
+          .delete(`/api/fleet/enrollment-api-keys/${keyId}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-
-        expect(apiResponse.success).to.eql(true);
 
         const {
           body: { api_keys: apiKeys },
@@ -86,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('POST /fleet/enrollment-api-keys', () => {
       it('should not accept bad parameters', async () => {
         await supertest
-          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
             raoul: 'raoul',
@@ -94,38 +92,37 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should not allow to create an enrollment api key for a non existing agent config', async () => {
+      it('should not allow to create an enrollment api key for a non existing agent policy', async () => {
         await supertest
-          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'idonotexistsconfig',
+            policy_id: 'idonotexistspolicy',
           })
           .expect(400);
       });
 
-      it('should allow to create an enrollment api key with an agent config', async () => {
+      it('should allow to create an enrollment api key with an agent policy', async () => {
         const { body: apiResponse } = await supertest
-          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'config1',
+            policy_id: 'policy1',
           })
           .expect(200);
 
-        expect(apiResponse.success).to.eql(true);
-        expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'config_id');
+        expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
       });
 
       it('should create an ES ApiKey with limited privileges', async () => {
         const { body: apiResponse } = await supertest
-          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'config1',
+            policy_id: 'policy1',
           })
           .expect(200);
-        expect(apiResponse.success).to.eql(true);
+
         const { body: privileges } = await getEsClientForAPIKey(
           providerContext,
           apiResponse.item.api_key

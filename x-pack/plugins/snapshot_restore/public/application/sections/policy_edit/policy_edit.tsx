@@ -10,6 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { SectionError, Error } from '../../../shared_imports';
+import { useDecodedParams } from '../../lib';
 import { TIME_UNITS } from '../../../../common/constants';
 import { SectionLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
@@ -22,12 +23,10 @@ interface MatchParams {
 }
 
 export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
   history,
   location: { pathname },
 }) => {
+  const { name } = useDecodedParams<MatchParams>();
   const { i18n } = useServices();
 
   // Set breadcrumb and page title
@@ -83,12 +82,12 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     if (error) {
       setSaveError(error);
     } else {
-      history.push(`${BASE_PATH}/policies/${name}`);
+      history.push(encodeURI(`${BASE_PATH}/policies/${encodeURIComponent(name)}`));
     }
   };
 
   const onCancel = () => {
-    history.push(`${BASE_PATH}/policies/${name}`);
+    history.push(encodeURI(`${BASE_PATH}/policies/${encodeURIComponent(name)}`));
   };
 
   const renderLoading = () => {

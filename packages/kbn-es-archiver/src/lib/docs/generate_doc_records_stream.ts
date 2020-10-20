@@ -25,7 +25,17 @@ import { Progress } from '../progress';
 const SCROLL_SIZE = 1000;
 const SCROLL_TIMEOUT = '1m';
 
-export function createGenerateDocRecordsStream(client: Client, stats: Stats, progress: Progress) {
+export function createGenerateDocRecordsStream({
+  client,
+  stats,
+  progress,
+  query,
+}: {
+  client: Client;
+  stats: Stats;
+  progress: Progress;
+  query?: Record<string, any>;
+}) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
@@ -41,6 +51,9 @@ export function createGenerateDocRecordsStream(client: Client, stats: Stats, pro
               scroll: SCROLL_TIMEOUT,
               size: SCROLL_SIZE,
               _source: true,
+              body: {
+                query,
+              },
               rest_total_hits_as_int: true, // not declared on SearchParams type
             } as SearchParams);
             remainingHits = resp.hits.total;

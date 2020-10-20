@@ -6,8 +6,10 @@
   "false_positives": [
     "Administrators may use the command prompt for regular administrative tasks. It's important to baseline your environment for network connections being made from the command prompt to determine any abnormal use of this tool."
   ],
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -31,7 +33,7 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
         }
       ]
@@ -46,12 +48,12 @@
       "technique": [
         {
           "id": "T1105",
-          "name": "Remote File Copy",
+          "name": "Ingress Tool Transfer",
           "reference": "https://attack.mitre.org/techniques/T1105/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

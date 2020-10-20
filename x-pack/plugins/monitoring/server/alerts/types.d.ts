@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { AlertInstanceState as BaseAlertInstanceState } from '../../../alerts/server';
 
 export interface AlertEnableAction {
   id: string;
@@ -11,19 +12,38 @@ export interface AlertEnableAction {
 }
 
 export interface AlertInstanceState {
-  alertStates: AlertState[];
+  alertStates: Array<AlertState | AlertCpuUsageState | AlertDiskUsageState>;
+  [x: string]: unknown;
 }
 
 export interface AlertState {
   cluster: AlertCluster;
-  ccs: string | null;
+  ccs?: string;
   ui: AlertUiState;
 }
 
-export interface AlertCpuUsageState extends AlertState {
-  cpuUsage: number;
+export interface AlertNodeState extends AlertState {
   nodeId: string;
-  nodeName: string;
+  nodeName?: string;
+}
+
+export interface AlertCpuUsageState extends AlertNodeState {
+  cpuUsage: number;
+}
+
+export interface AlertDiskUsageState extends AlertNodeState {
+  diskUsage: number;
+}
+
+export interface AlertMissingDataState extends AlertState {
+  stackProduct: string;
+  stackProductUuid: string;
+  stackProductName: string;
+  gapDuration: number;
+}
+
+export interface AlertMemoryUsageState extends AlertNodeState {
+  memoryUsage: number;
 }
 
 export interface AlertUiState {
@@ -66,21 +86,41 @@ export interface AlertCluster {
   clusterName: string;
 }
 
-export interface AlertCpuUsageNodeStats {
+export interface AlertNodeStats {
   clusterUuid: string;
   nodeId: string;
-  nodeName: string;
+  nodeName?: string;
+  ccs?: string;
+}
+
+export interface AlertCpuUsageNodeStats extends AlertNodeStats {
   cpuUsage: number;
   containerUsage: number;
   containerPeriods: number;
   containerQuota: number;
-  ccs: string | null;
+}
+
+export interface AlertDiskUsageNodeStats extends AlertNodeStats {
+  diskUsage: number;
+}
+
+export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
+  memoryUsage: number;
+}
+
+export interface AlertMissingData {
+  stackProduct: string;
+  stackProductUuid: string;
+  stackProductName: string;
+  clusterUuid: string;
+  gapDuration: number;
+  ccs?: string;
 }
 
 export interface AlertData {
   instanceKey: string;
   clusterUuid: string;
-  ccs: string | null;
+  ccs?: string;
   shouldFire: boolean;
   severity: AlertSeverity;
   meta: any;

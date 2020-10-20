@@ -21,18 +21,20 @@ import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../es_query';
+type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
-  filter: string,
+  filter: string | KueryNode,
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
-  if (filter && filter.length > 0 && indexMapping) {
-    const filterKueryNode = esKuery.fromKueryExpression(filter);
+  if (filter && indexMapping) {
+    const filterKueryNode =
+      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,

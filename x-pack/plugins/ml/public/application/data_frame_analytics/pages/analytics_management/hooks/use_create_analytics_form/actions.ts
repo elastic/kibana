@@ -25,6 +25,7 @@ export enum ACTION {
   SET_JOB_CONFIG,
   SET_JOB_IDS,
   SWITCH_TO_ADVANCED_EDITOR,
+  SWITCH_TO_FORM,
   SET_ESTIMATED_MODEL_MEMORY_LIMIT,
   SET_JOB_CLONE,
 }
@@ -38,7 +39,8 @@ export type Action =
         | ACTION.OPEN_MODAL
         | ACTION.RESET_ADVANCED_EDITOR_MESSAGES
         | ACTION.RESET_FORM
-        | ACTION.SWITCH_TO_ADVANCED_EDITOR;
+        | ACTION.SWITCH_TO_ADVANCED_EDITOR
+        | ACTION.SWITCH_TO_FORM;
     }
   // Actions with custom payloads:
   | { type: ACTION.ADD_REQUEST_MESSAGE; requestMessage: FormMessage }
@@ -71,6 +73,7 @@ export interface ActionDispatchers {
   setJobConfig: (payload: State['jobConfig']) => void;
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
+  switchToForm: () => void;
   setEstimatedModelMemoryLimit: (value: State['estimatedModelMemoryLimit']) => void;
   setJobClone: (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => Promise<void>;
 }

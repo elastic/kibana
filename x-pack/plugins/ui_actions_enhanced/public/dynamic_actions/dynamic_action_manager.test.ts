@@ -24,6 +24,9 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const actionFactoryDefinition2: ActionFactoryDefinition = {
@@ -36,6 +39,9 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const event1: SerializedEvent = {
@@ -81,7 +87,9 @@ const setup = (
     actions,
   });
   const uiActionsEnhancements = new UiActionsServiceEnhancements({
-    getLicenseInfo,
+    getLicense: getLicenseInfo,
+    featureUsageSetup: licensingMock.createSetup().featureUsage,
+    getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
   });
   const manager = new DynamicActionManager({
     isCompatible,
@@ -242,7 +250,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition1);
         await manager.start();
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -269,7 +277,7 @@ describe('DynamicActionManager', () => {
 
       test('adds event to UI state', async () => {
         const { manager, uiActions } = setup([]);
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -288,7 +296,7 @@ describe('DynamicActionManager', () => {
 
       test('optimistically adds event to UI state', async () => {
         const { manager, uiActions } = setup([]);
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -311,7 +319,7 @@ describe('DynamicActionManager', () => {
 
       test('instantiates event in actions service', async () => {
         const { manager, uiActions, actions } = setup([]);
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -340,7 +348,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition1);
         await manager.start();
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -353,7 +361,7 @@ describe('DynamicActionManager', () => {
 
       test('does not add even to UI state', async () => {
         const { manager, storage, uiActions } = setup([]);
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -372,7 +380,7 @@ describe('DynamicActionManager', () => {
 
       test('optimistically adds event to UI state and then removes it', async () => {
         const { manager, storage, uiActions } = setup([]);
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -398,7 +406,7 @@ describe('DynamicActionManager', () => {
 
       test('does not instantiate event in actions service', async () => {
         const { manager, storage, uiActions, actions } = setup([]);
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
           config: {},
@@ -417,6 +425,20 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(0);
       });
+
+      test('throws when trigger is unknown', async () => {
+        const { manager, uiActions } = setup([]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+        await manager.start();
+
+        const action: SerializedAction = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects.toThrow();
+      });
     });
   });
 
@@ -434,7 +456,7 @@ describe('DynamicActionManager', () => {
 
         expect(registeredAction1.getDisplayName()).toBe('Action 3');
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
           name: 'foo',
           config: {},
@@ -456,7 +478,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition2);
         await manager.start();
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
           name: 'foo',
           config: {},
@@ -482,7 +504,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition2);
         await manager.start();
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
           name: 'foo',
           config: {},
@@ -501,7 +523,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition2);
         await manager.start();
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
           name: 'foo',
           config: {},
@@ -529,7 +551,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition2);
         await manager.start();
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
           name: 'foo',
           config: {},
@@ -557,7 +579,7 @@ describe('DynamicActionManager', () => {
 
         expect(registeredAction1.getDisplayName()).toBe('Action 3');
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
           name: 'foo',
           config: {},
@@ -581,7 +603,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition2);
         await manager.start();
 
-        const action: SerializedAction<unknown> = {
+        const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
           name: 'foo',
           config: {},
@@ -650,11 +672,13 @@ describe('DynamicActionManager', () => {
     const basicActionFactory: ActionFactoryDefinition = {
       ...actionFactoryDefinition1,
       minimalLicense: 'basic',
+      licenseFeatureName: 'Feature 1',
     };
 
     const goldActionFactory: ActionFactoryDefinition = {
       ...actionFactoryDefinition2,
       minimalLicense: 'gold',
+      licenseFeatureName: 'Feature 2',
     };
 
     uiActions.registerActionFactory(basicActionFactory);
@@ -678,5 +702,19 @@ describe('DynamicActionManager', () => {
     );
 
     expect(basicAndGoldActions).toHaveLength(2);
+  });
+
+  test("failing to revive/kill an action doesn't fail action manager", async () => {
+    const { manager, uiActions, storage } = setup([event1, event3, event2]);
+
+    uiActions.registerActionFactory(actionFactoryDefinition1);
+
+    await manager.start();
+
+    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(2);
+    expect(await storage.list()).toEqual([event1, event3, event2]);
+
+    await manager.stop();
+    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(0);
   });
 });

@@ -12,7 +12,7 @@ import React, {
   FC,
   ReactElement,
 } from 'react';
-import { CanvasServices, CanvasServiceProviders } from '.';
+import { CanvasServices, CanvasServiceProviders, services } from '.';
 
 export interface WithServicesProps {
   services: CanvasServices;
@@ -36,23 +36,22 @@ export const useNotifyService = () => useServices().notify;
 export const useNavLinkService = () => useServices().navLink;
 
 export const withServices = <Props extends WithServicesProps>(type: ComponentType<Props>) => {
-  const EnhancedType: FC<Props> = (props) => {
-    const services = useServices();
-    return createElement(type, { ...props, services });
-  };
+  const EnhancedType: FC<Props> = (props) =>
+    createElement(type, { ...props, services: useServices() });
   return EnhancedType;
 };
 
 export const ServicesProvider: FC<{
-  providers: CanvasServiceProviders;
+  providers?: Partial<CanvasServiceProviders>;
   children: ReactElement<any>;
-}> = ({ providers, children }) => {
+}> = ({ providers = {}, children }) => {
+  const specifiedProviders: CanvasServiceProviders = { ...services, ...providers };
   const value = {
-    embeddables: providers.embeddables.getService(),
-    expressions: providers.expressions.getService(),
-    notify: providers.notify.getService(),
-    platform: providers.platform.getService(),
-    navLink: providers.navLink.getService(),
+    embeddables: specifiedProviders.embeddables.getService(),
+    expressions: specifiedProviders.expressions.getService(),
+    notify: specifiedProviders.notify.getService(),
+    platform: specifiedProviders.platform.getService(),
+    navLink: specifiedProviders.navLink.getService(),
   };
   return <context.Provider value={value}>{children}</context.Provider>;
 };

@@ -3,8 +3,10 @@
     "Elastic"
   ],
   "description": "Windows services typically run as SYSTEM and can be used as a privilege escalation opportunity. Malware or penetration testers may run a shell as a service to gain SYSTEM permissions.",
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -35,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

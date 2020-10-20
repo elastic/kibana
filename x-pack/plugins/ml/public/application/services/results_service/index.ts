@@ -10,9 +10,9 @@ import { ml, MlApiServices } from '../ml_api_service';
 
 export type MlResultsService = typeof mlResultsService;
 
-type time = string;
+type Time = string;
 export interface ModelPlotOutputResults {
-  results: Record<time, { actual: number; modelUpper: number | null; modelLower: number | null }>;
+  results: Record<Time, { actual: number; modelUpper: number | null; modelLower: number | null }>;
 }
 
 export interface CriteriaField {

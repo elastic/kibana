@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { getNotifications, getData, getSavedObjects } from './services';
 
-export const createVegaVisualization = ({ serviceSettings }) =>
+export const createVegaVisualization = ({ getServiceSettings }) =>
   class VegaVisualization {
     constructor(el, vis) {
       this._el = el;
@@ -102,10 +102,12 @@ export const createVegaVisualization = ({ serviceSettings }) =>
           this._vegaView = null;
         }
 
+        const serviceSettings = await getServiceSettings();
         const { filterManager } = this.dataPlugin.query;
         const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
           parentEl: this._el,
+          applyFilter: this._vis.API.events.applyFilter,
           vegaParser,
           serviceSettings,
           filterManager,

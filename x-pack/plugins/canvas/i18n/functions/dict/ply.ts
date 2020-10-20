@@ -13,8 +13,8 @@ import { DATATABLE } from '../../constants';
 export const help: FunctionHelp<FunctionFactory<typeof ply>> = {
   help: i18n.translate('xpack.canvas.functions.plyHelpText', {
     defaultMessage:
-      'Subdivides a {DATATABLE} by the unique values of the specified column, ' +
-      'and passes the resulting tables into an expression, then merges the outputs of each expression',
+      'Subdivides a {DATATABLE} by the unique values of the specified columns, ' +
+      'and passes the resulting tables into an expression, then merges the outputs of each expression.',
     values: {
       DATATABLE,
     },

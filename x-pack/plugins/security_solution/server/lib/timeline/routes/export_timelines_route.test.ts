@@ -96,7 +96,7 @@ describe('export timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest.mock.calls[0][0]).toEqual(
-        'Invalid value "undefined" supplied to "file_name"'
+        'Invalid value {"id":"someId"}, excess properties: ["id"]'
       );
     });
 
@@ -110,7 +110,7 @@ describe('export timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest.mock.calls[0][0]).toEqual(
-        'Invalid value "someId" supplied to "ids",Invalid value "someId" supplied to "ids",Invalid value "{"ids":"someId"}" supplied to "(Partial<{ ids: (Array<string> | null) }> | null)"'
+        'Invalid value "someId" supplied to "ids"'
       );
     });
   });

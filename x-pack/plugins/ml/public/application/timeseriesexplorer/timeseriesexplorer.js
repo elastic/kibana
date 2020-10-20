@@ -27,6 +27,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiPanel,
   EuiTitle,
   EuiAccordion,
   EuiBadge,
@@ -82,6 +83,7 @@ import {
   getFocusData,
 } from './timeseriesexplorer_utils';
 import { EMPTY_FIELD_VALUE_LABEL } from './components/entity_control/entity_control';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -627,7 +629,7 @@ export class TimeSeriesExplorer extends React.Component {
             nonBlankEntities,
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.expression
+            stateUpdate.contextAggregationInterval.asMilliseconds()
           )
           .toPromise()
           .then((resp) => {
@@ -650,7 +652,7 @@ export class TimeSeriesExplorer extends React.Component {
             this.getCriteriaFields(detectorIndex, entityControls),
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.expression
+            stateUpdate.contextAggregationInterval.asMilliseconds()
           )
           .then((resp) => {
             const fullRangeRecordScoreData = processRecordScoreResults(resp.results);
@@ -701,7 +703,7 @@ export class TimeSeriesExplorer extends React.Component {
               nonBlankEntities,
               searchBounds.min.valueOf(),
               searchBounds.max.valueOf(),
-              stateUpdate.contextAggregationInterval.expression,
+              stateUpdate.contextAggregationInterval.asMilliseconds(),
               aggType
             )
             .toPromise()
@@ -832,6 +834,22 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
+    // if timeRange used in the url is incorrect
+    // perhaps due to user's advanced setting using incorrect date-maths
+    const { invalidTimeRangeError } = this.props;
+    if (invalidTimeRangeError) {
+      const toastNotifications = getToastNotifications();
+      toastNotifications.addWarning(
+        i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
+          defaultMessage:
+            'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
+          values: {
+            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+          },
+        })
+      );
+    }
+
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', () => {
@@ -1028,6 +1046,7 @@ export class TimeSeriesExplorer extends React.Component {
       dataNotChartable,
       entityValues,
       focusAggregationInterval,
+      focusAnnotationError,
       focusAnnotationData,
       focusAggregations,
       focusChartData,
@@ -1316,6 +1335,36 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </MlTooltipComponent>
                 </div>
+                {focusAnnotationError !== undefined && (
+                  <>
+                    <EuiTitle
+                      className="panel-title"
+                      data-test-subj="mlAnomalyExplorerAnnotations error"
+                    >
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
+                          defaultMessage="Annotations"
+                        />
+                      </h2>
+                    </EuiTitle>
+                    <EuiPanel>
+                      <EuiCallOut
+                        title={i18n.translate(
+                          'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
+                          {
+                            defaultMessage: 'An error occurred loading annotations:',
+                          }
+                        )}
+                        color="danger"
+                        iconType="alert"
+                      >
+                        <p>{focusAnnotationError}</p>
+                      </EuiCallOut>
+                    </EuiPanel>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
                 {focusAnnotationData && focusAnnotationData.length > 0 && (
                   <EuiAccordion
                     id={'EuiAccordion-blah'}
@@ -1340,6 +1389,7 @@ export class TimeSeriesExplorer extends React.Component {
                         </h2>
                       </EuiTitle>
                     }
+                    data-test-subj="mlAnomalyExplorerAnnotations loaded"
                   >
                     <AnnotationsTable
                       chartDetails={chartDetails}

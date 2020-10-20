@@ -25,11 +25,12 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -260,19 +261,12 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -502,27 +496,12 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -781,27 +760,12 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -1112,27 +1076,12 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}

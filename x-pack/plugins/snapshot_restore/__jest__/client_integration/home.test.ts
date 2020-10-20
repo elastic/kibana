@@ -20,13 +20,6 @@ import { REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.home;
 
-jest.mock('ui/new_platform');
-
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
 jest.mock('@kbn/i18n/react', () => {
   const original = jest.requireActual('@kbn/i18n/react');

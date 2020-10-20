@@ -25,6 +25,7 @@ import { promisify } from 'util';
 
 const lstat = promisify(fs.lstat);
 export const readFile = promisify(fs.readFile);
+export const writeFile = promisify(fs.writeFile);
 const symlink = promisify(fs.symlink);
 export const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);

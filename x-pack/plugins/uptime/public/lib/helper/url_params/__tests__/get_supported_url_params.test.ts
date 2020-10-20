@@ -59,6 +59,8 @@ describe('getSupportedUrlParams', () => {
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
       filters: FILTERS,
+      focusConnectorField: false,
+      pagination: undefined,
       search: SEARCH,
       selectedPingStatus: SELECTED_PING_LIST_STATUS,
       statusFilter: STATUS_FILTER,

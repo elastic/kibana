@@ -16,7 +16,7 @@ import {
   ImportRulesSchema,
 } from '../../../common/detection_engine/schemas/request/import_rules_schema';
 import { exactCheck } from '../../../common/exact_check';
-import { createMapStream, createFilterStream } from '../../../../../../src/legacy/utils/streams';
+import { createMapStream, createFilterStream } from '../../../../../../src/core/server/utils';
 import { BadRequestError } from '../../lib/detection_engine/errors/bad_request_error';
 
 export interface RulesObjectsExportResultDetails {

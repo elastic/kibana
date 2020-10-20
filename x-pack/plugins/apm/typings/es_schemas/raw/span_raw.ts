@@ -5,7 +5,7 @@
  */
 
 import { APMBaseDoc } from './apm_base_doc';
-import { IStackframe } from './fields/stackframe';
+import { Stackframe } from './fields/stackframe';
 import { Observer } from './fields/observer';
 
 interface Processor {
@@ -24,7 +24,7 @@ export interface SpanRaw extends APMBaseDoc {
     duration: { us: number };
     id: string;
     name: string;
-    stacktrace?: IStackframe[];
+    stacktrace?: Stackframe[];
     subtype?: string;
     sync?: boolean;
     type: string;

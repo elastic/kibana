@@ -60,7 +60,7 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
                   }),
                   textPre: i18n.translate('xpack.maps.tutorials.ems.uploadStepText', {
                     defaultMessage:
-                      '1. Open [Elastic Maps]({newMapUrl}).\n\
+                      '1. Open [Maps]({newMapUrl}).\n\
 2. Click `Add layer`, then select `Upload GeoJSON`.\n\
 3. Upload the GeoJSON file and click `Import file`.',
                     values: {

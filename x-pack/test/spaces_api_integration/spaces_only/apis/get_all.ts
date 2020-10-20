@@ -38,6 +38,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          shareSavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
         },
       });
     });

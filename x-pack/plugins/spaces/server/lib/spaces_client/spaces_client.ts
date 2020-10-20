@@ -17,6 +17,7 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = [
   'any',
   'copySavedObjectsIntoSpace',
   'findSavedObjects',
+  'shareSavedObjectsIntoSpace',
 ];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
@@ -30,6 +31,9 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   findSavedObjects: (authorization) => {
     return [authorization.actions.savedObject.get('config', 'find')];
   },
+  shareSavedObjectsIntoSpace: (authorization) => [
+    authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
+  ],
 };
 
 export class SpacesClient {
@@ -43,21 +47,6 @@ export class SpacesClient {
     private readonly request: KibanaRequest
   ) {}
 
-  public async canEnumerateSpaces(): Promise<boolean> {
-    if (this.useRbac()) {
-      const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-      const { hasAllRequested } = await checkPrivileges.globally(
-        this.authorization!.actions.space.manage
-      );
-      this.debugLogger(`SpacesClient.canEnumerateSpaces, using RBAC. Result: ${hasAllRequested}`);
-      return hasAllRequested;
-    }
-
-    // If not RBAC, then security isn't enabled and we can enumerate all spaces
-    this.debugLogger(`SpacesClient.canEnumerateSpaces, NOT USING RBAC. Result: true`);
-    return true;
-  }
-
   public async getAll(purpose: GetSpacePurpose = 'any'): Promise<Space[]> {
     if (!SUPPORTED_GET_SPACE_PURPOSES.includes(purpose)) {
       throw Boom.badRequest(`unsupported space purpose: ${purpose}`);
@@ -66,6 +55,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       const privilegeFactory = PURPOSE_PRIVILEGE_MAP[purpose];
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -82,9 +72,11 @@ export class SpacesClient {
 
       const privilege = privilegeFactory(this.authorization!);
 
-      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
+      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, {
+        kibana: privilege,
+      });
 
-      const authorized = privileges.filter((x) => x.authorized).map((x) => x.resource);
+      const authorized = privileges.kibana.filter((x) => x.authorized).map((x) => x.resource);
 
       this.debugLogger(
         `SpacesClient.getAll(), authorized for ${
@@ -97,7 +89,7 @@ export class SpacesClient {
           `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces for ${purpose} purpose.`
         );
         this.auditLogger.spacesAuthorizationFailure(username, 'getAll');
-        throw Boom.forbidden();
+        throw Boom.forbidden(); // Note: there is a catch for this in `SpacesSavedObjectsClient.find`; if we get rid of this error, remove that too
       }
 
       this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized as string[]);
@@ -111,6 +103,7 @@ export class SpacesClient {
     } else {
       this.debugLogger(`SpacesClient.getAll(), NOT USING RBAC. querying all spaces`);
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -228,7 +221,7 @@ export class SpacesClient {
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-    const { username, hasAllRequested } = await checkPrivileges.globally(action);
+    const { username, hasAllRequested } = await checkPrivileges.globally({ kibana: action });
 
     if (hasAllRequested) {
       this.auditLogger.spacesAuthorizationSuccess(username, method);
@@ -246,7 +239,9 @@ export class SpacesClient {
     forbiddenMessage: string
   ) {
     const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-    const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, action);
+    const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, {
+      kibana: action,
+    });
 
     if (hasAllRequested) {
       this.auditLogger.spacesAuthorizationSuccess(username, method, [spaceId]);

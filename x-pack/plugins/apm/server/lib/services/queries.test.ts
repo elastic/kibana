@@ -12,7 +12,7 @@ import { hasHistoricalAgentData } from './get_services/has_historical_agent_data
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;
@@ -23,7 +23,11 @@ describe('services queries', () => {
 
   it('fetches the service agent name', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceAgentName('foo', setup)
+      getServiceAgentName({
+        serviceName: 'foo',
+        setup,
+        searchAggregatedTransactions: false,
+      })
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -31,14 +35,24 @@ describe('services queries', () => {
 
   it('fetches the service transaction types', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceTransactionTypes('foo', setup)
+      getServiceTransactionTypes({
+        serviceName: 'foo',
+        setup,
+        searchAggregatedTransactions: false,
+      })
     );
 
     expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches the service items', async () => {
-    mock = await inspectSearchParams((setup) => getServicesItems(setup));
+    mock = await inspectSearchParams((setup) =>
+      getServicesItems({
+        setup,
+        searchAggregatedTransactions: false,
+        logger: {} as any,
+      })
+    );
 
     const allParams = mock.spy.mock.calls.map((call) => call[0]);
 

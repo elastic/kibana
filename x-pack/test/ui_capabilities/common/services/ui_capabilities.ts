@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import axios, { AxiosInstance } from 'axios';
-import { UICapabilities } from 'ui/capabilities';
+import type { Capabilities as UICapabilities } from 'src/core/types';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import { ToolingLog } from '@kbn/dev-utils';

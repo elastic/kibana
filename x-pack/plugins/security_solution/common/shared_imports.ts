@@ -25,7 +25,6 @@ export {
   NamespaceType,
   Operator,
   OperatorEnum,
-  OperatorType,
   OperatorTypeEnum,
   ExceptionListTypeEnum,
   exceptionListItemSchema,
@@ -43,4 +42,6 @@ export {
   ExceptionListType,
   Type,
   ENDPOINT_LIST_ID,
+  osTypeArray,
+  OsTypeArray,
 } from '../../lists/common';

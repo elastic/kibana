@@ -41,6 +41,7 @@ import {
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
 import { actionServiceMock } from '../../services/action_service.mock';
+import { columnServiceMock } from '../../services/column_service.mock';
 import {
   SavedObjectsTable,
   SavedObjectsTableProps,
@@ -134,6 +135,7 @@ describe('SavedObjectsTable', () => {
       allowedTypes,
       serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
+      columnRegistry: columnServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,
@@ -542,11 +544,13 @@ describe('SavedObjectsTable', () => {
       expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
         mockSavedObjects[0].type,
-        mockSavedObjects[0].id
+        mockSavedObjects[0].id,
+        { force: true }
       );
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
         mockSavedObjects[1].type,
-        mockSavedObjects[1].id
+        mockSavedObjects[1].id,
+        { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });

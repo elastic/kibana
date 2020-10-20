@@ -24,13 +24,16 @@ import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 
 import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
-import { migrateLegacyQuery } from '../../../../../kibana_legacy/public';
+import { migrateLegacyQuery } from '../migrate_legacy_query';
 import { esFilters, connectToQueryState } from '../../../../../data/public';
-import { VisualizeServices, VisualizeAppStateContainer, SavedVisInstance } from '../../types';
+import {
+  VisualizeServices,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
+} from '../../types';
 import { visStateToEditorState } from '../utils';
 import { createVisualizeAppState } from '../create_visualize_app_state';
 import { VisualizeConstants } from '../../visualize_constants';
-
 /**
  * This effect is responsible for instantiating the visualize app state container,
  * which is in sync with "_a" url param
@@ -38,7 +41,7 @@ import { VisualizeConstants } from '../../visualize_constants';
 export const useVisualizeAppState = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
-  instance?: SavedVisInstance
+  instance?: VisualizeEditorVisInstance
 ) => {
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [appState, setAppState] = useState<VisualizeAppStateContainer | null>(null);
@@ -46,10 +49,11 @@ export const useVisualizeAppState = (
   useEffect(() => {
     if (instance) {
       const stateDefaults = visStateToEditorState(instance, services);
-
+      const byValue = !('savedVis' in instance);
       const { stateContainer, stopStateSync } = createVisualizeAppState({
         stateDefaults,
         kbnUrlStateStorage: services.kbnUrlStateStorage,
+        byValue,
       });
 
       const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {

@@ -27,6 +27,15 @@ const condition = schema.object({
   timeUnit: schema.string(),
   timeSize: schema.number(),
   metric: schema.string(),
+  customMetric: schema.maybe(
+    schema.object({
+      type: schema.literal('custom'),
+      id: schema.string(),
+      field: schema.string(),
+      aggregation: schema.string(),
+      label: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs) => ({

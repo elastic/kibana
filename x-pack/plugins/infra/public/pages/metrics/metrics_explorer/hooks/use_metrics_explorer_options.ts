@@ -4,19 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as t from 'io-ts';
+import { values } from 'lodash';
 import createContainer from 'constate';
 import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { MetricsExplorerColor } from '../../../../../common/color_palette';
-import {
-  MetricsExplorerAggregation,
-  MetricsExplorerMetric,
-} from '../../../../../common/http_api/metrics_explorer';
+import { Color } from '../../../../../common/color_palette';
+import { metricsExplorerMetricRT } from '../../../../../common/http_api/metrics_explorer';
 
-export type MetricsExplorerOptionsMetric = MetricsExplorerMetric & {
-  color?: MetricsExplorerColor;
-  label?: string;
-};
+const metricsExplorerOptionsMetricRT = t.intersection([
+  metricsExplorerMetricRT,
+  t.partial({
+    rate: t.boolean,
+    color: t.keyof(Object.fromEntries(values(Color).map((c) => [c, null])) as Record<Color, null>),
+    label: t.string,
+  }),
+]);
+
+export type MetricsExplorerOptionsMetric = t.TypeOf<typeof metricsExplorerOptionsMetricRT>;
 
 export enum MetricsExplorerChartType {
   line = 'line',
@@ -29,28 +34,50 @@ export enum MetricsExplorerYAxisMode {
   auto = 'auto',
 }
 
-export interface MetricsExplorerChartOptions {
-  type: MetricsExplorerChartType;
-  yAxisMode: MetricsExplorerYAxisMode;
-  stack: boolean;
-}
+export const metricsExplorerChartOptionsRT = t.type({
+  yAxisMode: t.keyof(
+    Object.fromEntries(values(MetricsExplorerYAxisMode).map((v) => [v, null])) as Record<
+      MetricsExplorerYAxisMode,
+      null
+    >
+  ),
+  type: t.keyof(
+    Object.fromEntries(values(MetricsExplorerChartType).map((v) => [v, null])) as Record<
+      MetricsExplorerChartType,
+      null
+    >
+  ),
+  stack: t.boolean,
+});
 
-export interface MetricsExplorerOptions {
-  metrics: MetricsExplorerOptionsMetric[];
-  limit?: number;
-  groupBy?: string | string[];
-  filterQuery?: string;
-  aggregation: MetricsExplorerAggregation;
-  forceInterval?: boolean;
-  dropLastBucket?: boolean;
-  source?: string;
-}
+export type MetricsExplorerChartOptions = t.TypeOf<typeof metricsExplorerChartOptionsRT>;
 
-export interface MetricsExplorerTimeOptions {
-  from: string;
-  to: string;
-  interval: string;
-}
+const metricExplorerOptionsRequiredRT = t.type({
+  aggregation: t.string,
+  metrics: t.array(metricsExplorerOptionsMetricRT),
+});
+
+const metricExplorerOptionsOptionalRT = t.partial({
+  limit: t.number,
+  groupBy: t.union([t.string, t.array(t.string)]),
+  filterQuery: t.string,
+  source: t.string,
+  forceInterval: t.boolean,
+  dropLastBucket: t.boolean,
+});
+export const metricExplorerOptionsRT = t.intersection([
+  metricExplorerOptionsRequiredRT,
+  metricExplorerOptionsOptionalRT,
+]);
+
+export type MetricsExplorerOptions = t.TypeOf<typeof metricExplorerOptionsRT>;
+
+export const metricsExplorerTimeOptionsRT = t.type({
+  from: t.string,
+  to: t.string,
+  interval: t.string,
+});
+export type MetricsExplorerTimeOptions = t.TypeOf<typeof metricsExplorerTimeOptionsRT>;
 
 export const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
   from: 'now-1h',
@@ -68,17 +95,17 @@ export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   {
     aggregation: 'avg',
     field: 'system.cpu.user.pct',
-    color: MetricsExplorerColor.color0,
+    color: Color.color0,
   },
   {
     aggregation: 'avg',
     field: 'kubernetes.pod.cpu.usage.node.pct',
-    color: MetricsExplorerColor.color1,
+    color: Color.color1,
   },
   {
     aggregation: 'avg',
     field: 'docker.cpu.total.pct',
-    color: MetricsExplorerColor.color2,
+    color: Color.color2,
   },
 ];
 

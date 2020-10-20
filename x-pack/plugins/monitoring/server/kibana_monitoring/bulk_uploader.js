@@ -5,7 +5,7 @@
  */
 
 import { defaultsDeep, uniq, compact } from 'lodash';
-
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   TELEMETRY_COLLECTION_INTERVAL,
   KIBANA_STATS_TYPE_MONITORING,
@@ -30,7 +30,7 @@ import { sendBulkPayload, monitoringBulk } from './lib';
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor({ log, interval, elasticsearch, kibanaStats }) {
+  constructor({ log, interval, elasticsearch, statusGetter$, kibanaStats }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -52,11 +52,11 @@ export class BulkUploader {
     });
 
     this.kibanaStats = kibanaStats;
-    this.kibanaStatusGetter = null;
-  }
 
-  setKibanaStatusGetter(getter) {
-    this.kibanaStatusGetter = getter;
+    this.kibanaStatus = null;
+    this.kibanaStatusGetter$ = statusGetter$.subscribe((nextStatus) => {
+      this.kibanaStatus = nextStatus.level;
+    });
   }
 
   filterCollectorSet(usageCollection) {
@@ -128,7 +128,7 @@ export class BulkUploader {
   async _fetchAndUpload(usageCollection) {
     const collectorsReady = await usageCollection.areAllCollectorsReady();
     const hasUsageCollectors = usageCollection.some(usageCollection.isUsageCollector);
-    if (!collectorsReady || typeof this.kibanaStatusGetter !== 'function') {
+    if (!collectorsReady) {
       this._log.debug('Skipping bulk uploading because not all collectors are ready');
       if (hasUsageCollectors) {
         this._lastFetchUsageTime = null;
@@ -172,10 +172,23 @@ export class BulkUploader {
     return await sendBulkPayload(this._cluster, this._interval, payload, this._log);
   }
 
+  getConvertedKibanaStatuss() {
+    if (this.kibanaStatus === ServiceStatusLevels.available) {
+      return 'green';
+    }
+    if (this.kibanaStatus === ServiceStatusLevels.critical) {
+      return 'red';
+    }
+    if (this.kibanaStatus === ServiceStatusLevels.degraded) {
+      return 'yellow';
+    }
+    return 'unknown';
+  }
+
   getKibanaStats(type) {
     const stats = {
       ...this.kibanaStats,
-      status: this.kibanaStatusGetter(),
+      status: this.getConvertedKibanaStatuss(),
     };
 
     if (type === KIBANA_STATS_TYPE_MONITORING) {

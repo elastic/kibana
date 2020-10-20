@@ -5,13 +5,13 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { CategoryId, Category } from '../../../../../common/types/categories';
 
-export function topCategoriesProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
-  async function getTotalCategories(jobId: string): Promise<{ total: number }> {
-    const totalResp = await callAsInternalUser('search', {
+export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) {
+  async function getTotalCategories(jobId: string): Promise<number> {
+    const { body } = await asInternalUser.search<SearchResponse<any>>({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -33,11 +33,12 @@ export function topCategoriesProvider({ callAsInternalUser }: ILegacyScopedClust
         },
       },
     });
-    return totalResp?.hits?.total?.value ?? 0;
+    // @ts-ignore total is an object here
+    return body?.hits?.total?.value ?? 0;
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const top: SearchResponse<any> = await callAsInternalUser('search', {
+    const { body } = await asInternalUser.search<SearchResponse<any>>({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -76,7 +77,7 @@ export function topCategoriesProvider({ callAsInternalUser }: ILegacyScopedClust
     const catCounts: Array<{
       id: CategoryId;
       count: number;
-    }> = top.aggregations?.cat_count?.buckets.map((c: any) => ({
+    }> = body.aggregations?.cat_count?.buckets.map((c: any) => ({
       id: c.key,
       count: c.doc_count,
     }));
@@ -99,7 +100,7 @@ export function topCategoriesProvider({ callAsInternalUser }: ILegacyScopedClust
             field: 'category_id',
           },
         };
-    const result: SearchResponse<any> = await callAsInternalUser('search', {
+    const { body } = await asInternalUser.search<SearchResponse<any>>({
       index: ML_RESULTS_INDEX_PATTERN,
       size,
       body: {
@@ -118,7 +119,7 @@ export function topCategoriesProvider({ callAsInternalUser }: ILegacyScopedClust
       },
     });
 
-    return result.hits.hits?.map((c: { _source: Category }) => c._source) || [];
+    return body.hits.hits?.map((c: { _source: Category }) => c._source) || [];
   }
 
   async function topCategories(jobId: string, numberOfCategories: number) {

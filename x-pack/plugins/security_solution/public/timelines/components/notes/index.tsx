@@ -9,7 +9,6 @@ import {
   EuiInMemoryTableProps,
   EuiModalBody,
   EuiModalHeader,
-  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -20,7 +19,6 @@ import { Note } from '../../../common/lib/note';
 import { AddNote } from './add_note';
 import { columns } from './columns';
 import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';
-import { NOTES_PANEL_WIDTH, NOTES_PANEL_HEIGHT } from '../timeline/properties/notes_size';
 import { TimelineStatusLiteral, TimelineStatus } from '../../../../common/types/timeline';
 
 interface Props {
@@ -32,23 +30,12 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-const NotesPanel = styled(EuiPanel)`
-  height: ${NOTES_PANEL_HEIGHT}px;
-  width: ${NOTES_PANEL_WIDTH}px;
-
-  & thead {
-    display: none;
-  }
-`;
-
-NotesPanel.displayName = 'NotesPanel';
-
 const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(
   EuiInMemoryTable as React.ComponentType<EuiInMemoryTableProps<Note>>
 )`
-  overflow-x: hidden;
-  overflow-y: auto;
-  height: 220px;
+  & thead {
+    display: none;
+  }
 ` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 InMemoryTable.displayName = 'InMemoryTable';
@@ -60,7 +47,7 @@ export const Notes = React.memo<Props>(
     const isImmutable = status === TimelineStatus.immutable;
 
     return (
-      <NotesPanel>
+      <>
         <EuiModalHeader>
           <NotesCount noteIds={noteIds} />
         </EuiModalHeader>
@@ -84,7 +71,7 @@ export const Notes = React.memo<Props>(
             sorting={true}
           />
         </EuiModalBody>
-      </NotesPanel>
+      </>
     );
   }
 );

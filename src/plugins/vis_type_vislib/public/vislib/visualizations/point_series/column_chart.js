@@ -130,8 +130,9 @@ export class ColumnChart extends PointSeries {
     const yMin = yScale.domain()[0];
     const gutterSpacingPercentage = 0.15;
     const chartData = this.chartData;
+    const getGroupedNum = this.getGroupedNum.bind(this);
     const groupCount = this.getGroupedCount();
-    const groupNum = this.getGroupedNum(this.chartData);
+
     let barWidth;
     let gutterWidth;
 
@@ -145,6 +146,8 @@ export class ColumnChart extends PointSeries {
     }
 
     function x(d, i) {
+      const groupNum = getGroupedNum(d.seriesId);
+
       if (isTimeScale) {
         return (
           xScale(d.x) +
@@ -249,12 +252,13 @@ export class ColumnChart extends PointSeries {
     const yScale = this.getValueAxis().getScale();
     const chartData = this.chartData;
     const groupCount = this.getGroupedCount();
-    const groupNum = this.getGroupedNum(this.chartData);
     const gutterSpacingPercentage = 0.15;
     const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
     const isLogScale = this.getValueAxis().axisConfig.isLogScale();
     const isLabels = this.labelOptions.show;
+    const getGroupedNum = this.getGroupedNum.bind(this);
+
     let barWidth;
     let gutterWidth;
 
@@ -268,6 +272,7 @@ export class ColumnChart extends PointSeries {
     }
 
     function x(d, i) {
+      const groupNum = getGroupedNum(d.seriesId);
       if (isTimeScale) {
         return (
           xScale(d.x) +

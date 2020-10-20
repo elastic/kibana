@@ -12,9 +12,9 @@ import d3 from 'd3';
 import { scaleUtc } from 'd3-scale';
 import { mean } from 'lodash';
 import React from 'react';
-import { asRelativeDateTimeRange } from '../../../../utils/formatters';
+import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
-// @ts-ignore
+// @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 
@@ -107,7 +107,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
         }
         formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
-            defaultMessage: '{occCount} occurrences',
+            defaultMessage:
+              '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
             values: { occCount: value },
           })
         }

@@ -16,3 +16,20 @@ export const VALUE_MUST_BE_GREATER_THAN_ZERO = i18n.translate(
 export const VALUE_MUST_BE_AN_INTEGER = i18n.translate('xpack.uptime.settings.invalid.nanError', {
   defaultMessage: 'Value must be an integer.',
 });
+
+export const MonitorStatusTranslations = {
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
+    defaultMessage:
+      'Monitor {monitorName} with url {monitorUrl} is {statusMessage} from {observerLocation}. The latest error message is {latestErrorMessage}',
+    values: {
+      monitorName: '{{state.monitorName}}',
+      monitorUrl: '{{{state.monitorUrl}}}',
+      statusMessage: '{{state.statusMessage}}',
+      latestErrorMessage: '{{{state.latestErrorMessage}}}',
+      observerLocation: '{{state.observerLocation}}',
+    },
+  }),
+  name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
+    defaultMessage: 'Uptime monitor status',
+  }),
+};

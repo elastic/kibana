@@ -9,7 +9,7 @@
  */
 
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { get } from 'lodash';
 
 import React, { Component } from 'react';
 
@@ -70,7 +70,7 @@ class AnomaliesTable extends Component {
     } else {
       const examples =
         item.entityName === 'mlcategory'
-          ? _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue])
+          ? get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue])
           : undefined;
       let definition = undefined;
 

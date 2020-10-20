@@ -14,7 +14,6 @@ import {
 } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services');
-jest.mock('ui/new_platform');
 
 class MockField {
   constructor({ fieldName }) {

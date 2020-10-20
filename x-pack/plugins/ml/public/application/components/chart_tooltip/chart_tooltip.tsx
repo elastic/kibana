@@ -23,6 +23,57 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
   return formatter ? formatter(headerData) : headerData.label;
 };
 
+/**
+ * Pure component for rendering the tooltip content with a custom layout across the ML plugin.
+ */
+export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData }) => {
+  return (
+    <div className="mlChartTooltip">
+      {tooltipData.length > 0 && tooltipData[0].skipHeader === undefined && (
+        <div className="mlChartTooltip__header">{renderHeader(tooltipData[0])}</div>
+      )}
+      {tooltipData.length > 1 && (
+        <div className="mlChartTooltip__list">
+          {tooltipData
+            .slice(1)
+            .map(({ label, value, color, isHighlighted, seriesIdentifier, valueAccessor }) => {
+              const classes = classNames('mlChartTooltip__item', {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                echTooltip__rowHighlighted: isHighlighted,
+              });
+
+              const renderValue = Array.isArray(value)
+                ? value.map((v) => <div key={v}>{v}</div>)
+                : value;
+
+              return (
+                <div
+                  key={`${seriesIdentifier.key}__${valueAccessor}`}
+                  className={classes}
+                  style={{
+                    borderLeftColor: color,
+                  }}
+                >
+                  <EuiFlexGroup>
+                    <EuiFlexItem className="eui-textBreakWord mlChartTooltip__label" grow={false}>
+                      {label}
+                    </EuiFlexItem>
+                    <EuiFlexItem className="eui-textBreakAll mlChartTooltip__value">
+                      {renderValue}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              );
+            })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Tooltip component bundled with the {@link ChartTooltipService}
+ */
 const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) => {
   const [tooltipData, setData] = useState<TooltipData>([]);
   const refCallback = useRef<ChildrenArg['triggerRef']>();
@@ -57,45 +108,9 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
         <div
           {...getTooltipProps({
             ref: tooltipRef,
-            className: 'mlChartTooltip',
           })}
         >
-          {tooltipData.length > 0 && tooltipData[0].skipHeader === undefined && (
-            <div className="mlChartTooltip__header">{renderHeader(tooltipData[0])}</div>
-          )}
-          {tooltipData.length > 1 && (
-            <div className="mlChartTooltip__list">
-              {tooltipData
-                .slice(1)
-                .map(({ label, value, color, isHighlighted, seriesIdentifier, valueAccessor }) => {
-                  const classes = classNames('mlChartTooltip__item', {
-                    /* eslint @typescript-eslint/camelcase:0 */
-                    echTooltip__rowHighlighted: isHighlighted,
-                  });
-                  return (
-                    <div
-                      key={`${seriesIdentifier.key}__${valueAccessor}`}
-                      className={classes}
-                      style={{
-                        borderLeftColor: color,
-                      }}
-                    >
-                      <EuiFlexGroup>
-                        <EuiFlexItem
-                          className="eui-textBreakWord mlChartTooltip__label"
-                          grow={false}
-                        >
-                          {label}
-                        </EuiFlexItem>
-                        <EuiFlexItem className="eui-textBreakAll mlChartTooltip__value">
-                          {value}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
+          <FormattedTooltip tooltipData={tooltipData} />
         </div>
       );
     }) as TooltipTriggerProps['tooltip'],

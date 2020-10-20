@@ -84,7 +84,7 @@ Here are two examples:
 | Allow the use of the the {beat_kib_app}
 
 | Spaces
-| `Read` or `All` on Dashboards, Visualize, and Discover
+| `Read` or `All` on Dashboards and Discover
 | Allow the user to view, edit, and create dashboards, as well as browse data.
 |====
 

@@ -25,12 +25,17 @@ export function registerFeature(home: HomePublicPluginSetup) {
     title: i18n.translate('discover.discoverTitle', {
       defaultMessage: 'Discover',
     }),
+    subtitle: i18n.translate('discover.discoverSubtitle', {
+      defaultMessage: 'Search and find insights.',
+    }),
     description: i18n.translate('discover.discoverDescription', {
       defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
     }),
     icon: 'discoverApp',
     path: '/app/discover#/',
-    showOnHomePage: true,
+    showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
+    solutionId: 'kibana',
+    order: 200,
   });
 }

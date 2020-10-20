@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Lens migrations 7.10.0 references should produce a valid document 1`] = `
+Object {
+  "attributes": Object {
+    "state": Object {
+      "datasourceStates": Object {
+        "indexpattern": Object {
+          "layers": Object {
+            "3b7791e9-326e-40d5-a787-b7594e48d906": Object {
+              "columnOrder": Array [
+                "77d8383e-f66e-471e-ae50-c427feedb5ba",
+                "a5c1b82d-51de-4448-a99d-6391432c3a03",
+              ],
+              "columns": Object {
+                "77d8383e-f66e-471e-ae50-c427feedb5ba": Object {
+                  "dataType": "string",
+                  "isBucketed": true,
+                  "label": "Top values of geoip.country_iso_code",
+                  "operationType": "terms",
+                  "params": Object {
+                    "orderBy": Object {
+                      "columnId": "a5c1b82d-51de-4448-a99d-6391432c3a03",
+                      "type": "column",
+                    },
+                    "orderDirection": "desc",
+                    "size": 5,
+                  },
+                  "scale": "ordinal",
+                  "sourceField": "geoip.country_iso_code",
+                },
+                "a5c1b82d-51de-4448-a99d-6391432c3a03": Object {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "Records",
+                },
+              },
+            },
+            "9a27f85d-35a9-4246-81b2-48e7ee9b0707": Object {
+              "columnOrder": Array [
+                "96352896-c508-4fca-90d8-66e9ebfce621",
+                "4ce9b4c7-2ebf-4d48-8669-0ea69d973353",
+              ],
+              "columns": Object {
+                "4ce9b4c7-2ebf-4d48-8669-0ea69d973353": Object {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "Records",
+                },
+                "96352896-c508-4fca-90d8-66e9ebfce621": Object {
+                  "dataType": "string",
+                  "isBucketed": true,
+                  "label": "Top values of geo.src",
+                  "operationType": "terms",
+                  "params": Object {
+                    "orderBy": Object {
+                      "columnId": "4ce9b4c7-2ebf-4d48-8669-0ea69d973353",
+                      "type": "column",
+                    },
+                    "orderDirection": "desc",
+                    "size": 5,
+                  },
+                  "scale": "ordinal",
+                  "sourceField": "geo.src",
+                },
+              },
+            },
+          },
+        },
+      },
+      "filters": Array [
+        Object {
+          "$state": Object {
+            "store": "appState",
+          },
+          "meta": Object {
+            "alias": null,
+            "disabled": false,
+            "index": undefined,
+            "indexRefName": "filter-index-pattern-0",
+            "key": "geo.src",
+            "negate": true,
+            "params": Object {
+              "query": "CN",
+            },
+            "type": "phrase",
+          },
+          "query": Object {
+            "match_phrase": Object {
+              "geo.src": "CN",
+            },
+          },
+        },
+        Object {
+          "$state": Object {
+            "store": "appState",
+          },
+          "meta": Object {
+            "alias": null,
+            "disabled": false,
+            "index": undefined,
+            "indexRefName": "filter-index-pattern-1",
+            "key": "geoip.country_iso_code",
+            "negate": true,
+            "params": Object {
+              "query": "US",
+            },
+            "type": "phrase",
+          },
+          "query": Object {
+            "match_phrase": Object {
+              "geoip.country_iso_code": "US",
+            },
+          },
+        },
+      ],
+      "query": Object {
+        "language": "kuery",
+        "query": "NOT bytes > 5000",
+      },
+      "visualization": Object {
+        "fittingFunction": "None",
+        "layers": Array [
+          Object {
+            "accessors": Array [
+              "4ce9b4c7-2ebf-4d48-8669-0ea69d973353",
+            ],
+            "layerId": "9a27f85d-35a9-4246-81b2-48e7ee9b0707",
+            "position": "top",
+            "seriesType": "bar",
+            "showGridlines": false,
+            "xAccessor": "96352896-c508-4fca-90d8-66e9ebfce621",
+          },
+          Object {
+            "accessors": Array [
+              "a5c1b82d-51de-4448-a99d-6391432c3a03",
+            ],
+            "layerId": "3b7791e9-326e-40d5-a787-b7594e48d906",
+            "seriesType": "bar",
+            "xAccessor": "77d8383e-f66e-471e-ae50-c427feedb5ba",
+          },
+        ],
+        "legend": Object {
+          "isVisible": true,
+          "position": "right",
+        },
+        "preferredSeriesType": "bar",
+      },
+    },
+    "title": "mylens",
+    "visualizationType": "lnsXY",
+  },
+  "references": Array [
+    Object {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "indexpattern-datasource-layer-3b7791e9-326e-40d5-a787-b7594e48d906",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "indexpattern-datasource-layer-9a27f85d-35a9-4246-81b2-48e7ee9b0707",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "filter-index-pattern-0",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "filter-index-pattern-1",
+      "type": "index-pattern",
+    },
+  ],
+  "type": "lens",
+}
+`;

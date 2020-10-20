@@ -10,6 +10,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     loadTestFile(require.resolve('./single_metric_job'));
+    loadTestFile(require.resolve('./single_metric_job_without_datafeed_start'));
     loadTestFile(require.resolve('./multi_metric_job'));
     loadTestFile(require.resolve('./population_job'));
     loadTestFile(require.resolve('./saved_search_job'));
@@ -18,5 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./anomaly_explorer'));
     loadTestFile(require.resolve('./categorization_job'));
     loadTestFile(require.resolve('./date_nanos_job'));
+    loadTestFile(require.resolve('./annotations'));
   });
 }

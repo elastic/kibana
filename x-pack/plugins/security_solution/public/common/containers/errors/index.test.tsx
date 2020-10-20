@@ -14,8 +14,7 @@ import { onError } from 'apollo-link-error';
 const mockDispatch = jest.fn();
 jest.mock('apollo-link-error');
 jest.mock('../../store');
-// @ts-ignore
-store.getStore.mockReturnValue({ dispatch: mockDispatch });
+(store.getStore as jest.Mock).mockReturnValue({ dispatch: mockDispatch });
 
 describe('errorLinkHandler', () => {
   const mockGraphQLErrors: GraphQLError = {

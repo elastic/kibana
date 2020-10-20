@@ -19,7 +19,6 @@
 import { SpecDefinitionsService } from '../../../services';
 import { BOOLEAN } from './shared';
 
-/* eslint-disable @typescript-eslint/camelcase */
 export const settings = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('put_settings', {
     data_autocomplete_rules: {

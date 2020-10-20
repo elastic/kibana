@@ -18,7 +18,6 @@
  */
 import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('application links', () => {
     loadTestFile(require.resolve('./redirect_app_links'));

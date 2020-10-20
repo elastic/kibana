@@ -5,24 +5,44 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
+import { useDispatch } from 'react-redux';
 
+import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 
+export const resetScroll = () => {
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+
+    const kibanaBody = document.querySelector('#kibana-body');
+    if (kibanaBody != null) {
+      kibanaBody.scrollTop = 0;
+    }
+
+    const pageContainer = document.querySelector('[data-test-subj="pageContainer"]');
+    if (pageContainer != null) {
+      pageContainer.scrollTop = 0;
+    }
+  }, 0);
+};
+
 export const useFullScreen = () => {
   const dispatch = useDispatch();
-  const globalFullScreen = useSelector(inputsSelectors.globalFullScreenSelector) ?? false;
-  const timelineFullScreen = useSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
+  const globalFullScreen =
+    useShallowEqualSelector(inputsSelectors.globalFullScreenSelector) ?? false;
+  const timelineFullScreen =
+    useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
   const setGlobalFullScreen = useCallback(
     (fullScreen: boolean) => {
       if (fullScreen) {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME);
+        resetScroll();
       } else {
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME);
-        setTimeout(() => window.scrollTo(0, 0), 0);
+        resetScroll();
       }
 
       dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen }));

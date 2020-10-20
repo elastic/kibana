@@ -8,13 +8,12 @@ function extractCausedByChain(
   causedBy: Record<string, any> = {},
   accumulator: string[] = []
 ): string[] {
-  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/camelcase
+  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/naming-convention
 
   if (reason) {
     accumulator.push(reason);
   }
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
   if (caused_by) {
     return extractCausedByChain(caused_by, accumulator);
   }
@@ -36,8 +35,8 @@ export function wrapEsError(
 
   const {
     error: {
-      root_cause = [], // eslint-disable-line @typescript-eslint/camelcase
-      caused_by = undefined, // eslint-disable-line @typescript-eslint/camelcase
+      root_cause = [], // eslint-disable-line @typescript-eslint/naming-convention
+      caused_by = undefined, // eslint-disable-line @typescript-eslint/naming-convention
     } = {},
   } = JSON.parse(response);
 

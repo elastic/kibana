@@ -6,8 +6,8 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
-import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { PackagePolicyServiceInterface } from '../../../../../../ingest_manager/server';
+import { createPackagePolicyServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
 import LRU from 'lru-cache';
@@ -15,8 +15,8 @@ import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
 import {
-  createPackageConfigWithManifestMock,
-  createPackageConfigWithInitialManifestMock,
+  createPackagePolicyWithManifestMock,
+  createPackagePolicyWithInitialManifestMock,
   getMockManifest,
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
@@ -32,7 +32,7 @@ export const getManifestManagerMock = (opts?: {
   mockType?: ManifestManagerMockType;
   cache?: LRU<string, Buffer>;
   exceptionListClient?: ExceptionListClient;
-  packageConfigService?: jest.Mocked<PackageConfigServiceInterface>;
+  packagePolicyService?: jest.Mocked<PackagePolicyServiceInterface>;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
 }): ManifestManager => {
   let cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
@@ -45,16 +45,16 @@ export const getManifestManagerMock = (opts?: {
     exceptionListClient = opts.exceptionListClient;
   }
 
-  let packageConfigService = createPackageConfigServiceMock();
-  if (opts?.packageConfigService != null) {
-    packageConfigService = opts.packageConfigService;
+  let packagePolicyService = createPackagePolicyServiceMock();
+  if (opts?.packagePolicyService != null) {
+    packagePolicyService = opts.packagePolicyService;
   }
-  packageConfigService.list = jest.fn().mockResolvedValue({
+  packagePolicyService.list = jest.fn().mockResolvedValue({
     total: 1,
     items: [
-      { version: 'policy-1-version', ...createPackageConfigWithManifestMock() },
-      { version: 'policy-2-version', ...createPackageConfigWithInitialManifestMock() },
-      { version: 'policy-3-version', ...createPackageConfigWithInitialManifestMock() },
+      { version: 'policy-1-version', ...createPackagePolicyWithManifestMock() },
+      { version: 'policy-2-version', ...createPackagePolicyWithInitialManifestMock() },
+      { version: 'policy-3-version', ...createPackagePolicyWithInitialManifestMock() },
     ],
   });
 
@@ -97,7 +97,7 @@ export const getManifestManagerMock = (opts?: {
   const manifestManager = new ManifestManagerMock({
     artifactClient: getArtifactClientMock(savedObjectsClient),
     cache,
-    packageConfigService,
+    packagePolicyService,
     exceptionListClient,
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     savedObjectsClient,

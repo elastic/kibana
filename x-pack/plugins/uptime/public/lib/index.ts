@@ -5,4 +5,4 @@
  */
 
 export { MountWithReduxProvider } from './helper';
-export { renderWithRouter, shallowWithRouter, mountWithRouter } from './helper/helper_with_router';
+export * from './helper/helper_with_router';

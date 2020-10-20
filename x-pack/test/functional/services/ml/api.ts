@@ -5,13 +5,29 @@
  */
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { IndexDocumentParams } from 'elasticsearch';
 import { Calendar, CalendarEvent } from '../../../../plugins/ml/server/models/calendar/index';
+import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
+import {
+  ML_ANNOTATIONS_INDEX_ALIAS_READ,
+  ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+} from '../../../../plugins/ml/common/constants/index_patterns';
+
+interface EsIndexResult {
+  _index: string;
+  _id: string;
+  _version: number;
+  result: string;
+  _shards: any;
+  _seq_no: number;
+  _primary_term: number;
+}
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
@@ -252,7 +268,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async waitForDFAJobTrainingRecordCountToBePositive(analyticsId: string) {
       await retry.waitForWithTimeout(
         `'${analyticsId}' to have training_docs_count > 0`,
-        10 * 1000,
+        60 * 1000,
         async () => {
           const trainingRecordCount = await this.getDFAJobTrainingRecordCount(analyticsId);
           if (trainingRecordCount > 0) {
@@ -633,6 +649,98 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(errorMsg || `expected filter '${filterId}' to not exist`);
         }
       });
+    },
+
+    async getAnnotations(jobId: string) {
+      log.debug(`Fetching annotations for job '${jobId}'...`);
+
+      const results = await es.search<Annotation>({
+        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+        body: {
+          query: {
+            match: {
+              job_id: jobId,
+            },
+          },
+        },
+      });
+      expect(results).to.not.be(undefined);
+      expect(results).to.have.property('hits');
+      return results.hits.hits;
+    },
+
+    async getAnnotationById(annotationId: string): Promise<Annotation | undefined> {
+      log.debug(`Fetching annotation '${annotationId}'...`);
+
+      const result = await es.search({
+        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+        body: {
+          size: 1,
+          query: {
+            match: {
+              _id: annotationId,
+            },
+          },
+        },
+      });
+      // @ts-ignore due to outdated type for hits.total
+      if (result.hits.total.value === 1) {
+        return result?.hits?.hits[0]?._source as Annotation;
+      }
+      return undefined;
+    },
+
+    async indexAnnotation(annotationRequestBody: Partial<Annotation>) {
+      log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
+      // @ts-ignore due to outdated type for IndexDocumentParams.type
+      const params: IndexDocumentParams<Partial<Annotation>> = {
+        index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+        body: annotationRequestBody,
+        refresh: 'wait_for',
+      };
+      const results: EsIndexResult = await es.index(params);
+      await this.waitForAnnotationToExist(results._id);
+      return results;
+    },
+
+    async waitForAnnotationToExist(annotationId: string, errorMsg?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if ((await this.getAnnotationById(annotationId)) !== undefined) {
+          return true;
+        } else {
+          throw new Error(errorMsg ?? `annotation '${annotationId}' should exist`);
+        }
+      });
+    },
+
+    async waitForAnnotationNotToExist(annotationId: string, errorMsg?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if ((await this.getAnnotationById(annotationId)) === undefined) {
+          return true;
+        } else {
+          throw new Error(errorMsg ?? `annotation '${annotationId}' should not exist`);
+        }
+      });
+    },
+
+    async runDFAJob(dfaId: string) {
+      log.debug(`Starting data frame analytics job '${dfaId}'...`);
+      const startResponse = await esSupertest
+        .post(`/_ml/data_frame/analytics/${dfaId}/_start`)
+        .set({ 'Content-Type': 'application/json' })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(startResponse)
+        .to.have.property('acknowledged')
+        .eql(true, 'Response for start data frame analytics job request should be acknowledged');
+    },
+
+    async createAndRunDFAJob(dfaConfig: DataFrameAnalyticsConfig) {
+      await this.createDataFrameAnalyticsJob(dfaConfig);
+      await this.runDFAJob(dfaConfig.id);
+      await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
+      await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
     },
   };
 }

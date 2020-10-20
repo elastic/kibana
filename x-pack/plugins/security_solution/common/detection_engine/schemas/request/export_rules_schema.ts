@@ -6,9 +6,7 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import { rule_id, FileName, ExcludeExportDetails } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 import { DefaultExportFileName } from '../types/default_export_file_name';
 import { DefaultStringBooleanFalse } from '../types/default_string_boolean_false';

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
 import {
   CoreSetup,
   CoreStart,
@@ -12,30 +13,42 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/server';
 import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/vis_type_timelion/server';
 import { FeatureRegistry } from './feature_registry';
-import { Feature, FeatureConfig } from '../common/feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
+import {
+  ElasticsearchFeatureConfig,
+  ElasticsearchFeature,
+  KibanaFeature,
+  KibanaFeatureConfig,
+} from '../common';
 
 /**
  * Describes public Features plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
-  registerFeature(feature: FeatureConfig): void;
+  registerKibanaFeature(feature: KibanaFeatureConfig): void;
+  registerElasticsearchFeature(feature: ElasticsearchFeatureConfig): void;
   /*
    * Calling this function during setup will crash Kibana.
    * Use start contract instead.
    * @deprecated
    * */
-  getFeatures(): Feature[];
+  getKibanaFeatures(): KibanaFeature[];
+  /*
+   * Calling this function during setup will crash Kibana.
+   * Use start contract instead.
+   * @deprecated
+   * */
+  getElasticsearchFeatures(): ElasticsearchFeature[];
   getFeaturesUICapabilities(): UICapabilities;
 }
 
 export interface PluginStartContract {
-  getFeatures(): Feature[];
+  getElasticsearchFeatures(): ElasticsearchFeature[];
+  getKibanaFeatures(): KibanaFeature[];
 }
 
 /**
@@ -61,10 +74,24 @@ export class Plugin {
       featureRegistry: this.featureRegistry,
     });
 
+    const getFeaturesUICapabilities = () =>
+      uiCapabilitiesForFeatures(
+        this.featureRegistry.getAllKibanaFeatures(),
+        this.featureRegistry.getAllElasticsearchFeatures()
+      );
+
+    core.capabilities.registerProvider(getFeaturesUICapabilities);
+
     return deepFreeze({
-      registerFeature: this.featureRegistry.register.bind(this.featureRegistry),
-      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
-      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(this.featureRegistry.getAll()),
+      registerKibanaFeature: this.featureRegistry.registerKibanaFeature.bind(this.featureRegistry),
+      registerElasticsearchFeature: this.featureRegistry.registerElasticsearchFeature.bind(
+        this.featureRegistry
+      ),
+      getKibanaFeatures: this.featureRegistry.getAllKibanaFeatures.bind(this.featureRegistry),
+      getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
+        this.featureRegistry
+      ),
+      getFeaturesUICapabilities,
     });
   }
 
@@ -72,7 +99,10 @@ export class Plugin {
     this.registerOssFeatures(core.savedObjects);
 
     return deepFreeze({
-      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
+      getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
+        this.featureRegistry
+      ),
+      getKibanaFeatures: this.featureRegistry.getAllKibanaFeatures.bind(this.featureRegistry),
     });
   }
 
@@ -93,7 +123,7 @@ export class Plugin {
     });
 
     for (const feature of features) {
-      this.featureRegistry.register(feature);
+      this.featureRegistry.registerKibanaFeature(feature);
     }
   }
 }

@@ -21,7 +21,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'body'}
-      inputTargetValue={body || ''}
+      inputTargetValue={body}
       label={i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyFieldLabel',
         {
@@ -37,6 +37,11 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
       errors={errors.body as string[]}
       onDocumentsChange={(json: string) => {
         editAction('body', json, index);
+      }}
+      onBlur={() => {
+        if (!body) {
+          editAction('body', '', index);
+        }
       }}
     />
   );

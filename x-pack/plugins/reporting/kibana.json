@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "optionalPlugins": [
     "security",
+    "spaces",
     "usageCollection"
   ],
   "configPath": ["xpack", "reporting"],
@@ -14,7 +15,8 @@
     "licensing",
     "uiActions",
     "embeddable",
-    "share"
+    "share",
+    "features"
   ],
   "server": true,
   "ui": true,

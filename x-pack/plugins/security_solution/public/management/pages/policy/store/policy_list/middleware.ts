@@ -6,17 +6,17 @@
 
 import { GetPolicyListResponse, PolicyListState } from '../../types';
 import {
-  sendGetEndpointSpecificPackageConfigs,
-  sendDeletePackageConfig,
-  sendGetFleetAgentStatusForConfig,
+  sendGetEndpointSpecificPackagePolicies,
+  sendDeletePackagePolicy,
+  sendGetFleetAgentStatusForPolicy,
   sendGetEndpointSecurityPackage,
 } from './services/ingest';
 import { endpointPackageInfo, isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { initialPolicyListState } from './reducer';
 import {
-  DeletePackageConfigsResponse,
-  DeletePackageConfigsRequest,
+  DeletePackagePoliciesResponse,
+  DeletePackagePoliciesRequest,
   GetAgentStatusResponse,
 } from '../../../../../../../ingest_manager/common';
 
@@ -57,7 +57,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       let response: GetPolicyListResponse;
 
       try {
-        response = await sendGetEndpointSpecificPackageConfigs(http, {
+        response = await sendGetEndpointSpecificPackagePolicies(http, {
           query: {
             perPage: pageSize,
             page: pageIndex + 1,
@@ -82,10 +82,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       });
     } else if (action.type === 'userClickedPolicyListDeleteButton') {
       const { policyId } = action.payload;
-      const packageConfigIds: DeletePackageConfigsRequest['body']['packageConfigIds'] = [policyId];
-      let apiResponse: DeletePackageConfigsResponse;
+      const packagePolicyIds: DeletePackagePoliciesRequest['body']['packagePolicyIds'] = [policyId];
+      let apiResponse: DeletePackagePoliciesResponse;
       try {
-        apiResponse = await sendDeletePackageConfig(http, { body: { packageConfigIds } });
+        apiResponse = await sendDeletePackagePolicy(http, { body: { packagePolicyIds } });
       } catch (err) {
         dispatch({
           type: 'serverDeletedPolicyFailure',
@@ -102,10 +102,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
         },
       });
     } else if (action.type === 'userOpenedPolicyListDeleteModal') {
-      const { agentConfigId } = action.payload;
+      const { agentPolicyId } = action.payload;
       let apiResponse: GetAgentStatusResponse;
       try {
-        apiResponse = await sendGetFleetAgentStatusForConfig(http, agentConfigId);
+        apiResponse = await sendGetFleetAgentStatusForPolicy(http, agentPolicyId);
       } catch (err) {
         dispatch({
           type: 'serverReturnedPolicyAgentsSummaryForDeleteFailure',

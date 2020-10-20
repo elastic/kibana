@@ -13,6 +13,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -22,12 +23,16 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export class MonitoringPlugin
@@ -54,21 +59,29 @@ export class MonitoringPlugin
     if (home) {
       home.featureCatalogue.register({
         id,
-        title,
+        title: i18n.translate('xpack.monitoring.featureCatalogueTitle', {
+          defaultMessage: 'Monitor the stack',
+        }),
         icon,
         path: '/app/monitoring',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
-        description: i18n.translate('xpack.monitoring.monitoringDescription', {
-          defaultMessage: 'Track the real-time health and performance of your Elastic Stack.',
+        description: i18n.translate('xpack.monitoring.featureCatalogueDescription', {
+          defaultMessage: 'Track the real-time health and performance of your deployment.',
         }),
+        order: 610,
       });
     }
 
-    plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
+    const { alertTypeRegistry } = plugins.triggersActionsUi;
+    alertTypeRegistry.register(createCpuUsageAlertType());
+    alertTypeRegistry.register(createDiskUsageAlertType());
+    alertTypeRegistry.register(createMemoryUsageAlertType());
+    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
+
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
-      plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);
+      alertTypeRegistry.register(legacyAlertType);
     }
 
     const app: App = {
@@ -89,7 +102,8 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggers_actions_ui,
+          triggersActionsUi: plugins.triggersActionsUi,
+          usageCollection: plugins.usageCollection,
         };
 
         pluginsStart.kibanaLegacy.loadFontAwesome();
@@ -128,7 +142,7 @@ export class MonitoringPlugin
       UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
       JSON.stringify(refreshInterval)
     );
-    uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));
+    uiSettings.overrideLocalDefault(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, JSON.stringify(time));
   }
 
   private getExternalConfig() {

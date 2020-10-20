@@ -37,6 +37,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
+import { ApplicationStart } from '../../../../../core/public';
 import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {
@@ -55,7 +56,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const {
     services: { application },
-  } = useKibana();
+  } = useKibana<{ application: ApplicationStart }>();
 
   const closePopover = useCallback(() => setShowPopover(false), []);
   const onClickButtonLink = useCallback(() => setShowPopover((v) => !v), []);

@@ -57,6 +57,7 @@ class MultiJobActionsMenuUI extends Component {
         disabled={
           anyJobsDeleting || (this.canDeleteJob === false && this.canStartStopDatafeed === false)
         }
+        data-test-subj="mlADJobListMultiSelectManagementActionsButton"
       />
     );
 
@@ -69,6 +70,7 @@ class MultiJobActionsMenuUI extends Component {
           this.props.showDeleteJobModal(this.props.jobs);
           this.closePopover();
         }}
+        data-test-subj="mlADJobListMultiSelectDeleteJobActionButton"
       >
         <FormattedMessage
           id="xpack.ml.jobsList.multiJobsActions.deleteJobsLabel"
@@ -88,6 +90,7 @@ class MultiJobActionsMenuUI extends Component {
             closeJobs(this.props.jobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectCloseJobActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.closeJobsLabel"
@@ -108,6 +111,7 @@ class MultiJobActionsMenuUI extends Component {
             stopDatafeeds(this.props.jobs, this.props.refreshJobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectStopDatafeedActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel"
@@ -128,6 +132,7 @@ class MultiJobActionsMenuUI extends Component {
             this.props.showStartDatafeedModal(this.props.jobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectStartDatafeedActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel"

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { expectType } from 'tsd';
+import { expectAssignable } from 'tsd';
 import { UnwrapPromise } from '../index';
 
 type STRING = UnwrapPromise<Promise<string>>;
 type TUPLE = UnwrapPromise<Promise<[number, number]>>;
 
-expectType<STRING>('adf');
-expectType<TUPLE>([1, 2]);
+expectAssignable<STRING>('adf');
+expectAssignable<TUPLE>([1, 2]);

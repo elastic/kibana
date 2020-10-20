@@ -17,74 +17,8 @@ export const infraSourceConfigurationSavedObjectType: SavedObjectsType = {
     importableAndExportable: true,
   },
   mappings: {
-    properties: {
-      name: {
-        type: 'text',
-      },
-      description: {
-        type: 'text',
-      },
-      metricAlias: {
-        type: 'keyword',
-      },
-      logAlias: {
-        type: 'keyword',
-      },
-      inventoryDefaultView: {
-        type: 'keyword',
-      },
-      metricsExplorerDefaultView: {
-        type: 'keyword',
-      },
-      fields: {
-        properties: {
-          container: {
-            type: 'keyword',
-          },
-          host: {
-            type: 'keyword',
-          },
-          pod: {
-            type: 'keyword',
-          },
-          tiebreaker: {
-            type: 'keyword',
-          },
-          timestamp: {
-            type: 'keyword',
-          },
-        },
-      },
-      logColumns: {
-        type: 'nested',
-        properties: {
-          timestampColumn: {
-            properties: {
-              id: {
-                type: 'keyword',
-              },
-            },
-          },
-          messageColumn: {
-            properties: {
-              id: {
-                type: 'keyword',
-              },
-            },
-          },
-          fieldColumn: {
-            properties: {
-              id: {
-                type: 'keyword',
-              },
-              field: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-    },
+    dynamic: false,
+    properties: {},
   },
   migrations: {
     '7.9.0': addNewIndexingStrategyIndexNames,

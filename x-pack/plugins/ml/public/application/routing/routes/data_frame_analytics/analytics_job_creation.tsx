@@ -5,36 +5,45 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { parse } from 'query-string';
+
+import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../../contexts/kibana';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
-import { ML_BREADCRUMB } from '../../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel', {
-      defaultMessage: 'Data Frame Analytics',
-    }),
-    href: '#/data_frame_analytics',
-  },
-];
-
-export const analyticsJobsCreationRoute: MlRoute = {
+export const analyticsJobsCreationRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/data_frame_analytics/new_job',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel', {
+        defaultMessage: 'Data Frame Analytics',
+      }),
+      onClick: breadcrumbOnClickFactory('/data_frame_analytics', navigateToPath),
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {
     sort: false,
   });
 
-  const { context } = useResolver(index, savedSearchId, deps.config, basicResolvers(deps));
+  const { context } = useResolver(index, savedSearchId, deps.config, {
+    ...basicResolvers(deps),
+    jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
+  });
 
   return (
     <PageLoader context={context}>

@@ -58,10 +58,26 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
-      const isPresent = await testSubjects.exists(testSubj, { timeout: 10000 });
+      let isPresent = false;
+      await retry.try(async () => {
+        isPresent = await testSubjects.exists(testSubj, { timeout: 20000 });
+      });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
       }
+    }
+
+    public async checkTabIsSelected(chartType: string) {
+      const chartTypeBtn = await testSubjects.find(`${chartType}TsvbTypeBtn`);
+      const isSelected = await chartTypeBtn.getAttribute('aria-selected');
+
+      if (isSelected !== 'true') {
+        throw new Error(`TSVB ${chartType} tab is not selected`);
+      }
+    }
+
+    public async checkPanelConfigIsPresent(chartType: string) {
+      await testSubjects.existOrFail(`tvbPanelConfig__${chartType}`);
     }
 
     public async checkVisualBuilderIsPresent() {
@@ -117,8 +133,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async enterMarkdown(markdown: string) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
-      await input.type(markdown, { charByChar: true });
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await input.type(markdown);
+      await PageObjects.common.sleep(3000);
     }
 
     public async clearMarkdown() {
@@ -420,7 +436,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async setIndexPatternValue(value: string) {
       const el = await testSubjects.find('metricsIndexPatternInput');
       await el.clearValue();
-      await el.type(value);
+      await el.type(value, { charByChar: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -435,6 +451,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const option = await testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
       (await option.findByCssSelector('label')).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    public async waitForIndexPatternTimeFieldOptionsLoaded() {
+      await retry.waitFor('combobox options loaded', async () => {
+        const options = await comboBox.getOptions('metricsIndexPatternFieldsSelect');
+        log.debug(`-- optionsCount=${options.length}`);
+        return options.length > 0;
+      });
     }
 
     public async selectIndexPatternTimeField(timeField: string) {
@@ -558,8 +582,39 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await find.allByCssSelector('.echLegendItem');
     }
 
+    public async getLegendItemsContent(): Promise<string[]> {
+      const legendList = await find.byCssSelector('.echLegendList');
+      const $ = await legendList.parseDomContent();
+
+      return $('li')
+        .toArray()
+        .map((li) => {
+          const label = $(li).find('.echLegendItem__label').text();
+          const value = $(li).find('.echLegendItem__extra').text();
+
+          return `${label}: ${value}`;
+        });
+    }
+
     public async getSeries(): Promise<WebElementWrapper[]> {
       return await find.allByCssSelector('.tvbSeriesEditor');
+    }
+
+    public async setMetricsGroupByTerms(field: string) {
+      const groupBy = await find.byCssSelector(
+        '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
+      );
+      await comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
+      await PageObjects.common.sleep(1000);
+      const byField = await testSubjects.find('groupByField');
+      await comboBox.setElement(byField, field, { clickWithMouse: true });
+    }
+
+    public async checkSelectedMetricsGroupByValue(value: string) {
+      const groupBy = await find.byCssSelector(
+        '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
+      );
+      return await comboBox.isOptionSelected(groupBy, value);
     }
   }
 

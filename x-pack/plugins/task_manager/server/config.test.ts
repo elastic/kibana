@@ -13,6 +13,7 @@ describe('config validation', () => {
         "enabled": true,
         "index": ".kibana_task_manager",
         "max_attempts": 3,
+        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "poll_interval": 3000,
         "request_capacity": 1000,

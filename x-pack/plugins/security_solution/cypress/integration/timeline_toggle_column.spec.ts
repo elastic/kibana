@@ -12,7 +12,7 @@ import {
 } from '../screens/timeline';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/security_main';
+import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
   checkIdToggleField,
   createNewTimeline,
@@ -30,7 +30,7 @@ describe('toggle column in timeline', () => {
   });
 
   beforeEach(() => {
-    openTimeline();
+    openTimelineUsingToggle();
     populateTimeline();
   });
 

@@ -18,11 +18,12 @@
  */
 
 import { statSync } from 'fs';
-import { errorIfXPackRemove } from '../lib/error_if_x_pack';
 
 import del from 'del';
 
-export default function remove(settings, logger) {
+import { errorIfXPackRemove } from '../lib/error_if_x_pack';
+
+export function remove(settings, logger) {
   try {
     let stat;
     try {

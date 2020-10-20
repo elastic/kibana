@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-search: (context: RequestHandlerContext, request: IKibanaSearchRequest, options: ISearchOptions) => Promise<IKibanaSearchResponse>;
+search: ISearchStrategy['search'];
 ```

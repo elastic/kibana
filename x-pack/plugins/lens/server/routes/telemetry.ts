@@ -15,7 +15,7 @@ export async function initLensUsageRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: `${BASE_API_URL}/telemetry`,
+      path: `${BASE_API_URL}/stats`,
       validate: {
         body: schema.object({
           events: schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number())),

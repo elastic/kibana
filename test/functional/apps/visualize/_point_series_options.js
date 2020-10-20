@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'visualize',
     'header',
@@ -146,6 +147,10 @@ export default function ({ getService, getPageObjects }) {
             expect(item - expectedChartValues[1][i]).to.be.lessThan(600001);
           });
         });
+      });
+
+      it('should not show advanced json for count agg', async function () {
+        await testSubjects.missingOrFail('advancedParams-1');
       });
 
       it('should put secondary axis on the right', async function () {

@@ -8,24 +8,8 @@
 // is also require'd in the Storybook config so that the Storybook Webpack instance
 // is aware of them, and can load them from the DLL.
 
-// Pull in the built CSS produced by the Kibana server, but not
-// the Canvas CSS-- we want that in the HMR service.
-const css = require.context(
-  '../../../../built_assets/css',
-  true,
-  /\.\/plugins\/(?!canvas).*light\.css/
-);
-css.keys().forEach((filename) => {
-  css(filename);
-});
-
-// Include Legacy styles
-const uiStyles = require.context(
-  '../../../../src/legacy/ui/public/styles',
-  false,
-  /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
-);
-uiStyles.keys().forEach((key) => uiStyles(key));
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+require('../../../../src/core/server/core_app/assets/legacy_light_theme.css');
 
 const json = require.context('../shareable_runtime/test/workpads', false, /\.json$/);
 json.keys().forEach((key) => json(key));

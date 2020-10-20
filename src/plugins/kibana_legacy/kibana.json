@@ -2,6 +2,5 @@
   "id": "kibanaLegacy",
   "version": "kibana",
   "server": true,
-  "ui": true,
-  "extraPublicDirs": ["common/kbn_base_url"]
+  "ui": true
 }

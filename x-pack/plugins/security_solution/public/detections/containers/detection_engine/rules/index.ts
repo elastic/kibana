@@ -5,8 +5,8 @@
  */
 
 export * from './api';
-export * from './fetch_index_patterns';
-export * from './persist_rule';
+export * from './use_update_rule';
+export * from './use_create_rule';
 export * from './types';
 export * from './use_rule';
 export * from './use_rules';

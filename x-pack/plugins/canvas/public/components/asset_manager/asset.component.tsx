@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useNotifyService } from '../../services';
 
 import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
@@ -38,11 +38,10 @@ interface Props {
 }
 
 export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
-  const { services } = useKibana();
+  const { success } = useNotifyService();
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
-  const onCopy = (result: boolean) =>
-    result && services.canvas.notify.success(`Copied '${asset.id}' to clipboard`);
+  const onCopy = (result: boolean) => result && success(`Copied '${asset.id}' to clipboard`);
 
   const confirmModal = (
     <ConfirmModal

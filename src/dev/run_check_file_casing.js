@@ -19,9 +19,9 @@
 
 import globby from 'globby';
 
+import { REPO_ROOT } from '@kbn/utils';
 import { run } from '@kbn/dev-utils';
 import { File } from './file';
-import { REPO_ROOT } from './constants';
 import { checkFileCasing } from './precommit_hook/check_file_casing';
 
 run(async ({ log }) => {

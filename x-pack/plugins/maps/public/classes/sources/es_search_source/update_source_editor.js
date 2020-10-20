@@ -42,6 +42,8 @@ export class UpdateSourceEditor extends Component {
     termFields: null,
     sortFields: null,
     supportsClustering: false,
+    mvtDisabledReason: null,
+    clusteringDisabledReason: null,
   };
 
   componentDidMount() {
@@ -97,6 +99,7 @@ export class UpdateSourceEditor extends Component {
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
+      mvtDisabledReason: null,
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(

@@ -26,7 +26,7 @@ import {
   IAggType,
   IndexPattern,
   IndexPatternField,
-} from 'src/plugins/data/public';
+} from '../../../data/public';
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';

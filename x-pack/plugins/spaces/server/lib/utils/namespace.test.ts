@@ -4,45 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { mockNamespaceIdToString, mockNamespaceStringToId } from './__mocks__';
 import { spaceIdToNamespace, namespaceToSpaceId } from './namespace';
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('#spaceIdToNamespace', () => {
-  it('converts the default space to undefined', () => {
-    expect(spaceIdToNamespace(DEFAULT_SPACE_ID)).toBeUndefined();
-  });
+  it('returns result of namespaceStringToId', () => {
+    mockNamespaceStringToId.mockReturnValue('bar');
 
-  it('returns non-default spaces as-is', () => {
-    expect(spaceIdToNamespace('foo')).toEqual('foo');
-  });
-
-  it('throws an error when a spaceId is not provided', () => {
-    // @ts-ignore ts knows this isn't right
-    expect(() => spaceIdToNamespace()).toThrowErrorMatchingInlineSnapshot(`"spaceId is required"`);
-
-    // @ts-ignore ts knows this isn't right
-    expect(() => spaceIdToNamespace(null)).toThrowErrorMatchingInlineSnapshot(
-      `"spaceId is required"`
-    );
-
-    expect(() => spaceIdToNamespace('')).toThrowErrorMatchingInlineSnapshot(
-      `"spaceId is required"`
-    );
+    const result = spaceIdToNamespace('foo');
+    expect(mockNamespaceStringToId).toHaveBeenCalledWith('foo');
+    expect(result).toEqual('bar');
   });
 });
 
 describe('#namespaceToSpaceId', () => {
-  it('returns the default space id for undefined namespaces', () => {
-    expect(namespaceToSpaceId(undefined)).toEqual(DEFAULT_SPACE_ID);
-  });
+  it('returns result of namespaceIdToString', () => {
+    mockNamespaceIdToString.mockReturnValue('bar');
 
-  it('returns all other namespaces as-is', () => {
-    expect(namespaceToSpaceId('foo')).toEqual('foo');
-  });
-
-  it('throws an error when an empty string is provided', () => {
-    expect(() => namespaceToSpaceId('')).toThrowErrorMatchingInlineSnapshot(
-      `"namespace cannot be an empty string"`
-    );
+    const result = namespaceToSpaceId('foo');
+    expect(mockNamespaceIdToString).toHaveBeenCalledWith('foo');
+    expect(result).toEqual('bar');
   });
 });

@@ -9,6 +9,6 @@ import { SecurityPluginSetup } from '../../../../security/server';
 
 export function getUserFactory(security?: SecurityPluginSetup) {
   return (request: KibanaRequest) => {
-    return security?.authc.getCurrentUser(request) ?? null;
+    return security?.authc.getCurrentUser(request) ?? false;
   };
 }

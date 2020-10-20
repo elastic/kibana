@@ -15,7 +15,7 @@ export const ComponentStrings = {
       }),
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
   },
   AdvancedFilter: {
@@ -234,6 +234,11 @@ export const ComponentStrings = {
     getChangeButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
         defaultMessage: 'Change element data source',
+      }),
+    getExpressionArgDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.expressionArgDescription', {
+        defaultMessage:
+          'The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.',
       }),
     getPreviewButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
@@ -913,6 +918,13 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.toolbar.errorMessage', {
+        defaultMessage: 'TOOLBAR ERROR: {message}',
+        values: {
+          message,
+        },
+      }),
   },
   ToolbarTray: {
     getCloseTrayAriaLabel: () =>
@@ -1301,7 +1313,7 @@ export const ComponentStrings = {
       }),
     getEmbedObjectMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
     getFilterMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {

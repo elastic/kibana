@@ -13,6 +13,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
@@ -49,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 401 if this a not a valid acks access', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
         .send({
@@ -60,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 200 if this a valid acks request', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -90,9 +91,8 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       expect(apiResponse.action).to.be('acks');
-      expect(apiResponse.success).to.be(true);
       const { body: eventResponse } = await supertest
-        .get(`/api/ingest_manager/fleet/agents/agent1/events`)
+        .get(`/api/fleet/agents/agent1/events`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -121,7 +121,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 when request event list contains event for another agent id', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -148,7 +148,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 when request event list contains action that does not belong to agent current actions', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -182,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -205,6 +205,51 @@ export default function (providerContext: FtrProviderContext) {
       expect(apiResponse.message).to.eql(
         'ACTION not allowed for acknowledgment only ACTION_RESULT'
       );
+    });
+
+    it('ack upgrade should update fleet-agent SO', async () => {
+      const { body: actionRes } = await supertest
+        .post(`/api/fleet/agents/agent1/actions`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          action: {
+            type: 'UPGRADE',
+            ack_data: { version: '8.0.0' },
+          },
+        })
+        .expect(200);
+      const actionId = actionRes.item.id;
+      await supertest
+        .post(`/api/fleet/agents/agent1/acks`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          events: [
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'ACKNOWLEDGED',
+              timestamp: '2020-09-21T13:25:29.02838-04:00',
+              action_id: actionId,
+              agent_id: 'agent1',
+              message:
+                "Action '70d97288-ffd9-4549-8c49-2423a844f67f' of type 'UPGRADE' acknowledged.",
+            },
+          ],
+        })
+        .expect(200);
+
+      const res = await kibanaServer.savedObjects.get({
+        type: 'fleet-agents',
+        id: 'agent1',
+      });
+      expect(res.attributes.upgraded_at).to.be.ok();
     });
   });
 }

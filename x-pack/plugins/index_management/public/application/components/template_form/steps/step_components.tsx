@@ -34,7 +34,7 @@ const i18nTexts = {
   description: (
     <FormattedMessage
       id="xpack.idxMgmt.formWizard.stepComponents.componentsDescription"
-      defaultMessage="Components templates let you save index settings, mappings and aliases and inherit from them in index templates."
+      defaultMessage="Component templates let you save index settings, mappings and aliases and inherit from them in index templates."
     />
   ),
 };

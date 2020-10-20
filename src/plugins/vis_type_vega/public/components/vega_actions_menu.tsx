@@ -70,7 +70,7 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
 
   return (
     <EuiPopover
-      id="helpMenu"
+      id="actionsMenu"
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

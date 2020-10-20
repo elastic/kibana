@@ -6,10 +6,10 @@
 
 import React, { useMemo, FC } from 'react';
 
-import { DataGrid } from '../../../../../shared_imports';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
-import { useToastNotifications } from '../../../../app_dependencies';
-import { getPivotQuery, TransformPivotConfig } from '../../../../common';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { getPivotQuery } from '../../../../common';
 import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
@@ -23,6 +23,9 @@ interface ExpandedRowPreviewPaneProps {
 }
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
+  const {
+    ml: { DataGrid },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
   const { aggList, groupByList, searchQuery } = useMemo(

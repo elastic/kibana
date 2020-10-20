@@ -19,29 +19,20 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Synopsis } from './synopsis';
-import { AddData } from './add_data';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import {
-  EuiButton,
-  EuiPage,
-  EuiPanel,
-  EuiTitle,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiText,
-  EuiPageBody,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { Welcome } from './welcome';
-import { getServices } from '../kibana_services';
+import {
+  OverviewPageFooter,
+  OverviewPageHeader,
+} from '../../../../../../src/plugins/kibana_react/public';
+import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
-import { createAppNavigationHandler } from './app_navigation_handler';
+import { getServices } from '../kibana_services';
+import { AddData } from './add_data';
+import { ManageData } from './manage_data';
+import { SolutionsSection } from './solutions_section';
+import { Welcome } from './welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -53,6 +44,10 @@ export class Home extends Component {
       getServices().homeConfig.disableWelcomeScreen ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
+
+    const body = document.querySelector('body');
+    body.classList.add('isHomPage');
+
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -116,105 +111,69 @@ export class Home extends Component {
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
-  renderDirectories = (category) => {
-    const { addBasePath, directories } = this.props;
-    return directories
-      .filter((directory) => {
-        return directory.showOnHomePage && directory.category === category;
-      })
-      .map((directory) => {
-        return (
-          <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
-            <Synopsis
-              onClick={createAppNavigationHandler(directory.path)}
-              description={directory.description}
-              iconType={directory.icon}
-              title={directory.title}
-              url={addBasePath(directory.path)}
-            />
-          </EuiFlexItem>
-        );
-      });
-  };
+  findDirectoryById = (id) => this.props.directories.find((directory) => directory.id === id);
+
+  getFeaturesByCategory = (category) =>
+    this.props.directories
+      .filter((directory) => directory.showOnHomePage && directory.category === category)
+      .sort((directoryA, directoryB) => directoryA.order - directoryB.order);
 
   renderNormal() {
-    const { apmUiEnabled, mlEnabled } = this.props;
+    const { addBasePath, solutions, directories } = this.props;
+
+    const devTools = this.findDirectoryById('console');
+    const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
+    const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
+
+    // Show card for console if none of the manage data plugins are available, most likely in OSS
+    if (manageDataFeatures.length < 1 && devTools) {
+      manageDataFeatures.push(devTools);
+    }
 
     return (
-      <EuiPage restrictWidth={1200} data-test-subj="homeApp">
-        <EuiPageBody className="eui-displayBlock">
-          <EuiScreenReaderOnly>
-            <h1>
-              <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
-            </h1>
-          </EuiScreenReaderOnly>
+      <main
+        aria-labelledby="kbnOverviewPageHeader__title"
+        className="homWrapper"
+        data-test-subj="homeApp"
+      >
+        <OverviewPageHeader
+          addBasePath={addBasePath}
+          overlap={solutions.length}
+          showDevToolsLink
+          showManagementLink
+          title={<FormattedMessage id="home.header.title" defaultMessage="Home" />}
+        />
 
-          <AddData
-            apmUiEnabled={apmUiEnabled}
-            mlEnabled={mlEnabled}
-            isNewKibanaInstance={this.state.isNewKibanaInstance}
-          />
+        <div className="homContent">
+          {solutions.length ? (
+            <SolutionsSection
+              addBasePath={addBasePath}
+              solutions={solutions}
+              directories={directories}
+            />
+          ) : null}
 
-          <EuiSpacer size="l" />
-
-          <EuiFlexGroup>
+          <EuiFlexGroup
+            className={`homData ${
+              addDataFeatures.length === 1 && manageDataFeatures.length === 1
+                ? 'homData--compressed'
+                : 'homData--expanded'
+            }`}
+          >
             <EuiFlexItem>
-              <EuiPanel paddingSize="l">
-                <EuiTitle size="s">
-                  <h2>
-                    <FormattedMessage
-                      id="home.directories.visualize.nameTitle"
-                      defaultMessage="Visualize and Explore Data"
-                    />
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2} gutterSize="s">
-                  {this.renderDirectories(FeatureCatalogueCategory.DATA)}
-                </EuiFlexGrid>
-              </EuiPanel>
+              <AddData addBasePath={addBasePath} features={addDataFeatures} />
             </EuiFlexItem>
+
             <EuiFlexItem>
-              <EuiPanel paddingSize="l">
-                <EuiTitle size="s">
-                  <h2>
-                    <FormattedMessage
-                      id="home.directories.manage.nameTitle"
-                      defaultMessage="Manage and Administer the Elastic Stack"
-                    />
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2}>
-                  {this.renderDirectories(FeatureCatalogueCategory.ADMIN)}
-                </EuiFlexGrid>
-              </EuiPanel>
+              <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer size="l" />
+          <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false} className="eui-textCenter">
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="home.directories.notFound.description"
-                    defaultMessage="Didn’t find what you were looking for?"
-                  />
-                </p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiButton data-test-subj="allPlugins" href="#/feature_directory">
-                <FormattedMessage
-                  id="home.directories.notFound.viewFullButtonLabel"
-                  defaultMessage="View full directory of Kibana plugins"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageBody>
-      </EuiPage>
+          <OverviewPageFooter addBasePath={addBasePath} path={HOME_APP_BASE_PATH} />
+        </div>
+      </main>
     );
   }
 
@@ -255,18 +214,31 @@ Home.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
+      subtitle: PropTypes.string,
       description: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       showOnHomePage: PropTypes.bool.isRequired,
       category: PropTypes.string.isRequired,
+      order: PropTypes.number,
+      solutionId: PropTypes.string,
     })
   ),
-  apmUiEnabled: PropTypes.bool.isRequired,
+  solutions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      subtitle: PropTypes.string.isRequired,
+      description: PropTypes.string,
+      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      order: PropTypes.number,
+    })
+  ),
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
-  mlEnabled: PropTypes.bool.isRequired,
   telemetry: PropTypes.shape({
     telemetryService: PropTypes.any,
     telemetryNotifications: PropTypes.any,

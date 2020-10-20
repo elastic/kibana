@@ -15,7 +15,9 @@ import { CanvasRenderedWorkpad, Stage, Settings, Refs } from '../types';
 
 let timeout: number = 0;
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type onSetPageFn = (page: number) => void;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type onSetScrubberVisibleFn = (visible: boolean) => void;
 type Workpad = Pick<CanvasRenderedWorkpad, 'height' | 'width' | 'pages'>;
 

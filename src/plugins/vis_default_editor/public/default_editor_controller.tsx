@@ -19,64 +19,21 @@
 
 import React, { Suspense, lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
-import { EditorRenderProps } from 'src/plugins/visualize/public';
+import { EditorRenderProps, IEditorController } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
 
 const DefaultEditor = lazy(() => import('./default_editor'));
 
-export interface DefaultEditorControllerState {
-  vis: Vis;
-  eventEmitter: EventEmitter;
-  embeddableHandler: VisualizeEmbeddableContract;
-  optionTabs: OptionTab[];
-}
-
-class DefaultEditorController {
-  private el: HTMLElement;
-  private state: DefaultEditorControllerState;
-
-  constructor(el: HTMLElement, vis: Vis, eventEmitter: EventEmitter, embeddableHandler: any) {
-    this.el = el;
-    const { type: visType } = vis;
-
-    const optionTabs = [
-      ...(visType.schemas.buckets || visType.schemas.metrics
-        ? [
-            {
-              name: 'data',
-              title: i18n.translate('visDefaultEditor.sidebar.tabs.dataLabel', {
-                defaultMessage: 'Data',
-              }),
-              editor: DefaultEditorDataTab,
-            },
-          ]
-        : []),
-
-      ...(!visType.editorConfig.optionTabs && visType.editorConfig.optionsTemplate
-        ? [
-            {
-              name: 'options',
-              title: i18n.translate('visDefaultEditor.sidebar.tabs.optionsLabel', {
-                defaultMessage: 'Options',
-              }),
-              editor: visType.editorConfig.optionsTemplate,
-            },
-          ]
-        : visType.editorConfig.optionTabs),
-    ];
-
-    this.state = {
-      vis,
-      optionTabs,
-      eventEmitter,
-      embeddableHandler,
-    };
-  }
+class DefaultEditorController implements IEditorController {
+  constructor(
+    private el: HTMLElement,
+    private vis: Vis,
+    private eventEmitter: EventEmitter,
+    private embeddableHandler: VisualizeEmbeddableContract
+  ) {}
 
   render(props: EditorRenderProps) {
     render(
@@ -95,7 +52,12 @@ class DefaultEditorController {
             </div>
           }
         >
-          <DefaultEditor {...this.state} {...props} />
+          <DefaultEditor
+            eventEmitter={this.eventEmitter}
+            embeddableHandler={this.embeddableHandler}
+            vis={this.vis}
+            {...props}
+          />
         </Suspense>
       </EuiErrorBoundary>,
       this.el

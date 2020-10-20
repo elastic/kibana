@@ -200,6 +200,25 @@ describe('sortLayer', () => {
     ]);
   });
 
+  // Hidden map layers on map load may not add mbLayers to mbStyle.
+  test('Should sort with missing mblayers to expected order', () => {
+    // Notice there are no bravo mbLayers in initial style.
+    const initialMbStyle = {
+      version: 0,
+      layers: [
+        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
+        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+      ],
+    };
+    const mbMap = new MockMbMap(initialMbStyle);
+    syncLayerOrder((mbMap as unknown) as MbMap, spatialFilterLayer, mapLayers);
+    const sortedMbStyle = mbMap.getStyle();
+    const sortedMbLayerIds = sortedMbStyle.layers!.map((mbLayer) => {
+      return mbLayer.id;
+    });
+    expect(sortedMbLayerIds).toEqual(['charlie_fill', 'alpha_circle']);
+  });
+
   test('Should not call move layers when layers are in expected order', () => {
     const initialMbStyle = {
       version: 0,

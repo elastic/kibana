@@ -6,8 +6,8 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useMemo, useState } from 'react';
-import url from 'url';
+import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -22,7 +22,6 @@ import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
-import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { CustomLinkFlyout } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout';
 import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
@@ -84,40 +83,7 @@ export function TransactionActionMenu({ transaction }: Props) {
     basePath: core.http.basePath,
     location,
     urlParams,
-  }).map((sectionList) =>
-    sectionList.map((section) => ({
-      ...section,
-      actions: section.actions.map((action) => {
-        const { href } = action;
-
-        // use navigateToApp as a temporary workaround for faster navigation between observability apps.
-        // see https://github.com/elastic/kibana/issues/65682
-
-        return {
-          ...action,
-          onClick: (event: MouseEvent) => {
-            const parsed = url.parse(href);
-
-            const appPathname = core.http.basePath.remove(
-              parsed.pathname ?? ''
-            );
-
-            const [, , app, ...rest] = appPathname.split('/');
-
-            if (app === 'uptime' || app === 'metrics' || app === 'logs') {
-              event.preventDefault();
-              const search = parsed.search || '';
-
-              const path = `${rest.join('/')}${search}`;
-              core.application.navigateToApp(app, {
-                path,
-              });
-            }
-          },
-        };
-      }),
-    }))
-  );
+  });
 
   const closePopover = () => {
     setIsActionPopoverOpen(false);
@@ -186,7 +152,6 @@ export function TransactionActionMenu({ transaction }: Props) {
                               key={action.key}
                               label={action.label}
                               href={action.href}
-                              onClick={action.onClick}
                             />
                           ))}
                         </SectionLinks>

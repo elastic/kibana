@@ -8,8 +8,17 @@ import { LevelLogger as Logger } from '../lib';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
 import { ReportingCore } from '../core';
+import { registerDiagnosticRoutes } from './diagnostic';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);
+  registerDiagnosticRoutes(reporting, logger);
+}
+
+export interface ReportingRequestPre {
+  management: {
+    jobTypes: string[];
+  };
+  user: string;
 }

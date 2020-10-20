@@ -24,7 +24,7 @@ import {
 } from './lifecycle_handlers';
 import { httpServerMock } from './http_server.mocks';
 import { HttpConfig } from './http_config';
-import { KibanaRequest, RouteMethod, KibanaRouteState } from './router';
+import { KibanaRequest, RouteMethod, KibanaRouteOptions } from './router';
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 
@@ -32,14 +32,19 @@ const forgeRequest = ({
   headers = {},
   path = '/',
   method = 'get',
-  kibanaRouteState,
+  kibanaRouteOptions,
 }: Partial<{
   headers: Record<string, string>;
   path: string;
   method: RouteMethod;
-  kibanaRouteState: KibanaRouteState;
+  kibanaRouteOptions: KibanaRouteOptions;
 }>): KibanaRequest => {
-  return httpServerMock.createKibanaRequest({ headers, path, method, kibanaRouteState });
+  return httpServerMock.createKibanaRequest({
+    headers,
+    path,
+    method,
+    kibanaRouteOptions,
+  });
 };
 
 describe('xsrf post-auth handler', () => {
@@ -154,7 +159,7 @@ describe('xsrf post-auth handler', () => {
         method: 'post',
         headers: {},
         path: '/some-path',
-        kibanaRouteState: {
+        kibanaRouteOptions: {
           xsrfRequired: false,
         },
       });

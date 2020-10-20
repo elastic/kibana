@@ -31,9 +31,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Auditbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Auditbeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Auditbeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -47,9 +47,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Auditbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Auditbeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Auditbeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -68,9 +68,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Auditbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Auditbeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Auditbeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -92,7 +92,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.auditbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
-            'First time using Auditbeat? See the [Getting Started Guide]({guideLinkUrl}).\n\
+            'First time using Auditbeat? See the [Quick Start]({guideLinkUrl}).\n\
  1. Download the Auditbeat Windows zip file from the [Download]({auditbeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Auditbeat`.\n\
@@ -101,7 +101,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
  5. From the PowerShell prompt, run the following commands to install Auditbeat as a Windows service.',
           values: {
             folderPath: '`C:\\Program Files`',
-            guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+            guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
             auditbeatLinkUrl: 'https://www.elastic.co/downloads/beats/auditbeat',
             directoryName: 'auditbeat-{config.kibana.version}-windows',
           },

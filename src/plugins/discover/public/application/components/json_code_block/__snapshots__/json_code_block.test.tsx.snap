@@ -9,6 +9,9 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
 >
   {
   "_index": "test",
+  "_type": "doc",
+  "_id": "foo",
+  "_score": 1,
   "_source": {
     "test": 123
   }

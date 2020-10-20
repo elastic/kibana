@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChromeStart, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
 
@@ -36,8 +36,7 @@ export class SavedObjectLoader {
 
   constructor(
     SavedObjectClass: any,
-    private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly chrome: ChromeStart
+    private readonly savedObjectsClient: SavedObjectsClientContract
   ) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
@@ -78,19 +77,6 @@ export class SavedObjectLoader {
       return savedObject.delete();
     });
     await Promise.all(deletions);
-
-    const coreNavLinks = this.chrome.navLinks;
-    /**
-     * Modify last url for deleted saved objects to avoid loading pages with "Could not locate..."
-     */
-    coreNavLinks
-      .getAll()
-      .filter(
-        (link) =>
-          link.linkToLastSubUrl &&
-          idsUsed.find((deletedId) => link.url && link.url.includes(deletedId)) !== undefined
-      )
-      .forEach((link) => coreNavLinks.update(link.id, { url: link.baseUrl }));
   }
 
   /**

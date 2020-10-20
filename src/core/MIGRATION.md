@@ -966,7 +966,7 @@ It means that NP plugin artifacts tend to have a bigger size than the legacy pla
 To understand the current size of your plugin artifact, run `@kbn/optimizer` as
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --dist --no-examples
+node scripts/build_kibana_platform_plugins.js --dist --profile --focus=my_plugin
 ```
 
 and check the output in the `target` sub-folder of your plugin folder
@@ -1231,7 +1231,7 @@ import { npStart: { plugins } } from 'ui/new_platform';
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
 | `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                           |
 | `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
-| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was moved to `src/plugins/kibana_legacy`.                                                                                    |
+| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was removed.                                                                                    |
 | `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../saved_objects/public'` |                                                                                                                                      |
 | `core_plugins/interpreter`                        | `plugins.data.expressions`                                           |
 | `ui/courier`                                      | `plugins.data.search`                                                |
@@ -1284,7 +1284,7 @@ _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-pl
 
 | Legacy Platform                                                                    | New Platform                                                                   | Notes |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----- |
-| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerFeature`](x-pack/plugins/features/server/plugin.ts) |       |
+| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerKibanaFeature`](x-pack/plugins/features/server/plugin.ts) |       |
 | `server.plugins.xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md)               |       |
 
 #### UI Exports
@@ -1322,7 +1322,6 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `savedObjectTypes`           |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `search`                     |                                                                                                                           |                                                                                                                                       |
 | `shareContextMenuExtensions` |                                                                                                                           |                                                                                                                                       |
-| `styleSheetPaths`            |                                                                                                                           |                                                                                                                                       |
 | `taskDefinitions`            |                                                                                                                           | Should be an API on the taskManager plugin.                                                                                           |
 | `uiCapabilities`             | [`core.application.register`](/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md)            |                                                                                                                                       |
 | `uiSettingDefaults`          | [`core.uiSettings.register`](/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.md)                |                                                                                                                                       |

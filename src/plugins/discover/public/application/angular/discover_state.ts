@@ -18,15 +18,17 @@
  */
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { NotificationsStart } from 'kibana/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncState,
   ReduxLikeStateContainer,
   IKbnUrlStateStorage,
+  withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
 import { esFilters, Filter, Query } from '../../../../data/public';
-import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
+import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 
 export interface AppState {
   /**
@@ -53,6 +55,10 @@ export interface AppState {
    * Array of the used sorting [[field,direction],...]
    */
   sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
 }
 
 interface GetStateParams {
@@ -68,6 +74,13 @@ interface GetStateParams {
    * Browser history
    */
   history: History;
+
+  /**
+   * Core's notifications.toasts service
+   * In case it is passed in,
+   * kbnUrlStateStorage will use it notifying about inner errors
+   */
+  toasts?: NotificationsStart['toasts'];
 }
 
 export interface GetStateReturn {
@@ -122,10 +135,12 @@ export function getState({
   defaultAppState = {},
   storeInSessionStorage = false,
   history,
+  toasts,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
+    ...(toasts && withNotifyOnErrors(toasts)),
   });
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;

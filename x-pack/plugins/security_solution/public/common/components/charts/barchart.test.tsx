@@ -13,6 +13,7 @@ import { ThemeProvider } from 'styled-components';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { TestProviders } from '../../mock';
 import '../../mock/match_media';
+import '../../mock/react_beautiful_dnd';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
@@ -130,19 +131,6 @@ const mockConfig = {
   },
   customHeight: 324,
 };
-
-// Suppress warnings about "react-beautiful-dnd"
-/* eslint-disable no-console */
-const originalError = console.error;
-const originalWarn = console.warn;
-beforeAll(() => {
-  console.warn = jest.fn();
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-  console.warn = originalWarn;
-});
 
 describe('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
@@ -350,8 +338,76 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
       )}-${escapeDataProviderId(datum.key)}`;
 
       expect(
-        wrapper.find(`div [data-rbd-draggable-id="${dataProviderId}"]`).first().text()
+        wrapper
+          .find(`[draggableId="${dataProviderId}"] [data-test-subj="providerContainer"]`)
+          .first()
+          .text()
       ).toEqual(datum.key);
+    });
+  });
+});
+
+describe.each(chartDataSets)('BarChart with custom color', () => {
+  let wrapper: ReactWrapper;
+
+  const data = [
+    {
+      key: 'python.exe',
+      value: [
+        {
+          x: 1586754900000,
+          y: 9675,
+          g: 'python.exe',
+        },
+      ],
+      color: '#1EA591',
+    },
+    {
+      key: 'kernel',
+      value: [
+        {
+          x: 1586754900000,
+          y: 8708,
+          g: 'kernel',
+        },
+        {
+          x: 1586757600000,
+          y: 9282,
+          g: 'kernel',
+        },
+      ],
+      color: '#000000',
+    },
+    {
+      key: 'sshd',
+      value: [
+        {
+          x: 1586754900000,
+          y: 5907,
+          g: 'sshd',
+        },
+      ],
+      color: '#ffffff',
+    },
+  ];
+
+  const expectedColors = ['#1EA591', '#000000', '#ffffff'];
+
+  const stackByField = 'process.name';
+
+  beforeAll(() => {
+    wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <TestProviders>
+          <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
+        </TestProviders>
+      </ThemeProvider>
+    );
+  });
+
+  expectedColors.forEach((color, i) => {
+    test(`it renders the expected legend color ${color} for legend item ${i}`, () => {
+      expect(wrapper.find(`div [color="${color}"]`).exists()).toBe(true);
     });
   });
 });

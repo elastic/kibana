@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerPlugin } from './plugin';
 
 export { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
@@ -89,10 +89,6 @@ export {
   isExpressionAstBuilder,
   KIBANA_CONTEXT_NAME,
   KibanaContext,
-  KibanaDatatable,
-  KibanaDatatableColumn,
-  KibanaDatatableColumnMeta,
-  KibanaDatatableRow,
   KnownTypeToString,
   Overflow,
   parse,

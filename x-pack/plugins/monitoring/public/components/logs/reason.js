@@ -24,7 +24,7 @@ export const Reason = ({ reason }) => {
         link: (
           <EuiLink
             target="_blank"
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}
+            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`}
           >
             <FormattedMessage
               id="xpack.monitoring.logs.reason.defaultMessageLink"
@@ -48,7 +48,7 @@ export const Reason = ({ reason }) => {
           link: (
             <EuiLink
               target="_blank"
-              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}
+              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`}
             >
               {i18n.translate('xpack.monitoring.logs.reason.noIndexPatternLink', {
                 defaultMessage: 'Filebeat',

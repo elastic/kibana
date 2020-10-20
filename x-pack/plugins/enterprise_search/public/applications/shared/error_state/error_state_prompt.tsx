@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiButton } from '../react_router_helpers';
-import { KibanaContext, IKibanaContext } from '../../index';
+import { KibanaLogic } from '../../shared/kibana';
 
 import './error_state_prompt.scss';
 
 export const ErrorStatePrompt: React.FC = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
 
   return (
     <EuiEmptyPrompt
@@ -36,7 +37,7 @@ export const ErrorStatePrompt: React.FC = () => {
               id="xpack.enterpriseSearch.errorConnectingState.description1"
               defaultMessage="We can’t establish a connection to Enterprise Search at the host URL: {enterpriseSearchUrl}"
               values={{
-                enterpriseSearchUrl: <EuiCode>{enterpriseSearchUrl}</EuiCode>,
+                enterpriseSearchUrl: <EuiCode>{config.host}</EuiCode>,
               }}
             />
           </p>

@@ -4,27 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppNavLinkStatus, AppStatus, PublicAppInfo, PublicLegacyAppInfo } from 'src/core/public';
+import {
+  AppNavLinkStatus,
+  AppStatus,
+  PublicAppInfo,
+  DEFAULT_APP_CATEGORIES,
+} from 'src/core/public';
 import { appToResult, getAppResults, scoreApp } from './get_app_results';
 
 const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'app1',
   title: 'App 1',
   appRoute: '/app/app1',
-  legacy: false,
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
   chromeless: false,
-  ...props,
-});
-
-const createLegacyApp = (props: Partial<PublicLegacyAppInfo> = {}): PublicLegacyAppInfo => ({
-  id: 'app1',
-  title: 'App 1',
-  appUrl: '/app/app1',
-  legacy: true,
-  status: AppStatus.accessible,
-  navLinkStatus: AppNavLinkStatus.visible,
   ...props,
 });
 
@@ -72,18 +66,32 @@ describe('scoreApp', () => {
       expect(scoreApp('1-2-3-4-5', createApp({ title: '123456789' }))).toBe(0);
     });
   });
-
-  it('works with legacy apps', () => {
-    expect(scoreApp('dashboard', createLegacyApp({ title: 'dashboard' }))).toBe(100);
-    expect(scoreApp('dash', createLegacyApp({ title: 'dashboard' }))).toBe(90);
-    expect(scoreApp('board', createLegacyApp({ title: 'dashboard' }))).toBe(75);
-    expect(scoreApp('0123456789', createLegacyApp({ title: '012345' }))).toBe(60);
-    expect(scoreApp('0123456789', createLegacyApp({ title: '12345' }))).toBe(0);
-  });
 });
 
 describe('appToResult', () => {
   it('converts an app to a result', () => {
+    const app = createApp({
+      id: 'foo',
+      title: 'Foo',
+      euiIconType: 'fooIcon',
+      appRoute: '/app/foo',
+      category: DEFAULT_APP_CATEGORIES.security,
+    });
+    expect(appToResult(app, 42)).toEqual({
+      id: 'foo',
+      title: 'Foo',
+      type: 'application',
+      icon: 'fooIcon',
+      url: '/app/foo',
+      meta: {
+        categoryId: DEFAULT_APP_CATEGORIES.security.id,
+        categoryLabel: DEFAULT_APP_CATEGORIES.security.label,
+      },
+      score: 42,
+    });
+  });
+
+  it('converts an app without category to a result', () => {
     const app = createApp({
       id: 'foo',
       title: 'Foo',
@@ -96,24 +104,11 @@ describe('appToResult', () => {
       type: 'application',
       icon: 'fooIcon',
       url: '/app/foo',
+      meta: {
+        categoryId: null,
+        categoryLabel: null,
+      },
       score: 42,
-    });
-  });
-
-  it('converts a legacy app to a result', () => {
-    const app = createLegacyApp({
-      id: 'legacy',
-      title: 'Legacy',
-      euiIconType: 'legacyIcon',
-      appUrl: '/app/legacy',
-    });
-    expect(appToResult(app, 69)).toEqual({
-      id: 'legacy',
-      title: 'Legacy',
-      type: 'application',
-      icon: 'legacyIcon',
-      url: '/app/legacy',
-      score: 69,
     });
   });
 });

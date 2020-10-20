@@ -36,5 +36,5 @@ export const openFirstHostDetails = () => {
 };
 
 export const waitForAllHostsToBeLoaded = () => {
-  cy.get(ALL_HOSTS_TABLE).should('exist');
+  cy.get(ALL_HOSTS_TABLE).should('be.visible');
 };

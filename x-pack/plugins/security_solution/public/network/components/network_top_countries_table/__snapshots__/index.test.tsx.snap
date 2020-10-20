@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkTopCountries Table Component rendering it renders the IP Details NetworkTopCountries table 1`] = `
-<Connect(NetworkTopCountriesTableComponent)
+<Memo(NetworkTopCountriesTableComponent)
   data={
     Array [
       Object {
@@ -146,7 +146,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
 `;
 
 exports[`NetworkTopCountries Table Component rendering it renders the default NetworkTopCountries table 1`] = `
-<Connect(NetworkTopCountriesTableComponent)
+<Memo(NetworkTopCountriesTableComponent)
   data={
     Array [
       Object {

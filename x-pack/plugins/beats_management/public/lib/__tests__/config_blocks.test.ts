@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { configBlockSchemas } from '../../../../../legacy/plugins/beats_management/common/config_schemas';
-import { translateConfigSchema } from '../../../../../legacy/plugins/beats_management/common/config_schemas_translations_map';
+import { configBlockSchemas } from '../../../common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { ConfigBlocksLib } from '../configuration_blocks';
 import { MemoryConfigBlocksAdapter } from './../adapters/configuration_blocks/memory_config_blocks_adapter';
 
@@ -20,7 +20,7 @@ describe('Tags Client Domain Lib', () => {
   });
 
   it('should use helper function to convert users yaml in tag to config object', async () => {
-    const convertedBlocks = lib.userConfigsToJson([
+    const convertedBlocks = await lib.userConfigsToJson([
       {
         id: 'foo',
         tag: 'basic',
@@ -42,7 +42,7 @@ describe('Tags Client Domain Lib', () => {
   });
 
   it('should use helper function to convert user config to json with undefined `other`', async () => {
-    const convertedTag = lib.userConfigsToJson([
+    const convertedTag = await lib.userConfigsToJson([
       {
         id: 'foo',
         tag: 'basic',
@@ -61,7 +61,7 @@ describe('Tags Client Domain Lib', () => {
   });
 
   it('should use helper function to convert users yaml in tag to config object, where empty other leads to no other fields saved', async () => {
-    const convertedTag = lib.userConfigsToJson([
+    const convertedTag = await lib.userConfigsToJson([
       {
         id: 'foo',
         tag: 'basic',
@@ -83,7 +83,7 @@ describe('Tags Client Domain Lib', () => {
   });
 
   it('should convert tokenized fields to JSON', async () => {
-    const convertedTag = lib.userConfigsToJson([
+    const convertedTag = await lib.userConfigsToJson([
       {
         id: 'foo',
         tag: 'basic',
@@ -106,7 +106,7 @@ describe('Tags Client Domain Lib', () => {
   });
 
   it('should use helper function to convert config object to users yaml', async () => {
-    const convertedTag = lib.jsonConfigToUserYaml([
+    const convertedTag = await lib.jsonConfigToUserYaml([
       {
         id: 'foo',
         tag: 'basic',
@@ -127,7 +127,7 @@ describe('Tags Client Domain Lib', () => {
   });
 
   it('should use helper function to convert config object to users yaml with empty `other`', async () => {
-    const convertedTag = lib.jsonConfigToUserYaml([
+    const convertedTag = await lib.jsonConfigToUserYaml([
       {
         id: 'foo',
         tag: 'basic',

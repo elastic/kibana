@@ -20,6 +20,7 @@
     "DataVisualizer",
     "GetOverallStats",
     "GetStatsForFields",
+    "GetHistogramsForFields",
 
     "AnomalyDetectors",
     "CreateAnomalyDetectors",
@@ -49,6 +50,8 @@
     "GetCategoryExamples",
     "GetPartitionFieldsValues",
     "AnomalySearch",
+    "GetCategorizerStats",
+    "GetCategoryStoppedPartitions",
 
     "Modules",
     "DataRecognizer",

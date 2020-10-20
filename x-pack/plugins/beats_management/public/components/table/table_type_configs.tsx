@@ -9,10 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { sortBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import {
-  BeatTag,
-  CMBeat,
-} from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 

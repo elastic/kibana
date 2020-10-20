@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const sqsOldestMessage: SnapshotModel = {
+export const sqsOldestMessage: MetricsUIAggregation = {
   sqsOldestMessage: {
     max: {
       field: 'aws.sqs.oldest_message_age.sec',

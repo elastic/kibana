@@ -4,6 +4,7 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
 <div>
   <EuiButton
     color="danger"
+    data-test-subj="mlFilterListsDeleteButton"
     iconType="trash"
     isDisabled={false}
     key="delete_filter_list"
@@ -22,6 +23,7 @@ exports[`DeleteFilterListModal renders as delete button after opening and closin
 <div>
   <EuiButton
     color="danger"
+    data-test-subj="mlFilterListsDeleteButton"
     iconType="trash"
     isDisabled={false}
     key="delete_filter_list"
@@ -40,6 +42,7 @@ exports[`DeleteFilterListModal renders as disabled delete button when no lists s
 <div>
   <EuiButton
     color="danger"
+    data-test-subj="mlFilterListsDeleteButton"
     iconType="trash"
     isDisabled={false}
     key="delete_filter_list"
@@ -58,6 +61,7 @@ exports[`DeleteFilterListModal renders as enabled delete button when a list is s
 <div>
   <EuiButton
     color="danger"
+    data-test-subj="mlFilterListsDeleteButton"
     iconType="trash"
     isDisabled={false}
     key="delete_filter_list"
@@ -76,6 +80,7 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
 <div>
   <EuiButton
     color="danger"
+    data-test-subj="mlFilterListsDeleteButton"
     iconType="trash"
     isDisabled={false}
     key="delete_filter_list"
@@ -105,12 +110,13 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
           values={Object {}}
         />
       }
+      data-test-subj="mlFilterListDeleteConfirmation"
       defaultFocusedButton="confirm"
       onCancel={[Function]}
       onConfirm={[Function]}
       title={
         <FormattedMessage
-          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}"
+          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?"
           id="xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle"
           values={
             Object {
@@ -120,20 +126,7 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
           }
         />
       }
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Are you sure you want to delete
-{selectedFilterListsLength, plural, one {this filter list} other {these filter lists}}"
-          id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteWarningMessage"
-          values={
-            Object {
-              "selectedFilterListsLength": 2,
-            }
-          }
-        />
-      </p>
-    </EuiConfirmModal>
+    />
   </EuiOverlayMask>
 </div>
 `;

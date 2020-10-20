@@ -76,3 +76,7 @@ export const RESPONSE_ANOMALY_SCORE = i18n.translate(
     defaultMessage: 'Response Anomaly Score',
   }
 );
+
+export const STATUS_ALERT_COLUMN = i18n.translate('xpack.uptime.monitorList.statusAlert.label', {
+  defaultMessage: 'Status alert',
+});

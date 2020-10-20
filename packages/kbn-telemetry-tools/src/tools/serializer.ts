@@ -18,7 +18,7 @@
  */
 
 import * as ts from 'typescript';
-import { uniq } from 'lodash';
+import { uniqBy, pick } from 'lodash';
 import {
   getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,
@@ -71,6 +71,46 @@ export function kindToDescriptorName(kind: number) {
   }
 }
 
+export function getConstraints(node: ts.Node, program: ts.Program): any {
+  if (ts.isTypeReferenceNode(node)) {
+    const typeChecker = program.getTypeChecker();
+    const symbol = typeChecker.getSymbolAtLocation(node.typeName);
+    const declaration = (symbol?.getDeclarations() || [])[0];
+    if (declaration) {
+      return getConstraints(declaration, program);
+    }
+    return getConstraints(node.typeName, program);
+  }
+
+  if (ts.isTypeAliasDeclaration(node)) {
+    return getConstraints(node.type, program);
+  }
+
+  if (ts.isUnionTypeNode(node)) {
+    const types = node.types.filter(discardNullOrUndefined);
+    return types.reduce<any>((acc, typeNode) => {
+      const constraints = getConstraints(typeNode, program);
+      const contraintsArray = Array.isArray(constraints) ? constraints : [constraints];
+      return [...acc, ...contraintsArray];
+    }, []);
+  }
+
+  if (ts.isLiteralTypeNode(node) && ts.isLiteralExpression(node.literal)) {
+    return node.literal.text;
+  }
+
+  if (ts.isImportSpecifier(node)) {
+    const source = node.getSourceFile();
+    const importedModuleName = getModuleSpecifier(node);
+
+    const declarationSource = getResolvedModuleSourceFile(source, program, importedModuleName);
+    const declarationNode = getIdentifierDeclarationFromSource(node.name, declarationSource);
+    return getConstraints(declarationNode, program);
+  }
+
+  throw Error(`Unsupported constraint of kind ${node.kind} [${ts.SyntaxKind[node.kind]}]`);
+}
+
 export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | DescriptorValue {
   if (ts.isMethodSignature(node) || ts.isPropertySignature(node)) {
     if (node.type) {
@@ -79,9 +119,29 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
   }
   if (ts.isTypeLiteralNode(node) || ts.isInterfaceDeclaration(node)) {
     return node.members.reduce((acc, m) => {
-      acc[m.name?.getText() || ''] = getDescriptor(m, program);
-      return acc;
-    }, {} as any);
+      const key = m.name?.getText();
+      if (key) {
+        return { ...acc, [key]: getDescriptor(m, program) };
+      } else {
+        return { ...acc, ...getDescriptor(m, program) };
+      }
+    }, {});
+  }
+
+  // If it's defined as signature { [key: string]: OtherInterface }
+  if ((ts.isIndexSignatureDeclaration(node) || ts.isMappedTypeNode(node)) && node.type) {
+    const descriptor = getDescriptor(node.type, program);
+
+    // If we know the constraints of `string` ({ [key in 'prop1' | 'prop2']: value })
+    const constraint = (node as ts.MappedTypeNode).typeParameter?.constraint;
+    if (constraint) {
+      const constraints = getConstraints(constraint, program);
+      const constraintsArray = Array.isArray(constraints) ? constraints : [constraints];
+      if (typeof constraintsArray[0] === 'string') {
+        return constraintsArray.reduce((acc, c) => ({ ...acc, [c]: descriptor }), {});
+      }
+    }
+    return { '@@INDEX@@': descriptor };
   }
 
   if (ts.SyntaxKind.FirstNode === node.kind) {
@@ -109,6 +169,26 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     if (symbolName === 'Date') {
       return { kind: TelemetryKinds.Date, type: 'Date' };
     }
+    // Support `Record<string, SOMETHING>`
+    if (symbolName === 'Record') {
+      const descriptor = getDescriptor(node.typeArguments![1], program);
+      if (node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword) {
+        return { '@@INDEX@@': descriptor };
+      }
+      const constraints = getConstraints(node.typeArguments![0], program);
+      const constraintsArray = Array.isArray(constraints) ? constraints : [constraints];
+      if (typeof constraintsArray[0] === 'string') {
+        return constraintsArray.reduce((acc, c) => ({ ...acc, [c]: descriptor }), {});
+      }
+    }
+
+    // Support `Pick<SOMETHING, 'prop1' | 'prop2'>`
+    if (symbolName === 'Pick') {
+      const parentDescriptor = getDescriptor(node.typeArguments![0], program);
+      const pickPropNames = getConstraints(node.typeArguments![1], program);
+      return pick(parentDescriptor, pickPropNames);
+    }
+
     const declaration = (symbol?.getDeclarations() || [])[0];
     if (declaration) {
       return getDescriptor(declaration, program);
@@ -126,7 +206,7 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
   }
 
   if (ts.isArrayTypeNode(node)) {
-    return getDescriptor(node.elementType, program);
+    return { items: getDescriptor(node.elementType, program) };
   }
 
   if (ts.isLiteralTypeNode(node)) {
@@ -137,22 +217,32 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
   }
 
   if (ts.isUnionTypeNode(node)) {
-    const types = node.types.filter((typeNode) => {
-      return (
-        typeNode.kind !== ts.SyntaxKind.NullKeyword &&
-        typeNode.kind !== ts.SyntaxKind.UndefinedKeyword
-      );
-    });
+    const types = node.types.filter(discardNullOrUndefined);
 
-    const kinds = types.map((typeNode) => getDescriptor(typeNode, program));
+    const kinds = types
+      .map((typeNode) => getDescriptor(typeNode, program))
+      .filter(discardNullOrUndefined);
 
-    const uniqueKinds = uniq(kinds, 'kind');
+    const uniqueKinds = uniqBy(kinds, 'kind');
 
     if (uniqueKinds.length !== 1) {
       throw Error('Mapping does not support conflicting union types.');
     }
 
     return uniqueKinds[0];
+  }
+
+  // Support `type MyUsageType = SomethingElse`
+  if (ts.isTypeAliasDeclaration(node)) {
+    return getDescriptor(node.type, program);
+  }
+
+  // Support `&` unions
+  if (ts.isIntersectionTypeNode(node)) {
+    return node.types.reduce(
+      (acc, unionNode) => ({ ...acc, ...getDescriptor(unionNode, program) }),
+      {}
+    );
   }
 
   switch (node.kind) {
@@ -166,4 +256,10 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     default:
       throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}; ${node.getText()}`);
   }
+}
+
+function discardNullOrUndefined(typeNode: ts.TypeNode | Descriptor | DescriptorValue) {
+  return (
+    typeNode.kind !== ts.SyntaxKind.NullKeyword && typeNode.kind !== ts.SyntaxKind.UndefinedKeyword
+  );
 }

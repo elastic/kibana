@@ -9,14 +9,17 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('layer visibility', () => {
     before(async () => {
+      await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);
       await PageObjects.maps.loadSavedMap('document example hidden');
     });
 
     afterEach(async () => {
       await inspector.close();
+      await security.testUser.restoreDefaults();
     });
 
     it('should not make any requests when layer is hidden', async () => {

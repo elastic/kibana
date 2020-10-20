@@ -11,6 +11,8 @@ import { getHostPolicyResponseHandler } from './handlers';
 
 export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy_response`;
 
+export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
+
 export function registerPolicyRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.get(
     {

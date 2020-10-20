@@ -8,13 +8,21 @@ import LRU from 'lru-cache';
 import { LegacyAPICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
-  IIndexPattern,
+  FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  ProcessorEvent,
+  UIProcessorEvent,
+} from '../../../common/processor_event';
 import { APMRequestHandlerContext } from '../../routes/typings';
 
-const cache = new LRU<string, IIndexPattern | undefined>({
+interface IndexPatternTitleAndFields {
+  title: string;
+  fields: FieldDescriptor[];
+}
+
+const cache = new LRU<string, IndexPatternTitleAndFields | undefined>({
   max: 100,
   maxAge: 1000 * 60,
 });
@@ -27,7 +35,7 @@ export const getDynamicIndexPattern = async ({
 }: {
   context: APMRequestHandlerContext;
   indices: ApmIndicesConfig;
-  processorEvent?: ProcessorEvent;
+  processorEvent?: UIProcessorEvent;
 }) => {
   const patternIndices = getPatternIndices(indices, processorEvent);
   const indexPatternTitle = patternIndices.join(',');
@@ -50,7 +58,7 @@ export const getDynamicIndexPattern = async ({
       pattern: patternIndices,
     });
 
-    const indexPattern: IIndexPattern = {
+    const indexPattern: IndexPatternTitleAndFields = {
       fields,
       title: indexPatternTitle,
     };
@@ -75,17 +83,17 @@ export const getDynamicIndexPattern = async ({
 
 function getPatternIndices(
   indices: ApmIndicesConfig,
-  processorEvent?: ProcessorEvent
+  processorEvent?: UIProcessorEvent
 ) {
   const indexNames = processorEvent
     ? [processorEvent]
-    : ['transaction' as const, 'metric' as const, 'error' as const];
+    : [ProcessorEvent.transaction, ProcessorEvent.metric, ProcessorEvent.error];
 
   const indicesMap = {
-    transaction: indices['apm_oss.transactionIndices'],
-    metric: indices['apm_oss.metricsIndices'],
-    error: indices['apm_oss.errorIndices'],
+    [ProcessorEvent.transaction]: indices['apm_oss.transactionIndices'],
+    [ProcessorEvent.metric]: indices['apm_oss.metricsIndices'],
+    [ProcessorEvent.error]: indices['apm_oss.errorIndices'],
   };
 
-  return indexNames.map((name) => indicesMap[name]);
+  return indexNames.map((name) => indicesMap[name as UIProcessorEvent]);
 }

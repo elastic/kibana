@@ -21,3 +21,4 @@ export * from './absolute_path_serializer';
 export * from './strip_ansi_serializer';
 export * from './recursive_serializer';
 export * from './any_instance_serizlizer';
+export * from './replace_serializer';

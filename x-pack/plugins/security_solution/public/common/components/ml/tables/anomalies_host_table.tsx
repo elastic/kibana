@@ -16,7 +16,7 @@ import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
 import { Loader } from '../../loader';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { AnomaliesHostTableProps } from '../types';
-import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 import { hostEquality } from './host_equality';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
@@ -77,9 +77,9 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
         />
 
         <BasicTable
-          // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
+          // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
           columns={columns}
-          // @ts-ignore ...which leads to `networks` not "matching" the columns
+          // @ts-expect-error ...which leads to `networks` not "matching" the columns
           items={hosts}
           pagination={pagination}
           sorting={sorting}

@@ -8,12 +8,13 @@ import { schema } from '@kbn/config-schema';
 
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionsClient } from './actions_client';
-import { ExecutorType } from './types';
+import { ExecutorType, ActionType } from './types';
 import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
+import { licensingMock } from '../../licensing/server/mocks';
 
 import {
   elasticsearchServiceMock,
@@ -33,13 +34,13 @@ const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
 const request = {} as KibanaRequest;
 
-const mockTaskManager = taskManagerMock.setup();
+const mockTaskManager = taskManagerMock.createSetup();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
-const executor: ExecutorType = async (options) => {
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
@@ -47,6 +48,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
+    licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
@@ -295,10 +297,11 @@ describe('create()', () => {
     const localConfigUtils = getActionsConfigurationUtilities({
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
-      whitelistedHosts: ['*'],
+      allowedHosts: ['*'],
     });
 
     const localActionTypeRegistryParams = {
+      licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
       taskRunnerFactory: new TaskRunnerFactory(
         new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
@@ -893,7 +896,7 @@ describe('update()', () => {
         },
         references: [],
       });
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'my-action',
         type: 'action',
         attributes: {
@@ -946,7 +949,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -972,16 +975,20 @@ describe('update()', () => {
       name: 'my name',
       config: {},
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
-        "my-action",
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
           "name": "my name",
           "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
         },
       ]
     `);
@@ -1043,7 +1050,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -1081,11 +1088,10 @@ describe('update()', () => {
         c: true,
       },
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
-        "my-action",
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {
@@ -1095,6 +1101,11 @@ describe('update()', () => {
           },
           "name": "my name",
           "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
         },
       ]
     `);
@@ -1118,7 +1129,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -1234,5 +1245,33 @@ describe('enqueueExecution()', () => {
     await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
 
     expect(executionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
+  });
+});
+
+describe('isActionTypeEnabled()', () => {
+  const fooActionType: ActionType = {
+    id: 'foo',
+    name: 'Foo',
+    minimumLicenseRequired: 'gold',
+    executor: jest.fn(),
+  };
+  beforeEach(() => {
+    actionTypeRegistry.register(fooActionType);
+  });
+
+  test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionsClient.isActionTypeEnabled('foo');
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+      notifyUsage: false,
+    });
+  });
+
+  test('should call isLicenseValidForActionType of the license state with notifyUsage true when specified', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionsClient.isActionTypeEnabled('foo', { notifyUsage: true });
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+      notifyUsage: true,
+    });
   });
 });

@@ -8,6 +8,8 @@ import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { NavigateToPath } from '../../../contexts/kibana';
+
 import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -16,20 +18,22 @@ import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import {
-  ANOMALY_DETECTION_BREADCRUMB,
-  CREATE_JOB_BREADCRUMB,
-  ML_BREADCRUMB,
-} from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
 }
 
-const baseBreadcrumbs = [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, CREATE_JOB_BREADCRUMB];
+const getBaseBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', navigateToPath, basePath),
+];
 
-const singleMetricBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getSingleMetricBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.singleMetricLabel', {
       defaultMessage: 'Single metric',
@@ -38,8 +42,8 @@ const singleMetricBreadcrumbs = [
   },
 ];
 
-const multiMetricBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getMultiMetricBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
       defaultMessage: 'Multi-metric',
@@ -48,8 +52,8 @@ const multiMetricBreadcrumbs = [
   },
 ];
 
-const populationBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getPopulationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.populationLabel', {
       defaultMessage: 'Population',
@@ -58,8 +62,8 @@ const populationBreadcrumbs = [
   },
 ];
 
-const advancedBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getAdvancedBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel', {
       defaultMessage: 'Advanced configuration',
@@ -68,8 +72,8 @@ const advancedBreadcrumbs = [
   },
 ];
 
-const categorizationBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.categorizationLabel', {
       defaultMessage: 'Categorization',
@@ -78,41 +82,60 @@ const categorizationBreadcrumbs = [
   },
 ];
 
-export const singleMetricRoute: MlRoute = {
+export const singleMetricRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/jobs/new_job/single_metric',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />,
-  breadcrumbs: singleMetricBreadcrumbs,
-};
+  breadcrumbs: getSingleMetricBreadcrumbs(navigateToPath, basePath),
+});
 
-export const multiMetricRoute: MlRoute = {
+export const multiMetricRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/jobs/new_job/multi_metric',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />,
-  breadcrumbs: multiMetricBreadcrumbs,
-};
+  breadcrumbs: getMultiMetricBreadcrumbs(navigateToPath, basePath),
+});
 
-export const populationRoute: MlRoute = {
+export const populationRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/jobs/new_job/population',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.POPULATION} deps={deps} />,
-  breadcrumbs: populationBreadcrumbs,
-};
+  breadcrumbs: getPopulationBreadcrumbs(navigateToPath, basePath),
+});
 
-export const advancedRoute: MlRoute = {
+export const advancedRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/jobs/new_job/advanced',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />,
-  breadcrumbs: advancedBreadcrumbs,
-};
+  breadcrumbs: getAdvancedBreadcrumbs(navigateToPath, basePath),
+});
 
-export const categorizationRoute: MlRoute = {
+export const categorizationRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/jobs/new_job/categorization',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.CATEGORIZATION} deps={deps} />,
-  breadcrumbs: categorizationBreadcrumbs,
-};
+  breadcrumbs: getCategorizationBreadcrumbs(navigateToPath, basePath),
+});
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
+
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
-    privileges: checkCreateJobsCapabilitiesResolver,
+    privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
     jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });

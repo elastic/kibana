@@ -19,10 +19,12 @@
 
 import { ratios } from './filter_ratios';
 
-describe('ratios(req, panel, series)', () => {
+describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => {
   let panel;
   let series;
   let req;
+  let esQueryConfig;
+  let indexPatternObject;
   beforeEach(() => {
     panel = {
       time_field: 'timestamp',
@@ -36,8 +38,8 @@ describe('ratios(req, panel, series)', () => {
         {
           id: 'metric-1',
           type: 'filter_ratio',
-          numerator: 'errors',
-          denominator: '*',
+          numerator: { query: 'errors', language: 'lucene' },
+          denominator: { query: 'warnings', language: 'lucene' },
           metric_agg: 'avg',
           field: 'cpu',
         },
@@ -51,17 +53,23 @@ describe('ratios(req, panel, series)', () => {
         },
       },
     };
+    esQueryConfig = {
+      allowLeadingWildcards: true,
+      queryStringOptions: { analyze_wildcard: true },
+      ignoreFilterIfFieldNotInIndex: false,
+    };
+    indexPatternObject = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    ratios(req, panel, series)(next)({});
+    ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns filter ratio aggs', () => {
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series)(next)({});
+    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -88,9 +96,18 @@ describe('ratios(req, panel, series)', () => {
                     },
                   },
                   filter: {
-                    query_string: {
-                      analyze_wildcard: true,
-                      query: '*',
+                    bool: {
+                      must: [
+                        {
+                          query_string: {
+                            query: 'warnings',
+                            analyze_wildcard: true,
+                          },
+                        },
+                      ],
+                      filter: [],
+                      should: [],
+                      must_not: [],
                     },
                   },
                 },
@@ -103,9 +120,18 @@ describe('ratios(req, panel, series)', () => {
                     },
                   },
                   filter: {
-                    query_string: {
-                      analyze_wildcard: true,
-                      query: 'errors',
+                    bool: {
+                      must: [
+                        {
+                          query_string: {
+                            query: 'errors',
+                            analyze_wildcard: true,
+                          },
+                        },
+                      ],
+                      filter: [],
+                      should: [],
+                      must_not: [],
                     },
                   },
                 },
@@ -120,7 +146,7 @@ describe('ratios(req, panel, series)', () => {
   test('returns empty object when field is not set', () => {
     delete series.metrics[0].field;
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series)(next)({});
+    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -141,18 +167,36 @@ describe('ratios(req, panel, series)', () => {
                 'metric-1-denominator': {
                   aggs: { metric: {} },
                   filter: {
-                    query_string: {
-                      analyze_wildcard: true,
-                      query: '*',
+                    bool: {
+                      must: [
+                        {
+                          query_string: {
+                            query: 'warnings',
+                            analyze_wildcard: true,
+                          },
+                        },
+                      ],
+                      filter: [],
+                      should: [],
+                      must_not: [],
                     },
                   },
                 },
                 'metric-1-numerator': {
                   aggs: { metric: {} },
                   filter: {
-                    query_string: {
-                      analyze_wildcard: true,
-                      query: 'errors',
+                    bool: {
+                      must: [
+                        {
+                          query_string: {
+                            analyze_wildcard: true,
+                            query: 'errors',
+                          },
+                        },
+                      ],
+                      filter: [],
+                      should: [],
+                      must_not: [],
                     },
                   },
                 },

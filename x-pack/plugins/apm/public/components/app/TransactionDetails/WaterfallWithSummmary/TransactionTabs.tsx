@@ -8,10 +8,10 @@ import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
@@ -45,6 +45,7 @@ export function TransactionTabs({
   waterfall,
   exceedsMax,
 }: Props) {
+  const history = useHistory();
   const tabs = [timelineTab, metadataTab];
   const currentTab =
     urlParams.detailTab === metadataTab.key ? metadataTab : timelineTab;

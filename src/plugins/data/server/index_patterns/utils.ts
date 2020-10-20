@@ -18,11 +18,11 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { IIndexPattern, IFieldType } from '../../common';
+import { IFieldType, IndexPatternAttributes, SavedObject } from '../../common';
 
 export const getFieldByName = (
   fieldName: string,
-  indexPattern: IIndexPattern
+  indexPattern: SavedObject<IndexPatternAttributes>
 ): IFieldType | undefined => {
   const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
   const field = fields && fields.find((f) => f.name === fieldName);
@@ -33,8 +33,8 @@ export const getFieldByName = (
 export const findIndexPatternById = async (
   savedObjectsClient: SavedObjectsClientContract,
   index: string
-): Promise<IIndexPattern | undefined> => {
-  const savedObjectsResponse = await savedObjectsClient.find<any>({
+): Promise<SavedObject<IndexPatternAttributes> | undefined> => {
+  const savedObjectsResponse = await savedObjectsClient.find<IndexPatternAttributes>({
     type: 'index-pattern',
     fields: ['fields'],
     search: `"${index}"`,
@@ -42,6 +42,6 @@ export const findIndexPatternById = async (
   });
 
   if (savedObjectsResponse.total > 0) {
-    return (savedObjectsResponse.saved_objects[0] as unknown) as IIndexPattern;
+    return savedObjectsResponse.saved_objects[0];
   }
 };

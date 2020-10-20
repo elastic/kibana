@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
 // @ts-ignore
@@ -43,7 +42,7 @@ jest.mock('./vislib/response_handler', () => ({
 describe('interpreter/functions#pie', () => {
   const fn = functionWrapper(createPieVisFn());
   const context = {
-    type: 'kibana_datatable',
+    type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };

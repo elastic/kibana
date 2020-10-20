@@ -16,7 +16,6 @@ import { buildCommentUserActionItem } from '../../../../services/user_actions/he
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { getConnectorId } from '../helpers';
 
 export function initPatchCommentApi({
   caseConfigureService,
@@ -68,9 +67,10 @@ export function initPatchCommentApi({
           );
         }
 
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
-        const [updatedComment, updatedCase, myCaseConfigure] = await Promise.all([
+        const [updatedComment, updatedCase] = await Promise.all([
           caseService.patchComment({
             client,
             commentId: query.id,
@@ -90,7 +90,6 @@ export function initPatchCommentApi({
             },
             version: myCase.version,
           }),
-          caseConfigureService.find({ client }),
         ]);
 
         const totalCommentsFindByCases = await caseService.getAllCaseComments({
@@ -102,7 +101,7 @@ export function initPatchCommentApi({
             perPage: 1,
           },
         });
-        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+
         const [comments] = await Promise.all([
           caseService.getAllCaseComments({
             client,
@@ -141,7 +140,6 @@ export function initPatchCommentApi({
                 references: myCase.references,
               },
               comments: comments.saved_objects,
-              caseConfigureConnectorId,
             })
           ),
         });

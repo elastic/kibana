@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AggName } from '../../../common/types/aggregations';
 import { Dictionary } from '../../../common/types/common';
+import { EsFieldName } from '../../../common/types/fields';
+import { GenericAgg } from '../../../common/types/pivot_group_by';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
-
-import { AggName } from './aggregations';
-import { EsFieldName } from './fields';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -106,39 +106,10 @@ export function isPivotGroupByConfigWithUiSupport(arg: any): arg is GroupByConfi
   return isGroupByDateHistogram(arg) || isGroupByHistogram(arg) || isGroupByTerms(arg);
 }
 
-export type GenericAgg = object;
-
-export interface TermsAgg {
-  terms: {
-    field: EsFieldName;
-  };
-}
-
-export interface HistogramAgg {
-  histogram: {
-    field: EsFieldName;
-    interval: string;
-  };
-}
-
-export interface DateHistogramAgg {
-  date_histogram: {
-    field: EsFieldName;
-    calendar_interval: string;
-  };
-}
-
-export type PivotGroupBy = GenericAgg | TermsAgg | HistogramAgg | DateHistogramAgg;
-export type PivotGroupByDict = Dictionary<PivotGroupBy>;
-
 export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): GenericAgg {
-  const esAgg = { ...groupByConfig };
-
-  delete esAgg.agg;
-  delete esAgg.aggName;
-  delete esAgg.dropDownName;
+  const { agg, aggName, dropDownName, ...esAgg } = groupByConfig;
 
   return {
-    [groupByConfig.agg]: esAgg,
+    [agg]: esAgg,
   };
 }

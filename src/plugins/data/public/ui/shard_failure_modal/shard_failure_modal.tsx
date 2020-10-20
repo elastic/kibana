@@ -32,18 +32,24 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
 } from '@elastic/eui';
+import { SearchResponse } from 'elasticsearch';
 import { ShardFailureTable } from './shard_failure_table';
-import { ShardFailureResponse, ShardFailureRequest } from './shard_failure_types';
+import { ShardFailureRequest } from './shard_failure_types';
 
 export interface Props {
   onClose: () => void;
   request: ShardFailureRequest;
-  response: ShardFailureResponse;
+  response: SearchResponse<any>;
   title: string;
 }
 
 export function ShardFailureModal({ request, response, title, onClose }: Props) {
-  if (!response || !response._shards || !Array.isArray(response._shards.failures) || !request) {
+  if (
+    !response ||
+    !response._shards ||
+    !Array.isArray((response._shards as any).failures) ||
+    !request
+  ) {
     // this should never ever happen, but just in case
     return (
       <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
@@ -51,10 +57,9 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
       </EuiCallOut>
     );
   }
-
+  const failures = (response._shards as any).failures;
   const requestJSON = JSON.stringify(request, null, 2);
   const responseJSON = JSON.stringify(response, null, 2);
-  const failures = response._shards.failures;
 
   const tabs = [
     {

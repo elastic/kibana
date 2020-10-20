@@ -18,4 +18,5 @@
  */
 
 export * from './esaggs';
-export * from './utils';
+export * from './es_raw_response';
+export * from './esdsl';

@@ -19,10 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { VisParams } from '../../../visualizations/public';
 import { TimeRange, Filter, esQuery, Query } from '../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
+import { TimelionVisParams } from '../timelion_vis_fn';
 
 interface Stats {
   cacheCount: number;
@@ -77,8 +77,7 @@ export function getTimelionRequestHandler({
     timeRange: TimeRange;
     filters: Filter[];
     query: Query;
-    visParams: VisParams;
-    forceFetch?: boolean;
+    visParams: TimelionVisParams;
   }): Promise<TimelionSuccessResponse> {
     const expression = visParams.expression;
 

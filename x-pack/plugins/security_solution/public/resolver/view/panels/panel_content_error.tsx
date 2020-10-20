@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
+import { Breadcrumbs } from './breadcrumbs';
+import { useLinkProps } from '../use_link_props';
 
 /**
  * Display an error in the panel when something goes wrong and give the user a way to "retreat" back to a default state.
@@ -17,45 +18,42 @@ import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
  */
 export const PanelContentError = memo(function ({
   translatedErrorMessage,
-  pushToQueryParams,
 }: {
   translatedErrorMessage: string;
-  pushToQueryParams: (arg0: CrumbInfo) => unknown;
 }) {
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
+  });
+
   const crumbs = useMemo(() => {
     return [
       {
         text: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.error.events', {
           defaultMessage: 'Events',
         }),
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        ...nodesLinkNavProps,
       },
       {
         text: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.error.error', {
           defaultMessage: 'Error',
         }),
-        onClick: () => {},
       },
     ];
-  }, [pushToQueryParams]);
+  }, [nodesLinkNavProps]);
   return (
     <>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
-      <EuiText textAlign="center">{translatedErrorMessage}</EuiText>
+      <EuiText textAlign="center" data-test-subj="resolver:panel:error">
+        {translatedErrorMessage}
+      </EuiText>
       <EuiSpacer size="l" />
-      <EuiButtonEmpty
-        onClick={() => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        }}
-      >
+
+      <EuiButtonEmpty {...nodesLinkNavProps}>
         {i18n.translate('xpack.securitySolution.endpoint.resolver.panel.error.goBack', {
-          defaultMessage: 'Click this link to return to the list of all processes.',
+          defaultMessage: 'View all processes',
         })}
       </EuiButtonEmpty>
     </>
   );
 });
-PanelContentError.displayName = 'TableServiceError';

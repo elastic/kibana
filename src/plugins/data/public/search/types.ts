@@ -17,45 +17,18 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
-import { SearchAggsSetup, SearchAggsStart } from './aggs';
-import { LegacyApiCaller } from './legacy/es_client';
-import { SearchInterceptor } from './search_interceptor';
-import { ISearchSource, SearchSourceFields } from './search_source';
+import { ISearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector } from './collectors';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../../common/search';
+import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
+import { ISearchGeneric, ISessionService, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
-import { ExpressionsSetup } from '../../../expressions/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { GetInternalStartServicesFn } from '../types';
 
-export interface ISearchOptions {
-  signal?: AbortSignal;
-}
+export { ISearchStartSearchSource };
 
-export type ISearch = (
-  request: IKibanaSearchRequest,
-  options?: ISearchOptions
-) => Observable<IKibanaSearchResponse>;
-
-// Service API types
-export interface IStrategyOptions extends ISearchOptions {
-  strategy?: string;
-}
-
-export type ISearchGeneric = (
-  request: IEsSearchRequest,
-  options?: IStrategyOptions
-) => Observable<IEsSearchResponse>;
-
-export interface ISearchStartLegacy {
-  esClient: LegacyApiCaller;
+export interface SearchEnhancements {
+  searchInterceptor: ISearchInterceptor;
 }
 
 /**
@@ -63,30 +36,60 @@ export interface ISearchStartLegacy {
  * point.
  */
 export interface ISearchSetup {
-  aggs: SearchAggsSetup;
+  aggs: AggsSetup;
+  usageCollector?: SearchUsageCollector;
+  /**
+   * session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
+/**
+ * search service
+ * @public
+ */
 export interface ISearchStart {
-  aggs: SearchAggsStart;
-  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
+  /**
+   * agg config sub service
+   * {@link AggsStart}
+   *
+   */
+  aggs: AggsStart;
+  /**
+   * low level search
+   * {@link ISearchGeneric}
+   */
   search: ISearchGeneric;
-  searchSource: {
-    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
-    createEmpty: () => ISearchSource;
-  };
-  usageCollector?: SearchUsageCollector;
-  __LEGACY: ISearchStartLegacy;
+
+  showError: (e: Error) => void;
+  /**
+   * high level search
+   * {@link ISearchStartSearchSource}
+   */
+  searchSource: ISearchStartSearchSource;
+  /**
+   * session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';
 
+/** @internal */
 export interface SearchServiceSetupDependencies {
-  expressions: ExpressionsSetup;
-  usageCollection?: UsageCollectionSetup;
-  getInternalStartServices: GetInternalStartServicesFn;
   packageInfo: PackageInfo;
+  registerFunction: AggsSetupDependencies['registerFunction'];
+  usageCollection?: UsageCollectionSetup;
 }
 
+/** @internal */
 export interface SearchServiceStartDependencies {
+  fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: IndexPatternsContract;
 }

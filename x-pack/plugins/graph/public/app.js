@@ -53,6 +53,7 @@ export function initGraphApp(angularModule, deps) {
     graphSavePolicy,
     overlays,
     savedObjects,
+    setHeaderActionMenu,
   } = deps;
 
   const app = angularModule;
@@ -465,6 +466,7 @@ export function initGraphApp(angularModule, deps) {
     };
 
     // ===== Menubar configuration =========
+    $scope.setHeaderActionMenu = setHeaderActionMenu;
     $scope.topNavMenu = [];
     $scope.topNavMenu.push({
       key: 'new',

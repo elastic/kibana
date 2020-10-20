@@ -18,13 +18,12 @@ import {
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
 interface Props {
-  metric?: { value: SnapshotMetricType; text: string };
+  metric?: { value: string; text: string };
   metrics: Array<{ value: string; text: string }>;
   errors: IErrorObject;
-  onChange: (metric?: SnapshotMetricType) => void;
+  onChange: (metric?: string) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -104,7 +103,7 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
                 renderOption={(o: any) => o.label}
                 onChange={(selectedOptions) => {
                   if (selectedOptions.length > 0) {
-                    onChange(selectedOptions[0].value as SnapshotMetricType);
+                    onChange(selectedOptions[0].value);
                     setAggFieldPopoverOpen(false);
                   } else {
                     onChange();

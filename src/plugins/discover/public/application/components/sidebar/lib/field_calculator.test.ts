@@ -21,11 +21,10 @@ import _ from 'lodash';
 // @ts-ignore
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
-import StubIndexPattern from 'test_utils/stub_index_pattern';
-// @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { IndexPattern } from '../../../../../../data/public';
+import { getStubIndexPattern } from '../../../../../../data/public/test_utils';
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
 
@@ -33,12 +32,12 @@ let indexPattern: IndexPattern;
 
 describe('fieldCalculator', function () {
   beforeEach(function () {
-    indexPattern = new StubIndexPattern(
+    indexPattern = getStubIndexPattern(
       'logstash-*',
       (cfg: any) => cfg,
       'time',
       stubbedLogstashFields(),
-      coreMock.createStart()
+      coreMock.createSetup()
     );
   });
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {
@@ -142,13 +141,14 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit);
+      hits = _.each(_.cloneDeep(realHits), (hit) => indexPattern.flattenHit(hit));
     });
 
     it('Should return an array of values for _source fields', function () {
       const extensions = fieldCalculator.getFieldValues(
         hits,
-        indexPattern.fields.getByName('extension')
+        indexPattern.fields.getByName('extension'),
+        indexPattern
       );
       expect(extensions).toBeInstanceOf(Array);
       expect(
@@ -160,7 +160,11 @@ describe('fieldCalculator', function () {
     });
 
     it('Should return an array of values for core meta fields', function () {
-      const types = fieldCalculator.getFieldValues(hits, indexPattern.fields.getByName('_type'));
+      const types = fieldCalculator.getFieldValues(
+        hits,
+        indexPattern.fields.getByName('_type'),
+        indexPattern
+      );
       expect(types).toBeInstanceOf(Array);
       expect(
         _.filter(types, function (v) {
@@ -172,12 +176,13 @@ describe('fieldCalculator', function () {
   });
 
   describe('getFieldValueCounts', function () {
-    let params: { hits: any; field: any; count: number };
+    let params: { hits: any; field: any; count: number; indexPattern: IndexPattern };
     beforeEach(function () {
       params = {
         hits: _.cloneDeep(realHits),
         field: indexPattern.fields.getByName('extension'),
         count: 3,
+        indexPattern,
       };
     });
 

@@ -59,30 +59,71 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async openContextMenu(parent?: WebElementWrapper) {
       log.debug(`openContextMenu(${parent}`);
+      if (await testSubjects.exists('embeddablePanelContextMenuOpen')) return;
       await this.toggleContextMenu(parent);
       await this.expectContextMenuToBeOpen();
     }
 
+    async hasContextMenuMoreItem() {
+      return await testSubjects.exists('embeddablePanelMore-mainMenu');
+    }
+
+    async clickContextMenuMoreItem() {
+      const hasMoreSubPanel = await testSubjects.exists('embeddablePanelMore-mainMenu');
+      if (hasMoreSubPanel) {
+        await testSubjects.click('embeddablePanelMore-mainMenu');
+      }
+    }
+
+    async openContextMenuMorePanel(parent?: WebElementWrapper) {
+      await this.openContextMenu(parent);
+      await this.clickContextMenuMoreItem();
+    }
+
     async clickEdit() {
       log.debug('clickEdit');
+      await this.openContextMenu();
+      const isActionVisible = await testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitForTopNavToBeVisible();
     }
 
+    async editPanelByTitle(title?: string) {
+      log.debug(`editPanelByTitle(${title})`);
+      if (title) {
+        const panelOptions = await this.getPanelHeading(title);
+        await this.openContextMenu(panelOptions);
+      } else {
+        await this.openContextMenu();
+      }
+      await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+    }
+
     async clickExpandPanelToggle() {
+      log.debug(`clickExpandPanelToggle`);
+      this.openContextMenu();
+      const isActionVisible = await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
     async removePanel() {
       log.debug('removePanel');
       await this.openContextMenu();
+      const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
+      const isPanelActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+      if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
     async removePanelByTitle(title: string) {
       const header = await this.getPanelHeading(title);
       await this.openContextMenu(header);
+      const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
@@ -98,6 +139,10 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
         await this.openContextMenu(panelOptions);
       } else {
         await this.openContextMenu();
+      }
+      const actionExists = await testSubjects.exists(REPLACE_PANEL_DATA_TEST_SUBJ);
+      if (!actionExists) {
+        await this.clickContextMenuMoreItem();
       }
       await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
@@ -120,52 +165,78 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async openInspector(parent: WebElementWrapper) {
       await this.openContextMenu(parent);
+      const exists = await testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
+      if (!exists) {
+        await this.clickContextMenuMoreItem();
+      }
       await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
     }
 
     async expectExistsRemovePanelAction() {
       log.debug('expectExistsRemovePanelAction');
-      await testSubjects.existOrFail(REMOVE_PANEL_DATA_TEST_SUBJ);
+      await this.expectExistsPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async expectMissingRemovePanelAction() {
-      log.debug('expectMissingRemovePanelAction');
-      await testSubjects.missingOrFail(REMOVE_PANEL_DATA_TEST_SUBJ);
+    async expectExistsPanelAction(testSubject: string) {
+      log.debug('expectExistsPanelAction', testSubject);
+      await this.openContextMenu();
+      if (await testSubjects.exists(CLONE_PANEL_DATA_TEST_SUBJ)) return;
+      if (await this.hasContextMenuMoreItem()) {
+        await this.clickContextMenuMoreItem();
+      }
+      await testSubjects.existOrFail(CLONE_PANEL_DATA_TEST_SUBJ);
+      await this.toggleContextMenu();
+    }
+
+    async expectMissingPanelAction(testSubject: string) {
+      log.debug('expectMissingPanelAction', testSubject);
+      await this.openContextMenu();
+      await testSubjects.missingOrFail(testSubject);
+      if (await this.hasContextMenuMoreItem()) {
+        await this.clickContextMenuMoreItem();
+        await testSubjects.missingOrFail(testSubject);
+      }
+      await this.toggleContextMenu();
     }
 
     async expectExistsEditPanelAction() {
       log.debug('expectExistsEditPanelAction');
-      await testSubjects.existOrFail(EDIT_PANEL_DATA_TEST_SUBJ);
+      await this.expectExistsPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
     }
 
     async expectExistsReplacePanelAction() {
       log.debug('expectExistsReplacePanelAction');
-      await testSubjects.existOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
+      await this.expectExistsPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async expectExistsDuplicatePanelAction() {
-      log.debug('expectExistsDuplicatePanelAction');
-      await testSubjects.existOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
+    async expectExistsClonePanelAction() {
+      log.debug('expectExistsClonePanelAction');
+      await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
     }
 
     async expectMissingEditPanelAction() {
       log.debug('expectMissingEditPanelAction');
-      await testSubjects.missingOrFail(EDIT_PANEL_DATA_TEST_SUBJ);
+      await this.expectMissingPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
     }
 
     async expectMissingReplacePanelAction() {
       log.debug('expectMissingReplacePanelAction');
-      await testSubjects.missingOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
+      await this.expectMissingPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 
     async expectMissingDuplicatePanelAction() {
       log.debug('expectMissingDuplicatePanelAction');
-      await testSubjects.missingOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
+      await this.expectMissingPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async expectMissingRemovePanelAction() {
+      log.debug('expectMissingRemovePanelAction');
+      await this.expectMissingPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
     async expectExistsToggleExpandAction() {
       log.debug('expectExistsToggleExpandAction');
-      await testSubjects.existOrFail(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+      await this.expectExistsPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
     async getPanelHeading(title: string) {

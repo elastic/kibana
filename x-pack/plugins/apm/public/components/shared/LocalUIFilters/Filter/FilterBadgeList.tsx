@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { unit, px, truncate } from '../../../../style/variables';
 
 const BadgeText = styled.div`
@@ -18,24 +19,34 @@ const BadgeText = styled.div`
 interface Props {
   value: string[];
   onRemove: (val: string) => void;
+  name: string;
 }
 
-function FilterBadgeList({ onRemove, value }: Props) {
+const removeFilterLabel = i18n.translate(
+  'xpack.apm.uifilter.badge.removeFilter',
+  { defaultMessage: 'Remove filter' }
+);
+
+function FilterBadgeList({ onRemove, value, name }: Props) {
   return (
-    <EuiFlexGrid gutterSize="s">
+    <EuiFlexGrid gutterSize="s" id={`local-filter-values-${name}`}>
       {value.map((val) => (
         <EuiFlexItem key={val} grow={false}>
-          <button
-            type="button"
+          <EuiBadge
+            color="hollow"
             onClick={() => {
               onRemove(val);
             }}
+            onClickAriaLabel={removeFilterLabel}
+            iconOnClick={() => {
+              onRemove(val);
+            }}
+            iconOnClickAriaLabel={removeFilterLabel}
+            iconType="cross"
+            iconSide="right"
           >
-            <EuiBadge color="hollow">
-              <BadgeText>{val}</BadgeText>
-              <EuiIcon type="cross" />
-            </EuiBadge>
-          </button>
+            <BadgeText>{val}</BadgeText>
+          </EuiBadge>
         </EuiFlexItem>
       ))}
     </EuiFlexGrid>

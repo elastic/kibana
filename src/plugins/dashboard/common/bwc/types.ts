@@ -53,7 +53,7 @@ interface DashboardAttributes extends SavedObjectAttributes {
 interface DashboardAttributesTo720 extends SavedObjectAttributes {
   panelsJSON: string;
   description: string;
-  uiStateJSON: string;
+  uiStateJSON?: string;
   version: number;
   timeRestore: boolean;
   useMargins?: boolean;

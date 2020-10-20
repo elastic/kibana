@@ -25,6 +25,7 @@ const defaultProps = {
  */
 describe('CheckupTab', () => {
   test('render with deprecations', () => {
+    // @ts-expect-error mock data is too loosely typed
     expect(shallow(<CheckupTab {...defaultProps} />)).toMatchSnapshot();
   });
 

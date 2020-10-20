@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolverRelatedEvents, ResolverTree } from '../../../../common/endpoint/types';
+import {
+  ResolverRelatedEvents,
+  ResolverTree,
+  SafeEndpointEvent,
+  SafeResolverEvent,
+} from '../../../../common/endpoint/types';
+import { TreeFetcherParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -14,9 +20,9 @@ interface ServerReturnedResolverData {
      */
     result: ResolverTree;
     /**
-     * The database document ID that was used to fetch the resolver tree
+     * The database parameters that was used to fetch the resolver tree
      */
-    databaseDocumentID: string;
+    parameters: TreeFetcherParameters;
   };
 }
 
@@ -25,7 +31,29 @@ interface AppRequestedResolverData {
   /**
    * entity ID used to make the request.
    */
-  readonly payload: string;
+  readonly payload: TreeFetcherParameters;
+}
+
+interface UserRequestedAdditionalRelatedEvents {
+  readonly type: 'userRequestedAdditionalRelatedEvents';
+}
+
+interface ServerFailedToReturnNodeEventsInCategory {
+  readonly type: 'serverFailedToReturnNodeEventsInCategory';
+  readonly payload: {
+    /**
+     * The cursor, if any, that can be used to retrieve more events.
+     */
+    cursor: string | null;
+    /**
+     * The nodeID that `events` are related to.
+     */
+    nodeID: string;
+    /**
+     * The category that `events` have in common.
+     */
+    eventCategory: string;
+  };
 }
 
 interface ServerFailedToReturnResolverData {
@@ -33,7 +61,7 @@ interface ServerFailedToReturnResolverData {
   /**
    * entity ID used to make the failed request
    */
-  readonly payload: string;
+  readonly payload: TreeFetcherParameters;
 }
 
 interface AppAbortedResolverDataRequest {
@@ -41,15 +69,7 @@ interface AppAbortedResolverDataRequest {
   /**
    * entity ID used to make the aborted request
    */
-  readonly payload: string;
-}
-
-/**
- * Will occur when a request for related event data is unsuccessful.
- */
-interface ServerFailedToReturnRelatedEventData {
-  readonly type: 'serverFailedToReturnRelatedEventData';
-  readonly payload: string;
+  readonly payload: TreeFetcherParameters;
 }
 
 /**
@@ -60,30 +80,49 @@ interface ServerReturnedRelatedEventData {
   readonly payload: ResolverRelatedEvents;
 }
 
-/**
- * Used by `useStateSyncingActions` hook.
- * This is dispatched when external sources provide new parameters for Resolver.
- * When the component receives a new 'databaseDocumentID' prop, this is fired.
- */
-interface AppReceivedNewExternalProperties {
-  type: 'appReceivedNewExternalProperties';
-  /**
-   * Defines the externally provided properties that Resolver acknowledges.
-   */
-  payload: {
+interface ServerReturnedNodeEventsInCategory {
+  readonly type: 'serverReturnedNodeEventsInCategory';
+  readonly payload: {
     /**
-     * the `_id` of an ES document. This defines the origin of the Resolver graph.
+     * Events with `event.category` that include `eventCategory` and that are related to `nodeID`.
      */
-    databaseDocumentID?: string;
-    resolverComponentInstanceID: string;
+    events: SafeEndpointEvent[];
+    /**
+     * The cursor, if any, that can be used to retrieve more events.
+     */
+    cursor: string | null;
+    /**
+     * The nodeID that `events` are related to.
+     */
+    nodeID: string;
+    /**
+     * The category that `events` have in common.
+     */
+    eventCategory: string;
   };
+}
+interface AppRequestedCurrentRelatedEventData {
+  type: 'appRequestedCurrentRelatedEventData';
+}
+
+interface ServerFailedToReturnCurrentRelatedEventData {
+  type: 'serverFailedToReturnCurrentRelatedEventData';
+}
+
+interface ServerReturnedCurrentRelatedEventData {
+  readonly type: 'serverReturnedCurrentRelatedEventData';
+  readonly payload: SafeResolverEvent;
 }
 
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
-  | ServerFailedToReturnRelatedEventData
+  | AppRequestedCurrentRelatedEventData
+  | ServerReturnedCurrentRelatedEventData
+  | ServerFailedToReturnCurrentRelatedEventData
   | ServerReturnedRelatedEventData
-  | AppReceivedNewExternalProperties
+  | ServerReturnedNodeEventsInCategory
   | AppRequestedResolverData
+  | UserRequestedAdditionalRelatedEvents
+  | ServerFailedToReturnNodeEventsInCategory
   | AppAbortedResolverDataRequest;

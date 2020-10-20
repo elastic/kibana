@@ -50,26 +50,27 @@ export function demodata(): ExpressionFunctionDefinition<
       if (args.type === DemoRows.CI) {
         set = {
           columns: [
-            { name: '@timestamp', type: 'date' },
-            { name: 'time', type: 'date' },
-            { name: 'cost', type: 'number' },
-            { name: 'username', type: 'string' },
-            { name: 'price', type: 'number' },
-            { name: 'age', type: 'number' },
-            { name: 'country', type: 'string' },
-            { name: 'state', type: 'string' },
-            { name: 'project', type: 'string' },
-            { name: 'percent_uptime', type: 'number' },
+            { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+            { id: 'time', name: 'time', meta: { type: 'date' } },
+            { id: 'cost', name: 'cost', meta: { type: 'number' } },
+            { id: 'username', name: 'username', meta: { type: 'string' } },
+            { id: 'price', name: 'price', meta: { type: 'number' } },
+            { id: 'age', name: 'age', meta: { type: 'number' } },
+            { id: 'country', name: 'country', meta: { type: 'string' } },
+            { id: 'state', name: 'state', meta: { type: 'string' } },
+            { id: 'project', name: 'project', meta: { type: 'string' } },
+            { id: 'percent_uptime', name: 'percent_uptime', meta: { type: 'number' } },
           ],
+          // @ts-expect-error invalid json mock
           rows: sortBy(demoRows, 'time'),
         };
       } else if (args.type === DemoRows.SHIRTS) {
         set = {
           columns: [
-            { name: 'size', type: 'string' },
-            { name: 'color', type: 'string' },
-            { name: 'price', type: 'number' },
-            { name: 'cut', type: 'string' },
+            { id: 'size', name: 'size', meta: { type: 'string' } },
+            { id: 'color', name: 'color', meta: { type: 'string' } },
+            { id: 'price', name: 'price', meta: { type: 'number' } },
+            { id: 'cut', name: 'cut', meta: { type: 'string' } },
           ],
           rows: demoRows,
         };

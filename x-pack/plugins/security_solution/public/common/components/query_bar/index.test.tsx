@@ -6,36 +6,33 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-
+import { render, waitFor } from '@testing-library/react';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { QueryBar, QueryBarComponentProps } from '.';
-import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 describe('QueryBar ', () => {
-  // We are doing that because we need to wrapped this component with redux
-  // and redux does not like to be updated and since we need to update our
-  // child component (BODY) and we do not want to scare anyone with this error
-  // we are hiding it!!!
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/<Provider> does not support changing `store` on the fly/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
   const mockOnChangeQuery = jest.fn();
   const mockOnSubmitQuery = jest.fn();
   const mockOnSavedQuery = jest.fn();
+
+  const Proxy = (props: QueryBarComponentProps) => (
+    <TestProviders>
+      <QueryBar {...props} />
+    </TestProviders>
+  );
+
+  // The data plugin's `SearchBar` is lazy loaded, so we need to ensure it is
+  // available before we mount our component with Enzyme.
+  const getWrapper = async (Component: ReturnType<typeof Proxy>) => {
+    const { getByTestId } = render(Component);
+    await waitFor(() => getByTestId('queryInput')); // check for presence of query input
+    return mount(Component);
+  };
 
   beforeEach(() => {
     mockOnChangeQuery.mockClear();
@@ -186,18 +183,8 @@ describe('QueryBar ', () => {
   });
 
   describe('state', () => {
-    test('clears draftQuery when filterQueryDraft has been cleared', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test('clears draftQuery when filterQueryDraft has been cleared', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -230,18 +217,8 @@ describe('QueryBar ', () => {
   });
 
   describe('#onQueryChange', () => {
-    test(' is the only reference that changed when filterQueryDraft props get updated', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test(' is the only reference that changed when filterQueryDraft props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -272,14 +249,8 @@ describe('QueryBar ', () => {
   });
 
   describe('#onQuerySubmit', () => {
-    test(' is the only reference that changed when filterQuery props get updated', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test(' is the only reference that changed when filterQuery props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -307,14 +278,8 @@ describe('QueryBar ', () => {
       expect(onSavedQueryRef).toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
     });
 
-    test(' is only reference that changed when timelineId props get updated', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test(' is only reference that changed when timelineId props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -344,14 +309,8 @@ describe('QueryBar ', () => {
   });
 
   describe('#onSavedQueryUpdated', () => {
-    test('is only reference that changed when dataProviders props get updated', () => {
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <QueryBar {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test('is only reference that changed when dataProviders props get updated', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -381,29 +340,8 @@ describe('QueryBar ', () => {
   });
 
   describe('SavedQueryManagementComponent state', () => {
-    test('popover should hidden when "Save current query" button was clicked', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <KibanaWithStorageProvider
-            services={{
-              data: {
-                query: {
-                  savedQueries: {
-                    findSavedQueries: jest.fn().mockResolvedValue({ total: 0, queries: [] }),
-                    getAllSavedQueries: jest.fn().mockResolvedValue([]),
-                  },
-                },
-              },
-            }}
-          >
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
-        </TestProviders>
-      );
-
-      const wrapper = mount(
+    test('popover should hidden when "Save current query" button was clicked', async () => {
+      const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
@@ -421,21 +359,24 @@ describe('QueryBar ', () => {
           onSavedQuery={mockOnSavedQuery}
         />
       );
+      await waitFor(() => {
+        const isSavedQueryPopoverOpen = () =>
+          wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
 
-      const isSavedQueryPopoverOpen = () =>
-        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+        expect(isSavedQueryPopoverOpen()).toBeFalsy();
 
-      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+        wrapper
+          .find('button[data-test-subj="saved-query-management-popover-button"]')
+          .simulate('click');
 
-      wrapper
-        .find('button[data-test-subj="saved-query-management-popover-button"]')
-        .simulate('click');
+        expect(isSavedQueryPopoverOpen()).toBeTruthy();
 
-      expect(isSavedQueryPopoverOpen()).toBeTruthy();
+        wrapper
+          .find('button[data-test-subj="saved-query-management-save-button"]')
+          .simulate('click');
 
-      wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
-
-      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+        expect(isSavedQueryPopoverOpen()).toBeFalsy();
+      });
     });
   });
 });

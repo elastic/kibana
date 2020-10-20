@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { getServiceNodesProjection } from '../../projections/service_nodes';
 
 export async function getServiceNodeMetadata({
   serviceName,
@@ -24,9 +20,9 @@ export async function getServiceNodeMetadata({
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const query = mergeProjection(
     getServiceNodesProjection({
@@ -55,7 +51,7 @@ export async function getServiceNodeMetadata({
     }
   );
 
-  const response = await client.search(query);
+  const response = await apmEventClient.search(query);
 
   return {
     host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,

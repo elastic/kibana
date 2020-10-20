@@ -31,6 +31,7 @@ const AgentEventBase = {
       schema.literal('STOPPING'),
       schema.literal('STOPPED'),
       schema.literal('DEGRADED'),
+      schema.literal('UPDATING'),
     ]),
     // Action results
     schema.literal('DATA_DUMP'),
@@ -43,7 +44,7 @@ const AgentEventBase = {
   payload: schema.maybe(schema.any()),
   agent_id: schema.string(),
   action_id: schema.maybe(schema.string()),
-  config_id: schema.maybe(schema.string()),
+  policy_id: schema.maybe(schema.string()),
   stream_id: schema.maybe(schema.string()),
 };
 
@@ -63,11 +64,12 @@ export const AgentEventSchema = schema.object({
 
 export const NewAgentActionSchema = schema.object({
   type: schema.oneOf([
-    schema.literal('CONFIG_CHANGE'),
-    schema.literal('DATA_DUMP'),
-    schema.literal('RESUME'),
-    schema.literal('PAUSE'),
+    schema.literal('POLICY_CHANGE'),
+    schema.literal('UNENROLL'),
+    schema.literal('UPGRADE'),
+    schema.literal('INTERNAL_POLICY_REASSIGN'),
   ]),
   data: schema.maybe(schema.any()),
+  ack_data: schema.maybe(schema.any()),
   sent_at: schema.maybe(schema.string()),
 });

@@ -93,7 +93,7 @@ describe('Url autocomplete', () => {
 
   (function () {
     const endpoints = {
-      '1': {
+      1: {
         patterns: ['a/b'],
         methods: ['GET'],
       },
@@ -125,11 +125,11 @@ describe('Url autocomplete', () => {
 
   (function () {
     const endpoints = {
-      '1': {
+      1: {
         patterns: ['a/b', 'a/b/{p}'],
         methods: ['GET'],
       },
-      '2': {
+      2: {
         patterns: ['a/c'],
         methods: ['GET'],
       },
@@ -176,14 +176,14 @@ describe('Url autocomplete', () => {
 
   (function () {
     const endpoints = {
-      '1': {
+      1: {
         patterns: ['a/{p}'],
         url_components: {
           p: ['a', 'b'],
         },
         methods: ['GET'],
       },
-      '2': {
+      2: {
         patterns: ['a/c'],
         methods: ['GET'],
       },
@@ -230,18 +230,18 @@ describe('Url autocomplete', () => {
 
   (function () {
     const endpoints = {
-      '1': {
+      1: {
         patterns: ['a/{p}'],
         url_components: {
           p: ['a', 'b'],
         },
         methods: ['GET'],
       },
-      '2': {
+      2: {
         patterns: ['b/{p}'],
         methods: ['GET'],
       },
-      '3': {
+      3: {
         patterns: ['b/{l}/c'],
         methods: ['GET'],
         url_components: {
@@ -315,7 +315,7 @@ describe('Url autocomplete', () => {
 
   (function () {
     const endpoints = {
-      '1': {
+      1: {
         patterns: ['a/b/{p}/c/e'],
         methods: ['GET'],
       },

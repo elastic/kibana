@@ -75,7 +75,7 @@ export const buildConfig = async (
       host: serverInfo.hostname,
       name: serverInfo.name,
       port: serverInfo.port,
-      uuid: core.uuid.getInstanceUuid(),
+      uuid: initContext.env.instanceUuid,
       protocol: serverInfo.protocol,
     },
   };

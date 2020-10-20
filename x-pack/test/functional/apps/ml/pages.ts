@@ -16,42 +16,50 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
-    it('loads the home page', async () => {
+    it('loads the ML pages', async () => {
+      await ml.testExecution.logTestStep('loads the ML home page');
       await ml.navigation.navigateToMl();
-    });
 
-    it('loads the overview page', async () => {
+      await ml.testExecution.logTestStep('loads the overview page');
       await ml.navigation.navigateToOverview();
-    });
 
-    it('loads the anomaly detection area', async () => {
+      await ml.testExecution.logTestStep('loads the anomaly detection area');
       await ml.navigation.navigateToAnomalyDetection();
-    });
 
-    it('loads the job management page', async () => {
+      await ml.testExecution.logTestStep('loads the job management page');
       await ml.navigation.navigateToJobManagement();
       await ml.jobManagement.assertJobStatsBarExists();
       await ml.jobManagement.assertJobTableExists();
       await ml.jobManagement.assertCreateNewJobButtonExists();
-    });
 
-    it('loads the settings page', async () => {
+      await ml.testExecution.logTestStep('loads the settings page');
       await ml.navigation.navigateToSettings();
-      await ml.settings.assertSettingsManageCalendarsLinkExists();
-      await ml.settings.assertSettingsCreateCalendarLinkExists();
-      await ml.settings.assertSettingsManageFilterListsLinkExists();
-      await ml.settings.assertSettingsCreateFilterListLinkExists();
-    });
+      await ml.settings.assertManageCalendarsLinkExists();
+      await ml.settings.assertCreateCalendarLinkExists();
+      await ml.settings.assertManageFilterListsLinkExists();
+      await ml.settings.assertCreateFilterListLinkExists();
 
-    it('loads the data frame analytics page', async () => {
+      await ml.testExecution.logTestStep('loads the data frame analytics page');
       await ml.navigation.navigateToDataFrameAnalytics();
       await ml.dataFrameAnalytics.assertEmptyListMessageExists();
-    });
 
-    it('loads the data visualizer page', async () => {
+      await ml.testExecution.logTestStep('loads the data visualizer page');
       await ml.navigation.navigateToDataVisualizer();
       await ml.dataVisualizer.assertDataVisualizerImportDataCardExists();
       await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
+
+      await ml.testExecution.logTestStep(
+        'should load the stack management with the ML menu item being present'
+      );
+      await ml.navigation.navigateToStackManagement();
+
+      await ml.testExecution.logTestStep('should load the jobs list page in stack management');
+      await ml.navigation.navigateToStackManagementJobsListPage();
+
+      await ml.testExecution.logTestStep(
+        'should load the analytics jobs list page in stack management'
+      );
+      await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
     });
   });
 }

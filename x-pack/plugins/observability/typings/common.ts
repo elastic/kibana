@@ -4,8 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
+export type ObservabilityApp =
+  | 'infra_metrics'
+  | 'infra_logs'
+  | 'apm'
+  | 'uptime'
+  | 'observability'
+  | 'stack_monitoring'
+  | 'ux';
 
 export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
   ? Value
   : Func;
+
+export { Coordinates } from '../public/typings/fetch_overview_data/';

@@ -28,11 +28,7 @@ export {
 } from '../../common/index_patterns/lib';
 export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
 
-export {
-  getIndexPatternFieldListCreator,
-  Field,
-  IIndexPatternFieldList,
-} from '../../common/index_patterns';
+export { IndexPatternField, IIndexPatternFieldList } from '../../common/index_patterns';
 
 export {
   IndexPatternsService,

@@ -124,7 +124,11 @@ export class SetupModeRenderer extends React.Component {
       <Fragment>
         <EuiSpacer size="xxl" />
         <EuiBottomBar>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            data-test-subj="monitoringSetupModeBottomBar"
+          >
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
@@ -173,11 +177,11 @@ export class SetupModeRenderer extends React.Component {
     const { render, productName } = this.props;
     const setupModeState = getSetupModeState();
 
-    let data = null;
+    let data = { byUuid: {} };
     if (setupModeState.data) {
-      if (productName) {
+      if (productName && setupModeState.data[productName]) {
         data = setupModeState.data[productName];
-      } else {
+      } else if (setupModeState.data) {
         data = setupModeState.data;
       }
     }

@@ -6,12 +6,11 @@
 
 import { getOr, omit } from 'lodash/fp';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
-import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/ip_details';
+import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';

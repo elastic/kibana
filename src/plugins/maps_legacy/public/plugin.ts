@@ -22,15 +22,12 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 // @ts-ignore
 import { setToasts, setUiSettings, setKibanaVersion, setMapsLegacyConfig } from './kibana_services';
 // @ts-ignore
-import { ServiceSettings } from './map/service_settings';
-// @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
-// @ts-ignore
-import { KibanaMap } from './map/kibana_map';
-import { MapsLegacyConfigType, MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
-import { ConfigSchema } from '../config';
+import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
+import { MapsLegacyConfig } from '../config';
 // @ts-ignore
 import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
+import { getServiceSettings } from './get_service_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -40,7 +37,7 @@ import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 
 export const bindSetupCoreAndPlugins = (
   core: CoreSetup,
-  config: MapsLegacyConfigType,
+  config: MapsLegacyConfig,
   kibanaVersion: string
 ) => {
   setToasts(core.notifications.toasts);
@@ -55,29 +52,25 @@ export interface MapsLegacySetupDependencies {}
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+  readonly _initializerContext: PluginInitializerContext<MapsLegacyConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<MapsLegacyConfig>) {
     this._initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    const config = this._initializerContext.config.get<MapsLegacyConfigType>();
+    const config = this._initializerContext.config.get<MapsLegacyConfig>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
     bindSetupCoreAndPlugins(core, config, kibanaVersion);
 
-    const serviceSettings = new ServiceSettings(config, config.tilemap);
-    const getKibanaMapFactoryProvider = (...args: any) => new KibanaMap(...args);
-    const getBaseMapsVis = () =>
-      new BaseMapsVisualizationProvider(getKibanaMapFactoryProvider, serviceSettings);
+    const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
 
     return {
-      serviceSettings,
+      getServiceSettings,
       getZoomPrecision,
       getPrecision,
       config,
-      getKibanaMapFactoryProvider,
       getBaseMapsVis,
     };
   }

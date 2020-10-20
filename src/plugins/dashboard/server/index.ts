@@ -17,8 +17,16 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '../../../core/server';
 import { DashboardPlugin } from './plugin';
+import { configSchema, ConfigSchema } from '../config';
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    allowByValueEmbeddables: true,
+  },
+  schema: configSchema,
+};
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.

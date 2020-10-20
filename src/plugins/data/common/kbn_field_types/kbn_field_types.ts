@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createKbnFieldTypes } from './kbn_field_types_factory';
+import { createKbnFieldTypes, kbnFieldTypeUnknown } from './kbn_field_types_factory';
 import { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
@@ -30,8 +30,8 @@ const registeredKbnTypes = createKbnFieldTypes();
  *  @param  {string} typeName
  *  @return {KbnFieldType}
  */
-export const getKbnFieldType = (typeName: string): KbnFieldType | undefined =>
-  registeredKbnTypes.find((t) => t.name === typeName);
+export const getKbnFieldType = (typeName: string): KbnFieldType =>
+  registeredKbnTypes.find((t) => t.name === typeName) || kbnFieldTypeUnknown;
 
 /**
  *  Get the esTypes known by all kbnFieldTypes

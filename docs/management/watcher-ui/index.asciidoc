@@ -60,7 +60,7 @@ The following example walks you through creating a threshold alert. The alert
 is triggered when the maximum total CPU usage on a machine goes above a
 certain percentage. The example uses https://www.elastic.co/products/beats/metricbeat[Metricbeat]
 to collect metrics from your systems and services.
-{metricbeat-ref}/metricbeat-installation.html[Learn more] on how to install
+{metricbeat-ref}/metricbeat-installation-configuration.html[Learn more] on how to install
 and get started with Metricbeat.
 
 [float]

@@ -94,6 +94,7 @@ describe('getCerts', () => {
         heartbeatIndices: 'heartbeat*',
         certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
         certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
+        defaultConnectors: [],
       },
       index: 1,
       from: 'now-2d',

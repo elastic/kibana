@@ -22,7 +22,6 @@ interface StartPlugins {
   share: SharePluginStart;
 }
 export type StartServices = CoreStart &
-  StartPlugins & { kibanaVersion: string } & MlServicesContext;
-// eslint-disable-next-line react-hooks/rules-of-hooks
+  StartPlugins & { appName: string; kibanaVersion: string } & MlServicesContext;
 export const useMlKibana = () => useKibana<StartServices>();
 export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

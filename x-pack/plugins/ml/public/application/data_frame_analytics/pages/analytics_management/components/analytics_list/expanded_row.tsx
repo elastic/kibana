@@ -11,10 +11,10 @@ import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
 
 import { DataFrameAnalyticsListRow } from './common';
-import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
 import {
@@ -28,6 +28,7 @@ import { getTaskStateBadge } from './use_columns';
 import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
+  getAnalysisType,
   ANALYSIS_CONFIG_TYPE,
   REGRESSION_STATS,
   isRegressionEvaluateResponse,
@@ -76,6 +77,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const resultsField = item.config.dest.results_field;
   const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
   const isRegressionJob = isRegressionAnalysis(item.config.analysis);
+  const analysisType = getAnalysisType(item.config.analysis);
 
   const loadData = async () => {
     setIsLoadingGeneralization(true);
@@ -95,6 +97,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         mse,
@@ -129,6 +132,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         mse,
@@ -158,25 +162,34 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const stateValues: any = { ...item.stats };
 
+  const analysisStatsValues = stateValues.analysis_stats
+    ? stateValues.analysis_stats[`${analysisType}_stats`]
+    : undefined;
+
   if (item.config?.description) {
     stateValues.description = item.config.description;
   }
   delete stateValues.progress;
 
-  const state: SectionConfig = {
-    title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
-      defaultMessage: 'State',
-    }),
-    items: Object.entries(stateValues).map(([stateKey, stateValue]) => {
+  const stateItems = Object.entries(stateValues)
+    .map(([stateKey, stateValue]) => {
       const title = stateKey.toString();
       if (title === 'state') {
         return {
           title,
           description: getTaskStateBadge(getItemDescription(stateValue)),
         };
+      } else if (title !== 'analysis_stats') {
+        return { title, description: getItemDescription(stateValue) };
       }
-      return { title, description: getItemDescription(stateValue) };
+    })
+    .filter((stateItem) => stateItem !== undefined);
+
+  const state: SectionConfig = {
+    title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
+      defaultMessage: 'State',
     }),
+    items: stateItems as SectionItem[],
     position: 'left',
   };
 
@@ -202,7 +215,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         };
       }),
     ],
-    position: 'left',
+    position: 'right',
   };
 
   const stats: SectionConfig = {
@@ -219,8 +232,38 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       { title: 'model_memory_limit', description: item.config.model_memory_limit },
       { title: 'version', description: item.config.version },
     ],
-    position: 'right',
+    position: 'left',
   };
+
+  const analysisStats: SectionConfig | undefined = analysisStatsValues
+    ? {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.analysisStats',
+          {
+            defaultMessage: 'Analysis stats',
+          }
+        ),
+        items: [
+          {
+            title: 'timestamp',
+            description: formatHumanReadableDateTimeSeconds(
+              moment(analysisStatsValues.timestamp).unix() * 1000
+            ),
+          },
+          {
+            title: 'timing_stats',
+            description: getItemDescription(analysisStatsValues.timing_stats),
+          },
+          ...Object.entries(
+            analysisStatsValues.parameters || analysisStatsValues.hyperparameters || {}
+          ).map(([stateKey, stateValue]) => {
+            const title = stateKey.toString();
+            return { title, description: getItemDescription(stateValue) };
+          }),
+        ],
+        position: 'right',
+      }
+    : undefined;
 
   if (jobIsCompleted && isRegressionJob) {
     stats.items.push(
@@ -307,13 +350,30 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     );
   }
 
+  const detailsSections: SectionConfig[] = [state, progress];
+  const statsSections: SectionConfig[] = [stats];
+
+  if (analysisStats !== undefined) {
+    statsSections.push(analysisStats);
+  }
+
   const tabs = [
     {
       id: 'ml-analytics-job-details',
       name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <ExpandedRowDetailsPane sections={[state, progress, stats]} />,
+      content: <ExpandedRowDetailsPane sections={detailsSections} />,
+    },
+    {
+      id: 'ml-analytics-job-stats',
+      name: i18n.translate(
+        'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsStatsLabel',
+        {
+          defaultMessage: 'Job stats',
+        }
+      ),
+      content: <ExpandedRowDetailsPane sections={statsSections} />,
     },
     {
       id: 'ml-analytics-job-json',

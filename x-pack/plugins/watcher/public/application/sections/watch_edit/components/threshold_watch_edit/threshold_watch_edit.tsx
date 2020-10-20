@@ -900,7 +900,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   data-test-subj="saveWatchButton"
                   type="submit"
                   iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
+                  disabled={hasErrors || hasActionErrors}
                   isLoading={isSaving}
                   onClick={async () => {
                     setIsSaving(true);

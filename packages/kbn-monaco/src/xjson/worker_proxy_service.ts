@@ -17,32 +17,21 @@
  * under the License.
  */
 
-import { AnnoTypes } from './grammar';
+import { ParseResult } from './grammar';
 import { monaco } from '../monaco';
 import { XJsonWorker } from './worker';
 import { ID } from './constants';
 
-export interface Annotation {
-  name?: string;
-  type: AnnoTypes;
-  text: string;
-  at: number;
-}
-
-export interface AnnotationsResponse {
-  annotations: Annotation[];
-}
-
 export class WorkerProxyService {
   private worker: monaco.editor.MonacoWebWorker<XJsonWorker> | undefined;
 
-  public async getAnnos(): Promise<AnnotationsResponse> {
+  public async getAnnos(modelUri: monaco.Uri): Promise<ParseResult | undefined> {
     if (!this.worker) {
       throw new Error('Worker Proxy Service has not been setup!');
     }
-    await this.worker.withSyncedResources(monaco.editor.getModels().map(({ uri }) => uri));
+    await this.worker.withSyncedResources([modelUri]);
     const proxy = await this.worker.getProxy();
-    return proxy.parse();
+    return proxy.parse(modelUri.toString());
   }
 
   public setup() {

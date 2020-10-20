@@ -21,6 +21,8 @@ import expect from '@kbn/expect';
 import path from 'path';
 import { keyBy } from 'lodash';
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -49,12 +51,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
 
-        // get all the elements in the table, and index them by the 'title' visible text field
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
         log.debug("check that 'Log Agents' is in table as a visualization");
-        expect(elements['Log Agents'].objectType).to.eql('visualization');
+        expect(await PageObjects.savedObjects.getObjectTypeByTitle('Log Agents')).to.eql(
+          'visualization'
+        );
 
-        await elements['logstash-*'].relationshipsElement.click();
+        await PageObjects.savedObjects.clickRelationshipsByTitle('logstash-*');
+
         const flyout = keyBy(await PageObjects.savedObjects.getRelationshipFlyout(), 'title');
         log.debug(
           "check that 'Shared-Item Visualization AreaChart' shows 'logstash-*' as it's Parent"
@@ -150,8 +153,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         await PageObjects.savedObjects.importFile(
@@ -182,8 +184,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         // Then, import the objects
@@ -204,12 +205,12 @@ export default function ({ getService, getPageObjects }) {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
-        await esArchiver.load('management');
+        await esArchiver.load('saved_objects_imports');
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('management');
+        await esArchiver.unload('saved_objects_imports');
       });
 
       it('should import saved objects', async function () {
@@ -281,6 +282,54 @@ export default function ({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
+      it('should allow the user to confirm overriding multiple duplicate saved objects', async function () {
+        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // so that we can override the existing visualization.
+        await PageObjects.savedObjects.importFile(
+          path.join(__dirname, 'exports', '_import_objects_multiple_exists.json'),
+          false
+        );
+
+        await PageObjects.savedObjects.checkImportLegacyWarning();
+        await PageObjects.savedObjects.checkImportConflictsWarning();
+
+        await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
+        await PageObjects.savedObjects.clickConfirmChanges();
+
+        // Override the visualizations.
+        await PageObjects.common.clickConfirmOnModal(false);
+        // as the second confirm can pop instantly, we can't wait for it to be hidden
+        // with is why we call clickConfirmOnModal with ensureHidden: false in previous statement
+        // but as the initial popin can take a few ms before fading, we need to wait a little
+        // to avoid clicking twice on the same modal.
+        await delay(1000);
+        await PageObjects.common.clickConfirmOnModal(false);
+
+        const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
+        expect(isSuccessful).to.be(true);
+      });
+
+      it('should allow the user to confirm overriding multiple duplicate index patterns', async function () {
+        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // so that we can override the existing visualization.
+        await PageObjects.savedObjects.importFile(
+          path.join(__dirname, 'exports', '_import_index_patterns_multiple_exists.json'),
+          false
+        );
+
+        // Override the index patterns.
+        await PageObjects.common.clickConfirmOnModal(false);
+        // as the second confirm can pop instantly, we can't wait for it to be hidden
+        // with is why we call clickConfirmOnModal with ensureHidden: false in previous statement
+        // but as the initial popin can take a few ms before fading, we need to wait a little
+        // to avoid clicking twice on the same modal.
+        await delay(1000);
+        await PageObjects.common.clickConfirmOnModal(false);
+
+        const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
+        expect(isSuccessful).to.be(true);
+      });
+
       it('should import saved objects linked to saved searches', async function () {
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.json')
@@ -321,8 +370,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickImportDone();
 
         // Second, we need to delete the index pattern
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         // Last, import a saved object connected to the saved search
@@ -353,8 +401,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         // Then, import the objects

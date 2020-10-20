@@ -8,9 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -34,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
       ],
       samplerShardSize: -1, // No sampling, as otherwise counts could vary on each run.
       timeFieldName: '@timestamp',
-      interval: '1d',
+      interval: 86400000,
       maxExamples: 10,
     },
     expected: {
@@ -42,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
       responseBody: [
         {
           documentCounts: {
-            interval: '1d',
+            interval: 86400000,
             buckets: {
               '1454803200000': 846,
               '1454889600000': 846,
@@ -146,6 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
       ],
       samplerShardSize: -1, // No sampling, as otherwise counts could vary on each run.
       timeFieldName: '@timestamp',
+      interval: 86400000,
       maxExamples: 10,
     },
     expected: {
@@ -153,8 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
       responseBody: {
         statusCode: 404,
         error: 'Not Found',
-        message:
-          '[index_not_found_exception] no such index [ft_farequote_not_exists], with { resource.type="index_or_alias" & resource.id="ft_farequote_not_exists" & index_uuid="_na_" & index="ft_farequote_not_exists" }',
+        message: 'index_not_found_exception',
       },
     },
   };

@@ -13,7 +13,7 @@ import {
   ValidationFunc,
   ERROR_CODE,
 } from '../../../../shared_imports';
-import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
+import { IMitreEnterpriseAttack, AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { isMitreAttackInvalid } from '../mitre/helpers';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
@@ -21,7 +21,7 @@ import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
 
-export const schema: FormSchema = {
+export const schema: FormSchema<AboutStepRule> = {
   author: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -96,35 +96,18 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel',
       {
-        defaultMessage: 'Associate rule to Global Endpoint Exception List',
+        defaultMessage: 'Add existing Endpoint exceptions to the rule',
       }
     ),
     labelAppend: OptionalFieldLabel,
   },
   severity: {
-    value: {
-      type: FIELD_TYPES.SUPER_SELECT,
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.severityFieldRequiredError',
-              {
-                defaultMessage: 'A severity is required.',
-              }
-            )
-          ),
-        },
-      ],
-    },
+    value: {},
     mapping: {},
     isMappingChecked: {},
   },
   riskScore: {
-    value: {
-      type: FIELD_TYPES.RANGE,
-      serializer: (input: string) => Number(input),
-    },
+    value: {},
     mapping: {},
     isMappingChecked: {},
   },

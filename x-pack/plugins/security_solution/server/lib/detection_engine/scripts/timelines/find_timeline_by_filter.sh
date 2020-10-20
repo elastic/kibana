@@ -14,13 +14,13 @@ STATUS=${1:-active}
 TIMELINE_TYPE=${2:-default}
 
 # Example get all timelines:
-# ./timelines/find_timeline_by_filter.sh active
+# sh ./timelines/find_timeline_by_filter.sh active
 
 # Example get all prepackaged timeline templates:
 # ./timelines/find_timeline_by_filter.sh immutable template
 
 # Example get all custom timeline templates:
-# ./timelines/find_timeline_by_filter.sh active template
+# sh ./timelines/find_timeline_by_filter.sh active template
 
 curl -s -k \
   -H "Content-Type: application/json" \

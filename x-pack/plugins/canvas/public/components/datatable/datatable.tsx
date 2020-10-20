@@ -9,11 +9,9 @@ import PropTypes from 'prop-types';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
 import { Paginate } from '../paginate';
-import { Datatable as DatatableType, DatatableColumn } from '../../../types';
+import { Datatable as DatatableType, DatatableColumn, DatatableColumnType } from '../../../types';
 
-type IconType = 'string' | 'number' | 'date' | 'boolean' | 'null';
-
-const getIcon = (type: IconType) => {
+const getIcon = (type: DatatableColumnType | null) => {
   if (type === null) {
     return;
   }
@@ -41,7 +39,7 @@ const getIcon = (type: IconType) => {
 
 const getColumnName = (col: DatatableColumn) => (typeof col === 'string' ? col : col.name);
 
-const getColumnType = (col: DatatableColumn) => col.type || null;
+const getColumnType = (col: DatatableColumn) => col.meta?.type || null;
 
 const getFormattedValue = (val: any, type: any) => {
   if (type === 'date') {

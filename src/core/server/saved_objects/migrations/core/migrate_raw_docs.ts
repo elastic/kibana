@@ -78,10 +78,14 @@ function transformNonBlocking(
 ): (doc: SavedObjectUnsanitizedDoc) => Promise<SavedObjectUnsanitizedDoc> {
   // promises aren't enough to unblock the event loop
   return (doc: SavedObjectUnsanitizedDoc) =>
-    new Promise((resolve) => {
+    new Promise((resolve, reject) => {
       // set immediate is though
       setImmediate(() => {
-        resolve(transform(doc));
+        try {
+          resolve(transform(doc));
+        } catch (e) {
+          reject(e);
+        }
       });
     });
 }

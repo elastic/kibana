@@ -8,7 +8,6 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -18,16 +17,13 @@ import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { SiemNavigation } from '../../common/components/navigation';
-import { KpiHostsComponent } from '../components/kpi_hosts';
-import { manageQuery } from '../../common/components/page/manage_query';
+import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { KpiHostsQuery } from '../containers/kpi_hosts';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
 import { TimelineId } from '../../../common/types/timeline';
-import { LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors, State } from '../../common/store';
@@ -35,7 +31,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
-import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
@@ -49,8 +45,7 @@ import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../timelines/store/timeline/model';
-
-const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
+import { useSourcererScope } from '../../common/containers/sourcerer';
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
   ({ filters, graphEventId, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
@@ -58,7 +53,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
     const { globalFullScreen } = useFullScreen();
     const capabilities = useMlCapabilities();
     const kibana = useKibana();
-    const { tabName } = useParams();
+    const { tabName } = useParams<{ tabName: string }>();
     const tabsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
         return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
@@ -79,7 +74,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
-    const { docValueFields, indicesExist, indexPattern } = useWithSource();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -96,12 +91,9 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
     return (
       <>
         {indicesExist ? (
-          <StickyContainer>
+          <>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal
-              globalFullScreen={globalFullScreen}
-              show={showGlobalFilters({ globalFullScreen, graphEventId })}
-            >
+            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
@@ -109,31 +101,25 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                  subtitle={
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.hosts}
+                      indexNames={selectedPatterns}
+                    />
+                  }
                   title={i18n.PAGE_TITLE}
                 />
 
-                <KpiHostsQuery
-                  endDate={to}
+                <HostsKpiComponent
                   filterQuery={filterQuery}
+                  indexNames={selectedPatterns}
+                  from={from}
+                  setQuery={setQuery}
+                  to={to}
                   skip={isInitializing}
-                  sourceId="default"
-                  startDate={from}
-                >
-                  {({ kpiHosts, loading, id, inspect, refetch }) => (
-                    <KpiHostsComponentManage
-                      data={kpiHosts}
-                      from={from}
-                      id={id}
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      to={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </KpiHostsQuery>
+                  narrowDateRange={narrowDateRange}
+                />
 
                 <EuiSpacer />
 
@@ -148,15 +134,15 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                 to={to}
                 filterQuery={tabsFilterQuery}
                 isInitializing={isInitializing}
+                indexNames={selectedPatterns}
                 setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                 setQuery={setQuery}
                 from={from}
                 type={hostsModel.HostsType.page}
-                indexPattern={indexPattern}
                 hostsPagePath={hostsPagePath}
               />
             </WrapperPage>
-          </StickyContainer>
+          </>
         ) : (
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />

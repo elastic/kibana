@@ -26,7 +26,7 @@ import {
   EuiLink,
   EuiIcon,
   EuiCallOut,
-  EuiLoadingKibana,
+  EuiLoadingElastic,
   EuiInMemoryTable,
   EuiToolTip,
   EuiText,
@@ -119,7 +119,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     }
 
     if (isLoading) {
-      return <EuiLoadingKibana size="xl" />;
+      return <EuiLoadingElastic size="xl" />;
     }
 
     const columns = [

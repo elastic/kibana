@@ -22,7 +22,7 @@ import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
-import { InjectedMetadataSetup } from '../injected_metadata';
+import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
@@ -31,7 +31,6 @@ import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
-  AppBase,
   AppLeaveHandler,
   AppMount,
   AppMountDeprecated,
@@ -41,8 +40,6 @@ import {
   AppUpdater,
   InternalApplicationSetup,
   InternalApplicationStart,
-  LegacyApp,
-  LegacyAppMounter,
   Mounter,
   NavigateToAppOptions,
 } from './types';
@@ -52,9 +49,8 @@ import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './ut
 interface SetupDeps {
   context: ContextSetup;
   http: HttpSetup;
-  injectedMetadata: InjectedMetadataSetup;
   history?: History<any>;
-  /** Used to redirect to external urls (and legacy apps) */
+  /** Used to redirect to external urls */
   redirectTo?: (path: string) => void;
 }
 
@@ -90,16 +86,22 @@ interface AppUpdaterWrapper {
   updater: AppUpdater;
 }
 
+interface AppInternalState {
+  leaveHandler?: AppLeaveHandler;
+  actionMenu?: MountPoint;
+}
+
 /**
  * Service that is responsible for registering new applications.
  * @internal
  */
 export class ApplicationService {
-  private readonly apps = new Map<string, App<any> | LegacyApp>();
+  private readonly apps = new Map<string, App<any>>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
-  private readonly appLeaveHandlers = new Map<string, AppLeaveHandler>();
+  private readonly appInternalStates = new Map<string, AppInternalState>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject();
@@ -112,28 +114,17 @@ export class ApplicationService {
   public setup({
     context,
     http: { basePath },
-    injectedMetadata,
     redirectTo = (path: string) => {
       window.location.assign(path);
     },
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    if (injectedMetadata.getLegacyMode()) {
-      this.currentAppId$.next(injectedMetadata.getLegacyMetadata().app.id);
-    } else {
-      // Only setup history if we're not in legacy mode
-      this.history = history || createBrowserHistory({ basename });
-    }
+    this.history = history || createBrowserHistory({ basename });
 
     this.navigate = (url, state, replace) => {
-      if (this.history) {
-        // basePath not needed here because `history` is configured with basename
-        return replace ? this.history.replace(url, state) : this.history.push(url, state);
-      } else {
-        // If we do not have history available (legacy mode), use redirectTo to do a full page refresh.
-        return redirectTo(basePath.prepend(url));
-      }
+      // basePath not needed here because `history` is configured with basename
+      return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
     };
 
     this.redirectTo = redirectTo;
@@ -193,7 +184,6 @@ export class ApplicationService {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
           navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
-          legacy: false,
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -204,43 +194,6 @@ export class ApplicationService {
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
-          legacy: false,
-        });
-      },
-      registerLegacyApp: (app) => {
-        const appRoute = `/app/${app.id.split(':')[0]}`;
-
-        if (this.registrationClosed) {
-          throw new Error('Applications cannot be registered after "setup"');
-        } else if (this.apps.has(app.id)) {
-          throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (basename && appRoute!.startsWith(`${basename}/`)) {
-          throw new Error('Cannot register an application route that includes HTTP base path');
-        }
-
-        const appBasePath = basePath.prepend(appRoute);
-        const mount: LegacyAppMounter = ({ history: appHistory }) => {
-          redirectTo(appHistory.createHref(appHistory.location));
-          window.location.reload();
-        };
-
-        const { updater$, ...appProps } = app;
-        this.apps.set(app.id, {
-          ...appProps,
-          status: app.status ?? AppStatus.accessible,
-          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
-          legacy: true,
-        });
-        if (updater$) {
-          registerStatusUpdater(app.id, updater$);
-        }
-        this.mounters.set(app.id, {
-          appRoute,
-          appBasePath,
-          exactRoute: false,
-          mount,
-          unmountBeforeMounting: true,
-          legacy: true,
         });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
@@ -289,15 +242,23 @@ export class ApplicationService {
       appId,
       { path, state, replace = false }: NavigateToAppOptions = {}
     ) => {
-      if (await this.shouldNavigate(overlays)) {
+      const currentAppId = this.currentAppId$.value;
+      const navigatingToSameApp = currentAppId === appId;
+      const shouldNavigate = navigatingToSameApp ? true : await this.shouldNavigate(overlays);
+
+      if (shouldNavigate) {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
-        this.appLeaveHandlers.delete(this.currentAppId$.value!);
+        if (!navigatingToSameApp) {
+          this.appInternalStates.delete(this.currentAppId$.value!);
+        }
         this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         this.currentAppId$.next(appId);
       }
     };
+
+    this.currentAppId$.subscribe(() => this.refreshCurrentActionMenu());
 
     return {
       applications$: applications$.pipe(
@@ -310,7 +271,11 @@ export class ApplicationService {
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
-      history: this.history,
+      currentActionMenu$: this.currentActionMenu$.pipe(
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
+      history: this.history!,
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (
         appId,
@@ -338,6 +303,7 @@ export class ApplicationService {
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
+            setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
           />
         );
@@ -346,7 +312,24 @@ export class ApplicationService {
   }
 
   private setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
-    this.appLeaveHandlers.set(appId, handler);
+    this.appInternalStates.set(appId, {
+      ...(this.appInternalStates.get(appId) ?? {}),
+      leaveHandler: handler,
+    });
+  };
+
+  private setAppActionMenu = (appId: string, mount: MountPoint | undefined) => {
+    this.appInternalStates.set(appId, {
+      ...(this.appInternalStates.get(appId) ?? {}),
+      actionMenu: mount,
+    });
+    this.refreshCurrentActionMenu();
+  };
+
+  private refreshCurrentActionMenu = () => {
+    const appId = this.currentAppId$.getValue();
+    const currentActionMenu = appId ? this.appInternalStates.get(appId)?.actionMenu : undefined;
+    this.currentActionMenu$.next(currentActionMenu);
   };
 
   private async shouldNavigate(overlays: OverlayStart): Promise<boolean> {
@@ -354,7 +337,7 @@ export class ApplicationService {
     if (currentAppId === undefined) {
       return true;
     }
-    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
@@ -372,7 +355,7 @@ export class ApplicationService {
     if (currentAppId === undefined) {
       return;
     }
-    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
     if (isConfirmAction(action)) {
       event.preventDefault();
       // some browsers accept a string return value being the message displayed
@@ -383,13 +366,14 @@ export class ApplicationService {
   public stop() {
     this.stop$.next();
     this.currentAppId$.complete();
+    this.currentActionMenu$.complete();
     this.statusUpdaters$.complete();
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);
   }
 }
 
-const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapper[]): T => {
+const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
   let changes: Partial<AppUpdatableFields> = {};
   statusUpdaters.forEach((wrapper) => {
     if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {

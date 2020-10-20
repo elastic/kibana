@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { ITileLayerArguments, TileLayer } from './tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';

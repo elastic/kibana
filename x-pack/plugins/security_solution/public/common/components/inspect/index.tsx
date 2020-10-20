@@ -20,6 +20,7 @@ import * as i18n from './translations';
 export const BUTTON_CLASS = 'inspectButtonComponent';
 
 export const InspectButtonContainer = styled.div<{ show?: boolean }>`
+  width: 100%;
   display: flex;
   flex-grow: 1;
 

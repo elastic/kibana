@@ -11,7 +11,7 @@ saved search, or Canvas workpad. Depending on the object type, you can export th
 a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
 
 Reporting is available from the *Share* menu
-in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
+in *Discover*, *Dashboard*, and *Canvas*.
 
 [role="screenshot"]
 image::user/reporting/images/share-button.png["Share"]

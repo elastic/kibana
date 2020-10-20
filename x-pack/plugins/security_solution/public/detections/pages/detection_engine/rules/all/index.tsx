@@ -24,6 +24,7 @@ import {
   Rule,
   PaginationOptions,
   exportRules,
+  RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {
@@ -33,6 +34,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
@@ -47,17 +49,19 @@ import { getColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { isBoolean } from '../../../../../common/utils/privileges';
 
-const SORT_FIELD = 'enabled';
+const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
   exportRuleIds: [],
   filterOptions: {
     filter: '',
-    sortField: SORT_FIELD,
+    sortField: INITIAL_SORT_FIELD,
     sortOrder: 'desc',
   },
   loadingRuleIds: [],
@@ -145,8 +149,7 @@ export const AllRules = React.memo<AllRulesProps>(
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
-    const hasMlPermissions =
-      mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+    const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
     const setRules = useCallback((newRules: Rule[], newPagination: Partial<PaginationOptions>) => {
       dispatch({
@@ -164,8 +167,13 @@ export const AllRules = React.memo<AllRulesProps>(
     });
 
     const sorting = useMemo(
-      (): SortingType => ({ sort: { field: 'enabled', direction: filterOptions.sortOrder } }),
-      [filterOptions.sortOrder]
+      (): SortingType => ({
+        sort: {
+          field: filterOptions.sortField,
+          direction: filterOptions.sortOrder,
+        },
+      }),
+      [filterOptions]
     );
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
@@ -173,6 +181,17 @@ export const AllRules = React.memo<AllRulesProps>(
       rulesNotInstalled,
       rulesNotUpdated
     );
+    const {
+      services: {
+        application: {
+          capabilities: { actions },
+        },
+      },
+    } = useKibana();
+
+    const hasActionsPrivileges = useMemo(() => (isBoolean(actions.show) ? actions.show : true), [
+      actions,
+    ]);
 
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
@@ -182,6 +201,7 @@ export const AllRules = React.memo<AllRulesProps>(
             dispatch,
             dispatchToaster,
             hasMlPermissions,
+            hasActionsPrivileges,
             loadingRuleIds,
             selectedRuleIds,
             reFetchRules: reFetchRulesData,
@@ -197,6 +217,7 @@ export const AllRules = React.memo<AllRulesProps>(
         reFetchRulesData,
         rules,
         selectedRuleIds,
+        hasActionsPrivileges,
       ]
     );
 
@@ -215,7 +236,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
-            sortField: SORT_FIELD, // Only enabled is supported for sorting currently
+            sortField: (sort?.field as RulesSortingFields) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
             sortOrder: sort?.direction ?? 'desc',
           },
           pagination: { page: page.index + 1, perPage: page.size },
@@ -238,6 +259,7 @@ export const AllRules = React.memo<AllRulesProps>(
             ? loadingRuleIds
             : [],
         reFetchRules: reFetchRulesData,
+        hasReadActionsPrivileges: hasActionsPrivileges,
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [

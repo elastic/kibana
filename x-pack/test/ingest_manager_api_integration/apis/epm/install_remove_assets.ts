@@ -20,10 +20,13 @@ export default function (providerContext: FtrProviderContext) {
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
   const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
   };
   const installPackage = async (pkg: string) => {
-    await supertest.post(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+    await supertest
+      .post(`/api/fleet/epm/packages/${pkg}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true });
   };
 
   describe('installs and uninstalls all assets', async () => {
@@ -31,6 +34,9 @@ export default function (providerContext: FtrProviderContext) {
       skipIfNoDockerRegistry(providerContext);
       before(async () => {
         await installPackage(pkgKey);
+      });
+      after(async () => {
+        await uninstallPackage(pkgKey);
       });
       it('should have installed the ILM policy', async function () {
         const resPolicy = await es.transport.request({
@@ -58,6 +64,16 @@ export default function (providerContext: FtrProviderContext) {
           path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
         });
         expect(res.statusCode).equal(200);
+        const resPipeline1 = await es.transport.request({
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+        });
+        expect(resPipeline1.statusCode).equal(200);
+        const resPipeline2 = await es.transport.request({
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+        });
+        expect(resPipeline2.statusCode).equal(200);
       });
       it('should have installed the template components', async function () {
         const res = await es.transport.request({
@@ -71,6 +87,21 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSettings.statusCode).equal(200);
       });
+      it('should have installed the transform components', async function () {
+        const res = await es.transport.request({
+          method: 'GET',
+          path: `/_transform/${pkgName}.test-default-${pkgVersion}`,
+        });
+        expect(res.statusCode).equal(200);
+      });
+      it('should have created the index for the transform', async function () {
+        // the  index is defined in the transform file
+        const res = await es.transport.request({
+          method: 'GET',
+          path: `/logs-all_assets.test_log_current_default`,
+        });
+        expect(res.statusCode).equal(200);
+      });
       it('should have installed the kibana assets', async function () {
         const resIndexPatternLogs = await kibanaServer.savedObjects.get({
           type: 'index-pattern',
@@ -82,11 +113,6 @@ export default function (providerContext: FtrProviderContext) {
           id: 'metrics-*',
         });
         expect(resIndexPatternMetrics.id).equal('metrics-*');
-        const resIndexPatternEvents = await kibanaServer.savedObjects.get({
-          type: 'index-pattern',
-          id: 'events-*',
-        });
-        expect(resIndexPatternEvents.id).equal('events-*');
         const resDashboard = await kibanaServer.savedObjects.get({
           type: 'dashboard',
           id: 'sample_dashboard',
@@ -108,11 +134,96 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSearch.id).equal('sample_search');
       });
+      it('should create an index pattern with the package fields', async () => {
+        const resIndexPatternLogs = await kibanaServer.savedObjects.get({
+          type: 'index-pattern',
+          id: 'logs-*',
+        });
+        const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
+        const exists = fields.find((field: { name: string }) => field.name === 'logs_test_name');
+        expect(exists).not.to.be(undefined);
+        const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
+          type: 'index-pattern',
+          id: 'metrics-*',
+        });
+        const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
+        const metricsExists = fieldsMetrics.find(
+          (field: { name: string }) => field.name === 'metrics_test_name'
+        );
+        expect(metricsExists).not.to.be(undefined);
+      });
+      it('should have created the correct saved object', async function () {
+        const res = await kibanaServer.savedObjects.get({
+          type: 'epm-packages',
+          id: 'all_assets',
+        });
+        expect(res.attributes).eql({
+          installed_kibana: [
+            {
+              id: 'sample_dashboard',
+              type: 'dashboard',
+            },
+            {
+              id: 'sample_dashboard2',
+              type: 'dashboard',
+            },
+            {
+              id: 'sample_search',
+              type: 'search',
+            },
+            {
+              id: 'sample_visualization',
+              type: 'visualization',
+            },
+          ],
+          installed_es: [
+            {
+              id: 'logs-all_assets.test_logs-0.1.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs-0.1.0-pipeline1',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs-0.1.0-pipeline2',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs',
+              type: 'index_template',
+            },
+            {
+              id: 'metrics-all_assets.test_metrics',
+              type: 'index_template',
+            },
+            {
+              id: 'all_assets.test-default-0.1.0',
+              type: 'transform',
+            },
+          ],
+          es_index_patterns: {
+            test_logs: 'logs-all_assets.test_logs-*',
+            test_metrics: 'metrics-all_assets.test_metrics-*',
+          },
+          name: 'all_assets',
+          version: '0.1.0',
+          internal: false,
+          removable: true,
+          install_version: '0.1.0',
+          install_status: 'installed',
+          install_started_at: res.attributes.install_started_at,
+          install_source: 'registry',
+        });
+      });
     });
 
     describe('uninstalls all assets when uninstalling a package', async () => {
       skipIfNoDockerRegistry(providerContext);
       before(async () => {
+        // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
+        // and then we'll test that not artifacts are left behind.
+        await installPackage(pkgKey);
         await uninstallPackage(pkgKey);
       });
       it('should have uninstalled the index templates', async function () {
@@ -143,6 +254,51 @@ export default function (providerContext: FtrProviderContext) {
           {
             method: 'GET',
             path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(res.statusCode).equal(404);
+        const resPipeline1 = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resPipeline1.statusCode).equal(404);
+        const resPipeline2 = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resPipeline2.statusCode).equal(404);
+      });
+      it('should have uninstalled the transforms', async function () {
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_transform/${pkgName}-test-default-${pkgVersion}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(res.statusCode).equal(404);
+      });
+      it('should have deleted the index for the transform', async function () {
+        // the  index is defined in the transform file
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/logs-all_assets.test_log_current_default`,
           },
           {
             ignore: [404],
@@ -191,6 +347,60 @@ export default function (providerContext: FtrProviderContext) {
           resSearch = err;
         }
         expect(resSearch.response.data.statusCode).equal(404);
+      });
+      it('should have removed the fields from the index patterns', async () => {
+        // The reason there is an expect inside the try and inside the catch in this test case is to guard against two
+        // different scenarios.
+        //
+        // If a test case in another file calls /setup then the system and endpoint packages will be installed and
+        // will be present for the remainder of the tests (because they cannot be removed). If that is the case the
+        // expect in the try will work because the logs-* and metrics-* index patterns will still be present even
+        // after this test uninstalls its package.
+        //
+        // If /setup was never called prior to this test, when the test package is uninstalled the index pattern code
+        // checks to see if there are no packages installed and completely removes the logs-* and metrics-* index
+        // patterns. If that happens this code will throw an error and indicate that the index pattern being searched
+        // for was completely removed. In this case the catch's expect will test to make sure the error thrown was
+        // a 404 because all of the packages have been removed.
+        try {
+          const resIndexPatternLogs = await kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'logs-*',
+          });
+          const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
+          const exists = fields.find((field: { name: string }) => field.name === 'logs_test_name');
+          expect(exists).to.be(undefined);
+        } catch (err) {
+          // if all packages are uninstalled there won't be a logs-* index pattern
+          expect(err.response.data.statusCode).equal(404);
+        }
+
+        try {
+          const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'metrics-*',
+          });
+          const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
+          const existsMetrics = fieldsMetrics.find(
+            (field: { name: string }) => field.name === 'metrics_test_name'
+          );
+          expect(existsMetrics).to.be(undefined);
+        } catch (err) {
+          // if all packages are uninstalled there won't be a metrics-* index pattern
+          expect(err.response.data.statusCode).equal(404);
+        }
+      });
+      it('should have removed the saved object', async function () {
+        let res;
+        try {
+          res = await kibanaServer.savedObjects.get({
+            type: 'epm-packages',
+            id: 'all_assets',
+          });
+        } catch (err) {
+          res = err;
+        }
+        expect(res.response.data.statusCode).equal(404);
       });
     });
   });

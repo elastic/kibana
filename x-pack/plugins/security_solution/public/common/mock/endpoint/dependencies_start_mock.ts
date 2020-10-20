@@ -6,7 +6,7 @@
 
 import {
   IngestManagerStart,
-  registerPackageConfigComponent,
+  registerPackagePolicyComponent,
 } from '../../../../../ingest_manager/public';
 import {
   dataPluginMock,
@@ -61,7 +61,7 @@ export const depsStartMock: () => DepsStartMock = () => {
     data: dataMock,
     ingestManager: {
       isInitialized: () => Promise.resolve(true),
-      registerPackageConfigComponent,
+      registerPackagePolicyComponent,
     },
   };
 };

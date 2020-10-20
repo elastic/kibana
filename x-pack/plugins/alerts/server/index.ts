@@ -11,14 +11,18 @@ import { AlertingPlugin } from './plugin';
 export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
 
 export {
+  ActionVariable,
   AlertType,
   ActionGroup,
   AlertingPlugin,
   AlertExecutorOptions,
   AlertActionParams,
   AlertServices,
-  State,
+  AlertTypeState,
+  AlertTypeParams,
   PartialAlert,
+  AlertInstanceState,
+  AlertInstanceContext,
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 export { FindResult } from './alerts_client';

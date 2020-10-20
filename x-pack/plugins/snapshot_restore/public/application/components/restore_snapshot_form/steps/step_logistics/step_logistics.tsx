@@ -311,7 +311,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             });
                           }
                         }}
-                        selectedIndicesAndDataStreams={csvToArray(restoreIndices)}
+                        selectedIndicesAndDataStreams={csvToArray(restoreIndices) ?? []}
                         indices={snapshotIndices}
                         dataStreams={snapshotDataStreams}
                       />

@@ -42,5 +42,7 @@ export const tsvbTelemetrySavedObjectType: SavedObjectsType = {
   migrations: {
     '7.7.0': flow(resetCount),
     '7.8.0': flow(resetCount),
+    '7.9.0': flow(resetCount),
+    '7.10.0': flow(resetCount),
   },
 };

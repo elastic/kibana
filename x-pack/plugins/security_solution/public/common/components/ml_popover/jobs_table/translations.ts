@@ -30,7 +30,7 @@ export const COLUMN_RUN_JOB = i18n.translate(
 export const NO_ITEMS_TEXT = i18n.translate(
   'xpack.securitySolution.components.mlPopup.jobsTable.noItemsDescription',
   {
-    defaultMessage: 'No SIEM Machine Learning jobs found',
+    defaultMessage: 'No Security Machine Learning jobs found',
   }
 );
 

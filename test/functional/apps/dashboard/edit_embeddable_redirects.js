@@ -21,8 +21,10 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardVisualizations = getService('dashboardVisualizations');
 
   describe('edit embeddable redirects', () => {
     before(async () => {
@@ -81,6 +83,23 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
+      await PageObjects.visualize.linkedToOriginatingApp();
+      await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
+        saveAsNew: true,
+        redirectToOrigin: false,
+      });
+      await PageObjects.visualize.notLinkedToOriginatingApp();
+      await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    it('loses originatingApp connection after first save when redirectToOrigin is false', async () => {
+      const newTitle = 'test create panel originatingApp';
+      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await PageObjects.dashboard.switchToEditMode();
+      await testSubjects.exists('dashboardAddNewPanelButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
+      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
+      await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: false,

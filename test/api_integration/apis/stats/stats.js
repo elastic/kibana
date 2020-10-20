@@ -55,7 +55,12 @@ const assertStatsAndMetrics = (body) => {
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
+
   describe('kibana stats api', () => {
+    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
+    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
         return supertest

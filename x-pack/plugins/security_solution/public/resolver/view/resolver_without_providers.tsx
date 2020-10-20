@@ -4,27 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
 /* eslint-disable react/display-name */
 
 import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-import { SymbolDefinitions, useResolverTheme } from './assets';
+import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { useResolverQueryParams } from './use_resolver_query_params';
-import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
-import { entityId } from '../../../common/endpoint/models/event';
+import { StyledMapContainer, GraphContainer } from './styles';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverProps } from '../types';
+import { ResolverProps, ResolverState } from '../types';
+import { PanelRouter } from './panels';
+import { useColors } from './use_colors';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -34,23 +33,27 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID }: ResolverProps,
+    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
     refToForward
   ) {
+    useResolverQueryParamCleaner();
     /**
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
      */
-    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
+    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID, indices });
 
     const { timestamp } = useContext(SideEffectContext);
 
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const { processNodePositions, connectingEdgeLineSegments } = useSelector(
-      selectors.visibleNodesAndEdgeLines
-    )(timeAtRender);
+    const {
+      processNodePositions,
+      connectingEdgeLineSegments,
+    } = useSelector((state: ResolverState) =>
+      selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
+    );
     const terminatedProcesses = useSelector(selectors.terminatedProcesses);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
@@ -68,15 +71,10 @@ export const ResolverWithoutProviders = React.memo(
       },
       [cameraRef, refToForward]
     );
-    const isLoading = useSelector(selectors.isLoading);
-    const hasError = useSelector(selectors.hasError);
+    const isLoading = useSelector(selectors.isTreeLoading);
+    const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
-    const { colorMap } = useResolverTheme();
-    const { cleanUpQueryParams } = useResolverQueryParams();
-
-    useEffectOnce(() => {
-      return () => cleanUpQueryParams();
-    });
+    const colorMap = useColors();
 
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
@@ -108,7 +106,7 @@ export const ResolverWithoutProviders = React.memo(
               ({ points: [startPosition, endPosition], metadata }) => (
                 <EdgeLine
                   edgeLineMetadata={metadata}
-                  key={metadata.uniqueId}
+                  key={metadata.reactKey}
                   startPosition={startPosition}
                   endPosition={endPosition}
                   projectionMatrix={projectionMatrix}
@@ -116,7 +114,7 @@ export const ResolverWithoutProviders = React.memo(
               )
             )}
             {[...processNodePositions].map(([processEvent, position]) => {
-              const processEntityId = entityId(processEvent);
+              const processEntityId = entityIDSafeVersion(processEvent);
               return (
                 <ProcessEventDot
                   key={processEntityId}
@@ -130,7 +128,7 @@ export const ResolverWithoutProviders = React.memo(
             })}
           </GraphContainer>
         )}
-        <StyledPanel />
+        <PanelRouter />
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>

@@ -80,21 +80,6 @@ export class IndexAction extends BaseAction {
       });
     }
 
-    if (json.index && !json.index.index) {
-      errors.push({
-        code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate(
-          'xpack.watcher.models.loggingAction.actionJsonIndexNamePropertyMissingBadRequestMessage',
-          {
-            defaultMessage: 'JSON argument must contain an {actionJsonIndexName} property',
-            values: {
-              actionJsonIndexName: 'actionJson.index.index',
-            },
-          }
-        ),
-      });
-    }
-
     return { errors: errors.length ? errors : null };
   }
 }

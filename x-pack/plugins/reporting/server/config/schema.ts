@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
@@ -33,22 +33,40 @@ const KibanaServerSchema = schema.object({
 const QueueSchema = schema.object({
   indexInterval: schema.string({ defaultValue: 'week' }),
   pollEnabled: schema.boolean({ defaultValue: true }),
-  pollInterval: schema.number({ defaultValue: 3000 }),
+  pollInterval: schema.oneOf([schema.number(), schema.duration()], {
+    defaultValue: moment.duration({ seconds: 3 }),
+  }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),
-  timeout: schema.number({ defaultValue: moment.duration(2, 'm').asMilliseconds() }),
+  timeout: schema.oneOf([schema.number(), schema.duration()], {
+    defaultValue: moment.duration({ minutes: 2 }),
+  }),
 });
 
 const RulesSchema = schema.object({
   allow: schema.boolean(),
   host: schema.maybe(schema.string()),
-  protocol: schema.maybe(schema.string()),
+  protocol: schema.maybe(
+    schema.string({
+      validate(value) {
+        if (!/:$/.test(value)) {
+          return 'must end in colon';
+        }
+      },
+    })
+  ),
 });
 
 const CaptureSchema = schema.object({
   timeouts: schema.object({
-    openUrl: schema.number({ defaultValue: 30000 }),
-    waitForElements: schema.number({ defaultValue: 30000 }),
-    renderComplete: schema.number({ defaultValue: 30000 }),
+    openUrl: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration({ minutes: 1 }),
+    }),
+    waitForElements: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration({ seconds: 30 }),
+    }),
+    renderComplete: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration({ seconds: 30 }),
+    }),
   }),
   networkPolicy: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -68,9 +86,9 @@ const CaptureSchema = schema.object({
     width: schema.number({ defaultValue: 1950 }),
     height: schema.number({ defaultValue: 1200 }),
   }),
-  loadDelay: schema.number({
-    defaultValue: moment.duration(3, 's').asMilliseconds(),
-  }), // TODO: use schema.duration
+  loadDelay: schema.oneOf([schema.number(), schema.duration()], {
+    defaultValue: moment.duration({ seconds: 3 }),
+  }),
   browser: schema.object({
     autoDownload: schema.conditional(
       schema.contextRef('dist'),
@@ -97,7 +115,7 @@ const CaptureSchema = schema.object({
         bypass: schema.conditional(
           schema.siblingRef('enabled'),
           true,
-          schema.arrayOf(schema.string({ hostname: true })),
+          schema.arrayOf(schema.string()),
           schema.maybe(schema.never())
         ),
       }),
@@ -116,13 +134,13 @@ const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
-  maxSizeBytes: schema.number({
-    defaultValue: 1024 * 1024 * 10, // 10MB
-  }), // TODO: use schema.byteSize
+  maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
+    defaultValue: ByteSizeValue.parse('10mb'),
+  }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
     duration: schema.string({
-      defaultValue: '30s',
+      defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
       validate(value) {
         if (!/^[0-9]+(d|h|m|s|ms|micros|nanos)$/.test(value)) {
           return 'must be a duration string';
@@ -146,18 +164,16 @@ const RolesSchema = schema.object({
 
 const IndexSchema = schema.string({ defaultValue: '.reporting' });
 
+// Browser side polling: job completion notifier, management table auto-refresh
+// NOTE: can not use schema.duration, a bug prevents it being passed to the browser correctly
 const PollSchema = schema.object({
   jobCompletionNotifier: schema.object({
-    interval: schema.number({
-      defaultValue: moment.duration(10, 's').asMilliseconds(),
-    }), // TODO: use schema.duration
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
+    interval: schema.number({ defaultValue: 10000 }),
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
   }),
   jobsRefresh: schema.object({
-    interval: schema.number({
-      defaultValue: moment.duration(5, 's').asMilliseconds(),
-    }), // TODO: use schema.duration
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
+    interval: schema.number({ defaultValue: 5000 }),
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
   }),
 });
 

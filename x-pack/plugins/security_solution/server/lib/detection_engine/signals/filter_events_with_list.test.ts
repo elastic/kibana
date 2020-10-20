@@ -126,7 +126,7 @@ describe('filterEventsAgainstList', () => {
       );
       expect(res.hits.hits.length).toEqual(2);
 
-      // @ts-ignore
+      // @ts-expect-error
       const ipVals = res.hits.hits.map((item) => item._source.source.ip);
       expect(['3.3.3.3', '7.7.7.7']).toEqual(ipVals);
     });
@@ -188,7 +188,7 @@ describe('filterEventsAgainstList', () => {
       expect(listClient.getListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect(res.hits.hits.length).toEqual(6);
 
-      // @ts-ignore
+      // @ts-expect-error
       const ipVals = res.hits.hits.map((item) => item._source.source.ip);
       expect(['1.1.1.1', '3.3.3.3', '5.5.5.5', '7.7.7.7', '8.8.8.8', '9.9.9.9']).toEqual(ipVals);
     });
@@ -247,7 +247,7 @@ describe('filterEventsAgainstList', () => {
         buildRuleMessage,
       });
       expect(listClient.getListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
-      // @ts-ignore
+      // @ts-expect-error
       const ipVals = res.hits.hits.map((item) => item._source.source.ip);
       expect(res.hits.hits.length).toEqual(7);
 
@@ -324,7 +324,7 @@ describe('filterEventsAgainstList', () => {
       expect(listClient.getListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect(res.hits.hits.length).toEqual(8);
 
-      // @ts-ignore
+      // @ts-expect-error
       const ipVals = res.hits.hits.map((item) => item._source.source.ip);
       expect([
         '1.1.1.1',
@@ -386,7 +386,7 @@ describe('filterEventsAgainstList', () => {
       expect(listClient.getListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect(res.hits.hits.length).toEqual(9);
 
-      // @ts-ignore
+      // @ts-expect-error
       const ipVals = res.hits.hits.map((item) => item._source.source.ip);
       expect([
         '1.1.1.1',

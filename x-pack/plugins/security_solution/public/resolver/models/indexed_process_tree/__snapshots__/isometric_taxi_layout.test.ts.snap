@@ -182,7 +182,7 @@ Object {
   "edgeLineSegments": Array [
     Object {
       "metadata": Object {
-        "uniqueId": "parentToMid",
+        "reactKey": "parentToMidedge:0:1",
       },
       "points": Array [
         Array [
@@ -197,7 +197,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "midway",
+        "reactKey": "midwayedge:0:1",
       },
       "points": Array [
         Array [
@@ -212,7 +212,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:1",
       },
       "points": Array [
         Array [
@@ -227,7 +231,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:2",
       },
       "points": Array [
         Array [
@@ -242,7 +250,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:8",
       },
       "points": Array [
         Array [
@@ -257,7 +269,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "parentToMid13",
+        "reactKey": "parentToMidedge:1:3",
       },
       "points": Array [
         Array [
@@ -272,7 +284,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "midway13",
+        "reactKey": "midwayedge:1:3",
       },
       "points": Array [
         Array [
@@ -287,7 +299,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "13",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:1:3",
       },
       "points": Array [
         Array [
@@ -302,7 +318,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "14",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:1:4",
       },
       "points": Array [
         Array [
@@ -317,7 +337,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "parentToMid25",
+        "reactKey": "parentToMidedge:2:5",
       },
       "points": Array [
         Array [
@@ -332,7 +352,7 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "midway25",
+        "reactKey": "midwayedge:2:5",
       },
       "points": Array [
         Array [
@@ -347,7 +367,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "25",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:2:5",
       },
       "points": Array [
         Array [
@@ -362,7 +386,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "26",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:2:6",
       },
       "points": Array [
         Array [
@@ -377,7 +405,11 @@ Object {
     },
     Object {
       "metadata": Object {
-        "uniqueId": "67",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:6:7",
       },
       "points": Array [
         Array [
@@ -584,7 +616,11 @@ Object {
   "edgeLineSegments": Array [
     Object {
       "metadata": Object {
-        "uniqueId": "",
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:1",
       },
       "points": Array [
         Array [

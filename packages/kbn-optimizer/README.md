@@ -10,9 +10,9 @@ The [Webpack config][WebpackConfig] is designed to provide the majority of what 
 
 Source maps are enabled except when building the distributable. They show the code actually being executed by the browser to strike a balance between debuggability and performance. They are not configurable at this time but will be configurable once we have a developer configuration solution that doesn't rely on the server (see [#55656](https://github.com/elastic/kibana/issues/55656)).
 
-### IE Support
+### Browser Support
 
-To make front-end code easier to debug the optimizer uses the `BROWSERSLIST_ENV=dev` environment variable (by default) to build JS and CSS that is compatible with modern browsers. In order to support older browsers like IE in development you will need to specify the `BROWSERSLIST_ENV=production` environment variable or build a distributable for testing.
+To make front-end code easier to debug the optimizer uses the `BROWSERSLIST_ENV=dev` environment variable (by default) to build JS and CSS that is compatible with modern browsers. In order to support all browsers that we support with the distributable you will need to specify the `BROWSERSLIST_ENV=production` environment variable or build a distributable for testing.
 
 ## Running the optimizer
 
@@ -69,7 +69,8 @@ To run the optimizer from code, you can import the [`OptimizerConfig`][Optimizer
 Example:
 ```ts
 import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
-import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
 const log = new ToolingLog({
   level: 'verbose',
@@ -83,9 +84,9 @@ const config = OptimizerConfig.create({
   dist: true
 });
 
-await runOptimizer(config)
-  .pipe(logOptimizerState(log, config))
-  .toPromise();
+await lastValueFrom(
+  runOptimizer(config).pipe(logOptimizerState(log, config))
+);
 ```
 
 This is essentially what we're doing in [`script/build_kibana_platform_plugins`][Cli] and the new [build system task][BuildTask].

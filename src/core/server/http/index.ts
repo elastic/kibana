@@ -24,6 +24,7 @@ export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage'
 export {
   CustomHttpResponseOptions,
   IKibanaSocket,
+  isKibanaRequest,
   isRealRequest,
   Headers,
   HttpResponseOptions,
@@ -82,6 +83,7 @@ export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 export {
   OnPreResponseHandler,
   OnPreResponseToolkit,
+  OnPreResponseRender,
   OnPreResponseExtensions,
   OnPreResponseInfo,
 } from './lifecycle/on_pre_response';

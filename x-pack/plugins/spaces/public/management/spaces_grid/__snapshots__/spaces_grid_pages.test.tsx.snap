@@ -38,6 +38,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
         grow={false}
       >
         <EuiButton
+          data-test-subj="createSpace"
           fill={true}
           onClick={[Function]}
         >

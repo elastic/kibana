@@ -6,9 +6,10 @@
 
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternService, getIsGoldPlus } from './kibana_services';
+import { getIndexPatternService } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
+import { getIsGoldPlus } from './licensed_features';
 
 export function getGeoTileAggNotSupportedReason(field: IFieldType): string | null {
   if (!field.aggregatable) {
@@ -81,7 +82,6 @@ export function supportsGeoTileAgg(field?: IFieldType): boolean {
   );
 }
 
-// Returns filtered fields list containing only fields that exist in _source.
 export function getSourceFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.

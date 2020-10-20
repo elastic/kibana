@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
   Datasource,
@@ -47,6 +48,7 @@ export function getSuggestions({
   subVisualizationId,
   visualizationState,
   field,
+  visualizeTriggerFieldContext,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -61,6 +63,7 @@ export function getSuggestions({
   subVisualizationId?: string;
   visualizationState: unknown;
   field?: unknown;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -70,10 +73,21 @@ export function getSuggestions({
   const datasourceTableSuggestions = _.flatten(
     datasources.map(([datasourceId, datasource]) => {
       const datasourceState = datasourceStates[datasourceId].state;
-      return (field
-        ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
-        : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
-      ).map((suggestion) => ({ ...suggestion, datasourceId }));
+      let dataSourceSuggestions;
+      if (visualizeTriggerFieldContext) {
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
+          datasourceState,
+          visualizeTriggerFieldContext.indexPatternId,
+          visualizeTriggerFieldContext.fieldName
+        );
+      } else if (field) {
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
+      } else {
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
+          datasourceState
+        );
+      }
+      return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
     })
   );
 
@@ -100,6 +114,45 @@ export function getSuggestions({
   ).sort((a, b) => b.score - a.score);
 }
 
+export function applyVisualizeFieldSuggestions({
+  datasourceMap,
+  datasourceStates,
+  visualizationMap,
+  activeVisualizationId,
+  visualizationState,
+  visualizeTriggerFieldContext,
+  dispatch,
+}: {
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
+  visualizationMap: Record<string, Visualization>;
+  activeVisualizationId: string | null;
+  subVisualizationId?: string;
+  visualizationState: unknown;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
+  dispatch: (action: Action) => void;
+}): void {
+  const suggestions = getSuggestions({
+    datasourceMap,
+    datasourceStates,
+    visualizationMap,
+    activeVisualizationId,
+    visualizationState,
+    visualizeTriggerFieldContext,
+  });
+  if (suggestions.length) {
+    const selectedSuggestion =
+      suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+    switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
+  }
+}
+
 /**
  * Queries a single visualization extensions for a single datasource suggestion and
  * creates an array of complete suggestions containing both the target datasource
@@ -107,7 +160,7 @@ export function getSuggestions({
  * title and preview expression.
  */
 function getVisualizationSuggestions(
-  visualization: Visualization<unknown, unknown>,
+  visualization: Visualization<unknown>,
   table: TableSuggestion,
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },

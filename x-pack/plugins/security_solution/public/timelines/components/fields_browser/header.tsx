@@ -54,7 +54,6 @@ SearchContainer.displayName = 'SearchContainer';
 
 interface Props {
   filteredBrowserFields: BrowserFields;
-  isEventViewer?: boolean;
   isSearching: boolean;
   onOutsideClick: () => void;
   onSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -93,7 +92,6 @@ CountRow.displayName = 'CountRow';
 
 const TitleRow = React.memo<{
   id: string;
-  isEventViewer?: boolean;
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
 }>(({ id, onOutsideClick, onUpdateColumns }) => {
@@ -130,7 +128,6 @@ TitleRow.displayName = 'TitleRow';
 
 export const Header = React.memo<Props>(
   ({
-    isEventViewer,
     isSearching,
     filteredBrowserFields,
     onOutsideClick,
@@ -140,12 +137,7 @@ export const Header = React.memo<Props>(
     timelineId,
   }) => (
     <HeaderContainer>
-      <TitleRow
-        id={timelineId}
-        isEventViewer={isEventViewer}
-        onUpdateColumns={onUpdateColumns}
-        onOutsideClick={onOutsideClick}
-      />
+      <TitleRow id={timelineId} onUpdateColumns={onUpdateColumns} onOutsideClick={onOutsideClick} />
       <SearchContainer>
         <EuiFieldSearch
           className={getFieldBrowserSearchInputClassName(timelineId)}

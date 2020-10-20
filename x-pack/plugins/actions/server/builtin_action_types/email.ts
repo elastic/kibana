@@ -15,6 +15,18 @@ import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
+export type EmailActionType = ActionType<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType,
+  unknown
+>;
+export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
+
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
@@ -24,16 +36,16 @@ const ConfigSchemaProps = {
   port: schema.nullable(portSchema()),
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
+  hasAuth: schema.boolean({ defaultValue: true }),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: unknown
+  configObject: ActionTypeConfigType
 ): string | void {
-  // avoids circular reference ...
-  const config = configObject as ActionTypeConfigType;
+  const config = configObject;
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
@@ -55,16 +67,16 @@ function validateConfig(
       return '[port] is required if [service] is not provided';
     }
 
-    if (!configurationUtilities.isWhitelistedHostname(config.host)) {
-      return `[host] value '${config.host}' is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(config.host)) {
+      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
     const host = getServiceNameHost(config.service);
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities.isWhitelistedHostname(host)) {
-      return `[service] value '${config.service}' resolves to host '${host}' which is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
     }
   }
 }
@@ -113,7 +125,7 @@ interface GetActionTypeParams {
 }
 
 // action type definition
-export function getActionType(params: GetActionTypeParams): ActionType {
+export function getActionType(params: GetActionTypeParams): EmailActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: '.email',
@@ -136,12 +148,12 @@ export function getActionType(params: GetActionTypeParams): ActionType {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: EmailActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const config = execOptions.config;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
 
   const transport: Transport = {};
 
@@ -173,6 +185,8 @@ async function executor(
       subject: params.subject,
       message: params.message,
     },
+    proxySettings: execOptions.proxySettings,
+    hasAuth: config.hasAuth,
   };
 
   let result;

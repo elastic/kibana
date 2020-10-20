@@ -5,12 +5,12 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
   class="euiFilterGroup"
 >
   <button
-    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
+    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
     data-test-subj="xpack.uptime.filterBar.filterStatusAll"
     type="button"
   >
     <span
-      class="euiButtonEmpty__content"
+      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
     >
       <span
         class="euiButtonEmpty__text"
@@ -26,35 +26,33 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
     </span>
   </button>
   <button
-    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton--withNext"
+    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--withNext"
     data-test-subj="xpack.uptime.filterBar.filterStatusUp"
     type="button"
   >
     <span
-      class="euiButtonEmpty__content"
+      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
     >
       <span
         class="euiButtonEmpty__text"
       >
         <span
           class="euiFilterButton__textShift"
+          data-text="Up"
+          title="Up"
         >
-          <span
-            class="euiTextColor euiTextColor--default"
-          >
-            Up
-          </span>
+          Up
         </span>
       </span>
     </span>
   </button>
   <button
-    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton"
+    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton"
     data-test-subj="xpack.uptime.filterBar.filterStatusDown"
     type="button"
   >
     <span
-      class="euiButtonEmpty__content"
+      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
     >
       <span
         class="euiButtonEmpty__text"

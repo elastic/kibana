@@ -16,8 +16,6 @@ import {
   SortField,
   SourceConfiguration,
   TimerangeInput,
-  Maybe,
-  HistogramType,
   DocValueFieldsInput,
 } from '../../graphql/types';
 
@@ -40,7 +38,7 @@ export interface FrameworkAdapter {
   callWithRequest(
     req: FrameworkRequest,
     method: 'indices.getMapping',
-    options?: IndicesGetMappingParams // eslint-disable-line
+    options?: IndicesGetMappingParams
   ): Promise<MappingResponse>;
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
 }
@@ -117,11 +115,6 @@ export interface RequestBasicOptions {
   filterQuery: ESQuery | undefined;
   defaultIndex: string[];
   docValueFields?: DocValueFieldsInput[];
-}
-
-export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  stackByField: Maybe<string>;
-  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

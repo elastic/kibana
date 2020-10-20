@@ -4,19 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScheduledTaskParams } from '../../types';
+import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
-
-interface DocValueField {
-  field: string;
-  format: string;
-}
-
-interface SortOptions {
-  order: string;
-  unmapped_type: string;
-}
 
 export interface IndexPatternSavedObject {
   title: string;
@@ -28,25 +18,23 @@ export interface IndexPatternSavedObject {
   };
 }
 
-export interface JobParamsDiscoverCsv {
-  browserTimezone: string;
-  indexPatternId: string;
-  objectType: string;
-  title: string;
+interface BaseParamsCSV {
   searchRequest: SearchRequest;
   fields: string[];
   metaFields: string[];
   conflictedTypesFields: string[];
 }
 
-export interface ScheduledTaskParamsCSV extends ScheduledTaskParams<JobParamsDiscoverCsv> {
-  basePath: string;
-  searchRequest: any;
-  fields: any;
-  indexPatternSavedObject: any;
-  metaFields: any;
-  conflictedTypesFields: any;
-}
+export type JobParamsCSV = BaseParamsCSV &
+  BaseParams & {
+    indexPatternId: string;
+  };
+
+// CSV create job method converts indexPatternID to indexPatternSavedObject
+export type TaskPayloadCSV = BaseParamsCSV &
+  BasePayload & {
+    indexPatternSavedObject: IndexPatternSavedObject;
+  };
 
 export interface SearchRequest {
   index: string;

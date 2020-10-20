@@ -22,7 +22,6 @@ import {
   TimelineType,
 } from '../../../../../common/types/timeline';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
 
 import { AssociateNote } from '../../notes/helpers';
@@ -121,8 +120,6 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   updateNote,
   usersViewing,
 }) => {
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -143,15 +140,13 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
             repositionOnScroll
           >
             <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-              {capabilitiesCanUserCRUD && (
-                <EuiFlexItem grow={false}>
-                  <NewTimeline
-                    timelineId={timelineId}
-                    title={i18n.NEW_TIMELINE}
-                    closeGearMenu={onClosePopover}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <NewTimeline
+                  timelineId={timelineId}
+                  title={i18n.NEW_TIMELINE}
+                  closeGearMenu={onClosePopover}
+                />
+              </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <NewTemplateTimeline

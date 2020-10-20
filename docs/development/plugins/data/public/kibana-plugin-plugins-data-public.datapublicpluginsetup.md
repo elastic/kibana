@@ -4,6 +4,8 @@
 
 ## DataPublicPluginSetup interface
 
+Data plugin public Setup contract
+
 <b>Signature:</b>
 
 ```typescript

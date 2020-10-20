@@ -4,43 +4,89 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiSpacer,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import type {
+import { groupBy } from 'lodash';
+import React, { Fragment, useState } from 'react';
+import { euiStyled } from '../../../../../observability/public';
+import {
+  CategoryQualityWarning,
   CategoryQualityWarningReason,
-  QualityWarning,
-} from '../../../containers/logs/log_analysis/log_analysis_module_types';
+  getFriendlyNameForPartitionId,
+} from '../../../../common/log_analysis';
+import { RecreateJobCallout } from './recreate_job_callout';
 
-export const CategoryQualityWarnings: React.FC<{ qualityWarnings: QualityWarning[] }> = ({
-  qualityWarnings,
-}) => (
-  <>
-    {qualityWarnings.map((qualityWarning, qualityWarningIndex) => (
-      <EuiCallOut
-        key={`${qualityWarningIndex}`}
-        title={categoryQualityWarningCalloutTitle}
-        color="warning"
-        iconType="alert"
-      >
-        <p>
+export const CategoryQualityWarnings: React.FC<{
+  hasSetupCapabilities: boolean;
+  onRecreateMlJob: () => void;
+  qualityWarnings: CategoryQualityWarning[];
+}> = ({ hasSetupCapabilities, onRecreateMlJob, qualityWarnings }) => {
+  const [detailAccordionId] = useState(htmlIdGenerator()());
+
+  const categoryQualityWarningsByJob = groupBy(qualityWarnings, 'jobId');
+
+  return (
+    <>
+      {Object.entries(categoryQualityWarningsByJob).map(([jobId, qualityWarningsForJob]) => (
+        <RecreateJobCallout
+          hasSetupCapabilities={hasSetupCapabilities}
+          key={`quality-warnings-callout-${jobId}`}
+          onRecreateMlJob={onRecreateMlJob}
+          title={categoryQualityWarningCalloutTitle}
+        >
           <FormattedMessage
             id="xpack.infra.logs.logEntryCategories.categoryQualityWarningCalloutMessage"
-            defaultMessage="While analyzing the log messages we've detected some problems which might indicate a reduced quality of the categorization results."
+            defaultMessage="While analyzing the log messages we've detected some problems which might indicate a reduced quality of the categorization results. Consider excluding the respective datasets from the analysis."
+            tagName="p"
           />
-        </p>
-        <ul>
-          {qualityWarning.reasons.map((reason, reasonIndex) => (
-            <li key={`${reasonIndex}`}>
-              <CategoryQualityWarningReasonDescription reason={reason} />
-            </li>
-          ))}
-        </ul>
-      </EuiCallOut>
-    ))}
-  </>
-);
+          <EuiAccordion
+            id={detailAccordionId}
+            buttonContent={
+              <FormattedMessage
+                id="xpack.infra.logs.logEntryCategories.categoryQualityWarningDetailsAccordionButtonLabel"
+                defaultMessage="Details"
+              />
+            }
+            paddingSize="m"
+          >
+            <EuiDescriptionList>
+              {qualityWarningsForJob.flatMap((qualityWarning) => (
+                <Fragment key={`item-${getFriendlyNameForPartitionId(qualityWarning.dataset)}`}>
+                  <EuiDescriptionListTitle data-test-subj={`title-${qualityWarning.dataset}`}>
+                    {getFriendlyNameForPartitionId(qualityWarning.dataset)}
+                  </EuiDescriptionListTitle>
+                  {qualityWarning.reasons.map((reason) => (
+                    <QualityWarningReasonDescription
+                      key={`description-${reason.type}-${qualityWarning.dataset}`}
+                      data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
+                    >
+                      <CategoryQualityWarningReasonDescription reason={reason} />
+                    </QualityWarningReasonDescription>
+                  ))}
+                </Fragment>
+              ))}
+            </EuiDescriptionList>
+          </EuiAccordion>
+          <EuiSpacer size="l" />
+        </RecreateJobCallout>
+      ))}
+    </>
+  );
+};
+
+const QualityWarningReasonDescription = euiStyled(EuiDescriptionListDescription)`
+  display: list-item;
+  list-style-type: disc;
+  margin-left: ${(props) => props.theme.eui.paddingSizes.m};
+`;
 
 const categoryQualityWarningCalloutTitle = i18n.translate(
   'xpack.infra.logs.logEntryCategories.categoryQUalityWarningCalloutTitle',
@@ -49,7 +95,7 @@ const categoryQualityWarningCalloutTitle = i18n.translate(
   }
 );
 
-const CategoryQualityWarningReasonDescription: React.FC<{
+export const CategoryQualityWarningReasonDescription: React.FC<{
   reason: CategoryQualityWarningReason;
 }> = ({ reason }) => {
   switch (reason.type) {
@@ -57,7 +103,7 @@ const CategoryQualityWarningReasonDescription: React.FC<{
       return (
         <FormattedMessage
           id="xpack.infra.logs.logEntryCategories.singleCategoryWarningReasonDescription"
-          defaultMessage="The analysis couldn't extract more than a single category from the log message."
+          defaultMessage="The analysis couldn't extract more than a single category from the log messages."
         />
       );
     case 'manyRareCategories':

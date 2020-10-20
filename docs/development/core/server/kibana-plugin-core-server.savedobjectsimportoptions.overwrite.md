@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportOptions.overwrite property
 
-if true, will override existing object if present
+If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option.
 
 <b>Signature:</b>
 

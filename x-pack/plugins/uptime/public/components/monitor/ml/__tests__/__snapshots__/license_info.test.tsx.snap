@@ -9,7 +9,7 @@ Array [
     <div
       class="euiCallOutHeader"
     >
-      <div
+      <span
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         data-euiicon-type="help"
@@ -34,7 +34,7 @@ Array [
           target="_blank"
         >
           <span
-            class="euiButton__content"
+            class="euiButtonContent euiButton__content"
           >
             <span
               class="euiButton__text"

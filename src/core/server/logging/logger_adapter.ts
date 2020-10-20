@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LogRecord } from './log_record';
-import { Logger, LogMeta } from './logger';
+import { LogRecord, Logger, LogMeta } from '@kbn/logging';
 
 /** @internal */
 export class LoggerAdapter implements Logger {

@@ -4,31 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
-import {
-  USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../common/elasticsearch_fieldnames';
 
 export async function getVisitorBreakdown({
   setup,
+  urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
+  urlQuery?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
+      track_total_hits: true,
       query: {
         bool: projection.body.query.bool,
       },
@@ -36,42 +35,62 @@ export async function getVisitorBreakdown({
         browsers: {
           terms: {
             field: USER_AGENT_NAME,
-            size: 10,
+            size: 9,
           },
         },
         os: {
           terms: {
             field: USER_AGENT_OS,
-            size: 10,
-          },
-        },
-        devices: {
-          terms: {
-            field: USER_AGENT_DEVICE,
-            size: 10,
+            size: 9,
           },
         },
       },
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
-  const { browsers, os, devices } = response.aggregations!;
+  const response = await apmEventClient.search(params);
+  const { browsers, os } = response.aggregations!;
+
+  const totalItems = response.hits.total.value;
+
+  const browserTotal = browsers.buckets.reduce(
+    (prevVal, item) => prevVal + item.doc_count,
+    0
+  );
+
+  const osTotal = os.buckets.reduce(
+    (prevVal, item) => prevVal + item.doc_count,
+    0
+  );
+
+  const browserItems = browsers.buckets.map((bucket) => ({
+    count: bucket.doc_count,
+    name: bucket.key as string,
+  }));
+
+  if (totalItems > 0) {
+    browserItems.push({
+      count: totalItems - browserTotal,
+      name: 'Others',
+    });
+  }
+
+  const osItems = os.buckets.map((bucket) => ({
+    count: bucket.doc_count,
+    name: bucket.key as string,
+  }));
+
+  if (totalItems > 0) {
+    osItems.push({
+      count: totalItems - osTotal,
+      name: 'Others',
+    });
+  }
 
   return {
-    browsers: browsers.buckets.map((bucket) => ({
-      count: bucket.doc_count,
-      name: bucket.key as string,
-    })),
-    os: os.buckets.map((bucket) => ({
-      count: bucket.doc_count,
-      name: bucket.key as string,
-    })),
-    devices: devices.buckets.map((bucket) => ({
-      count: bucket.doc_count,
-      name: bucket.key as string,
-    })),
+    os: osItems,
+    browsers: browserItems,
   };
 }

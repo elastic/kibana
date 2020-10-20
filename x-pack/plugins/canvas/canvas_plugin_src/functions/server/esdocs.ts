@@ -7,7 +7,6 @@
 import squel from 'squel';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 /* eslint-disable */
-// @ts-expect-error untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 /* eslint-enable */
 import { ExpressionValueFilter } from '../../../types';

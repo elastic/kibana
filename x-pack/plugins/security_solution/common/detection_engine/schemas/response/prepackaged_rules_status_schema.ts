@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   rules_installed,
   rules_custom_installed,
@@ -16,7 +15,6 @@ import {
   timelines_not_installed,
   timelines_not_updated,
 } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 export const prePackagedTimelinesStatusSchema = t.type({
   timelines_installed,

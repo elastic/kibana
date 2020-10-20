@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMLink } from './APMLink';
-import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+} from '../../../../../common/environment_filter_values';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useLicense } from '../../../../hooks/useLicense';
@@ -30,7 +33,10 @@ export function AnomalyDetectionSetupLink() {
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
   return (
-    <APMLink path="/settings/anomaly-detection">
+    <APMLink
+      path="/settings/anomaly-detection"
+      style={{ whiteSpace: 'nowrap' }}
+    >
       <EuiButtonEmpty size="s" color="primary" iconType="inspect">
         {ANOMALY_DETECTION_LINK_LABEL}
       </EuiButtonEmpty>
@@ -54,7 +60,8 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
     return null;
   }
 
-  const isEnvironmentSelected = !!environment;
+  const isEnvironmentSelected =
+    environment && environment !== ENVIRONMENT_ALL.value;
 
   // there are jobs for at least one environment
   if (!isEnvironmentSelected && data.jobs.length > 0) {
@@ -77,7 +84,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
 }
 
 function getTooltipText(environment?: string) {
-  if (!environment) {
+  if (!environment || environment === ENVIRONMENT_ALL.value) {
     return i18n.translate('xpack.apm.anomalyDetectionSetup.notEnabledText', {
       defaultMessage: `Anomaly detection is not yet enabled. Click to continue setup.`,
     });

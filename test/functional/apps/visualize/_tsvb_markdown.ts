@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
   const retry = getService('retry');
@@ -31,10 +30,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await visualBuilder.markdownSwitchSubTab('markdown');
     const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
     rerenderedTable.forEach((row) => {
-      // eslint-disable-next-line no-unused-expressions
-      variableName === 'label'
-        ? expect(row.key).to.include.string(checkedValue)
-        : expect(row.key).to.not.include.string(checkedValue);
+      if (variableName === 'label') {
+        expect(row.key).to.include.string(checkedValue);
+      } else {
+        expect(row.key).to.not.include.string(checkedValue);
+      }
     });
   }
 
@@ -108,10 +108,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         table.forEach((row, index) => {
           // exception: last index for variable is always: {{count.label}}
-          // eslint-disable-next-line no-unused-expressions
-          index === table.length - 1
-            ? expect(row.key).to.not.include.string(VARIABLE)
-            : expect(row.key).to.include.string(VARIABLE);
+          if (index === table.length - 1) {
+            expect(row.key).to.not.include.string(VARIABLE);
+          } else {
+            expect(row.key).to.include.string(VARIABLE);
+          }
         });
 
         await cleanupMarkdownData(VARIABLE, VARIABLE);

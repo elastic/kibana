@@ -19,6 +19,8 @@
 
 import { includedFields } from './included_fields';
 
+const BASE_FIELD_COUNT = 9;
+
 describe('includedFields', () => {
   it('returns undefined if fields are not provided', () => {
     expect(includedFields()).toBe(undefined);
@@ -26,7 +28,7 @@ describe('includedFields', () => {
 
   it('accepts type string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('type');
   });
 
@@ -42,6 +44,7 @@ Array [
   "references",
   "migrationVersion",
   "updated_at",
+  "originId",
   "foo",
 ]
 `);
@@ -49,14 +52,14 @@ Array [
 
   it('accepts field as string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('config.foo');
   });
 
   it('accepts fields as an array', () => {
     const fields = includedFields('config', ['foo', 'bar']);
 
-    expect(fields).toHaveLength(10);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT + 2);
     expect(fields).toContain('config.foo');
     expect(fields).toContain('config.bar');
   });
@@ -75,6 +78,7 @@ Array [
   "references",
   "migrationVersion",
   "updated_at",
+  "originId",
   "foo",
   "bar",
 ]
@@ -83,37 +87,43 @@ Array [
 
   it('includes namespace', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('namespace');
   });
 
   it('includes namespaces', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('namespaces');
   });
 
   it('includes references', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('references');
   });
 
   it('includes migrationVersion', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('migrationVersion');
   });
 
   it('includes updated_at', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('updated_at');
+  });
+
+  it('includes originId', () => {
+    const fields = includedFields('config', 'foo');
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
+    expect(fields).toContain('originId');
   });
 
   it('uses wildcard when type is not provided', () => {
     const fields = includedFields(undefined, 'foo');
-    expect(fields).toHaveLength(8);
+    expect(fields).toHaveLength(BASE_FIELD_COUNT);
     expect(fields).toContain('*.foo');
   });
 
@@ -121,7 +131,7 @@ Array [
     it('includes legacy field path', () => {
       const fields = includedFields('config', ['foo', 'bar']);
 
-      expect(fields).toHaveLength(10);
+      expect(fields).toHaveLength(BASE_FIELD_COUNT + 2);
       expect(fields).toContain('foo');
       expect(fields).toContain('bar');
     });

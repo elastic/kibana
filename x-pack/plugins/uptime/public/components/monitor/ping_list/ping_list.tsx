@@ -21,14 +21,63 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
 import { Ping, GetPingsParams, DateRange } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { LocationName } from './location_name';
 import { Pagination } from '../../overview/monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
-import { PingListProps } from './ping_list_container';
+// import { PingListProps } from './ping_list_container';
+import { pruneJourneyState } from '../../../state/actions/journey';
+import { selectPingList } from '../../../state/selectors';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
+import { getPings as getPingsAction } from '../../../state/actions';
+
+export interface PingListProps {
+  monitorId: string;
+}
+
+export const PingList = (props: PingListProps) => {
+  const {
+    error,
+    loading,
+    pingList: { locations, pings, total },
+  } = useSelector(selectPingList);
+
+  const { lastRefresh } = useContext(UptimeRefreshContext);
+
+  const { dateRangeStart: drs, dateRangeEnd: dre } = useContext(UptimeSettingsContext);
+
+  const dispatch = useDispatch();
+  const getPingsCallback = useCallback(
+    (params: GetPingsParams) => dispatch(getPingsAction(params)),
+    [dispatch]
+  );
+  const pruneJourneysCallback = useCallback(
+    (checkGroups: string[]) => dispatch(pruneJourneyState(checkGroups)),
+    [dispatch]
+  );
+
+  return (
+    <PingListComponent
+      dateRange={{
+        from: drs,
+        to: dre,
+      }}
+      error={error}
+      getPings={getPingsCallback}
+      pruneJourneysCallback={pruneJourneysCallback}
+      lastRefresh={lastRefresh}
+      loading={loading}
+      locations={locations}
+      pings={pings}
+      total={total}
+      {...props}
+    />
+  );
+};
 
 export const AllLocationOption = {
   'data-test-subj': 'xpack.uptime.pingList.locationOptions.all',
@@ -63,6 +112,7 @@ interface Props extends PingListProps {
   dateRange: DateRange;
   error?: Error;
   getPings: (props: GetPingsParams) => void;
+  pruneJourneysCallback: (checkGroups: string[]) => void;
   lastRefresh: number;
   loading: boolean;
   locations: string[];
@@ -96,6 +146,13 @@ const statusOptions = [
   },
 ];
 
+export function rowShouldExpand(item: Ping) {
+  const errorPresent = !!item.error;
+  const httpBodyPresent = item.http?.response?.body?.bytes ?? 0 > 0;
+  const isBrowserMonitor = item.monitor.type === 'browser';
+  return errorPresent || httpBodyPresent || isBrowserMonitor;
+}
+
 export const PingListComponent = (props: Props) => {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [status, setStatus] = useState<string>('');
@@ -105,6 +162,7 @@ export const PingListComponent = (props: Props) => {
     dateRange: { from, to },
     error,
     getPings,
+    pruneJourneysCallback,
     lastRefresh,
     loading,
     locations,
@@ -128,6 +186,27 @@ export const PingListComponent = (props: Props) => {
   }, [from, to, getPings, monitorId, lastRefresh, selectedLocation, pageIndex, pageSize, status]);
 
   const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});
+
+  const expandedIdsToRemove = JSON.stringify(
+    Object.keys(expandedRows).filter((e) => !pings.some(({ docId }) => docId === e))
+  );
+  useEffect(() => {
+    const parsed = JSON.parse(expandedIdsToRemove);
+    if (parsed.length) {
+      parsed.forEach((docId: string) => {
+        delete expandedRows[docId];
+      });
+      setExpandedRows(expandedRows);
+    }
+  }, [expandedIdsToRemove, expandedRows]);
+
+  const expandedCheckGroups = pings
+    .filter((p: Ping) => Object.keys(expandedRows).some((f) => p.docId === f))
+    .map(({ monitor: { check_group: cg } }) => cg);
+  const expandedCheckGroupsStr = JSON.stringify(expandedCheckGroups);
+  useEffect(() => {
+    pruneJourneysCallback(JSON.parse(expandedCheckGroupsStr));
+  }, [pruneJourneysCallback, expandedCheckGroupsStr]);
 
   const locationOptions = !locations
     ? [AllLocationOption]
@@ -237,8 +316,9 @@ export const PingListComponent = (props: Props) => {
       render: (item: Ping) => {
         return (
           <EuiButtonIcon
+            data-test-subj="uptimePingListExpandBtn"
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
-            disabled={!item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
+            disabled={!rowShouldExpand(item)}
             aria-label={
               expandedRows[item.docId]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {

@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './listing.scss';
 
 const IsClusterSupported = ({ isSupported, children }) => {
@@ -78,7 +79,7 @@ const getColumns = (
         if (cluster.isSupported) {
           return (
             <EuiLink
-              onClick={() => changeCluster(cluster.cluster_uuid, cluster.ccs)}
+              href={getSafeForExternalLink(`#/overview`, { cluster_uuid: cluster.cluster_uuid })}
               data-test-subj="clusterLink"
             >
               {value}

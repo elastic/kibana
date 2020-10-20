@@ -24,7 +24,8 @@ import { ShardFailure } from './shard_failure_types';
 
 describe('ShardFailureDescription', () => {
   it('renders matching snapshot given valid properties', () => {
-    const failure = shardFailureResponse._shards.failures[0] as ShardFailure;
+    // TODO: remove cast once https://github.com/elastic/elasticsearch-js/issues/1286 is resolved
+    const failure = (shardFailureResponse._shards as any).failures[0] as ShardFailure;
     const component = shallowWithIntl(<ShardFailureDescription {...failure} />);
     expect(component).toMatchSnapshot();
   });

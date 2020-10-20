@@ -30,5 +30,9 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
       return testSubjects.click('xpack.uptime.openAlertContextPanel');
     },
+
+    async displaysDefineConnector() {
+      return await testSubjects.existOrFail('uptimeSettingsDefineConnector');
+    },
   };
 }

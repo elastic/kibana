@@ -17,7 +17,7 @@ This action is send when a new policy is available, the policy is available unde
     "id": "action_id_1",
     "data": {
       "policy":  {
-        "id": "config_id",
+        "id": "policy_id",
         "outputs": {
           "default": {
             "api_key": "slfhsdlfhjjkshfkjh:sdfsdfsdfsdf",

@@ -9,7 +9,7 @@ import { first } from 'rxjs/operators';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { GetCsvReportPanelAction } from './get_csv_panel_action';
 
-type licenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
+type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
 
 describe('GetCsvReportPanelAction', () => {
   let core: any;
@@ -27,7 +27,7 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   beforeEach(() => {
-    mockLicense$ = (state: licenseResults = 'valid') => {
+    mockLicense$ = (state: LicenseResults = 'valid') => {
       return (of({
         check: jest.fn().mockImplementation(() => ({ state })),
       }) as unknown) as LicensingPluginSetup['license$'];

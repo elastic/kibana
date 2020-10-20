@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { EuiLink } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import { FeatureProperties } from './feature_properties';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 import { TooltipHeader } from './tooltip_header';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const VIEWS = {
   PROPERTIES_VIEW: 'PROPERTIES_VIEW',
   GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW',
+  FILTER_ACTIONS_VIEW: 'FILTER_ACTIONS_VIEW',
 };
 
-export class FeaturesTooltip extends React.Component {
+export class FeaturesTooltip extends Component {
   state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -41,7 +43,11 @@ export class FeaturesTooltip extends React.Component {
   };
 
   _showPropertiesView = () => {
-    this.setState({ view: VIEWS.PROPERTIES_VIEW });
+    this.setState({ view: VIEWS.PROPERTIES_VIEW, filterView: null });
+  };
+
+  _showFilterActionsView = (filterView) => {
+    this.setState({ view: VIEWS.FILTER_ACTIONS_VIEW, filterView });
   };
 
   _renderActions(geoFields) {
@@ -96,6 +102,22 @@ export class FeaturesTooltip extends React.Component {
     });
   };
 
+  _renderBackButton(label) {
+    return (
+      <button
+        className="euiContextMenuPanelTitle mapFeatureTooltip_backButton"
+        type="button"
+        onClick={this._showPropertiesView}
+      >
+        <span className="euiContextMenu__itemLayout">
+          <EuiIcon type="arrowLeft" size="m" className="euiContextMenu__icon" />
+
+          <span className="euiContextMenu__text">{label}</span>
+        </span>
+      </button>
+    );
+  }
+
   render() {
     if (!this.state.currentFeature) {
       return null;
@@ -109,14 +131,36 @@ export class FeaturesTooltip extends React.Component {
 
     if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW && currentFeatureGeometry) {
       return (
-        <FeatureGeometryFilterForm
-          onClose={this.props.closeTooltip}
-          showPropertiesView={this._showPropertiesView}
-          geometry={currentFeatureGeometry}
-          geoFields={geoFields}
-          addFilters={this.props.addFilters}
-          loadPreIndexedShape={this._loadCurrentFeaturePreIndexedShape}
-        />
+        <Fragment>
+          {this._renderBackButton(
+            i18n.translate('xpack.maps.tooltip.showGeometryFilterViewLinkLabel', {
+              defaultMessage: 'Filter by geometry',
+            })
+          )}
+          <FeatureGeometryFilterForm
+            onClose={this.props.closeTooltip}
+            showPropertiesView={this._showPropertiesView}
+            geometry={currentFeatureGeometry}
+            geoFields={geoFields}
+            addFilters={this.props.addFilters}
+            getFilterActions={this.props.getFilterActions}
+            getActionContext={this.props.getActionContext}
+            loadPreIndexedShape={this._loadCurrentFeaturePreIndexedShape}
+          />
+        </Fragment>
+      );
+    }
+
+    if (this.state.view === VIEWS.FILTER_ACTIONS_VIEW) {
+      return (
+        <Fragment>
+          {this._renderBackButton(
+            i18n.translate('xpack.maps.tooltip.showAddFilterActionsViewLabel', {
+              defaultMessage: 'Filter actions',
+            })
+          )}
+          {this.state.filterView}
+        </Fragment>
       );
     }
 
@@ -137,6 +181,9 @@ export class FeaturesTooltip extends React.Component {
           showFilterButtons={!!this.props.addFilters && this.props.isLocked}
           onCloseTooltip={this.props.closeTooltip}
           addFilters={this.props.addFilters}
+          getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
+          showFilterActions={this._showFilterActionsView}
         />
         {this._renderActions(geoFields)}
       </Fragment>

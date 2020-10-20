@@ -387,6 +387,36 @@ describe('The metric threshold alert type', () => {
   //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
   //   });
   // });
+
+  describe('querying a metric with a percentage metric', () => {
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        services,
+        params: {
+          sourceId: 'default',
+          criteria: [
+            {
+              ...baseCriterion,
+              metric: 'test.metric.pct',
+              comparator: Comparator.GT,
+              threshold: [0.75],
+            },
+          ],
+        },
+      });
+    test('reports values converted from decimals to percentages to the action context', async () => {
+      const now = 1577858400000;
+      await execute();
+      const { action } = mostRecentAction(instanceID);
+      expect(action.group).toBe('*');
+      expect(action.reason).toContain('current value is 100%');
+      expect(action.reason).toContain('threshold of 75%');
+      expect(action.threshold.condition0[0]).toBe('75%');
+      expect(action.value.condition0).toBe('100%');
+      expect(action.timestamp).toBe(new Date(now).toISOString());
+    });
+  });
 });
 
 const createMockStaticConfiguration = (sources: any) => ({

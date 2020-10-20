@@ -19,4 +19,4 @@
 
 export * from './json_editor';
 
-export { OnJsonEditorUpdateHandler } from './use_json';
+export { OnJsonEditorUpdateHandler, JsonEditorState } from './use_json';

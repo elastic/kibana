@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['reporting', 'common', 'discover']);
@@ -22,6 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     after('clean up archives', async () => {
       await esArchiver.unload('reporting/ecommerce');
+      await es.deleteByQuery({
+        index: '.reporting-*',
+        refresh: true,
+        body: { query: { match_all: {} } },
+      });
     });
 
     describe('Generate CSV button', () => {

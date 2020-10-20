@@ -19,6 +19,7 @@ export declare class SavedObjectsErrorHelpers
 |  [createConflictError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.createconflicterror.md) | <code>static</code> |  |
 |  [createGenericNotFoundError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.creategenericnotfounderror.md) | <code>static</code> |  |
 |  [createInvalidVersionError(versionInput)](./kibana-plugin-core-server.savedobjectserrorhelpers.createinvalidversionerror.md) | <code>static</code> |  |
+|  [createTooManyRequestsError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.createtoomanyrequestserror.md) | <code>static</code> |  |
 |  [createUnsupportedTypeError(type)](./kibana-plugin-core-server.savedobjectserrorhelpers.createunsupportedtypeerror.md) | <code>static</code> |  |
 |  [decorateBadRequestError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decoratebadrequesterror.md) | <code>static</code> |  |
 |  [decorateConflictError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decorateconflicterror.md) | <code>static</code> |  |
@@ -28,6 +29,7 @@ export declare class SavedObjectsErrorHelpers
 |  [decorateGeneralError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decorategeneralerror.md) | <code>static</code> |  |
 |  [decorateNotAuthorizedError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decoratenotauthorizederror.md) | <code>static</code> |  |
 |  [decorateRequestEntityTooLargeError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decoraterequestentitytoolargeerror.md) | <code>static</code> |  |
+|  [decorateTooManyRequestsError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decoratetoomanyrequestserror.md) | <code>static</code> |  |
 |  [isBadRequestError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isbadrequesterror.md) | <code>static</code> |  |
 |  [isConflictError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isconflicterror.md) | <code>static</code> |  |
 |  [isEsCannotExecuteScriptError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isescannotexecutescripterror.md) | <code>static</code> |  |
@@ -38,4 +40,5 @@ export declare class SavedObjectsErrorHelpers
 |  [isNotFoundError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isnotfounderror.md) | <code>static</code> |  |
 |  [isRequestEntityTooLargeError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isrequestentitytoolargeerror.md) | <code>static</code> |  |
 |  [isSavedObjectsClientError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.issavedobjectsclienterror.md) | <code>static</code> |  |
+|  [isTooManyRequestsError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.istoomanyrequestserror.md) | <code>static</code> |  |
 

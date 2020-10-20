@@ -618,6 +618,37 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:78116c8c-fd2a-11ea-adc1-0242ac120002",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "bounds": {
+          "coordinates": [
+            [
+              -140.62361,
+              54.11832
+            ],
+            [
+              -55.49169,
+              18.17193
+            ]
+          ],
+          "type": "envelope"
+        },
+        "description": "",
+        "layerListJSON": "[{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"SUPER_FINE\",\"type\":\"ES_GEO_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"TILED_VECTOR\"}]",
+        "mapStateJSON": "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
+        "title": "geo grid vector grid example (SUPER_FINE resolution)",
+        "uiStateJSON": "{\"isDarkMode\":false}"
+      },
+      "type": "map"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:346fbec0-1811-11e9-b78a-23d706cd2507",
     "index": ".kibana",
     "source": {
@@ -982,6 +1013,69 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:13776f20-db37-11ea-8fbb-3da39bb9bff2",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "title" : "document example - auto fit to bounds for initial location",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":5.2,\"center\":{\"lon\":-67.80052,\"lat\":-55.25331},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"initialLocation\":\"AUTO_FIT_TO_BOUNDS\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showSpatialFilters\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.9.0"
+      },
+      "updated_at" : "2020-08-10T18:27:39.805Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:bff99716-e3dc-11ea-87d0-0242ac130003",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "description":"shapes with mvt scaling",
+        "layerListJSON":"[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"isAutoSelect\":true},\"id\":\"76b9fc1d-1e8a-4d2f-9f9e-6ba2b19f24bb\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"style\":{\"type\":\"TILE\"},\"type\":\"VECTOR_TILE\"},{\"sourceDescriptor\":{\"geoField\":\"geometry\",\"filterByMapBounds\":true,\"scalingType\":\"MVT\",\"topHitsSize\":1,\"id\":\"97f8555e-8db0-4bd8-8b18-22e32f468667\",\"type\":\"ES_SEARCH\",\"tooltipProperties\":[],\"sortField\":\"\",\"sortOrder\":\"desc\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"id\":\"caffa63a-ebfb-466d-8ff6-d797975b88ab\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}},\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"colorCategory\":\"palette_0\",\"field\":{\"name\":\"prop1\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":true,\"sigma\":1},\"type\":\"ORDINAL\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#41937c\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":6}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"labelText\":{\"type\":\"STATIC\",\"options\":{\"value\":\"\"}},\"labelColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#000000\"}},\"labelSize\":{\"type\":\"STATIC\",\"options\":{\"size\":14}},\"labelBorderColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"labelBorderSize\":{\"options\":{\"size\":\"SMALL\"}}},\"isTimeAware\":true},\"type\":\"TILED_VECTOR\",\"joins\":[]}]",
+        "mapStateJSON":"{\"zoom\":3.75,\"center\":{\"lon\":80.01106,\"lat\":3.65009},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showSpatialFilters\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+        "title":"geo_shape_mvt",
+        "uiStateJSON":"{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "id":"561253e0-f731-11e8-8487-11b9dd924f96",
+          "name":"layer_1_source_index_pattern",
+          "type":"index-pattern"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.9.0"
+      },
+      "updated_at" : "2020-08-10T18:27:39.805Z"
+    }
+  }
+}
+
+
+
+
+
+
+{
+  "type": "doc",
+  "value": {
     "id": "dashboard:19906970-2e40-11e9-85cb-6965aae20f13",
     "index": ".kibana",
     "source": {
@@ -1019,7 +1113,7 @@
         "title" : "dash for tooltip filter action test",
         "hits" : 0,
         "description" : "Zoomed in so entire screen is covered by filter so click to open tooltip can not miss.",
-        "panelsJSON" : "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":26,\"i\":\"1\"},\"version\":\"8.0.0\",\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":-1.31919,\"lon\":59.53306,\"zoom\":9.67},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"]},\"panelRefName\":\"panel_0\"}]",
+        "panelsJSON" : "[{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":-1.31919,\"lon\":59.53306,\"zoom\":9.67},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"],\"hiddenLayers\":[],\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"669a3521-1215-4228-9ced-77e2edf5ad17\",\"triggers\":[\"FILTER_TRIGGER\"],\"action\":{\"name\":\"drilldown1\",\"config\":{\"dashboardId\":\"19906970-2e40-11e9-85cb-6965aae20f13\",\"useCurrentFilters\":true,\"useCurrentDateRange\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}}]}}},\"panelRefName\":\"panel_0\"}]",
         "optionsJSON" : "{\"useMargins\":true,\"hidePanelTitles\":false}",
         "version" : 1,
         "timeRestore" : true,
@@ -1042,9 +1136,9 @@
         }
       ],
       "migrationVersion" : {
-        "dashboard" : "7.0.0"
+        "dashboard" : "7.3.0"
       },
-      "updated_at" : "2019-06-14T14:09:25.039Z"
+      "updated_at" : "2020-08-26T14:32:27.854Z"
     }
   }
 }

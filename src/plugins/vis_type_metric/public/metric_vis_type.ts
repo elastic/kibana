@@ -18,22 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { MetricVisComponent } from './components/metric_vis_component';
+import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorSchemas, colorSchemas, ColorModes } from '../../charts/public';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
+import { toExpressionAst } from './to_ast';
 
-export const createMetricVisTypeDefinition = () => ({
+export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
   description: i18n.translate('visTypeMetric.metricDescription', {
     defaultMessage: 'Display a calculation as a single number',
   }),
+  toExpressionAst,
   visConfig: {
-    component: MetricVisComponent,
     defaults: {
       addTooltip: true,
       addLegend: false,

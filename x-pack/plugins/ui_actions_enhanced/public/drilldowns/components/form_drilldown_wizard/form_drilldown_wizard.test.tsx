@@ -7,22 +7,28 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { FormDrilldownWizard } from './form_drilldown_wizard';
-import { render as renderTestingLibrary, fireEvent, cleanup } from '@testing-library/react/pure';
+import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
 import { txtNameOfDrilldown } from './i18n';
+import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
-afterEach(cleanup);
+const otherProps = {
+  actionFactoryContext: { triggers: [] as TriggerId[] },
+  triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'] as TriggerId[],
+  getTriggerInfo: (id: TriggerId) => ({ id } as Trigger),
+  onSelectedTriggersChange: () => {},
+};
 
 describe('<FormDrilldownWizard>', () => {
   test('renders without crashing', () => {
     const div = document.createElement('div');
-    render(<FormDrilldownWizard onNameChange={() => {}} actionFactoryContext={{}} />, div);
+    render(<FormDrilldownWizard onNameChange={() => {}} {...otherProps} />, div);
   });
 
   describe('[name=]', () => {
     test('if name not provided, uses to empty string', () => {
       const div = document.createElement('div');
 
-      render(<FormDrilldownWizard actionFactoryContext={{}} />, div);
+      render(<FormDrilldownWizard {...otherProps} />, div);
 
       const input = div.querySelector('[data-test-subj="drilldownNameInput"]') as HTMLInputElement;
 
@@ -32,13 +38,13 @@ describe('<FormDrilldownWizard>', () => {
     test('can set initial name input field value', () => {
       const div = document.createElement('div');
 
-      render(<FormDrilldownWizard name={'foo'} actionFactoryContext={{}} />, div);
+      render(<FormDrilldownWizard name={'foo'} {...otherProps} />, div);
 
       const input = div.querySelector('[data-test-subj="drilldownNameInput"]') as HTMLInputElement;
 
       expect(input?.value).toBe('foo');
 
-      render(<FormDrilldownWizard name={'bar'} actionFactoryContext={{}} />, div);
+      render(<FormDrilldownWizard name={'bar'} {...otherProps} />, div);
 
       expect(input?.value).toBe('bar');
     });
@@ -46,7 +52,7 @@ describe('<FormDrilldownWizard>', () => {
     test('fires onNameChange callback on name change', () => {
       const onNameChange = jest.fn();
       const utils = renderTestingLibrary(
-        <FormDrilldownWizard name={''} onNameChange={onNameChange} actionFactoryContext={{}} />
+        <FormDrilldownWizard name={''} onNameChange={onNameChange} {...otherProps} />
       );
       const input = utils.getByLabelText(txtNameOfDrilldown);
 

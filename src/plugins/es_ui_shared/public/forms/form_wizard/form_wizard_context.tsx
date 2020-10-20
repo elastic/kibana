@@ -147,7 +147,7 @@ export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWiza
         return nextState;
       });
     },
-    [getStepIndex, validate, onSave, getData]
+    [getStepIndex, validate, onSave, getData, lastStep]
   );
 
   const value: Context = {

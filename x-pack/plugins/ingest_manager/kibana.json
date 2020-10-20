@@ -3,9 +3,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "ingestManager"],
+  "configPath": ["xpack", "fleet"],
   "requiredPlugins": ["licensing", "data", "encryptedSavedObjects"],
   "optionalPlugins": ["security", "features", "cloud", "usageCollection", "home"],
   "extraPublicDirs": ["common"],
-  "requiredBundles": ["kibanaReact", "esUiShared"]
+  "requiredBundles": ["kibanaReact", "esUiShared", "home"]
 }

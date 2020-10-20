@@ -25,6 +25,7 @@ describe('delete_list_schema', () => {
 
   test('it should NOT accept an undefined for an id', () => {
     const payload = getDeleteListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = deleteListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

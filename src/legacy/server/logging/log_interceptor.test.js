@@ -147,7 +147,7 @@ describe('server logging LogInterceptor', () => {
   describe('#downgradeIfHTTPWhenHTTPS', () => {
     it('transforms http requests when serving https errors', () => {
       const message =
-        '40735139278848:error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request:../deps/openssl/openssl/ssl/s23_srvr.c:394';
+        '4584650176:error:1408F09C:SSL routines:ssl3_get_record:http request:../deps/openssl/openssl/ssl/record/ssl3_record.c:322:\n';
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message });
       assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event));

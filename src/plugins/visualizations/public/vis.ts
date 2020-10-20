@@ -83,12 +83,12 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
-export class Vis {
-  public readonly type: VisType;
+export class Vis<TVisParams = VisParams> {
+  public readonly type: VisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
-  public params: VisParams = {};
+  public params: TVisParams;
   // Session state is for storing information that is transitory, and will not be saved with the visualization.
   // For instance, map bounds, which depends on the view port, browser window size, etc.
   public sessionState: Record<string, any> = {};
@@ -97,14 +97,14 @@ export class Vis {
   public readonly uiState: PersistedState;
 
   constructor(visType: string, visState: SerializedVis = {} as any) {
-    this.type = this.getType(visType);
+    this.type = this.getType<TVisParams>(visType);
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
   }
 
-  private getType(visType: string) {
-    const type = getTypes().get(visType);
+  private getType<TVisParams>(visType: string) {
+    const type = getTypes().get<TVisParams>(visType);
     if (!type) {
       const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
         defaultMessage: 'Invalid visualization type "{visType}"',
@@ -118,7 +118,7 @@ export class Vis {
   }
 
   private getParams(params: VisParams) {
-    return defaults({}, cloneDeep(params || {}), cloneDeep(this.type.visConfig.defaults || {}));
+    return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
   async setState(state: PartialVisState) {
@@ -200,10 +200,6 @@ export class Vis {
         savedSearchId: this.data.savedSearchId,
       },
     };
-  }
-
-  toAST() {
-    return this.type.toAST(this.params);
   }
 
   // deprecated

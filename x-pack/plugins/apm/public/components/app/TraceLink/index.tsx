@@ -6,61 +6,22 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
-import url from 'url';
-import { TRACE_ID } from '../../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
+import { getRedirectToTracePageUrl } from './get_redirect_to_trace_page_url';
 
 const CentralizedContainer = styled.div`
   height: 100%;
   display: flex;
 `;
 
-const redirectToTransactionDetailPage = ({
-  transaction,
-  rangeFrom,
-  rangeTo,
-}: {
-  transaction: Transaction;
-  rangeFrom?: string;
-  rangeTo?: string;
-}) =>
-  url.format({
-    pathname: `/services/${transaction.service.name}/transactions/view`,
-    query: {
-      traceId: transaction.trace.id,
-      transactionId: transaction.transaction.id,
-      transactionName: transaction.transaction.name,
-      transactionType: transaction.transaction.type,
-      rangeFrom,
-      rangeTo,
-    },
-  });
-
-const redirectToTracePage = ({
-  traceId,
-  rangeFrom,
-  rangeTo,
-}: {
-  traceId: string;
-  rangeFrom?: string;
-  rangeTo?: string;
-}) =>
-  url.format({
-    pathname: `/traces`,
-    query: {
-      kuery: encodeURIComponent(`${TRACE_ID} : "${traceId}"`),
-      rangeFrom,
-      rangeTo,
-    },
-  });
-
-export function TraceLink() {
+export function TraceLink({ match }: RouteComponentProps<{ traceId: string }>) {
+  const { traceId } = match.params;
   const { urlParams } = useUrlParams();
-  const { traceIdLink: traceId, rangeFrom, rangeTo } = urlParams;
+  const { rangeFrom, rangeTo } = urlParams;
 
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
@@ -79,12 +40,12 @@ export function TraceLink() {
   );
   if (traceId && status === FETCH_STATUS.SUCCESS) {
     const to = data.transaction
-      ? redirectToTransactionDetailPage({
+      ? getRedirectToTransactionDetailPageUrl({
           transaction: data.transaction,
           rangeFrom,
           rangeTo,
         })
-      : redirectToTracePage({ traceId, rangeFrom, rangeTo });
+      : getRedirectToTracePageUrl({ traceId, rangeFrom, rangeTo });
     return <Redirect to={to} />;
   }
 

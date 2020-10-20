@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
 import { run } from '@kbn/dev-utils';
 import { getInstalledPackages } from '../npm';
 
 import { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
 import { assertLicensesValid } from './valid';
-import { REPO_ROOT } from '../constants';
 
 run(
   async ({ log, flags }) => {

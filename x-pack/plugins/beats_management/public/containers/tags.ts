@@ -5,7 +5,7 @@
  */
 
 import { Container } from 'unstated';
-import { BeatTag } from '../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag } from '../../common/domain_types';
 import { FrontendLibs } from '../lib/types';
 
 interface ContainerState {

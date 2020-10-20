@@ -18,4 +18,3 @@
  */
 
 export { HitsCounter } from './hits_counter';
-export { createHitsCounterDirective } from './hits_counter_directive';

@@ -40,7 +40,7 @@ export const onRedirectNoIndexPattern = (
 
   const bannerMessage = i18n.translate('data.indexPatterns.ensureDefaultIndexPattern.bannerLabel', {
     defaultMessage:
-      "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
+      'To visualize and explore data in Kibana, you must create an index pattern to retrieve data from Elasticsearch.',
   });
 
   // Avoid being hostile to new users who don't have an index pattern setup yet

@@ -26,9 +26,9 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     before(async () => {
       await ingestManager.setup();
     });
-    loadTestFile(require.resolve('./resolver/entity_id'));
-    loadTestFile(require.resolve('./resolver/tree'));
+    loadTestFile(require.resolve('./resolver/index'));
     loadTestFile(require.resolve('./metadata'));
+    loadTestFile(require.resolve('./metadata_v1'));
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./artifacts'));
     loadTestFile(require.resolve('./package'));

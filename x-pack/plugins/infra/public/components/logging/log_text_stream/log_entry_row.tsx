@@ -8,7 +8,7 @@ import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled, useUiTracker } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import {
   LogColumnConfiguration,
@@ -68,6 +68,8 @@ export const LogEntryRow = memo(
     scale,
     wrap,
   }: LogEntryRowProps) => {
+    const trackMetric = useUiTracker({ app: 'infra_logs' });
+
     const [isHovered, setIsHovered] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -82,10 +84,10 @@ export const LogEntryRow = memo(
       logEntry.id,
     ]);
 
-    const handleOpenViewLogInContext = useCallback(() => openViewLogInContext?.(logEntry), [
-      openViewLogInContext,
-      logEntry,
-    ]);
+    const handleOpenViewLogInContext = useCallback(() => {
+      openViewLogInContext?.(logEntry);
+      trackMetric({ metric: 'view_in_context__stream' });
+    }, [openViewLogInContext, logEntry, trackMetric]);
 
     const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
     const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;

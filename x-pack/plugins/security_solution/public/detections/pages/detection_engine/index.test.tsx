@@ -12,8 +12,8 @@ import { DetectionEngineContainer } from './index';
 
 describe('DetectionEngineContainer', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<DetectionEngineContainer url="url" />);
+    const wrapper = shallow(<DetectionEngineContainer />);
 
-    expect(wrapper.find('ManageUserInfo')).toHaveLength(1);
+    expect(wrapper.find('Switch')).toHaveLength(1);
   });
 });

@@ -15,7 +15,7 @@ import { IngestManagerConfigType } from '../index';
 describe('registerLimitedConcurrencyRoutes', () => {
   test(`doesn't call registerOnPreAuth if maxConcurrentConnections is 0`, async () => {
     const mockSetup = coreMock.createSetup();
-    const mockConfig = { fleet: { maxConcurrentConnections: 0 } } as IngestManagerConfigType;
+    const mockConfig = { agents: { maxConcurrentConnections: 0 } } as IngestManagerConfigType;
     registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
 
     expect(mockSetup.http.registerOnPreAuth).not.toHaveBeenCalled();
@@ -23,7 +23,7 @@ describe('registerLimitedConcurrencyRoutes', () => {
 
   test(`calls registerOnPreAuth once if maxConcurrentConnections is 1`, async () => {
     const mockSetup = coreMock.createSetup();
-    const mockConfig = { fleet: { maxConcurrentConnections: 1 } } as IngestManagerConfigType;
+    const mockConfig = { agents: { maxConcurrentConnections: 1 } } as IngestManagerConfigType;
     registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
 
     expect(mockSetup.http.registerOnPreAuth).toHaveBeenCalledTimes(1);
@@ -31,7 +31,7 @@ describe('registerLimitedConcurrencyRoutes', () => {
 
   test(`calls registerOnPreAuth once if maxConcurrentConnections is 1000`, async () => {
     const mockSetup = coreMock.createSetup();
-    const mockConfig = { fleet: { maxConcurrentConnections: 1000 } } as IngestManagerConfigType;
+    const mockConfig = { agents: { maxConcurrentConnections: 1000 } } as IngestManagerConfigType;
     registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
 
     expect(mockSetup.http.registerOnPreAuth).toHaveBeenCalledTimes(1);
@@ -39,7 +39,7 @@ describe('registerLimitedConcurrencyRoutes', () => {
 });
 
 // assertions for calls to .decrease are commented out because it's called on the
-// "req.events.aborted$ observable (which) will never emit from a mocked request in a jest unit test environment"
+// "req.events.completed$ observable (which) will never emit from a mocked request in a jest unit test environment"
 // https://github.com/elastic/kibana/pull/72338#issuecomment-661908791
 describe('preAuthHandler', () => {
   test(`ignores routes when !isMatch`, async () => {

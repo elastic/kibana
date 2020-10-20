@@ -9,5 +9,5 @@ Get other registered search strategies. For example, if a new strategy needs to 
 <b>Signature:</b>
 
 ```typescript
-getSearchStrategy: (name: string) => ISearchStrategy;
+getSearchStrategy: (name: string) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
 ```

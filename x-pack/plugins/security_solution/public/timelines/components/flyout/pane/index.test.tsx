@@ -10,19 +10,13 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { Pane } from '.';
 
-const testFlyoutHeight = 980;
 const testWidth = 640;
 
 describe('Pane', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
       <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          width={testWidth}
-        >
+        <Pane onClose={jest.fn()} timelineId={'test'} width={testWidth}>
           <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
@@ -33,12 +27,7 @@ describe('Pane', () => {
   test('it should NOT let the flyout expand to take up the full width of the element that contains it', () => {
     const wrapper = mount(
       <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          width={testWidth}
-        >
+        <Pane onClose={jest.fn()} timelineId={'test'} width={testWidth}>
           <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
@@ -50,12 +39,7 @@ describe('Pane', () => {
   test('it should render a resize handle', () => {
     const wrapper = mount(
       <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          width={testWidth}
-        >
+        <Pane onClose={jest.fn()} timelineId={'test'} width={testWidth}>
           <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
@@ -67,12 +51,7 @@ describe('Pane', () => {
   test('it should render children', () => {
     const wrapper = mount(
       <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          width={testWidth}
-        >
+        <Pane onClose={jest.fn()} timelineId={'test'} width={testWidth}>
           <span>{'I am a mock body'}</span>
         </Pane>
       </TestProviders>

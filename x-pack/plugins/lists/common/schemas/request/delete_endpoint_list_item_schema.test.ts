@@ -30,6 +30,7 @@ describe('delete_endpoint_list_item_schema', () => {
     const payload: DeleteEndpointListItemSchema & {
       namespace_type: string;
     } = { ...getDeleteEndpointListItemSchemaMock(), namespace_type: 'single' };
+    // @ts-expect-error
     delete payload.namespace_type;
     const decoded = deleteEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -99,6 +99,45 @@ const migratePercentileRankAggregation: SavedObjectMigrationFn<any, any> = (doc)
   return doc;
 };
 
+// [TSVB] Replace string query with object
+const migrateFilterRatioQuery: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const series: any[] = get(visState, 'params.series') || [];
+
+      series.forEach((part) => {
+        (part.metrics || []).forEach((metric: any) => {
+          if (metric.type === 'filter_ratio') {
+            if (typeof metric.numerator === 'string') {
+              metric.numerator = { query: metric.numerator, language: 'lucene' };
+            }
+            if (typeof metric.denominator === 'string') {
+              metric.denominator = { query: metric.denominator, language: 'lucene' };
+            }
+          }
+        });
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 // [TSVB] Remove stale opperator key
 const migrateOperatorKeyTypo: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -616,6 +655,12 @@ const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
   }
 };
 
+/**
+ * This migration script is related to:
+ *   @link https://github.com/elastic/kibana/pull/62194
+ *   @link https://github.com/elastic/kibana/pull/14644
+ * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
+ */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
@@ -626,6 +671,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
       searchSource = JSON.parse(searchSourceJSON);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
+      return doc;
     }
 
     if (searchSource.query?.match_all) {
@@ -682,6 +728,35 @@ const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn<any, any> = (doc) 
   return doc;
 };
 
+// [TSVB] Remove serialized search source as it's not used in TSVB visualizations
+const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics' && searchSourceJSON !== '{}') {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          kibanaSavedObjectMeta: {
+            ...get(doc, 'attributes.kibanaSavedObjectMeta'),
+            searchSourceJSON: '{}',
+          },
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -713,4 +788,6 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.4.2': flow(transformSplitFiltersStringToQueryObject),
   '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
+  '7.9.3': flow(migrateMatchAllQuery),
+  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
 };

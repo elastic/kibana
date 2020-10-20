@@ -13,7 +13,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React from 'react';
-import { TABLE_CONFIG } from '../../../../../../legacy/plugins/beats_management/common/constants/table';
+import { TABLE_CONFIG } from '../../../../common/constants/table';
 import { TagBadge } from '../../tag/tag_badge';
 import { AssignmentActionType } from '../index';
 

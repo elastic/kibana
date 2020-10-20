@@ -49,7 +49,7 @@ export interface CustomUrlListProps {
  */
 export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCustomUrls }) => {
   const {
-    services: { notifications },
+    services: { http, notifications },
   } = useMlKibana();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
@@ -103,7 +103,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
     if (index < customUrls.length) {
       getTestUrl(job, customUrls[index])
         .then((testUrl) => {
-          openCustomUrlWindow(testUrl, customUrls[index]);
+          openCustomUrlWindow(testUrl, customUrls[index], http.basePath.get());
         })
         .catch((resp) => {
           // eslint-disable-next-line no-console

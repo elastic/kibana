@@ -18,7 +18,13 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller } from 'kibana/server';
+import {
+  Logger,
+  LegacyAPICaller,
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -76,23 +82,27 @@ export class CollectorSet {
   };
 
   public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
-    // Kept this for runtime validation in JS code.
     if (!(collectorSet instanceof CollectorSet)) {
       throw new Error(
         `areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet
       );
     }
 
-    const collectorTypesNotReady = (
-      await Promise.all(
-        [...collectorSet.collectors.values()].map(async (collector) => {
-          if (!(await collector.isReady())) {
-            return collector.type;
-          }
-        })
-      )
-    ).filter((collectorType): collectorType is string => !!collectorType);
-    const allReady = collectorTypesNotReady.length === 0;
+    const collectors = [...collectorSet.collectors.values()];
+    const collectorsWithStatus = await Promise.all(
+      collectors.map(async (collector) => {
+        return {
+          isReady: await collector.isReady(),
+          collector,
+        };
+      })
+    );
+
+    const collectorsTypesNotReady = collectorsWithStatus
+      .filter((collectorWithStatus) => collectorWithStatus.isReady === false)
+      .map((collectorWithStatus) => collectorWithStatus.collector.type);
+
+    const allReady = collectorsTypesNotReady.length === 0;
 
     if (!allReady && this.maximumWaitTimeForAllCollectorsInS >= 0) {
       const nowTimestamp = +new Date();
@@ -102,10 +112,11 @@ export class CollectorSet {
       const timeLeftInMS = this.maximumWaitTimeForAllCollectorsInS * 1000 - timeWaitedInMS;
       if (timeLeftInMS <= 0) {
         this.logger.debug(
-          `All collectors are not ready (waiting for ${collectorTypesNotReady.join(',')}) ` +
+          `All collectors are not ready (waiting for ${collectorsTypesNotReady.join(',')}) ` +
             `but we have waited the required ` +
             `${this.maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`
         );
+
         return true;
       } else {
         this.logger.debug(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
@@ -119,6 +130,8 @@ export class CollectorSet {
 
   public bulkFetch = async (
     callCluster: LegacyAPICaller,
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository,
     collectors: Map<string, Collector<any, any>> = this.collectors
   ) => {
     const responses = await Promise.all(
@@ -127,7 +140,7 @@ export class CollectorSet {
         try {
           return {
             type: collector.type,
-            result: await collector.fetch(callCluster),
+            result: await collector.fetch({ callCluster, esClient, soClient }),
           };
         } catch (err) {
           this.logger.warn(err);
@@ -149,9 +162,18 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: LegacyAPICaller) => {
+  public bulkFetchUsage = async (
+    callCluster: LegacyAPICaller,
+    esClient: ElasticsearchClient,
+    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
+  ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, usageCollectors.collectors);
+    return await this.bulkFetch(
+      callCluster,
+      esClient,
+      savedObjectsClient,
+      usageCollectors.collectors
+    );
   };
 
   // convert an array of fetched stats results into key/object

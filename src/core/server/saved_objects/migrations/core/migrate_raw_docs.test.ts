@@ -90,4 +90,18 @@ describe('migrateRawDocs', () => {
 
     expect(logger.error).toBeCalledTimes(1);
   });
+
+  test('rejects when the transform function throws an error', async () => {
+    const transform = jest.fn<any, any>((doc: any) => {
+      throw new Error('error during transform');
+    });
+    await expect(
+      migrateRawDocs(
+        new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
+        transform,
+        [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }],
+        createSavedObjectsMigrationLoggerMock()
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error during transform"`);
+  });
 });

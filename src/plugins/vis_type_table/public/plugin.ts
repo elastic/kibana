@@ -21,10 +21,11 @@ import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createTableVisFn } from './table_vis_fn';
-import { getTableVisTypeDefinition } from './table_vis_type';
+import { tableVisTypeDefinition } from './table_vis_type';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setKibanaLegacy } from './services';
+import { setFormatService } from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { getTableVisLegacyRenderer } from './legacy/table_vis_legacy_renderer';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
@@ -39,7 +40,9 @@ export interface TablePluginStartDependencies {
 }
 
 /** @internal */
-export class TableVisPlugin implements Plugin<Promise<void>, void> {
+export class TableVisPlugin
+  implements
+    Plugin<Promise<void>, void, TablePluginSetupDependencies, TablePluginStartDependencies> {
   initializerContext: PluginInitializerContext;
   createBaseVisualization: any;
 
@@ -48,17 +51,15 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
   }
 
   public async setup(
-    core: CoreSetup,
+    core: CoreSetup<TablePluginStartDependencies>,
     { expressions, visualizations }: TablePluginSetupDependencies
   ) {
     expressions.registerFunction(createTableVisFn);
-    visualizations.createBaseVisualization(
-      getTableVisTypeDefinition(core, this.initializerContext)
-    );
+    expressions.registerRenderer(getTableVisLegacyRenderer(core, this.initializerContext));
+    visualizations.createBaseVisualization(tableVisTypeDefinition);
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
     setFormatService(data.fieldFormats);
-    setKibanaLegacy(kibanaLegacy);
   }
 }

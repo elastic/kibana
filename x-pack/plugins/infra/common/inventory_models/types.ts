@@ -224,7 +224,7 @@ export type TSVBMetricModelCreator = (
   interval: string
 ) => TSVBMetricModel;
 
-export const SnapshotModelMetricAggRT = rt.record(
+export const ESBasicMetricAggRT = rt.record(
   rt.string,
   rt.union([
     rt.undefined,
@@ -234,7 +234,21 @@ export const SnapshotModelMetricAggRT = rt.record(
   ])
 );
 
-export const SnapshotModelBucketScriptRT = rt.type({
+export const ESPercentileAggRT = rt.type({
+  percentiles: rt.type({
+    field: rt.string,
+    percents: rt.array(rt.number),
+  }),
+});
+
+export const ESCaridnalityAggRT = rt.type({
+  cardinality: rt.partial({
+    field: rt.string,
+    script: rt.string,
+  }),
+});
+
+export const ESBucketScriptAggRT = rt.type({
   bucket_script: rt.intersection([
     rt.type({
       buckets_path: rt.record(rt.string, rt.union([rt.undefined, rt.string])),
@@ -247,13 +261,13 @@ export const SnapshotModelBucketScriptRT = rt.type({
   ]),
 });
 
-export const SnapshotModelCumulativeSumRT = rt.type({
+export const ESCumulativeSumAggRT = rt.type({
   cumulative_sum: rt.type({
     buckets_path: rt.string,
   }),
 });
 
-export const SnapshotModelDerivativeRT = rt.type({
+export const ESDerivativeAggRT = rt.type({
   derivative: rt.type({
     buckets_path: rt.string,
     gap_policy: rt.keyof({ skip: null, insert_zeros: null }),
@@ -261,42 +275,46 @@ export const SnapshotModelDerivativeRT = rt.type({
   }),
 });
 
-export const SnapshotModelSumBucketRT = rt.type({
+export const ESSumBucketAggRT = rt.type({
   sum_bucket: rt.type({
     buckets_path: rt.string,
   }),
 });
 
+export const ESTopHitsAggRT = rt.type({
+  top_hits: rt.object,
+});
+
 interface SnapshotTermsWithAggregation {
   terms: { field: string };
-  aggregations: SnapshotModel;
+  aggregations: MetricsUIAggregation;
 }
 
-export const SnapshotTermsWithAggregationRT: rt.Type<SnapshotTermsWithAggregation> = rt.recursion(
+export const ESTermsWithAggregationRT: rt.Type<SnapshotTermsWithAggregation> = rt.recursion(
   'SnapshotModelRT',
   () =>
     rt.type({
       terms: rt.type({ field: rt.string }),
-      aggregations: SnapshotModelRT,
+      aggregations: MetricsUIAggregationRT,
     })
 );
 
-export const SnapshotModelAggregationRT = rt.union([
-  SnapshotModelMetricAggRT,
-  SnapshotModelBucketScriptRT,
-  SnapshotModelCumulativeSumRT,
-  SnapshotModelDerivativeRT,
-  SnapshotModelSumBucketRT,
-  SnapshotTermsWithAggregationRT,
+export const ESAggregationRT = rt.union([
+  ESBasicMetricAggRT,
+  ESPercentileAggRT,
+  ESBucketScriptAggRT,
+  ESCumulativeSumAggRT,
+  ESDerivativeAggRT,
+  ESSumBucketAggRT,
+  ESTermsWithAggregationRT,
+  ESCaridnalityAggRT,
+  ESTopHitsAggRT,
 ]);
 
-export const SnapshotModelRT = rt.record(
-  rt.string,
-  rt.union([rt.undefined, SnapshotModelAggregationRT])
-);
-export type SnapshotModel = rt.TypeOf<typeof SnapshotModelRT>;
+export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
+export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 
-export const SnapshotMetricTypeRT = rt.keyof({
+export const SnapshotMetricTypeKeys = {
   count: null,
   cpu: null,
   load: null,
@@ -321,13 +339,14 @@ export const SnapshotMetricTypeRT = rt.keyof({
   sqsMessagesEmpty: null,
   sqsOldestMessage: null,
   custom: null,
-});
+};
+export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
 export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: SnapshotModel };
+  snapshot: { [name: string]: MetricsUIAggregation };
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;
@@ -352,4 +371,5 @@ export interface InventoryModel {
   metrics: InventoryMetrics;
   requiredMetrics: InventoryMetric[];
   tooltipMetrics: SnapshotMetricType[];
+  nodeFilter?: object[];
 }

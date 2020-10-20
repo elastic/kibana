@@ -17,7 +17,6 @@ export default {
   ],
   collectCoverageFrom: ['legacy/plugins/**/*.js', 'legacy/common/**/*.js', 'legacy/server/**/*.js'],
   moduleNameMapper: {
-    '^ui/(.*)': '<rootDir>**/public/$1',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/../src/dev/jest/mocks/style_mock.js',
@@ -46,5 +45,5 @@ export default {
   },
   transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.js$', 'packages/kbn-pm/dist/index.js'],
   snapshotSerializers: ['<rootDir>/../node_modules/enzyme-to-json/serializer'],
-  reporters: ['default', '<rootDir>/../src/dev/jest/junit_reporter.js'],
+  reporters: ['default', '<rootDir>/../packages/kbn-test/target/jest/junit_reporter'],
 };

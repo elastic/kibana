@@ -7,11 +7,11 @@
 import React, { useMemo } from 'react';
 import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
 
-import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { FlowTarget } from '../../graphql/types';
 
-import { IPDetails } from './ip_details';
+import { NetworkDetails } from './details';
 import { Network } from './network';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
@@ -49,14 +49,9 @@ const NetworkContainerComponent: React.FC<Props> = () => {
           hasMlUserPermissions={userHasMlUserPermissions}
         />
       </Route>
-      <Route
-        path={`${ipDetailsPageBasePath}/:flowTarget`}
-        render={({
-          match: {
-            params: { detailName, flowTarget },
-          },
-        }) => <IPDetails detailName={detailName} flowTarget={flowTarget} />}
-      />
+      <Route path={`${ipDetailsPageBasePath}/:flowTarget`}>
+        <NetworkDetails />
+      </Route>
       <Route
         path={ipDetailsPageBasePath}
         render={({

@@ -55,7 +55,20 @@ export async function bootstrap({
     onRootShutdown('Kibana REPL mode can only be run in development mode.');
   }
 
-  const env = Env.createDefault({
+  if (cliArgs.optimize) {
+    // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
+    return;
+  }
+
+  // `bootstrap` is exported from the `src/core/server/index` module,
+  // meaning that any test importing, implicitly or explicitly, anything concrete
+  // from `core/server` will load `dev-utils`. As some tests are mocking the `fs` package,
+  // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
+  // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { REPO_ROOT } = require('@kbn/utils');
+
+  const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
@@ -105,12 +118,6 @@ export async function bootstrap({
     await root.start();
   } catch (err) {
     await shutdown(err);
-  }
-
-  if (cliArgs.optimize) {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
   }
 }
 

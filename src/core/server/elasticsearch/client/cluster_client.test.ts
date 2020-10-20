@@ -24,6 +24,7 @@ import { GetAuthHeaders } from '../../http';
 import { elasticsearchClientMock } from './mocks';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './client_config';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -96,7 +97,7 @@ describe('ClusterClient', () => {
       expect(scopedClusterClient.asCurrentUser).toBe(scopedClient.child.mock.results[0].value);
     });
 
-    it('returns a distinct  scoped cluster client on each call', () => {
+    it('returns a distinct scoped cluster client on each call', () => {
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest();
 
@@ -127,7 +128,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { foo: 'bar' },
+        headers: { ...DEFAULT_HEADERS, foo: 'bar', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -147,7 +148,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -171,7 +172,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -193,8 +194,30 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
+          ...DEFAULT_HEADERS,
           foo: 'bar',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('adds the x-opaque-id header based on the request id', () => {
+      const config = createConfig();
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          ...DEFAULT_HEADERS,
+          'x-opaque-id': 'my-fake-id',
         },
       });
     });
@@ -219,8 +242,10 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
+          ...DEFAULT_HEADERS,
           foo: 'auth',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
         },
       });
     });
@@ -245,8 +270,81 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
+          ...DEFAULT_HEADERS,
           foo: 'request',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('respect the precedence of config headers over default headers', () => {
+      const headerKey = Object.keys(DEFAULT_HEADERS)[0];
+      const config = createConfig({
+        customHeaders: {
+          [headerKey]: 'foo',
+        },
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest();
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          [headerKey]: 'foo',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('respect the precedence of request headers over default headers', () => {
+      const headerKey = Object.keys(DEFAULT_HEADERS)[0];
+      const config = createConfig({
+        requestHeadersWhitelist: [headerKey],
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [headerKey]: 'foo' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          [headerKey]: 'foo',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('respect the precedence of x-opaque-id header over config headers', () => {
+      const config = createConfig({
+        customHeaders: {
+          'x-opaque-id': 'from config',
+        },
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { foo: 'request' },
+        kibanaRequestState: { requestId: 'from request', requestUuid: 'ignore-this-id' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          ...DEFAULT_HEADERS,
+          'x-opaque-id': 'from request',
         },
       });
     });
@@ -269,7 +367,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth' },
       });
     });
 
@@ -293,7 +391,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { foo: 'bar' },
+        headers: { ...DEFAULT_HEADERS, foo: 'bar' },
       });
     });
   });

@@ -8,7 +8,7 @@ import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestDefinition, TestSuite } from '../lib/types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -20,15 +20,31 @@ export interface ExportTestDefinition extends TestDefinition {
   request: ReturnType<typeof createRequest>;
 }
 export type ExportTestSuite = TestSuite<ExportTestDefinition>;
+interface SuccessResult {
+  type: string;
+  id: string;
+  originId?: string;
+}
 export interface ExportTestCase {
   title: string;
   type: string;
   id?: string;
-  successResult?: TestCase | TestCase[];
-  failure?: 400 | 403;
+  successResult?: SuccessResult | SuccessResult[];
+  failure?: {
+    statusCode: 200 | 400 | 403; // if the user searches for only types they are not authorized for, they will get an empty 200 result
+    reason: 'unauthorized' | 'bad_request';
+  };
 }
 
-export const getTestCases = (spaceId?: string) => ({
+// additional sharedtype objects that exist but do not have common test cases defined
+const CID = 'conflict_';
+const CONFLICT_1_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}1` });
+const CONFLICT_2A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2a`, originId: `${CID}2` });
+const CONFLICT_2B_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2b`, originId: `${CID}2` });
+const CONFLICT_3_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}3` });
+const CONFLICT_4A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}4a`, originId: `${CID}4` });
+
+export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase } => ({
   singleNamespaceObject: {
     title: 'single-namespace object',
     ...(spaceId === SPACE_1_ID
@@ -36,7 +52,7 @@ export const getTestCases = (spaceId?: string) => ({
       : spaceId === SPACE_2_ID
       ? CASES.SINGLE_NAMESPACE_SPACE_2
       : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE),
-  } as ExportTestCase,
+  },
   singleNamespaceType: {
     // this test explicitly ensures that single-namespace objects from other spaces are not returned
     title: 'single-namespace type',
@@ -47,7 +63,7 @@ export const getTestCases = (spaceId?: string) => ({
         : spaceId === SPACE_2_ID
         ? CASES.SINGLE_NAMESPACE_SPACE_2
         : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
-  } as ExportTestCase,
+  },
   multiNamespaceObject: {
     title: 'multi-namespace object',
     ...(spaceId === SPACE_1_ID
@@ -55,63 +71,70 @@ export const getTestCases = (spaceId?: string) => ({
       : spaceId === SPACE_2_ID
       ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
       : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1),
-    failure: 400, // multi-namespace types cannot be exported yet
-  } as ExportTestCase,
+  },
   multiNamespaceType: {
     title: 'multi-namespace type',
     type: 'sharedtype',
-    // successResult:
-    //   spaceId === SPACE_1_ID
-    //     ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
-    //     : spaceId === SPACE_2_ID
-    //     ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
-    //     : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
-    failure: 400, // multi-namespace types cannot be exported yet
-  } as ExportTestCase,
+    successResult: [
+      CASES.MULTI_NAMESPACE_ALL_SPACES,
+      ...(spaceId === SPACE_1_ID
+        ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+        : spaceId === SPACE_2_ID
+        ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
+        : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
+      )
+        .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
+        .flat(),
+    ],
+  },
   namespaceAgnosticObject: {
     title: 'namespace-agnostic object',
     ...CASES.NAMESPACE_AGNOSTIC,
-  } as ExportTestCase,
+  },
   namespaceAgnosticType: {
     title: 'namespace-agnostic type',
     type: 'globaltype',
     successResult: CASES.NAMESPACE_AGNOSTIC,
-  } as ExportTestCase,
-  hiddenObject: { title: 'hidden object', ...CASES.HIDDEN, failure: 400 } as ExportTestCase,
-  hiddenType: { title: 'hidden type', type: 'hiddentype', failure: 400 } as ExportTestCase,
+  },
+  hiddenObject: {
+    title: 'hidden object',
+    ...CASES.HIDDEN,
+    failure: { statusCode: 400, reason: 'bad_request' },
+  },
+  hiddenType: {
+    title: 'hidden type',
+    type: 'hiddentype',
+    failure: { statusCode: 400, reason: 'bad_request' },
+  },
 });
 export const createRequest = ({ type, id }: ExportTestCase) =>
   id ? { objects: [{ type, id }] } : { type };
-const getTestTitle = ({ failure, title }: ExportTestCase) => {
-  let description = 'success';
-  if (failure === 400) {
-    description = 'bad request';
-  } else if (failure === 403) {
-    description = 'forbidden';
-  }
-  return `${description} ["${title}"]`;
-};
+const getTestTitle = ({ failure, title }: ExportTestCase) =>
+  `${failure?.reason || 'success'} ["${title}"]`;
+
+const EMPTY_RESULT = { exportedCount: 0, missingRefCount: 0, missingReferences: [] };
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
-  const expectForbiddenFind = expectResponses.forbiddenTypes('find');
+  const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
-    const { type, id, successResult = { type, id }, failure } = testCase;
-    if (failure === 403) {
-      // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
-      // The best that could be done here is to have an if statement to ensure at least one of the
-      // two errors has been thrown.
-      if (id) {
-        await expectForbiddenBulkGet(type)(response);
+    const { type, id, successResult = { type, id } as SuccessResult, failure } = testCase;
+    if (failure?.reason === 'unauthorized') {
+      // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
+      if (failure.statusCode === 403) {
+        // "bulkGet" was unauthorized, which returns a forbidden error
+        await expectSavedObjectForbiddenBulkGet(type)(response);
+      } else if (failure.statusCode === 200) {
+        // "find" was unauthorized, which returns an empty result
+        expect(response.body).not.to.have.property('error');
+        expect(response.text).to.equal(JSON.stringify(EMPTY_RESULT));
       } else {
-        await expectForbiddenFind(type)(response);
+        throw new Error(`Unexpected failure status code: ${failure.statusCode}`);
       }
-    } else if (failure === 400) {
-      // 400
+    } else if (failure?.reason === 'bad_request') {
       expect(response.body.error).to.eql('Bad Request');
-      expect(response.body.statusCode).to.eql(failure);
+      expect(response.body.statusCode).to.eql(failure.statusCode);
       if (id) {
         expect(response.body.message).to.eql(
           `Trying to export object(s) with non-exportable types: ${type}:${id}`
@@ -119,17 +142,22 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       } else {
         expect(response.body.message).to.eql(`Trying to export non-exportable type(s): ${type}`);
       }
+    } else if (failure?.reason) {
+      throw new Error(`Unexpected failure reason: ${failure.reason}`);
     } else {
       // 2xx
       expect(response.body).not.to.have.property('error');
       const ndjson = response.text.split('\n');
       const savedObjectsArray = Array.isArray(successResult) ? successResult : [successResult];
       expect(ndjson.length).to.eql(savedObjectsArray.length + 1);
-      for (let i = 0; i < savedObjectsArray.length; i++) {
+      for (let i = 0; i < ndjson.length - 1; i++) {
         const object = JSON.parse(ndjson[i]);
-        const { type: expectedType, id: expectedId } = savedObjectsArray[i];
-        expect(object.type).to.eql(expectedType);
-        expect(object.id).to.eql(expectedId);
+        const expected = savedObjectsArray.find((x) => x.id === object.id)!;
+        expect(expected).not.to.be(undefined);
+        expect(object.type).to.eql(expected.type);
+        if (object.originId) {
+          expect(object.originId).to.eql(expected.originId);
+        }
         expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
         // don't test attributes, version, or references
       }
@@ -143,19 +171,19 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
   const createTestDefinitions = (
     testCases: ExportTestCase | ExportTestCase[],
-    forbidden: boolean,
+    failure: ExportTestCase['failure'] | false,
     options?: {
       responseBodyOverride?: ExpectResponseBody;
     }
   ): ExportTestDefinition[] => {
     let cases = Array.isArray(testCases) ? testCases : [testCases];
-    if (forbidden) {
+    if (failure) {
       // override the expected result in each test case
-      cases = cases.map((x) => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure }));
     }
     return cases.map((x) => ({
       title: getTestTitle(x),
-      responseStatusCode: x.failure ?? 200,
+      responseStatusCode: x.failure?.statusCode ?? 200,
       request: createRequest(x),
       responseBody: options?.responseBodyOverride || expectResponseBody(x),
     }));

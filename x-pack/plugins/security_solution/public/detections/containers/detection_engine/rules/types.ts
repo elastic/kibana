@@ -6,9 +6,8 @@
 
 import * as t from 'io-ts';
 
-import { RuleTypeSchema } from '../../../../../common/detection_engine/types';
-/* eslint-disable @typescript-eslint/camelcase */
 import {
+  SortOrder,
   author,
   building_block_type,
   license,
@@ -17,13 +16,21 @@ import {
   severity_mapping,
   timestamp_override,
   threshold,
+  type,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 import {
   listArray,
-  listArrayOrUndefined,
+  threat_query,
+  threat_index,
+  threat_mapping,
+  threat_language,
+  threat_filters,
 } from '../../../../../common/detection_engine/schemas/types';
-import { PatchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import {
+  CreateRulesSchema,
+  PatchRulesSchema,
+  UpdateRulesSchema,
+} from '../../../../../common/detection_engine/schemas/request';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -38,48 +45,13 @@ export const action = t.exact(
   })
 );
 
-export const NewRuleSchema = t.intersection([
-  t.type({
-    description: t.string,
-    enabled: t.boolean,
-    interval: t.string,
-    name: t.string,
-    risk_score: t.number,
-    severity: t.string,
-    type: RuleTypeSchema,
-  }),
-  t.partial({
-    actions: t.array(action),
-    anomaly_threshold: t.number,
-    created_by: t.string,
-    false_positives: t.array(t.string),
-    filters: t.array(t.unknown),
-    from: t.string,
-    id: t.string,
-    index: t.array(t.string),
-    language: t.string,
-    machine_learning_job_id: t.string,
-    max_signals: t.number,
-    query: t.string,
-    references: t.array(t.string),
-    rule_id: t.string,
-    saved_id: t.string,
-    tags: t.array(t.string),
-    threat: t.array(t.unknown),
-    threshold,
-    throttle: t.union([t.string, t.null]),
-    to: t.string,
-    updated_by: t.string,
-    note: t.string,
-    exceptions_list: listArrayOrUndefined,
-  }),
-]);
+export interface CreateRulesProps {
+  rule: CreateRulesSchema;
+  signal: AbortSignal;
+}
 
-export const NewRulesSchema = t.array(NewRuleSchema);
-export type NewRule = t.TypeOf<typeof NewRuleSchema>;
-
-export interface AddRulesProps {
-  rule: NewRule;
+export interface UpdateRulesProps {
+  rule: UpdateRulesSchema;
   signal: AbortSignal;
 }
 
@@ -119,7 +91,7 @@ export const RuleSchema = t.intersection([
     severity: t.string,
     severity_mapping,
     tags: t.array(t.string),
-    type: RuleTypeSchema,
+    type,
     to: t.string,
     threat: t.array(t.unknown),
     updated_at: t.string,
@@ -145,6 +117,11 @@ export const RuleSchema = t.intersection([
     status: t.string,
     status_date: t.string,
     threshold,
+    threat_query,
+    threat_filters,
+    threat_index,
+    threat_mapping,
+    threat_language,
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,
@@ -184,10 +161,11 @@ export interface FetchRulesProps {
   signal: AbortSignal;
 }
 
+export type RulesSortingFields = 'enabled' | 'updated_at' | 'name' | 'created_at';
 export interface FilterOptions {
   filter: string;
-  sortField: string;
-  sortOrder: 'asc' | 'desc';
+  sortField: RulesSortingFields;
+  sortOrder: SortOrder;
   showCustomRules?: boolean;
   showElasticRules?: boolean;
   tags?: string[];
@@ -236,10 +214,18 @@ export interface ImportRulesResponseError {
   };
 }
 
+export interface ImportResponseError {
+  id: string;
+  error: {
+    status_code: number;
+    message: string;
+  };
+}
+
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
-  errors: ImportRulesResponseError[];
+  errors: Array<ImportRulesResponseError | ImportResponseError>;
 }
 
 export interface ExportDocumentsProps {

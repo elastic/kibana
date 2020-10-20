@@ -25,7 +25,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   const actionsSet = new Set(actions);
 
   const spacePrefix = getUrlPrefix(spaceId);
-  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find`;
+  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000`;
 
   const { body: result } = await supertest.get(url).expect(200);
   if (!result.total) {

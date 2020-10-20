@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import path, { join, resolve } from 'path';
 import * as rt from 'io-ts';
-import stream from 'stream';
 
 import {
   TIMELINE_DRAFT_URL,
@@ -20,8 +21,8 @@ import { requestMock } from '../../../detection_engine/routes/__mocks__';
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
 import { GetTimelineByIdSchemaQuery } from '../schemas/get_timeline_by_id_schema';
+import { getReadables } from '../utils/common';
 
-const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
   requestMock.create({
     method: 'get',
@@ -34,15 +35,20 @@ export const getExportTimelinesRequest = () =>
     },
   });
 
-export const getImportTimelinesRequest = (filename?: string) =>
-  requestMock.create({
+export const getImportTimelinesRequest = async (fileName?: string) => {
+  const dir = resolve(join(__dirname, '../../../detection_engine/rules/prepackaged_timelines'));
+  const file = fileName ?? 'index.ndjson';
+  const dataPath = path.join(dir, file);
+  const readable = await getReadables(dataPath);
+  return requestMock.create({
     method: 'post',
     path: TIMELINE_IMPORT_URL,
     query: { overwrite: false },
     body: {
-      file: { ...readable, hapi: { filename: filename ?? 'filename.ndjson' } },
+      file: { ...readable, hapi: { filename: file } },
     },
   });
+};
 
 export const inputTimeline: SavedTimeline = {
   columns: [
@@ -175,11 +181,11 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     },
   });
 
-export const getTimelineByIdRequest = (query: GetTimelineByIdSchemaQuery) =>
+export const getTimelineRequest = (query?: GetTimelineByIdSchemaQuery) =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_URL,
-    query,
+    query: query ?? {},
   });
 
 export const installPrepackedTimelinesRequest = () =>

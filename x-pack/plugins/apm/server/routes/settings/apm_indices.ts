@@ -42,12 +42,14 @@ export const saveApmIndicesRoute = createRoute(() => ({
   },
   params: {
     body: t.partial({
+      /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': t.string,
       'apm_oss.errorIndices': t.string,
       'apm_oss.onboardingIndices': t.string,
       'apm_oss.spanIndices': t.string,
       'apm_oss.transactionIndices': t.string,
       'apm_oss.metricsIndices': t.string,
+      /* eslint-enable @typescript-eslint/naming-convention */
     }),
   },
   handler: async ({ context }) => {

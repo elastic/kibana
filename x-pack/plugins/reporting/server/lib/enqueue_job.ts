@@ -5,57 +5,68 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { AuthenticatedUser } from '../../../security/server';
-import { ESQueueCreateJobFn } from '../../server/types';
-import { ReportingCore } from '../core';
+import { ReportingCore } from '../';
+import { durationToNumber } from '../../common/schema_utils';
+import { BaseParams, ReportingUser } from '../types';
 import { LevelLogger } from './';
-import { ReportingStore, Report } from './store';
+import { Report } from './store';
 
 export type EnqueueJobFn = (
   exportTypeId: string,
-  jobParams: unknown,
-  user: AuthenticatedUser | null,
+  jobParams: BaseParams,
+  user: ReportingUser,
   context: RequestHandlerContext,
   request: KibanaRequest
 ) => Promise<Report>;
 
 export function enqueueJobFactory(
   reporting: ReportingCore,
-  store: ReportingStore,
   parentLogger: LevelLogger
 ): EnqueueJobFn {
-  const config = reporting.getConfig();
-  const queueTimeout = config.get('queue', 'timeout');
-  const browserType = config.get('capture', 'browser', 'type');
-  const maxAttempts = config.get('capture', 'maxAttempts');
   const logger = parentLogger.clone(['queue-job']);
+  const config = reporting.getConfig();
+  const jobSettings = {
+    timeout: durationToNumber(config.get('queue', 'timeout')),
+    browser_type: config.get('capture', 'browser', 'type'),
+    max_attempts: config.get('capture', 'maxAttempts'),
+    priority: 10, // unused
+  };
 
   return async function enqueueJob(
     exportTypeId: string,
-    jobParams: unknown,
-    user: AuthenticatedUser | null,
+    jobParams: BaseParams,
+    user: ReportingUser,
     context: RequestHandlerContext,
     request: KibanaRequest
   ) {
-    type ScheduleTaskFnType = ESQueueCreateJobFn<unknown>;
-
-    const username = user ? user.username : false;
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const scheduleTask = exportType.scheduleTaskFnFactory(reporting, logger) as ScheduleTaskFnType;
-    const payload = await scheduleTask(jobParams, context, request);
+    const [createJob, { store }] = await Promise.all([
+      exportType.createJobFnFactory(reporting, logger),
+      reporting.getPluginStartDeps(),
+    ]);
 
-    const options = {
-      timeout: queueTimeout,
-      created_by: username,
-      browser_type: browserType,
-      max_attempts: maxAttempts,
-    };
+    const job = await createJob(jobParams, context, request);
+    const pendingReport = new Report({
+      jobtype: exportType.jobType,
+      created_by: user ? user.username : false,
+      payload: job,
+      meta: {
+        objectType: jobParams.objectType,
+        layout: jobParams.layout?.id,
+      },
+      ...jobSettings,
+    });
 
-    return await store.addReport(exportType.jobType, payload, options);
+    // store the pending report, puts it in the Reporting Management UI table
+    const report = await store.addReport(pendingReport);
+
+    logger.info(`Scheduled ${exportType.name} report: ${report._id}`);
+
+    return report;
   };
 }

@@ -15,8 +15,9 @@ import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 describe('DataProviders', () => {
@@ -40,11 +41,6 @@ describe('DataProviders', () => {
               data-test-subj="dataProviders-container"
               dataProviders={mockDataProviders}
               timelineId="foo"
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              onToggleDataProviderType={jest.fn()}
             />
           </ManageGlobalTimeline>
         </TestProviders>
@@ -57,16 +53,7 @@ describe('DataProviders', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <DataProviders
-            browserFields={{}}
-            timelineId="foo"
-            dataProviders={dataProviders}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            onToggleDataProviderType={jest.fn()}
-          />
+          <DataProviders browserFields={{}} timelineId="foo" dataProviders={dataProviders} />
         </TestProviders>
       );
 
@@ -76,16 +63,7 @@ describe('DataProviders', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <DataProviders
-            browserFields={{}}
-            timelineId="foo"
-            dataProviders={mockDataProviders}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            onToggleDataProviderType={jest.fn()}
-          />
+          <DataProviders browserFields={{}} timelineId="foo" dataProviders={mockDataProviders} />
         </TestProviders>
       );
 

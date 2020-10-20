@@ -32,15 +32,6 @@ export function extractNanos(timeFieldValue: string = ''): string {
 }
 
 /**
- * extract the nanoseconds as string of a given ISO formatted timestamp
- */
-export function convertIsoToNanosAsStr(isoValue: string): string {
-  const nanos = extractNanos(isoValue);
-  const millis = convertIsoToMillis(isoValue);
-  return `${millis}${nanos.substr(3, 6)}`;
-}
-
-/**
  * convert an iso formatted string to number of milliseconds since
  * 1970-01-01T00:00:00.000Z
  * @param {string} isoValue

@@ -6,12 +6,8 @@
 
 import { initializeFindWorkpadsRoute } from './find';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
@@ -25,14 +21,10 @@ describe('Find workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter();
-    initializeFindWorkpadsRoute({
-      router,
-      logger: loggingSystemMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeFindWorkpadsRoute(routerDeps);
 
-    routeHandler = router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
   it(`returns 200 with the found workpads`, async () => {

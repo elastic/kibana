@@ -8,7 +8,7 @@ import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { mlJobService } from '../../../../../services/job_service';
+import { ml } from '../../../../../services/ml_api_service';
 import { ValidateJob } from '../../../../../components/validate_job';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
@@ -66,7 +66,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           <ValidateJob
             getJobConfig={getJobConfig}
             getDuration={getDuration}
-            mlJobService={mlJobService}
+            ml={ml}
             embedded={true}
             setIsValid={setIsValid}
             idFilterList={idFilterList}

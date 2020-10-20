@@ -11,15 +11,20 @@ export const deserializeAutoFollowPattern = (
 ): AutoFollowPattern => {
   const {
     name,
-    pattern: { active, remote_cluster, leader_index_patterns, follow_index_pattern },
+    pattern: {
+      active,
+      remote_cluster: remoteCluster,
+      leader_index_patterns: leaderIndexPatterns,
+      follow_index_pattern: followIndexPattern,
+    },
   } = autoFollowPattern;
 
   return {
     name,
     active,
-    remoteCluster: remote_cluster,
-    leaderIndexPatterns: leader_index_patterns,
-    followIndexPattern: follow_index_pattern,
+    remoteCluster,
+    leaderIndexPatterns,
+    followIndexPattern,
   };
 };
 

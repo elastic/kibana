@@ -19,7 +19,8 @@ import {
 
 export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
-  cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click({ force: true });
+  cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).should('be.visible');
+  cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click();
 };
 
 export const fillAddFilterForm = ({ key, value }: SearchBarFilter) => {
@@ -32,4 +33,5 @@ export const fillAddFilterForm = ({ key, value }: SearchBarFilter) => {
   cy.get(ADD_FILTER_FORM_OPERATOR_OPTION_IS).click();
   cy.get(ADD_FILTER_FORM_FILTER_VALUE_INPUT).type(value);
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
+  cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
 };

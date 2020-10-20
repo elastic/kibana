@@ -90,7 +90,41 @@ describe('suggestions', () => {
             columns: [
               {
                 columnId: 'b',
-                operation: { label: 'Days', dataType: 'date' as DataType, isBucketed: true },
+                operation: {
+                  label: 'Days',
+                  dataType: 'date' as DataType,
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: undefined,
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should reject any histogram operations', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'b',
+                operation: {
+                  label: 'Durations',
+                  dataType: 'number' as DataType,
+                  isBucketed: true,
+                  scale: 'interval',
+                },
               },
               {
                 columnId: 'c',

@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiDescriptionList,
   EuiHorizontalRule,
   EuiDescriptionListTitle,
@@ -18,7 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { healthToColor } from '../../../../../services';
+import { DataHealth } from '../../../../../components';
 import { AppContextConsumer } from '../../../../../app_context';
 
 const getHeaders = () => {
@@ -78,7 +77,7 @@ export class Summary extends React.PureComponent {
       const value = index[fieldName];
       let content = value;
       if (fieldName === 'health') {
-        content = <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
+        content = <DataHealth health={value} />;
       }
       if (Array.isArray(content)) {
         content = content.join(', ');

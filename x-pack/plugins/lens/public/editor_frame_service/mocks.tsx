@@ -31,7 +31,6 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getVisualizationTypeId: jest.fn((_state) => 'empty'),
     getDescription: jest.fn((_state) => ({ label: '' })),
     switchVisualizationType: jest.fn((_, x) => x),
-    getPersistableState: jest.fn((_state) => _state),
     getSuggestions: jest.fn((_options) => []),
     initialize: jest.fn((_frame, _state?) => ({})),
     getConfiguration: jest.fn((props) => ({
@@ -70,8 +69,9 @@ export function createMockDatasource(id: string): DatasourceMock {
     id: 'mockindexpattern',
     clearLayer: jest.fn((state, _layerId) => state),
     getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
+    getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
-    getPersistableState: jest.fn(),
+    getPersistableState: jest.fn((x) => ({ state: x, savedObjectReferences: [] })),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
@@ -81,7 +81,6 @@ export function createMockDatasource(id: string): DatasourceMock {
     removeLayer: jest.fn((_state, _layerId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
-    getMetaData: jest.fn((_state) => ({ filterableIndexPatterns: [] })),
 
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),

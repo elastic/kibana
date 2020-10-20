@@ -26,15 +26,12 @@ import {
 
 import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { MapsLegacyConfigType } from '../../maps_legacy/public';
+import { MapsLegacyConfig } from '../../maps_legacy/config';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
-);
-export const [getKibanaMapFactory, setKibanaMapFactory] = createGetterSetter<any>(
-  'KibanaMapFactory'
 );
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
@@ -48,12 +45,11 @@ export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObject
 );
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
-  esShardTimeout: number;
   enableExternalUrls: boolean;
   emsTileLayerId: unknown;
 }>('InjectedVars');
 
-export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<MapsLegacyConfigType>(
+export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<MapsLegacyConfig>(
   'MapsLegacyConfig'
 );
 

@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-// eslint-disable-next-line @typescript-eslint/camelcase
 import { risk_score_mapping, RiskScoreMapping } from '../common/schemas';
 
 /**

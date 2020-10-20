@@ -25,7 +25,9 @@ describe('filter manager utilities', () => {
     let filters: unknown;
 
     function getDisplayName(filter: Filter) {
-      return typeof filter.meta.value === 'function' ? filter.meta.value() : filter.meta.value;
+      return typeof filter.meta.value === 'function'
+        ? (filter.meta.value as any)()
+        : filter.meta.value;
     }
 
     beforeEach(() => {

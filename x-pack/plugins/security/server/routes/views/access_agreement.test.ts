@@ -16,24 +16,25 @@ import {
 import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import { AuthenticationProvider } from '../../../common/types';
 import { ConfigType } from '../../config';
+import { Session } from '../../session_management';
 import { defineAccessAgreementRoutes } from './access_agreement';
 
 import { httpResourcesMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { Authentication } from '../../authentication';
 
 describe('Access agreement view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
   let router: jest.Mocked<IRouter>;
   let config: ConfigType;
-  let authc: jest.Mocked<Authentication>;
+  let session: jest.Mocked<PublicMethodsOf<Session>>;
   let license: jest.Mocked<SecurityLicense>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
     httpResources = routeParamsMock.httpResources;
-    authc = routeParamsMock.authc;
+    session = routeParamsMock.session;
     config = routeParamsMock.config;
     license = routeParamsMock.license;
 
@@ -125,7 +126,7 @@ describe('Access agreement view routes', () => {
     it('returns empty `accessAgreement` if session info is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      authc.getSessionInfo.mockResolvedValue(null);
+      session.get.mockResolvedValue(null);
 
       await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
         options: { body: { accessAgreement: '' } },
@@ -159,12 +160,7 @@ describe('Access agreement view routes', () => {
       ];
 
       for (const [sessionProvider, expectedAccessAgreement] of cases) {
-        authc.getSessionInfo.mockResolvedValue({
-          now: Date.now(),
-          idleTimeoutExpiration: null,
-          lifespanExpiration: null,
-          provider: sessionProvider,
-        });
+        session.get.mockResolvedValue(sessionMock.createValue({ provider: sessionProvider }));
 
         await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
           options: { body: { accessAgreement: expectedAccessAgreement } },

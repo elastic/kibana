@@ -35,7 +35,7 @@ export class RemoteClustersServerPlugin
     this.licenseStatus = { valid: false };
   }
 
-  async setup({ http }: CoreSetup, { licensing, cloud }: Dependencies) {
+  async setup({ http }: CoreSetup, { features, licensing, cloud }: Dependencies) {
     const router = http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
@@ -46,6 +46,19 @@ export class RemoteClustersServerPlugin
         isCloudEnabled: Boolean(cloud?.isCloudEnabled),
       },
     };
+
+    features.registerElasticsearchFeature({
+      id: 'remote_clusters',
+      management: {
+        data: ['remote_clusters'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage'],
+          ui: [],
+        },
+      ],
+    });
 
     // Register routes
     registerGetRoute(routeDependencies);

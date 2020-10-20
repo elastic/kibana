@@ -6,6 +6,7 @@
 
 import {
   get,
+  getOr,
   has,
   merge as mergeObject,
   set,
@@ -65,6 +66,7 @@ import {
   updateRange,
   updateSort,
   upsertColumn,
+  updateIndexNames,
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
@@ -104,6 +106,7 @@ const timelineActionsType = [
   updateDescription.type,
   updateEventType.type,
   updateKqlMode.type,
+  updateIndexNames.type,
   updateProviders.type,
   updateSort.type,
   updateTitle.type,
@@ -172,7 +175,7 @@ export const createTimelineEpic = <State>(): Epic<
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
           myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
           myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
-          return true;
+          return getOr(false, 'payload.savedTimeline', action);
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
@@ -338,6 +341,7 @@ const timelineInput: TimelineInput = {
   filters: null,
   kqlMode: null,
   kqlQuery: null,
+  indexNames: null,
   title: null,
   timelineType: TimelineType.default,
   templateTimelineVersion: null,

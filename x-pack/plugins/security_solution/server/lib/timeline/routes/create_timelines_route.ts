@@ -9,7 +9,7 @@ import { TIMELINE_URL } from '../../../../common/constants';
 
 import { ConfigType } from '../../..';
 import { SetupPlugins } from '../../../plugin';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 
@@ -20,6 +20,7 @@ import {
   TimelineStatusActions,
 } from './utils/common';
 import { createTimelines } from './utils/create_timelines';
+import { DEFAULT_ERROR } from './utils/failure_cases';
 
 export const createTimelinesRoute = (
   router: IRouter,
@@ -30,7 +31,7 @@ export const createTimelinesRoute = (
     {
       path: TIMELINE_URL,
       validate: {
-        body: buildRouteValidation(createTimelineSchema),
+        body: buildRouteValidationWithExcess(createTimelineSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -85,7 +86,7 @@ export const createTimelinesRoute = (
           return siemResponse.error(
             compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.create) || {
               statusCode: 405,
-              body: 'update timeline error',
+              body: DEFAULT_ERROR,
             }
           );
         }

@@ -17,6 +17,7 @@ import {
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { getLogEntryAnomalies } from '../../../lib/log_analysis';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -71,6 +72,15 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
+        }
+
+        if (isMlPrivilegesError(error)) {
+          return response.customError({
+            statusCode: 403,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({

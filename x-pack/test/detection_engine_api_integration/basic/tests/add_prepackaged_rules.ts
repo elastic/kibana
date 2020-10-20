@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllTimelines(es);
       });
 
-      it('should contain two output keys of rules_installed and rules_updated', async () => {
+      it('should contain rules_installed, rules_updated, timelines_installed, and timelines_updated', async () => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_PREPACKAGED_URL)
           .set('kbn-xsrf', 'true')
@@ -74,6 +74,16 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rules_installed).to.be.greaterThan(0);
       });
 
+      it('should create the prepackaged timelines and return a count greater than zero', async () => {
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(body.timelines_installed).to.be.greaterThan(0);
+      });
+
       it('should create the prepackaged rules that the rules_updated is of size zero', async () => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_PREPACKAGED_URL)
@@ -82,6 +92,16 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.rules_updated).to.eql(0);
+      });
+
+      it('should create the prepackaged timelines and the timelines_updated is of size zero', async () => {
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(body.timelines_updated).to.eql(0);
       });
 
       it('should be possible to call the API twice and the second time the number of rules installed should be zero', async () => {
@@ -108,6 +128,30 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.rules_installed).to.eql(0);
+      });
+
+      it('should be possible to call the API twice and the second time the number of timelines installed should be zero', async () => {
+        await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        await waitFor(async () => {
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+          return body.timelines_not_installed === 0;
+        });
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(body.timelines_installed).to.eql(0);
       });
     });
   });

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
 import { CiStatsReporter } from '@kbn/dev-utils';
 import {
   runOptimizer,
@@ -29,9 +30,10 @@ import { Task } from '../lib';
 
 export const BuildKibanaPlatformPlugins: Task = {
   description: 'Building distributable versions of Kibana platform plugins',
-  async run(config, log, build) {
-    const optimizerConfig = OptimizerConfig.create({
-      repoRoot: build.resolvePath(),
+  async run(_, log, build) {
+    const config = OptimizerConfig.create({
+      repoRoot: REPO_ROOT,
+      outputRoot: build.resolvePath(),
       cache: false,
       oss: build.isOss(),
       examples: false,
@@ -42,11 +44,10 @@ export const BuildKibanaPlatformPlugins: Task = {
 
     const reporter = CiStatsReporter.fromEnv(log);
 
-    await runOptimizer(optimizerConfig)
-      .pipe(
-        reportOptimizerStats(reporter, optimizerConfig, log),
-        logOptimizerState(log, optimizerConfig)
-      )
+    await runOptimizer(config)
+      .pipe(reportOptimizerStats(reporter, config, log), logOptimizerState(log, config))
       .toPromise();
+
+    await Promise.all(config.bundles.map((b) => b.cache.clear()));
   },
 };

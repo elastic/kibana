@@ -9,8 +9,6 @@
  * the raw data in the Explorer dashboard.
  */
 
-import _ from 'lodash';
-
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
@@ -30,7 +28,7 @@ export function buildConfig(record) {
 
   config.detectorLabel = record.function;
   if (
-    _.has(mlJobService.detectorsByJob, record.job_id) &&
+    mlJobService.detectorsByJob[record.job_id] !== undefined &&
     detectorIndex < mlJobService.detectorsByJob[record.job_id].length
   ) {
     config.detectorLabel =

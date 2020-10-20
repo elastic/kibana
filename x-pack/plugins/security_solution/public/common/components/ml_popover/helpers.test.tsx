@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockSiemJobs } from './__mocks__/api';
+import { mockSecurityJobs } from './api.mock';
 import { filterJobs, getStablePatternTitles, searchFilter } from './helpers';
 
 describe('helpers', () => {
   describe('filterJobs', () => {
     test('returns all jobs when no filter is suplied', () => {
       const filteredJobs = filterJobs({
-        jobs: mockSiemJobs,
+        jobs: mockSecurityJobs,
         selectedGroups: [],
         showCustomJobs: false,
         showElasticJobs: false,
@@ -23,17 +23,17 @@ describe('helpers', () => {
 
   describe('searchFilter', () => {
     test('returns all jobs when nullfilterQuery is provided', () => {
-      const jobsToDisplay = searchFilter(mockSiemJobs);
-      expect(jobsToDisplay.length).toEqual(mockSiemJobs.length);
+      const jobsToDisplay = searchFilter(mockSecurityJobs);
+      expect(jobsToDisplay.length).toEqual(mockSecurityJobs.length);
     });
 
     test('returns correct DisplayJobs when filterQuery matches job.id', () => {
-      const jobsToDisplay = searchFilter(mockSiemJobs, 'rare_process');
+      const jobsToDisplay = searchFilter(mockSecurityJobs, 'rare_process');
       expect(jobsToDisplay.length).toEqual(2);
     });
 
     test('returns correct DisplayJobs when filterQuery matches job.description', () => {
-      const jobsToDisplay = searchFilter(mockSiemJobs, 'Detect unusually');
+      const jobsToDisplay = searchFilter(mockSecurityJobs, 'Detect unusually');
       expect(jobsToDisplay.length).toEqual(2);
     });
   });

@@ -32,7 +32,7 @@ describe('getLatestMonitor', () => {
           },
         },
         size: 1,
-        _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*'],
+        _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
         sort: {
           '@timestamp': { order: 'desc' },
         },

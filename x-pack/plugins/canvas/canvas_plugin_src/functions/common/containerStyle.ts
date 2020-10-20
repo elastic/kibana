@@ -6,7 +6,6 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
-// @ts-expect-error untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
 interface Output extends ContainerStyle {

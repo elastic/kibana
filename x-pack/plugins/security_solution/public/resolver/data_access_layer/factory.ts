@@ -11,8 +11,9 @@ import {
   ResolverRelatedEvents,
   ResolverTree,
   ResolverEntityIndex,
+  ResolverPaginatedEvents,
+  SafeResolverEvent,
 } from '../../../common/endpoint/types';
-import { DEFAULT_INDEX_KEY as defaultIndexKey } from '../../../common/constants';
 
 /**
  * The data access layer for resolver. All communication with the Kibana server is done through this object. This object is provided to Resolver. In tests, a mock data access layer can be used instead.
@@ -23,12 +24,54 @@ export function dataAccessLayerFactory(
   const dataAccessLayer: DataAccessLayer = {
     /**
      * Used to get non-process related events for a node.
+     * @deprecated use the new API (eventsWithEntityIDAndCategory & event) instead
      */
     async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
-      return context.services.http.get(`/api/endpoint/resolver/${entityID}/events`, {
-        query: { events: 100 },
+      const response: ResolverPaginatedEvents = await context.services.http.post(
+        '/api/endpoint/resolver/events',
+        {
+          query: {},
+          body: JSON.stringify({
+            filter: `process.entity_id:"${entityID}" and not event.category:"process"`,
+          }),
+        }
+      );
+
+      return { ...response, entityID };
+    },
+
+    /**
+     * Return events that have `process.entity_id` that includes `entityID` and that have
+     * a `event.category` that includes `category`.
+     */
+    eventsWithEntityIDAndCategory(
+      entityID: string,
+      category: string,
+      after?: string
+    ): Promise<ResolverPaginatedEvents> {
+      return context.services.http.post('/api/endpoint/resolver/events', {
+        query: { afterEvent: after, limit: 25 },
+        body: JSON.stringify({
+          filter: `process.entity_id:"${entityID}" and event.category:"${category}"`,
+        }),
       });
     },
+
+    /**
+     * Return up to one event that has an `event.id` that includes `eventID`.
+     */
+    async event(eventID: string): Promise<SafeResolverEvent | null> {
+      const response: ResolverPaginatedEvents = await context.services.http.post(
+        '/api/endpoint/resolver/events',
+        {
+          query: { limit: 1 },
+          body: JSON.stringify({ filter: `event.id:"${eventID}"` }),
+        }
+      );
+      const [oneEvent] = response.events;
+      return oneEvent ?? null;
+    },
+
     /**
      * Used to get descendant and ancestor process events for a node.
      */
@@ -36,13 +79,6 @@ export function dataAccessLayerFactory(
       return context.services.http.get(`/api/endpoint/resolver/${entityID}`, {
         signal,
       });
-    },
-
-    /**
-     * Used to get the default index pattern from the SIEM application.
-     */
-    indexPatterns(): string[] {
-      return context.services.uiSettings.get(defaultIndexKey);
     },
 
     /**

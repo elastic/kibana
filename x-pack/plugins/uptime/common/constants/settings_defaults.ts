@@ -10,4 +10,5 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   heartbeatIndices: 'heartbeat-8*',
   certAgeThreshold: 730,
   certExpirationThreshold: 30,
+  defaultConnectors: [],
 };

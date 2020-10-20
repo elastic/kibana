@@ -18,11 +18,13 @@
  */
 import _ from 'lodash';
 import { History } from 'history';
+import { NotificationsStart } from 'kibana/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
   BaseStateContainer,
+  withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
 
@@ -74,6 +76,13 @@ interface GetStateParams {
    * History instance to use
    */
   history: History;
+
+  /**
+   * Core's notifications.toasts service
+   * In case it is passed in,
+   * kbnUrlStateStorage will use it notifying about inner errors
+   */
+  toasts?: NotificationsStart['toasts'];
 }
 
 interface GetStateReturn {
@@ -123,10 +132,12 @@ export function getState({
   timeFieldName,
   storeInSessionStorage = false,
   history,
+  toasts,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
+    ...(toasts && withNotifyOnErrors(toasts)),
   });
 
   const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;

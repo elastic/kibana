@@ -21,9 +21,9 @@ import { existsSync, lstatSync, readFileSync, readlinkSync } from 'fs';
 import globby from 'globby';
 import { dirname } from 'path';
 
+import { REPO_ROOT } from '@kbn/utils';
 import { run, createFailError } from '@kbn/dev-utils';
 
-import { REPO_ROOT } from './constants';
 import { File } from './file';
 import { matchesAnyGlob } from './globs';
 

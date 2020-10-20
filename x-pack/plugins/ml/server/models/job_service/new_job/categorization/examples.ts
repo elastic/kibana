@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
@@ -18,9 +18,9 @@ import { ValidationResults } from './validation_results';
 const CHUNK_SIZE = 100;
 
 export function categorizationExamplesProvider({
-  callAsCurrentUser,
-  callAsInternalUser,
-}: ILegacyScopedClusterClient) {
+  asCurrentUser,
+  asInternalUser,
+}: IScopedClusterClient) {
   const validationResults = new ValidationResults();
 
   async function categorizationExamples(
@@ -56,18 +56,25 @@ export function categorizationExamplesProvider({
         }
       }
     }
-
-    const results: SearchResponse<{ [id: string]: string }> = await callAsCurrentUser('search', {
+    const { body } = await asCurrentUser.search<SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
-        _source: categorizationFieldName,
+        fields: [categorizationFieldName],
+        _source: false,
         query,
         sort: ['_doc'],
       },
     });
 
-    const tempExamples = results.hits.hits.map(({ _source }) => _source[categorizationFieldName]);
+    // hit.fields can be undefined if value is originally null
+    const tempExamples = body.hits.hits.map(({ fields }) =>
+      fields &&
+      Array.isArray(fields[categorizationFieldName]) &&
+      fields[categorizationFieldName].length > 0
+        ? fields[categorizationFieldName][0]
+        : null
+    );
 
     validationResults.createNullValueResult(tempExamples);
 
@@ -81,7 +88,6 @@ export function categorizationExamplesProvider({
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);
       return { examples: examplesWithTokens };
     } catch (err) {
-      // console.log('dropping to 50 chunk size');
       // if an error is thrown when loading the tokens, lower the chunk size by half and try again
       // the error may have been caused by too many tokens being found.
       // the _analyze endpoint has a maximum of 10000 tokens.
@@ -112,7 +118,9 @@ export function categorizationExamplesProvider({
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const { tokens }: { tokens: Token[] } = await callAsInternalUser('indices.analyze', {
+    const {
+      body: { tokens },
+    } = await asInternalUser.indices.analyze<{ tokens: Token[] }>({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,

@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectAttributes } from 'kibana/server';
-import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
+import { SavedObject, SavedObjectAttributes } from 'kibana/server';
+import { IFieldType, IIndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   LAYER_TYPE,
@@ -19,13 +19,14 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
-  SourceDescriptor,
 } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
-// @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
-import { IndexPatternSavedObjectAttrs } from '../../../../../src/plugins/data/common/index_patterns/index_patterns';
+
+interface Settings {
+  showMapVisualizationTypes: boolean;
+}
 
 interface IStats {
   [key: string]: {
@@ -37,6 +38,30 @@ interface IStats {
 
 interface ILayerTypeCount {
   [key: string]: number;
+}
+
+export interface MapsUsage {
+  settings: Settings;
+  indexPatternsWithGeoFieldCount: number;
+  indexPatternsWithGeoPointFieldCount: number;
+  indexPatternsWithGeoShapeFieldCount: number;
+  geoShapeAggLayersCount: number;
+  mapsTotalCount: number;
+  timeCaptured: string;
+  attributesPerMap: {
+    dataSourcesCount: {
+      min: number;
+      max: number;
+      avg: number;
+    };
+    layersCount: {
+      min: number;
+      max: number;
+      avg: number;
+    };
+    layerTypesCount: IStats;
+    emsVectorLayersCount: IStats;
+  };
 }
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
@@ -62,7 +87,9 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
   }, {});
 }
 
-function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
+function getIndexPatternsWithGeoFieldCount(
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>
+) {
   const fieldLists = indexPatterns.map((indexPattern) =>
     indexPattern.attributes && indexPattern.attributes.fields
       ? JSON.parse(indexPattern.attributes.fields)
@@ -110,7 +137,7 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
 }
 
 function isFieldGeoShape(
-  indexPatterns: IIndexPattern[],
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>,
   indexPatternId: string,
   geoField: string | undefined
 ): boolean {
@@ -118,9 +145,11 @@ function isFieldGeoShape(
     return false;
   }
 
-  const matchIndexPattern = indexPatterns.find((indexPattern: IIndexPattern) => {
-    return indexPattern.id === indexPatternId;
-  });
+  const matchIndexPattern = indexPatterns.find(
+    (indexPattern: SavedObject<IndexPatternAttributes>) => {
+      return indexPattern.id === indexPatternId;
+    }
+  );
 
   if (!matchIndexPattern) {
     return false;
@@ -138,7 +167,10 @@ function isFieldGeoShape(
   return !!matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
 }
 
-function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescriptor): boolean {
+function isGeoShapeAggLayer(
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>,
+  layer: LayerDescriptor
+): boolean {
   if (layer.sourceDescriptor === null) {
     return false;
   }
@@ -151,7 +183,7 @@ function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescript
     return false;
   }
 
-  const sourceDescriptor: SourceDescriptor = layer.sourceDescriptor;
+  const sourceDescriptor = layer.sourceDescriptor;
   if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
     return isFieldGeoShape(
       indexPatterns,
@@ -174,7 +206,7 @@ function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescript
 
 function getGeoShapeAggCount(
   layerLists: LayerDescriptor[][],
-  indexPatterns: IIndexPattern[]
+  indexPatterns: Array<SavedObject<IndexPatternAttributes>>
 ): number {
   const countsPerMap: number[] = layerLists.map((layerList: LayerDescriptor[]) => {
     const geoShapeAggLayers = layerList.filter((layerDescriptor) => {
@@ -184,6 +216,16 @@ function getGeoShapeAggCount(
   });
 
   return _.sum(countsPerMap);
+}
+
+export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
+  return mapSavedObjects.map((savedMapObject) => {
+    const layerList =
+      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+        ? JSON.parse(savedMapObject.attributes.layerListJSON)
+        : [];
+    return layerList as LayerDescriptor[];
+  });
 }
 
 export function buildMapsIndexPatternsTelemetry(
@@ -207,9 +249,7 @@ export function buildMapsIndexPatternsTelemetry(
   };
 }
 
-export function buildMapsSavedObjectsTelemetry(
-  layerLists: LayerDescriptor[][]
-): SavedObjectAttributes {
+export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]): MapsUsage {
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map((layerList: LayerDescriptor[]) => {
@@ -236,14 +276,14 @@ export function buildMapsSavedObjectsTelemetry(
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
-        min: dataSourcesCount.length ? _.min(dataSourcesCount) : 0,
-        max: dataSourcesCount.length ? _.max(dataSourcesCount) : 0,
+        min: dataSourcesCount.length ? _.min(dataSourcesCount)! : 0,
+        max: dataSourcesCount.length ? _.max(dataSourcesCount)! : 0,
         avg: dataSourcesCountSum ? layersCountSum / mapsCount : 0,
       },
       // Total count of layers per map
       layersCount: {
-        min: layersCount.length ? _.min(layersCount) : 0,
-        max: layersCount.length ? _.max(layersCount) : 0,
+        min: layersCount.length ? _.min(layersCount)! : 0,
+        max: layersCount.length ? _.max(layersCount)! : 0,
         avg: layersCountSum ? layersCountSum / mapsCount : 0,
       },
       // Count of layers by type
@@ -256,16 +296,6 @@ export function buildMapsSavedObjectsTelemetry(
       },
     },
   };
-}
-
-export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
-  return mapSavedObjects.map((savedMapObject) => {
-    const layerList =
-      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
-        ? JSON.parse(savedMapObject.attributes.layerListJSON)
-        : [];
-    return layerList as LayerDescriptor[];
-  });
 }
 
 export async function getMapsTelemetry(config: MapsConfigType) {
@@ -294,7 +324,7 @@ export async function getMapsTelemetry(config: MapsConfigType) {
   const indexPatternsTelemetry = {};
   while (currentPage <= Math.ceil(total / perPage)) {
     ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find<
-      IndexPatternSavedObjectAttrs
+      IndexPatternAttributes
     >({
       type: 'index-pattern',
       page: currentPage++,

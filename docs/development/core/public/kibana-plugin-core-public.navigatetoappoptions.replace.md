@@ -11,8 +11,3 @@ if true, will not create a new history entry when navigating (using `replace` in
 ```typescript
 replace?: boolean;
 ```
-
-## Remarks
-
-This option not be used when navigating from and/or to legacy applications.
-

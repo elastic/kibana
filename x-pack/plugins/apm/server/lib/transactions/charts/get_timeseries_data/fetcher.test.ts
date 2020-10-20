@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ESResponse, timeseriesFetcher } from './fetcher';
 import { APMConfig } from '../../../../../server';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 describe('timeseriesFetcher', () => {
   let res: ESResponse;
@@ -21,7 +21,7 @@ describe('timeseriesFetcher', () => {
       setup: {
         start: 1528113600000,
         end: 1528977600000,
-        client: { search: clientSpy } as any,
+        apmEventClient: { search: clientSpy } as any,
         internalClient: { search: clientSpy } as any,
         config: new Proxy(
           {},
@@ -29,22 +29,28 @@ describe('timeseriesFetcher', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFiltersES: [
+        uiFilters: {
+          environment: 'test',
+        },
+        esFilter: [
           {
             term: { 'service.environment': 'test' },
           },
         ],
         indices: {
+          /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'myIndex',
           'apm_oss.errorIndices': 'myIndex',
           'apm_oss.onboardingIndices': 'myIndex',
           'apm_oss.spanIndices': 'myIndex',
           'apm_oss.transactionIndices': 'myIndex',
           'apm_oss.metricsIndices': 'myIndex',
+          /* eslint-enable @typescript-eslint/naming-convention */
           apmAgentConfigurationIndex: 'myIndex',
           apmCustomLinkIndex: 'myIndex',
         },
       },
+      searchAggregatedTransactions: false,
     });
   });
 
@@ -54,15 +60,7 @@ describe('timeseriesFetcher', () => {
 
   it('should restrict results to only transaction documents', () => {
     const query = clientSpy.mock.calls[0][0];
-    expect(query.body.query.bool.filter).toEqual(
-      expect.arrayContaining([
-        {
-          term: {
-            [PROCESSOR_EVENT]: 'transaction',
-          },
-        } as any,
-      ])
-    );
+    expect(query.apm.events).toEqual([ProcessorEvent.transaction]);
   });
 
   it('should return correct response', () => {

@@ -35,6 +35,7 @@ import {
   IndexPattern,
   IndexPatternField,
   UI_SETTINGS,
+  DataPublicPluginStart,
 } from '../../../../../../plugins/data/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
@@ -48,6 +49,7 @@ import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
   fields: IndexPatternField[];
+  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
 }
 
 const searchAriaLabel = i18n.translate(
@@ -71,7 +73,7 @@ const filterPlaceholder = i18n.translate(
   }
 );
 
-export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
+export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
   const { uiSettings, indexPatternManagementStart, docLinks } = useKibana<
     IndexPatternManagmentContext
   >().services;
@@ -87,7 +89,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
-    indexPattern.fields.forEach((field) => {
+    indexPattern.fields.getAll().forEach((field) => {
       if (field.scripted) {
         if (field.lang) {
           tempScriptedFieldLanguages.push(field.lang);
@@ -118,6 +120,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiFieldSearch
+              fullWidth
               placeholder={filterPlaceholder}
               value={fieldFilter}
               onChange={(e) => setFieldFilter(e.target.value)}
@@ -175,7 +178,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
                 indexedFieldTypeFilter={indexedFieldTypeFilter}
                 helpers={{
                   redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field));
+                    history.push(getPath(field, indexPattern));
                   },
                   getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                 }}
@@ -190,11 +193,12 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
               <EuiSpacer size="m" />
               <ScriptedFieldsTable
                 indexPattern={indexPattern}
+                saveIndexPattern={saveIndexPattern}
                 fieldFilter={fieldFilter}
                 scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
                 helpers={{
                   redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field));
+                    history.push(getPath(field, indexPattern));
                   },
                 }}
                 onRemoveField={refreshFilters}
@@ -209,6 +213,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
               {getFilterSection(type)}
               <EuiSpacer size="m" />
               <SourceFiltersTable
+                saveIndexPattern={saveIndexPattern}
                 indexPattern={indexPattern}
                 filterFilter={fieldFilter}
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
@@ -230,6 +235,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
       indexedFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
+      saveIndexPattern,
     ]
   );
 
