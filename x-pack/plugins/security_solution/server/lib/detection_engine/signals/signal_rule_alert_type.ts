@@ -121,10 +121,10 @@ export const signalRulesAlertType = ({
         type,
         exceptionsList,
       } = params;
-      const outputIndexTemplateMapping: unknown = await services.callCluster(
-        'indices.getTemplate',
-        { name: outputIndex }
-      );
+
+      const outputIndexTemplateMapping: unknown = await callAsInternalUser('indices.getTemplate', {
+        name: outputIndex,
+      });
       const signalMappingVersion: number | undefined = get(outputIndexTemplateMapping, [
         outputIndex,
         'version',
