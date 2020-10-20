@@ -33,10 +33,9 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
           .filter(
             (feature) =>
               request.query.ignoreValidLicenses ||
-              !feature.validLicenses ||
-              !feature.validLicenses.length ||
-              (context.licensing!.license.type &&
-                feature.validLicenses.includes(context.licensing!.license.type))
+              !feature.minimumLicense ||
+              (context.licensing!.license &&
+                context.licensing!.license.hasAtLeast(feature.minimumLicense))
           )
           .sort(
             (f1, f2) =>
