@@ -834,23 +834,6 @@ describe('edit policy', () => {
         expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeFalsy();
       });
 
-      test('should show cloud notice when warm tier nodes do not exist', async () => {
-        http.setupNodeListResponse({
-          nodesByAttributes: {},
-          nodesByRoles: { data: ['test'], data_hot: ['test'], data_cold: ['test'] },
-          isUsingDeprecatedDataRoleConfig: false,
-        });
-        const rendered = mountWithIntl(component);
-        noRollover(rendered);
-        setPolicyName(rendered, 'mypolicy');
-        await activatePhase(rendered, 'warm');
-        expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-        expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeTruthy();
-        // Assert that other notices are not showing
-        expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
-        expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
-      });
-
       test('should show cloud notice when cold tier nodes do not exist', async () => {
         http.setupNodeListResponse({
           nodesByAttributes: {},
