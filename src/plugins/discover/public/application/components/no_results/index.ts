@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { DiscoverUninitialized } from './uninitialized';
-export { DiscoverHistogram } from './histogram';
+export { DiscoverNoResults } from './no_results';

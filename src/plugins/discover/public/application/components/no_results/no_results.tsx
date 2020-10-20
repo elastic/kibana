@@ -23,18 +23,21 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@el
 import { getServices } from '../../../kibana_services';
 import { DataPublicPluginStart } from '../../../../../data/public';
 import { getLuceneQueryMessage, getTimeFieldMessage } from './no_results_helper';
+import './_no_results.scss';
+
+export interface DiscoverNoResultsProps {
+  timeFieldName?: string;
+  queryLanguage?: string;
+  error?: Error;
+  data?: DataPublicPluginStart;
+}
 
 export function DiscoverNoResults({
   timeFieldName,
   queryLanguage,
   error,
   data,
-}: {
-  timeFieldName?: string;
-  queryLanguage?: string;
-  error?: Error;
-  data?: DataPublicPluginStart;
-}) {
+}: DiscoverNoResultsProps) {
   const callOut = !error ? (
     <EuiFlexItem grow={false} className="dscNoResults">
       <EuiCallOut

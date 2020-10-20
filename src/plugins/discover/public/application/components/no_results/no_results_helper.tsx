@@ -116,7 +116,7 @@ export function getLuceneQueryMessage(link: string) {
   return (
     <Fragment>
       <EuiSpacer size="xl" />
-      <EuiText>
+      <EuiText data-test-subj="discoverNoResultsLucene">
         <h3>
           <FormattedMessage
             id="discover.noResults.searchExamples.refineYourQueryTitle"
