@@ -12,6 +12,7 @@ import { AlertSeverity } from '../../common/enums';
 import { AlertMessage, AlertState } from '../../server/alerts/types';
 import { AlertsBadge } from './badge';
 import { isInSetupMode } from '../lib/setup_mode';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
@@ -28,7 +29,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
     stateFilter = () => true,
     nextStepsFilter = () => true,
   } = props;
-  const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   if (!alerts) {
     return null;
