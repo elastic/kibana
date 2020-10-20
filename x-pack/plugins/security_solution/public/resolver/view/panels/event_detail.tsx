@@ -155,15 +155,20 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
       const section = {
         // Group the fields by their top-level namespace
         namespace: <GeneratedText>{key}</GeneratedText>,
-        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => ({
-          title: <GeneratedText>{path.join('.')}</GeneratedText>,
-          description: (
-            <CopyablePanelField
-              textToCopy={String(fieldValue)}
-              content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
-            />
-          ),
-        })),
+        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => {
+          // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
+          const fieldName = [key, ...path].join('.');
+
+          return {
+            title: <GeneratedText>{fieldName}</GeneratedText>,
+            description: (
+              <CopyablePanelField
+                textToCopy={String(fieldValue)}
+                content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
+              />
+            ),
+          };
+        }),
       };
       returnValue.push(section);
     }
@@ -187,7 +192,10 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
             <StyledDescriptionList
               type="column"
               align="left"
-              titleProps={{ className: 'desc-title' }}
+              titleProps={{
+                className: 'desc-title',
+                'data-test-subj': 'resolver:panel:event-detail:event-field-title',
+              }}
               compressed
               listItems={descriptions}
             />

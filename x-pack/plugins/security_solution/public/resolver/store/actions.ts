@@ -8,16 +8,25 @@ import { DataAction } from './data/action';
 
 /**
  * When the user wants to bring a node front-and-center on the map.
+ * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
  */
 interface UserBroughtNodeIntoView {
+  /**
+   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
+   */
   readonly type: 'userBroughtNodeIntoView';
+  /**
+   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
+   */
   readonly payload: {
     /**
      * Used to identify the node that should be brought into view.
+     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
      */
     readonly nodeID: string;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
+     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
      */
     readonly time: number;
   };
