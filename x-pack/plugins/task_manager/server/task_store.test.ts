@@ -447,6 +447,11 @@ describe('TaskStore', () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
       const definitions = new TaskTypeDictionary(mockLogger());
+      const taskManagerId = uuid.v1();
+      const fieldUpdates = {
+        ownerId: taskManagerId,
+        retryAt: new Date(Date.now()),
+      };
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
@@ -460,10 +465,11 @@ describe('TaskStore', () => {
       });
       const {
         args: {
-          updateByQuery: { body: { query, sort } = {} },
+          updateByQuery: { body: { query, script, sort } = {} },
         },
       } = await testClaimAvailableTasks({
         opts: {
+          taskManagerId,
           maxAttempts,
           definitions,
         },
@@ -551,6 +557,30 @@ describe('TaskStore', () => {
         },
       });
 
+      expect(script).toMatchObject({
+        source: `
+  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
+  } else {
+    ctx._source.task.status = "failed";
+  }
+  `,
+        lang: 'painless',
+        params: {
+          fieldUpdates,
+          claimTasksById: [
+            'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+            'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+          ],
+          taskMaxAttempts: {
+            bar: customMaxAttempts,
+            foo: maxAttempts,
+          },
+        },
+      });
+
       expect(sort).toMatchObject([
         '_score',
         {
@@ -595,7 +625,7 @@ if (doc['task.runAt'].size()!=0) {
       });
       expect(script).toMatchObject({
         source: `
-  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType]) {
+  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
     ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
       .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
       .join(' ')}
@@ -606,6 +636,7 @@ if (doc['task.runAt'].size()!=0) {
         lang: 'painless',
         params: {
           fieldUpdates,
+          claimTasksById: [],
           taskMaxAttempts: {
             dernstraight: 2,
             report: 2,

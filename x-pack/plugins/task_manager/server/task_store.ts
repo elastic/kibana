@@ -278,6 +278,7 @@ export class TaskStore {
             ownerId: this.taskManagerId,
             retryAt: claimOwnershipUntil,
           },
+          claimTasksById || [],
           taskMaxAttempts
         ),
         sort: [
