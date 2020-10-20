@@ -20,7 +20,7 @@ import {
   ViewMode,
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { useLayerList } from './LayerList';
+import { useLayerList } from './useLayerList';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
