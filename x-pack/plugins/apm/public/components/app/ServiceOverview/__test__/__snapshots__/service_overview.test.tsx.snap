@@ -106,7 +106,7 @@ NodeList [
                 <span
                   class="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     class="euiButtonContent__icon"
                     data-euiicon-type="help"
                   />
@@ -128,12 +128,24 @@ NodeList [
 
 exports[`Service Overview -> View should render services, when list is not empty 1`] = `
 NodeList [
-  .c0 {
+  .c1 {
   font-size: 16px;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.c0 {
+  width: 100%;
+}
+
+.c0 .apmServiceList__serviceNameTooltip {
+  width: 100%;
+}
+
+.c0 .apmServiceList__serviceNameTooltip .apmServiceList__serviceNameContainer {
+  width: calc(100% - 24px);
 }
 
 <tr
@@ -181,32 +193,36 @@ NodeList [
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiToolTipAnchor"
+          class="c0"
         >
-          <div
-            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          <span
+            class="euiToolTipAnchor apmServiceList__serviceNameTooltip"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
-              <img
-                alt="python"
-                height="24px"
-                src="test-file-stub"
-              />
-            </div>
-            <div
-              class="euiFlexItem"
-            >
-              <a
-                class="euiLink euiLink--primary c0"
-                href="/basepath/app/apm/services/My Python Service/transactions"
-                rel="noreferrer"
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                My Python Service
-              </a>
+                <img
+                  alt="python"
+                  height="24px"
+                  src="test-file-stub"
+                />
+              </div>
+              <div
+                class="euiFlexItem apmServiceList__serviceNameContainer"
+              >
+                <a
+                  class="euiLink euiLink--primary c1 eui-textTruncate"
+                  href="/basepath/app/apm/services/My Python Service/transactions"
+                  rel="noreferrer"
+                >
+                  My Python Service
+                </a>
+              </div>
             </div>
-          </div>
+          </span>
         </span>
       </div>
     </td>
@@ -267,7 +283,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -320,7 +336,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -373,7 +389,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -401,12 +417,24 @@ NodeList [
       </div>
     </td>
   </tr>,
-  .c0 {
+  .c1 {
   font-size: 16px;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.c0 {
+  width: 100%;
+}
+
+.c0 .apmServiceList__serviceNameTooltip {
+  width: 100%;
+}
+
+.c0 .apmServiceList__serviceNameTooltip .apmServiceList__serviceNameContainer {
+  width: calc(100% - 24px);
 }
 
 <tr
@@ -454,32 +482,36 @@ NodeList [
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiToolTipAnchor"
+          class="c0"
         >
-          <div
-            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          <span
+            class="euiToolTipAnchor apmServiceList__serviceNameTooltip"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
-              <img
-                alt="go"
-                height="24px"
-                src="test-file-stub"
-              />
-            </div>
-            <div
-              class="euiFlexItem"
-            >
-              <a
-                class="euiLink euiLink--primary c0"
-                href="/basepath/app/apm/services/My Go Service/transactions"
-                rel="noreferrer"
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                My Go Service
-              </a>
+                <img
+                  alt="go"
+                  height="24px"
+                  src="test-file-stub"
+                />
+              </div>
+              <div
+                class="euiFlexItem apmServiceList__serviceNameContainer"
+              >
+                <a
+                  class="euiLink euiLink--primary c1 eui-textTruncate"
+                  href="/basepath/app/apm/services/My Go Service/transactions"
+                  rel="noreferrer"
+                >
+                  My Go Service
+                </a>
+              </div>
             </div>
-          </div>
+          </span>
         </span>
       </div>
     </td>
@@ -520,7 +552,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -573,7 +605,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -626,7 +658,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
