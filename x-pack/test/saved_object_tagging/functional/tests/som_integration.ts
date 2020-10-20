@@ -97,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('properly display tags', async () => {
         const testRow = await testSubjects.find('savedObjectsTableRow row-vis-area-3');
-        const tagCell = await testSubjects.findDescendant('savedObjectsTableRowTags', testRow);
+        const tagCell = await testSubjects.findDescendant('listingTableRowTags', testRow);
         const tagContents = await tagCell.findAllByCssSelector('.euiBadge__content');
         const tagNames = await Promise.all(tagContents.map((tag) => tag.getVisibleText()));
 

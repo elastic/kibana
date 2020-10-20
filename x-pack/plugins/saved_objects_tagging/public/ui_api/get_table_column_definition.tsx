@@ -29,7 +29,7 @@ export const buildGetTableColumnDefinition = ({
         defaultMessage: 'Tags associated with this saved object',
       }),
       sortable: false,
-      'data-test-subj': 'savedObjectsTableRowTags',
+      'data-test-subj': 'listingTableRowTags',
       render: (references: SavedObjectReference[], object: SavedObject) => {
         return <components.TagList object={object} />;
       },

@@ -35,7 +35,7 @@ describe('getSearchBarFilter', () => {
     });
   });
 
-  it('use the specified field', () => {
+  it('uses the specified field', () => {
     expect(getSearchBarFilter({ tagField: 'foo' })).toEqual(
       expect.objectContaining({
         field: 'foo',
@@ -58,7 +58,7 @@ describe('getSearchBarFilter', () => {
     expect(fetched).toEqual(tags.map((tag) => expectTagOption(tag, true)));
   });
 
-  it('use the `useName` option', async () => {
+  it('uses the `useName` option', async () => {
     const tags = [
       createTag({ id: 'id-1', name: 'name-1' }),
       createTag({ id: 'id-2', name: 'name-2' }),

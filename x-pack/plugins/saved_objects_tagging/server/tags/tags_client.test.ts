@@ -151,8 +151,6 @@ describe('TagsClient', () => {
     });
   });
 
-  /////////////
-
   describe('#get', () => {
     const tagId = 'some-id';
     const tagObject = createTagSavedObject(tagId);
