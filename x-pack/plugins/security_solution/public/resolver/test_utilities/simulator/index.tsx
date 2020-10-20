@@ -16,7 +16,7 @@ import { MockResolver } from './mock_resolver';
 import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
-import { getUiSettings } from '../../mocks/get_ui_settings';
+import { uiSettings } from '../../mocks/ui_settings';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -110,7 +110,7 @@ export class Simulator {
     // Used for `KibanaContextProvider`
     const coreStart = coreMock.createStart();
 
-    coreStart.uiSettings.get.mockImplementation(getUiSettings);
+    coreStart.uiSettings.get.mockImplementation(uiSettings);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
