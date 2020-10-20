@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, Dispatch, SetStateAction } from 'react';
-import { isEmpty } from 'lodash';
+import { SeriesIdentifier } from '@elastic/charts';
+import { isEmpty, omit } from 'lodash';
+import { useState } from 'react';
 import {
   getDurationFormatter,
   TimeFormatter,
@@ -17,14 +18,33 @@ export const useFormatter = (
   series: TimeSeries[]
 ): {
   formatter: TimeFormatter;
-  setDisabledSeriesState: Dispatch<SetStateAction<boolean[]>>;
+  toggleSerie: (disabledSerie: SeriesIdentifier) => void;
 } => {
-  const [disabledSeriesState, setDisabledSeriesState] = useState<boolean[]>([]);
+  const [disabledSeries, setDisabledSeries] = useState<
+    Record<SeriesIdentifier['specId'], 0>
+  >({});
+
   const visibleSeries = series.filter(
-    (serie, index) => disabledSeriesState[index] !== true
+    (serie) => disabledSeries[serie.title] === undefined
   );
+
   const maxY = getMaxY(isEmpty(visibleSeries) ? series : visibleSeries);
   const formatter = getDurationFormatter(maxY);
 
-  return { formatter, setDisabledSeriesState };
+  const toggleSerie = ({ specId }: SeriesIdentifier) => {
+    if (disabledSeries[specId] !== undefined) {
+      setDisabledSeries((prevState) => {
+        return omit(prevState, specId);
+      });
+    } else {
+      setDisabledSeries((prevState) => {
+        return { ...prevState, [specId]: 0 };
+      });
+    }
+  };
+
+  return {
+    formatter,
+    toggleSerie,
+  };
 };

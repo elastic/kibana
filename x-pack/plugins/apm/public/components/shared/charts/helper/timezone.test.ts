@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment-timezone';
-import { getDomainTZ, getTimeTicksTZ } from '../timezone';
+import { getDomainTZ, getTimeTicksTZ } from './timezone';
 
 describe('Timezone helper', () => {
   let originalTimezone: moment.MomentZone | null;

@@ -7,6 +7,7 @@
 import {
   Axis,
   Chart,
+  LegendItemListener,
   LineSeries,
   niceTimeFormatter,
   Placement,
@@ -15,23 +16,32 @@ import {
   Settings,
   SettingsSpec,
 } from '@elastic/charts';
-import React, { useEffect } from 'react';
 import moment from 'moment';
+import React, { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { TimeSeries } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useChartsSync } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
-import { TimeSeries } from '../../../../../typings/timeseries';
 import { Annotations } from '../annotations';
+import { onBrushEnd } from '../helper/helper';
 
 interface Props {
   timeseries: TimeSeries[];
   tickFormatY: (y: number) => string;
   id: string;
+  onToggleLegend?: LegendItemListener;
 }
 
 const XY_HEIGHT = unit * 16;
 
-export function LineChart({ timeseries, tickFormatY, id }: Props) {
+export function LineChart({
+  timeseries,
+  tickFormatY,
+  id,
+  onToggleLegend,
+}: Props) {
+  const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const { event, setEvent } = useChartsSync();
   const { urlParams } = useUrlParams();
@@ -59,6 +69,7 @@ export function LineChart({ timeseries, tickFormatY, id }: Props) {
     <div style={{ height: XY_HEIGHT }}>
       <Chart ref={chartRef} id={id}>
         <Settings
+          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           theme={chartTheme}
           onPointerUpdate={(currEvent: any) => {
             setEvent(currEvent);
@@ -70,6 +81,11 @@ export function LineChart({ timeseries, tickFormatY, id }: Props) {
           showLegendExtra
           legendPosition={Position.Bottom}
           xDomain={{ min, max }}
+          onLegendItemClick={(legend) => {
+            if (onToggleLegend) {
+              onToggleLegend(legend);
+            }
+          }}
         />
         <Axis
           id="x-axis"

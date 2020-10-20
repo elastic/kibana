@@ -62,9 +62,7 @@ export function TransactionCharts({
 
   const { responseTimeSeries, tpmSeries } = charts;
 
-  const { formatter, setDisabledSeriesState } = useFormatter(
-    responseTimeSeries
-  );
+  const { formatter, toggleSerie } = useFormatter(responseTimeSeries);
 
   return (
     <>
@@ -87,23 +85,15 @@ export function TransactionCharts({
                   )}
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
-              <div style={{ height: unit * 16 }}>
-                <TransactionLineChart
-                  series={responseTimeSeries}
-                  tickFormatY={getResponseTimeTickFormatter(formatter)}
-                  formatTooltipValue={getResponseTimeTooltipFormatter(
-                    formatter
-                  )}
-                  onToggleLegend={setDisabledSeriesState}
-                />
-              </div>
-              <br />
-              <br />
-              <br />
               <LineChart
                 id="transactionDuration"
                 timeseries={responseTimeSeries}
                 tickFormatY={getResponseTimeTickFormatter(formatter)}
+                onToggleLegend={(serie) => {
+                  if (serie) {
+                    toggleSerie(serie);
+                  }
+                }}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -113,17 +103,6 @@ export function TransactionCharts({
               <EuiTitle size="xs">
                 <span>{tpmLabel(transactionType)}</span>
               </EuiTitle>
-              <div style={{ height: unit * 16 }}>
-                <TransactionLineChart
-                  series={tpmSeries}
-                  tickFormatY={getTPMFormatter}
-                  formatTooltipValue={getTPMTooltipFormatter}
-                  truncateLegends
-                />
-              </div>
-              <br />
-              <br />
-              <br />
               <LineChart
                 id="requestPerMinutes"
                 timeseries={tpmSeries}

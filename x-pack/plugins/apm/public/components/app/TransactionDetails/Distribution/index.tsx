@@ -16,6 +16,7 @@ import {
   Settings,
   SettingsSpec,
   TooltipValue,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,8 +32,6 @@ import { TransactionDistributionAPIResponse } from '../../../../../server/lib/tr
 import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { unit } from '../../../../style/variables';
-// @ts-expect-error
-import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
@@ -89,7 +88,7 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
         'xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel',
         {
           defaultMessage:
-            '{transCount, plural, =0 {# request} one {# request} other {# requests}}',
+            '{transCount, plural, =0 {request} one {request} other {requests}}',
           values: {
             transCount: t,
           },
@@ -99,7 +98,7 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
         'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
         {
           defaultMessage:
-            '{transCount, plural, =0 {# transaction} one {# transaction} other {# transactions}}',
+            '{transCount, plural, =0 {transaction} one {transaction} other {transactions}}',
           values: {
             transCount: t,
           },
@@ -153,21 +152,13 @@ export function TransactionDistribution(props: Props) {
     );
   }
 
-  function getBucketFromChartPoint(chartPoint: IChartPoint) {
-    const clickedBucket = distribution?.buckets.find((bucket) => {
-      return bucket.key === chartPoint.x0;
-    });
-
-    return clickedBucket;
-  }
-
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
   );
 
   const xMin = d3.min(buckets, (d) => d.x0) || 0;
-  const xMax = d3.max(buckets, (d) => d.x) || 0;
+  const xMax = d3.max(buckets, (d) => d.x0) || 0;
   const timeFormatter = getDurationFormatter(xMax);
 
   const tooltipProps: SettingsSpec['tooltip'] = {
@@ -223,43 +214,6 @@ export function TransactionDistribution(props: Props) {
         </h5>
       </EuiTitle>
       <div style={{ height: unit * 10 }}>
-        <Histogram
-          buckets={buckets}
-          bucketSize={distribution.bucketSize}
-          bucketIndex={bucketIndex}
-          onClick={(chartPoint: IChartPoint) => {
-            const clickedBucket = getBucketFromChartPoint(chartPoint);
-
-            if (clickedBucket) {
-              onBucketClick(clickedBucket);
-            }
-          }}
-          formatX={(time: number) => timeFormatter(time).formatted}
-          formatYShort={formatYShort}
-          formatYLong={formatYLong}
-          verticalLineHover={(point: IChartPoint) =>
-            isEmpty(getBucketFromChartPoint(point)?.samples)
-          }
-          backgroundHover={(point: IChartPoint) =>
-            !isEmpty(getBucketFromChartPoint(point)?.samples)
-          }
-          tooltipHeader={(point: IChartPoint) => {
-            const xFormatted = timeFormatter(point.x);
-            const x0Formatted = timeFormatter(point.x0);
-            return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
-          }}
-          tooltipFooter={(point: IChartPoint) =>
-            isEmpty(getBucketFromChartPoint(point)?.samples) &&
-            i18n.translate(
-              'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
-              {
-                defaultMessage: 'No sample available for this bucket',
-              }
-            )
-          }
-        />
-      </div>
-      <div style={{ height: unit * 10 }}>
         <Chart>
           <Settings
             xDomain={{ min: xMin, max: xMax }}
@@ -283,15 +237,31 @@ export function TransactionDistribution(props: Props) {
             />
           )}
           <Axis
-            id="bottom"
+            id="x-axis"
             position={Position.Bottom}
             showOverlappingTicks
             tickFormat={(time: number) => timeFormatter(time).formatted}
           />
-          <Axis id="left" position={Position.Left} ticks={3} showGridLines />
+          <Axis
+            id="y-axis"
+            position={Position.Left}
+            ticks={3}
+            showGridLines
+            tickFormat={(value: number) => formatYShort(value)}
+          />
           <HistogramBarSeries
+            tickFormat={(value: number) => {
+              return `${value}`;
+            }}
+            minBarHeight={2}
             id="transactionDurationDistribution"
-            name="requests"
+            name={(series: XYChartSeriesIdentifier) => {
+              const bucketCount = series.splitAccessors.get(
+                series.yAccessor
+              ) as number;
+              return formatYLong(bucketCount);
+            }}
+            splitSeriesAccessors={['y']}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             xAccessor="x0"

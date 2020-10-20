@@ -5,29 +5,24 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { max } from 'lodash';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { unit } from '../../../../style/variables';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { useTheme } from '../../../../hooks/useTheme';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-// @ts-expect-error
-import CustomPlot from '../CustomPlot';
-import { ErroneousTransactionsRateChartElasticChart } from './elastic_chart';
+import { LineChart } from '../line_chart';
 
 const tickFormatY = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };
 
 export function ErroneousTransactionsRateChart() {
+  const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-  const syncedChartsProps = useChartsSync();
 
   const { start, end, transactionType, transactionName } = urlParams;
 
@@ -52,15 +47,7 @@ export function ErroneousTransactionsRateChart() {
     }
   }, [serviceName, start, end, uiFilters, transactionType, transactionName]);
 
-  const combinedOnHover = useCallback(
-    (hoverX: number) => {
-      return syncedChartsProps.onHover(hoverX);
-    },
-    [syncedChartsProps]
-  );
-
   const errorRates = data?.transactionErrorRate || [];
-  const maxRate = max(errorRates.map((errorRate) => errorRate.y));
 
   return (
     <EuiPanel>
@@ -72,41 +59,21 @@ export function ErroneousTransactionsRateChart() {
         </span>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <div style={{ height: unit * 16 }}>
-        <CustomPlot
-          {...syncedChartsProps}
-          noHits={data?.noHits}
-          yMax={maxRate === 0 ? 1 : undefined}
-          series={[
-            {
-              color: theme.euiColorVis7,
-              data: [],
-              legendValue: tickFormatY(data?.average),
-              legendClickDisabled: true,
-              title: i18n.translate('xpack.apm.errorRateChart.avgLabel', {
-                defaultMessage: 'Avg.',
-              }),
-              type: 'linemark',
-              hideTooltipValue: true,
-            },
-            {
-              data: errorRates,
-              type: 'linemark',
-              color: theme.euiColorVis7,
-              hideLegend: true,
-              title: i18n.translate('xpack.apm.errorRateChart.rateLabel', {
-                defaultMessage: 'Rate',
-              }),
-            },
-          ]}
-          onHover={combinedOnHover}
-          tickFormatY={tickFormatY}
-          formatTooltipValue={({ y }: { y?: number }) =>
-            Number.isFinite(y) ? tickFormatY(y) : 'N/A'
-          }
-        />
-      </div>
-      <ErroneousTransactionsRateChartElasticChart errorRates={errorRates} />
+      <LineChart
+        id="errorRate"
+        timeseries={[
+          {
+            data: errorRates,
+            type: 'linemark',
+            color: theme.eui.euiColorVis7,
+            hideLegend: true,
+            title: i18n.translate('xpack.apm.errorRateChart.rateLabel', {
+              defaultMessage: 'Rate',
+            }),
+          },
+        ]}
+        tickFormatY={tickFormatY}
+      />
     </EuiPanel>
   );
 }

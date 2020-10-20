@@ -115,6 +115,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             tickFormat={(value) => `${value} occ.`}
           />
           <HistogramBarSeries
+            minBarHeight={2}
             id="errorOccurrences"
             name="Occurences"
             xScaleType={ScaleType.Linear}
