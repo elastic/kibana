@@ -324,9 +324,9 @@ export const ReorderableDragDrop = ({
         ),
       })}
       <div
-        data-test-subj="lnsDragDrop__reorderableDrop"
+        data-test-subj="lnsDragDrop-reorderableDrop"
         className={classNames('lnsDragDrop', {
-          'lnsDragDrop-reorderableDrop': dragging && droppable,
+          'lnsDragDrop__reorderableDrop': dragging && droppable,
         })}
         onDrop={(e) => {
           dropProps.onDrop(e);
