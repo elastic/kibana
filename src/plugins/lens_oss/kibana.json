@@ -1,5 +1,5 @@
 {
-    "id": "lensOSS",
+    "id": "lensOss",
     "version": "kibana",
     "ui": true,
     "requiredPlugins": [

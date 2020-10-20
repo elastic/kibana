@@ -18,5 +18,5 @@
   "optionalPlugins": ["usageCollection", "taskManager", "globalSearch"],
   "configPath": ["xpack", "lens"],
   "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable", "lensOSS"]
+  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable", "lensOss"]
 }

@@ -45,7 +45,7 @@ pageLoadAssetSize:
   kibanaReact: 161921
   kibanaUtils: 198829
   lens: 96624
-  lensOSS: 19341
+  lensOss: 19341
   licenseManagement: 41817
   licensing: 39008
   lists: 183665
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   maps: 183610
   mapsLegacy: 116817
   mapsLegacyLicensing: 20214
-  mapsOSS: 19284
+  mapsOss: 19284
   ml: 82187
   monitoring: 268612
   navigation: 37269

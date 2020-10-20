@@ -1,5 +1,5 @@
 {
-    "id": "mapsOSS",
+    "id": "mapsOss",
     "version": "kibana",
     "ui": true,
     "requiredPlugins": [
