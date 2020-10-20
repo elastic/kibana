@@ -39,7 +39,7 @@ export const createIndexRoute = (router: IRouter) => {
 
         const index = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(callCluster, index);
-        if (await templateNeedsUpdate(callCluster, index)) {
+        if (await templateNeedsUpdate(clusterClient.callAsInternalUser, index)) {
           const policyExists = await getPolicyExists(callCluster, index);
           if (!policyExists) {
             await setPolicy(callCluster, index, signalsPolicy);

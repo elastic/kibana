@@ -32,7 +32,7 @@ export const readIndexRoute = (router: IRouter) => {
 
         const index = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
-        const templateOutdated = await templateNeedsUpdate(clusterClient.callAsCurrentUser, index);
+        const templateOutdated = await templateNeedsUpdate(clusterClient.callAsInternalUser, index);
 
         if (indexExists) {
           return response.ok({ body: { name: index, template_outdated: templateOutdated } });
