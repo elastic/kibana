@@ -61,17 +61,29 @@
  */
 
 import Boom from '@hapi/boom';
+import uuidv5 from 'uuid/v5';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
-import { SavedObjectsMigrationVersion } from '../../types';
+import { SavedObjectsMigrationVersion, SavedObjectsType } from '../../types';
 import { MigrationLogger } from './migration_logger';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn } from '../types';
+import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
 
-export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+
+type TransformFn = (
+  doc: SavedObjectUnsanitizedDoc,
+  options?: TransformOptions
+) => SavedObjectUnsanitizedDoc;
+
+interface TransformOptions {
+  convertTypes?: boolean;
+}
 
 interface DocumentMigratorOptions {
   kibanaVersion: string;
@@ -88,7 +100,8 @@ interface ActiveMigrations {
 
 interface Transform {
   version: string;
-  transform: TransformFn;
+  transform: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+  transformType: 'migrate' | 'convert';
 }
 
 /**
@@ -96,7 +109,8 @@ interface Transform {
  */
 export interface VersionedTransformer {
   migrationVersion: SavedObjectsMigrationVersion;
-  migrate: TransformFn;
+  migrate: MigrateFn;
+  migrateAndConvert: MigrateAndConvertFn;
 }
 
 /**
@@ -150,6 +164,21 @@ export class DocumentMigrator implements VersionedTransformer {
     const clonedDoc = _.cloneDeep(doc);
     return this.transformDoc(clonedDoc);
   };
+
+  /**
+   * Migrates a document to the latest version and applies type conversions if applicable.
+   *
+   * @param {SavedObjectUnsanitizedDoc} doc
+   * @returns {SavedObjectUnsanitizedDoc}
+   * @memberof DocumentMigrator
+   */
+  public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
+    // Clone the document to prevent accidental mutations on the original data
+    // Ex: Importing sample data that is cached at import level, migrations would
+    // execute on mutated data the second time.
+    const clonedDoc = _.cloneDeep(doc);
+    return this.transformDoc(clonedDoc, { convertTypes: true });
+  };
 }
 
 /**
@@ -184,8 +213,32 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry, kibanaV
     }
   }
 
+  function assertValidConvertToMultiNamespaceType(
+    namespaceType: string,
+    convertToMultiNamespaceTypeVersion: string,
+    type: string
+  ) {
+    if (namespaceType !== 'multiple') {
+      throw new Error(
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected namespaceType to be 'multiple', but got '${namespaceType}'.`
+      );
+    } else if (!Semver.valid(convertToMultiNamespaceTypeVersion)) {
+      throw new Error(
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected value to be a semver, but got '${convertToMultiNamespaceTypeVersion}'.`
+      );
+    } else if (Semver.gt(convertToMultiNamespaceTypeVersion, kibanaVersion)) {
+      throw new Error(
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be greater than the current Kibana version '${kibanaVersion}'.`
+      );
+    } else if (Semver.patch(convertToMultiNamespaceTypeVersion)) {
+      throw new Error(
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be used on a patch version (must be like 'x.y.0').`
+      );
+    }
+  }
+
   registry.getAllTypes().forEach((type) => {
-    const { name, migrations } = type;
+    const { name, migrations, convertToMultiNamespaceTypeVersion, namespaceType } = type;
     if (migrations) {
       assertObject(
         type.migrations,
@@ -195,6 +248,13 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry, kibanaV
         assertValidSemver(version, name);
         assertValidTransform(fn, version, name);
       });
+    }
+    if (convertToMultiNamespaceTypeVersion) {
+      assertValidConvertToMultiNamespaceType(
+        namespaceType,
+        convertToMultiNamespaceTypeVersion,
+        name
+      );
     }
   });
 }
@@ -211,14 +271,23 @@ function buildActiveMigrations(
 ): ActiveMigrations {
   return typeRegistry
     .getAllTypes()
-    .filter((type) => type.migrations && Object.keys(type.migrations).length > 0)
+    .filter(
+      (type) =>
+        (type.migrations && Object.keys(type.migrations).length > 0) ||
+        type.convertToMultiNamespaceTypeVersion
+    )
     .reduce((migrations, type) => {
-      const transforms = Object.entries(type.migrations!)
-        .map<Transform>(([version, transform]) => ({
+      const migrationTransforms = Object.entries(type.migrations!).map<Transform>(
+        ([version, transform]) => ({
           version,
           transform: wrapWithTry(version, type.name, transform, log),
-        }))
-        .sort((a, b) => Semver.compare(a.version, b.version));
+          transformType: 'migrate',
+        })
+      );
+      const conversionTransforms = getConversionTransforms(type);
+      const transforms = [...migrationTransforms, ...conversionTransforms].sort(
+        transformComparator
+      );
       return {
         ...migrations,
         [type.name]: {
@@ -238,9 +307,13 @@ function buildDocumentTransform({
   kibanaVersion: string;
   migrations: ActiveMigrations;
 }): TransformFn {
-  return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
+  return function transformAndValidate(
+    doc: SavedObjectUnsanitizedDoc,
+    options: TransformOptions = {}
+  ) {
+    const { convertTypes = false } = options;
     const result = doc.migrationVersion
-      ? applyMigrations(doc, migrations)
+      ? applyMigrations(doc, migrations, convertTypes)
       : markAsUpToDate(doc, migrations);
 
     // In order to keep tests a bit more stable, we won't
@@ -254,13 +327,17 @@ function buildDocumentTransform({
   };
 }
 
-function applyMigrations(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
+function applyMigrations(
+  doc: SavedObjectUnsanitizedDoc,
+  migrations: ActiveMigrations,
+  convertTypes: boolean
+) {
   while (true) {
     const prop = nextUnmigratedProp(doc, migrations);
     if (!prop) {
       return doc;
     }
-    doc = migrateProp(doc, prop, migrations);
+    doc = migrateProp(doc, prop, migrations, convertTypes);
   }
 }
 
@@ -292,6 +369,63 @@ function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrat
       return version ? set(acc, prop, version) : acc;
     }, {}),
   };
+}
+
+/**
+ * Converts a single-namespace object to a multi-namespace object. This primarily entails removing the `namespace` field and adding the
+ * `namespaces` field.
+ *
+ * If the object does not exist in the default namespace (undefined), its ID is also regenerated, and an "originId" is added to preserve
+ * legacy import/copy behavior.
+ */
+function convertType(doc: SavedObjectUnsanitizedDoc) {
+  const { namespace, ...otherAttrs } = doc;
+
+  // If this object exists in the default namespace, return it with the appropriate `namespaces` field without changing its ID.
+  if (namespace === undefined) {
+    return { ...otherAttrs, namespaces: [DEFAULT_NAMESPACE_STRING] };
+  }
+
+  const { id: originId, type } = otherAttrs;
+  // Deterministically generate a new ID for this object; the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
+  const id = uuidv5(`${namespace}:${type}:${originId}`, uuidv5.DNS);
+  return { ...otherAttrs, id, originId, namespaces: [namespace] };
+}
+
+/**
+ * Returns all applicable conversion transforms for a given object type.
+ */
+function getConversionTransforms(type: SavedObjectsType): Transform[] {
+  const { convertToMultiNamespaceTypeVersion } = type;
+  if (!convertToMultiNamespaceTypeVersion) {
+    return [];
+  }
+  return [
+    {
+      version: convertToMultiNamespaceTypeVersion,
+      transform: convertType,
+      transformType: 'convert',
+    },
+  ];
+}
+
+/**
+ * Transforms are sorted in ascending order by version. One version may contain multiple transforms; 'convert' transforms always run first,
+ * and 'migrate' transforms always run last. This is because 'migrate' transforms are defined by the consumer, and may change the object
+ * type or migrationVersion which resets the migration loop and could cause any remaining transforms for this version to be skipped.
+ */
+function transformComparator(a: Transform, b: Transform) {
+  const semver = Semver.compare(a.version, b.version);
+  if (semver !== 0) {
+    return semver;
+  } else if (a.transformType !== b.transformType) {
+    if (a.transformType === 'migrate') {
+      return 1;
+    } else if (b.transformType === 'migrate') {
+      return -1;
+    }
+  }
+  return 0;
 }
 
 /**
@@ -362,19 +496,23 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
 function migrateProp(
   doc: SavedObjectUnsanitizedDoc,
   prop: string,
-  migrations: ActiveMigrations
+  migrations: ActiveMigrations,
+  convertTypes: boolean
 ): SavedObjectUnsanitizedDoc {
   const originalType = doc.type;
   let migrationVersion = _.clone(doc.migrationVersion) || {};
 
-  for (const { version, transform } of applicableTransforms(migrations, doc, prop)) {
+  for (const { version, transform, transformType } of applicableTransforms(migrations, doc, prop)) {
     const currentVersion = propVersion(doc, prop);
     if (currentVersion && Semver.gt(currentVersion, version)) {
       // the previous transform function increased the object's migrationVersion; break out of the loop
       break;
     }
 
-    doc = transform(doc);
+    if (transformType === 'migrate' || convertTypes) {
+      // migrate transforms are always applied, but conversion transforms are only applied when Kibana is upgraded
+      doc = transform(doc);
+    }
     migrationVersion = updateMigrationVersion(doc, migrationVersion, prop, version);
     doc.migrationVersion = _.clone(migrationVersion);
 

@@ -423,6 +423,26 @@ describe('#rawToSavedObject', () => {
     test(`doesn't copy _source.namespace to namespace`, () => {
       expect(actual).not.toHaveProperty('namespace');
     });
+
+    describe('with "flexible" option enabled', () => {
+      const options = { flexible: true };
+
+      test(`removes type prefix from _id`, () => {
+        const _actual = multiNamespaceSerializer.rawToSavedObject(raw, options);
+        expect(_actual).toHaveProperty('id', 'bar');
+      });
+
+      test(`removes type and namespace prefix from _id`, () => {
+        const _id = `${raw._source.namespace}:${raw._id}`;
+        const _actual = multiNamespaceSerializer.rawToSavedObject({ ...raw, _id }, options);
+        expect(_actual).toHaveProperty('id', 'bar');
+      });
+
+      test(`copies _source.namespace to namespace if "flexible" option is enabled`, () => {
+        const _actual = multiNamespaceSerializer.rawToSavedObject(raw, options);
+        expect(_actual).toHaveProperty('namespace', 'baz');
+      });
+    });
   });
 
   describe('multi-namespace type with namespaces', () => {
@@ -1006,6 +1026,23 @@ describe('#isRawSavedObject', () => {
           },
         })
       ).toBeFalsy();
+    });
+
+    test('is true if the id is prefixed with type and namespace, and the "flexible" option is enabled', () => {
+      const options = { flexible: true };
+      expect(
+        multiNamespaceSerializer.isRawSavedObject(
+          {
+            _id: 'foo:hello:world',
+            _source: {
+              type: 'hello',
+              hello: {},
+              namespace: 'foo',
+            },
+          },
+          options
+        )
+      ).toBeTruthy();
     });
 
     test(`is false if the type prefix omits the :`, () => {

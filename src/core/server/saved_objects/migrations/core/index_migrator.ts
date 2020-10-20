@@ -194,7 +194,7 @@ async function migrateSourceToDest(context: Context) {
     await Index.write(
       client,
       dest.indexName,
-      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
+      await migrateRawDocs(serializer, documentMigrator.migrateAndConvert, docs, log)
     );
   }
 }

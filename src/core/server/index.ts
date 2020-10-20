@@ -274,6 +274,7 @@ export {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,

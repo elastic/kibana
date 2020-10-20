@@ -20,7 +20,11 @@
 import uuid from 'uuid';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsRawDoc, SavedObjectSanitizedDoc } from './types';
+import {
+  SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDocParseOptions,
+} from './types';
 
 /**
  * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
@@ -43,23 +47,30 @@ export class SavedObjectsSerializer {
    * Determines whether or not the raw document can be converted to a saved object.
    *
    * @param {SavedObjectsRawDoc} doc - The raw ES document to be tested
+   * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
-  public isRawSavedObject(doc: SavedObjectsRawDoc) {
+  public isRawSavedObject(doc: SavedObjectsRawDoc, options: SavedObjectsRawDocParseOptions = {}) {
+    const { flexible = false } = options;
     const { _id, _source } = doc;
     const { type, namespace } = _source;
     if (!type) {
       return false;
     }
-    const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id);
+    const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id, flexible);
     return idMatchesPrefix && _source.hasOwnProperty(type);
   }
 
   /**
    * Converts a document from the format that is stored in elasticsearch to the saved object client format.
    *
-   *  @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
+   * @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
+   * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
-  public rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc {
+  public rawToSavedObject(
+    doc: SavedObjectsRawDoc,
+    options: SavedObjectsRawDocParseOptions = {}
+  ): SavedObjectSanitizedDoc {
+    const { flexible = false } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
     const { type, namespace, namespaces, originId } = _source;
 
@@ -67,12 +78,14 @@ export class SavedObjectsSerializer {
       _seq_no != null || _primary_term != null
         ? encodeVersion(_seq_no!, _primary_term!)
         : undefined;
+    const includeNamespace = namespace && (flexible || this.registry.isSingleNamespace(type));
+    const includeNamespaces = this.registry.isMultiNamespace(type);
 
     return {
       type,
-      id: this.trimIdPrefix(namespace, type, _id),
-      ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
-      ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
+      id: this.trimIdPrefix(namespace, type, _id, flexible),
+      ...(includeNamespace && { namespace }),
+      ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
       attributes: _source[type],
       references: _source.references || [],
@@ -132,20 +145,30 @@ export class SavedObjectsSerializer {
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 
-  private trimIdPrefix(namespace: string | undefined, type: string, id: string) {
+  private trimIdPrefix(namespace: string | undefined, type: string, id: string, flexible: boolean) {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
 
-    const { prefix, idMatchesPrefix } = this.parseIdPrefix(namespace, type, id);
+    const { prefix, idMatchesPrefix } = this.parseIdPrefix(namespace, type, id, flexible);
     return idMatchesPrefix ? id.slice(prefix.length) : id;
   }
 
-  private parseIdPrefix(namespace: string | undefined, type: string, id: string) {
+  private parseIdPrefix(
+    namespace: string | undefined,
+    type: string,
+    id: string,
+    flexible: boolean
+  ) {
     const namespacePrefix =
       namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
-    const prefix = `${namespacePrefix}${type}:`;
+    let prefix = `${namespacePrefix}${type}:`;
 
-    const idMatchesPrefix = id.startsWith(prefix);
+    let idMatchesPrefix = id.startsWith(prefix);
+    if (!idMatchesPrefix && namespace && flexible && this.registry.isMultiNamespace(type)) {
+      // retry checking the prefix by treating this raw ID as the single-namespace ID format
+      prefix = `${namespace}:${type}:`;
+      idMatchesPrefix = id.startsWith(prefix);
+    }
 
     return { prefix, idMatchesPrefix };
   }

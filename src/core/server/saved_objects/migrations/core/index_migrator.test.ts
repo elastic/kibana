@@ -42,6 +42,7 @@ describe('IndexMigrator', () => {
       documentMigrator: {
         migrationVersion: {},
         migrate: _.identity,
+        migrateAndConvert: _.identity,
       },
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
     };
@@ -317,7 +318,7 @@ describe('IndexMigrator', () => {
   test('transforms all docs from the original index', async () => {
     let count = 0;
     const { client } = testOpts;
-    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
+    const migrateAndConvertDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
       return {
         ...doc,
         attributes: { name: ++count },
@@ -326,7 +327,8 @@ describe('IndexMigrator', () => {
 
     testOpts.documentMigrator = {
       migrationVersion: { foo: '1.2.3' },
-      migrate: migrateDoc,
+      migrate: jest.fn(),
+      migrateAndConvert: migrateAndConvertDoc,
     };
 
     withIndex(client, {
@@ -340,14 +342,14 @@ describe('IndexMigrator', () => {
     await new IndexMigrator(testOpts).migrate();
 
     expect(count).toEqual(2);
-    expect(migrateDoc).toHaveBeenCalledWith({
+    expect(migrateAndConvertDoc).toHaveBeenNthCalledWith(1, {
       id: '1',
       type: 'foo',
       attributes: { name: 'Bar' },
       migrationVersion: {},
       references: [],
     });
-    expect(migrateDoc).toHaveBeenCalledWith({
+    expect(migrateAndConvertDoc).toHaveBeenNthCalledWith(2, {
       id: '2',
       type: 'foo',
       attributes: { name: 'Baz' },
@@ -372,13 +374,14 @@ describe('IndexMigrator', () => {
 
   test('rejects when the migration function throws an error', async () => {
     const { client } = testOpts;
-    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
+    const migrateAndConvertDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
       throw new Error('error migrating document');
     });
 
     testOpts.documentMigrator = {
       migrationVersion: { foo: '1.2.3' },
-      migrate: migrateDoc,
+      migrate: jest.fn(),
+      migrateAndConvert: migrateAndConvertDoc,
     };
 
     withIndex(client, {

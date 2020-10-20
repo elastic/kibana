@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { mockUuidv5 } from './__mocks__';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
@@ -42,6 +43,10 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   );
   return registry;
 };
+
+beforeEach(() => {
+  mockUuidv5.mockClear();
+});
 
 describe('DocumentMigrator', () => {
   function testOpts() {
@@ -112,6 +117,65 @@ describe('DocumentMigrator', () => {
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
         /expected a function, but got 23/i
+      );
+    });
+
+    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple'`, () => {
+      const invalidDefinition = {
+        kibanaVersion: '3.2.3',
+        typeRegistry: createRegistry({
+          name: 'foo',
+          convertToMultiNamespaceTypeVersion: 'bar',
+        }),
+        log: mockLogger,
+      };
+      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple', but got 'single'.`
+      );
+    });
+
+    it(`validates convertToMultiNamespaceTypeVersion must be a semver`, () => {
+      const invalidDefinition = {
+        kibanaVersion: '3.2.3',
+        typeRegistry: createRegistry({
+          name: 'foo',
+          convertToMultiNamespaceTypeVersion: 'bar',
+          namespaceType: 'multiple',
+        }),
+        log: mockLogger,
+      };
+      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected value to be a semver, but got 'bar'.`
+      );
+    });
+
+    it('validates convertToMultiNamespaceTypeVersion is not greater than the current Kibana version', () => {
+      const invalidDefinition = {
+        kibanaVersion: '3.2.3',
+        typeRegistry: createRegistry({
+          name: 'foo',
+          convertToMultiNamespaceTypeVersion: '3.2.4',
+          namespaceType: 'multiple',
+        }),
+        log: mockLogger,
+      };
+      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
+      );
+    });
+
+    it('validates convertToMultiNamespaceTypeVersion is not used on a patch version', () => {
+      const invalidDefinition = {
+        kibanaVersion: '3.2.3',
+        typeRegistry: createRegistry({
+          name: 'foo',
+          convertToMultiNamespaceTypeVersion: '3.1.1',
+          namespaceType: 'multiple',
+        }),
+        log: mockLogger,
+      };
+      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.1.1' cannot be used on a patch version (must be like 'x.y.0').`
       );
     });
   });
@@ -636,6 +700,146 @@ describe('DocumentMigrator', () => {
       expect(migrationVersion).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
+      });
+    });
+
+    describe('conversion to multi-namespace type', () => {
+      it('assumes documents w/ undefined migrationVersion are up to date', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+            // no migration transforms are defined, the migrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
+          ),
+        });
+        const obj = {
+          id: 'mischievous',
+          type: 'dog',
+          attributes: { name: 'Ann' },
+        } as SavedObjectUnsanitizedDoc;
+        const actual = migrator.migrateAndConvert(obj);
+        expect(actual).toEqual({
+          id: 'mischievous',
+          type: 'dog',
+          attributes: { name: 'Ann' },
+          migrationVersion: { dog: '1.0.0' },
+          // there is no 'namespaces' field because no transforms were applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+        });
+      });
+
+      it('skips conversion transforms when using `migrate`', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'dog',
+            namespaceType: 'multiple',
+            convertToMultiNamespaceTypeVersion: '1.0.0',
+          }),
+        });
+        const obj = {
+          id: 'cowardly',
+          type: 'dog',
+          attributes: { name: 'Leslie' },
+          migrationVersion: {},
+        };
+        const actual = migrator.migrate(obj);
+        expect(actual).toEqual({
+          id: 'cowardly',
+          type: 'dog',
+          attributes: { name: 'Leslie' },
+          migrationVersion: { dog: '1.0.0' },
+          // there is no 'namespaces' field because no transforms were applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+        });
+      });
+
+      describe('correctly applies conversion transforms', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'dog',
+            namespaceType: 'multiple',
+            convertToMultiNamespaceTypeVersion: '1.0.0',
+          }),
+        });
+        const obj = {
+          id: 'loud',
+          type: 'dog',
+          attributes: { name: 'Wally' },
+          migrationVersion: {},
+        };
+
+        it('in the default space', () => {
+          const actual = migrator.migrateAndConvert(obj);
+          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(actual).toEqual({
+            id: 'loud',
+            type: 'dog',
+            attributes: { name: 'Wally' },
+            migrationVersion: { dog: '1.0.0' },
+            namespaces: ['default'],
+          });
+        });
+
+        it('in a non-default space', () => {
+          const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
+          expect(mockUuidv5).toHaveBeenCalledTimes(1);
+          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:dog:loud', 'DNSUUID');
+          expect(actual).toEqual({
+            id: 'uuidv5',
+            type: 'dog',
+            attributes: { name: 'Wally' },
+            migrationVersion: { dog: '1.0.0' },
+            namespaces: ['foo-namespace'],
+            originId: 'loud',
+          });
+        });
+      });
+
+      describe('correctly applies conversion and migration transforms', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'dog',
+            namespaceType: 'multiple',
+            migrations: {
+              '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+              '2.0.0': (doc) => doc, // noop
+            },
+            convertToMultiNamespaceTypeVersion: '1.0.0', // the conversion transform occurs before the migration transform above
+          }),
+        });
+        const obj = {
+          id: 'hungry',
+          type: 'dog',
+          attributes: { name: 'Remy' },
+          migrationVersion: {},
+        };
+
+        it('in the default space', () => {
+          const actual = migrator.migrateAndConvert(obj);
+          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(actual).toEqual({
+            id: 'hungry',
+            type: 'dog',
+            attributes: { name: 'Remy' },
+            migrationVersion: { dog: '2.0.0' },
+            namespaces: ['default'],
+          });
+        });
+
+        it('in a non-default space', () => {
+          const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
+          expect(mockUuidv5).toHaveBeenCalledTimes(1);
+          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:dog:hungry', 'DNSUUID');
+          expect(actual).toEqual({
+            id: 'uuidv5',
+            type: 'dog',
+            attributes: { name: 'Remy' },
+            migrationVersion: { dog: '2.0.0' },
+            namespaces: ['foo-namespace'],
+            originId: 'hungry',
+          });
+        });
       });
     });
   });

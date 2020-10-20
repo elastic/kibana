@@ -17,16 +17,8 @@
  * under the License.
  */
 
-/*
- * This file contains the logic for transforming saved objects to / from
- * the raw document format as stored in ElasticSearch.
- */
+const mockUuidv5 = jest.fn().mockReturnValue('uuidv5');
+Object.defineProperty(mockUuidv5, 'DNS', { value: 'DNSUUID', writable: false });
+jest.mock('uuid/v5', () => mockUuidv5);
 
-export {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocParseOptions,
-  SavedObjectsRawDocSource,
-} from './types';
-export { SavedObjectsSerializer } from './serializer';
+export { mockUuidv5 };

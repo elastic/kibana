@@ -249,6 +249,41 @@ export interface SavedObjectsType {
    */
   migrations?: SavedObjectMigrationMap;
   /**
+   * If defined, objects of this type will be converted to multi-namespace objects when migrating to this version.
+   *
+   * Requirements:
+   *
+   *  1. This string value must be a valid semver version
+   *  2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}
+   *  3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`}
+   *
+   * Example of a single-namespace type in 7.10:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'single',
+   *   mappings: {...}
+   * }
+   * ```
+   *
+   * Example after converting to a multi-namespace type in 7.11:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'multiple',
+   *   mappings: {...},
+   *   convertToMultiNamespaceTypeVersion: '7.11.0'
+   * }
+   * ```
+   *
+   * Note: a migration function can be optionally specified for the same version.
+   */
+  convertToMultiNamespaceTypeVersion?: string;
+  /**
    * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
   management?: SavedObjectsTypeManagementDefinition;
