@@ -53,22 +53,31 @@ import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 const AdvancedPolicyForms = React.memo(() => {
   return (
-    <EuiFlexGrid columns={3}>
-      <EuiFlexItem>
-        <FormattedMessage
-          id="xpack.securitySolution.policyAdvanced.fieldName"
-          defaultMessage="Field Name"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <FormattedMessage
-          id="xpack.securitySolution.policyAdvanced.supportedEndpointVersion"
-          defaultMessage="Supported endpoint version"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <FormattedMessage id="xpack.securitySolution.policyAdvanced.value" defaultMessage="Value" />
-      </EuiFlexItem>
+    // <EuiFlexGroup>
+    <EuiFlexGrid>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.securitySolution.policyAdvanced.fieldName"
+            defaultMessage="Field Name"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.securitySolution.policyAdvanced.supportedEndpointVersion"
+            defaultMessage="Supported endpoint version"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.securitySolution.policyAdvanced.value"
+            defaultMessage="Value"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
       {AdvancedPolicySchema.map((advancedField, index) => {
         const configPath = advancedField.key.split('.');
         return (

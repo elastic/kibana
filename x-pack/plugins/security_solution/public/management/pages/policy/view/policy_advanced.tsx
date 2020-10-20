@@ -6,7 +6,7 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
@@ -71,19 +71,21 @@ export const PolicyAdvanced = React.memo(
 
     return (
       <>
-        <EuiFlexItem>
-          <h1>{configPath.join('.')}</h1>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <h1>
-            {lastSupportedVersion
-              ? `${firstSupportedVersion}-${lastSupportedVersion}`
-              : `${firstSupportedVersion}+`}
-          </h1>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldText value={value as string} onChange={onChange} />
-        </EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <h1>{configPath.join('.')}</h1>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <h1>
+              {lastSupportedVersion
+                ? `${firstSupportedVersion}-${lastSupportedVersion}`
+                : `${firstSupportedVersion}+`}
+            </h1>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldText value={value as string} onChange={onChange} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     );
   }
