@@ -411,6 +411,15 @@ export function App({
         return;
       }
 
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
+          defaultMessage: `Saved '{visTitle}'`,
+          values: {
+            visTitle: docToSave.title,
+          },
+        })
+      );
+
       if (
         attributeService.inputIsRefType(newInput) &&
         newInput.savedObjectId !== originalSavedObjectId
