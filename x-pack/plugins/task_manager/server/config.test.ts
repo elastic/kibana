@@ -117,7 +117,37 @@ describe('config validation', () => {
     `);
   });
 
-  test('the monitored_task_execution_thresholds warn_threshold must be lte error_threshold', () => {
+  test('the monitored_task_execution_thresholds ensures that the default warn_threshold is lt the default error_threshold', () => {
+    const config: Record<string, unknown> = {
+      monitored_task_execution_thresholds: {
+        default: {
+          warn_threshold: 80,
+          error_threshold: 70,
+        },
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[monitored_task_execution_thresholds.default]: warn_threshold (80) must be less than, or equal to, error_threshold (70)"`
+    );
+  });
+
+  test('the monitored_task_execution_thresholds allows the default warn_threshold to equal the default error_threshold', () => {
+    const config: Record<string, unknown> = {
+      monitored_task_execution_thresholds: {
+        default: {
+          warn_threshold: 70,
+          error_threshold: 70,
+        },
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).not.toThrowError();
+  });
+
+  test('the monitored_task_execution_thresholds ensures that the warn_threshold is lte error_threshold on custom thresholds', () => {
     const config: Record<string, unknown> = {
       monitored_task_execution_thresholds: {
         custom: {
@@ -131,7 +161,27 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[monitored_task_execution_thresholds.custom.alerting:always-fires]: warn_threshold must be less than, or equal to, error_threshold"`
+      `"[monitored_task_execution_thresholds.custom.alerting:always-fires]: warn_threshold (90) must be less than, or equal to, error_threshold (80)"`
     );
+  });
+
+  test('the monitored_task_execution_thresholds allows a custom error_threshold which is lower than the default warn_threshold', () => {
+    const config: Record<string, unknown> = {
+      monitored_task_execution_thresholds: {
+        default: {
+          warn_threshold: 80,
+          error_threshold: 90,
+        },
+        custom: {
+          'alerting:always-fires': {
+            error_threshold: 60,
+            warn_threshold: 50,
+          },
+        },
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).not.toThrowError();
   });
 });

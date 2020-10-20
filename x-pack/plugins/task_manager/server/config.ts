@@ -28,13 +28,9 @@ export const taskExecutionFailureThresholdSchema = schema.object(
     }),
   },
   {
-    validate: (config) => {
-      if (
-        config.error_threshold &&
-        config.warn_threshold &&
-        config.warn_threshold > config.error_threshold
-      ) {
-        return `warn_threshold must be less than, or equal to, error_threshold`;
+    validate(config) {
+      if (config.error_threshold < config.warn_threshold) {
+        return `warn_threshold (${config.warn_threshold}) must be less than, or equal to, error_threshold (${config.error_threshold})`;
       }
     },
   }
