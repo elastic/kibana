@@ -36,7 +36,10 @@ import {
 import { getToastNotifications } from '../util/dependency_cache';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+} from '../../../common/constants/search';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -84,6 +87,7 @@ import {
 } from './timeseriesexplorer_utils';
 import { EMPTY_FIELD_VALUE_LABEL } from './components/entity_control/entity_control';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
+import { extractErrorMessage } from '../../../common/util/errors';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -128,6 +132,8 @@ function getTimeseriesexplorerDefaultState() {
     dataNotChartable: false,
     entitiesLoading: false,
     entityValues: {},
+    annotationError: undefined,
+    annotationData: [],
     focusAnnotationData: [],
     focusAggregations: {},
     focusAggregationInterval: {},
@@ -188,6 +194,7 @@ export class TimeSeriesExplorer extends React.Component {
         this.resizeRef.current !== null ? this.resizeRef.current.offsetWidth - containerPadding : 0,
     });
   };
+  unmounted = false;
 
   /**
    * Subject for listening brush time range selection.
@@ -831,6 +838,22 @@ export class TimeSeriesExplorer extends React.Component {
     mlFieldFormatService.populateFormats([jobId]).catch((err) => {
       console.log('Error populating field formats:', err);
     });
+
+    ml.annotations
+      .getAnnotations({
+        jobIds: [jobId],
+        earliestMs: null,
+        latestMs: null,
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+      })
+      .then((resp) => {
+        if (!this.unmounted && resp?.success === true) {
+          this.setState({ annotationData: resp.annotations[jobId] ?? [] });
+        }
+      })
+      .catch((error) => {
+        this.setState({ annotationData: [], annotationError: extractErrorMessage(error) });
+      });
   }
 
   componentDidMount() {
@@ -1026,6 +1049,7 @@ export class TimeSeriesExplorer extends React.Component {
   componentWillUnmount() {
     this.subscriptions.unsubscribe();
     this.resizeChecker.destroy();
+    this.unmounted = true;
   }
 
   render() {
@@ -1046,6 +1070,7 @@ export class TimeSeriesExplorer extends React.Component {
       dataNotChartable,
       entityValues,
       focusAggregationInterval,
+      annotationData,
       focusAnnotationError,
       focusAnnotationData,
       focusAggregations,
@@ -1077,6 +1102,7 @@ export class TimeSeriesExplorer extends React.Component {
       contextForecastData,
       contextAggregationInterval,
       swimlaneData,
+      annotationData,
       focusAnnotationData,
       focusChartData,
       focusForecastData,

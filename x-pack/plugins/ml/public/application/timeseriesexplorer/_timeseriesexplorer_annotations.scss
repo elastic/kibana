@@ -76,3 +76,55 @@ $mlAnnotationRectDefaultFillOpacity: 0.05;
 .mlAnnotationHidden {
   display: none;
 }
+
+.mlAnnotationText {
+  text-anchor: middle;
+  font-size: $euiFontSizeXS;
+  font-family: $euiFontFamily;
+  font-weight: $euiFontWeightMedium;
+
+  fill: $euiColorFullShade;
+  transition: fill $euiAnimSpeedFast;
+}
+
+.mlAnnotationText-isBlur {
+  fill: $euiColorMediumShade;
+  transition: fill $euiAnimSpeedFast;
+}
+
+.mlAnnotationTextRect {
+  fill: $euiColorLightShade;
+  transition: fill $euiAnimSpeedFast;
+}
+
+.mlAnnotationTextRect-isBlur {
+  fill: $euiColorLightestShade;
+  transition: fill $euiAnimSpeedFast;
+}
+
+.mlAnnotationHidden {
+  display: none;
+}
+
+
+// context annotation marker
+.mlContextAnnotationRect {
+  stroke: $euiColorFullShade;
+  stroke-width: $mlAnnotationBorderWidth;
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity;
+  transition: stroke-opacity $euiAnimSpeedFast;
+
+  fill: $euiColorFullShade;
+  fill-opacity: $mlAnnotationRectDefaultFillOpacity;
+  transition: fill-opacity $euiAnimSpeedFast;
+
+  shape-rendering: geometricPrecision;
+}
+
+.mlContextAnnotationRect-isBlur {
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity / 2;
+  transition: stroke-opacity $euiAnimSpeedFast;
+
+  fill-opacity: $mlAnnotationRectDefaultFillOpacity / 2;
+  transition: fill-opacity $euiAnimSpeedFast;
+}

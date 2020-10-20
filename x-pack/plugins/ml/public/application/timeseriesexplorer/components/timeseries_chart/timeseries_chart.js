@@ -225,7 +225,11 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.renderFocusChartOnly === false || prevProps.svgWidth !== this.props.svgWidth) {
+    if (
+      this.props.renderFocusChartOnly === false ||
+      prevProps.svgWidth !== this.props.svgWidth ||
+      prevProps.showAnnotations !== this.props.showAnnotations
+    ) {
       this.renderChart();
       this.drawContextChartSelection();
     }
@@ -348,6 +352,7 @@ class TimeseriesChartIntl extends Component {
 
     const context = svg
       .append('g')
+      .attr('id', 'timeSeriesBrush')
       .attr('class', 'context-chart')
       .attr(
         'transform',
@@ -947,8 +952,14 @@ class TimeseriesChartIntl extends Component {
   }
 
   drawContextElements(cxtGroup, cxtWidth, cxtChartHeight, swlHeight) {
-    const { bounds, contextChartData, contextForecastData, modelPlotEnabled } = this.props;
-
+    const {
+      bounds,
+      contextChartData,
+      contextForecastData,
+      modelPlotEnabled,
+      annotationData,
+      showAnnotations,
+    } = this.props;
     const data = contextChartData;
 
     this.contextXScale = d3.time
@@ -1064,6 +1075,38 @@ class TimeseriesChartIntl extends Component {
 
     cxtGroup.append('path').datum(data).attr('class', 'values-line').attr('d', contextValuesLine);
     drawLineChartDots(data, cxtGroup, contextValuesLine, 1);
+
+    cxtGroup.append('g').classed('mlContextAnnotations', true);
+
+    const ctxAnnotations = cxtGroup
+      .select('.mlContextAnnotations')
+      .selectAll('g.mlContextAnnotation')
+      .data(showAnnotations && annotationData ? annotationData : [], (d) => d._id || '');
+
+    ctxAnnotations.enter().append('g').classed('mlContextAnnotation', true);
+
+    const ctxAnnotationRects = ctxAnnotations
+      .selectAll('.mlContextAnnotationRect')
+      .data((d) => [d]);
+
+    ctxAnnotationRects
+      .enter()
+      .append('rect')
+      .attr('rx', 2)
+      .attr('ry', 2)
+      .classed('mlContextAnnotationRect', true);
+
+    ctxAnnotationRects
+      .attr('x', (d) => {
+        const date = moment(d.timestamp);
+        return this.contextXScale(date);
+      })
+      .attr('y', cxtChartHeight / 8)
+      .attr('height', 10)
+      .attr('width', 10);
+
+    ctxAnnotations.classed('mlAnnotationHidden', !showAnnotations);
+    ctxAnnotationRects.exit().remove();
 
     // Create the path elements for the forecast value line and bounds area.
     if (contextForecastData !== undefined) {
