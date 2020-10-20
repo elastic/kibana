@@ -84,7 +84,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
               'xpack.ml.dataframe.analytics.outlierExploration.legacyFeatureInfluenceFormatCalloutTitle',
               {
                 defaultMessage:
-                  'Color coded table cells based on feature influence are not available, because this results index uses an unsupported legacy format. Please clone an rerun the job to enable support for color coding.',
+                  'Color coded table cells based on feature influence are not available because the results index uses an unsupported legacy format. Please clone and rerun the job.',
               }
             )}
             iconType="pin"
