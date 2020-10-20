@@ -20,7 +20,7 @@ import {
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime } from './panel_content_utilities';
+import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';

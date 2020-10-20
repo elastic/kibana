@@ -15,7 +15,7 @@ import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime, noTimestampRetrievedText } from './panel_content_utilities';
+import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
 import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
