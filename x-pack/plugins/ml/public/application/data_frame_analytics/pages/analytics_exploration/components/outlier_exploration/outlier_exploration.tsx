@@ -6,7 +6,7 @@
 
 import React, { useState, FC } from 'react';
 
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -33,7 +33,12 @@ interface ExplorationProps {
 }
 
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
-  const { indexPattern, jobConfig, needsDestIndexPattern } = useResultsViewConfig(jobId);
+  const {
+    indexPattern,
+    indexPatternErrorMessage,
+    jobConfig,
+    needsDestIndexPattern,
+  } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
@@ -60,6 +65,22 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     columnsWithCharts.findIndex(
       (d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}.feature_name`
     ) === -1;
+
+  if (indexPatternErrorMessage !== undefined) {
+    return (
+      <EuiPanel grow={false}>
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
+            defaultMessage: 'An error occurred loading the index data.',
+          })}
+          color="danger"
+          iconType="cross"
+        >
+          <p>{indexPatternErrorMessage}</p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
 
   return (
     <>
