@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, FunctionComponent } from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -73,9 +74,12 @@ export const WarmPhase: FunctionComponent<Props> = ({
   errors,
   isShowingErrors,
 }) => {
-  const [{ [useRolloverPath]: hotPhaseRolloverEnabled }] = useFormData({
-    watch: [useRolloverPath],
+  const [formData] = useFormData({
+    watch: useRolloverPath,
   });
+
+  const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
+
   return (
     <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
       <>

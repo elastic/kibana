@@ -54,7 +54,7 @@ export const AddComment = React.memo(
 
       const fieldName = 'comment';
       const { setFieldValue, reset, submit } = form;
-      const [{ comment }] = useFormData({ form, watch: [fieldName] });
+      const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
 
       const onCommentChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
         setFieldValue,
