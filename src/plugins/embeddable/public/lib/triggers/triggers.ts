@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaDatatable } from '../../../../expressions';
+import { Datatable } from '../../../../expressions';
 import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
@@ -29,7 +29,7 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
     data: Array<{
-      table: Pick<KibanaDatatable, 'rows' | 'columns'>;
+      table: Pick<Datatable, 'rows' | 'columns'>;
       column: number;
       row: number;
       value: any;
@@ -42,7 +42,7 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
 export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
-    table: KibanaDatatable;
+    table: Datatable;
     column: number;
     range: number[];
     timeFieldName?: string;

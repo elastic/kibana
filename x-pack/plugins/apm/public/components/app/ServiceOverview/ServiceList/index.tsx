@@ -55,6 +55,17 @@ const AppLink = styled(TransactionOverviewLink)`
   ${truncate('100%')};
 `;
 
+const ToolTipWrapper = styled.span`
+  width: 100%;
+  .apmServiceList__serviceNameTooltip {
+    width: 100%;
+    .apmServiceList__serviceNameContainer {
+      // removes 24px referent to the icon placed on the left side of the text.
+      width: calc(100% - 24px);
+    }
+  }
+`;
+
 export const getServiceColumns = (
   dateBucketUnit: DateBucketUnit
 ): Array<ITableColumn<ServiceListItem>> => [
@@ -81,24 +92,27 @@ export const getServiceColumns = (
     width: '40%',
     sortable: true,
     render: (_, { serviceName, agentName }) => (
-      <EuiToolTip
-        delay="long"
-        content={formatString(serviceName)}
-        id="service-name-tooltip"
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {agentName && (
-            <EuiFlexItem grow={false}>
-              <AgentIcon agentName={agentName} />
+      <ToolTipWrapper>
+        <EuiToolTip
+          delay="long"
+          content={formatString(serviceName)}
+          id="service-name-tooltip"
+          anchorClassName="apmServiceList__serviceNameTooltip"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {agentName && (
+              <EuiFlexItem grow={false}>
+                <AgentIcon agentName={agentName} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem className="apmServiceList__serviceNameContainer">
+              <AppLink serviceName={serviceName} className="eui-textTruncate">
+                {formatString(serviceName)}
+              </AppLink>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <AppLink serviceName={serviceName}>
-              {formatString(serviceName)}
-            </AppLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiToolTip>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      </ToolTipWrapper>
     ),
   },
   {

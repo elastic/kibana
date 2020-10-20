@@ -22,6 +22,7 @@ import { MLCallout } from './ServiceList/MLCallout';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
 import { useDateBucketOptions } from '../../../hooks/use_date_bucket_options';
+import { Correlations } from '../Correlations';
 
 const NUM_BUCKETS = 20;
 
@@ -136,6 +137,9 @@ export function ServiceOverview() {
   return (
     <>
       <EuiSpacer />
+
+      <Correlations />
+
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localFiltersConfig} />
