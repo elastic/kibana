@@ -340,6 +340,11 @@ export function getIndexPatternDatasource({
     },
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
+
+    getErrorMessage(state, dimensionGroups) {
+      // console.log('datasource.getErrorMessage', { state, dimensionGroups });
+      return undefined;
+    },
   };
 
   return indexPatternDatasource;

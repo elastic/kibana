@@ -66,7 +66,7 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  expressionBuildError: string | undefined;
+  expressionBuildError?: { shortMessage: string; longMessage: string };
   expandError: boolean;
 }
 
@@ -117,7 +117,7 @@ export function WorkspacePanel({
   );
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    expressionBuildError: undefined as string | undefined,
+    expressionBuildError: undefined,
     expandError: false,
   });
 
@@ -135,8 +135,13 @@ export function WorkspacePanel({
           datasourceLayers: framePublicAPI.datasourceLayers,
         });
       } catch (e) {
+        const message = activeVisualization?.getErrorMessage(visualizationState, framePublicAPI);
+        const defaultMessage = {
+          shortMessage: 'An error occurred in the expression',
+          longMessage: e.toString(),
+        };
         // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
+        setLocalState((s) => ({ ...s, expressionBuildError: message || defaultMessage }));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -250,6 +255,8 @@ export function WorkspacePanel({
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={localState}
+        visualizationState={visualizationState}
+        visualization={activeVisualization}
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
@@ -291,6 +298,8 @@ export const InnerVisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
+  visualizationState,
+  visualization,
 }: {
   expression: Ast | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -299,6 +308,8 @@ export const InnerVisualizationWrapper = ({
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState;
   ExpressionRendererComponent: ReactExpressionRendererType;
+  visualizationState: unknown;
+  visualization: Visualization | null;
 }) => {
   const autoRefreshFetch$ = useMemo(() => timefilter.getAutoRefreshFetch$(), [timefilter]);
 
@@ -331,7 +342,7 @@ export const InnerVisualizationWrapper = ({
             defaultMessage="An error occurred in the expression"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{localState.expressionBuildError}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{localState.expressionBuildError.longMessage}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -346,16 +357,21 @@ export const InnerVisualizationWrapper = ({
         onEvent={onEvent}
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
+
+          const { shortMessage, longMessage } =
+            visualization?.getErrorMessage(visualizationState, framePublicAPI) || {};
           return (
             <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
               <EuiFlexItem>
                 <EuiIcon type="alert" size="xl" color="danger" />
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="expression-failure">
-                <FormattedMessage
-                  id="xpack.lens.editorFrame.dataFailure"
-                  defaultMessage="An error occurred when loading data."
-                />
+                {shortMessage ?? (
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.dataFailure"
+                    defaultMessage={'An error occurred when loading data.'}
+                  />
+                )}
               </EuiFlexItem>
               {visibleErrorMessage ? (
                 <EuiFlexItem className="eui-textBreakAll" grow={false}>
@@ -372,7 +388,7 @@ export const InnerVisualizationWrapper = ({
                     })}
                   </EuiButtonEmpty>
 
-                  {localState.expandError ? visibleErrorMessage : null}
+                  {localState.expandError ? longMessage || visibleErrorMessage : null}
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>

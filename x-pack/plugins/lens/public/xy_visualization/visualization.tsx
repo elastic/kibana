@@ -278,7 +278,71 @@ export const xyVisualization: Visualization<State> = {
 
   toExpression,
   toPreviewExpression,
+
+  getErrorMessage(state, frame) {
+    // Data error handling below here
+    const hasNoXAccessor = ({ xAccessor }: LayerConfig) => xAccessor == null;
+    const hasNoAccessors = ({ accessors }: LayerConfig) =>
+      accessors == null || accessors.length === 0;
+
+    // check if the layes in the state are compatible with this type of chart
+    if (state.layers.length > 1) {
+      const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
+        ['X', hasNoXAccessor],
+        ['Y', hasNoAccessors],
+      ];
+
+      // filter those layers with no accessors at all
+      const filteredLayers = state.layers.filter(
+        (layer) => !checks.every(([dimension, missingCriteria]) => missingCriteria(layer))
+      );
+
+      for (const [dimension, criteria] of checks) {
+        const result = validateLayersForDimension(dimension, filteredLayers, criteria);
+        if (!result.valid) {
+          return result.payload;
+        }
+      }
+    }
+    return undefined;
+  },
 };
+
+function validateLayersForDimension(
+  dimension: string,
+  layers: LayerConfig[],
+  missingCriteria: (layer: LayerConfig) => boolean
+): { valid: true } | { valid: false; payload: { shortMessage: string; longMessage: string } } {
+  // Multiple layers must be consistent:
+  // * either a dimension is missing in ALL of them
+  // * or should not miss on any
+  if (layers.every(missingCriteria) || !layers.some(missingCriteria)) {
+    return { valid: true };
+  }
+  // otherwise it's an error and it has to be reported
+  const layerMissingAccessors = layers.reduce((missing: number[], layer, i) => {
+    if (missingCriteria(layer)) {
+      missing.push(i);
+    }
+    return missing;
+  }, []);
+  return {
+    valid: false,
+    payload: {
+      shortMessage: i18n.translate(`xpack.lens.xyVisualization.dataFailure${dimension}Short`, {
+        defaultMessage: `Some layers are missing the ${dimension} dimension`,
+      }),
+      longMessage: i18n.translate(`xpack.lens.xyVisualization.dataFailure${dimension}Long`, {
+        defaultMessage: `{layers, plural, one {Layer} other {Layers}} ${layerMissingAccessors
+          .map((i: number) => i + 1)
+          .join(
+            ', '
+          )} {layers, plural, one {has} other {have}} no dimension field set for the ${dimension} axis`,
+        values: { layers: layerMissingAccessors.length },
+      }),
+    },
+  };
+}
 
 function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {

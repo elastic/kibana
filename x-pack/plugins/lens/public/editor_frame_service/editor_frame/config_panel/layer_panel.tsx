@@ -409,6 +409,7 @@ export function LayerPanel(
                         isNew: false,
                       });
                     },
+                    dimensionGroups: [activeGroup],
                   }}
                 />
               )}

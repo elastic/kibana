@@ -180,6 +180,11 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+
+  getErrorMessage: (
+    state: T,
+    dimensionGroups: VisualizationDimensionGroupConfig[]
+  ) => { shortMessage: string; longMessage: string } | undefined;
 }
 
 /**
@@ -232,6 +237,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
@@ -557,6 +563,14 @@ export interface Visualization<T = unknown> {
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>
   ) => Ast | string | null;
+  /**
+   * The frame will call this function on all visualizations at error time in order
+   * to provide more context to the error and show it to the user
+   */
+  getErrorMessage: (
+    state: T,
+    frame: FramePublicAPI
+  ) => { shortMessage: string; longMessage: string } | undefined;
 }
 
 export interface LensFilterEvent {
