@@ -13,10 +13,7 @@
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
     "plugins/licensing/**/*",
-    "plugins/global_search/**/*",
-    "../src/plugins/usage_collection/**/*",
-    "../src/plugins/telemetry_collection_manager/**/*",
-    "../src/plugins/telemetry/**/*"
+    "plugins/global_search/**/*"
   ],
   "compilerOptions": {
     "paths": {
