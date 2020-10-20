@@ -61,7 +61,11 @@ export const Groups: React.FC = () => {
 
   if (newGroup && hasMessages) {
     messages[0].description = (
-      <EuiLinkButton to={getGroupPath(newGroup.id)} color="primary">
+      <EuiLinkButton
+        to={getGroupPath(newGroup.id)}
+        color="primary"
+        data-test-subj="NewGroupManageButton"
+      >
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action', {
           defaultMessage: 'Manage Group',
         })}
