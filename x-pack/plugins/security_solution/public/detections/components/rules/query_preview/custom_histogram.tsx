@@ -54,7 +54,7 @@ export const PreviewCustomQueryHistogram = ({
 
   const subtitle = useMemo(
     (): string =>
-      isLoading ? i18n.PREVIEW_SUBTITLE_LOADING : i18n.QUERY_PREVIEW_TITLE(totalCount),
+      isLoading ? i18n.QUERY_PREVIEW_SUBTITLE_LOADING : i18n.QUERY_PREVIEW_TITLE(totalCount),
     [isLoading, totalCount]
   );
 
@@ -67,7 +67,7 @@ export const PreviewCustomQueryHistogram = ({
       barConfig={barConfig}
       title={i18n.QUERY_GRAPH_HITS_TITLE}
       subtitle={subtitle}
-      disclaimer={i18n.PREVIEW_QUERY_DISCLAIMER}
+      disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER}
       isLoading={isLoading}
       data-test-subj="queryPreviewCustomHistogram"
     />
