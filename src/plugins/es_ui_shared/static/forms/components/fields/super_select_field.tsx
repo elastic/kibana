@@ -42,8 +42,8 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      {...rest}
     >
       <EuiSuperSelect
         fullWidth
