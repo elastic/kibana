@@ -82,8 +82,6 @@ async function createSetupSideEffects(
     throw new Error('Policy not found');
   }
 
-  await ensureAgentActionPolicyChangeExists(soClient);
-
   for (const installedPackage of installedPackages) {
     const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
       (packageName) => installedPackage.name === packageName
@@ -108,6 +106,8 @@ async function createSetupSideEffects(
       );
     }
   }
+
+  await ensureAgentActionPolicyChangeExists(soClient);
 
   return { isIntialized: true };
 }

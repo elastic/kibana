@@ -14,7 +14,7 @@ export async function isAgentsSetup(soClient: SavedObjectsClientContract): Promi
   const adminUser = await outputService.getAdminUser(soClient, false);
   const outputId = await outputService.getDefaultOutputId(soClient);
   // If admin user (fleet_enroll) and output id exist Agents are correctly setup
-  return adminUser !== null && outputId !== null;
+  return adminUser && outputId ? true : false;
 }
 
 /**
