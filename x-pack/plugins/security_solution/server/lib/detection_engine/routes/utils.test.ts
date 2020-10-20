@@ -7,7 +7,7 @@
 import Boom from 'boom';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
   transformError,
@@ -321,7 +321,7 @@ describe('utils', () => {
         saved_objects: [],
       };
       expect(
-        convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
+        convertToSnakeCase<IRuleStatusSOAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
       ).toEqual(null);
     });
   });

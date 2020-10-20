@@ -105,7 +105,7 @@ export interface RuleAlertType extends Alert {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleStatusAttributes extends Record<string, any> {
+export interface IRuleStatusSOAttributes extends Record<string, any> {
   alertId: string; // created alert id.
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
@@ -141,13 +141,13 @@ export interface RuleStatusResponse {
 }
 
 export interface IRuleSavedAttributesSavedObjectAttributes
-  extends IRuleStatusAttributes,
+  extends IRuleStatusSOAttributes,
     SavedObjectAttributes {}
 
 export interface IRuleStatusSavedObject {
   type: string;
   id: string;
-  attributes: Array<SavedObject<IRuleStatusAttributes & SavedObjectAttributes>>;
+  attributes: Array<SavedObject<IRuleStatusSOAttributes & SavedObjectAttributes>>;
   references: unknown[];
   updated_at: string;
   version: string;

@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../src/core/server';
 import { AlertsClient } from '../../../../../alerts/server';
 import { BadRequestError } from '../errors/bad_request_error';
-import { RuleStatusResponse, IRuleStatusAttributes } from '../rules/types';
+import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 export interface OutputError {
   message: string;
@@ -296,7 +296,7 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
 
 export const mergeStatuses = (
   id: string,
-  failures: Array<SavedObjectsFindResult<IRuleStatusAttributes>>,
+  failures: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
   acc: RuleStatusResponse
 ): RuleStatusResponse => {
   if (failures.length === 0) {
@@ -304,14 +304,16 @@ export const mergeStatuses = (
       ...acc,
     };
   }
-  const convertedCurrentStatus = convertToSnakeCase<IRuleStatusAttributes>(failures[0].attributes);
+  const convertedCurrentStatus = convertToSnakeCase<IRuleStatusSOAttributes>(
+    failures[0].attributes
+  );
   return {
     ...acc,
     [id]: {
       current_status: convertedCurrentStatus,
       failures: failures
         .slice(1)
-        .map((errorItem) => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes)),
+        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem.attributes)),
     },
   } as RuleStatusResponse;
 };
