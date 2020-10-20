@@ -17,12 +17,8 @@ import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 import {
   AnomalySeverity,
   SelectAnomalySeverity,
-} from './SelectAnomalySeverity';
+} from './select_anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
 import {
   EnvironmentField,
   ServiceField,
@@ -32,8 +28,8 @@ import {
 interface Params {
   windowSize: number;
   windowUnit: string;
-  serviceName: string;
-  transactionType: string;
+  serviceName?: string;
+  transactionType?: string;
   environment: string;
   anomalySeverityType:
     | ANOMALY_SEVERITY.CRITICAL
@@ -53,23 +49,17 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { urlParams } = useUrlParams();
   const transactionTypes = useServiceTransactionTypes(urlParams);
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end } = urlParams;
+  const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
-  const supportedTransactionTypes = transactionTypes.filter((transactionType) =>
-    [TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST].includes(transactionType)
-  );
 
-  if (!supportedTransactionTypes.length || !serviceName) {
+  if (serviceName && !transactionTypes.length) {
     return null;
   }
-
-  // 'page-load' for RUM, 'request' otherwise
-  const transactionType = supportedTransactionTypes[0];
 
   const defaults: Params = {
     windowSize: 15,
     windowUnit: 'm',
-    transactionType,
+    transactionType: transactionType || transactionTypes[0],
     serviceName,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
     anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
@@ -82,7 +72,11 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
 
   const fields = [
     <ServiceField value={serviceName} />,
-    <TransactionTypeField currentValue={transactionType} />,
+    <TransactionTypeField
+      currentValue={params.transactionType}
+      options={transactionTypes.map((key) => ({ text: key, value: key }))}
+      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+    />,
     <EnvironmentField
       currentValue={params.environment}
       options={environmentOptions}

@@ -12,7 +12,16 @@ import { BeatsPanel } from './beats_panel';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import {
+  STANDALONE_CLUSTER_CLUSTER_UUID,
+  ALERT_MISSING_MONITORING_DATA,
+  ELASTICSEARCH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  APM_SYSTEM_ID,
+} from '../../../../common/constants';
+import { filterAlertStates } from '../../../alerts/filter_alert_states';
 
 export function Overview(props) {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -37,12 +46,22 @@ export function Overview(props) {
               license={props.cluster.license}
               setupMode={props.setupMode}
               showLicenseExpiration={props.showLicenseExpiration}
-              alerts={props.alerts}
+              alerts={filterAlertStates(props.alerts, (type, { state }) => {
+                if (type === ALERT_MISSING_MONITORING_DATA) {
+                  return state.stackProduct === ELASTICSEARCH_SYSTEM_ID;
+                }
+                return true;
+              })}
             />
             <KibanaPanel
               {...props.cluster.kibana}
               setupMode={props.setupMode}
-              alerts={props.alerts}
+              alerts={filterAlertStates(props.alerts, (type, { state }) => {
+                if (type === ALERT_MISSING_MONITORING_DATA) {
+                  return state.stackProduct === KIBANA_SYSTEM_ID;
+                }
+                return true;
+              })}
             />
           </Fragment>
         ) : null}
@@ -50,12 +69,35 @@ export function Overview(props) {
         <LogstashPanel
           {...props.cluster.logstash}
           setupMode={props.setupMode}
-          alerts={props.alerts}
+          alerts={filterAlertStates(props.alerts, (type, { state }) => {
+            if (type === ALERT_MISSING_MONITORING_DATA) {
+              return state.stackProduct === LOGSTASH_SYSTEM_ID;
+            }
+            return true;
+          })}
         />
 
-        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} />
+        <BeatsPanel
+          {...props.cluster.beats}
+          setupMode={props.setupMode}
+          alerts={filterAlertStates(props.alerts, (type, { state }) => {
+            if (type === ALERT_MISSING_MONITORING_DATA) {
+              return state.stackProduct === BEATS_SYSTEM_ID;
+            }
+            return true;
+          })}
+        />
 
-        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} />
+        <ApmPanel
+          {...props.cluster.apm}
+          setupMode={props.setupMode}
+          alerts={filterAlertStates(props.alerts, (type, { state }) => {
+            if (type === ALERT_MISSING_MONITORING_DATA) {
+              return state.stackProduct === APM_SYSTEM_ID;
+            }
+            return true;
+          })}
+        />
       </EuiPageBody>
     </EuiPage>
   );

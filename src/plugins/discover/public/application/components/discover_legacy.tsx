@@ -31,7 +31,6 @@ import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DiscoverFetchError, FetchError } from './fetch_error/fetch_error';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import {
@@ -54,7 +53,6 @@ export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
-  fetchError: FetchError;
   fieldCounts: Record<string, number>;
   histogramData: Chart;
   hits: number;
@@ -95,7 +93,6 @@ export function DiscoverLegacy({
   addColumn,
   fetch,
   fetchCounter,
-  fetchError,
   fieldCounts,
   histogramData,
   hits,
@@ -214,13 +211,7 @@ export function DiscoverLegacy({
                 />
               )}
               {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-              {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
-              <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
-                {fetchError && <DiscoverFetchError fetchError={fetchError} />}
-                <div className="dscOverlay" style={{ display: fetchError ? 'none' : '' }}>
-                  <LoadingSpinner />
-                </div>
-              </span>
+              {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
                   <SkipBottomButton onClick={onSkipBottomButtonClick} />

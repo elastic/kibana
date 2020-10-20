@@ -80,7 +80,6 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
         const resp = await ctx.transform!.dataClient.callAsCurrentUser('search', {
           index: ML_DF_NOTIFICATION_INDEX_PATTERN,
           ignore_unavailable: true,
-          rest_total_hits_as_int: true,
           size: SIZE,
           body: {
             sort: [{ timestamp: { order: 'desc' } }, { transform_id: { order: 'asc' } }],
@@ -89,7 +88,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
         });
 
         let messages: TransformMessage[] = [];
-        if (resp.hits.total !== 0) {
+        if (resp.hits.total.value > 0) {
           messages = resp.hits.hits.map((hit: AuditMessage) => hit._source);
           messages.reverse();
         }

@@ -18,6 +18,8 @@
  */
 
 import { Execution } from './execution';
+import { ExpressionValueError } from '../expression_types/specs';
+import { ExpressionAstExpression } from '../ast';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
@@ -53,14 +55,14 @@ export class ExecutionContract<
    * wraps that error into `ExpressionValueError` type and returns that.
    * This function never throws.
    */
-  getData = async () => {
+  getData = async (): Promise<Output | ExpressionValueError> => {
     try {
       return await this.execution.result;
     } catch (e) {
       return {
         type: 'error',
         error: {
-          type: e.type,
+          name: e.name,
           message: e.message,
           stack: e.stack,
         },
@@ -80,7 +82,7 @@ export class ExecutionContract<
   /**
    * Get AST used to execute the expression.
    */
-  getAst = () => this.execution.state.get().ast;
+  getAst = (): ExpressionAstExpression => this.execution.state.get().ast;
 
   /**
    * Get Inspector adapters provided to all functions of expression through

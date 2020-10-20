@@ -23,7 +23,7 @@ import { WrapperPage } from '../../common/components/wrapper_page';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
-import { LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors, State } from '../../common/store';

@@ -18,7 +18,7 @@ import {
 } from '../../components';
 
 jest.mock('../../../../kibana_services', () => {
-  const services = require.requireActual('../../../../kibana_services');
+  const services = jest.requireActual('../../../../kibana_services');
   return {
     ...services,
     trackUiMetric: jest.fn(),

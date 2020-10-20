@@ -18,6 +18,8 @@ import {
   SumIndexPatternColumn,
   maxOperation,
   MaxIndexPatternColumn,
+  medianOperation,
+  MedianIndexPatternColumn,
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
 import { countOperation, CountIndexPatternColumn } from './count';
@@ -27,22 +29,6 @@ import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../..
 import { DateRange } from '../../../../common';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
-
-// List of all operation definitions registered to this data source.
-// If you want to implement a new operation, add the definition to this array and
-// the column type to the `IndexPatternColumn` union type below.
-const internalOperationDefinitions = [
-  filtersOperation,
-  termsOperation,
-  dateHistogramOperation,
-  minOperation,
-  maxOperation,
-  averageOperation,
-  cardinalityOperation,
-  sumOperation,
-  countOperation,
-  rangeOperation,
-];
 
 /**
  * A union type of all available column types. If a column is of an unknown type somewhere
@@ -59,7 +45,27 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | CardinalityIndexPatternColumn
   | SumIndexPatternColumn
+  | MedianIndexPatternColumn
   | CountIndexPatternColumn;
+
+export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
+
+// List of all operation definitions registered to this data source.
+// If you want to implement a new operation, add the definition to this array and
+// the column type to the `IndexPatternColumn` union type below.
+const internalOperationDefinitions = [
+  filtersOperation,
+  termsOperation,
+  dateHistogramOperation,
+  minOperation,
+  maxOperation,
+  averageOperation,
+  cardinalityOperation,
+  sumOperation,
+  medianOperation,
+  countOperation,
+  rangeOperation,
+];
 
 export { termsOperation } from './terms';
 export { rangeOperation } from './ranges';
@@ -71,7 +77,7 @@ export { countOperation } from './count';
 /**
  * Properties passed to the operation-specific part of the popover editor
  */
-export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
+export interface ParamEditorProps<C> {
   currentColumn: C;
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
@@ -138,13 +144,25 @@ interface BaseBuildColumnArgs {
   indexPattern: IndexPattern;
 }
 
-/**
- * Shape of an operation definition. If the type parameter of the definition
- * indicates a field based column, `getPossibleOperationForField` has to be
- * specified, otherwise `getPossibleOperationForDocument` has to be defined.
- */
-export interface OperationDefinition<C extends BaseIndexPatternColumn>
-  extends BaseOperationDefinitionProps<C> {
+interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
+  input: 'none';
+  /**
+   * Builds the column object for the given parameters. Should include default p
+   */
+  buildColumn: (
+    arg: BaseBuildColumnArgs & {
+      previousColumn?: IndexPatternColumn;
+    }
+  ) => C;
+  /**
+   * Returns the meta data of the operation if applied. Undefined
+   * if the field is not applicable.
+   */
+  getPossibleOperation: () => OperationMetadata | undefined;
+}
+
+interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
+  input: 'field';
   /**
    * Returns the meta data of the operation if applied to the given field. Undefined
    * if the field is not applicable to the operation.
@@ -156,7 +174,8 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn>
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      previousColumn?: IndexPatternColumn;
+      // previousColumn?: IndexPatternColumn;
+      previousColumn?: C;
     }
   ) => C;
   /**
@@ -175,8 +194,28 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn>
    * @param indexPattern The index pattern that field is on.
    * @param field The field that the user changed to.
    */
-  onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
+  onFieldChange: (
+    // oldColumn: FieldBasedIndexPatternColumn,
+    oldColumn: C,
+    indexPattern: IndexPattern,
+    field: IndexPatternField
+  ) => C;
 }
+
+interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
+  field: FieldBasedOperationDefinition<C>;
+  none: FieldlessOperationDefinition<C>;
+}
+
+/**
+ * Shape of an operation definition. If the type parameter of the definition
+ * indicates a field based column, `getPossibleOperationForField` has to be
+ * specified, otherwise `getPossibleOperation` has to be defined.
+ */
+export type OperationDefinition<
+  C extends BaseIndexPatternColumn,
+  Input extends keyof OperationDefinitionMap<C>
+> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.
@@ -188,7 +227,9 @@ export type OperationType = typeof internalOperationDefinitions[number]['type'];
  * This is an operation definition of an unspecified column out of all possible
  * column types.
  */
-export type GenericOperationDefinition = OperationDefinition<IndexPatternColumn>;
+export type GenericOperationDefinition =
+  | OperationDefinition<IndexPatternColumn, 'field'>
+  | OperationDefinition<IndexPatternColumn, 'none'>;
 
 /**
  * List of all available operation definitions
@@ -206,7 +247,10 @@ export const operationDefinitions = internalOperationDefinitions as GenericOpera
  * (e.g. `import { termsOperation } from './operations/definitions'`). This map is
  * intended to be used in situations where the operation type is not known during compile time.
  */
-export const operationDefinitionMap = internalOperationDefinitions.reduce(
+export const operationDefinitionMap: Record<
+  string,
+  GenericOperationDefinition
+> = internalOperationDefinitions.reduce(
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
   {}
-) as Record<OperationType, GenericOperationDefinition>;
+);

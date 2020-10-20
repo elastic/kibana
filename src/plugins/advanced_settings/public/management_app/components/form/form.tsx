@@ -154,7 +154,9 @@ export class Form extends PureComponent<FormProps> {
       let equalsToDefault = false;
       switch (type) {
         case 'array':
-          valueToSave = valueToSave.split(',').map((val: string) => val.trim());
+          valueToSave = valueToSave.trim();
+          valueToSave =
+            valueToSave === '' ? [] : valueToSave.split(',').map((val: string) => val.trim());
           equalsToDefault = valueToSave.join(',') === (defVal as string[]).join(',');
           break;
         case 'json':
@@ -386,6 +388,13 @@ export class Form extends PureComponent<FormProps> {
     const { unsavedChanges } = this.state;
     const { visibleSettings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories: Category[] = [];
+    const hasUnsavedChanges = !isEmpty(unsavedChanges);
+
+    if (hasUnsavedChanges) {
+      document.body.classList.add('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    } else {
+      document.body.classList.remove('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    }
 
     categories.forEach((category) => {
       if (visibleSettings[category] && visibleSettings[category].length) {
@@ -406,7 +415,7 @@ export class Form extends PureComponent<FormProps> {
               })
             : this.maybeRenderNoSettings(clearQuery)}
         </div>
-        {!isEmpty(unsavedChanges) && this.renderBottomBar()}
+        {hasUnsavedChanges && this.renderBottomBar()}
       </Fragment>
     );
   }

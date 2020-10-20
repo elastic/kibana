@@ -15,7 +15,7 @@ exports[`Storyshots renderers/DropdownFilter default 1`] = `
       -- ANY --
     </option>
   </select>
-  <div
+  <span
     className="canvasDropdownFilter__icon"
     data-euiicon-type="arrowDown"
   />
@@ -55,7 +55,7 @@ exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
       Item Three
     </option>
   </select>
-  <div
+  <span
     className="canvasDropdownFilter__icon"
     data-euiicon-type="arrowDown"
   />
@@ -96,7 +96,7 @@ exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
       Item Three
     </option>
   </select>
-  <div
+  <span
     className="canvasDropdownFilter__icon"
     data-euiicon-type="arrowDown"
   />
@@ -137,7 +137,7 @@ exports[`Storyshots renderers/DropdownFilter with choices and value 1`] = `
       Item Three
     </option>
   </select>
-  <div
+  <span
     className="canvasDropdownFilter__icon"
     data-euiicon-type="arrowDown"
   />
@@ -160,7 +160,7 @@ exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
       -- ANY --
     </option>
   </select>
-  <div
+  <span
     className="canvasDropdownFilter__icon"
     data-euiicon-type="arrowDown"
   />

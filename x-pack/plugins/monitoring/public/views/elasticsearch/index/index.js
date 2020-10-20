@@ -66,6 +66,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
             indexName,
           },
         }),
+        telemetryPageViewTitle: 'elasticsearch_index',
         pageTitle: i18n.translate('xpack.monitoring.elasticsearch.indices.overview.pageTitle', {
           defaultMessage: 'Index: {indexName}',
           values: {

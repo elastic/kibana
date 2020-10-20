@@ -9,16 +9,12 @@ import { omit } from 'lodash';
 import {
   setupRequest,
   Setup,
-  SetupUIFilters,
   SetupTimeRange,
 } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../projections/typings';
-import {
-  localUIFilterNames,
-  LocalUIFilterName,
-} from '../lib/ui_filters/local_ui_filters/config';
-import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
+import { localUIFilterNames } from '../lib/ui_filters/local_ui_filters/config';
+import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
 import { getServicesProjection } from '../projections/services';
 import { getTransactionGroupsProjection } from '../projections/transaction_groups';
@@ -32,6 +28,7 @@ import { getServiceNodesProjection } from '../projections/service_nodes';
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { APMRequestHandlerContext } from './typings';
+import { LocalUIFilterName } from '../../common/ui_filter';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -99,23 +96,23 @@ function createLocalFiltersRoute<
     },
     handler: async ({ context, request }) => {
       const setup = await setupRequest(context, request);
+      const { uiFilters } = setup;
       const { query } = context.params;
 
-      const { uiFilters, filterNames } = query;
-      const parsedUiFilters = JSON.parse(uiFilters);
+      const { filterNames } = query;
       const projection = await getProjection({
         query,
         context,
         setup: {
           ...setup,
-          uiFiltersES: getUiFiltersES(omit(parsedUiFilters, filterNames)),
+          esFilter: getEsFilter(omit(uiFilters, filterNames)),
         },
       });
 
       return getLocalUIFilters({
         projection,
         setup,
-        uiFilters: parsedUiFilters,
+        uiFilters,
         localFilterNames: filterNames,
       });
     },
@@ -273,6 +270,6 @@ type GetProjection<
   context,
 }: {
   query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupUIFilters & SetupTimeRange;
+  setup: Setup & SetupTimeRange;
   context: APMRequestHandlerContext;
 }) => Promise<TProjection> | TProjection;

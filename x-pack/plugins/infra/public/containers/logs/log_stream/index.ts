@@ -9,6 +9,7 @@ import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { LogEntry, LogEntriesCursor } from '../../../../common/http_api';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface LogStreamProps {
   sourceId: string;
@@ -31,6 +32,7 @@ export function useLogStream({
   query,
   center,
 }: LogStreamProps): LogStreamState {
+  const { services } = useKibanaContextForPlugin();
   const [entries, setEntries] = useState<LogStreamState['entries']>([]);
 
   const parsedQuery = useMemo(() => {
@@ -47,13 +49,16 @@ export function useLogStream({
         setEntries([]);
         const fetchPosition = center ? { center } : { before: 'last' };
 
-        return fetchLogEntries({
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          query: parsedQuery,
-          ...fetchPosition,
-        });
+        return fetchLogEntries(
+          {
+            sourceId,
+            startTimestamp,
+            endTimestamp,
+            query: parsedQuery,
+            ...fetchPosition,
+          },
+          services.http.fetch
+        );
       },
       onResolve: ({ data }) => {
         setEntries(data.entries);

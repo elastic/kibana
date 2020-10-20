@@ -136,6 +136,8 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   unusedFromRoot('optimize.workers'),
   unusedFromRoot('optimize.profile'),
   unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
+  unusedFromRoot('elasticsearch.preserveHost'),
+  unusedFromRoot('elasticsearch.startupTimeout'),
   rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   configPathDeprecation,

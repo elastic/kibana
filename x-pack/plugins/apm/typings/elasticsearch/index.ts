@@ -7,11 +7,22 @@
 import { SearchParams, SearchResponse } from 'elasticsearch';
 import { AggregationResponseMap, AggregationInputMap } from './aggregations';
 
+interface CollapseQuery {
+  field: string;
+  inner_hits: {
+    name: string;
+    size?: number;
+    sort?: [{ date: 'asc' | 'desc' }];
+  };
+  max_concurrent_group_searches?: number;
+}
+
 export interface ESSearchBody {
   query?: any;
   size?: number;
   aggs?: AggregationInputMap;
   track_total_hits?: boolean | number;
+  collapse?: CollapseQuery;
 }
 
 export type ESSearchRequest = Omit<SearchParams, 'body'> & {

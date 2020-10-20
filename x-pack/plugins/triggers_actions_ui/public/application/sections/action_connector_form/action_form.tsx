@@ -29,7 +29,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { HttpSetup, ToastsSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   IErrorObject,
@@ -56,15 +56,13 @@ interface ActionAccordionFormProps {
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: ToastsSetup;
   docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   capabilities: ApplicationStart['capabilities'];
 }
 
@@ -86,6 +84,7 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   capabilities,
   docLinks,
 }: ActionAccordionFormProps) => {
@@ -173,6 +172,16 @@ export const ActionForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, actionTypesIndex]);
+
+  useEffect(() => {
+    const hasActionWithBrokenConnector = actions.some(
+      (action) => !connectors.find((connector) => connector.id === action.id)
+    );
+    if (setHasActionsWithBrokenConnector) {
+      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions, connectors]);
 
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
@@ -270,7 +279,7 @@ export const ActionForm = ({
                     }}
                   >
                     <FormattedMessage
-                      defaultMessage="Add new"
+                      defaultMessage="Add connector"
                       id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
                     />
                   </EuiButtonEmpty>
@@ -311,6 +320,8 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               defaultMessage={defaultActionMessage ?? undefined}
               docLinks={docLinks}
+              http={http}
+              toastNotifications={toastNotifications}
               actionConnector={actionConnector}
             />
           </Suspense>

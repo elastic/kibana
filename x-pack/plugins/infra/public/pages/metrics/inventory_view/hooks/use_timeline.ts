@@ -81,10 +81,12 @@ export function useTimeline(
   ]);
   const { timeLength, intervalInSeconds } = timeLengthResult;
 
+  const endTime = currentTime + intervalInSeconds * 1000;
+  const startTime = currentTime - timeLength * 1000;
   const timerange: InfraTimerangeInput = {
     interval: displayInterval ?? '',
-    to: currentTime + intervalInSeconds * 1000,
-    from: currentTime - timeLength * 1000,
+    to: endTime,
+    from: startTime,
     ignoreLookback: true,
     forceInterval: true,
   };
@@ -127,6 +129,8 @@ export function useTimeline(
     error: (error && error.message) || null,
     loading: !interval ? true : loading,
     timeseries,
+    startTime,
+    endTime,
     reload: makeRequest,
   };
 }

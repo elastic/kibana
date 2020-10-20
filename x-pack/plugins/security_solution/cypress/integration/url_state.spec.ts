@@ -14,7 +14,7 @@ import {
 import { HOSTS_NAMES } from '../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../screens/hosts/main';
 import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/security_header';
-import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
+import { TIMELINE_TITLE } from '../screens/timeline';
 
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import {
@@ -32,15 +32,17 @@ import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
 import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/security_header';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
-  addDescriptionToTimeline,
   addNameToTimeline,
   closeTimeline,
-  executeTimelineKQL,
+  populateTimeline,
   waitForTimelineChanges,
 } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../urls/state';
+
+import { timeline } from '../objects/timeline';
+import { TIMELINE } from '../screens/create_new_case';
 
 const ABSOLUTE_DATE = {
   endTime: '2019-08-01T20:33:29.186Z',
@@ -51,8 +53,7 @@ const ABSOLUTE_DATE = {
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/61612
-describe.skip('url state', () => {
+describe('url state', () => {
   it('sets the global start and end dates from the url', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
@@ -222,23 +223,12 @@ describe.skip('url state', () => {
   it('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
-    executeTimelineKQL('host.name: *');
-
-    cy.get(SERVER_SIDE_EVENT_COUNT)
-      .invoke('text')
-      .then((strCount) => {
-        const intCount = +strCount;
-        cy.wrap(intCount).should('be.above', 0);
-      });
+    populateTimeline();
 
     cy.server();
     cy.route('PATCH', '**/api/timeline').as('timeline');
 
-    const timelineName = 'Security';
-    const timelineDescription = 'This is the best timeline of the world';
-    addNameToTimeline(timelineName);
-    waitForTimelineChanges();
-    addDescriptionToTimeline(timelineDescription);
+    addNameToTimeline(timeline.title);
     waitForTimelineChanges();
 
     cy.wait('@timeline').then((response) => {
@@ -249,9 +239,10 @@ describe.skip('url state', () => {
       cy.visit('/app/home');
       cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
-      cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).invoke('text').should('not.equal', 'Updating');
+      cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
+      cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timelineName);
+      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
     });
   });
 });

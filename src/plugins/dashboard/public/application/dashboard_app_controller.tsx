@@ -81,7 +81,7 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IKbnUrlStateStorage, unhashUrl } from '../../../kibana_utils/public';
+import { IKbnUrlStateStorage, setStateToKbnUrl, unhashUrl } from '../../../kibana_utils/public';
 import {
   addFatalError,
   AngularHttpError,
@@ -144,7 +144,6 @@ export class DashboardAppController {
       notifications,
       overlays,
       chrome,
-      injectedMetadata,
       fatalErrors,
       uiSettings,
       savedObjects,
@@ -359,10 +358,6 @@ export class DashboardAppController {
         incomingEmbeddable = undefined;
       }
 
-      let expandedPanelId;
-      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        expandedPanelId = dashboardContainer.getInput().expandedPanelId;
-      }
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
       const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
@@ -384,7 +379,7 @@ export class DashboardAppController {
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
         description: dashboardStateManager.getDescription(),
-        expandedPanelId,
+        expandedPanelId: dashboardStateManager.getExpandedPanelId(),
       };
     };
 
@@ -530,9 +525,6 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
       filterManager.getFilters()
     );
-
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
 
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
@@ -1083,7 +1075,12 @@ export class DashboardAppController {
           allowEmbed: true,
           allowShortUrl:
             !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href),
+          shareableUrl: setStateToKbnUrl(
+            '_a',
+            dashboardStateManager.getAppState(),
+            { useHash: false, storeInHashQuery: true },
+            unhashUrl(window.location.href)
+          ),
           objectId: dash.id,
           objectType: 'dashboard',
           sharingData: {

@@ -33,9 +33,6 @@ export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Dat
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
-export const [getKibanaMapFactory, setKibanaMapFactory] = createGetterSetter<any>(
-  'KibanaMapFactory'
-);
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

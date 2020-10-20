@@ -197,7 +197,6 @@ export interface SafeResolverTree {
    */
   entityID: string;
   children: SafeResolverChildren;
-  relatedEvents: Omit<SafeResolverRelatedEvents, 'entityID'>;
   relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: SafeResolverAncestry;
   lifecycle: SafeResolverEvent[];
@@ -268,10 +267,10 @@ export interface ResolverRelatedEvents {
 }
 
 /**
- * Safe version of `ResolverRelatedEvents`
+ * Response structure for the events route.
+ * `nextEvent` will be set to null when at the time of querying there were no more results to retrieve from ES.
  */
-export interface SafeResolverRelatedEvents {
-  entityID: string;
+export interface ResolverPaginatedEvents {
   events: SafeResolverEvent[];
   nextEvent: string | null;
 }
@@ -299,6 +298,15 @@ export interface HostResultList {
   request_page_index: number;
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
+}
+
+/**
+ * The data_stream fields in an elasticsearch document.
+ */
+export interface DataStream {
+  dataset: string;
+  namespace: string;
+  type: string;
 }
 
 /**
@@ -557,6 +565,7 @@ export type HostMetadata = Immutable<{
     version: string;
   };
   host: Host;
+  data_stream: DataStream;
 }>;
 
 export interface LegacyEndpointEvent {
@@ -676,6 +685,11 @@ export type SafeEndpointEvent = Partial<{
     version: ECSField<string>;
     type: ECSField<string>;
   }>;
+  data_stream: Partial<{
+    type: ECSField<string>;
+    dataset: ECSField<string>;
+    namespace: ECSField<string>;
+  }>;
   ecs: Partial<{
     version: ECSField<string>;
   }>;
@@ -709,7 +723,10 @@ export type SafeEndpointEvent = Partial<{
     forwarded_ip: ECSField<string>;
   }>;
   dns: Partial<{
-    question: Partial<{ name: ECSField<string> }>;
+    question: Partial<{
+      name: ECSField<string>;
+      type: ECSField<string>;
+    }>;
   }>;
   process: Partial<{
     entity_id: ECSField<string>;
@@ -1000,6 +1017,7 @@ interface HostPolicyResponseAppliedArtifact {
  */
 export interface HostPolicyResponse {
   '@timestamp': number;
+  data_stream: DataStream;
   elastic: {
     agent: {
       id: string;

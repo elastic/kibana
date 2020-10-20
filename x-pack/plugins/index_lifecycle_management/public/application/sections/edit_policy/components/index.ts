@@ -18,7 +18,9 @@ export {
   NodeAllocation,
   NodeAttrsDetails,
   NodesDataProvider,
-  DefaultAllocationWarning,
+  DefaultAllocationNotice,
 } from './data_tier_allocation';
 export { DescribedFormField } from './described_form_field';
 export { Forcemerge } from './forcemerge';
+
+export * from './phases';

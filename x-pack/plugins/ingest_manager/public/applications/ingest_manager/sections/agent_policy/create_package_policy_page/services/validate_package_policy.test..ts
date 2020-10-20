@@ -7,7 +7,7 @@ import {
   PackageInfo,
   InstallationStatus,
   NewPackagePolicy,
-  RegistryConfigTemplate,
+  RegistryPolicyTemplate,
 } from '../../../../types';
 import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
 
@@ -32,9 +32,9 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
       },
     },
     status: InstallationStatus.notInstalled,
-    datasets: [
+    data_streams: [
       {
-        name: 'foo',
+        dataset: 'foo',
         streams: [
           {
             input: 'foo',
@@ -44,7 +44,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'bar',
+        dataset: 'bar',
         streams: [
           {
             input: 'bar',
@@ -59,7 +59,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'bar2',
+        dataset: 'bar2',
         streams: [
           {
             input: 'bar',
@@ -69,7 +69,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'disabled',
+        dataset: 'disabled',
         streams: [
           {
             input: 'with-disabled-streams',
@@ -80,7 +80,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
       {
-        name: 'disabled2',
+        dataset: 'disabled2',
         streams: [
           {
             input: 'with-disabled-streams',
@@ -90,7 +90,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         ],
       },
     ],
-    config_templates: [
+    policy_templates: [
       {
         name: 'pkgPolicy1',
         title: 'Package policy 1',
@@ -465,7 +465,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
     expect(
       validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
-        config_templates: undefined,
+        policy_templates: undefined,
       })
     ).toEqual({
       name: null,
@@ -476,7 +476,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
     expect(
       validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
-        config_templates: [],
+        policy_templates: [],
       })
     ).toEqual({
       name: null,
@@ -490,7 +490,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
     expect(
       validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
-        config_templates: [{} as RegistryConfigTemplate],
+        policy_templates: [{} as RegistryPolicyTemplate],
       })
     ).toEqual({
       name: null,
@@ -501,7 +501,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
     expect(
       validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
-        config_templates: [({ inputs: [] } as unknown) as RegistryConfigTemplate],
+        policy_templates: [({ inputs: [] } as unknown) as RegistryPolicyTemplate],
       })
     ).toEqual({
       name: null,

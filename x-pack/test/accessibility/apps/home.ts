@@ -11,8 +11,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const retry = getService('retry');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
 
-  describe('Kibana Home', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/80929
+  describe.skip('Kibana Home', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
@@ -46,15 +48,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // issue:  https://github.com/elastic/kibana/issues/38980
-    it.skip('navigating back to home page from console meets a11y requirements', async () => {
+    it('navigating back to home page from console meets a11y requirements', async () => {
       await PageObjects.home.clickOnLogo();
       await a11y.testAppSnapshot();
     });
 
-    // Extra clickon logo step here will be removed after preceding test is fixed.
     it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
-      await PageObjects.home.clickOnLogo();
       await PageObjects.home.clickOnAddData();
       await a11y.testAppSnapshot();
     });
@@ -85,8 +84,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('unDock the side nav', async () => {
+    // TODO https://github.com/elastic/kibana/issues/77828
+    it.skip('undock the side nav', async () => {
       await PageObjects.home.dockTheSideNav();
+      await a11y.testAppSnapshot();
+    });
+
+    it('passes with searchbox open', async () => {
+      await PageObjects.common.navigateToApp('home');
+      await testSubjects.click('header-search');
       await a11y.testAppSnapshot();
     });
   });

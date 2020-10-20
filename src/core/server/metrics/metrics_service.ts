@@ -50,7 +50,10 @@ export class MetricsService
       .pipe(first())
       .toPromise();
 
-    this.metricsCollector = new OpsMetricsCollector(http.server, config.cGroupOverrides);
+    this.metricsCollector = new OpsMetricsCollector(http.server, {
+      logger: this.logger,
+      ...config.cGroupOverrides,
+    });
 
     await this.refreshMetrics();
 

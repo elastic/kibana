@@ -13,11 +13,7 @@ import {
   ERROR_LOG_MESSAGE,
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../projections/errors';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
@@ -35,7 +31,7 @@ export async function getErrorGroups({
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const { apmEventClient } = setup;
 

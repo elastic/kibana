@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+import { SO_SEARCH_LIMIT } from '../constants';
 import { ListWithKuery } from '../types';
 
 /**
@@ -40,19 +41,13 @@ export const findAllSOs = async <T = unknown>(
   const { type, sortField, sortOrder, kuery } = options;
   let savedObjectResults: SavedObjectsFindResponse<T>['saved_objects'] = [];
 
-  // TODO: This is the default `index.max_result_window` ES setting, which dictates
-  // the maximum amount of results allowed to be returned from a search. It's possible
-  // for the actual setting to differ from the default. Can we retrieve the real
-  // setting in the future?
-  const searchLimit = 10000;
-
   const query = {
     type,
     sortField,
     sortOrder,
     filter: kuery,
     page: 1,
-    perPage: searchLimit,
+    perPage: SO_SEARCH_LIMIT,
   };
 
   const { saved_objects: initialSOs, total } = await soClient.find<T>(query);

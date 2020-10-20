@@ -308,7 +308,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                                 type="button"
                               >
-                                <div
+                                <span
                                   aria-hidden="true"
                                   class="euiButtonIcon__icon"
                                   data-euiicon-type="cross"
@@ -457,7 +457,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         size="m"
                                         type="cross"
                                       >
-                                        <div
+                                        <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
                                           data-euiicon-type="cross"
@@ -749,7 +749,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                               size="l"
                                               type="importAction"
                                             >
-                                              <div
+                                              <span
                                                 aria-hidden="true"
                                                 className="euiFilePicker__icon"
                                                 data-euiicon-type="importAction"
@@ -1437,7 +1437,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                               size="l"
                                               type="importAction"
                                             >
-                                              <div
+                                              <span
                                                 aria-hidden="true"
                                                 className="euiFilePicker__icon"
                                                 data-euiicon-type="importAction"
@@ -2125,7 +2125,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                               size="l"
                                               type="importAction"
                                             >
-                                              <div
+                                              <span
                                                 aria-hidden="true"
                                                 className="euiFilePicker__icon"
                                                 data-euiicon-type="importAction"
@@ -2813,7 +2813,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                               size="l"
                                               type="importAction"
                                             >
-                                              <div
+                                              <span
                                                 aria-hidden="true"
                                                 className="euiFilePicker__icon"
                                                 data-euiicon-type="importAction"
@@ -3501,7 +3501,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                               size="l"
                                               type="importAction"
                                             >
-                                              <div
+                                              <span
                                                 aria-hidden="true"
                                                 className="euiFilePicker__icon"
                                                 data-euiicon-type="importAction"

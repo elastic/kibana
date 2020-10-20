@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/isEqual';
-import merge from 'lodash/merge';
+import { isEqual } from 'lodash';
+import { merge } from 'lodash';
 
 import { useReducer } from 'react';
 

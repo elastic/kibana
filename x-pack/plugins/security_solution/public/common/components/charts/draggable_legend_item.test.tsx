@@ -10,6 +10,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../mock/match_media';
+import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
 import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
@@ -17,19 +18,6 @@ import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('DraggableLegendItem', () => {
-  // Suppress warnings about "react-beautiful-dnd"
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  beforeAll(() => {
-    console.warn = jest.fn();
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-    console.warn = originalWarn;
-  });
-
   describe('rendering a regular (non "All others") legend item', () => {
     const legendItem: LegendItem = {
       color: '#1EA593',

@@ -13,6 +13,7 @@ import { InfraBackendLibs } from './lib/infra_types';
 import {
   initGetLogEntryCategoriesRoute,
   initGetLogEntryCategoryDatasetsRoute,
+  initGetLogEntryCategoryDatasetsStatsRoute,
   initGetLogEntryCategoryExamplesRoute,
   initGetLogEntryRateRoute,
   initGetLogEntryExamplesRoute,
@@ -54,6 +55,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
   initGetLogEntryCategoriesRoute(libs);
   initGetLogEntryCategoryDatasetsRoute(libs);
+  initGetLogEntryCategoryDatasetsStatsRoute(libs);
   initGetLogEntryCategoryExamplesRoute(libs);
   initGetLogEntryRateRoute(libs);
   initGetLogEntryAnomaliesRoute(libs);

@@ -7,7 +7,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('settings', function () {
-    this.tags(['quynh', 'skipFirefox']);
+    this.tags(['mlqa', 'skipFirefox']);
 
     loadTestFile(require.resolve('./calendar_creation'));
     loadTestFile(require.resolve('./calendar_edit'));

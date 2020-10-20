@@ -274,12 +274,12 @@ Running the action by scheduling a task means that we will no longer have a user
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                                                                            | Type   |
-| -------- | ------------------------------------------------------------------------------------------------------ | ------ |
-| id       | The id of the action you want to execute.                                                              | string |
-| params   | The `params` value to give the action type executor.                                                   | object |
-| spaceId  | The space id the action is within.                                                                     | string |
-| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string |
+| Property | Description                                                                                            | Type             |
+| -------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
+| id       | The id of the action you want to execute.                                                              | string           |
+| params   | The `params` value to give the action type executor.                                                   | object           |
+| spaceId  | The space id the action is within.                                                                     | string           |
+| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string           |
 | source   | The source of the execution, either an HTTP request or a reference to a Saved Object.                  | object, optional |
 
 ## Example
@@ -308,11 +308,11 @@ This api runs the action and asynchronously returns the result of running the ac
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                                                          | Type   |
-| -------- | ------------------------------------------------------------------------------------ | ------ |
-| id       | The id of the action you want to execute.                                            | string |
-| params   | The `params` value to give the action type executor.                                 | object |
-| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.| object, optional |
+| Property | Description                                                                           | Type             |
+| -------- | ------------------------------------------------------------------------------------- | ---------------- |
+| id       | The id of the action you want to execute.                                             | string           |
+| params   | The `params` value to give the action type executor.                                  | object           |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object. | object, optional |
 
 ## Example
 
@@ -330,7 +330,7 @@ const result = await actionsClient.execute({
   },
   source: asSavedObjectExecutionSource({
     id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
-    type: 'alert'
+    type: 'alert',
   }),
 });
 ```
@@ -620,6 +620,7 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 | issueType     | The id of the issue type in Jira.                                                                                | string _(optional)_   |
 | priority      | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
 | labels        | An array of labels.                                                                                              | string[] _(optional)_ |
+| parent        | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
 | comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`     | object[] _(optional)_ |
 
 #### `subActionParams (issueTypes)`

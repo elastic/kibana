@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-
 import { Create } from '.';
 import { TestProviders } from '../../../common/mock';
 import { getFormMock } from '../__mock__/form';
@@ -19,9 +18,19 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
 
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { connectorsMock } from '../../containers/configure/mock';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiFieldText: () => <input />,
+  };
+});
 jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_case');
 
@@ -34,6 +43,7 @@ jest.mock(
 );
 
 jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/configure/use_connectors');
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
   () => ({
@@ -41,7 +51,7 @@ jest.mock(
       children({ tags: ['rad', 'dude'] }),
   })
 );
-
+const useConnectorsMock = useConnectors as jest.Mock;
 const useFormMock = useForm as jest.Mock;
 const useFormDataMock = useFormData as jest.Mock;
 
@@ -66,6 +76,12 @@ const sampleData = {
   description: 'what a great description',
   tags: sampleTags,
   title: 'what a cool title',
+  connector: {
+    fields: null,
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
+  },
 };
 const defaultPostCase = {
   isLoading: false,
@@ -73,17 +89,8 @@ const defaultPostCase = {
   caseData: null,
   postCase,
 };
+const sampleConnectorData = { loading: false, connectors: [] };
 describe('Create case', () => {
-  // Suppress warnings about "noSuggestions" prop
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
   const fetchTags = jest.fn();
   const formHookMock = getFormMock(sampleData);
   beforeEach(() => {
@@ -91,7 +98,12 @@ describe('Create case', () => {
     useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ description: sampleData.description }]);
+    useFormDataMock.mockImplementation(() => [
+      {
+        description: sampleData.description,
+      },
+    ]);
+    useConnectorsMock.mockReturnValue(sampleConnectorData);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     (useGetTags as jest.Mock).mockImplementation(() => ({
       tags: sampleTags,
@@ -99,63 +111,122 @@ describe('Create case', () => {
     }));
   });
 
-  it('should post case on submit click', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
-  });
+  describe('Step 1 - Case Fields', () => {
+    it('should post case on submit click', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
+    });
 
-  it('should redirect to all cases on cancel click', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-    expect(mockHistory.push).toHaveBeenCalledWith('/');
-  });
-  it('should redirect to new case when caseData is there', () => {
-    const sampleId = '777777';
-    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, caseData: { id: sampleId } }));
-    mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777');
-  });
+    it('should redirect to all cases on cancel click', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+      await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
+    });
+    it('should redirect to new case when caseData is there', async () => {
+      const sampleId = '777777';
+      usePostCaseMock.mockImplementation(() => ({
+        ...defaultPostCase,
+        caseData: { id: sampleId },
+      }));
+      mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777'));
+    });
 
-  it('should render spinner when loading', () => {
-    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, isLoading: true }));
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
+    it('should render spinner when loading', async () => {
+      usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, isLoading: true }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      await waitFor(() =>
+        expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy()
+      );
+    });
+    it('Tag options render with new tags added', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+      await waitFor(() =>
+        expect(
+          wrapper
+            .find(`[data-test-subj="caseTags"] [data-test-subj="input"]`)
+            .first()
+            .prop('options')
+        ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }])
+      );
+    });
   });
-  it('Tag options render with new tags added', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
-    );
-    expect(
-      wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
-    ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
+  describe('Step 2 - Connector Fields', () => {
+    const connectorTypes = [
+      {
+        label: 'Jira',
+        testId: 'jira-1',
+        dataTestSubj: 'connector-settings-jira',
+      },
+      {
+        label: 'Resilient',
+        testId: 'resilient-2',
+        dataTestSubj: 'connector-settings-resilient',
+      },
+      {
+        label: 'ServiceNow',
+        testId: 'servicenow-1',
+        dataTestSubj: 'connector-settings-sn',
+      },
+    ];
+    connectorTypes.forEach(({ label, testId, dataTestSubj }) => {
+      it(`should change from none to ${label} connector fields`, async () => {
+        useConnectorsMock.mockReturnValue({
+          ...sampleConnectorData,
+          connectors: connectorsMock,
+        });
+
+        const wrapper = mount(
+          <TestProviders>
+            <Router history={mockHistory}>
+              <Create />
+            </Router>
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(wrapper.find(`[data-test-subj="${dataTestSubj}"]`).exists()).toBeFalsy();
+          wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+          wrapper.find(`button[data-test-subj="dropdown-connector-${testId}"]`).simulate('click');
+          wrapper.update();
+        });
+
+        await waitFor(() => {
+          wrapper.update();
+          expect(wrapper.find(`[data-test-subj="${dataTestSubj}"]`).exists()).toBeTruthy();
+        });
+      });
+    });
   });
 });

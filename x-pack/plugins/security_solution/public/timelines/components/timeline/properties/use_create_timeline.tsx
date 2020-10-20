@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useMemo } from 'react';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
 import { useFullScreen } from '../../../../common/containers/use_full_screen';
@@ -14,9 +15,9 @@ import {
   TimelineType,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
-import { State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const useCreateTimelineButton = ({
@@ -33,9 +34,9 @@ export const useCreateTimelineButton = ({
     () => sourcererSelectors.getAllExistingIndexNamesSelector(),
     []
   );
-  const existingIndexNames = useSelector<State, string[]>(existingIndexNamesSelector, shallowEqual);
+  const existingIndexNames = useShallowEqualSelector<string[]>(existingIndexNamesSelector);
   const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
-  const globalTimeRange = useSelector(inputsSelectors.globalTimeRangeSelector);
+  const globalTimeRange = useShallowEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
     ({ id, show }) => {
       if (id === TimelineId.active && timelineFullScreen) {

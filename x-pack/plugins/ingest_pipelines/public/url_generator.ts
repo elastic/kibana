@@ -13,7 +13,7 @@ import {
   getEditPath,
   getListPath,
 } from './application/services/navigation';
-import { Dependencies } from './types';
+import { SetupDependencies } from './types';
 import { PLUGIN_ID } from '../common/constants';
 
 export const INGEST_PIPELINES_APP_ULR_GENERATOR = 'INGEST_PIPELINES_APP_URL_GENERATOR';
@@ -83,8 +83,8 @@ export class IngestPipelinesUrlGenerator
 
 export const registerUrlGenerator = (
   coreSetup: CoreSetup,
-  management: Dependencies['management'],
-  share: Dependencies['share']
+  management: SetupDependencies['management'],
+  share: SetupDependencies['share']
 ) => {
   const getAppBasePath = async (absolute = false) => {
     const [coreStart] = await coreSetup.getStartServices();

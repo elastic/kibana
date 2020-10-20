@@ -165,6 +165,19 @@ export function DiscoverField({
     );
   }
 
+  if (field.type === '_source') {
+    return (
+      <FieldButton
+        size="s"
+        className="dscSidebarItem"
+        dataTestSubj={`field-${field.name}-showDetails`}
+        fieldIcon={dscFieldIcon}
+        fieldAction={actionButton}
+        fieldName={fieldName}
+      />
+    );
+  }
+
   return (
     <EuiPopover
       ownFocus
@@ -177,7 +190,7 @@ export function DiscoverField({
           onClick={() => {
             togglePopover();
           }}
-          buttonProps={{ 'data-test-subj': `field-${field.name}-showDetails` }}
+          dataTestSubj={`field-${field.name}-showDetails`}
           fieldIcon={dscFieldIcon}
           fieldAction={actionButton}
           fieldName={fieldName}

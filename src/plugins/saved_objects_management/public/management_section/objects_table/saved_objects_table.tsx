@@ -468,7 +468,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
     const deletes = objects.savedObjects.map((object) =>
-      savedObjectsClient.delete(object.type, object.id)
+      savedObjectsClient.delete(object.type, object.id, { force: true })
     );
     await Promise.all(deletes);
 

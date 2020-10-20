@@ -14,7 +14,7 @@ jest.mock('./common', () => {
   };
 });
 
-import { installTransformForDataset } from './install';
+import { installTransform } from './install';
 import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
@@ -47,7 +47,7 @@ describe('test transform install', () => {
           type: ElasticsearchAssetType.ingestPipeline,
         },
         {
-          id: 'metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+          id: 'endpoint.metadata_current-default-0.15.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
@@ -60,15 +60,15 @@ describe('test transform install', () => {
           type: ElasticsearchAssetType.ingestPipeline,
         },
         {
-          id: 'metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+          id: 'endpoint.metadata_current-default-0.15.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
         {
-          id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
         {
-          id: 'metrics-endpoint.metadata-default-0.16.0-dev.0',
+          id: 'endpoint.metadata-default-0.16.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
@@ -91,14 +91,33 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    await installTransformForDataset(
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
+      Promise.resolve({
+        count: 1,
+        transforms: [
+          {
+            dest: {
+              index: 'index',
+            },
+          },
+        ],
+      } as {
+        count: number;
+        transforms: Array<{
+          dest: {
+            index: string;
+          };
+        }>;
+      })
+    );
+    await installTransform(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata',
+            dataset: 'endpoint.metadata',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -112,7 +131,7 @@ describe('test transform install', () => {
           },
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata Current',
             release: 'experimental',
             package: 'endpoint',
@@ -127,19 +146,28 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       [
-        'endpoint-0.16.0-dev.0/dataset/policy/elasticsearch/ingest_pipeline/default.json',
-        'endpoint-0.16.0-dev.0/dataset/metadata/elasticsearch/transform/default.json',
-        'endpoint-0.16.0-dev.0/dataset/metadata_current/elasticsearch/transform/default.json',
+        'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
       legacyScopedClusterClient.callAsCurrentUser,
       savedObjectsClient
     );
+
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
       [
         'transport.request',
         {
+          method: 'GET',
+          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
+        },
+      ],
+      [
+        'transport.request',
+        {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0/_stop',
+          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
           ignore: [404],
         },
@@ -149,7 +177,15 @@ describe('test transform install', () => {
         {
           method: 'DELETE',
           query: 'force=true',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
+        },
+      ],
+      [
+        'transport.request',
+        {
+          method: 'DELETE',
+          path: '/index',
           ignore: [404],
         },
       ],
@@ -157,7 +193,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'PUT',
-          path: '/_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
+          path: '/_transform/endpoint.metadata-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -166,7 +202,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'PUT',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -175,14 +211,14 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata-default-0.16.0-dev.0/_start',
+          path: '/_transform/endpoint.metadata-default-0.16.0-dev.0/_start',
         },
       ],
       [
         'transport.request',
         {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
         },
       ],
     ]);
@@ -198,15 +234,15 @@ describe('test transform install', () => {
               type: 'ingest_pipeline',
             },
             {
-              id: 'metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+              id: 'endpoint.metadata_current-default-0.15.0-dev.0',
               type: 'transform',
             },
             {
-              id: 'metrics-endpoint.metadata-default-0.16.0-dev.0',
+              id: 'endpoint.metadata-default-0.16.0-dev.0',
               type: 'transform',
             },
             {
-              id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+              id: 'endpoint.metadata_current-default-0.16.0-dev.0',
               type: 'transform',
             },
           ],
@@ -222,11 +258,11 @@ describe('test transform install', () => {
               type: 'ingest_pipeline',
             },
             {
-              id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+              id: 'endpoint.metadata_current-default-0.16.0-dev.0',
               type: 'transform',
             },
             {
-              id: 'metrics-endpoint.metadata-default-0.16.0-dev.0',
+              id: 'endpoint.metadata-default-0.16.0-dev.0',
               type: 'transform',
             },
           ],
@@ -263,14 +299,14 @@ describe('test transform install', () => {
       >)
     );
     legacyScopedClusterClient.callAsCurrentUser = jest.fn();
-    await installTransformForDataset(
+    await installTransform(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -284,7 +320,7 @@ describe('test transform install', () => {
           },
         ],
       } as unknown) as RegistryPackage,
-      ['endpoint-0.16.0-dev.0/dataset/metadata_current/elasticsearch/transform/default.json'],
+      ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       legacyScopedClusterClient.callAsCurrentUser,
       savedObjectsClient
     );
@@ -294,7 +330,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'PUT',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -303,7 +339,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
         },
       ],
     ]);
@@ -313,7 +349,7 @@ describe('test transform install', () => {
         'endpoint',
         {
           installed_es: [
-            { id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
+            { id: 'endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
           ],
         },
       ],
@@ -324,7 +360,7 @@ describe('test transform install', () => {
     const previousInstallation: Installation = ({
       installed_es: [
         {
-          id: 'metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          id: 'endpoint.metadata-current-default-0.15.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
@@ -346,14 +382,33 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    await installTransformForDataset(
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
+      Promise.resolve({
+        count: 1,
+        transforms: [
+          {
+            dest: {
+              index: 'index',
+            },
+          },
+        ],
+      } as {
+        count: number;
+        transforms: Array<{
+          dest: {
+            index: string;
+          };
+        }>;
+      })
+    );
+    await installTransform(
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata',
+            dataset: 'endpoint.metadata',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -367,7 +422,7 @@ describe('test transform install', () => {
           },
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata Current',
             release: 'experimental',
             package: 'endpoint',
@@ -390,8 +445,16 @@ describe('test transform install', () => {
       [
         'transport.request',
         {
+          method: 'GET',
+          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
+        },
+      ],
+      [
+        'transport.request',
+        {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
+          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
           ignore: [404],
         },
@@ -401,7 +464,15 @@ describe('test transform install', () => {
         {
           method: 'DELETE',
           query: 'force=true',
-          path: '/_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
+        },
+      ],
+      [
+        'transport.request',
+        {
+          method: 'DELETE',
+          path: '/index',
           ignore: [404],
         },
       ],

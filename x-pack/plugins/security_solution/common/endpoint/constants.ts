@@ -7,8 +7,8 @@
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 export const metadataIndexPattern = 'metrics-endpoint.metadata-*';
-export const metadataCurrentIndexPattern = 'metrics-endpoint.metadata_current-*';
-export const metadataTransformPrefix = 'metrics-endpoint.metadata-current-default';
+export const metadataCurrentIndexPattern = 'metrics-endpoint.metadata_current_*';
+export const metadataTransformPrefix = 'endpoint.metadata_current-default';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';

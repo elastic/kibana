@@ -8,10 +8,12 @@ import React from 'react';
 import { render } from 'react-dom';
 import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../legacy_shims';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 import { SetupModeFeature } from '../../common/enums';
+import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);
@@ -179,8 +181,17 @@ export const setSetupModeMenuItem = () => {
   const globalState = angularState.injector.get('globalState');
   const enabled = !globalState.inSetupMode;
 
+  const services = {
+    usageCollection: Legacy.shims.usageCollection,
+  };
+  const I18nContext = Legacy.shims.I18nContext;
+
   render(
-    <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />,
+    <KibanaContextProvider services={services}>
+      <I18nContext>
+        <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
+      </I18nContext>
+    </KibanaContextProvider>,
     document.getElementById('setupModeNav')
   );
 };
@@ -196,11 +207,14 @@ export const initSetupModeState = async ($scope: any, $injector: any, callback?:
 
   const globalState = $injector.get('globalState');
   if (globalState.inSetupMode) {
-    await toggleSetupMode(true);
+    toggleSetupMode(true);
   }
 };
 
-export const isInSetupMode = () => {
+export const isInSetupMode = (context?: ISetupModeContext) => {
+  if (context?.setupModeSupported === false) {
+    return false;
+  }
   if (setupModeState.enabled) {
     return true;
   }
