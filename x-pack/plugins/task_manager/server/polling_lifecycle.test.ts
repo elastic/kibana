@@ -45,7 +45,7 @@ describe('TaskPollingLifecycle', () => {
   afterEach(() => clock.restore());
 
   describe('start', () => {
-    test('begins poilling once start is called', () => {
+    test('begins polling once start is called', () => {
       const taskManager = new TaskPollingLifecycle(taskManagerOpts);
 
       clock.tick(150);
