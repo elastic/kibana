@@ -81,3 +81,5 @@ export const TOKEN_TYPE_INFO = [
   { value: ApiTokenTypes.Private, text: TOKEN_TYPE_DISPLAY_NAMES[ApiTokenTypes.Private] },
   { value: ApiTokenTypes.Admin, text: TOKEN_TYPE_DISPLAY_NAMES[ApiTokenTypes.Admin] },
 ];
+
+export const FLYOUT_ARIA_LABEL_ID = 'credentialsFlyoutTitle';
