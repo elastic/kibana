@@ -63,6 +63,12 @@ const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<
 
 MyEuiPopover.displayName = 'MyEuiPopover';
 
+const MyEuiPopoverContent = styled.div`
+  user-select: none;
+`;
+
+MyEuiPopoverContent.displayName = 'MyEuiPopoverContent';
+
 interface GetProviderActionsProps {
   andProviderId?: string;
   browserFields?: BrowserFields;
@@ -232,9 +238,9 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         anchorPosition="downCenter"
         panelPaddingSize="none"
       >
-        <div style={{ userSelect: 'none' }}>
+        <MyEuiPopoverContent>
           <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
-        </div>
+        </MyEuiPopoverContent>
       </MyEuiPopover>
     );
   }

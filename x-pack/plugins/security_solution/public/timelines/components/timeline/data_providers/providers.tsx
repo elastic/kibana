@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo } from 'react';
-import { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -55,12 +54,9 @@ const listStyle: React.CSSProperties = {
   minWidth: '125px',
 };
 
-const getItemStyle = (
-  draggableStyle: DraggingStyle | NotDraggingStyle | undefined
-): React.CSSProperties => ({
-  ...draggableStyle,
-  userSelect: 'none',
-});
+const ProviderContainer = styled.div`
+  user-select: none;
+`;
 
 const DroppableContainer = styled.div`
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
@@ -231,7 +227,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
 
     const DraggableContent = useCallback(
       (_, state) => (
-        <div style={getItemStyle({})} data-test-subj="providerContainer">
+        <ProviderContainer data-test-subj="providerContainer">
           <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
               <ProviderItemBadge
@@ -273,7 +269,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 ))}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </div>
+        </ProviderContainer>
       ),
       [
         browserFields,
