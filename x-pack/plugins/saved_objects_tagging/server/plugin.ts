@@ -8,9 +8,9 @@ import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
-import { TagsRequestHandlerContext } from './types';
-import { TagsClient } from './tags';
+import { ITagsRequestHandlerContext } from './types';
 import { registerRoutes } from './routes';
+import { TagsRequestHandlerContext } from './request_handler_context';
 
 interface SetupDeps {
   features: FeaturesPluginSetup;
@@ -27,11 +27,8 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
 
     http.registerRouteHandlerContext(
       'tags',
-      async (context, req, res): Promise<TagsRequestHandlerContext> => {
-        const { client } = context.core.savedObjects;
-        return {
-          tagsClient: new TagsClient({ client }),
-        };
+      async (context, req, res): Promise<ITagsRequestHandlerContext> => {
+        return new TagsRequestHandlerContext(context.core);
       }
     );
 

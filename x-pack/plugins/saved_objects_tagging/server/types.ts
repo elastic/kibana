@@ -6,12 +6,12 @@
 
 import { ITagsClient } from '../common/types';
 
-export interface TagsRequestHandlerContext {
+export interface ITagsRequestHandlerContext {
   tagsClient: ITagsClient;
 }
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    tags?: TagsRequestHandlerContext;
+    tags?: ITagsRequestHandlerContext;
   }
 }
