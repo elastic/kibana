@@ -20,6 +20,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [deleteFieldFormat](./kibana-plugin-plugins-data-public.indexpattern.deletefieldformat.md) |  | <code>(fieldName: string) =&gt; void</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IIndexPatternFieldList &amp; {</code><br/><code>        toSpec: () =&gt; IndexPatternFieldMap;</code><br/><code>    }</code> |  |
 |  [flattenHit](./kibana-plugin-plugins-data-public.indexpattern.flattenhit.md) |  | <code>(hit: Record&lt;string, any&gt;, deep?: boolean) =&gt; Record&lt;string, any&gt;</code> |  |
@@ -30,6 +31,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
 |  [resetOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.resetoriginalsavedobjectbody.md) |  | <code>() =&gt; void</code> | Reset last saved saved object fields. used after saving |
+|  [setFieldFormat](./kibana-plugin-plugins-data-public.indexpattern.setfieldformat.md) |  | <code>(fieldName: string, format: SerializedFieldFormat) =&gt; void</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
@@ -48,17 +50,15 @@ export declare class IndexPattern implements IIndexPattern
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-public.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
 |  [getIndex()](./kibana-plugin-plugins-data-public.indexpattern.getindex.md) |  |  |
+|  [getFormatterForFieldNoDefault(fieldname)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfieldnodefault.md) |  | Get formatter for a given field name. Return undefined if none exists |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
-<<<<<<< HEAD
 |  [isUnsupportedTimePattern()](./kibana-plugin-plugins-data-public.indexpattern.isunsupportedtimepattern.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
-=======
->>>>>>> cdb922f2a2... Move indexPattern.popularizeField into discover (#77668)
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
 

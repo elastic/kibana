@@ -2,6 +2,9 @@
 
 exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
+  "fieldFormats": Object {
+    "field": Object {},
+  },
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,

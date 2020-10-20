@@ -513,6 +513,8 @@ export class IndexPattern implements IIndexPattern {
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
+    deleteFieldFormat: (fieldName: string) => void;
+    // (undocumented)
     fieldFormatMap: Record<string, any>;
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternFieldList" needs to be exported by the entry point index.d.ts
     //
@@ -562,6 +564,7 @@ export class IndexPattern implements IIndexPattern {
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     // (undocumented)
     getIndex(): string;
+    getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternField" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -597,6 +600,10 @@ export class IndexPattern implements IIndexPattern {
     metaFields: string[];
     removeScriptedField(fieldName: string): void;
     resetOriginalSavedObjectBody: () => void;
+    // Warning: (ae-forgotten-export) The symbol "SerializedFieldFormat" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    setFieldFormat: (fieldName: string, format: SerializedFieldFormat) => void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1108,8 +1115,8 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 //
 // src/plugins/data/common/es_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:70:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:58:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:71:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts
