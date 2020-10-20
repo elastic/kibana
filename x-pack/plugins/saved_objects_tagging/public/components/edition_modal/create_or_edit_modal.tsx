@@ -77,7 +77,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   }, [validation, onSubmit]);
 
   return (
-    <EuiModal onClose={onClose} style={{ minWidth: '600px' }}>
+    <EuiModal onClose={onClose} initialFocus="[name=name]" style={{ minWidth: '600px' }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {isEdit ? (
@@ -110,6 +110,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 error={validation.errors.name}
               >
                 <EuiFieldText
+                  name="name"
                   fullWidth={true}
                   maxLength={tagNameMaxLength}
                   value={tag.name}
@@ -169,6 +170,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             error={validation.errors.description}
           >
             <EuiTextArea
+              name="description"
               value={tag.description}
               onChange={(e) => setDescription(e.target.value)}
               data-test-subj="createModalField-description"
