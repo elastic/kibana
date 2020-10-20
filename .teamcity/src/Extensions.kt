@@ -171,7 +171,7 @@ fun BuildSteps.runbld(stepName: String, script: String) {
 
         echo '#!/bin/bash' > ${'$'}file
         echo 'export PATH="${'$'}OLD_PATH"' >> ${'$'}file
-        echo 'bash $script' > ${'$'}' >> ${'$'}file
+        echo 'bash $script' >> ${'$'}file
 
         /usr/local/bin/runbld -d "${'$'}(pwd)" --job-name="elastic+${'$'}project+${'$'}branchName" ${'$'}file
       """.trimIndent()
