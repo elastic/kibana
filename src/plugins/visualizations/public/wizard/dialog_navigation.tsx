@@ -28,7 +28,7 @@ interface DialogNavigationProps {
 function DialogNavigation(props: DialogNavigationProps) {
   return (
     <>
-      <EuiLink data-test-subj="goBackLink" onClick={() => props.goBack()}>
+      <EuiLink data-test-subj="goBackLink" onClick={props.goBack}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type="arrowLeft" />

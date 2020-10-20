@@ -199,4 +199,5 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   }
 }
 
-export { NewVisModal };
+// eslint-disable-next-line import/no-default-export
+export { NewVisModal as default };
