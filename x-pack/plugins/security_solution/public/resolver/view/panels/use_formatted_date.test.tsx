@@ -12,10 +12,9 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { uiSetting } from '../../mocks/ui_setting';
 
-// TODO, show the time and date format stuff in the test desc.
-describe(`useFormattedDate, when the "dateFormat" UI setting is ${uiSetting(
+describe(`useFormattedDate, when the "dateFormat" UI setting is "${uiSetting(
   'dateFormat'
-)} and the "dateFormat:tz" setting is ${uiSetting('dateFormat:tz')}`, () => {
+)}" and the "dateFormat:tz" setting is "${uiSetting('dateFormat:tz')}"`, () => {
   let formattedDate: (date: ConstructorParameters<typeof Date>[0] | Date | undefined) => string;
 
   beforeEach(async () => {
