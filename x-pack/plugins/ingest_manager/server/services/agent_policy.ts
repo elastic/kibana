@@ -438,7 +438,7 @@ class AgentPolicyService {
   ) {
     // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
     // the action will be created during the fleet setup
-    if (!isAgentsSetup(soClient)) {
+    if (!(await isAgentsSetup(soClient))) {
       return;
     }
     const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
