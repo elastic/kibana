@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { monaco } from '../../monaco';
+import { monaco } from '../../monaco_imports';
 
 const brackets = [
   { open: '[', close: ']', token: 'delimiter.square' },

@@ -19,7 +19,7 @@
 
 // This file contains a lot of single setup logic for registering a language globally
 
-import { monaco } from '../monaco';
+import { monaco } from '../monaco_imports';
 import { WorkerProxyService } from './worker_proxy_service';
 import { ID } from './constants';
 

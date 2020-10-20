@@ -18,9 +18,9 @@
  */
 
 // global setup for supported languages
-import './global';
+import './register_globals';
 
-export { monaco } from './monaco';
+export { monaco } from './monaco_imports';
 export { XJsonLang } from './xjson';
 export { PainlessLang } from './painless';
 

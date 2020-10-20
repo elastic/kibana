@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { monaco } from '../../monaco';
+import { monaco } from '../../monaco_imports';
 
 export interface Language extends monaco.languages.IMonarchLanguage {
   default: string;

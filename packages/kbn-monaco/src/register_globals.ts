@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+// @ts-ignore
+import defaultWorkerSrc from 'raw-loader!monaco-editor/min/vs/base/worker/workerMain.js';
 import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
 import { EsqlLang } from './esql';
-import { monaco } from './monaco';
+import { monaco } from './monaco_imports';
 // @ts-ignore
 import xJsonWorkerSrc from '!!raw-loader!../target/public/xjson.editor.worker.js';
 
@@ -45,12 +46,9 @@ const mapLanguageIdToWorker: { [key: string]: any } = {
 // @ts-ignore
 window.MonacoEnvironment = {
   getWorker: (module: string, languageId: string) => {
-    const workerSrc = mapLanguageIdToWorker[languageId];
+    const workerSrc = mapLanguageIdToWorker[languageId] || defaultWorkerSrc;
 
-    if (workerSrc) {
-      // In kibana we will probably build this once and then load with raw-loader
-      const blob = new Blob([workerSrc], { type: 'application/javascript' });
-      return new Worker(URL.createObjectURL(blob));
-    }
+    const blob = new Blob([workerSrc], { type: 'application/javascript' });
+    return new Worker(URL.createObjectURL(blob));
   },
 };
