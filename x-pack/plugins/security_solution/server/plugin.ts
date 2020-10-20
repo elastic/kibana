@@ -256,6 +256,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
+        callAsInternalUser: core.elasticsearch.legacy.client.callAsInternalUser,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,

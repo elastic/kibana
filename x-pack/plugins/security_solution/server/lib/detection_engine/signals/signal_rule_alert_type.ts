@@ -6,7 +6,7 @@
 
 /* eslint-disable complexity */
 
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, KibanaRequest, LegacyAPICaller } from 'src/core/server';
 
 import { get } from 'lodash';
 import {
@@ -75,6 +75,7 @@ export const signalRulesAlertType = ({
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
+  callAsInternalUser: LegacyAPICaller;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
