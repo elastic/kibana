@@ -51,7 +51,7 @@ export const createThreatSignals = async ({
   logger.debug(buildRuleMessage('Starting threat matching'));
 
   // TODO: Bubble these up to the UI
-  const concurrentSearches = 1;
+  const concurrentSearches = 100;
   const numberOfItemsPerSearch = 10;
   const perPage = concurrentSearches * numberOfItemsPerSearch;
 
