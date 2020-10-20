@@ -116,6 +116,12 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         wordBreaks: 2,
       });
     });
+
+    /**
+     * These tests use a statically defined map of fields and expected values. The test finds the `dt` for each field and then finds the related `dd`s. From there it finds a special 'hover area' (via `data-test-subj`) and simulates a `mouseenter` on it. This is because the feature work by adding event listeners to `div`s. There is no way for the user to know that the `div`s are interactable.
+
+     * Finally the test clicks a button and checks that the clipboard was written to.
+     */
     describe.each([...originEventDetailEntries])(
       'when the user hovers over the description for the field (%p) with their mouse',
       (fieldTitleText, value) => {
