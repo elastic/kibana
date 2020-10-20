@@ -319,8 +319,8 @@ describe('xy_visualization', () => {
         layerId: 'first',
       }).groups;
       expect(options.map((o) => o.groupLabel)).toEqual([
-        'Horizontal Axis',
-        'Vertical Axis',
+        'Horizontal axis',
+        'Vertical axis',
         'Break down by',
       ]);
     });
@@ -337,8 +337,8 @@ describe('xy_visualization', () => {
         layerId: 'first',
       }).groups;
       expect(options.map((o) => o.groupLabel)).toEqual([
-        'Vertical Axis',
-        'Horizontal Axis',
+        'Vertical axis',
+        'Horizontal axis',
         'Break down by',
       ]);
     });
