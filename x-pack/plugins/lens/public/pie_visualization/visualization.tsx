@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Visualization, OperationMetadata } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
@@ -35,7 +35,7 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const getPieVisualization = ({
   paletteService,
 }: {
-  paletteService: ChartsPluginSetup['palettes'];
+  paletteService: PaletteRegistry;
 }): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 

@@ -127,7 +127,8 @@ export function createMockFramePublicAPI(): FrameMock {
     query: { query: '', language: 'lucene' },
     filters: [],
     availablePalettes: {
-      default: palette,
+      get: () => palette,
+      getAll: () => [palette],
     },
   };
 }

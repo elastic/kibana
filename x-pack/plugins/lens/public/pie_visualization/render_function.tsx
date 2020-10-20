@@ -29,7 +29,11 @@ import { getFilterContext, getSliceValueWithFallback } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
-import { ChartsPluginSetup, SeriesLayer } from '../../../../../src/plugins/charts/public';
+import {
+  ChartsPluginSetup,
+  PaletteRegistry,
+  SeriesLayer,
+} from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
 const EMPTY_SLICE = Symbol('empty_slice');
@@ -38,7 +42,7 @@ export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
-    paletteService: ChartsPluginSetup['palettes'];
+    paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
   }
 ) {
@@ -143,7 +147,7 @@ export function PieComponent(
             }
           }
 
-          const outputColor = paletteService[palette.name].getColor(
+          const outputColor = paletteService.get(palette.name).getColor(
             seriesLayers,
             {
               behindText: categoryDisplay !== 'hide',

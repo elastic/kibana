@@ -14,12 +14,12 @@ import {
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
-import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 jest.mock('../id_generator');
 
 const xyVisualization = getXyVisualization({
-  paletteService: { default: createMockPaletteDefinition() },
+  paletteService: chartPluginMock.createPaletteRegistry(),
 });
 
 describe('xy_suggestions', () => {

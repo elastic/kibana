@@ -36,16 +36,13 @@ import {
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
-const paletteService = {
-  mock: createMockPaletteDefinition(),
-};
+const paletteService = chartPluginMock.createPaletteRegistry();
 
 const mockPaletteOutput: PaletteOutput = {
   type: 'palette',
@@ -1388,13 +1385,13 @@ describe('xy_expression', () => {
             yAccessor: 'a',
             seriesKeys: ['a'],
           })
-        ).toEqual('#ff0000');
+        ).toEqual('black');
         expect(
           (component.find(LineSeries).at(1).prop('color') as Function)!({
             yAccessor: 'c',
             seriesKeys: ['c'],
           })
-        ).toEqual('#ff0000');
+        ).toEqual('black');
       });
     });
 

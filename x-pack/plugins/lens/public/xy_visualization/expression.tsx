@@ -43,7 +43,11 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
-import { ChartsPluginSetup, SeriesLayer } from '../../../../../src/plugins/charts/public';
+import {
+  ChartsPluginSetup,
+  PaletteRegistry,
+  SeriesLayer,
+} from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
@@ -67,7 +71,7 @@ export interface XYRender {
 
 type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
-  paletteService: ChartsPluginSetup['palettes'];
+  paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
@@ -167,7 +171,7 @@ export const xyChart: ExpressionFunctionDefinition<
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
-  paletteService: ChartsPluginSetup['palettes'];
+  paletteService: PaletteRegistry;
   histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -637,7 +641,7 @@ export function XYChart({
                     accessors.indexOf(String(yAccessor)),
                 },
               ];
-              return paletteService[palette.name].getColor(
+              return paletteService.get(palette.name).getColor(
                 seriesLayers,
                 {
                   maxDepth: 1,

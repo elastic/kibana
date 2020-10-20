@@ -16,7 +16,6 @@ import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
-import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
@@ -70,9 +69,7 @@ describe('PieVisualization component', () => {
         formatFactory: getFormatSpy,
         onClickValue: jest.fn(),
         chartsThemeService,
-        paletteService: {
-          mock: createMockPaletteDefinition(),
-        },
+        paletteService: chartPluginMock.createPaletteRegistry(),
       };
     }
 
@@ -158,7 +155,7 @@ describe('PieVisualization component', () => {
         [] as HierarchyOfArrays
       );
 
-      expect(defaultArgs.paletteService.mock.getColor).toHaveBeenCalledWith(
+      expect(defaultArgs.paletteService.get('mock').getColor).toHaveBeenCalledWith(
         [
           {
             name: 'css',

@@ -17,7 +17,7 @@ import {
 import { LensMultiTable, FormatFactory, LensFilterEvent } from '../types';
 import { PieExpressionProps, PieExpressionArgs } from './types';
 import { PieComponent } from './render_function';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export interface PieRender {
   type: 'render';
@@ -113,7 +113,7 @@ export const pie: ExpressionFunctionDefinition<
 export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
-  paletteService: ChartsPluginSetup['palettes'];
+  paletteService: PaletteRegistry;
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {

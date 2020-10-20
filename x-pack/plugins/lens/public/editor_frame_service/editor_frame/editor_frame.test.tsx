@@ -236,10 +236,11 @@ describe('editor_frame', () => {
     });
 
     it('should pass the public frame api into visualization initialize', async () => {
+      const defaultProps = getDefaultProps();
       await act(async () => {
         mount(
           <EditorFrame
-            {...getDefaultProps()}
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -262,9 +263,7 @@ describe('editor_frame', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
-        availablePalettes: {
-          default: expect.anything(),
-        },
+        availablePalettes: defaultProps.palettes,
       });
     });
 
