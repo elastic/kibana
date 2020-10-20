@@ -1,9 +1,9 @@
 {
-    "id": "mapsOss",
-    "version": "kibana",
-    "ui": true,
-    "requiredPlugins": [
-      "visualizations"
-    ],
-    "extraPublicDirs": ["common/constants"]
-  }
+  "id": "mapsOss",
+  "version": "kibana",
+  "ui": true,
+  "requiredPlugins": [
+    "visualizations"
+  ],
+  "extraPublicDirs": ["common/constants"]
+}
