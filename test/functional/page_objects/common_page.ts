@@ -123,12 +123,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         const alert = await browser.getAlert();
         await alert?.accept();
 
-        // accept app leave modal if it pops up
-        const confirmButtonExists = await testSubjects.exists('confirmModalConfirmButton');
-        if (confirmButtonExists) {
-          await testSubjects.click('confirmModalConfirmButton');
-        }
-
         const currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp)
           : await browser.getCurrentUrl();
