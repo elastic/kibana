@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TagAttributes, TagValidation, validateTagColor } from '../../../common';
+import { TagAttributes, TagValidation, validateTagColor, tagNameMaxLength } from '../../../common';
 import { TagBadge } from '../../components';
 import { getRandomColor } from './utils';
 
@@ -77,7 +77,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   }, [validation, onSubmit]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} style={{ minWidth: '600px' }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {isEdit ? (
@@ -99,7 +99,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
       <EuiModalBody>
         <EuiForm data-test-subj="tagModalForm" component="form">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
-            <EuiFlexItem>
+            <EuiFlexItem grow={3}>
               <EuiFormRow
                 data-test-subj="createModalRow-name"
                 fullWidth={true}
@@ -110,13 +110,15 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 error={validation.errors.name}
               >
                 <EuiFieldText
+                  fullWidth={true}
+                  maxLength={tagNameMaxLength}
                   value={tag.name}
                   onChange={(e) => setName(e.target.value)}
                   data-test-subj="createModalField-name"
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={2}>
               <EuiFormRow
                 data-test-subj="createModalRow-color"
                 fullWidth={true}
@@ -140,6 +142,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               >
                 <EuiColorPicker
                   color={tag.color}
+                  fullWidth={true}
                   onChange={(text) => setColor(text)}
                   format="hex"
                   data-test-subj="createModalField-color"
