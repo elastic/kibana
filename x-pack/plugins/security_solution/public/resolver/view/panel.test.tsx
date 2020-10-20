@@ -134,11 +134,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
           expect(dt).toHaveLength(1);
 
-          // The copyable field does not use a button to be trigger. It is instead triggered by mouse interaction with this `div`.
           const copyableFieldHoverArea = simulator()
             .descriptionDetails(dt!)
+            // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
             .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
-            .filterWhere((wrapper) => typeof wrapper.type() === 'string');
+            .filterWhere(Simulator.isDOM);
 
           expect(copyableFieldHoverArea).toHaveLength(1);
           copyableFieldHoverArea!.simulate('mouseenter');
@@ -211,11 +211,15 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
         expect(nodeLinkTitles).toHaveLength(3);
 
-        return nodeLinkTitles!
-          .filterWhere((linkTitle) => linkTitle.text() === 'c.ext')
-          .closest('tr')
-          .find('[data-test-subj="resolver:panel:copyable-field-hover-area"]')
-          .filterWhere((wrapper) => typeof wrapper.type() === 'string');
+        return (
+          nodeLinkTitles!
+            .filterWhere((linkTitle) => linkTitle.text() === 'c.ext')
+            // Find the parent `tr` and the find all hover areas in that TR. The test assumes that all cells in a row are associated.
+            .closest('tr')
+            // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
+            .find('[data-test-subj="resolver:panel:copyable-field-hover-area"]')
+            .filterWhere(Simulator.isDOM)
+        );
       });
       cExtHoverArea!.simulate('mouseenter');
     });
@@ -328,10 +332,13 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                   const dt = (
                     await simulator().resolve('resolver:panel:event-detail:event-field-title')
                   )?.filterWhere((title) => title.text() === fieldName);
-                  return simulator()
-                    .descriptionDetails(dt!)
-                    .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
-                    .filterWhere((wrapper) => typeof wrapper.type() === 'string');
+                  return (
+                    simulator()
+                      .descriptionDetails(dt!)
+                      // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
+                      .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
+                      .filterWhere(Simulator.isDOM)
+                  );
                 });
                 expect(fieldHoverArea).toBeTruthy();
                 fieldHoverArea?.simulate('mouseenter');

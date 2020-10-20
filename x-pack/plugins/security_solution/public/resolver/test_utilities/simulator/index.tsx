@@ -62,6 +62,13 @@ export class Simulator {
     return selector;
   }
 
+  /**
+   * The simulator returns enzyme `ReactWrapper`s from various methods. Use this predicate to determine if they are DOM nodes.
+   */
+  public static isDOM(wrapper: ReactWrapper): boolean {
+    return typeof wrapper.type() === 'string';
+  }
+
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
