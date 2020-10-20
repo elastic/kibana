@@ -9,11 +9,17 @@ There are three different sections to the stats returned by the `health` api.
 - `runtime`: Tracks Task Manager's performance.
 
 ### Configuring the Stats
-There are three new configurations:
+There are four new configurations:
 
 - `xpack.task_manager.monitored_stats_required_freshness` - The _required freshness_ of critical "Hot" stats, which means that if key stats (last polling cycle time, for example) haven't been refreshed within the specified duration, the `_health` endpoint and service will report an `Error` status. By default this is inferred from the configured `poll_interval` and is set to `poll_interval` plus a `1s` buffer.
 - `xpack.task_manager.monitored_aggregated_stats_refresh_rate` - Dictates how often we refresh the "Cold" metrics.  These metrics require an aggregation against Elasticsearch and add load to the system, hence we want to limit how often we execute these. We also inffer the _required freshness_ of these "Cold" metrics from this configuration, which means that if these stats have not been updated within the required duration then the `_health` endpoint and service will report an `Error` status. This covers the entire `workload` section of the stats. By default this is configured to `60s`, and as a result the _required freshness_ defaults to `61s` (refresh plus a `1s` buffer).
 - `xpack.task_manager.monitored_stats_running_average_window`- Dictates the size of the window used to calculate the running average of various "Hot" stats, such as the time it takes to run a task, the _drift_ that tasks experience etc. These stats are collected throughout the lifecycle of tasks and this window will dictate how large the queue we keep in memory would be, and how many values we need to calculate the average against. We do not calculate the average on *every* new value, but rather only when the time comes to summarize the stats before logging them or returning them to the API endpoint.
+- `xpack.task_manager.monitored_task_execution_thresholds`- Configures the threshold of failed task executions at which point the `warn` or `error` health status will be set either at a default level or a custom level for specific task types. This will allow you to mark the health as `error` when any task type failes 90% of the time, but set it to `error` at 50% of the time for task types that you consider critical. This value can be set to any number between 0 to 100, and a threshold is hit when the value *exceeds* this number. This means that you can avoid setting the status to `error` by setting the threshold at 100, or hit `error` the moment any task failes by setting the threshold to 0 (as it will exceed 0 once a single failer occurs).
+
+For example:
+```
+
+```
 
 ## Consuming Health Stats
 Task Manager exposes a `/api/task_manager/_health` api which returns the _latest_ stats.
@@ -204,31 +210,38 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                     "result_frequency_percent_as_number": {
                                /* and 100% of `endpoint:user-artifact-packager` have completed in success (within the running average window, so the past 50 runs (by default, configrable by `monitored_stats_running_average_window`) */
                         "endpoint:user-artifact-packager": {
+							"status": "OK",
                             "Success": 100,
                             "RetryScheduled": 0,
                             "Failed": 0
                         },
                         "session_cleanup": {
-                            "Success": 100,
-                            "RetryScheduled": 0,
-                            "Failed": 0
+							/* `error` status as 90% of results are `Failed` */
+							"status": "error",
+                            "Success": 5,
+                            "RetryScheduled": 5,
+                            "Failed": 90
                         },
                         "lens_telemetry": {
+							"status": "OK",
                             "Success": 100,
                             "RetryScheduled": 0,
                             "Failed": 0
                         },
                         "actions_telemetry": {
+							"status": "OK",
                             "Success": 100,
                             "RetryScheduled": 0,
                             "Failed": 0
                         },
                         "alerting_telemetry": {
+							"status": "OK",
                             "Success": 100,
                             "RetryScheduled": 0,
                             "Failed": 0
                         },
                         "apm-telemetry-task": {
+							"status": "OK",
                             "Success": 100,
                             "RetryScheduled": 0,
                             "Failed": 0

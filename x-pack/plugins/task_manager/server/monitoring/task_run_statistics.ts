@@ -31,6 +31,7 @@ import {
 } from './task_run_calcultors';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
+import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
   last_successful_poll: string;
@@ -57,23 +58,27 @@ interface FillPoolRawStat extends JsonObject {
   };
 }
 
+interface ResultFrequency extends JsonObject {
+  [TaskRunResult.Success]: number;
+  [TaskRunResult.SuccessRescheduled]: number;
+  [TaskRunResult.RetryScheduled]: number;
+  [TaskRunResult.Failed]: number;
+}
+
+type ResultFrequencySummary = ResultFrequency & {
+  status: HealthStatus;
+};
+
 export interface SummarizedTaskRunStat extends JsonObject {
   drift: AveragedStat;
   execution: {
     duration: Record<string, AveragedStat>;
-    result_frequency_percent_as_number: Record<
-      string,
-      {
-        [TaskRunResult.Success]: number;
-        [TaskRunResult.SuccessRescheduled]: number;
-        [TaskRunResult.RetryScheduled]: number;
-        [TaskRunResult.Failed]: number;
-      }
-    >;
+    result_frequency_percent_as_number: Record<string, ResultFrequencySummary>;
   };
   polling: FillPoolRawStat | Omit<FillPoolRawStat, 'last_successful_poll'>;
 }
 
+const DEFAULT_EXECUTION_ERROR_THRESHOLD = 90;
 export function createTaskRunAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
   runningAverageWindowSize: number
@@ -165,12 +170,15 @@ const DEFAULT_POLLING_FREQUENCIES = {
   [FillPoolResult.PoolFilled]: 0,
 };
 
-export function summarizeTaskRunStat({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  polling: { last_successful_poll, result_frequency_percent_as_number: pollingResultFrequency },
-  drift,
-  execution: { duration, result_frequency_percent_as_number: executionResultFrequency },
-}: TaskRunStat): { value: SummarizedTaskRunStat; status: HealthStatus } {
+export function summarizeTaskRunStat(
+  {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    polling: { last_successful_poll, result_frequency_percent_as_number: pollingResultFrequency },
+    drift,
+    execution: { duration, result_frequency_percent_as_number: executionResultFrequency },
+  }: TaskRunStat,
+  config: TaskManagerConfig
+): { value: SummarizedTaskRunStat; status: HealthStatus } {
   return {
     value: {
       polling: {
@@ -185,13 +193,33 @@ export function summarizeTaskRunStat({
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
         result_frequency_percent_as_number: mapValues(
           executionResultFrequency,
-          (typedResultFrequencies) => ({
-            ...DEFAULT_TASK_RUN_FREQUENCIES,
-            ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
-          })
+          (typedResultFrequencies, taskType) =>
+            summarizeTaskExecutionResultFrequencyStat(
+              {
+                ...DEFAULT_TASK_RUN_FREQUENCIES,
+                ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
+              },
+              config.monitored_task_execution_thresholds.custom[taskType] ??
+                config.monitored_task_execution_thresholds.default
+            )
         ),
       },
     },
     status: HealthStatus.OK,
+  };
+}
+
+function summarizeTaskExecutionResultFrequencyStat(
+  resultFrequencySummary: ResultFrequency,
+  executionErrorThreshold: TaskExecutionFailureThreshold
+): ResultFrequencySummary {
+  return {
+    ...resultFrequencySummary,
+    status:
+      resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold
+        ? resultFrequencySummary.Failed > executionErrorThreshold.error_threshold
+          ? HealthStatus.Error
+          : HealthStatus.Warning
+        : HealthStatus.OK,
   };
 }

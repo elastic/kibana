@@ -16,6 +16,30 @@ export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
 export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
 
+export const taskExecutionFailureThresholdSchema = schema.object(
+  {
+    error_threshold: schema.number({
+      defaultValue: 90,
+      min: 1,
+    }),
+    warn_threshold: schema.number({
+      defaultValue: 80,
+      min: 1,
+    }),
+  },
+  {
+    validate: (config) => {
+      if (
+        config.error_threshold &&
+        config.warn_threshold &&
+        config.warn_threshold > config.error_threshold
+      ) {
+        return `warn_threshold must be less than, or equal to, error_threshold`;
+      }
+    },
+  }
+);
+
 export const configSchema = schema.object(
   {
     enabled: schema.boolean({ defaultValue: true }),
@@ -73,6 +97,13 @@ export const configSchema = schema.object(
       max: 100,
       min: 10,
     }),
+    /* Task Execution result warn & error thresholds. */
+    monitored_task_execution_thresholds: schema.object({
+      default: taskExecutionFailureThresholdSchema,
+      custom: schema.recordOf(schema.string(), taskExecutionFailureThresholdSchema, {
+        defaultValue: {},
+      }),
+    }),
   },
   {
     validate: (config) => {
@@ -88,3 +119,4 @@ export const configSchema = schema.object(
 );
 
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
+export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;

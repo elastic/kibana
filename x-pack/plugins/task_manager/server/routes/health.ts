@@ -23,6 +23,7 @@ import {
   HealthStatus,
   RawMonitoringStats,
 } from '../monitoring';
+import { TaskManagerConfig } from '../config';
 
 type MonitoredHealth = RawMonitoringStats & { id: string; status: HealthStatus; timestamp: string };
 
@@ -37,13 +38,19 @@ export function healthRoute(
   monitoringStats$: Observable<MonitoringStats>,
   logger: Logger,
   taskManagerId: string,
-  requiredHotStatsFreshness: number,
-  requiredColdStatsFreshness: number
+  config: TaskManagerConfig
 ): Observable<ServiceStatus> {
+  // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
+  // consider the system unhealthy
+  const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
+
+  // if "cold" health stats are any more stale than the configured refresh (+ a buffer), consider the system unhealthy
+  const requiredColdStatsFreshness: number = config.monitored_aggregated_stats_refresh_rate * 1.5;
+
   function calculateStatus(monitoredStats: MonitoringStats): MonitoredHealth {
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-    const summarizedStats = summarizeMonitoringStats(monitoredStats);
+    const summarizedStats = summarizeMonitoringStats(monitoredStats, config);
 
     /**
      * If the monitored stats aren't fresh, return a red status

@@ -16,6 +16,7 @@ import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { Logger } from '../../../../../src/core/server';
 import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
 import { ServiceStatusLevels } from 'src/core/server';
+import { configSchema, TaskManagerConfig } from '../config';
 
 describe('healthRoute', () => {
   beforeEach(() => {
@@ -26,7 +27,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const logger = loggingSystemMock.create().get();
-    healthRoute(router, of(), logger, uuid.v4(), 1000, 1000);
+    healthRoute(router, of(), logger, uuid.v4(), getTaskManagerConfig());
 
     const [config] = router.get.mock.calls[0];
 
@@ -46,7 +47,16 @@ describe('healthRoute', () => {
     const stats$ = new Subject<MonitoringStats>();
 
     const id = uuid.v4();
-    healthRoute(router, stats$, logger, id, 1000, 60000);
+    healthRoute(
+      router,
+      stats$,
+      logger,
+      id,
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
+    );
 
     stats$.next(mockStat);
     await sleep(500);
@@ -59,7 +69,7 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(mockStat),
+      ...summarizeMonitoringStats(mockStat, getTaskManagerConfig({})),
     });
 
     const secondDebug = JSON.parse((logger as jest.Mocked<Logger>).debug.mock.calls[1][0]);
@@ -67,13 +77,13 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(skippedMockStat),
+      ...summarizeMonitoringStats(skippedMockStat, getTaskManagerConfig({})),
     });
     expect(secondDebug).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...summarizeMonitoringStats(nextMockStat),
+      ...summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({})),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -89,8 +99,10 @@ describe('healthRoute', () => {
       stats$,
       loggingSystemMock.create().get(),
       uuid.v4(),
-      1000,
-      60000
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
     );
 
     const serviceStatus = getLatest(serviceStatus$);
@@ -129,7 +141,8 @@ describe('healthRoute', () => {
                 },
               },
             },
-          })
+          }),
+          getTaskManagerConfig({})
         ),
       },
     });
@@ -158,7 +171,8 @@ describe('healthRoute', () => {
                 },
               },
             },
-          })
+          }),
+          getTaskManagerConfig({})
         ),
       },
     });
@@ -169,7 +183,16 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    healthRoute(router, stats$, loggingSystemMock.create().get(), uuid.v4(), 5000, 60000);
+    healthRoute(
+      router,
+      stats$,
+      loggingSystemMock.create().get(),
+      uuid.v4(),
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 5000,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
+    );
 
     await sleep(0);
 
@@ -212,7 +235,8 @@ describe('healthRoute', () => {
                 },
               },
             },
-          })
+          }),
+          getTaskManagerConfig()
         ),
       },
     });
@@ -222,7 +246,16 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const stats$ = new Subject<MonitoringStats>();
-    healthRoute(router, stats$, loggingSystemMock.create().get(), uuid.v4(), 1000, 60000);
+    healthRoute(
+      router,
+      stats$,
+      loggingSystemMock.create().get(),
+      uuid.v4(),
+      getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      })
+    );
 
     await sleep(0);
 
@@ -268,7 +301,8 @@ describe('healthRoute', () => {
                 },
               },
             },
-          })
+          }),
+          getTaskManagerConfig()
         ),
       },
     });
@@ -290,6 +324,13 @@ function mockHealthStats(overrides = {}) {
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
               monitored_stats_running_average_window: 50,
+              monitored_task_execution_thresholds: {
+                default: {
+                  error_threshold: 90,
+                  warn_threshold: 80,
+                },
+                custom: {},
+              },
             },
           },
         },
@@ -334,3 +375,15 @@ function mockHealthStats(overrides = {}) {
 async function getLatest<T>(stream$: Observable<T>) {
   return new Promise<T>((resolve) => stream$.pipe(take(1)).subscribe((stats) => resolve(stats)));
 }
+
+const getTaskManagerConfig = (overrides: Partial<TaskManagerConfig> = {}) =>
+  configSchema.validate(
+    overrides.monitored_stats_required_freshness
+      ? {
+          // use `monitored_stats_required_freshness` as poll interval otherwise we might
+          // fail validation as it must be greather than the poll interval
+          poll_interval: overrides.monitored_stats_required_freshness,
+          ...overrides,
+        }
+      : overrides
+  );

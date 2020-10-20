@@ -24,6 +24,7 @@ import {
 import { AggregatedStat } from './runtime_statistics_aggregator';
 import { FillPoolResult } from '../lib/fill_pool';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
+import { configSchema } from '../config';
 
 describe('Task Run Statistics', () => {
   let fakeTimer: sinon.SinonFakeTimers;
@@ -68,7 +69,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value).value,
+            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
           })),
           take(runAtDrift.length),
           bufferCount(runAtDrift.length)
@@ -136,7 +137,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value).value,
+            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
           })),
           take(runDurations.length * 2),
           bufferCount(runDurations.length * 2)
@@ -232,7 +233,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value).value,
+            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
           })),
           take(10),
           bufferCount(10)
@@ -250,25 +251,116 @@ describe('Task Run Statistics', () => {
               )
             ).toEqual([
               // Success
-              { Success: 100, RetryScheduled: 0, Failed: 0 },
+              { Success: 100, RetryScheduled: 0, Failed: 0, status: 'OK' },
               // Success, Success,
-              { Success: 100, RetryScheduled: 0, Failed: 0 },
+              { Success: 100, RetryScheduled: 0, Failed: 0, status: 'OK' },
               // Success, Success, Success
-              { Success: 100, RetryScheduled: 0, Failed: 0 },
+              { Success: 100, RetryScheduled: 0, Failed: 0, status: 'OK' },
               // Success, Success, Success, Failed
-              { Success: 75, RetryScheduled: 0, Failed: 25 },
+              { Success: 75, RetryScheduled: 0, Failed: 25, status: 'OK' },
               // Success, Success, Success, Failed, Failed
-              { Success: 60, RetryScheduled: 0, Failed: 40 },
+              { Success: 60, RetryScheduled: 0, Failed: 40, status: 'OK' },
               // Success, Success, Failed, Failed, Failed
-              { Success: 40, RetryScheduled: 0, Failed: 60 },
+              { Success: 40, RetryScheduled: 0, Failed: 60, status: 'OK' },
               // Success, Failed, Failed, Failed, RetryScheduled
-              { Success: 20, RetryScheduled: 20, Failed: 60 },
+              { Success: 20, RetryScheduled: 20, Failed: 60, status: 'OK' },
               // Failed, Failed, Failed, RetryScheduled, RetryScheduled
-              { Success: 0, RetryScheduled: 40, Failed: 60 },
+              { Success: 0, RetryScheduled: 40, Failed: 60, status: 'OK' },
               // Failed, Failed, RetryScheduled, RetryScheduled, Success
-              { Success: 20, RetryScheduled: 40, Failed: 40 },
+              { Success: 20, RetryScheduled: 40, Failed: 40, status: 'OK' },
               // Failed, RetryScheduled, RetryScheduled, Success, Success
-              { Success: 40, RetryScheduled: 40, Failed: 20 },
+              { Success: 40, RetryScheduled: 40, Failed: 20, status: 'OK' },
+            ]);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
+
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.RetryScheduled));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.RetryScheduled));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+    });
+  });
+
+  test('frequency of task run results return an error health status when failure is above a certain threshold', async () => {
+    const events$ = new Subject<TaskLifecycleEvent>();
+
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+
+    const runningAverageWindowSize = 5;
+    const taskRunAggregator = createTaskRunAggregator(
+      taskPollingLifecycle,
+      runningAverageWindowSize
+    );
+
+    return new Promise((resolve, reject) => {
+      taskRunAggregator
+        .pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          // Use 'summarizeTaskRunStat' to receive summarize stats
+          map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
+            key,
+            value: summarizeTaskRunStat(
+              value,
+              getTaskManagerConfig({
+                monitored_task_execution_thresholds: {
+                  custom: {
+                    'alerting:test': {
+                      error_threshold: 59,
+                      warn_threshold: 39,
+                    },
+                  },
+                },
+              })
+            ).value,
+          })),
+          take(10),
+          bufferCount(10)
+        )
+        .subscribe((taskStats: Array<AggregatedStat<SummarizedTaskRunStat>>) => {
+          try {
+            /**
+             * At any given time we only keep track of the last X Polling Results
+             * In the tests this is ocnfiugured to a window size of 5
+             */
+            expect(
+              taskStats.map(
+                (taskStat) =>
+                  taskStat.value.execution.result_frequency_percent_as_number['alerting:test']
+              )
+            ).toEqual([
+              // Success
+              { Success: 100, RetryScheduled: 0, Failed: 0, status: 'OK' },
+              // Success, Success,
+              { Success: 100, RetryScheduled: 0, Failed: 0, status: 'OK' },
+              // Success, Success, Success
+              { Success: 100, RetryScheduled: 0, Failed: 0, status: 'OK' },
+              // Success, Success, Success, Failed
+              { Success: 75, RetryScheduled: 0, Failed: 25, status: 'OK' },
+              // Success, Success, Success, Failed, Failed
+              { Success: 60, RetryScheduled: 0, Failed: 40, status: 'warn' },
+              // Success, Success, Failed, Failed, Failed
+              { Success: 40, RetryScheduled: 0, Failed: 60, status: 'error' },
+              // Success, Failed, Failed, Failed, RetryScheduled
+              { Success: 20, RetryScheduled: 20, Failed: 60, status: 'error' },
+              // Failed, Failed, Failed, RetryScheduled, RetryScheduled
+              { Success: 0, RetryScheduled: 40, Failed: 60, status: 'error' },
+              // Failed, Failed, RetryScheduled, RetryScheduled, Success
+              { Success: 20, RetryScheduled: 40, Failed: 40, status: 'warn' },
+              // Failed, RetryScheduled, RetryScheduled, Success, Success
+              { Success: 40, RetryScheduled: 40, Failed: 20, status: 'OK' },
             ]);
             resolve();
           } catch (e) {
@@ -311,7 +403,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value).value,
+            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
           })),
           tap(() => {
             expectedTimestamp.push(new Date().toISOString());
@@ -405,3 +497,5 @@ const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
   ownerId: null,
   ...overrides,
 });
+
+const getTaskManagerConfig = (overrides: unknown = {}) => configSchema.validate(overrides);

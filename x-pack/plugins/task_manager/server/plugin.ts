@@ -71,11 +71,7 @@ export class TaskManagerPlugin
       monitoringStats$,
       logger,
       this.taskManagerId,
-      // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
-      // consider the system unhealthy
-      config.monitored_stats_required_freshness,
-      // if "cold" health stats are any more stale than the configured refresh, consider the system unhealthy
-      config.monitored_aggregated_stats_refresh_rate + 1000
+      config
     );
 
     core.getStartServices().then(async () => {

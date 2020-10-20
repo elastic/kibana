@@ -83,6 +83,13 @@ export default function ({ getService }: FtrProviderContext) {
         max_poll_inactivity_cycles: 10,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
         monitored_stats_running_average_window: 50,
+        monitored_task_execution_thresholds: {
+          custom: {},
+          default: {
+            error_threshold: 90,
+            warn_threshold: 80,
+          },
+        },
         request_capacity: 1000,
         max_workers: 10,
       });

@@ -6,7 +6,6 @@
 import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs/operators';
 import { set } from '@elastic/safer-lodash-set';
-import { pick } from 'lodash';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { TaskStore } from '../task_store';
@@ -22,26 +21,16 @@ import {
   TaskRunStat,
   SummarizedTaskRunStat,
 } from './task_run_statistics';
+import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 
 export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
-const CONFIG_FIELDS_TO_EXPOSE = [
-  'max_workers',
-  'poll_interval',
-  'request_capacity',
-  'max_poll_inactivity_cycles',
-  'monitored_aggregated_stats_refresh_rate',
-  'monitored_stats_running_average_window',
-] as const;
-
-type ConfigStat = Pick<TaskManagerConfig, typeof CONFIG_FIELDS_TO_EXPOSE[number]>;
-
 export interface MonitoringStats {
   last_update: string;
   stats: {
-    configuration: MonitoredStat<ConfigStat>;
+    configuration?: MonitoredStat<ConfigStat>;
     workload?: MonitoredStat<WorkloadStat>;
     runtime?: MonitoredStat<TaskRunStat>;
   };
@@ -64,7 +53,7 @@ type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
 export interface RawMonitoringStats {
   last_update: string;
   stats: {
-    configuration: RawMonitoredStat<JsonObject>;
+    configuration?: RawMonitoredStat<ConfigStat>;
     workload?: RawMonitoredStat<WorkloadStat>;
     runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
   };
@@ -77,6 +66,7 @@ export function createAggregators(
   logger: Logger
 ): AggregatedStatProvider {
   return merge(
+    createConfigurationAggregator(config),
     createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
     createWorkloadAggregator(
       taskStore,
@@ -91,7 +81,10 @@ export function createMonitoringStatsStream(
   provider$: AggregatedStatProvider,
   config: TaskManagerConfig
 ): Observable<MonitoringStats> {
-  const initialStats = initializeStats(new Date().toISOString(), config);
+  const initialStats = {
+    last_update: new Date().toISOString(),
+    stats: {},
+  };
   return merge(
     // emit the initial stats
     of(initialStats),
@@ -113,23 +106,30 @@ export function createMonitoringStatsStream(
   );
 }
 
-export function summarizeMonitoringStats({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  last_update,
-  stats: { runtime, workload, configuration },
-}: MonitoringStats): RawMonitoringStats {
+export function summarizeMonitoringStats(
+  {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    last_update,
+    stats: { runtime, workload, configuration },
+  }: MonitoringStats,
+  config: TaskManagerConfig
+): RawMonitoringStats {
   return {
     last_update,
     stats: {
-      configuration: {
-        ...configuration,
-        status: HealthStatus.OK,
-      },
+      ...(configuration
+        ? {
+            configuration: {
+              ...configuration,
+              status: HealthStatus.OK,
+            },
+          }
+        : {}),
       ...(runtime
         ? {
             runtime: {
               timestamp: runtime.timestamp,
-              ...summarizeTaskRunStat(runtime.value),
+              ...summarizeTaskRunStat(runtime.value, config),
             },
           }
         : {}),
@@ -144,16 +144,3 @@ export function summarizeMonitoringStats({
     },
   };
 }
-
-const initializeStats = (
-  initialisationTimestamp: string,
-  config: TaskManagerConfig
-): MonitoringStats => ({
-  last_update: initialisationTimestamp,
-  stats: {
-    configuration: {
-      timestamp: initialisationTimestamp,
-      value: pick(config, ...CONFIG_FIELDS_TO_EXPOSE) as ConfigStat,
-    },
-  },
-});

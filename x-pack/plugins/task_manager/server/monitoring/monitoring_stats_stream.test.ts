@@ -26,6 +26,13 @@ describe('createMonitoringStatsStream', () => {
     request_capacity: 1000,
     monitored_aggregated_stats_refresh_rate: 5000,
     monitored_stats_running_average_window: 50,
+    monitored_task_execution_thresholds: {
+      default: {
+        error_threshold: 90,
+        warn_threshold: 80,
+      },
+      custom: {},
+    },
   };
 
   it('returns the initial config used to configure Task Manager', async () => {
@@ -33,18 +40,7 @@ describe('createMonitoringStatsStream', () => {
       createMonitoringStatsStream(of(), configuration)
         .pipe(take(1))
         .subscribe((firstValue) => {
-          expect(firstValue.stats).toMatchObject({
-            configuration: {
-              value: {
-                max_workers: 10,
-                poll_interval: 6000000,
-                max_poll_inactivity_cycles: 10,
-                request_capacity: 1000,
-                monitored_aggregated_stats_refresh_rate: 5000,
-                monitored_stats_running_average_window: 50,
-              },
-            },
-          });
+          expect(firstValue.stats).toEqual({});
           resolve();
         });
     });
@@ -68,6 +64,13 @@ describe('createMonitoringStatsStream', () => {
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
                   monitored_stats_running_average_window: 50,
+                  monitored_task_execution_thresholds: {
+                    default: {
+                      error_threshold: 90,
+                      warn_threshold: 80,
+                    },
+                    custom: {},
+                  },
                 },
               },
             },
@@ -95,6 +98,13 @@ describe('createMonitoringStatsStream', () => {
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
                   monitored_stats_running_average_window: 50,
+                  monitored_task_execution_thresholds: {
+                    default: {
+                      error_threshold: 90,
+                      warn_threshold: 80,
+                    },
+                    custom: {},
+                  },
                 },
               },
             },
@@ -122,6 +132,13 @@ describe('createMonitoringStatsStream', () => {
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
                   monitored_stats_running_average_window: 50,
+                  monitored_task_execution_thresholds: {
+                    default: {
+                      error_threshold: 90,
+                      warn_threshold: 80,
+                    },
+                    custom: {},
+                  },
                 },
               },
             },
