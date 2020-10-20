@@ -22,6 +22,7 @@ import { ContextAppLegacy } from './context_app_legacy';
 import { IIndexPattern } from '../../../../../data/common/index_patterns';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('ContextAppLegacy test', () => {
   const hit = {
@@ -58,7 +59,8 @@ describe('ContextAppLegacy test', () => {
     const component = mountWithIntl(<ContextAppLegacy {...defaultProps} />);
     expect(component).toMatchSnapshot();
     expect(component.find(DocTableLegacy).length).toBe(1);
-    expect(component.find('.kuiTableInfo').length).toBe(0);
+    const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
+    expect(loadingIndicator.length).toBe(0);
   });
 
   it('renders loading indicator', () => {
@@ -66,7 +68,8 @@ describe('ContextAppLegacy test', () => {
     props.status = 'loading';
     const component = mountWithIntl(<ContextAppLegacy {...props} />);
     expect(component).toMatchSnapshot();
-    expect(component.find('.kuiTableInfo').length).toBe(1);
     expect(component.find('DocTableLegacy').length).toBe(0);
+    const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
+    expect(loadingIndicator.length).toBe(1);
   });
 });

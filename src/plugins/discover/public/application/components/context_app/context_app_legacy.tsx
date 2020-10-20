@@ -18,6 +18,8 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPanel, EuiText } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   DocTableLegacy,
   DocTableLegacyProps,
@@ -45,28 +47,30 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const loadingFeedback = () => {
     if (status === LOADING_STATUS.UNINITIALIZED || status === LOADING_STATUS.LOADING) {
       return (
-        <div className="kuiPanel kuiPanel--centered kuiVerticalRhythm">
-          <div className="kuiTableInfo">
+        <EuiPanel paddingSize="l" data-test-subj="contextApp_loadingIndicator">
+          <EuiText textAlign="center">
             <FormattedMessage
               id="discover.context.loadingDescription"
               defaultMessage="Loading..."
             />
-          </div>
-        </div>
+          </EuiText>
+        </EuiPanel>
       );
     }
     return null;
   };
   return (
-    <React.Fragment>
-      {loadingFeedback()}
-      {isLoaded ? (
-        <div className="kuiPanel kuiVerticalRhythm">
-          <div className="discover-table">
-            <DocTableLegacy {...props} />
-          </div>
-        </div>
-      ) : null}
-    </React.Fragment>
+    <I18nProvider>
+      <React.Fragment>
+        {loadingFeedback()}
+        {isLoaded ? (
+          <EuiPanel paddingSize="none">
+            <div className="discover-table">
+              <DocTableLegacy {...props} />
+            </div>
+          </EuiPanel>
+        ) : null}
+      </React.Fragment>
+    </I18nProvider>
   );
 }
