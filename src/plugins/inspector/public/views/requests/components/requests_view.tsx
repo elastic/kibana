@@ -153,6 +153,18 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
           </EuiText>
         )}
 
+        {this.state.request && this.state.request.sessionId && (
+          <EuiText size="xs">
+            <p data-test-sujb={'inspectorRequestSessionId'}>
+              <FormattedMessage
+                id="inspector.requests.sessionId"
+                defaultMessage="Session id: {sessionId}"
+                values={{ sessionId: this.state.request.sessionId }}
+              />
+            </p>
+          </EuiText>
+        )}
+
         <EuiSpacer size="m" />
 
         {this.state.request && <RequestDetails request={this.state.request} />}

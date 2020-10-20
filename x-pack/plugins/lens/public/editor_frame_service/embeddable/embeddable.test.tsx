@@ -171,6 +171,7 @@ describe('embeddable', () => {
       timeRange,
       query,
       filters,
+      searchSessionId: 'searchSessionId',
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
@@ -181,7 +182,13 @@ describe('embeddable', () => {
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
-    const input = { savedObjectId: '123', timeRange, query, filters } as LensEmbeddableInput;
+    const input = {
+      savedObjectId: '123',
+      timeRange,
+      query,
+      filters,
+      searchSessionId: 'searchSessionId',
+    } as LensEmbeddableInput;
 
     const embeddable = new Embeddable(
       {
@@ -211,6 +218,7 @@ describe('embeddable', () => {
         timeRange,
         query: [query, savedVis.state.query],
         filters,
+        sessionId: input.searchSessionId,
       })
     );
   });

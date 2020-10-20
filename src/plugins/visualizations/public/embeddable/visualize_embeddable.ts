@@ -100,6 +100,7 @@ export class VisualizeEmbeddable
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  private searchSessionId?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
@@ -243,6 +244,11 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    if (this.searchSessionId !== this.input.searchSessionId) {
+      this.searchSessionId = this.input.searchSessionId;
+      dirty = true;
+    }
+
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
@@ -373,6 +379,7 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
+        sessionId: this.input.searchSessionId,
       },
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
