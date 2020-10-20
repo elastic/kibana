@@ -87,26 +87,30 @@ fun BuildType.addTestArtifacts() {
   this.artifactRules += "\n" + testArtifactRules
 }
 
-fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
-  features {
-    notifications {
-      notifierSettings = slackNotifier {
-        connection = "KIBANA_SLACK"
-        sendTo = to
-        messageFormat = verboseMessageFormat {
-          addBranch = true
-          addChanges = true
-          addStatusText = true
-          maximumNumberOfChanges = 5
-        }
-      }
-      buildFailedToStart = true
-      buildFailed = true
-      buildFinishedSuccessfully = false
-      firstBuildErrorOccurs = true
-      buildProbablyHanging = true
-    }
+fun BuildType.addSlackNotifications(to: String = "C019TKJ363F") {
+  params {
+    param("elastic.slack.enabled", "true")
+    param("elastic.slack.channels", to)
   }
+//  features {
+//    notifications {
+//      notifierSettings = slackNotifier {
+//        connection = "KIBANA_SLACK"
+//        sendTo = to
+//        messageFormat = verboseMessageFormat {
+//          addBranch = true
+//          addChanges = true
+//          addStatusText = true
+//          maximumNumberOfChanges = 5
+//        }
+//      }
+//      buildFailedToStart = true
+//      buildFailed = true
+//      buildFinishedSuccessfully = false
+//      firstBuildErrorOccurs = true
+//      buildProbablyHanging = true
+//    }
+//  }
 }
 
 fun BuildType.dependsOn(buildType: BuildType, init: SnapshotDependency.() -> Unit = {}) {
