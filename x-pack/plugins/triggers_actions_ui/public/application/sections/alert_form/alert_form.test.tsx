@@ -161,8 +161,9 @@ describe('alert_form', () => {
 
     it('renders registered selected alert type', async () => {
       await setup();
-      const alertTypeSelectOptions = wrapper.find('[data-test-subj="my-alert-type-SelectOption"]');
-      expect(alertTypeSelectOptions.exists()).toBeTruthy();
+      wrapper.find('[data-test-subj="my-alert-type-SelectOption"]');
+      wrapper.find('[data-test-subj="alertTypesComboBox"]').first().simulate('click');
+      expect(wrapper.find('.euiSelect').length > 0).toBeTruthy();
     });
 
     it('does not render registered alert type which non editable', async () => {

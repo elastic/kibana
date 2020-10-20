@@ -57,7 +57,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   async function defineAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('alertNameInput', alertName);
-    await testSubjects.click('.index-threshold-SelectOption');
+    await testSubjects.click('[data-test-subj="alertTypesComboBox"]');
+
+    await retry.try(async () => {
+      const fieldOptions = await find.allByCssSelector('#.index-threshold option');
+      expect(fieldOptions[1]).not.to.be(undefined);
+      await fieldOptions[1].click();
+    });
     await testSubjects.click('selectIndexExpression');
     const comboBox = await find.byCssSelector('#indexSelectSearchBox');
     await comboBox.click();

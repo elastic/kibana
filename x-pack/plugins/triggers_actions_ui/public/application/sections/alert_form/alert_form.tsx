@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiTextColor,
   EuiForm,
   EuiSpacer,
   EuiFieldText,
@@ -21,10 +20,10 @@ import {
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
-  EuiButtonIcon,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -123,6 +122,9 @@ export const AlertForm = ({
     alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
+  const [selectedAlertTypeOptions, setSelectedAlertTypeOptions] = useState<
+    EuiComboBoxOptionOption[] | undefined
+  >(undefined);
 
   // load alert types
   useEffect(() => {
@@ -205,25 +207,6 @@ export const AlertForm = ({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        {canChangeTrigger ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="danger"
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertForm.changeAlertTypeAriaLabel',
-                {
-                  defaultMessage: 'Delete',
-                }
-              )}
-              onClick={() => {
-                setAlertProperty('alertTypeId', null);
-                setAlertTypeModel(null);
-                setAlertProperty('params', {});
-              }}
-            />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
         <Suspense fallback={<CenterJustifiedSpinner />}>
@@ -306,7 +289,19 @@ export const AlertForm = ({
     id: item.id,
   }));
 
-  const alertTypeOnChange = (alertTypeSelectedOption) => {
+  const resetAlertTypeToEmpty = () => {
+    setAlertProperty('alertTypeId', null);
+    setAlertTypeModel(null);
+    setAlertProperty('params', {});
+  };
+
+  const alertTypeOnChange = (alertTypeSelectedOption: EuiComboBoxOptionOption[]) => {
+    setSelectedAlertTypeOptions(alertTypeSelectedOption);
+
+    if (alertTypeSelectedOption.length === 0) {
+      resetAlertTypeToEmpty();
+      return;
+    }
     setAlertProperty('alertTypeId', alertTypeSelectedOption[0].id);
     setAlertTypeModel(
       alertTypeRegistry
@@ -317,14 +312,18 @@ export const AlertForm = ({
         )[0]
     );
     setAlertProperty('params', {});
-    if (alertTypesIndex && alertTypesIndex.has(alertTypeSelectedOption[0].id)) {
+    if (
+      alertTypesIndex &&
+      alertTypeSelectedOption[0].id &&
+      alertTypesIndex.has(alertTypeSelectedOption[0].id)
+    ) {
       setDefaultActionGroupId(
         alertTypesIndex.get(alertTypeSelectedOption[0].id)!.defaultActionGroupId
       );
     }
   };
 
-  const alertTypeRenderOption = (option) => {
+  const alertTypeRenderOption = (option: EuiComboBoxOptionOption<unknown>) => {
     return (
       <div>
         <EuiText size="s" color="default">
@@ -493,36 +492,38 @@ export const AlertForm = ({
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
-      {alertTypeModel ? (
-        <Fragment>{alertTypeDetails}</Fragment>
-      ) : alertTypeOptions.length ? (
-        <Fragment>
-          <EuiHorizontalRule />
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle',
-              {
-                defaultMessage: 'Select alert type',
-              }
-            )}
-          >
-            <EuiComboBox
+      {alertTypeOptions.length ? (
+        canChangeTrigger ? (
+          <Fragment>
+            <EuiHorizontalRule />
+            <EuiFormRow
               fullWidth
-              data-test-subj="alertTypesComboBox"
-              singleSelection={{ asPlainText: true }}
-              onChange={alertTypeOnChange}
-              options={alertTypeOptions}
-              renderOption={alertTypeRenderOption}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="l" />
-        </Fragment>
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle',
+                {
+                  defaultMessage: 'Select alert type',
+                }
+              )}
+            >
+              <EuiComboBox
+                fullWidth
+                selectedOptions={selectedAlertTypeOptions}
+                data-test-subj="alertTypesComboBox"
+                singleSelection={{ asPlainText: true }}
+                onChange={alertTypeOnChange}
+                options={alertTypeOptions}
+                renderOption={alertTypeRenderOption}
+              />
+            </EuiFormRow>
+            <EuiSpacer size="l" />
+          </Fragment>
+        ) : null
       ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (
         <CenterJustifiedSpinner />
       )}
+      {alertTypeModel ? <Fragment>{alertTypeDetails}</Fragment> : null}
     </EuiForm>
   );
 };
