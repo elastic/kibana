@@ -342,9 +342,7 @@ export class Simulator {
    * Return DOM nodes that match `enzymeSelector`.
    */
   private domNodes(enzymeSelector: string): ReactWrapper {
-    return this.wrapper
-      .find(enzymeSelector)
-      .filterWhere((wrapper) => typeof wrapper.type() === 'string');
+    return this.wrapper.find(enzymeSelector).filterWhere(Simulator.isDOM);
   }
 
   /**
