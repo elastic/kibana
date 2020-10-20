@@ -29,6 +29,7 @@ import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
+import { ensureAgentActionPolicyChangeExists } from './agents';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -80,6 +81,7 @@ async function createSetupSideEffects(
   ) {
     throw new Error('Policy not found');
   }
+
   for (const installedPackage of installedPackages) {
     const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
       (packageName) => installedPackage.name === packageName
@@ -104,6 +106,8 @@ async function createSetupSideEffects(
       );
     }
   }
+
+  await ensureAgentActionPolicyChangeExists(soClient);
 
   return { isIntialized: true };
 }
