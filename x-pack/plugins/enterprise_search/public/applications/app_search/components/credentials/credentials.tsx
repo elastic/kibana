@@ -19,6 +19,7 @@ import {
   EuiButton,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -41,11 +42,6 @@ export const Credentials: React.FC = () => {
     };
   }, []);
 
-  // TODO
-  // if (dataLoading) { return <Loading /> }
-  if (dataLoading) {
-    return null;
-  }
   return (
     <>
       <SetPageChrome
@@ -110,22 +106,22 @@ export const Credentials: React.FC = () => {
             </EuiTitle>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton
-              color="primary"
-              data-test-subj="CreateAPIKeyButton"
-              fill={true}
-              onClick={() => showCredentialsForm()}
-            >
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
-                defaultMessage: 'Create a key',
-              })}
-            </EuiButton>
+            {!dataLoading && (
+              <EuiButton
+                color="primary"
+                data-test-subj="CreateAPIKeyButton"
+                fill={true}
+                onClick={() => showCredentialsForm()}
+              >
+                {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
+                  defaultMessage: 'Create a key',
+                })}
+              </EuiButton>
+            )}
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiSpacer size="s" />
-        <EuiPanel>
-          <CredentialsList />
-        </EuiPanel>
+        <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
       </EuiPageContentBody>
     </>
   );

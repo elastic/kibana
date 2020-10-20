@@ -201,8 +201,10 @@ export async function buildContextMenuForActions({
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
-      // TODO: Add separator line here once it is available in EUI.
-      // See https://github.com/elastic/eui/pull/4018
+      panels.mainMenu.items.push({
+        isSeparator: true,
+        key: panel.id + '__separator',
+      });
       if (panel.items.length > 3) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,

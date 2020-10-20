@@ -15,7 +15,6 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
@@ -193,18 +192,16 @@ export const StatefulEditDataProvider = React.memo<Props>(
             <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiFormRow label={i18n.FIELD}>
-                  <EuiToolTip content={updatedField.length > 0 ? updatedField[0].label : null}>
-                    <EuiComboBox
-                      data-test-subj="field"
-                      isClearable={false}
-                      onChange={onFieldSelected}
-                      options={getCategorizedFieldNames(browserFields)}
-                      placeholder={i18n.FIELD_PLACEHOLDER}
-                      selectedOptions={updatedField}
-                      singleSelection={{ asPlainText: true }}
-                      style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
-                    />
-                  </EuiToolTip>
+                  <EuiComboBox
+                    data-test-subj="field"
+                    isClearable={false}
+                    onChange={onFieldSelected}
+                    options={getCategorizedFieldNames(browserFields)}
+                    placeholder={i18n.FIELD_PLACEHOLDER}
+                    selectedOptions={updatedField}
+                    singleSelection={{ asPlainText: true }}
+                    style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
 

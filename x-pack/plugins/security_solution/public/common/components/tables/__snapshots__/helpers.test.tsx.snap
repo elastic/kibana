@@ -49,8 +49,6 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
   >
     item1
   </DraggableWrapper>
-  ,
-  <Spacer />
   <DraggableWrapper
     dataProvider={
       Object {
@@ -72,8 +70,6 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
   >
     item2
   </DraggableWrapper>
-  ,
-  <Spacer />
   <DraggableWrapper
     dataProvider={
       Object {

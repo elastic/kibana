@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "main": "target/index.js",
+  "kibana": {
+    "devOnly": true
+  },
   "scripts": {
     "kbn:bootstrap": "rm -rf target && tsc",
     "kbn:watch": "rm -rf target && tsc --watch"
