@@ -10,6 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solutio
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
+  createRule,
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
@@ -35,11 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should set the response content types to be expected', async () => {
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(200);
+        await createRule(supertest, getSimpleRule());
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -51,11 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a single rule with a rule_id', async () => {
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(200);
+        await createRule(supertest, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -71,11 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a exported count with a single rule_id', async () => {
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(200);
+        await createRule(supertest, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -94,19 +83,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export exactly two rules given two rules', async () => {
-        // post rule 1
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
-          .expect(200);
-
-        // post rule 2
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-2'))
-          .expect(200);
+        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, getSimpleRule('rule-2'));
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)

@@ -325,6 +325,10 @@ describe('EnterpriseSearchRequestHandler', () => {
         expect(mockLogger.error).toHaveBeenCalled();
       });
 
+      it('errors when receiving a 401 response', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { status: 401 });
+      });
+
       it('errors when redirected to /login', async () => {
         EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/login' });
       });

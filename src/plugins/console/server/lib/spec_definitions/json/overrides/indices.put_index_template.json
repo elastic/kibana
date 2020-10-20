@@ -1,0 +1,11 @@
+{
+  "indices.put_index_template": {
+    "data_autocomplete_rules": {
+      "index_patterns": "",
+      "aliases": "{name}",
+      "mappings": "",
+      "settings": "",
+      "version": 0
+    }
+  }
+}

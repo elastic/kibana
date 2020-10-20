@@ -87,7 +87,8 @@ const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 7;
 const expectedNumberOfSequenceAlerts = 1;
 
-describe('Detection rules, EQL', () => {
+// Failing: See https://github.com/elastic/kibana/issues/79522
+describe.skip('Detection rules, EQL', () => {
   beforeEach(() => {
     esArchiverLoad('timeline');
   });
@@ -130,7 +131,7 @@ describe('Detection rules, EQL', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${eqlRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${eqlRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', eqlRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', eqlRule.severity);
