@@ -87,7 +87,7 @@ fun BuildType.addTestArtifacts() {
   this.artifactRules += "\n" + testArtifactRules
 }
 
-fun BuildType.addSlackNotifications(to: String = "C019TKJ363F") {
+fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
   params {
     param("elastic.slack.enabled", "true")
     param("elastic.slack.channels", to)
