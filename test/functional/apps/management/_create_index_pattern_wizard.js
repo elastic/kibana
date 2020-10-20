@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const es = getService('legacyEs');
   const PageObjects = getPageObjects(['settings', 'common']);
+  const security = getService('security');
 
   describe('"Create Index Pattern" wizard', function () {
     before(async function () {
@@ -51,6 +52,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('index alias', () => {
+      before(async function () {
+        await security.testUser.setRoles(['kibana_admin', 'test_alias1_reader']);
+      });
       it('can be an index pattern', async () => {
         await es.transport.request({
           path: '/blogs/_doc',
@@ -77,6 +81,7 @@ export default function ({ getService, getPageObjects }) {
           path: '/blogs',
           method: 'DELETE',
         });
+        await security.testUser.restoreDefaults();
       });
     });
   });
