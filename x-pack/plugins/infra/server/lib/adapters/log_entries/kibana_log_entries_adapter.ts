@@ -43,8 +43,9 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<LogEntryDocument[]> {
-    const { startTimestamp, endTimestamp, query, cursor, size, highlightTerm } = params;
+  ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
+    const { startTimestamp, endTimestamp, query, cursor, highlightTerm } = params;
+    const size = params.size ?? LOG_ENTRIES_PAGE_SIZE;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
 
@@ -80,7 +81,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       index: sourceConfiguration.logAlias,
       ignoreUnavailable: true,
       body: {
-        size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
+        size: size + 1, // Extra one to test if it has more before or after
         track_total_hits: false,
         _source: false,
         fields,
@@ -113,7 +114,17 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     );
 
     const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
-    return mapHitsToLogEntryDocuments(hits, fields);
+    const hasMore = hits.length > size;
+
+    if (hasMore) {
+      hits.pop();
+    }
+
+    return {
+      documents: mapHitsToLogEntryDocuments(hits, fields),
+      hasMoreBefore: sortDirection === 'desc' ? hasMore : undefined,
+      hasMoreAfter: sortDirection === 'asc' ? hasMore : undefined,
+    };
   }
 
   public async getContainedLogSummaryBuckets(

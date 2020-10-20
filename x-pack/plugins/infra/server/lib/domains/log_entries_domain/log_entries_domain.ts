@@ -136,7 +136,7 @@ export class InfraLogEntriesDomain {
 
     const requiredFields = getRequiredFields(configuration, messageFormattingRules);
 
-    const documents = await this.adapter.getLogEntries(
+    const { documents } = await this.adapter.getLogEntries(
       requestContext,
       configuration,
       requiredFields,
@@ -323,7 +323,7 @@ export interface LogEntriesAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<LogEntryDocument[]>;
+  ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
 
   getContainedLogSummaryBuckets(
     requestContext: RequestHandlerContext,
