@@ -56,7 +56,7 @@ export function getTemplate(
     },
 
     footer(currentPage: number, pageCount: number) {
-      const logoPath = path.resolve(assetPath, 'img', 'logo-grey.png');
+      const logoPath = path.resolve(assetPath, 'img', 'logo-grey.png'); // Default Elastic Logo
       return {
         margin: [pageMarginWidth, pageMarginBottom / 4, pageMarginWidth, 0],
         layout: 'noBorder',
