@@ -534,35 +534,35 @@ export default function ({ getService }) {
       expect(await successfulRunNowResult).to.eql({ id: longRunningTask.id });
     });
 
-    // it('should allow a failed task to be rerun using runNow', async () => {
-    //   const taskThatFailsBeforeRunNow = await scheduleTask({
-    //     taskType: 'singleAttemptSampleTask',
-    //     params: {
-    //       waitForParams: true,
-    //     },
-    //   });
+    it('should allow a failed task to be rerun using runNow', async () => {
+      const taskThatFailsBeforeRunNow = await scheduleTask({
+        taskType: 'singleAttemptSampleTask',
+        params: {
+          waitForParams: true,
+        },
+      });
 
-    //   // tell the task to fail on its next run
-    //   await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
-    //     failWith: 'error on first run',
-    //   });
+      // tell the task to fail on its next run
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
+        failWith: 'error on first run',
+      });
 
-    //   // wait for task to fail
-    //   await retry.try(async () => {
-    //     const tasks = (await currentTasks()).docs;
-    //     expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
-    //   });
+      // wait for task to fail
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
+      });
 
-    //   // runNow should be successfully run the failing task
-    //   const runNowResultWithExpectedFailure = runTaskNow({
-    //     id: taskThatFailsBeforeRunNow.id,
-    //   });
+      // runNow should be successfully run the failing task
+      const runNowResultWithExpectedFailure = runTaskNow({
+        id: taskThatFailsBeforeRunNow.id,
+      });
 
-    //   // release the task without failing this time
-    //   await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id);
+      // release the task without failing this time
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id);
 
-    //   expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
-    // });
+      expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
+    });
 
     async function expectReschedule(originalRunAt, currentTask, expectedDiff) {
       const buffer = 10000;
