@@ -10,7 +10,7 @@ import concat from 'concat-stream';
 import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
-import { Content } from 'pdfmake/interfaces';
+import { Content, ContentText } from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../../lib/layouts';
 import { getDocOptions } from './get_doc_options';
 import { getFont } from './get_font';
@@ -58,10 +58,10 @@ export class PdfMaker {
     // inject a page break for every 2 groups on the page
     if (groupCount > 0 && groupCount % this._layout.groupCount === 0) {
       contents = [
-        {
+        ({
           text: '',
           pageBreak: 'after',
-        } as Content,
+        } as ContentText) as Content,
       ].concat(contents);
     }
     this._content.push(contents);

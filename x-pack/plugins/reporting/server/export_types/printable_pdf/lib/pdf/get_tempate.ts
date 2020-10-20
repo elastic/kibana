@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import path from 'path';
-import { Style, TDocumentDefinitions } from 'pdfmake/interfaces';
+import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../../lib/layouts';
 import { getFont } from './get_font';
 
