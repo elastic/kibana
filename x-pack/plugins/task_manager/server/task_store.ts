@@ -273,7 +273,12 @@ export class TaskStore {
       )
     );
 
-    // the sort should use score first, but only if there are pinned tasks
+    // The documents should be sorted by runAt/retryAt, unless there are pinned
+    // tasks being queried, in which case we want to sort by score first, and then
+    // the runAt/retryAt.  That way we'll get the pinned tasks first.  Note that
+    // the score seems to favor newer documents rather than older documents, so
+    // if there are not pinned tasks being queried, we do NOT want to sort by score
+    // at all, just by runAt/retryAt.
     const sort: SortOptions = [SortByRunAtAndRetryAt];
     if (claimTasksById && claimTasksById.length) {
       sort.unshift('_score');
