@@ -241,9 +241,7 @@ describe('TaskScheduling', () => {
       events$.next(asTaskRunRequestEvent(id, asErr(new Error('failed to buffer request'))));
 
       await expect(result).rejects.toEqual(
-        new Error(
-          `Failed to run task "${id}" as Task Manager is at capacity, please try again later`
-        )
+        new Error(`Failed to run task "${id}": Task Manager is at capacity, please try again later`)
       );
       expect(mockTaskStore.getLifecycle).not.toHaveBeenCalled();
     });
