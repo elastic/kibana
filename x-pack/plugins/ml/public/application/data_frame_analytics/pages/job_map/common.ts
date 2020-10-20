@@ -8,4 +8,5 @@ export enum JOB_MAP_NODE_TYPES {
   ANALYTICS = 'analytics',
   TRANSFORM = 'transform',
   INDEX_PATTERN = 'index-pattern',
+  INFERENCE_MODEL = 'inferenceModel',
 }

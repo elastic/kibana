@@ -90,7 +90,7 @@ export const Page: FC<{
           <UpgradeWarning />
 
           <EuiPageContent>
-            <AnalyticsNavigationBar selectedTabId={selectedTabId} />
+            <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={jobId} />
             {selectedTabId === 'map' && jobId && <JobMap analyticsId={jobId} />}
             {selectedTabId === 'data_frame_analytics' && (
               <DataFrameAnalyticsList blockRefresh={blockRefresh} />

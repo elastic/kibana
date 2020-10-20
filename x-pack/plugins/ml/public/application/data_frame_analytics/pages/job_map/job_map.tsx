@@ -66,7 +66,7 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
       idToUse,
       treatAsRoot
     );
-    // console.log('----- ANALYTICS MAP ----', JSON.stringify(analyticsMap, null, 2)); // remove
+
     const { elements: nodeElements, details, error: fetchError } = analyticsMap;
 
     if (fetchError !== null) {

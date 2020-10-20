@@ -8,32 +8,45 @@ import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { JOB_MAP_NODE_TYPES } from '../../../public/application/data_frame_analytics/pages/job_map/common'; // eslint-disable-line
 import { getAnalysisType } from '../../../public/application/data_frame_analytics/common/analytics'; // eslint-disable-line
-
-// interface NextLinkReturnType {
-//   isIndexPattern?: boolean;
-//   indexData?: any;
-//   isJob?: boolean;
-//   jobData?: any;
-//   isTransform?: boolean;
-//   transformData?: any;
-// }
-// interface AnalyticsMapReturnType {
-//   elements: any[];
-//   details: object; // transform, job, or index details
-//   error: null | any;
-// }
-// interface AnalyticsMapElement {
-//   id: string;
-//   label: string;
-//   type: string;
-//   analysisType?: string; (job types type)
-// }
+import {
+  AnalyticsMapEdgeElement,
+  AnalyticsMapReturnType,
+  AnalyticsMapNodeElement,
+  isAnalyticsMapEdgeElement,
+  isAnalyticsMapNodeElement,
+  isIndexPatternLinkReturnType,
+  isJobDataLinkReturnType,
+  isTransformLinkReturnType,
+  MapElements,
+  NextLinkReturnType,
+} from './types';
 
 export class AnalyticsManager {
   private _client: IScopedClusterClient['asInternalUser'];
+  public _inferenceModels: any; // TODO: update types
 
   constructor(client: IScopedClusterClient['asInternalUser']) {
     this._client = client;
+    this._inferenceModels = [];
+  }
+
+  public set inferenceModels(models: any) {
+    this._inferenceModels = models;
+  }
+
+  public get inferenceModels(): any {
+    return this._inferenceModels;
+  }
+
+  async setInferenceModels() {
+    try {
+      const models = await this.getAnalyticsModels();
+      this.inferenceModels = models;
+    } catch (error) {
+      // TODO: bubble up this error?
+      // eslint-disable-next-line
+      console.error('Unable to fetch inference models', error);
+    }
   }
 
   private isDuplicateElement(analyticsId: string, elements: any[]): boolean {
@@ -45,13 +58,19 @@ export class AnalyticsManager {
     });
     return isDuplicate;
   }
-
+  // @ts-ignore
   private async getAnalyticsModelData(modelId: string) {
     const resp = await this._client.ml.getTrainedModels({
       model_id: modelId,
     });
     const modelData = resp?.body?.trained_model_configs[0];
     return modelData;
+  }
+
+  private async getAnalyticsModels() {
+    const resp = await this._client.ml.getTrainedModels();
+    const models = resp?.body?.trained_model_configs;
+    return models;
   }
 
   private async getAnalyticsJobData(analyticsId: string) {
@@ -78,7 +97,19 @@ export class AnalyticsManager {
     return transformData;
   }
 
-  private async getNextLink({ id, type }: { id: string; type: JOB_MAP_NODE_TYPES }) {
+  private findJobModel(analyticsId: string): any {
+    return this.inferenceModels.find(
+      (model: any) => model.metadata?.analytics_config?.id === analyticsId
+    );
+  }
+
+  private async getNextLink({
+    id,
+    type,
+  }: {
+    id: string;
+    type: JOB_MAP_NODE_TYPES;
+  }): Promise<NextLinkReturnType> {
     try {
       if (type === JOB_MAP_NODE_TYPES.INDEX_PATTERN) {
         // fetch index data
@@ -99,19 +130,56 @@ export class AnalyticsManager {
     }
   }
 
+  private getAnalyticsModelElements(
+    analyticsId: string
+  ): {
+    modelElement?: AnalyticsMapNodeElement;
+    modelDetails?: any;
+    edgeElement?: AnalyticsMapEdgeElement;
+  } {
+    // Get inference model for analytics job and create model node
+    const analyticsModel = this.findJobModel(analyticsId);
+    let modelElement;
+    let edgeElement;
+
+    if (analyticsModel !== undefined) {
+      const modelId = `${analyticsModel.model_id}-${JOB_MAP_NODE_TYPES.INFERENCE_MODEL}`;
+      modelElement = {
+        data: {
+          id: modelId,
+          label: analyticsModel.model_id,
+          type: JOB_MAP_NODE_TYPES.INFERENCE_MODEL,
+        },
+      };
+      // Create edge for job and corresponding model
+      edgeElement = {
+        data: {
+          id: `${analyticsId}-${JOB_MAP_NODE_TYPES.ANALYTICS}~${modelId}`,
+          source: `${analyticsId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`,
+          target: modelId,
+        },
+      };
+    }
+
+    return { modelElement, modelDetails: analyticsModel, edgeElement };
+  }
+
   /**
    * Works backward from jobId to return related jobs from source indices
    * @param jobId
    */
-  async getAnalyticsMap(analyticsId: string) {
+  async getAnalyticsMap(analyticsId: string): Promise<AnalyticsMapReturnType> {
     const result: any = { elements: [], details: {}, error: null };
+    const modelElements: MapElements[] = [];
 
     try {
+      await this.setInferenceModels();
+      // Create first node for incoming analyticsId
       let data = await this.getAnalyticsJobData(analyticsId);
       let nextLinkId = data?.source?.index[0];
       let nextType = JOB_MAP_NODE_TYPES.INDEX_PATTERN;
       let complete = false;
-      let link: any = {};
+      let link: NextLinkReturnType;
       let count = 0;
       let rootTransform;
       let rootIndexPattern;
@@ -127,10 +195,19 @@ export class AnalyticsManager {
         },
       });
       result.details[firstNodeId] = data;
+
+      let { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(analyticsId);
+      if (isAnalyticsMapNodeElement(modelElement)) {
+        modelElements.push(modelElement);
+        result.details[modelElement.data.id] = modelDetails;
+      }
+      if (isAnalyticsMapEdgeElement(edgeElement)) {
+        modelElements.push(edgeElement);
+      }
       // Add a safeguard against infinite loops.
       while (complete === false) {
         count++;
-        if (count >= 50) {
+        if (count >= 100) {
           break;
         }
 
@@ -144,7 +221,7 @@ export class AnalyticsManager {
           break;
         }
         // If it's index pattern, check meta data to see what to fetch next
-        if (link.isIndexPattern === true) {
+        if (isIndexPatternLinkReturnType(link) && link.isIndexPattern === true) {
           const nodeId = `${nextLinkId}-${JOB_MAP_NODE_TYPES.INDEX_PATTERN}`;
           result.elements.unshift({
             data: { id: nodeId, label: nextLinkId, type: JOB_MAP_NODE_TYPES.INDEX_PATTERN },
@@ -167,7 +244,7 @@ export class AnalyticsManager {
             complete = true;
             break;
           }
-        } else if (link.isJob === true) {
+        } else if (isJobDataLinkReturnType(link) && link.isJob === true) {
           data = link.jobData;
           const nodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
@@ -182,7 +259,17 @@ export class AnalyticsManager {
           result.details[nodeId] = data;
           nextLinkId = data?.source?.index[0];
           nextType = JOB_MAP_NODE_TYPES.INDEX_PATTERN;
-        } else if (link.isTransform === true) {
+
+          // Get inference model for analytics job and create model node
+          ({ modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(data.id));
+          if (isAnalyticsMapNodeElement(modelElement)) {
+            modelElements.push(modelElement);
+            result.details[modelElement.data.id] = modelDetails;
+          }
+          if (isAnalyticsMapEdgeElement(edgeElement)) {
+            modelElements.push(edgeElement);
+          }
+        } else if (isTransformLinkReturnType(link) && link.isTransform === true) {
           data = link.transformData;
 
           const nodeId = `${data.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
@@ -202,13 +289,15 @@ export class AnalyticsManager {
       for (let i = 0; i < elemLength; i++) {
         const currentElem = result.elements[i];
         const nextElem = result.elements[i + 1];
-        result.elements.push({
-          data: {
-            id: `${currentElem.data.id}~${nextElem.data.id}`,
-            source: currentElem.data.id,
-            target: nextElem.data.id,
-          },
-        });
+        if (currentElem !== undefined && nextElem !== undefined) {
+          result.elements.push({
+            data: {
+              id: `${currentElem.data.id}~${nextElem.data.id}`,
+              source: currentElem.data.id,
+              target: nextElem.data.id,
+            },
+          });
+        }
       }
 
       // fetch all jobs associated with root transform if defined, otherwise check root index
@@ -240,9 +329,22 @@ export class AnalyticsManager {
                 target: nodeId,
               },
             });
+            // Get inference model for analytics job and create model node
+            ({ modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
+              jobs[i].id
+            ));
+            if (isAnalyticsMapNodeElement(modelElement)) {
+              modelElements.push(modelElement);
+              result.details[modelElement.data.id] = modelDetails;
+            }
+            if (isAnalyticsMapEdgeElement(edgeElement)) {
+              modelElements.push(edgeElement);
+            }
           }
         }
       }
+      // Include model nodes in result elements now that all other nodes have been created
+      result.elements.push(...modelElements);
 
       return result;
     } catch (error) {
@@ -250,7 +352,7 @@ export class AnalyticsManager {
       return result;
     }
   }
-
+  // TODO: add model nodes for extension as well
   async extendAnalyticsMapForAnalyticsJob(analyticsId: string) {
     const result: any = { elements: [], details: {}, error: null };
 

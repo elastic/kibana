@@ -5,22 +5,25 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
-
-import {
-  getJobMapUrl,
-  DataFrameAnalyticsListAction,
-  DataFrameAnalyticsListRow,
-} from '../analytics_list/common';
+import { useMlUrlGenerator, useNavigateToPath } from '../../../../../contexts/kibana';
+import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
 import { mapActionButtonText, MapButton } from './map_button';
 
 export type MapAction = ReturnType<typeof useMapAction>;
 export const useMapAction = () => {
+  const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
-  const clickHandler = useCallback((item: DataFrameAnalyticsListRow) => {
-    navigateToPath(getJobMapUrl(item.id));
+  const clickHandler = useCallback(async (item: DataFrameAnalyticsListRow) => {
+    const path = await mlUrlGenerator.createUrl({
+      // @ts-ignore
+      page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+      pageState: { jobId: item.id },
+    });
+
+    await navigateToPath(path, false);
   }, []);
 
   const action: DataFrameAnalyticsListAction = useMemo(

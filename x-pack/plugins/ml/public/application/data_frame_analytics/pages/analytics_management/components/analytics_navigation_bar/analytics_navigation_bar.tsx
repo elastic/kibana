@@ -15,7 +15,10 @@ interface Tab {
   path: string;
 }
 
-export const AnalyticsNavigationBar: FC<{ selectedTabId?: string }> = ({ selectedTabId }) => {
+export const AnalyticsNavigationBar: FC<{ selectedTabId?: string; jobId?: string }> = ({
+  jobId,
+  selectedTabId,
+}) => {
   const navigateToPath = useNavigateToPath();
 
   const tabs = useMemo(() => {
@@ -35,7 +38,7 @@ export const AnalyticsNavigationBar: FC<{ selectedTabId?: string }> = ({ selecte
         path: '/data_frame_analytics/models',
       },
     ];
-    if (selectedTabId === 'map') {
+    if (jobId !== undefined) {
       navTabs.push({
         id: 'map',
         name: i18n.translate('xpack.ml.dataframe.mapTabLabel', {
@@ -45,10 +48,10 @@ export const AnalyticsNavigationBar: FC<{ selectedTabId?: string }> = ({ selecte
       });
     }
     return navTabs;
-  }, [selectedTabId === 'map']);
+  }, []);
 
   const onTabClick = useCallback(async (tab: Tab) => {
-    await navigateToPath(tab.path);
+    await navigateToPath(tab.path, true);
   }, []);
 
   return (
