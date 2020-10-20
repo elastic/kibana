@@ -10,10 +10,12 @@ import { FormSchema, fieldValidators } from '../../../shared_imports';
 import { defaultSetPriority } from '../../constants';
 
 import { FormInternal } from './types';
+
 import { ifExistsNumberGreaterThanZero, rolloverThresholdsValidator } from './form_validations';
+
 import { i18nTexts } from './i18n_texts';
 
-const { emptyField } = fieldValidators;
+const { emptyField, numberGreaterThanField } = fieldValidators;
 
 export const schema: FormSchema<FormInternal> = {
   _meta: {
@@ -30,20 +32,9 @@ export const schema: FormSchema<FormInternal> = {
       maxAgeUnit: {
         defaultValue: 'd',
       },
-      forceMergeEnabled: {
-        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
-      },
       bestCompression: {
-        label: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.bestCompressionLabel', {
-          defaultMessage: 'Compress stored fields',
-        }),
-        helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.forceMerge.bestCompressionText',
-          {
-            defaultMessage:
-              'Use higher compression for stored fields at the cost of slower performance.',
-          }
-        ),
+        label: i18nTexts.editPolicy.bestCompressionFieldLabel,
+        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
     },
     warm: {
@@ -62,9 +53,6 @@ export const schema: FormSchema<FormInternal> = {
       },
       minAgeUnit: {
         defaultValue: 'd',
-      },
-      forceMergeEnabled: {
-        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
@@ -156,6 +144,33 @@ export const schema: FormSchema<FormInternal> = {
         ],
       },
       actions: {
+        allocate: {
+          number_of_replicas: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
+              defaultMessage: 'Number of replicas (optional)',
+            }),
+            validations: [
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+          },
+        },
+        shrink: {
+          number_of_shards: {
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              {
+                validator: numberGreaterThanField({
+                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+                  than: 0,
+                }),
+              },
+            ],
+          },
+        },
         forcemerge: {
           max_num_segments: {
             label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,

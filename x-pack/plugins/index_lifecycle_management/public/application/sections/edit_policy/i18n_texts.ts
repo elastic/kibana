@@ -36,5 +36,19 @@ export const i18nTexts = {
           'Use higher compression for stored fields at the cost of slower performance.',
       }
     ),
+    errors: {
+      numberRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.numberRequiredErrorMessage',
+        {
+          defaultMessage: 'A number is required.',
+        }
+      ),
+      numberGreatThan0Required: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.numberAboveZeroRequiredError',
+        {
+          defaultMessage: 'Only numbers above 0 are allowed.',
+        }
+      ),
+    },
   },
 };

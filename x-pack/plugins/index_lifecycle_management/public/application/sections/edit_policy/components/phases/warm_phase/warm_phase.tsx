@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiFieldNumber,
-  EuiSwitch,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
@@ -22,6 +21,7 @@ import {
   UseField,
   ToggleField,
   useFormContext,
+  NumericField,
 } from '../../../../../../shared_imports';
 
 import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../../../common/types';
@@ -29,14 +29,15 @@ import { PhaseValidationErrors } from '../../../../../services/policies/policy_v
 
 import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared';
 
+import { useEditPolicyContext } from '../../../edit_policy_context';
+
 import {
   LearnMoreLink,
   ActiveBadge,
   PhaseErrorMessage,
-  OptionalLabel,
   ErrableFormRow,
   DescribedFormField,
-} from '../../index';
+} from '../../';
 
 import { DataTierAllocationField } from '../shared';
 
@@ -64,6 +65,7 @@ interface Props {
   errors?: PhaseValidationErrors<WarmPhaseInterface>;
 }
 export const WarmPhase: FunctionComponent<Props> = ({ setPhaseData, phaseData, errors }) => {
+  const { originalPolicy } = useEditPolicyContext();
   const form = useFormContext();
   const [
     {
@@ -173,40 +175,25 @@ export const WarmPhase: FunctionComponent<Props> = ({ setPhaseData, phaseData, e
                   'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
                   { defaultMessage: 'Set replicas' }
                 ),
-                initialValue: Boolean(phaseData.selectedReplicaCount),
-                onChange: (v) => {
-                  if (!v) {
-                    setPhaseData('selectedReplicaCount', '');
-                  }
-                },
+                initialValue: Boolean(
+                  originalPolicy.phases.warm?.actions?.allocate?.number_of_replicas
+                ),
               }}
               fullWidth
             >
-              <ErrableFormRow
-                id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
-                label={
-                  <Fragment>
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel"
-                      defaultMessage="Number of replicas"
-                    />
-                    <OptionalLabel />
-                  </Fragment>
-                }
-                isShowingErrors={isShowingErrors}
-                errors={errors?.selectedReplicaCount}
-              >
-                <EuiFieldNumber
-                  id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
-                  value={phaseData.selectedReplicaCount}
-                  onChange={(e) => {
-                    setPhaseData('selectedReplicaCount', e.target.value);
-                  }}
-                  min={0}
-                />
-              </ErrableFormRow>
+              <UseField
+                path="phases.warm.actions.allocate.number_of_replicas"
+                component={NumericField}
+                componentProps={{
+                  fullWidth: false,
+                  euiFieldProps: {
+                    'data-test-subj': `${warmProperty}-${phaseProperty('selectedReplicaCount')}`,
+                    min: 0,
+                  },
+                }}
+              />
             </DescribedFormField>
-            <EuiDescribedFormGroup
+            <DescribedFormField
               title={
                 <h3>
                   <FormattedMessage
@@ -224,58 +211,45 @@ export const WarmPhase: FunctionComponent<Props> = ({ setPhaseData, phaseData, e
                   <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
                 </EuiTextColor>
               }
-              fullWidth
               titleSize="xs"
+              switchProps={{
+                'aria-controls': 'shrinkContent',
+                'data-test-subj': 'shrinkSwitch',
+                label: i18nTexts.shrinkLabel,
+                'aria-label': i18nTexts.shrinkLabel,
+                initialValue: Boolean(originalPolicy.phases.warm?.actions?.shrink),
+              }}
+              fullWidth
             >
-              <Fragment>
-                <EuiSwitch
-                  data-test-subj="shrinkSwitch"
-                  checked={phaseData.shrinkEnabled}
-                  onChange={(e) => {
-                    setPhaseData(phaseProperty('shrinkEnabled'), e.target.checked);
-                  }}
-                  label={i18nTexts.shrinkLabel}
-                  aria-label={i18nTexts.shrinkLabel}
-                  aria-controls="shrinkContent"
-                />
-
-                <div id="shrinkContent" aria-live="polite" role="region">
-                  {phaseData.shrinkEnabled ? (
-                    <Fragment>
-                      <EuiSpacer />
-                      <EuiFlexGroup>
-                        <EuiFlexItem grow={false}>
-                          <ErrableFormRow
-                            id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
-                            label={i18n.translate(
-                              'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
-                              {
-                                defaultMessage: 'Number of primary shards',
-                              }
-                            )}
-                            isShowingErrors={isShowingErrors}
-                            errors={errors?.selectedPrimaryShardCount}
-                          >
-                            <EuiFieldNumber
-                              id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
-                              value={phaseData.selectedPrimaryShardCount}
-                              onChange={(e) => {
-                                setPhaseData(
-                                  phaseProperty('selectedPrimaryShardCount'),
-                                  e.target.value
-                                );
-                              }}
-                              min={1}
-                            />
-                          </ErrableFormRow>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      <EuiSpacer />
-                    </Fragment>
-                  ) : null}
-                </div>
-              </Fragment>
-            </EuiDescribedFormGroup>
+              <div id="shrinkContent" aria-live="polite" role="region">
+                <EuiSpacer />
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <ErrableFormRow
+                      id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
+                      label={i18n.translate(
+                        'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
+                        {
+                          defaultMessage: 'Number of primary shards',
+                        }
+                      )}
+                      isShowingErrors={isShowingErrors}
+                      errors={errors?.selectedPrimaryShardCount}
+                    >
+                      <EuiFieldNumber
+                        id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
+                        value={phaseData.selectedPrimaryShardCount}
+                        onChange={(e) => {
+                          setPhaseData(phaseProperty('selectedPrimaryShardCount'), e.target.value);
+                        }}
+                        min={1}
+                      />
+                    </ErrableFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+              </div>
+            </DescribedFormField>
 
             <Forcemerge phase="warm" />
 

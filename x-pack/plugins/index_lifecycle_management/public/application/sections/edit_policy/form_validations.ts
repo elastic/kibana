@@ -4,27 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { fieldValidators, ValidationFunc } from '../../../shared_imports';
 
 import { i18nTexts } from './components/phases/hot_phase/i18n_texts';
 
 import { ROLLOVER_FORM_PATHS } from './constants';
 
-const { numberGreaterThanField } = fieldValidators;
+import { i18nTexts } from './i18n_texts';
 
-export const positiveNumberRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.numberAboveZeroRequiredError',
-  {
-    defaultMessage: 'Only numbers above 0 are allowed.',
-  }
-);
+const { numberGreaterThanField } = fieldValidators;
 
 export const ifExistsNumberGreaterThanZero: ValidationFunc<any, any, any> = (arg) => {
   if (arg.value) {
     return numberGreaterThanField({
       than: 0,
-      message: positiveNumberRequiredMessage,
+      message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
     })({
       ...arg,
       value: parseInt(arg.value, 10),
