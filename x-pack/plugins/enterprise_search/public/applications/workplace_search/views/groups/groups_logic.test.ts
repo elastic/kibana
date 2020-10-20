@@ -145,21 +145,6 @@ describe('GroupsLogic', () => {
       });
     });
 
-    describe('setActivePage', () => {
-      it('sets reducer', () => {
-        const activePage = 3;
-        GroupsLogic.actions.setActivePage(activePage);
-
-        expect(GroupsLogic.values.groupsMeta).toEqual({
-          ...DEFAULT_META,
-          page: {
-            ...DEFAULT_META.page,
-            current: activePage,
-          },
-        });
-      });
-    });
-
     describe('setNewGroupName', () => {
       it('sets reducer', () => {
         const NEW_NAME = 'new name';
@@ -391,6 +376,24 @@ describe('GroupsLogic', () => {
         } catch {
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         }
+      });
+    });
+
+    describe('setActivePage', () => {
+      it('sets reducer', () => {
+        const getSearchResultsSpy = jest.spyOn(GroupsLogic.actions, 'getSearchResults');
+        const activePage = 3;
+        GroupsLogic.actions.setActivePage(activePage);
+
+        expect(GroupsLogic.values.groupsMeta).toEqual({
+          ...DEFAULT_META,
+          page: {
+            ...DEFAULT_META.page,
+            current: activePage,
+          },
+        });
+
+        expect(getSearchResultsSpy).toHaveBeenCalled();
       });
     });
 
