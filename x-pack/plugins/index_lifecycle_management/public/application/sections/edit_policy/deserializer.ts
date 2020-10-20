@@ -11,7 +11,6 @@ import { SerializedPolicy } from '../../../../common/types';
 import { splitSizeAndUnits } from '../../services/policies/policy_serialization';
 
 import { determineDataTierAllocationType } from '../../lib';
-import {} from '../../services/policies/policy_serialization';
 
 import { FormInternal } from './types';
 
