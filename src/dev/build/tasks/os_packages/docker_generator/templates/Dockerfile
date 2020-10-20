@@ -33,7 +33,6 @@ RUN tar --strip-components=1 -zxf /opt/{{artifactTarball}}
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-RUN find /usr/share/kibana -type d -exec chmod g+s {} \;
 
 ################################################################################
 # Build stage 1 (the actual Kibana image):

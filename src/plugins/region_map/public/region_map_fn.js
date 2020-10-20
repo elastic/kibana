@@ -23,7 +23,7 @@ export const createRegionMapFn = () => ({
   name: 'regionmap',
   type: 'render',
   context: {
-    types: ['kibana_datatable'],
+    types: ['datatable'],
   },
   help: i18n.translate('regionMap.function.help', {
     defaultMessage: 'Regionmap visualization',

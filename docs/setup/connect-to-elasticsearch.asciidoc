@@ -20,10 +20,10 @@ to see all that you can do in {kib}.
 
 experimental[]
 
-To visualize data in a CSV, JSON, or log file, you can upload it using the File 
-Data Visualizer. On the home page, click *Import a CSV, NDSON, or log file*, and 
-then drag your file into the File Data Visualizer. Alternatively, you can open 
-it by navigating to *Machine Learning* from the side navigation and selecting 
+To visualize data in a CSV, JSON, or log file, you can upload it using the File
+Data Visualizer. On the home page, click *Import a CSV, NDSON, or log file*, and
+then drag your file into the File Data Visualizer. Alternatively, you can open
+it by navigating to *Machine Learning* from the side navigation and selecting
 *Data Visualizer*.
 
 [role="screenshot"]
@@ -45,15 +45,11 @@ repeated production process, but rather for the initial exploration of your data
 [[upload-geoipdata-kibana]]
 === Upload geospatial data
 
-To visualize geospatial data in a point or shape file, you can upload it using the <<geojson-upload, GeoJSON Upload>>
+To visualize geospatial data in a point or shape file, you can upload it using the <<import-geospatial-data, GeoJSON Upload>>
 feature in Maps, and then use that data as a layer in a map.
 The data is also available for use in the broader Kibana ecosystem, for example,
 in visualizations and Canvas workpads.
 With GeoJSON Upload, you can upload a file up to 50 MB.
-
-[role="screenshot"]
-image::images/fu_gs_select_source_file_upload.png[]
-
 
 [float]
 [[add-data-tutorial-kibana]]
