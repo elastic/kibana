@@ -23,7 +23,7 @@ import { getMockEqlResponse, getMockEqlSequenceResponse } from './eql_search_res
 
 describe('eql/helpers', () => {
   describe('calculateBucketForHour', () => {
-    test('returns 2 if event occurred within 2 minutes of "now"', () => {
+    test('returns 2 if the difference in times is 2 minutes', () => {
       const diff = calculateBucketForHour(
         Date.parse('2020-02-20T05:56:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -32,7 +32,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(2);
     });
 
-    test('returns 10 if event occurred within 8-10 minutes of "now"', () => {
+    test('returns 10 if the difference in times is 8-10 minutes', () => {
       const diff = calculateBucketForHour(
         Date.parse('2020-02-20T05:48:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -41,7 +41,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(10);
     });
 
-    test('returns 16 if event occurred within 10-15 minutes of "now"', () => {
+    test('returns 16 if the difference in times is 10-15 minutes', () => {
       const diff = calculateBucketForHour(
         Date.parse('2020-02-20T05:42:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -50,7 +50,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(16);
     });
 
-    test('returns 60 if event occurred within 58-60 minutes of "now"', () => {
+    test('returns 60 if the difference in times is 58-60 minutes', () => {
       const diff = calculateBucketForHour(
         Date.parse('2020-02-20T04:58:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -77,7 +77,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(0);
     });
 
-    test('returns 2 if event occurred within 2 minutes of "now" but arguments are flipped', () => {
+    test('returns 2 if the difference in times is 2 minutes but arguments are flipped', () => {
       const diff = calculateBucketForHour(
         Date.parse('2020-02-20T05:57:54.037Z'),
         Date.parse('2020-02-20T05:56:54.037Z')
@@ -97,7 +97,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(0);
     });
 
-    test('returns 1 if event occurred within 60 minutes of "now"', () => {
+    test('returns 1 if the difference in times is 60 minutes', () => {
       const diff = calculateBucketForDay(
         Date.parse('2020-02-20T05:17:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -106,7 +106,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(1);
     });
 
-    test('returns 2 if event occurred 60-120 minutes from "now"', () => {
+    test('returns 2 if the difference in times is 60-120 minutes', () => {
       const diff = calculateBucketForDay(
         Date.parse('2020-02-20T03:57:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -115,7 +115,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(2);
     });
 
-    test('returns 3 if event occurred 120-180 minutes from "now', () => {
+    test('returns 3 if the difference in times is 120-180 minutes', () => {
       const diff = calculateBucketForDay(
         Date.parse('2020-02-20T03:56:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -124,7 +124,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(3);
     });
 
-    test('returns 4 if event occurred 180-240 minutes from "now', () => {
+    test('returns 4 if the difference in times is 180-240 minutes', () => {
       const diff = calculateBucketForDay(
         Date.parse('2020-02-20T02:15:54.037Z'),
         Date.parse('2020-02-20T05:57:54.037Z')
@@ -133,7 +133,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(4);
     });
 
-    test('returns 2 if event occurred 60-120 minutes of "now" but arguments are flipped', () => {
+    test('returns 2 if the difference in times is 60-120 minutes but arguments are flipped', () => {
       const diff = calculateBucketForDay(
         Date.parse('2020-02-20T05:57:54.037Z'),
         Date.parse('2020-02-20T03:59:54.037Z')
