@@ -17,6 +17,8 @@ import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 
+const PAGE_THRESHOLD = 2;
+
 export interface LogStreamProps {
   sourceId?: string;
   startTimestamp: number;
@@ -58,7 +60,16 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   });
 
   // Internal state
-  const { loadingState, entries, fetchEntries } = useLogStream({
+  const {
+    loadingState,
+    pageLoadingState,
+    entries,
+    hasMoreBefore,
+    hasMoreAfter,
+    fetchEntries,
+    fetchPreviousEntries,
+    fetchNextEntries,
+  } = useLogStream({
     sourceId,
     startTimestamp,
     endTimestamp,
@@ -69,6 +80,8 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   // Derived state
   const isReloading =
     isLoadingSourceConfiguration || loadingState === 'uninitialized' || loadingState === 'loading';
+
+  const isLoadingMore = pageLoadingState === 'loading';
 
   const columnConfigurations = useMemo(() => {
     return sourceConfiguration ? sourceConfiguration.configuration.logColumns : [];
@@ -101,13 +114,23 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
         scale="medium"
         wrap={false}
         isReloading={isReloading}
-        isLoadingMore={false}
-        hasMoreBeforeStart={false}
-        hasMoreAfterEnd={false}
+        isLoadingMore={isLoadingMore}
+        hasMoreBeforeStart={hasMoreBefore}
+        hasMoreAfterEnd={hasMoreAfter}
         isStreaming={false}
         lastLoadedTime={null}
         jumpToTarget={noop}
-        reportVisibleInterval={noop}
+        reportVisibleInterval={({ fromScroll, pagesBeforeStart, pagesAfterEnd }) => {
+          if (!fromScroll) {
+            return;
+          }
+
+          if (pagesBeforeStart < PAGE_THRESHOLD) {
+            fetchPreviousEntries();
+          } else if (pagesAfterEnd < PAGE_THRESHOLD) {
+            fetchNextEntries();
+          }
+        }}
         loadNewerItems={noop}
         reloadItems={fetchEntries}
         highlightedItem={highlight ?? null}
