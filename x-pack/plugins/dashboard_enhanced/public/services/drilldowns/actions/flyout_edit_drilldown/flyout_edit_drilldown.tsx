@@ -10,7 +10,11 @@ import {
   reactToUiComponent,
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
-import { EmbeddableContext, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableContext,
+  ViewMode,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import {
@@ -67,7 +71,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           onClose={() => handle.close()}
           viewMode={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          triggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
         />
       ),

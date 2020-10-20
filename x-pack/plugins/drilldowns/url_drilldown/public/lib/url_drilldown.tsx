@@ -65,7 +65,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   public readonly euiIcon = 'link';
 
   supportedTriggers(): UrlTrigger[] {
-    return [CONTEXT_MENU_TRIGGER, VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, CONTEXT_MENU_TRIGGER];
   }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
