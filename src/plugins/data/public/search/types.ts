@@ -17,38 +17,20 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
 import { ISearchInterceptor } from './search_interceptor';
-import { ISearchSource, SearchSourceFields } from './search_source';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ISearchOptions,
-} from '../../common/search';
+import { ISearchGeneric, ISessionService, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
-export type ISearch = (
-  request: IKibanaSearchRequest,
-  options?: ISearchOptions
-) => Observable<IKibanaSearchResponse>;
-
-export type ISearchGeneric = <
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
->(
-  request: SearchStrategyRequest,
-  options?: ISearchOptions
-) => Observable<SearchStrategyResponse>;
+export { ISearchStartSearchSource };
 
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;
 }
+
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
@@ -57,18 +39,44 @@ export interface ISearchSetup {
   aggs: AggsSetup;
   usageCollector?: SearchUsageCollector;
   /**
+   * session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
    * @internal
    */
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
+/**
+ * search service
+ * @public
+ */
 export interface ISearchStart {
+  /**
+   * agg config sub service
+   * {@link AggsStart}
+   *
+   */
   aggs: AggsStart;
+  /**
+   * low level search
+   * {@link ISearchGeneric}
+   */
   search: ISearchGeneric;
-  searchSource: {
-    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
-    createEmpty: () => ISearchSource;
-  };
+
+  showError: (e: Error) => void;
+  /**
+   * high level search
+   * {@link ISearchStartSearchSource}
+   */
+  searchSource: ISearchStartSearchSource;
+  /**
+   * session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

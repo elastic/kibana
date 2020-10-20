@@ -69,6 +69,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     id: 'mockindexpattern',
     clearLayer: jest.fn((state, _layerId) => state),
     getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
+    getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
     getPersistableState: jest.fn((x) => ({ state: x, savedObjectReferences: [] })),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),

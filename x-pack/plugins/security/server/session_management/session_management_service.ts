@@ -47,6 +47,7 @@ export class SessionManagementService {
   private statusSubscription?: Subscription;
   private sessionIndex!: SessionIndex;
   private config!: ConfigType;
+  private isCleanupTaskScheduled = false;
 
   constructor(private readonly logger: Logger) {}
 
@@ -77,7 +78,6 @@ export class SessionManagementService {
     taskManager.registerTaskDefinitions({
       [SESSION_INDEX_CLEANUP_TASK_NAME]: {
         title: 'Cleanup expired or invalid user sessions',
-        type: SESSION_INDEX_CLEANUP_TASK_NAME,
         createTaskRunner: () => ({ run: () => this.sessionIndex.cleanUp() }),
       },
     });
@@ -124,7 +124,12 @@ export class SessionManagementService {
 
     // Check if currently scheduled task is scheduled with the correct interval.
     const cleanupInterval = `${this.config.session.cleanupInterval.asSeconds()}s`;
-    if (currentTask && currentTask.schedule?.interval !== cleanupInterval) {
+    if (currentTask) {
+      if (currentTask.schedule?.interval === cleanupInterval) {
+        this.logger.debug('Session index cleanup task is already scheduled.');
+        return;
+      }
+
       this.logger.debug(
         'Session index cleanup interval has changed, the cleanup task will be rescheduled.'
       );
@@ -139,6 +144,13 @@ export class SessionManagementService {
           throw err;
         }
       }
+    } else if (this.isCleanupTaskScheduled) {
+      // WORKAROUND: This is a workaround for the Task Manager issue: https://github.com/elastic/kibana/issues/75501
+      // and should be removed as soon as this issue is resolved.
+      this.logger.error(
+        'Session index cleanup task has been already scheduled, but is missing in the task list for some reason. Please restart Kibana to automatically reschedule this task.'
+      );
+      return;
     }
 
     try {
@@ -151,10 +163,11 @@ export class SessionManagementService {
         state: {},
       });
     } catch (err) {
-      this.logger.error(`Failed to register session index cleanup task: ${err.message}`);
+      this.logger.error(`Failed to schedule session index cleanup task: ${err.message}`);
       throw err;
     }
 
+    this.isCleanupTaskScheduled = true;
     this.logger.debug('Successfully scheduled session index cleanup task.');
   }
 }

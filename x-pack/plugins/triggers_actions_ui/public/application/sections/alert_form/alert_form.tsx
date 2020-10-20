@@ -81,6 +81,7 @@ interface AlertFormProps {
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   operation: string;
 }
 
@@ -90,6 +91,7 @@ export const AlertForm = ({
   dispatch,
   errors,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   operation,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
@@ -244,10 +246,11 @@ export const AlertForm = ({
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <Suspense fallback={CenterJustifiedSpinner}>
+        <Suspense fallback={<CenterJustifiedSpinner />}>
           <AlertParamsExpressionComponent
             alertParams={alert.params}
             alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+            alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
             errors={errors}
             setAlertParams={setAlertParams}
             setAlertProperty={setAlertProperty}
@@ -259,6 +262,7 @@ export const AlertForm = ({
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           messageVariables={
             alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
               ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>

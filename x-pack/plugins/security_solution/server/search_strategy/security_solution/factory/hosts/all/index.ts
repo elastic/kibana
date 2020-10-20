@@ -52,7 +52,7 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
       edges,
       totalCount,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

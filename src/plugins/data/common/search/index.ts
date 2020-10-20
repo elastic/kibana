@@ -20,13 +20,7 @@
 export * from './aggs';
 export * from './es_search';
 export * from './expressions';
+export * from './search_source';
 export * from './tabify';
 export * from './types';
-
-export {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
-  ISearchRequestParams,
-  ISearchOptions,
-} from './es_search';
+export * from './session';

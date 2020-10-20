@@ -22,7 +22,7 @@ import {
   SavedSourceConfigurationFieldColumnRuntimeType,
 } from '../../sources';
 import { getBuiltinRules } from './builtin_rules';
-import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
+import { convertESFieldsToLogItemFields } from './convert_document_source_to_log_item_fields';
 import {
   CompiledLogMessageFormattingRule,
   Fields,
@@ -264,7 +264,7 @@ export class InfraLogEntriesDomain {
         tiebreaker: document.sort[1],
       },
       fields: sortBy(
-        [...defaultFields, ...convertDocumentSourceToLogItemFields(document._source)],
+        [...defaultFields, ...convertESFieldsToLogItemFields(document.fields)],
         'field'
       ),
     };
@@ -313,7 +313,7 @@ export class InfraLogEntriesDomain {
 interface LogItemHit {
   _index: string;
   _id: string;
-  _source: JsonObject;
+  fields: { [field: string]: [value: unknown] };
   sort: [number, number];
 }
 

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { from } from 'rxjs';
 import { CoreStart, KibanaRequest } from 'src/core/server';
 import { GlobalSearchProviderContext } from '../types';
 
@@ -30,6 +31,7 @@ export const getContextFactory = (coreStart: CoreStart) => (
       uiSettings: {
         client: coreStart.uiSettings.asScopedToClient(soClient),
       },
+      capabilities: from(coreStart.capabilities.resolveCapabilities(request)),
     },
   };
 };

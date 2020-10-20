@@ -37,7 +37,7 @@ async function getCcrStat(req, esIndexPattern, filters) {
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.failed_read_requests',
     ],
     body: {
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       query: {
         bool: {
           must: [
@@ -59,7 +59,7 @@ async function getCcrStat(req, esIndexPattern, filters) {
         inner_hits: {
           name: 'oldest',
           size: 1,
-          sort: [{ timestamp: 'asc' }],
+          sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
         },
       },
     },

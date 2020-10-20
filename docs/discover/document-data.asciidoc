@@ -44,7 +44,7 @@ immediately before and after your event.
 share the link for direct access to a particular document.
 
 [role="screenshot"]
-image::images/Expanded-Document.png[]
+image::images/Expanded-Document.png[Image showing expanded view, with JSON and table viewing options]
 
 
 [float]

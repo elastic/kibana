@@ -13,7 +13,7 @@ import {
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
 import { AuthenticationProvider } from '../../common/types';
-import { SecurityAuditLogger } from '../audit';
+import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -59,7 +59,8 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  audit: AuditServiceSetup;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'authc'>;
@@ -129,6 +130,10 @@ function isLoginAttemptWithProviderType(
     (attempt as any)?.provider?.type &&
     typeof (attempt as any)?.provider?.type === 'string'
   );
+}
+
+function isSessionAuthenticated(sessionValue?: Readonly<SessionValue> | null) {
+  return !!sessionValue?.username;
 }
 
 /**
@@ -289,6 +294,20 @@ export class Authenticator {
           existingSessionValue,
         });
 
+        // Checking for presence of `user` object to determine success state rather than
+        // `success()` method since that indicates a successful authentication and `redirect()`
+        // could also (but does not always) authenticate a user successfully (e.g. SAML flow)
+        if (authenticationResult.user || authenticationResult.failed()) {
+          const auditLogger = this.options.audit.asScoped(request);
+          auditLogger.log(
+            userLoginEvent({
+              authenticationResult,
+              authenticationProvider: providerName,
+              authenticationType: provider.type,
+            })
+          );
+        }
+
         return this.handlePreAccessRedirects(
           request,
           authenticationResult,
@@ -417,7 +436,7 @@ export class Authenticator {
       accessAgreementAcknowledged: true,
     });
 
-    this.options.auditLogger.accessAgreementAcknowledged(
+    this.options.legacyAuditLogger.accessAgreementAcknowledged(
       currentUser.username,
       existingSessionValue.provider
     );
@@ -558,7 +577,7 @@ export class Authenticator {
       return ownsSession ? { value: existingSessionValue, overwritten: false } : null;
     }
 
-    const isExistingSessionAuthenticated = !!existingSessionValue?.username;
+    const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
     const isNewSessionAuthenticated = !!authenticationResult.user;
 
     const providerHasChanged = !!existingSessionValue && !ownsSession;
@@ -637,7 +656,7 @@ export class Authenticator {
     //  4. Request isn't attributed with HTTP Authorization header
     return (
       canRedirectRequest(request) &&
-      !sessionValue &&
+      !isSessionAuthenticated(sessionValue) &&
       this.options.config.authc.selector.enabled &&
       HTTPAuthorizationHeader.parseFromRequest(request) == null
     );
@@ -688,14 +707,14 @@ export class Authenticator {
       return authenticationResult;
     }
 
-    const isSessionAuthenticated = !!sessionUpdateResult?.value?.username;
+    const isUpdatedSessionAuthenticated = isSessionAuthenticated(sessionUpdateResult?.value);
 
     let preAccessRedirectURL;
-    if (isSessionAuthenticated && sessionUpdateResult?.overwritten) {
+    if (isUpdatedSessionAuthenticated && sessionUpdateResult?.overwritten) {
       this.logger.debug('Redirecting user to the overwritten session UI.');
       preAccessRedirectURL = `${this.options.basePath.serverBasePath}${OVERWRITTEN_SESSION_ROUTE}`;
     } else if (
-      isSessionAuthenticated &&
+      isUpdatedSessionAuthenticated &&
       this.shouldRedirectToAccessAgreement(sessionUpdateResult?.value ?? null)
     ) {
       this.logger.debug('Redirecting user to the access agreement UI.');

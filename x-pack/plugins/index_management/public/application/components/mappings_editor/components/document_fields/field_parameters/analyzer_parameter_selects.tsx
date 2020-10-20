@@ -49,16 +49,17 @@ export const AnalyzerParameterSelects = ({
   'data-test-subj': dataTestSubj,
 }: Props) => {
   const { form } = useForm({ defaultValue: { main: mainDefaultValue, sub: subDefaultValue } });
+  const { subscribe } = form;
 
   useEffect(() => {
-    const subscription = form.subscribe((updateData) => {
-      const formData = updateData.data.raw;
+    const subscription = subscribe((updateData) => {
+      const formData = updateData.data.internal;
       const value = formData.sub ? formData.sub : formData.main;
       onChange(value);
     });
 
     return subscription.unsubscribe;
-  }, [form, onChange]);
+  }, [subscribe, onChange]);
 
   const getSubOptionsMeta = useCallback(
     (mainValue: string) =>

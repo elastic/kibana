@@ -27,11 +27,6 @@ function getTimingLabelForPhase(phase: keyof Phases) {
         defaultMessage: 'Timing for cold phase',
       });
 
-    case 'frozen':
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseFrozen.minimumAgeLabel', {
-        defaultMessage: 'Timing for frozen phase',
-      });
-
     case 'delete':
       return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeLabel', {
         defaultMessage: 'Timing for delete phase',
@@ -217,7 +212,7 @@ export const MinAgeInput = <Phase extends PhaseWithMinAge>({
           <EuiFieldNumber
             id={`${phase}-${selectedMinimumAgeProperty}`}
             value={phaseData.selectedMinimumAge}
-            onChange={async (e) => {
+            onChange={(e) => {
               setPhaseData(selectedMinimumAgeProperty, e.target.value);
             }}
             min={0}

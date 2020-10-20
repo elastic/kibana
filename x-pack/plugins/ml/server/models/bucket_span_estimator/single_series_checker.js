@@ -166,7 +166,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
           non_empty_buckets: {
             date_histogram: {
               field: this.timeField,
-              interval: `${intervalMs}ms`,
+              fixed_interval: `${intervalMs}ms`,
             },
           },
         },

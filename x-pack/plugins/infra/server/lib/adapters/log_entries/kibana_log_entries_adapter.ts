@@ -8,12 +8,12 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
-import { compact, first, get, has } from 'lodash';
+import { compact, first } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject, JsonValue } from '../../../../common/typed_json';
+import { JsonValue } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
   LogEntriesParams,
@@ -31,7 +31,7 @@ const TIMESTAMP_FORMAT = 'epoch_millis';
 interface LogItemHit {
   _index: string;
   _id: string;
-  _source: JsonObject;
+  fields: { [key: string]: [value: unknown] };
   sort: [number, number];
 }
 
@@ -82,7 +82,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       body: {
         size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
         track_total_hits: false,
-        _source: fields,
+        _source: false,
+        fields,
         query: {
           bool: {
             filter: [
@@ -214,6 +215,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             values: [id],
           },
         },
+        fields: ['*'],
+        _source: false,
       },
     };
 
@@ -230,8 +233,8 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
   return hits.map((hit) => {
     const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
       (flattenedFields, field) => {
-        if (has(hit._source, field)) {
-          flattenedFields[field] = get(hit._source, field);
+        if (field in hit.fields) {
+          flattenedFields[field] = hit.fields[field][0];
         }
         return flattenedFields;
       },

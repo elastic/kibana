@@ -27,10 +27,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const { header } = getPageObjects(['header']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
-  const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
   const elasticChart = getService('elasticChart');
   const docTable = getService('docTable');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     public async getChartTimespan() {
@@ -84,8 +84,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitUntilSearchingHasFinished() {
-      const spinner = await testSubjects.find('loadingSpinner');
-      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
+      await testSubjects.missingOrFail('loadingSpinner', { timeout: defaultFindTimeout * 10 });
     }
 
     public async getColumnHeaders() {
@@ -119,8 +118,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async loadSavedSearch(searchName: string) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byButtonText(searchName);
-      await searchLink.click();
+      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -254,7 +252,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getSidebarWidth() {
-      const sidebar = await find.byCssSelector('.sidebar-list');
+      const sidebar = await testSubjects.find('discover-sidebar');
       return await sidebar.getAttribute('clientWidth');
     }
 
@@ -386,6 +384,42 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await retry.waitFor('Discover app on screen', async () => {
         return await this.isDiscoverAppOnScreen();
       });
+    }
+
+    public async showAllFilterActions() {
+      await testSubjects.click('showFilterActions');
+    }
+
+    public async clickSavedQueriesPopOver() {
+      await testSubjects.click('saved-query-management-popover-button');
+    }
+
+    public async clickCurrentSavedQuery() {
+      await testSubjects.click('saved-query-management-save-button');
+    }
+
+    public async setSaveQueryFormTitle(savedQueryName: string) {
+      await testSubjects.setValue('saveQueryFormTitle', savedQueryName);
+    }
+
+    public async toggleIncludeFilters() {
+      await testSubjects.click('saveQueryFormIncludeFiltersOption');
+    }
+
+    public async saveCurrentSavedQuery() {
+      await testSubjects.click('savedQueryFormSaveButton');
+    }
+
+    public async deleteSavedQuery() {
+      await testSubjects.click('delete-saved-query-TEST-button');
+    }
+
+    public async confirmDeletionOfSavedQuery() {
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    public async clearSavedQuery() {
+      await testSubjects.click('saved-query-management-clear-button');
     }
   }
 

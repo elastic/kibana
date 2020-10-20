@@ -4,9 +4,9 @@
 [partintro]
 --
 
-A _dashboard_ is a collection of panels that you use to analyze your data. On a dashboard, you can add a variety of panels that 
-you can rearrange and tell a story about your data. Panels contain everything you need, including visualizations, 
-interactive controls, markdown, and more.  
+A _dashboard_ is a collection of panels that you use to analyze your data. On a dashboard, you can add a variety of panels that
+you can rearrange and tell a story about your data. Panels contain everything you need, including visualizations,
+interactive controls, markdown, and more.
 
 With *Dashboard*s, you can:
 
@@ -18,7 +18,7 @@ With *Dashboard*s, you can:
 
 * Create and apply filters to focus on the data you want to display.
 
-* Control who can use your data, and share the dashboard with a small or large audience. 
+* Control who can use your data, and share the dashboard with a small or large audience.
 
 * Generate reports based on your findings.
 
@@ -42,7 +42,7 @@ image::images/dashboard-read-only-badge.png[Example of Dashboard read only acces
 [[types-of-panels]]
 == Types of panels
 
-Panels contain everything you need to tell a story about you data, including visualizations, 
+Panels contain everything you need to tell a story about you data, including visualizations,
 interactive controls, Markdown, and more.
 
 [cols="50, 50"]
@@ -50,30 +50,30 @@ interactive controls, Markdown, and more.
 
 a| *Area*
 
-Displays data points, connected by a line, where the area between the line and axes are shaded. 
+Displays data points, connected by a line, where the area between the line and axes are shaded.
 Use area charts to compare two or more categories over time, and display the magnitude of trends.
 
 | image:images/area.png[Area chart]
 
 a| *Stacked area*
 
-Displays the evolution of the value of several data groups. The values of each group are displayed 
-on top of each other. Use stacked area charts to visualize part-to-whole relationships, and to show 
+Displays the evolution of the value of several data groups. The values of each group are displayed
+on top of each other. Use stacked area charts to visualize part-to-whole relationships, and to show
 how each category contributes to the cumulative total.
 
 | image:images/stacked_area.png[Stacked area chart]
 
 a| *Bar*
 
-Displays bars side-by-side where each bar represents a category. Use bar charts to compare data across a 
-large number of categories, display data that includes categories with negative values, and easily identify 
+Displays bars side-by-side where each bar represents a category. Use bar charts to compare data across a
+large number of categories, display data that includes categories with negative values, and easily identify
 the categories that represent the highest and lowest values. Kibana also supports horizontal bar charts.
 
 | image:images/bar.png[Bar chart]
 
 a| *Stacked bar*
 
-Displays numeric values across two or more categories. Use stacked bar charts to compare numeric values between 
+Displays numeric values across two or more categories. Use stacked bar charts to compare numeric values between
 levels of a categorical value. Kibana also supports stacked horizontal bar charts.
 
 | image:images/stacked_bar.png[Stacked area chart]
@@ -81,15 +81,15 @@ levels of a categorical value. Kibana also supports stacked horizontal bar chart
 
 a| *Line*
 
-Displays data points that are connected by a line. Use line charts to visualize a sequence of values, discover 
+Displays data points that are connected by a line. Use line charts to visualize a sequence of values, discover
 trends over time, and forecast future values.
 
 | image:images/line.png[Line chart]
 
 a| *Pie*
 
-Displays slices that represent a data category, where the slice size is proportional to the quantity it represents.  
-Use pie charts to show comparisons between multiple categories, illustrate the dominance of one category over others, 
+Displays slices that represent a data category, where the slice size is proportional to the quantity it represents.
+Use pie charts to show comparisons between multiple categories, illustrate the dominance of one category over others,
 and show percentage or proportional data.
 
 | image:images/pie.png[Pie chart]
@@ -103,7 +103,7 @@ Similar to the pie chart, but the central circle is removed. Use donut charts wh
 
 a| *Tree map*
 
-Relates different segments of your data to the whole. Each rectangle is subdivided into smaller rectangles, or sub branches, based on 
+Relates different segments of your data to the whole. Each rectangle is subdivided into smaller rectangles, or sub branches, based on
 its proportion to the whole. Use treemaps to make efficient use of space to show percent total for each category.
 
 | image:images/treemap.png[Tree map]
@@ -111,7 +111,7 @@ its proportion to the whole. Use treemaps to make efficient use of space to show
 
 a| *Heat map*
 
-Displays graphical representations of data where the individual values are represented by colors. Use heat maps when your data set includes 
+Displays graphical representations of data where the individual values are represented by colors. Use heat maps when your data set includes
 categorical data. For example, use a heat map to see the flights of origin countries compared to destination countries using the sample flight data.
 
 | image:images/heat_map.png[Heat map]
@@ -125,7 +125,7 @@ Displays how your metric progresses toward a fixed goal. Use the goal to display
 
 a| *Gauge*
 
-Displays your data along a scale that changes color according to where your data falls on the expected scale. Use the gauge to show how metric 
+Displays your data along a scale that changes color according to where your data falls on the expected scale. Use the gauge to show how metric
 values relate to reference threshold values, or determine how a specified field is performing versus how it is expected to perform.
 
 | image:images/gauge.png[Gauge]
@@ -133,7 +133,7 @@ values relate to reference threshold values, or determine how a specified field 
 
 a| *Metric*
 
-Displays a single numeric value for an aggregation. Use the metric visualization when you have a numeric value that is powerful enough to tell 
+Displays a single numeric value for an aggregation. Use the metric visualization when you have a numeric value that is powerful enough to tell
 a story about your data.
 
 | image:images/metric.png[Metric]
@@ -141,7 +141,7 @@ a story about your data.
 
 a| *Data table*
 
-Displays your raw data or aggregation results in a tabular format. Use data tables to display server configuration details, track counts, min, 
+Displays your raw data or aggregation results in a tabular format. Use data tables to display server configuration details, track counts, min,
 or max values for a specific field, and monitor the status of key services.
 
 | image:images/data_table.png[Data table]
@@ -149,7 +149,7 @@ or max values for a specific field, and monitor the status of key services.
 
 a| *Tag cloud*
 
-Graphical representations of how frequently a word appears in the source text. Use tag clouds to easily produce a summary of large documents and 
+Graphical representations of how frequently a word appears in the source text. Use tag clouds to easily produce a summary of large documents and
 create visual art for a specific topic.
 
 | image:images/tag_cloud.png[Tag cloud]
@@ -168,16 +168,16 @@ For all your mapping needs, use <<maps,Maps>>.
 [[create-panels]]
 == Create panels
 
-To create a panel, make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>> 
-to retrieve the data from {es}. If you aren’t ready to use your own data, {kib} comes with several pre-built dashboards that you can test out. For more information, 
+To create a panel, make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>
+to retrieve the data from {es}. If you aren’t ready to use your own data, {kib} comes with several pre-built dashboards that you can test out. For more information,
 refer to <<add-sample-data, Explore {kib} using sample data>>.
 
-To begin, click *Create new*, then choose one of the following options on the 
+To begin, click *Create new*, then choose one of the following options on the
 *New Visualization* window:
 
-* Click on the type of panel you want to create, then configure the options. 
+* Click on the type of panel you want to create, then configure the options.
 
-* Select an editor to help you create the panel. 
+* Select an editor to help you create the panel.
 
 [role="screenshot"]
 image:images/Dashboard_add_new_visualization.png[Example add new visualization to dashboard]
@@ -188,19 +188,19 @@ image:images/Dashboard_add_new_visualization.png[Example add new visualization t
 [[lens]]
 === Create panels with Lens
 
-*Lens* is the simplest and fastest way to create powerful visualizations of your data. To use *Lens*, you drag and drop as many data fields 
+*Lens* is the simplest and fastest way to create powerful visualizations of your data. To use *Lens*, you drag and drop as many data fields
 as you want onto the visualization builder pane, and *Lens* uses heuristics to decide how to apply each field to the visualization.
 
 With *Lens*, you can:
 
 * Use the automatically generated suggestions to change the visualization type.
-* Create visualizations with multiple layers and indices. 
+* Create visualizations with multiple layers and indices.
 * Change the aggregation and labels to customize the data.
 
 [role="screenshot"]
 image::images/lens_drag_drop.gif[Drag and drop]
 
-TIP: Drag-and-drop capabilities are available only when *Lens* knows how to use the data. If *Lens* is unable to automatically generate a 
+TIP: Drag-and-drop capabilities are available only when *Lens* knows how to use the data. If *Lens* is unable to automatically generate a
 visualization, configure the customization options for your visualization.
 
 [float]
@@ -209,18 +209,18 @@ visualization, configure the customization options for your visualization.
 
 The data fields that are displayed are based on the selected <<index-patterns,index pattern>> and the <<set-time-filter,time filter>>.
 
-To view the data fields in a different index pattern, click the index pattern, then select a new one. The data fields automatically update.
+To view the data fields in a different index pattern, click the *Change Index Pattern* dropdown, then select a new one.
 
 To filter the data fields:
 
-* Enter the name in the *Search field names*.
-* Click *Field by type*, then select the filter. To show all fields in the index pattern, deselect *Only show fields with data*.
+* Enter the data field name in *Search field names*.
+* Click *Field filters*, then select the filter.
 
 [float]
 [[view-data-summaries]]
-==== View data summaries
+==== View data field summaries
 
-To help you decide exactly the data you want to display, get a quick summary of each field. The summary shows the distribution of 
+To help you decide exactly the data you want to display, get a quick summary of each data field. The summary shows the distribution of
 values within the specified time range.
 
 To view the data field summary information, navigate to the field, then click *i*.
@@ -250,19 +250,17 @@ When there is an exclamation point (!) next to a visualization type, *Lens* is u
 [[customize-the-data]]
 ==== Customize the data
 
-For each visualization type, you can customize the aggregation and labels. The options available depend on the selected visualization type. 
+For each visualization type, you can customize the aggregation and labels. The options available depend on the selected visualization type.
 
-. Click a data field name in the editor, or click *Drop a field here*.
-. Change the options that appear. 
-+
-[role="screenshot"]
-image::images/lens_aggregation_labels.png[Quick function options]
+. From the editor, click a data field, or click *Drop a field or click to add*.
+
+. Change the options, then click *Close*.
 
 [float]
 [[add-layers-and-indices]]
 ==== Add layers and indices
 
-To compare and analyze data from different sources, you can visualize multiple data layers and indices. Multiple layers and indices are 
+To compare and analyze data from different sources, you can visualize multiple data layers and indices. Multiple layers and indices are
 supported in area, line, and bar charts.
 
 To add a layer, click *+*, then drag and drop the data fields for the new layer.
@@ -281,7 +279,7 @@ Ready to try out *Lens*? Refer to the <<lens-tutorial,step-by-step tutorial>>.
 [[tsvb]]
 === Create panels with TSVB
 
-*TSVB* is a time series data visualizer that allows you to use the full power of the Elasticsearch aggregation framework. To use *TSVB*, 
+*TSVB* is a time series data visualizer that allows you to use the full power of the Elasticsearch aggregation framework. To use *TSVB*,
 you can combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
 
 With *TSVB*, you can:
@@ -295,15 +293,15 @@ image::images/tsvb.png[TSVB UI]
 
 [float]
 [[configure-the-data]]
-==== Configure the data 
+==== Configure the data
 
-With *TSVB*, you can add and display multiple data sets to compare and analyze. {kib} uses many types of <<aggregation-reference,aggregations>> that you can use to build 
+With *TSVB*, you can add and display multiple data sets to compare and analyze. {kib} uses many types of <<aggregation-reference,aggregations>> that you can use to build
 complex summaries of that data.
 
 . Select *Data*. If you are using *Table*, select *Columns*.
-. From the *Aggregation* drop down, select the aggregation you want to visualize. 
+. From the *Aggregation* drop down, select the aggregation you want to visualize.
 +
-If you don’t see any data, change the <<set-time-filter,time filter>>. 
+If you don’t see any data, change the <<set-time-filter,time filter>>.
 +
 To add multiple aggregations, click *+*.
 . From the *Group by* drop down, select how you want to group or split the data.
@@ -315,14 +313,14 @@ When you have more than one aggregation, the last value is displayed, which is i
 [[change-the-data-display]]
 ==== Change the data display
 
-To find the best way to display your data, *TSVB* supports several types of panels and charts. 
+To find the best way to display your data, *TSVB* supports several types of panels and charts.
 
 To change the *Time Series* chart type:
 
 . Click *Data > Options*.
 . Select the *Chart type*.
 
-To change the panel type, click on the panel options: 
+To change the panel type, click on the panel options:
 
 [role="screenshot"]
 image::images/tsvb_change_display.gif[TSVB change the panel type]
@@ -331,7 +329,7 @@ image::images/tsvb_change_display.gif[TSVB change the panel type]
 [[custommize-the-data]]
 ==== Customize the data
 
-View data in a different <<index-patterns,index pattern>>, and change the data label name and colors. The options available depend on the panel type. 
+View data in a different <<index-patterns,index pattern>>, and change the data label name and colors. The options available depend on the panel type.
 
 To change the index pattern, click *Panel options*, then enter the new *Index Pattern*.
 
@@ -361,7 +359,7 @@ image::images/tsvb_annotations.png[TSVB annotations]
 [[filter-the-panel]]
 ==== Filter the panel
 
-The data that displays on the panel is based on the <<index-patterns,index pattern>> and <<set-time-filter,time filter>>. 
+The data that displays on the panel is based on the <<index-patterns,index pattern>> and <<set-time-filter,time filter>>.
 You can filter the data on the panels using the <<lucene-query,Lucene query syntax>>.
 
 Click *Panel options*, then enter the syntax in the *Panel Filter* field.
@@ -372,7 +370,7 @@ If you want to ignore filters from all of {kib}, select *Yes* for *Ignore global
 [[vega]]
 === Create custom panels with Vega
 
-Build custom visualizations using *Vega* and *Vega-Lite*, backed by one or more data sources including {es}, Elastic Map Service, 
+Build custom visualizations using *Vega* and *Vega-Lite*, backed by one or more data sources including {es}, Elastic Map Service,
 URL, or static data. Use the {kib} extensions to embed *Vega* in your dashboard, and add interactive tools.
 
 Use *Vega* and *Vega-Lite* when you want to create a visualization for:
@@ -405,7 +403,7 @@ For more information about *Vega* and *Vega-Lite*, refer to:
 [[timelion]]
 === Create panels with Timelion
 
-*Timelion* is a time series data visualizer that enables you to combine independent data sources within a single visualization. 
+*Timelion* is a time series data visualizer that enables you to combine independent data sources within a single visualization.
 
 *Timelion* is driven by a simple expression language that you use to:
 
@@ -423,8 +421,40 @@ Ready to try out Timelion? For step-by-step tutorials, refer to:
 * <<timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends,Create visualizations with conditional logic and tracking trends>>
 
 [float]
+[[timelion-deprecation]]
+==== Timelion app deprecation
+
+Deprecated since 7.0, the Timelion app will be removed in 8.0. If you have any Timelion worksheets, you must migrate them to a dashboard.
+
+NOTE: Only the Timelion app is deprecated. {kib} continues to support Timelion
+visualizations on dashboards and in Visualize and Canvas.
+
+To migrate a Timelion worksheet to a dashboard:
+
+. Open the menu, click **Dashboard**, then click **Create dashboard**.
+
+. On the dashboard, click **Create New**, then select the Timelion visualization.
+
+. On a new tab, open the Timelion app, select the chart you want to copy, and copy its expression.
++
+[role="screenshot"]
+image::images/timelion-copy-expression.png[]
+
+. Return to the other tab and paste the copied expression to the *Timelion Expression* field and click **Update**.
++
+[role="screenshot"]
+image::images/timelion-vis-paste-expression.png[]
+
+. Save the new visualization, give it a name, and click **Save and Return**.
++
+Your Timelion visualization will appear on the dashboard. Repeat this for all your charts on each worksheet.
++
+[role="screenshot"]
+image::images/timelion-dashboard.png[]
+
+[float]
 [[save-panels]]
-=== Save panels
+== Save panels
 
 When you’ve finished making changes, save the panels.
 
@@ -436,7 +466,7 @@ When you’ve finished making changes, save the panels.
 [[add-existing-panels]]
 == Add existing panels
 
-Add panels that you’ve already created to your dashboard. 
+Add panels that you’ve already created to your dashboard.
 
 On the dashboard, click *Add an existing*, then select the panel you want to add.
 
@@ -445,7 +475,7 @@ When a panel contains a stored query, both queries are applied.
 [role="screenshot"]
 image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
-To make changes to the panel, put the dashboard in *Edit* mode, then select the edit option from the panel menu. 
+To make changes to the panel, put the dashboard in *Edit* mode, then select the edit option from the panel menu.
 The changes you make appear in every dashboard that uses the panel, except if you edit the panel title. Changes to the panel title appear only on the dashboard where you made the change.
 
 [float]
@@ -462,6 +492,8 @@ When you’ve finished adding the panels, save the dashboard.
 include::edit-dashboards.asciidoc[]
 
 include::explore-dashboard-data.asciidoc[]
+
+include::drilldowns.asciidoc[]
 
 include::share-dashboards.asciidoc[]
 

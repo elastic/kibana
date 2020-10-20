@@ -9,7 +9,7 @@ import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
-  HostOverviewStrategyResponse,
+  HostsOverviewStrategyResponse,
   HostAuthenticationsRequestOptions,
   HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
@@ -18,11 +18,20 @@ import {
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
-  HostUncommonProcessesStrategyResponse,
-  HostUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+  HostsUncommonProcessesRequestOptions,
+  HostsKpiQueries,
+  HostsKpiAuthenticationsStrategyResponse,
+  HostsKpiAuthenticationsRequestOptions,
+  HostsKpiHostsStrategyResponse,
+  HostsKpiHostsRequestOptions,
+  HostsKpiUniqueIpsStrategyResponse,
+  HostsKpiUniqueIpsRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
+  NetworkDetailsStrategyResponse,
+  NetworkDetailsRequestOptions,
   NetworkDnsStrategyResponse,
   NetworkDnsRequestOptions,
   NetworkTlsStrategyResponse,
@@ -35,6 +44,19 @@ import {
   NetworkTopCountriesRequestOptions,
   NetworkTopNFlowStrategyResponse,
   NetworkTopNFlowRequestOptions,
+  NetworkUsersStrategyResponse,
+  NetworkUsersRequestOptions,
+  NetworkKpiQueries,
+  NetworkKpiDnsStrategyResponse,
+  NetworkKpiDnsRequestOptions,
+  NetworkKpiNetworkEventsStrategyResponse,
+  NetworkKpiNetworkEventsRequestOptions,
+  NetworkKpiTlsHandshakesStrategyResponse,
+  NetworkKpiTlsHandshakesRequestOptions,
+  NetworkKpiUniqueFlowsStrategyResponse,
+  NetworkKpiUniqueFlowsRequestOptions,
+  NetworkKpiUniquePrivateIpsStrategyResponse,
+  NetworkKpiUniquePrivateIpsRequestOptions,
 } from './network';
 import {
   MatrixHistogramQuery,
@@ -53,7 +75,12 @@ export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
 
-export type FactoryQueryTypes = HostsQueries | NetworkQueries | typeof MatrixHistogramQuery;
+export type FactoryQueryTypes =
+  | HostsQueries
+  | HostsKpiQueries
+  | NetworkQueries
+  | NetworkKpiQueries
+  | typeof MatrixHistogramQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -80,13 +107,21 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
-  ? HostOverviewStrategyResponse
+  ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
   ? HostAuthenticationsStrategyResponse
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesStrategyResponse
+  ? HostsUncommonProcessesStrategyResponse
+  : T extends HostsKpiQueries.kpiAuthentications
+  ? HostsKpiAuthenticationsStrategyResponse
+  : T extends HostsKpiQueries.kpiHosts
+  ? HostsKpiHostsStrategyResponse
+  : T extends HostsKpiQueries.kpiUniqueIps
+  ? HostsKpiUniqueIpsStrategyResponse
+  : T extends NetworkQueries.details
+  ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
   ? NetworkDnsStrategyResponse
   : T extends NetworkQueries.http
@@ -99,6 +134,18 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTopCountriesStrategyResponse
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowStrategyResponse
+  : T extends NetworkQueries.users
+  ? NetworkUsersStrategyResponse
+  : T extends NetworkKpiQueries.dns
+  ? NetworkKpiDnsStrategyResponse
+  : T extends NetworkKpiQueries.networkEvents
+  ? NetworkKpiNetworkEventsStrategyResponse
+  : T extends NetworkKpiQueries.tlsHandshakes
+  ? NetworkKpiTlsHandshakesStrategyResponse
+  : T extends NetworkKpiQueries.uniqueFlows
+  ? NetworkKpiUniqueFlowsStrategyResponse
+  : T extends NetworkKpiQueries.uniquePrivateIps
+  ? NetworkKpiUniquePrivateIpsStrategyResponse
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramStrategyResponse
   : never;
@@ -114,7 +161,15 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesRequestOptions
+  ? HostsUncommonProcessesRequestOptions
+  : T extends HostsKpiQueries.kpiAuthentications
+  ? HostsKpiAuthenticationsRequestOptions
+  : T extends HostsKpiQueries.kpiHosts
+  ? HostsKpiHostsRequestOptions
+  : T extends HostsKpiQueries.kpiUniqueIps
+  ? HostsKpiUniqueIpsRequestOptions
+  : T extends NetworkQueries.details
+  ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
   ? NetworkDnsRequestOptions
   : T extends NetworkQueries.http
@@ -127,6 +182,18 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTopCountriesRequestOptions
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptions
+  : T extends NetworkQueries.users
+  ? NetworkUsersRequestOptions
+  : T extends NetworkKpiQueries.dns
+  ? NetworkKpiDnsRequestOptions
+  : T extends NetworkKpiQueries.networkEvents
+  ? NetworkKpiNetworkEventsRequestOptions
+  : T extends NetworkKpiQueries.tlsHandshakes
+  ? NetworkKpiTlsHandshakesRequestOptions
+  : T extends NetworkKpiQueries.uniqueFlows
+  ? NetworkKpiUniqueFlowsRequestOptions
+  : T extends NetworkKpiQueries.uniquePrivateIps
+  ? NetworkKpiUniquePrivateIpsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : never;

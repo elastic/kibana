@@ -42,35 +42,6 @@ beforeEach(() => {
 
 describe('DiscoverNoResults', () => {
   describe('props', () => {
-    describe('shardFailures', () => {
-      test('renders failures list when there are failures', () => {
-        const shardFailures = [
-          {
-            index: 'A',
-            shard: '1',
-            reason: { reason: 'Awful error' },
-          },
-          {
-            index: 'B',
-            shard: '2',
-            reason: { reason: 'Bad error' },
-          },
-        ];
-
-        const component = renderWithIntl(<DiscoverNoResults shardFailures={shardFailures} />);
-
-        expect(component).toMatchSnapshot();
-      });
-
-      test(`doesn't render failures list when there are no failures`, () => {
-        const shardFailures = [];
-
-        const component = renderWithIntl(<DiscoverNoResults shardFailures={shardFailures} />);
-
-        expect(component).toMatchSnapshot();
-      });
-    });
-
     describe('timeFieldName', () => {
       test('renders time range feedback', () => {
         const component = renderWithIntl(<DiscoverNoResults timeFieldName="awesome_time_field" />);

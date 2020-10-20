@@ -16,6 +16,7 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
@@ -31,8 +32,10 @@ import {
   IEnterpriseSearchRequestHandler,
 } from './lib/enterprise_search_request_handler';
 
-import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
+import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
+import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
+import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -42,6 +45,7 @@ import { registerCredentialsRoutes } from './routes/app_search/credentials';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 import { registerWSOverviewRoute } from './routes/workplace_search/overview';
+import { registerWSGroupRoutes } from './routes/workplace_search/groups';
 
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -76,13 +80,18 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register space/feature control
      */
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: ENTERPRISE_SEARCH_PLUGIN.ID,
       name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       icon: 'logoEnterpriseSearch',
-      navLinkId: APP_SEARCH_PLUGIN.ID, // TODO - remove this once functional tests no longer rely on navLinkId
-      app: ['kibana', APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
+      app: [
+        'kibana',
+        ENTERPRISE_SEARCH_PLUGIN.ID,
+        APP_SEARCH_PLUGIN.ID,
+        WORKPLACE_SEARCH_PLUGIN.ID,
+      ],
       catalogue: [ENTERPRISE_SEARCH_PLUGIN.ID, APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
       privileges: null,
     });
@@ -94,14 +103,16 @@ export class EnterpriseSearchPlugin implements Plugin {
       const dependencies = { config, security, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
+      const showEnterpriseSearchOverview = hasAppSearchAccess || hasWorkplaceSearchAccess;
 
       return {
         navLinks: {
+          enterpriseSearch: showEnterpriseSearchOverview,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
-          enterpriseSearch: hasAppSearchAccess || hasWorkplaceSearchAccess,
+          enterpriseSearch: showEnterpriseSearchOverview,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
@@ -119,10 +130,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerEnginesRoute(dependencies);
     registerCredentialsRoutes(dependencies);
     registerWSOverviewRoute(dependencies);
+    registerWSGroupRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
+    savedObjects.registerType(enterpriseSearchTelemetryType);
     savedObjects.registerType(appSearchTelemetryType);
     savedObjects.registerType(workplaceSearchTelemetryType);
     let savedObjectsStarted: SavedObjectsServiceStart;
@@ -131,6 +144,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       savedObjectsStarted = coreStart.savedObjects;
 
       if (usageCollection) {
+        registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }

@@ -7,8 +7,12 @@
 .enterpriseSearchLayout {
   $sideBarWidth: $euiSize * 15;
   $sideBarMobileHeight: $euiSize * 4.75;
+  $consoleHeaderHeight: 98px; // NOTE: Keep an eye on this for changes
+  $pageHeight: calc(100vh - #{$consoleHeaderHeight});
 
   display: block;
+  background-color: $euiColorEmptyShade;
+  min-height: $pageHeight;
   position: relative;
   left: $sideBarWidth;
   width: calc(100% - #{$sideBarWidth});
@@ -44,8 +48,7 @@
     overflow-y: auto;
     overflow-x: hidden;
 
-    $kibanaHeader: 49px; // NOTE: Keep an eye on this for changes
-    height: calc(100vh - #{$kibanaHeader});
+    height: $pageHeight;
     width: $sideBarWidth;
 
     background-color: $euiColorLightestShade;
@@ -76,6 +79,17 @@
     }
     @include euiBreakpoint('xs', 's') {
       padding: $euiSize;
+    }
+  }
+
+  &__readOnlyMode {
+    margin: -$euiSizeM 0 $euiSizeL;
+
+    @include euiBreakpoint('m') {
+      margin: 0 0 $euiSizeL;
+    }
+    @include euiBreakpoint('xs', 's') {
+      margin: 0;
     }
   }
 }

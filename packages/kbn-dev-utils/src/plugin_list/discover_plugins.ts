@@ -22,14 +22,14 @@ import Fs from 'fs';
 
 import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
+import { REPO_ROOT } from '@kbn/utils';
 
-import { REPO_ROOT } from '../repo_root';
-import { simpleKibanaPlatformPluginDiscovery } from '../simple_kibana_platform_plugin_discovery';
+import { simpleKibanaPlatformPluginDiscovery } from '../plugins';
 import { extractAsciidocInfo } from './extract_asciidoc_info';
 
 export interface Plugin {
   id: string;
-  relativeDir?: string;
+  relativeDir: string;
   relativeReadmePath?: string;
   readmeSnippet?: string;
   readmeAsciidocAnchor?: string;

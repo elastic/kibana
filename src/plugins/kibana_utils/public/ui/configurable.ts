@@ -18,11 +18,15 @@
  */
 
 import { UiComponent } from '../../common/ui/ui_component';
+import { SerializableState } from '../../common';
 
 /**
  * Represents something that can be configured by user using UI.
  */
-export interface Configurable<Config extends object = object, Context = object> {
+export interface Configurable<
+  Config extends SerializableState = SerializableState,
+  Context = object
+> {
   /**
    * Create default config for this item, used when item is created for the first time.
    */
@@ -42,7 +46,10 @@ export interface Configurable<Config extends object = object, Context = object> 
 /**
  * Props provided to `CollectConfig` component on every re-render.
  */
-export interface CollectConfigProps<Config extends object = object, Context = object> {
+export interface CollectConfigProps<
+  Config extends SerializableState = SerializableState,
+  Context = object
+> {
   /**
    * Current (latest) config of the item.
    */

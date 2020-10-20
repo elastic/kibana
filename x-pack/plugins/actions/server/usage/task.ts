@@ -38,8 +38,7 @@ function registerActionsTelemetryTask(
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: 'Actions telemetry fetch task',
-      type: TELEMETRY_TASK_TYPE,
+      title: 'Actions usage fetch task',
       timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },

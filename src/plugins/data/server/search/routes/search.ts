@@ -21,6 +21,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 import { getRequestAbortedSignal } from '../../lib';
 import { SearchRouteDependencies } from '../search_service';
+import { shimHitsTotal } from './shim_hits_total';
 
 export function registerSearchRoute(
   router: IRouter,
@@ -48,15 +49,25 @@ export function registerSearchRoute(
       const [, , selfStart] = await getStartServices();
 
       try {
-        const response = await selfStart.search.search(
-          context,
-          { ...searchRequest, id },
-          {
-            abortSignal,
-            strategy,
-          }
-        );
-        return res.ok({ body: response });
+        const response = await selfStart.search
+          .search(
+            { ...searchRequest, id },
+            {
+              abortSignal,
+              strategy,
+            },
+            context
+          )
+          .toPromise();
+
+        return res.ok({
+          body: {
+            ...response,
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse),
+            },
+          },
+        });
       } catch (err) {
         return res.customError({
           statusCode: err.statusCode || 500,

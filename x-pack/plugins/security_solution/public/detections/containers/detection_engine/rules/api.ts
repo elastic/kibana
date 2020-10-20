@@ -107,7 +107,7 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const filters = [
+  const filtersWithoutTags = [
     ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
     ...(filterOptions.showCustomRules
       ? [`alert.attributes.tags: "__internal_immutable:false"`]
@@ -115,15 +115,27 @@ export const fetchRules = async ({
     ...(filterOptions.showElasticRules
       ? [`alert.attributes.tags: "__internal_immutable:true"`]
       : []),
+  ].join(' AND ');
+
+  const tags = [
     ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ];
+  ].join(' AND ');
+
+  const filterString =
+    filtersWithoutTags !== '' && tags !== ''
+      ? `${filtersWithoutTags} AND (${tags})`
+      : filtersWithoutTags + tags;
+
+  const getFieldNameForSortField = (field: string) => {
+    return field === 'name' ? `${field}.keyword` : field;
+  };
 
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: filterOptions.sortField,
+    sort_field: getFieldNameForSortField(filterOptions.sortField),
     sort_order: filterOptions.sortOrder,
-    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
+    ...(filterString !== '' ? { filter: filterString } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(

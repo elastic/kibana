@@ -1,0 +1,22 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "max_empty_searches": 10,
+    "query": {
+        "bool": {
+            "filter": [{"exists": {"field": "process.title"}}],
+            "must": [
+                {"bool": {
+                    "should": [
+                    {"term": {"process.name": "insmod"}},
+                    {"term": {"process.name": "kmod"}},
+                    {"term": {"process.name": "modprobe"}},
+                    {"term": {"process.name": "rmod"}}
+                    ]
+                }}
+            ]
+        }
+    }
+}

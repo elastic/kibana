@@ -32,6 +32,7 @@ export class ManageSpacesButton extends Component<Props, {}> {
         isDisabled={this.props.isDisabled}
         onClick={this.navigateToManageSpaces}
         style={this.props.style}
+        data-test-subj="manageSpaces"
       >
         <FormattedMessage
           id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"

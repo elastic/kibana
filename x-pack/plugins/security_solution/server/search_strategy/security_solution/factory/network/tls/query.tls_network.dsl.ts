@@ -8,13 +8,13 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 import {
-  NetworkTlsRequestOptions,
-  SortField,
   Direction,
-  TlsFields,
+  NetworkTlsRequestOptions,
+  NetworkTlsFields,
+  SortField,
 } from '../../../../../../common/search_strategy';
 
-const getAggs = (querySize: number, sort: SortField<TlsFields>) => ({
+const getAggs = (querySize: number, sort: SortField<NetworkTlsFields>) => ({
   count: {
     cardinality: {
       field: 'tls.server.hash.sha1',
@@ -53,7 +53,7 @@ const getAggs = (querySize: number, sort: SortField<TlsFields>) => ({
   },
 });
 
-export const buildTlsQuery = ({
+export const buildNetworkTlsQuery = ({
   ip,
   sort,
   filterQuery,
@@ -98,9 +98,9 @@ interface QueryOrder {
   _key: Direction;
 }
 
-const getQueryOrder = (sort: SortField<TlsFields>): QueryOrder => {
+const getQueryOrder = (sort: SortField<NetworkTlsFields>): QueryOrder => {
   switch (sort.field) {
-    case TlsFields._id:
+    case NetworkTlsFields._id:
       return { _key: sort.direction };
     default:
       return assertUnreachable(sort.field);

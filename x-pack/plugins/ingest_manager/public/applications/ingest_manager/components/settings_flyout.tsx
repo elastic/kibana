@@ -20,10 +20,12 @@ import {
   EuiFormRow,
   EuiRadioGroup,
   EuiComboBox,
+  EuiCodeEditor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-import { useComboInput, useCore, useGetSettings, sendPutSettings } from '../hooks';
+import { safeLoad } from 'js-yaml';
+import { useComboInput, useCore, useGetSettings, useInput, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 import { isDiffPathProtocol } from '../../../../common/';
 
@@ -69,10 +71,27 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
   });
 
+  const additionalYamlConfigInput = useInput('', (value) => {
+    try {
+      safeLoad(value);
+      return;
+    } catch (error) {
+      return [
+        i18n.translate('xpack.ingestManager.settings.invalidYamlFormatErrorMessage', {
+          defaultMessage: 'Invalid YAML: {reason}',
+          values: { reason: error.message },
+        }),
+      ];
+    }
+  });
   return {
     isLoading,
     onSubmit: async () => {
-      if (!kibanaUrlsInput.validate() || !elasticsearchUrlInput.validate()) {
+      if (
+        !kibanaUrlsInput.validate() ||
+        !elasticsearchUrlInput.validate() ||
+        !additionalYamlConfigInput.validate()
+      ) {
         return;
       }
 
@@ -83,6 +102,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         }
         const outputResponse = await sendPutOutput(outputId, {
           hosts: elasticsearchUrlInput.value,
+          config_yaml: additionalYamlConfigInput.value,
         });
         if (outputResponse.error) {
           throw outputResponse.error;
@@ -110,6 +130,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     inputs: {
       kibanaUrls: kibanaUrlsInput,
       elasticsearchUrl: elasticsearchUrlInput,
+      additionalYamlConfig: additionalYamlConfigInput,
     },
   };
 }
@@ -124,6 +145,10 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   useEffect(() => {
     if (output) {
       inputs.elasticsearchUrl.setValue(output.hosts || []);
+      inputs.additionalYamlConfig.setValue(
+        output.config_yaml ||
+          `# YAML settings here will be added to the Elasticsearch output section of each policy`
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [output]);
@@ -247,6 +272,30 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <EuiComboBox noSuggestions {...inputs.elasticsearchUrl.props} />
         </EuiFormRow>
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow fullWidth>
+        <EuiFormRow
+          {...inputs.additionalYamlConfig.formRowProps}
+          label={i18n.translate('xpack.ingestManager.settings.additionalYamlConfig', {
+            defaultMessage: 'Elasticsearch output configuration',
+          })}
+          fullWidth={true}
+        >
+          <EuiCodeEditor
+            width="100%"
+            mode="yaml"
+            theme="textmate"
+            setOptions={{
+              minLines: 10,
+              maxLines: 30,
+              tabSize: 2,
+              showGutter: false,
+            }}
+            {...inputs.additionalYamlConfig.props}
+            onChange={inputs.additionalYamlConfig.setValue}
+          />
+        </EuiFormRow>
+      </EuiFormRow>
     </EuiForm>
   );
 
@@ -257,7 +306,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <h2 id="IngestManagerSettingsFlyoutTitle">
             <FormattedMessage
               id="xpack.ingestManager.settings.flyoutTitle"
-              defaultMessage="Ingest Manager settings"
+              defaultMessage="Fleet settings"
             />
           </h2>
         </EuiTitle>

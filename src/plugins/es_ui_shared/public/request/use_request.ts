@@ -20,11 +20,7 @@
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 
 import { HttpSetup } from '../../../../../src/core/public';
-import {
-  sendRequest as sendStatelessRequest,
-  SendRequestConfig,
-  SendRequestResponse,
-} from './send_request';
+import { sendRequest, SendRequestConfig } from './send_request';
 
 export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;
@@ -37,7 +33,7 @@ export interface UseRequestResponse<D = any, E = Error> {
   isLoading: boolean;
   error: E | null;
   data?: D | null;
-  sendRequest: () => Promise<SendRequestResponse<D, E>>;
+  resendRequest: () => void;
 }
 
 export const useRequest = <D = any, E = Error>(
@@ -53,7 +49,7 @@ export const useRequest = <D = any, E = Error>(
 
   // Consumers can use isInitialRequest to implement a polling UX.
   const requestCountRef = useRef<number>(0);
-  const isInitialRequest = requestCountRef.current === 0;
+  const isInitialRequestRef = useRef<boolean>(true);
   const pollIntervalIdRef = useRef<any>(null);
 
   const clearPollInterval = useCallback(() => {
@@ -80,7 +76,7 @@ export const useRequest = <D = any, E = Error>(
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [path, method, queryStringified, bodyStringified]);
 
-  const sendRequest = useCallback(async () => {
+  const resendRequest = useCallback(async () => {
     // If we're on an interval, this allows us to reset it if the user has manually requested the
     // data, to avoid doubled-up requests.
     clearPollInterval();
@@ -91,7 +87,7 @@ export const useRequest = <D = any, E = Error>(
     // "old" error/data or loading state when a new request is in-flight.
     setIsLoading(true);
 
-    const response = await sendStatelessRequest<D, E>(httpClient, requestBody);
+    const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
     const isOutdatedRequest = requestId !== requestCountRef.current;
@@ -99,8 +95,11 @@ export const useRequest = <D = any, E = Error>(
 
     // Ignore outdated or irrelevant data.
     if (isOutdatedRequest || isUnmounted) {
-      return { data: null, error: null };
+      return;
     }
+
+    // Surface to consumers that at least one request has resolved.
+    isInitialRequestRef.current = false;
 
     setError(responseError);
     // If there's an error, keep the data from the last request in case it's still useful to the user.
@@ -112,8 +111,6 @@ export const useRequest = <D = any, E = Error>(
     }
     // Setting isLoading to false also acts as a signal for scheduling the next poll request.
     setIsLoading(false);
-
-    return { data: serializedResponseData, error: responseError };
   }, [requestBody, httpClient, deserializer, clearPollInterval]);
 
   const scheduleRequest = useCallback(() => {
@@ -121,19 +118,19 @@ export const useRequest = <D = any, E = Error>(
     clearPollInterval();
 
     if (pollIntervalMs) {
-      pollIntervalIdRef.current = setTimeout(sendRequest, pollIntervalMs);
+      pollIntervalIdRef.current = setTimeout(resendRequest, pollIntervalMs);
     }
-  }, [pollIntervalMs, sendRequest, clearPollInterval]);
+  }, [pollIntervalMs, resendRequest, clearPollInterval]);
 
-  // Send the request on component mount and whenever the dependencies of sendRequest() change.
+  // Send the request on component mount and whenever the dependencies of resendRequest() change.
   useEffect(() => {
-    sendRequest();
-  }, [sendRequest]);
+    resendRequest();
+  }, [resendRequest]);
 
   // Schedule the next poll request when the previous one completes.
   useEffect(() => {
     // When a request completes, attempt to schedule the next one. Note that we aren't re-scheduling
-    // a request whenever sendRequest's dependencies change. isLoading isn't set to false until the
+    // a request whenever resendRequest's dependencies change. isLoading isn't set to false until the
     // initial request has completed, so we won't schedule a request on mount.
     if (!isLoading) {
       scheduleRequest();
@@ -152,10 +149,10 @@ export const useRequest = <D = any, E = Error>(
   }, [clearPollInterval]);
 
   return {
-    isInitialRequest,
+    isInitialRequest: isInitialRequestRef.current,
     isLoading,
     error,
     data,
-    sendRequest, // Gives the user the ability to manually request data
+    resendRequest, // Gives the user the ability to manually request data
   };
 };

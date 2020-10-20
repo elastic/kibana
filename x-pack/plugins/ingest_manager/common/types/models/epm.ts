@@ -19,6 +19,9 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export type InstallSource = 'registry' | 'upload';
+
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
@@ -38,6 +41,12 @@ export enum ElasticsearchAssetType {
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
+  transform = 'transform',
+}
+
+export enum DataType {
+  logs = 'logs',
+  metrics = 'metrics',
 }
 
 export enum AgentAssetType {
@@ -46,10 +55,8 @@ export enum AgentAssetType {
 
 export type RegistryRelease = 'ga' | 'beta' | 'experimental';
 
-// from /package/{name}
-// type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-// https://github.com/elastic/package-registry/blob/master/docs/api/package.json
-export interface RegistryPackage {
+// Fields common to packages that come from direct upload and the registry
+export interface InstallablePackage {
   name: string;
   title?: string;
   version: string;
@@ -58,28 +65,36 @@ export interface RegistryPackage {
   description: string;
   type: string;
   categories: string[];
-  requirement: RequirementsByServiceName;
   screenshots?: RegistryImage[];
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
   format_version: string;
-  datasets?: Dataset[];
-  config_templates?: RegistryConfigTemplate[];
+  data_streams?: RegistryDataStream[];
+  policy_templates?: RegistryPolicyTemplate[];
+}
+
+// Uploaded package archives don't have extra fields
+// Linter complaint disabled because this extra type is meant for better code readability
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ArchivePackage extends InstallablePackage {}
+
+// Registry packages do have extra fields.
+// cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
+export interface RegistryPackage extends InstallablePackage {
+  requirement: RequirementsByServiceName;
   download: string;
   path: string;
 }
 
 interface RegistryImage {
-  // https://github.com/elastic/package-registry/blob/master/util/package.go#L74
-  // says src is potentially missing but I couldn't find any examples
-  // it seems like src should be required. How can you have an image with no reference to the content?
   src: string;
+  path: string;
   title?: string;
   size?: string;
   type?: string;
 }
-export interface RegistryConfigTemplate {
+export interface RegistryPolicyTemplate {
   name: string;
   title: string;
   description: string;
@@ -126,8 +141,8 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'download'
   | 'path'
-  | 'datasets'
-  | 'config_templates'
+  | 'data_streams'
+  | 'policy_templates'
 >;
 
 export type ScreenshotItem = RegistryImage;
@@ -173,9 +188,9 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetParts[]
 >;
 
-export interface Dataset {
+export interface RegistryDataStream {
   type: string;
-  name: string;
+  dataset: string;
   title: string;
   release: string;
   streams?: RegistryStream[];
@@ -239,6 +254,7 @@ export interface Installation extends SavedObjectAttributes {
   install_status: EpmPackageInstallStatus;
   install_version: string;
   install_started_at: string;
+  install_source: InstallSource;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;

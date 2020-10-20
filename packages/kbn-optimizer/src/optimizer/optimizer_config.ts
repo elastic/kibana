@@ -19,6 +19,7 @@
 
 import Path from 'path';
 import Os from 'os';
+import { getPluginSearchPaths } from '@kbn/config';
 
 import {
   Bundle,
@@ -32,6 +33,14 @@ import {
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
+import { focusBundles } from './focus_bundles';
+import { readLimits } from '../limits';
+
+export interface Limits {
+  pageLoadAssetSize?: {
+    [id: string]: number | undefined;
+  };
+}
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -97,6 +106,11 @@ interface Options {
    *  --filter f*r # [foobar], excludes [foo, bar]
    */
   filter?: string[];
+  /**
+   * behaves just like filter, but includes required bundles and plugins of the
+   * listed bundle ids. Filters only apply to bundles selected by focus
+   */
+  focus?: string[];
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
@@ -125,6 +139,7 @@ export interface ParsedOptions {
   pluginPaths: string[];
   pluginScanDirs: string[];
   filters: string[];
+  focus: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
@@ -141,6 +156,7 @@ export class OptimizerConfig {
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
+    const focus = options.focus || [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -152,18 +168,14 @@ export class OptimizerConfig {
       throw new TypeError('outputRoot must be an absolute path');
     }
 
-    /**
-     * BEWARE: this needs to stay roughly synchronized with
-     * `src/core/server/config/env.ts` which determines which paths
-     * should be searched for plugins to load
-     */
-    const pluginScanDirs = options.pluginScanDirs || [
-      Path.resolve(repoRoot, 'src/plugins'),
-      ...(oss ? [] : [Path.resolve(repoRoot, 'x-pack/plugins')]),
-      Path.resolve(repoRoot, 'plugins'),
-      ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
-      Path.resolve(repoRoot, '../kibana-extra'),
-    ];
+    const pluginScanDirs =
+      options.pluginScanDirs ||
+      getPluginSearchPaths({
+        rootDir: repoRoot,
+        oss,
+        examples,
+      });
+
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
     }
@@ -202,6 +214,7 @@ export class OptimizerConfig {
       pluginScanDirs,
       pluginPaths,
       filters,
+      focus,
       inspectWorkers,
       includeCoreBundle,
       themeTags,
@@ -228,7 +241,7 @@ export class OptimizerConfig {
     ];
 
     return new OptimizerConfig(
-      filterById(options.filters, bundles),
+      filterById(options.filters, focusBundles(options.focus, bundles)),
       options.cache,
       options.watch,
       options.inspectWorkers,
@@ -237,7 +250,8 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags
+      options.themeTags,
+      readLimits()
     );
   }
 
@@ -251,7 +265,8 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags
+    public readonly themeTags: ThemeTags,
+    public readonly limits: Limits
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {

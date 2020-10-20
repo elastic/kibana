@@ -61,7 +61,7 @@ export function getFocusData(
       nonBlankEntities,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      focusAggregationInterval.expression
+      focusAggregationInterval.asMilliseconds()
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
     mlResultsService.getRecordsForCriteria(
@@ -77,7 +77,7 @@ export function getFocusData(
       [selectedJob.job_id],
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      focusAggregationInterval.expression,
+      focusAggregationInterval.asMilliseconds(),
       1,
       MAX_SCHEDULED_EVENTS
     ),
@@ -123,7 +123,7 @@ export function getFocusData(
             nonBlankEntities,
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            focusAggregationInterval.expression,
+            focusAggregationInterval.asMilliseconds(),
             aggType
           );
         })()

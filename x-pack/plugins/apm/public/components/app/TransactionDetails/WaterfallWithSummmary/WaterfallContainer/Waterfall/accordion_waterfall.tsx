@@ -25,9 +25,7 @@ interface AccordionWaterfallProps {
   location: Location;
   errorsPerTransaction: IWaterfall['errorsPerTransaction'];
   childrenByParentId: Record<string, IWaterfallItem[]>;
-  onToggleEntryTransaction?: (
-    nextState: EuiAccordionProps['forceState']
-  ) => void;
+  onToggleEntryTransaction?: () => void;
   timelineMargins: Margins;
   onClickWaterfallItem: (item: IWaterfallItem) => void;
 }
@@ -106,6 +104,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     errorsPerTransaction,
     timelineMargins,
     onClickWaterfallItem,
+    onToggleEntryTransaction,
   } = props;
 
   const nextLevel = level + 1;
@@ -147,7 +146,12 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       arrowDisplay={isEmpty(children) ? 'none' : 'left'}
       initialIsOpen={true}
       forceState={isOpen ? 'open' : 'closed'}
-      onToggle={() => setIsOpen((isCurrentOpen) => !isCurrentOpen)}
+      onToggle={() => {
+        setIsOpen((isCurrentOpen) => !isCurrentOpen);
+        if (onToggleEntryTransaction) {
+          onToggleEntryTransaction();
+        }
+      }}
     >
       {children.map((child) => (
         <AccordionWaterfall

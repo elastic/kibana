@@ -8,6 +8,7 @@
  * Kibana Overview
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
@@ -63,6 +64,9 @@ uiRoutes.when('/kibana', {
     constructor($injector, $scope) {
       super({
         title: `Kibana`,
+        pageTitle: i18n.translate('xpack.monitoring.kibana.overview.pageTitle', {
+          defaultMessage: 'Kibana overview',
+        }),
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringKibanaOverviewApp',

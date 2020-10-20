@@ -126,10 +126,10 @@ export function buildGetIndicesQuery(
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ timestamp: 'asc' }],
+          sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
         },
       },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
 }

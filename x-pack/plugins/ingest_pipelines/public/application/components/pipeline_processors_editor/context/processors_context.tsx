@@ -38,7 +38,7 @@ import { OnActionHandler } from '../components/processors_tree';
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
-  ManageProcessorForm,
+  ProcessorForm,
   OnSubmitHandler,
 } from '../components';
 
@@ -159,12 +159,12 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
               selector: mode.arg.selector,
             },
           });
+
           break;
         default:
       }
-      setMode({ id: 'idle' });
     },
-    [processorsDispatch, mode, setMode]
+    [processorsDispatch, mode]
   );
 
   const onCloseSettingsForm = useCallback(() => {
@@ -208,8 +208,8 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     };
   }, [mode, setMode, processorsState, processorsDispatch]);
 
-  // Update the test output whenever the processorsState changes (e.g., on move, update, delete)
-  // Note: updateTestOutputPerProcessor() will only simulate if the user has added sample documents
+  // Make a request to the simulate API and update the processor output
+  // whenever the documents or processorsState changes (e.g., on move, update, delete)
   useEffect(() => {
     updateTestOutputPerProcessor(documents, processorsState);
   }, [documents, processorsState, updateTestOutputPerProcessor]);
@@ -233,7 +233,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       )}
 
       {mode.id === 'managingProcessor' || mode.id === 'creatingProcessor' ? (
-        <ManageProcessorForm
+        <ProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
           processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
           onOpen={onFlyoutOpen}

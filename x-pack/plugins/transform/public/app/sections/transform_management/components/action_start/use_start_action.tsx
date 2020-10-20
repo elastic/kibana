@@ -6,7 +6,7 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';
@@ -27,7 +27,7 @@ export const useStartAction = (forceDisable: boolean) => {
 
   const startAndCloseModal = () => {
     setModalVisible(false);
-    startTransforms(items);
+    startTransforms(items.map((i) => ({ id: i.id })));
   };
 
   const openModal = (newItems: TransformListRow[]) => {

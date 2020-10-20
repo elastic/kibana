@@ -1,0 +1,9 @@
+{
+  "id": "data_search_plugin",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["data_search_test_plugin"],
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["data"]
+}

@@ -5,28 +5,21 @@
  */
 
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiProgress } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
-import { TimelineQuery } from '../../containers/index';
-import { Direction } from '../../../graphql/types';
+import { Direction } from '../../../../common/search_strategy';
+import { useTimelineEvents } from '../../containers/index';
 import { useKibana } from '../../../common/lib/kibana';
-import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
-import {
-  OnChangeItemsPerPage,
-  OnDataProviderRemoved,
-  OnDataProviderEdited,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-  OnToggleDataProviderType,
-} from './events';
+import { OnChangeItemsPerPage } from './events';
 import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
@@ -99,35 +92,28 @@ export interface Props {
   dataProviders: DataProvider[];
   docValueFields: DocValueFields[];
   end: string;
-  eventType?: EventType;
   filters: Filter[];
   graphEventId?: string;
   id: string;
+  indexNames: string[];
   indexPattern: IIndexPattern;
-  indexToAdd: string[];
   isLive: boolean;
-  isLoadingSource: boolean;
   isSaving: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   kqlQueryExpression: string;
-  loadingIndexName: boolean;
+  loadingSourcerer: boolean;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  start: string;
   sort: Sort;
+  start: string;
   status: TimelineStatusLiteral;
+  timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
-  timelineType: TimelineType;
 }
 
 /** The parent Timeline component */
@@ -137,27 +123,20 @@ export const TimelineComponent: React.FC<Props> = ({
   dataProviders,
   docValueFields,
   end,
-  eventType,
   filters,
   graphEventId,
   id,
   indexPattern,
-  indexToAdd,
+  indexNames,
   isLive,
-  isLoadingSource,
+  loadingSourcerer,
   isSaving,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
-  loadingIndexName,
   onChangeItemsPerPage,
   onClose,
-  onDataProviderEdited,
-  onDataProviderRemoved,
-  onToggleDataProviderEnabled,
-  onToggleDataProviderExcluded,
-  onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
   start,
@@ -204,11 +183,11 @@ export const TimelineComponent: React.FC<Props> = ({
   const canQueryTimeline = useMemo(
     () =>
       combinedQueries != null &&
-      isLoadingSource != null &&
-      !isLoadingSource &&
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
       !isEmpty(start) &&
       !isEmpty(end),
-    [isLoadingSource, combinedQueries, start, end]
+    [loadingSourcerer, combinedQueries, start, end]
   );
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => {
@@ -217,29 +196,43 @@ export const TimelineComponent: React.FC<Props> = ({
   }, [columnsHeader]);
   const timelineQuerySortField = useMemo(
     () => ({
-      sortFieldId: sort.columnId,
+      field: sort.columnId,
       direction: sort.sortDirection as Direction,
     }),
     [sort.columnId, sort.sortDirection]
   );
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-  const { initializeTimeline, setIndexToAdd, setIsTimelineLoading } = useManageTimeline();
+  const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
     initializeTimeline({
       filterManager,
       id,
-      indexToAdd,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initializeTimeline, filterManager, id]);
+
+  const [
+    loading,
+    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
+  ] = useTimelineEvents({
+    docValueFields,
+    endDate: end,
+    id,
+    indexNames,
+    fields: timelineQueryFields,
+    limit: itemsPerPage,
+    filterQuery: combinedQueries?.filterQuery ?? '',
+    startDate: start,
+    skip: !canQueryTimeline,
+    sort: timelineQuerySortField,
+  });
 
   useEffect(() => {
-    setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
-  }, [loadingIndexName, id, isQueryLoading, setIsTimelineLoading]);
+    setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingSourcerer });
+  }, [loadingSourcerer, id, isQueryLoading, setIsTimelineLoading]);
 
   useEffect(() => {
-    setIndexToAdd({ id, indexToAdd });
-  }, [id, indexToAdd, setIndexToAdd]);
+    setIsQueryLoading(loading);
+  }, [loading]);
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -260,11 +253,6 @@ export const TimelineComponent: React.FC<Props> = ({
             dataProviders={dataProviders}
             filterManager={filterManager}
             graphEventId={graphEventId}
-            onDataProviderEdited={onDataProviderEdited}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            onToggleDataProviderType={onToggleDataProviderType}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             timelineId={id}
@@ -274,85 +262,51 @@ export const TimelineComponent: React.FC<Props> = ({
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
       {canQueryTimeline ? (
-        <TimelineQuery
-          docValueFields={docValueFields}
-          endDate={end}
-          eventType={eventType}
-          id={id}
-          indexToAdd={indexToAdd}
-          fields={timelineQueryFields}
-          sourceId="default"
-          limit={itemsPerPage}
-          filterQuery={combinedQueries!.filterQuery}
-          sortField={timelineQuerySortField}
-          startDate={start}
-          queryDeduplication="timeline"
-        >
-          {({
-            events,
-            inspect,
-            loading,
-            totalCount,
-            pageInfo,
-            loadMore,
-            getUpdatedAt,
-            refetch,
-          }) => {
-            setIsQueryLoading(loading);
-            return (
-              <>
-                <TimelineRefetch
+        <>
+          <TimelineRefetch
+            id={id}
+            inputId="timeline"
+            inspect={inspect}
+            loading={loading}
+            refetch={refetch}
+          />
+          <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StatefulBody
+              browserFields={browserFields}
+              data={events}
+              docValueFields={docValueFields}
+              id={id}
+              refetch={refetch}
+              sort={sort}
+              toggleColumn={toggleColumn}
+            />
+          </StyledEuiFlyoutBody>
+          {
+            /** Hide the footer if Resolver is showing. */
+            !graphEventId && (
+              <StyledEuiFlyoutFooter
+                data-test-subj="eui-flyout-footer"
+                className="timeline-flyout-footer"
+              >
+                <Footer
+                  activePage={pageInfo.activePage}
+                  data-test-subj="timeline-footer"
+                  updatedAt={updatedAt}
+                  height={footerHeight}
                   id={id}
-                  inputId="timeline"
-                  inspect={inspect}
-                  loading={loading}
-                  refetch={refetch}
+                  isLive={isLive}
+                  isLoading={loading || loadingSourcerer}
+                  itemsCount={events.length}
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  onChangeItemsPerPage={onChangeItemsPerPage}
+                  onChangePage={loadPage}
+                  totalCount={totalCount}
                 />
-                <StyledEuiFlyoutBody
-                  data-test-subj="eui-flyout-body"
-                  className="timeline-flyout-body"
-                >
-                  <StatefulBody
-                    browserFields={browserFields}
-                    data={events}
-                    docValueFields={docValueFields}
-                    id={id}
-                    refetch={refetch}
-                    sort={sort}
-                    toggleColumn={toggleColumn}
-                  />
-                </StyledEuiFlyoutBody>
-                {
-                  /** Hide the footer if Resolver is showing. */
-                  !graphEventId && (
-                    <StyledEuiFlyoutFooter
-                      data-test-subj="eui-flyout-footer"
-                      className="timeline-flyout-footer"
-                    >
-                      <Footer
-                        data-test-subj="timeline-footer"
-                        getUpdatedAt={getUpdatedAt}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        height={footerHeight}
-                        id={id}
-                        isLive={isLive}
-                        isLoading={loading || loadingIndexName}
-                        itemsCount={events.length}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        onChangeItemsPerPage={onChangeItemsPerPage}
-                        onLoadMore={loadMore}
-                        serverSideEventCount={totalCount}
-                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                      />
-                    </StyledEuiFlyoutFooter>
-                  )
-                }
-              </>
-            );
-          }}
-        </TimelineQuery>
+              </StyledEuiFlyoutFooter>
+            )
+          }
+        </>
       ) : null}
     </TimelineContainer>
   );

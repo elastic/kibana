@@ -33,7 +33,7 @@ export const createLogEntryExamplesQuery = (
               },
             },
           },
-          ...(!!dataset
+          ...(dataset !== ''
             ? [
                 {
                   term: {
@@ -41,7 +41,19 @@ export const createLogEntryExamplesQuery = (
                   },
                 },
               ]
-            : []),
+            : [
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        exists: {
+                          field: partitionField,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ]),
           ...(categoryQuery
             ? [
                 {
@@ -58,19 +70,18 @@ export const createLogEntryExamplesQuery = (
       },
     },
     sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
+    _source: false,
+    fields: ['event.dataset', 'message'],
   },
-  _source: ['event.dataset', 'message'],
   index: indices,
   size: exampleCount,
 });
 
 export const logEntryExampleHitRT = rt.type({
   _id: rt.string,
-  _source: rt.partial({
-    event: rt.partial({
-      dataset: rt.string,
-    }),
-    message: rt.string,
+  fields: rt.partial({
+    'event.dataset': rt.array(rt.string),
+    message: rt.array(rt.string),
   }),
   sort: rt.tuple([rt.number, rt.number]),
 });

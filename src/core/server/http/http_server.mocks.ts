@@ -68,7 +68,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeAuthRequired,
   validation = {},
   kibanaRouteOptions = { xsrfRequired: true },
-  kibanaRequestState = { requestId: '123' },
+  kibanaRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
@@ -175,6 +175,7 @@ type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreR
 
 const createToolkitMock = (): ToolkitMock => {
   return {
+    render: jest.fn(),
     next: jest.fn(),
     rewriteUrl: jest.fn(),
   };

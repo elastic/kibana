@@ -67,7 +67,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="sortUp"
@@ -93,7 +93,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="arrowUp"
@@ -119,7 +119,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="arrowDown"
@@ -145,7 +145,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="sortDown"

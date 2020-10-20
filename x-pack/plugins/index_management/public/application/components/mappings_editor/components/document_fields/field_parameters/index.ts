@@ -69,6 +69,14 @@ export * from './other_type_name_parameter';
 
 export * from './other_type_json_parameter';
 
+export * from './meta_parameter';
+
+export * from './ignore_above_parameter';
+
+export { RuntimeTypeParameter } from './runtime_type_parameter';
+
+export { PainlessScriptParameter } from './painless_script_parameter';
+
 export const PARAMETER_SERIALIZERS = [relationsSerializer, dynamicSerializer];
 
 export const PARAMETER_DESERIALIZERS = [relationsDeserializer, dynamicDeserializer];

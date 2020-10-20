@@ -8,7 +8,6 @@ import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
 import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
-import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
@@ -17,6 +16,7 @@ import { MockResolver } from './mock_resolver';
 import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
+import { getUiSettings } from '../../mocks/get_ui_settings';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -44,6 +44,23 @@ export class Simulator {
    * Simulator which allows you to explicitly simulate resize events and trigger animation frames
    */
   private readonly sideEffectSimulator: SideEffectSimulator;
+
+  /**
+   * An `enzyme` supported CSS selector for process node elements.
+   */
+  public static nodeElementSelector({
+    entityID,
+    selected = false,
+  }: ProcessNodeElementSelectorOptions = {}): string {
+    let selector: string = baseNodeElementSelector;
+    if (entityID !== undefined) {
+      selector += `[data-test-resolver-node-id="${entityID}"]`;
+    }
+    if (selected) {
+      selector += '[aria-selected="true"]';
+    }
+    return selector;
+  }
 
   constructor({
     dataAccessLayer,
@@ -91,7 +108,9 @@ export class Simulator {
     this.history = history ?? createMemoryHistory();
 
     // Used for `KibanaContextProvider`
-    const coreStart: CoreStart = coreMock.createStart();
+    const coreStart = coreMock.createStart();
+
+    coreStart.uiSettings.get.mockImplementation(getUiSettings);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
@@ -191,7 +210,7 @@ export class Simulator {
    * returns a `ReactWrapper` even if nothing is found, as that is how `enzyme` does things.
    */
   public processNodeElements(options: ProcessNodeElementSelectorOptions = {}): ReactWrapper {
-    return this.domNodes(processNodeElementSelector(options));
+    return this.domNodes(Simulator.nodeElementSelector(options));
   }
 
   /**
@@ -228,7 +247,7 @@ export class Simulator {
    */
   public unselectedProcessNode(entityID: string): ReactWrapper {
     return this.processNodeElements({ entityID }).not(
-      processNodeElementSelector({ entityID, selected: true })
+      Simulator.nodeElementSelector({ entityID, selected: true })
     );
   }
 
@@ -264,6 +283,13 @@ export class Simulator {
   }
 
   /**
+   * Given a `role`, return DOM nodes that have it. Use this to assert that ARIA roles are present as expected.
+   */
+  public domNodesWithRole(role: string): ReactWrapper {
+    return this.domNodes(`[role="${role}"]`);
+  }
+
+  /**
    * Given a 'data-test-subj' selector, it will return the domNode
    */
   public testSubject(selector: string): ReactWrapper {
@@ -296,10 +322,7 @@ export class Simulator {
       const title = titles.at(index).text();
       const description = descriptions.at(index).text();
 
-      // Exclude timestamp since we can't currently calculate the expected description for it from tests
-      if (title !== '@timestamp') {
-        entries.push([title, description]);
-      }
+      entries.push([title, description]);
     }
     return entries;
   }
@@ -319,7 +342,7 @@ export class Simulator {
   }
 }
 
-const baseResolverSelector = '[data-test-subj="resolver:node"]';
+const baseNodeElementSelector = '[data-test-subj="resolver:node"]';
 
 interface ProcessNodeElementSelectorOptions {
   /**
@@ -330,21 +353,4 @@ interface ProcessNodeElementSelectorOptions {
    * If true, only get nodes with an `[aria-selected="true"]` attribute.
    */
   selected?: boolean;
-}
-
-/**
- * An `enzyme` supported CSS selector for process node elements.
- */
-function processNodeElementSelector({
-  entityID,
-  selected = false,
-}: ProcessNodeElementSelectorOptions = {}): string {
-  let selector: string = baseResolverSelector;
-  if (entityID !== undefined) {
-    selector += `[data-test-resolver-node-id="${entityID}"]`;
-  }
-  if (selected) {
-    selector += '[aria-selected="true"]';
-  }
-  return selector;
 }

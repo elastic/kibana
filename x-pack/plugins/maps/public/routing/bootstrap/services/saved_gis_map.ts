@@ -8,9 +8,8 @@ import _ from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
-  createSavedObjectClass,
+  SavedObjectsStart,
   SavedObject,
-  SavedObjectKibanaServices,
 } from '../../../../../../../src/plugins/saved_objects/public';
 import {
   getTimeFilters,
@@ -27,7 +26,6 @@ import { copyPersistentState } from '../../../reducers/util';
 // @ts-expect-error
 import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 import { getExistingMapPath, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-// @ts-expect-error
 import { getStore } from '../../store_operations';
 import { MapStoreState } from '../../../reducers/store';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
@@ -41,10 +39,8 @@ export interface ISavedGisMap extends SavedObject {
   syncWithStore(): void;
 }
 
-export function createSavedGisMapClass(services: SavedObjectKibanaServices) {
-  const SavedObjectClass = createSavedObjectClass(services);
-
-  class SavedGisMap extends SavedObjectClass implements ISavedGisMap {
+export function createSavedGisMapClass(savedObjects: SavedObjectsStart) {
+  class SavedGisMap extends savedObjects.SavedObjectClass implements ISavedGisMap {
     public static type = MAP_SAVED_OBJECT_TYPE;
 
     // Mappings are used to place object properties into saved object _source

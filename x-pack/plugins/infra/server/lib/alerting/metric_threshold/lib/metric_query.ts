@@ -8,8 +8,8 @@ import { networkTraffic } from '../../../../../common/inventory_models/shared/me
 import { MetricExpressionParams, Aggregators } from '../types';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { roundTimestamp } from '../../../../utils/round_timestamp';
-import { getDateHistogramOffset } from '../../../snapshot/query_helpers';
 import { createPercentileAggregation } from './create_percentile_aggregation';
+import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
 const MINIMUM_BUCKETS = 5;
 
@@ -46,7 +46,7 @@ export const getElasticsearchMetricQuery = (
     timeUnit
   );
 
-  const offset = getDateHistogramOffset(from, interval);
+  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
 
   const aggregations =
     aggType === Aggregators.COUNT

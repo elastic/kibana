@@ -88,6 +88,7 @@ describe('ConditionalToolTip', () => {
     mockedUseSnapshot.mockReturnValue({
       nodes: [
         {
+          name: 'host-01',
           path: [{ label: 'host-01', value: 'host-01', ip: '192.168.1.10' }],
           metrics: [
             { name: 'cpu', value: 0.1, avg: 0.4, max: 0.7 },

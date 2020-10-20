@@ -5,10 +5,18 @@
  */
 
 import { AbstractESAggSource } from '../es_agg_source';
-import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
+import {
+  ESGeoGridSourceDescriptor,
+  MapFilters,
+  MapQuery,
+  VectorSourceSyncMeta,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
+import { IField } from '../../fields/field';
+import { ITiledSingleLayerVectorSource } from '../vector_source';
 
-export class ESGeoGridSource extends AbstractESAggSource {
+export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
   static createDescriptor({
     indexPatternId,
     geoField,
@@ -18,7 +26,21 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   constructor(sourceDescriptor: ESGeoGridSourceDescriptor, inspectorAdapters: unknown);
 
+  readonly _descriptor: ESGeoGridSourceDescriptor;
+
   getFieldNames(): string[];
   getGridResolution(): GRID_RESOLUTION;
   getGeoGridPrecision(zoom: number): number;
+  createField({ fieldName }: { fieldName: string }): IField;
+
+  getLayerName(): string;
+
+  getUrlTemplateWithMeta(
+    searchFilters: VectorSourceRequestMeta
+  ): Promise<{
+    layerName: string;
+    urlTemplate: string;
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }>;
 }

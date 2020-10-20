@@ -19,7 +19,8 @@ export const txtUrlTemplatePlaceholder = i18n.translate(
 export const txtUrlPreviewHelpText = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlPreviewHelpText',
   {
-    defaultMessage: 'Please note that \\{\\{event.*\\}\\} variables replaced by dummy values.',
+    defaultMessage:
+      'Please note that in preview \\{\\{event.*\\}\\} variables are substituted with dummy values.',
   }
 );
 

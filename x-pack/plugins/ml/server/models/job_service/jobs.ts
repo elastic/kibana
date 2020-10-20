@@ -152,11 +152,18 @@ export function jobsProvider(client: IScopedClusterClient) {
   async function jobsSummary(jobIds: string[] = []) {
     const fullJobsList: CombinedJobWithStats[] = await createFullJobsList();
     const fullJobsIds = fullJobsList.map((job) => job.job_id);
-    const auditMessages: AuditMessage[] = await getAuditMessagesSummary(fullJobsIds);
-    const auditMessagesByJob = auditMessages.reduce((acc, cur) => {
-      acc[cur.job_id] = cur;
-      return acc;
-    }, {} as { [id: string]: AuditMessage });
+    let auditMessagesByJob: { [id: string]: AuditMessage } = {};
+
+    // even if there are errors getting the audit messages, we still want to show the full list
+    try {
+      const auditMessages: AuditMessage[] = await getAuditMessagesSummary(fullJobsIds);
+      auditMessagesByJob = auditMessages.reduce((acc, cur) => {
+        acc[cur.job_id] = cur;
+        return acc;
+      }, auditMessagesByJob);
+    } catch (e) {
+      // fail silently
+    }
 
     const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
       defaultMessage: 'deleting',
@@ -407,28 +414,21 @@ export function jobsProvider(client: IScopedClusterClient) {
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
   async function jobsExist(jobIds: string[] = []) {
-    // Get the list of job IDs.
-    const { body } = await asInternalUser.ml.getJobs<MlJobsResponse>({
-      job_id: jobIds.join(),
-    });
-
     const results: { [id: string]: boolean } = {};
-    if (body.count > 0) {
-      const allJobIds = body.jobs.map((job) => job.job_id);
-
-      // Check if each of the supplied IDs match existing jobs.
-      jobIds.forEach((jobId) => {
-        // Create a Regex for each supplied ID as wildcard * is allowed.
-        const regexp = new RegExp(`^${jobId.replace(/\*+/g, '.*')}$`);
-        const exists = allJobIds.some((existsJobId) => regexp.test(existsJobId));
-        results[jobId] = exists;
-      });
-    } else {
-      jobIds.forEach((jobId) => {
+    for (const jobId of jobIds) {
+      try {
+        const { body } = await asInternalUser.ml.getJobs<MlJobsResponse>({
+          job_id: jobId,
+        });
+        results[jobId] = body.count > 0;
+      } catch (e) {
+        // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
+        if (e.body?.status !== 404) {
+          throw e;
+        }
         results[jobId] = false;
-      });
+      }
     }
-
     return results;
   }
 

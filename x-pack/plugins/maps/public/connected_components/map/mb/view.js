@@ -23,7 +23,7 @@ import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../../common/elasticsearch_geo_utils';
+import { clampToLatBounds, clampToLonBounds } from '../../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../../kibana_services';
 

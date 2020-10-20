@@ -18,3 +18,4 @@
  */
 
 export { getFieldFormatsRegistry } from './field_formats/field_formats_registry.stub';
+export { getStubIndexPattern, StubIndexPattern } from './index_patterns/index_pattern.stub';

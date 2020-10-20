@@ -132,7 +132,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   fetchIndexPatterns = async () => {
-    const indexPatterns = await this.props.indexPatterns.getFields(['id', 'title']);
+    const indexPatterns = (await this.props.indexPatterns.getCache())?.map((savedObject) => ({
+      id: savedObject.id,
+      title: savedObject.attributes.title,
+    }));
     this.setState({ indexPatterns } as any);
   };
 
@@ -729,7 +732,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           label={
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-              defaultMessage="Please select a file to import"
+              defaultMessage="Select a file to import"
             />
           }
         >
@@ -756,7 +759,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { status } = this.state;
+    const { isLegacyFile, status } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
@@ -773,7 +776,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } else if (this.hasUnmatchedReferences) {
       confirmButton = (
         <EuiButton
-          onClick={this.state.isLegacyFile ? this.confirmLegacyImport : this.resolveImportErrors}
+          onClick={isLegacyFile ? this.confirmLegacyImport : this.resolveImportErrors}
           size="s"
           fill
           isLoading={status === 'loading'}
@@ -788,7 +791,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } else {
       confirmButton = (
         <EuiButton
-          onClick={this.state.isLegacyFile ? this.legacyImport : this.import}
+          onClick={isLegacyFile ? this.legacyImport : this.import}
           size="s"
           fill
           isLoading={status === 'loading'}
@@ -805,7 +808,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     return (
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={close} size="s">
+          <EuiButtonEmpty
+            onClick={close}
+            size="s"
+            disabled={status === 'loading' || (isLegacyFile === false && status === 'success')}
+            data-test-subj="importSavedObjectsCancelBtn"
+          >
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
               defaultMessage="Cancel"

@@ -4,31 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../server/lib/helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
-import { ProcessorEvent } from '../../common/processor_event';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getDocumentTypeFilterForAggregatedTransactions,
+} from '../lib/helpers/aggregated_transactions';
 
 export function getTransactionsProjection({
   setup,
   serviceName,
   transactionName,
   transactionType,
+  searchAggregatedTransactions,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
+  searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -46,13 +47,20 @@ export function getTransactionsProjection({
       ...transactionNameFilter,
       ...transactionTypeFilter,
       ...serviceNameFilter,
-      ...uiFiltersES,
+      ...esFilter,
+      ...getDocumentTypeFilterForAggregatedTransactions(
+        searchAggregatedTransactions
+      ),
     ],
   };
 
   return {
     apm: {
-      events: [ProcessorEvent.transaction as const],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
     },
     body: {
       query: {

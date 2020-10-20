@@ -5,6 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { concatMap, delay } from 'rxjs/operators';
 
 export class AbortError extends Error {}
 
@@ -45,63 +46,37 @@ export const toPromiseAbortable = <T>(
 
 export function createRateLimiter(
   ratelimitIntervalMs: number,
-  ratelimitRequestPerInterval: number
+  ratelimitRequestPerInterval: number,
+  maxDelay: number,
+  scheduler = Rx.asyncScheduler
 ) {
-  function createCurrentInterval() {
-    return {
-      startedAt: Rx.asyncScheduler.now(),
-      numRequests: 0,
-    };
-  }
+  let intervalEnd = 0;
+  let countInCurrentInterval = 0;
 
-  let currentInterval: { startedAt: number; numRequests: number } = createCurrentInterval();
-  let observers: Array<[Rx.Subscriber<any>, any]> = [];
-  let timerSubscription: Rx.Subscription | undefined;
+  function createRateLimitOperator<T>(): Rx.OperatorFunction<T, T> {
+    const maxIntervalEnd = scheduler.now() + maxDelay;
 
-  function createTimeout() {
-    if (timerSubscription) {
-      return;
-    }
-    timerSubscription = Rx.asyncScheduler.schedule(() => {
-      timerSubscription = undefined;
-      currentInterval = createCurrentInterval();
-      for (const [waitingObserver, value] of observers) {
-        if (currentInterval.numRequests >= ratelimitRequestPerInterval) {
-          createTimeout();
-          continue;
+    return Rx.pipe(
+      concatMap(function rateLimit(value: T) {
+        const now = scheduler.now();
+        if (intervalEnd <= now) {
+          countInCurrentInterval = 1;
+          intervalEnd = now + ratelimitIntervalMs;
+          return Rx.of(value);
+        } else if (intervalEnd >= maxIntervalEnd) {
+          // drop the value as it's never going to success as long polling timeout is going to happen before we can send the policy
+          return Rx.EMPTY;
+        } else {
+          if (++countInCurrentInterval > ratelimitRequestPerInterval) {
+            countInCurrentInterval = 1;
+            intervalEnd += ratelimitIntervalMs;
+          }
+
+          const wait = intervalEnd - ratelimitIntervalMs - now;
+          return wait > 0 ? Rx.of(value).pipe(delay(wait, scheduler)) : Rx.of(value);
         }
-        currentInterval.numRequests++;
-        waitingObserver.next(value);
-      }
-    }, ratelimitIntervalMs);
+      })
+    );
   }
-
-  return function limit<T>(): Rx.MonoTypeOperatorFunction<T> {
-    return (observable) =>
-      new Rx.Observable<T>((observer) => {
-        const subscription = observable.subscribe({
-          next(value) {
-            if (currentInterval.numRequests < ratelimitRequestPerInterval) {
-              currentInterval.numRequests++;
-              observer.next(value);
-              return;
-            }
-
-            observers = [...observers, [observer, value]];
-            createTimeout();
-          },
-          error(err) {
-            observer.error(err);
-          },
-          complete() {
-            observer.complete();
-          },
-        });
-
-        return () => {
-          observers = observers.filter((o) => o[0] !== observer);
-          subscription.unsubscribe();
-        };
-      });
-  };
+  return createRateLimitOperator;
 }

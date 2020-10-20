@@ -13,6 +13,25 @@ import { documentationService } from '../../../services/documentation';
 import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
+  runtime: {
+    value: 'runtime',
+    isBeta: true,
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldDescription', {
+      defaultMessage: 'Runtime',
+    }),
+    // TODO: Add this once the page exists.
+    // documentation: {
+    //   main: '/runtime_field.html',
+    // },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldLongDescription"
+          defaultMessage="Runtime fields define scripts that calculate field values at runtime."
+        />
+      </p>
+    ),
+  },
   text: {
     value: 'text',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.textDescription', {
@@ -66,6 +85,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
                 )}
               </EuiLink>
             ),
+          }}
+        />
+      </p>
+    ),
+  },
+  constant_keyword: {
+    value: 'constant_keyword',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.constantKeywordDescription', {
+      defaultMessage: 'Constant keyword',
+    }),
+    documentation: {
+      main: '/keyword.html#constant-keyword-field-type',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.constantKeywordLongDescription"
+          defaultMessage="Constant keyword fields are a special type of keyword fields for fields that contain the same keyword across all documents in the index. Supports the same queries and aggregations as {keyword} fields."
+          values={{
+            keyword: <EuiCode inline>{'keyword'}</EuiCode>,
           }}
         />
       </p>
@@ -699,6 +738,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  histogram: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.histogramDescription', {
+      defaultMessage: 'Histogram',
+    }),
+    value: 'histogram',
+    documentation: {
+      main: '/histogram.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.histogramLongDescription"
+          defaultMessage="Histogram fields store pre-aggregated numerical data representing a histogram, and are intended for use with aggregations."
+        />
+      </p>
+    ),
+  },
   join: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.joinDescription', {
       defaultMessage: 'Join',
@@ -784,6 +840,72 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  point: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
+      defaultMessage: 'Point',
+    }),
+    value: 'point',
+    documentation: {
+      main: '/point.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.pointLongDescription"
+          defaultMessage="Point fields enable searching of {code} pairs that fall in a 2-dimensional planar coordinate system."
+          values={{
+            code: <EuiCode inline>{'x,y'}</EuiCode>,
+          }}
+        />
+      </p>
+    ),
+  },
+  version: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.versionDescription', {
+      defaultMessage: 'Version',
+    }),
+    value: 'version',
+    documentation: {
+      main: '/version.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription"
+          defaultMessage="Version fields are helpful to handle software version values. This field isn’t optimized for heavy wildcard, regex, or fuzzy searches. For these query types, use the {keywordType}."
+          values={{
+            keywordType: (
+              <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription.keywordTypeLink',
+                  {
+                    defaultMessage: 'keyword data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
+  },
+  wildcard: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.wildcardDescription', {
+      defaultMessage: 'Wildcard',
+    }),
+    value: 'wildcard',
+    documentation: {
+      main: '/keyword.html#wildcard-field-type',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.wildcardLongDescription"
+          defaultMessage="Wildcard fields store values optimized for wildcard grep-like queries."
+        />
+      </p>
+    ),
+  },
   other: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.otherDescription', {
       defaultMessage: 'Other',
@@ -805,6 +927,7 @@ export const MAIN_TYPES: MainType[] = [
   'binary',
   'boolean',
   'completion',
+  'constant_keyword',
   'date',
   'date_nanos',
   'dense_vector',
@@ -821,10 +944,15 @@ export const MAIN_TYPES: MainType[] = [
   'range',
   'rank_feature',
   'rank_features',
+  'runtime',
   'search_as_you_type',
   'shape',
   'text',
   'token_count',
+  'histogram',
+  'wildcard',
+  'point',
+  'version',
   'other',
 ];
 

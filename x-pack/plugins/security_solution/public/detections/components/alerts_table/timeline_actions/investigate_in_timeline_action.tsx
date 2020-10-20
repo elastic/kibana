@@ -7,14 +7,15 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineNonEcsData, Ecs } from '../../../../../public/graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useApolloClient } from '../../../../common/utils/apollo_context';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
-
 import { CreateTimelineProps } from '../types';
 import {
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -30,6 +31,9 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   ecsRowData,
   nonEcsRowData,
 }) => {
+  const {
+    data: { search: searchStrategyClient },
+  } = useKibana().services;
   const dispatch = useDispatch();
   const apolloClient = useApolloClient();
 
@@ -48,6 +52,8 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
         notes: [],
         timeline: {
           ...timeline,
+          // by setting as an empty array, it will default to all in the reducer because of the event type
+          indexNames: [],
           show: true,
         },
         to: toTimeline,
@@ -64,9 +70,17 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
         createTimeline,
         ecsData: ecsRowData,
         nonEcsData: nonEcsRowData,
+        searchStrategyClient,
         updateTimelineIsLoading,
       }),
-    [apolloClient, createTimeline, ecsRowData, nonEcsRowData, updateTimelineIsLoading]
+    [
+      apolloClient,
+      createTimeline,
+      ecsRowData,
+      nonEcsRowData,
+      searchStrategyClient,
+      updateTimelineIsLoading,
+    ]
   );
 
   return (

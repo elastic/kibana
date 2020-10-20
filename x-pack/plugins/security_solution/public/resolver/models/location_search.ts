@@ -4,36 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * The legacy `crumbEvent` and `crumbId` parameters.
- * @deprecated
- */
-export function breadcrumbParameters(
-  locationSearch: string,
-  resolverComponentInstanceID: string
-): { crumbEvent: string; crumbId: string } {
-  const urlSearchParams = new URLSearchParams(locationSearch);
-  const { eventKey, idKey } = parameterNames(resolverComponentInstanceID);
-  return {
-    // Use `''` for backwards compatibility with deprecated code.
-    crumbEvent: urlSearchParams.get(eventKey) ?? '',
-    crumbId: urlSearchParams.get(idKey) ?? '',
-  };
-}
+import { PanelViewAndParameters } from '../types';
+import * as schema from './schema';
 
 /**
- * Parameter names based on the `resolverComponentInstanceID`.
+ * Validates an `unknown` value, narrowing it to `PanelViewAndParameters`.
+ * Use this to validate that the value decoded from the URL is a valid `PanelViewAndParameters` object.
  */
-function parameterNames(
-  resolverComponentInstanceID: string
-): {
-  idKey: string;
-  eventKey: string;
-} {
-  const idKey: string = `resolver-${resolverComponentInstanceID}-id`;
-  const eventKey: string = `resolver-${resolverComponentInstanceID}-event`;
-  return {
-    idKey,
-    eventKey,
-  };
-}
+export const isPanelViewAndParameters: (
+  value: unknown
+) => value is PanelViewAndParameters = schema.oneOf([
+  schema.object({
+    panelView: schema.literal('nodes' as const),
+  }),
+  schema.object({
+    panelView: schema.literal('nodeDetail' as const),
+    panelParameters: schema.object({
+      nodeID: schema.string(),
+    }),
+  }),
+  schema.object({
+    panelView: schema.literal('nodeEvents' as const),
+    panelParameters: schema.object({
+      nodeID: schema.string(),
+    }),
+  }),
+  schema.object({
+    panelView: schema.literal('nodeEventsInCategory' as const),
+    panelParameters: schema.object({
+      nodeID: schema.string(),
+      eventCategory: schema.string(),
+    }),
+  }),
+  schema.object({
+    panelView: schema.literal('eventDetail' as const),
+    panelParameters: schema.object({
+      nodeID: schema.string(),
+      eventCategory: schema.string(),
+      eventID: schema.string(),
+    }),
+  }),
+]);

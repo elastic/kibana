@@ -7,7 +7,8 @@
     "licensing",
     "management",
     "charts",
-    "data"
+    "data",
+    "features"
   ],
   "server": true,
   "ui": true,

@@ -74,7 +74,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
 
   // Table and search states
@@ -108,7 +108,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   );
 
   // Fetch agent policies
-  const { isLoading, data: agentPolicyData, sendRequest } = useGetAgentPolicies({
+  const { isLoading, data: agentPolicyData, resendRequest } = useGetAgentPolicies({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     sortField: sorting?.field,
@@ -204,7 +204,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             render: (agentPolicy: AgentPolicy) => (
               <AgentPolicyActionMenu
                 agentPolicy={agentPolicy}
-                onCopySuccess={() => sendRequest()}
+                onCopySuccess={() => resendRequest()}
               />
             ),
           },
@@ -218,7 +218,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [getHref, isFleetEnabled, sendRequest]);
+  }, [getHref, isFleetEnabled, resendRequest]);
 
   const createAgentPolicyButton = useMemo(
     () => (
@@ -270,7 +270,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         <CreateAgentPolicyFlyout
           onClose={() => {
             setIsCreateAgentPolicyFlyoutOpen(false);
-            sendRequest();
+            resendRequest();
           }}
         />
       ) : null}
@@ -289,7 +289,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
+          <EuiButton color="primary" iconType="refresh" onClick={() => resendRequest()}>
             <FormattedMessage
               id="xpack.ingestManager.agentPolicyList.reloadAgentPoliciesButtonText"
               defaultMessage="Reload"

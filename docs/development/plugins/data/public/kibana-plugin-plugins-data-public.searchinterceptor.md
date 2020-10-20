@@ -14,21 +14,20 @@ export declare class SearchInterceptor
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(deps, requestTimeout)](./kibana-plugin-plugins-data-public.searchinterceptor._constructor_.md) |  | This class should be instantiated with a <code>requestTimeout</code> corresponding with how many ms after requests are initiated that they should automatically cancel. |
+|  [(constructor)(deps)](./kibana-plugin-plugins-data-public.searchinterceptor._constructor_.md) |  | Constructs a new instance of the <code>SearchInterceptor</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [deps](./kibana-plugin-plugins-data-public.searchinterceptor.deps.md) |  | <code>SearchInterceptorDeps</code> |  |
-|  [requestTimeout](./kibana-plugin-plugins-data-public.searchinterceptor.requesttimeout.md) |  | <code>number &#124; undefined</code> |  |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [getPendingCount$()](./kibana-plugin-plugins-data-public.searchinterceptor.getpendingcount_.md) |  | Returns an <code>Observable</code> over the current number of pending searches. This could mean that one of the search requests is still in flight, or that it has only received partial responses. |
-|  [runSearch(request, signal, strategy)](./kibana-plugin-plugins-data-public.searchinterceptor.runsearch.md) |  |  |
+|  [getTimeoutMode()](./kibana-plugin-plugins-data-public.searchinterceptor.gettimeoutmode.md) |  |  |
+|  [handleSearchError(e, request, timeoutSignal, options)](./kibana-plugin-plugins-data-public.searchinterceptor.handlesearcherror.md) |  |  |
 |  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when <code>cancelPending</code> is called, when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates <code>pendingCount$</code> when the request is started/finalized. |
-|  [setupTimers(options)](./kibana-plugin-plugins-data-public.searchinterceptor.setuptimers.md) |  |  |
+|  [showError(e)](./kibana-plugin-plugins-data-public.searchinterceptor.showerror.md) |  |  |
 

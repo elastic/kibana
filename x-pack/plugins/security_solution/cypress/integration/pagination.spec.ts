@@ -35,6 +35,7 @@ describe('Pagination', () => {
       .then((processNameFirstPage) => {
         goToThirdPage();
         waitForUncommonProcessesToBeLoaded();
+        cy.wait(1500);
         cy.get(PROCESS_NAME_FIELD)
           .first()
           .invoke('text')

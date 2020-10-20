@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from 'kibana/server';
 
 /**
   Function for collecting information about canvas usage
@@ -13,7 +13,7 @@ export type TelemetryCollector = (
   /** The server instance */
   kibanaIndex: string,
   /** Function for calling elasticsearch */
-  callCluster: CallCluster
+  callCluster: LegacyAPICaller
 ) => Record<string, any>;
 
 export interface TelemetryCustomElementDocument {

@@ -32,6 +32,7 @@
         "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent2_filebeat",
+        "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
@@ -54,6 +55,7 @@
         "access_api_key_id": "api-key-3",
         "active": true,
         "shared_id": "agent3_metricbeat",
+        "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
@@ -76,6 +78,7 @@
         "access_api_key_id": "api-key-4",
         "active": true,
         "shared_id": "agent4_metricbeat",
+        "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
@@ -193,7 +196,7 @@
       "type": "fleet-agent-actions",
       "fleet-agent-actions": {
         "agent_id": "agent1",
-        "type": "CONFIG_CHANGE",
+        "type": "POLICY_CHANGE",
         "created_at": "2020-03-15T03:47:15.129Z",
         "sent_at": "2020-03-04T15:03:07+0000"
       }
@@ -210,7 +213,7 @@
       "type": "fleet-agent-actions",
       "fleet-agent-actions": {
         "agent_id": "agent1",
-        "type": "CONFIG_CHANGE",
+        "type": "POLICY_CHANGE",
         "created_at": "2020-03-15T03:47:15.129Z",
         "sent_at": "2020-03-04T15:03:07+0000"
       }
@@ -229,6 +232,35 @@
         "name": "Test policy",
         "namespace": "default",
         "description": "Policy 1",
+        "status": "active",
+        "package_policies": [],
+        "is_default": true,
+        "monitoring_enabled": [
+          "logs",
+          "metrics"
+        ],
+        "revision": 2,
+        "updated_at": "2020-05-07T19:34:42.533Z",
+        "updated_by": "system"
+      },
+      "migrationVersion": {
+        "ingest-agent-policies": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ingest-agent-policies:policy2",
+    "index": ".kibana",
+    "source": {
+      "type": "ingest-agent-policies",
+      "ingest-agent-policies": {
+        "name": "Test policy 2",
+        "namespace": "default",
+        "description": "Policy 2",
         "status": "active",
         "package_policies": [],
         "is_default": true,

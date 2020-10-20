@@ -9,9 +9,9 @@ import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
-import { createLayout, LayoutInstance, LayoutParams } from '../../../lib/layouts';
+import { createLayout, LayoutParams } from '../../../lib/layouts';
 import { ScreenshotResults } from '../../../lib/screenshots';
-import { ConditionalHeaders } from '../../../types';
+import { ConditionalHeaders } from '../../common';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
 import { getTracker } from './tracker';
@@ -35,7 +35,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     logger: LevelLogger,
     title: string,
     urls: string[],
-    browserTimezone: string,
+    browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo?: string
@@ -43,7 +43,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     const tracker = getTracker();
     tracker.startLayout();
 
-    const layout = createLayout(captureConfig, layoutParams) as LayoutInstance;
+    const layout = createLayout(captureConfig, layoutParams);
     tracker.endLayout();
 
     tracker.startScreenshots();

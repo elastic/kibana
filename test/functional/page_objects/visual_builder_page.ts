@@ -58,7 +58,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
-      const isPresent = await testSubjects.exists(testSubj, { timeout: 10000 });
+      let isPresent = false;
+      await retry.try(async () => {
+        isPresent = await testSubjects.exists(testSubj, { timeout: 20000 });
+      });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
       }
@@ -130,8 +133,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async enterMarkdown(markdown: string) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
-      await input.type(markdown, { charByChar: true });
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await input.type(markdown);
+      await PageObjects.common.sleep(3000);
     }
 
     public async clearMarkdown() {
@@ -448,6 +451,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const option = await testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
       (await option.findByCssSelector('label')).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    public async waitForIndexPatternTimeFieldOptionsLoaded() {
+      await retry.waitFor('combobox options loaded', async () => {
+        const options = await comboBox.getOptions('metricsIndexPatternFieldsSelect');
+        log.debug(`-- optionsCount=${options.length}`);
+        return options.length > 0;
+      });
     }
 
     public async selectIndexPatternTimeField(timeField: string) {

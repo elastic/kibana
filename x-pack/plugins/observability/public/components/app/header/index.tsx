@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +27,7 @@ const Wrapper = styled.div<{ restrictWidth?: number }>`
   max-width: ${(props) => `${props.restrictWidth}px`};
   margin: 0 auto;
   overflow: hidden;
-  padding: ${(props) => (props.restrictWidth ? 0 : '0 24px')};
+  padding: 0 16px;
 `;
 
 interface Props {
@@ -58,12 +57,7 @@ export function Header({
               <h1>
                 {i18n.translate('xpack.observability.home.title', {
                   defaultMessage: 'Observability',
-                })}{' '}
-                <EuiBetaBadge
-                  className="eui-alignMiddle"
-                  label={i18n.translate('xpack.observability.beta', { defaultMessage: 'Beta' })}
-                  tooltipContent="This feature is in beta. Please help us improve it by reporting any bugs or give us feedback."
-                />
+                })}
               </h1>
             </EuiTitle>
           </EuiFlexItem>

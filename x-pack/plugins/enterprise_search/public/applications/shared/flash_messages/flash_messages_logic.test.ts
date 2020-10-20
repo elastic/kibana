@@ -6,23 +6,28 @@
 
 import { resetContext } from 'kea';
 
-import { FlashMessagesLogic, IFlashMessage } from './flash_messages_logic';
+import { mockHistory } from '../../__mocks__';
+jest.mock('../kibana', () => ({
+  KibanaLogic: { values: { history: mockHistory } },
+}));
+
+import { FlashMessagesLogic, mountFlashMessagesLogic, IFlashMessage } from './';
 
 describe('FlashMessagesLogic', () => {
-  const DEFAULT_VALUES = {
-    messages: [],
-    queuedMessages: [],
-    historyListener: null,
-  };
+  const mount = () => mountFlashMessagesLogic();
 
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
   });
 
-  it('has expected default values', () => {
-    FlashMessagesLogic.mount();
-    expect(FlashMessagesLogic.values).toEqual(DEFAULT_VALUES);
+  it('has default values', () => {
+    mount();
+    expect(FlashMessagesLogic.values).toEqual({
+      messages: [],
+      queuedMessages: [],
+      historyListener: expect.any(Function),
+    });
   });
 
   describe('setFlashMessages()', () => {
@@ -33,7 +38,7 @@ describe('FlashMessagesLogic', () => {
         { type: 'info', message: 'Everything is fine, nothing is ruined' },
       ];
 
-      FlashMessagesLogic.mount();
+      mount();
       FlashMessagesLogic.actions.setFlashMessages(messages);
 
       expect(FlashMessagesLogic.values.messages).toEqual(messages);
@@ -42,7 +47,7 @@ describe('FlashMessagesLogic', () => {
     it('automatically converts to an array if a single message obj is passed in', () => {
       const message = { type: 'success', message: 'I turn into an array!' } as IFlashMessage;
 
-      FlashMessagesLogic.mount();
+      mount();
       FlashMessagesLogic.actions.setFlashMessages(message);
 
       expect(FlashMessagesLogic.values.messages).toEqual([message]);
@@ -51,7 +56,7 @@ describe('FlashMessagesLogic', () => {
 
   describe('clearFlashMessages()', () => {
     it('sets messages back to an empty array', () => {
-      FlashMessagesLogic.mount();
+      mount();
       FlashMessagesLogic.actions.setFlashMessages('test' as any);
       FlashMessagesLogic.actions.clearFlashMessages();
 
@@ -63,7 +68,7 @@ describe('FlashMessagesLogic', () => {
     it('sets an array of messages', () => {
       const queuedMessage: IFlashMessage = { type: 'error', message: 'You deleted a thing' };
 
-      FlashMessagesLogic.mount();
+      mount();
       FlashMessagesLogic.actions.setQueuedMessages(queuedMessage);
 
       expect(FlashMessagesLogic.values.queuedMessages).toEqual([queuedMessage]);
@@ -72,7 +77,7 @@ describe('FlashMessagesLogic', () => {
 
   describe('clearQueuedMessages()', () => {
     it('sets queued messages back to an empty array', () => {
-      FlashMessagesLogic.mount();
+      mount();
       FlashMessagesLogic.actions.setQueuedMessages('test' as any);
       FlashMessagesLogic.actions.clearQueuedMessages();
 
@@ -83,30 +88,25 @@ describe('FlashMessagesLogic', () => {
   describe('history listener logic', () => {
     describe('setHistoryListener()', () => {
       it('sets the historyListener value', () => {
-        FlashMessagesLogic.mount();
+        mount();
         FlashMessagesLogic.actions.setHistoryListener('test' as any);
 
         expect(FlashMessagesLogic.values.historyListener).toEqual('test');
       });
     });
 
-    describe('listenToHistory()', () => {
+    describe('on mount', () => {
       it('listens for history changes and clears messages on change', () => {
-        FlashMessagesLogic.mount();
+        mount();
+        expect(mockHistory.listen).toHaveBeenCalled();
+
         FlashMessagesLogic.actions.setQueuedMessages(['queuedMessages'] as any);
         jest.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'clearQueuedMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'setHistoryListener');
 
-        const mockListener = jest.fn(() => jest.fn());
-        const history = { listen: mockListener } as any;
-        FlashMessagesLogic.actions.listenToHistory(history);
-
-        expect(mockListener).toHaveBeenCalled();
-        expect(FlashMessagesLogic.actions.setHistoryListener).toHaveBeenCalled();
-
-        const mockHistoryChange = (mockListener.mock.calls[0] as any)[0];
+        const mockHistoryChange = (mockHistory.listen.mock.calls[0] as any)[0];
         mockHistoryChange();
         expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
         expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
@@ -116,19 +116,20 @@ describe('FlashMessagesLogic', () => {
       });
     });
 
-    describe('beforeUnmount', () => {
-      it('removes history listener on unmount', () => {
+    describe('on unmount', () => {
+      it('removes history listener', () => {
         const mockUnlistener = jest.fn();
-        const unmount = FlashMessagesLogic.mount();
+        mockHistory.listen.mockReturnValueOnce(mockUnlistener);
 
-        FlashMessagesLogic.actions.setHistoryListener(mockUnlistener);
+        const unmount = mount();
         unmount();
 
         expect(mockUnlistener).toHaveBeenCalled();
       });
 
       it('does not crash if no listener exists', () => {
-        const unmount = FlashMessagesLogic.mount();
+        const unmount = mount();
+        FlashMessagesLogic.actions.setHistoryListener(null as any);
         unmount();
       });
     });

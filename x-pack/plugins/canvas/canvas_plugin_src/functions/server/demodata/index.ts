@@ -61,6 +61,7 @@ export function demodata(): ExpressionFunctionDefinition<
             { id: 'project', name: 'project', meta: { type: 'string' } },
             { id: 'percent_uptime', name: 'percent_uptime', meta: { type: 'number' } },
           ],
+          // @ts-expect-error invalid json mock
           rows: sortBy(demoRows, 'time'),
         };
       } else if (args.type === DemoRows.SHIRTS) {

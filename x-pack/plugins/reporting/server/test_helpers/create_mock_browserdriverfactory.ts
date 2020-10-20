@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
@@ -15,6 +16,7 @@ import { CaptureConfig } from '../types';
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;
   waitForSelector: jest.Mock<Promise<any>, any[]>;
+  waitFor: jest.Mock<Promise<any>, any[]>;
   screenshot: jest.Mock<Promise<any>, any[]>;
   open: jest.Mock<Promise<any>, any[]>;
   getCreatePage: (driver: HeadlessChromiumDriver) => jest.Mock<any, any>;
@@ -86,6 +88,7 @@ const getCreatePage = (driver: HeadlessChromiumDriver) =>
 const defaultOpts: CreateMockBrowserDriverFactoryOpts = {
   evaluate: mockBrowserEvaluate,
   waitForSelector: mockWaitForSelector,
+  waitFor: jest.fn(),
   screenshot: mockScreenshot,
   open: jest.fn(),
   getCreatePage,
@@ -96,7 +99,11 @@ export const createMockBrowserDriverFactory = async (
   opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
   const captureConfig: CaptureConfig = {
-    timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
+    timeouts: {
+      openUrl: moment.duration(60, 's'),
+      waitForElements: moment.duration(30, 's'),
+      renderComplete: moment.duration(30, 's'),
+    },
     browser: {
       type: 'chromium',
       chromium: {
@@ -108,18 +115,14 @@ export const createMockBrowserDriverFactory = async (
     },
     networkPolicy: { enabled: true, rules: [] },
     viewport: { width: 800, height: 600 },
-    loadDelay: 2000,
+    loadDelay: moment.duration(2, 's'),
     zoom: 2,
     maxAttempts: 1,
   };
 
   const binaryPath = '/usr/local/share/common/secure/super_awesome_binary';
-  const mockBrowserDriverFactory = await chromium.createDriverFactory(
-    binaryPath,
-    captureConfig,
-    logger
-  );
-  const mockPage = {} as Page;
+  const mockBrowserDriverFactory = chromium.createDriverFactory(binaryPath, captureConfig, logger);
+  const mockPage = ({ setViewport: () => {} } as unknown) as Page;
   const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, {
     inspect: true,
     networkPolicy: captureConfig.networkPolicy,
@@ -127,6 +130,7 @@ export const createMockBrowserDriverFactory = async (
 
   // mock the driver methods as either default mocks or passed-in
   mockBrowserDriver.waitForSelector = opts.waitForSelector ? opts.waitForSelector : defaultOpts.waitForSelector; // prettier-ignore
+  mockBrowserDriver.waitFor = opts.waitFor ? opts.waitFor : defaultOpts.waitFor;
   mockBrowserDriver.evaluate = opts.evaluate ? opts.evaluate : defaultOpts.evaluate;
   mockBrowserDriver.screenshot = opts.screenshot ? opts.screenshot : defaultOpts.screenshot;
   mockBrowserDriver.open = opts.open ? opts.open : defaultOpts.open;

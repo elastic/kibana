@@ -3,7 +3,6 @@
 exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -23,7 +22,7 @@ exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
       <span
         className="euiButtonContent euiButton__content"
       >
-        <div
+        <span
           className="euiButtonContent__icon"
           data-euiicon-type="plusInCircle"
           size="m"

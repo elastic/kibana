@@ -12,7 +12,10 @@ import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -20,7 +23,7 @@ import { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
-
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../common/constants/ml_url_generator';
 export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
   MlStartDependencies;
 
@@ -50,11 +53,21 @@ export interface MlServicesContext {
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+  const redirectToMlAccessDeniedPage = async () => {
+    const accessDeniedPageUrl = await deps.share.urlGenerators
+      .getUrlGenerator(ML_APP_URL_GENERATOR)
+      .createUrl({
+        page: ML_PAGES.ACCESS_DENIED,
+      });
+    await coreStart.application.navigateToUrl(accessDeniedPageUrl);
+  };
+
   const pageDeps = {
     history: appMountParams.history,
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    redirectToMlAccessDeniedPage,
   };
   const services = {
     appName: 'ML',
@@ -69,13 +82,17 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   const I18nContext = coreStart.i18n.Context;
   return (
-    <I18nContext>
-      <KibanaContextProvider
-        services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
-      >
-        <MlRouter pageDeps={pageDeps} />
-      </KibanaContextProvider>
-    </I18nContext>
+    /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
+     * avoiding full page reload **/
+    <RedirectAppLinks application={coreStart.application}>
+      <I18nContext>
+        <KibanaContextProvider
+          services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
+        >
+          <MlRouter pageDeps={pageDeps} />
+        </KibanaContextProvider>
+      </I18nContext>
+    </RedirectAppLinks>
   );
 };
 

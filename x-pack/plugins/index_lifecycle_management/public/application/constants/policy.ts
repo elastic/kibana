@@ -8,26 +8,31 @@ import {
   SerializedPhase,
   ColdPhase,
   DeletePhase,
-  HotPhase,
   WarmPhase,
-  FrozenPhase,
+  SerializedPolicy,
 } from '../../../common/types';
 
-export const defaultNewHotPhase: HotPhase = {
-  phaseEnabled: true,
-  rolloverEnabled: true,
-  selectedMaxAge: '30',
-  selectedMaxAgeUnits: 'd',
-  selectedMaxSizeStored: '50',
-  selectedMaxSizeStoredUnits: 'gb',
-  phaseIndexPriority: '100',
-  selectedMaxDocuments: '',
+export const defaultSetPriority: string = '100';
+
+export const defaultPolicy: SerializedPolicy = {
+  name: '',
+  phases: {
+    hot: {
+      actions: {
+        rollover: {
+          max_age: '30d',
+          max_size: '50gb',
+        },
+      },
+    },
+  },
 };
 
 export const defaultNewWarmPhase: WarmPhase = {
   phaseEnabled: false,
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
+  bestCompressionEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',
   selectedNodeAttrs: '',
@@ -36,6 +41,7 @@ export const defaultNewWarmPhase: WarmPhase = {
   selectedReplicaCount: '',
   warmPhaseOnRollover: true,
   phaseIndexPriority: '50',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewColdPhase: ColdPhase = {
@@ -46,16 +52,7 @@ export const defaultNewColdPhase: ColdPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '0',
-};
-
-export const defaultNewFrozenPhase: FrozenPhase = {
-  phaseEnabled: false,
-  selectedMinimumAge: '0',
-  selectedMinimumAgeUnits: 'd',
-  selectedNodeAttrs: '',
-  selectedReplicaCount: '',
-  freezeEnabled: false,
-  phaseIndexPriority: '0',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewDeletePhase: DeletePhase = {

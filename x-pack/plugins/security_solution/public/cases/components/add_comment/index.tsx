@@ -11,14 +11,13 @@ import styled from 'styled-components';
 import { CommentRequest } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { MarkdownEditorForm } from '../../../common/components/markdown_editor/form';
-import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
+import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
-import { Form, useForm, UseField } from '../../../shared_imports';
+import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
 import * as i18n from './translations';
 import { schema } from './schema';
-import { useTimelineClick } from '../utils/use_timeline_click';
+import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_click';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -46,23 +45,28 @@ export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
       const { isLoading, postComment } = usePostComment(caseId);
+
       const { form } = useForm<CommentRequest>({
         defaultValue: initialCommentValue,
         options: { stripEmptyFields: false },
         schema,
       });
-      const { getFormData, setFieldValue, reset, submit } = form;
-      const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
-        form,
-        'comment'
-      );
+
+      const fieldName = 'comment';
+      const { setFieldValue, reset, submit } = form;
+      const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
+
+      const onCommentChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
+        setFieldValue,
+      ]);
+
+      const { handleCursorChange } = useInsertTimeline(comment, onCommentChange);
 
       const addQuote = useCallback(
         (quote) => {
-          const { comment } = getFormData();
-          setFieldValue('comment', `${comment}${comment.length > 0 ? '\n\n' : ''}${quote}`);
+          setFieldValue(fieldName, `${comment}${comment.length > 0 ? '\n\n' : ''}${quote}`);
         },
-        [getFormData, setFieldValue]
+        [comment, setFieldValue]
       );
 
       useImperativeHandle(ref, () => ({
@@ -87,7 +91,7 @@ export const AddComment = React.memo(
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
           <Form form={form}>
             <UseField
-              path="comment"
+              path={fieldName}
               component={MarkdownEditorForm}
               componentProps={{
                 idAria: 'caseComment',
@@ -107,13 +111,6 @@ export const AddComment = React.memo(
                   >
                     {i18n.ADD_COMMENT}
                   </EuiButton>
-                ),
-                topRightContent: (
-                  <InsertTimelinePopover
-                    hideUntitled={true}
-                    isDisabled={isLoading}
-                    onTimelineChange={handleOnTimelineChange}
-                  />
                 ),
               }}
             />

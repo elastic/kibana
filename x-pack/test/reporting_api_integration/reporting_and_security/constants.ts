@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import path from 'path';
 
 export const OSS_KIBANA_ARCHIVE_PATH = path.resolve(

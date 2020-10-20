@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Section } from '../sections';
 import { AlphaMessaging, SettingFlyout } from '../components';
-import { useLink, useConfig, useCore } from '../hooks';
+import { useLink, useConfig } from '../hooks';
 
 interface Props {
   showSettings?: boolean;
@@ -41,8 +41,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const { getHref } = useLink();
-  const { fleet } = useConfig();
-  const { uiSettings } = useCore();
+  const { agents } = useConfig();
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
   return (
@@ -58,11 +57,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         <div>
           <Nav>
             <EuiFlexGroup gutterSize="l" alignItems="center">
-              {uiSettings.get('pageNavigation') === 'legacy' ? (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="savedObjectsApp" size="l" />
-                </EuiFlexItem>
-              ) : null}
               <EuiFlexItem>
                 <EuiTabs display="condensed">
                   <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
@@ -86,11 +80,11 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiTab
                     isSelected={section === 'fleet'}
                     href={getHref('fleet')}
-                    disabled={!fleet?.enabled}
+                    disabled={!agents?.enabled}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.fleetLinkText"
-                      defaultMessage="Fleet"
+                      id="xpack.ingestManager.appNavigation.agentsLinkText"
+                      defaultMessage="Agents"
                     />
                   </EuiTab>
                   <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>

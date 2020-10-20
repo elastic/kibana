@@ -29,10 +29,20 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
-import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
+import {
+  sortExplorationResultsFields,
+  ML__ID_COPY,
+  ML__INCREMENTAL_ID,
+} from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
+
+interface FeatureInfluence {
+  feature_name: string;
+  influence: number;
+}
 
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,
@@ -42,17 +52,21 @@ export const useOutlierData = (
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
 
-  const columns: EuiDataGridColumn[] = [];
+  const columns = useMemo(() => {
+    const newColumns: EuiDataGridColumn[] = [];
 
-  if (jobConfig !== undefined && indexPattern !== undefined) {
-    const resultsField = jobConfig.dest.results_field;
-    const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
-    columns.push(
-      ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
-        sortExplorationResultsFields(a.id, b.id, jobConfig)
-      )
-    );
-  }
+    if (jobConfig !== undefined && indexPattern !== undefined) {
+      const resultsField = jobConfig.dest.results_field;
+      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+      newColumns.push(
+        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
+          sortExplorationResultsFields(a.id, b.id, jobConfig)
+        )
+      );
+    }
+
+    return newColumns;
+  }, [jobConfig, indexPattern]);
 
   const dataGrid = useDataGrid(
     columns,
@@ -60,7 +74,7 @@ export const useOutlierData = (
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-influence columns and the doc id copy
-    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
+    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY && d !== ML__INCREMENTAL_ID
   );
 
   useEffect(() => {
@@ -114,7 +128,10 @@ export const useOutlierData = (
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,
-    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+    // Only trigger when search or the visible columns changes.
+    // We're only interested in the visible columns but not their order, that's
+    // why we sort for comparison (and copying it via spread to avoid sort in place).
+    JSON.stringify([searchQuery, [...dataGrid.visibleColumns].sort()]),
   ]);
 
   const colorRange = useColorRange(
@@ -137,9 +154,16 @@ export const useOutlierData = (
       // column with feature values get color coded by its corresponding influencer value
       if (
         fullItem[resultsField] !== undefined &&
-        fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`] !== undefined
+        fullItem[resultsField][FEATURE_INFLUENCE] !== undefined &&
+        fullItem[resultsField][FEATURE_INFLUENCE].find(
+          (d: FeatureInfluence) => d.feature_name === columnId
+        ) !== undefined
       ) {
-        backgroundColor = colorRange(fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`]);
+        backgroundColor = colorRange(
+          fullItem[resultsField][FEATURE_INFLUENCE].find(
+            (d: FeatureInfluence) => d.feature_name === columnId
+          ).influence
+        );
       }
 
       // column with influencer values get color coded by its own value

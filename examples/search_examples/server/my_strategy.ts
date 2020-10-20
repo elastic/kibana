@@ -17,20 +17,22 @@
  * under the License.
  */
 
+import { map } from 'rxjs/operators';
 import { ISearchStrategy, PluginStart } from '../../../src/plugins/data/server';
 import { IMyStrategyResponse, IMyStrategyRequest } from '../common';
 
-export const mySearchStrategyProvider = (data: PluginStart): ISearchStrategy => {
+export const mySearchStrategyProvider = (
+  data: PluginStart
+): ISearchStrategy<IMyStrategyRequest, IMyStrategyResponse> => {
   const es = data.search.getSearchStrategy('es');
   return {
-    search: async (context, request, options): Promise<IMyStrategyResponse> => {
-      request.debug = true;
-      const esSearchRes = await es.search(context, request, options);
-      return {
-        ...esSearchRes,
-        cool: (request as IMyStrategyRequest).get_cool ? 'YES' : 'NOPE',
-      };
-    },
+    search: (request, options, context) =>
+      es.search(request, options, context).pipe(
+        map((esSearchRes) => ({
+          ...esSearchRes,
+          cool: request.get_cool ? 'YES' : 'NOPE',
+        }))
+      ),
     cancel: async (context, id) => {
       if (es.cancel) {
         es.cancel(context, id);

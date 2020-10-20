@@ -10,7 +10,7 @@
  * And a minimum bucket span
  */
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 export function polledDataCheckerFactory({ asCurrentUser }) {
   class PolledDataChecker {
@@ -56,7 +56,7 @@ export function polledDataCheckerFactory({ asCurrentUser }) {
             date_histogram: {
               min_doc_count: 1,
               field: this.timeField,
-              interval: `${intervalMs}ms`,
+              fixed_interval: `${intervalMs}ms`,
             },
           },
         },

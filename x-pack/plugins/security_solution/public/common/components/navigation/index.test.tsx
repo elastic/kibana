@@ -78,6 +78,7 @@ describe('SIEM Navigation', () => {
       },
       [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
       [CONSTANTS.filters]: [],
+      [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
@@ -145,6 +146,7 @@ describe('SIEM Navigation', () => {
         pageName: 'hosts',
         pathName: '/',
         search: '',
+        sourcerer: {},
         state: undefined,
         tabName: 'authentications',
         query: { query: '', language: 'kuery' },
@@ -252,6 +254,7 @@ describe('SIEM Navigation', () => {
         query: { language: 'kuery', query: '' },
         savedQuery: undefined,
         search: '',
+        sourcerer: {},
         state: undefined,
         tabName: 'authentications',
         timeline: { id: '', isOpen: false, graphEventId: '' },

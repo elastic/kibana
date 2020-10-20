@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import partition from 'lodash/partition';
+import { partition } from 'lodash';
+import { getFlattenedObject } from '@kbn/std';
 import { UrlDrilldownGlobalScope, UrlDrilldownScope } from './types';
-import { getFlattenedObject } from '../../../../../../src/core/public';
 
 export function buildScope<
   ContextScope extends object = object,

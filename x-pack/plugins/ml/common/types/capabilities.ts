@@ -9,6 +9,7 @@ import { PLUGIN_ID } from '../constants/app';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
+  canAccessML: false,
 };
 
 export const userMlCapabilities = {
@@ -102,6 +103,7 @@ export function getPluginPrivileges() {
       ...privilege,
       api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
       catalogue: [PLUGIN_ID],
+      management: { insightsAndAlerting: [] },
       ui: userMlCapabilitiesKeys,
       savedObject: {
         all: [],

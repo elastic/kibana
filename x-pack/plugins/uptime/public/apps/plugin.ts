@@ -33,13 +33,13 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export type ClientSetup = void;
@@ -59,7 +59,7 @@ export class UptimePlugin
         title: PLUGIN.TITLE,
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
-        path: '/app/uptime#/',
+        path: '/app/uptime',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
@@ -84,9 +84,8 @@ export class UptimePlugin
     });
 
     core.application.register({
-      appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
-      euiIconType: 'uptimeApp',
+      euiIconType: 'logoObservability',
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -107,10 +106,10 @@ export class UptimePlugin
         plugins,
       });
       if (
-        plugins.triggers_actions_ui &&
-        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+        plugins.triggersActionsUi &&
+        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
       ) {
-        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+        plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
       }
     });
   }

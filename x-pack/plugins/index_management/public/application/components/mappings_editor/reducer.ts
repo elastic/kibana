@@ -175,10 +175,18 @@ export const reducer = (state: State, action: Action): State => {
         fields: action.value.fields,
         configuration: {
           ...state.configuration,
+          data: {
+            internal: action.value.configuration,
+            format: () => action.value.configuration,
+          },
           defaultValue: action.value.configuration,
         },
         templates: {
           ...state.templates,
+          data: {
+            internal: action.value.templates,
+            format: () => action.value.templates,
+          },
           defaultValue: action.value.templates,
         },
         documentFields: {
@@ -209,7 +217,7 @@ export const reducer = (state: State, action: Action): State => {
           isValid: true,
           defaultValue: action.value,
           data: {
-            raw: action.value,
+            internal: action.value,
             format: () => action.value,
           },
           validate: async () => true,
@@ -233,7 +241,7 @@ export const reducer = (state: State, action: Action): State => {
           isValid: true,
           defaultValue: action.value,
           data: {
-            raw: action.value,
+            internal: action.value,
             format: () => action.value,
           },
           validate: async () => true,

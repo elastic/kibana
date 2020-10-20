@@ -14,6 +14,14 @@ version of {es} to see the most up-to-date deprecation issues.
 For example, if you want to upgrade to to 7.0, make sure that you are using 6.8.
 
 [float]
+=== Required permissions
+
+The `manage` cluster privilege is required to access the *Upgrade assistant*.
+Additional privileges may be needed to perform certain actions.
+
+You can add this privilege in *Stack Management > Security > Roles*.
+
+[float]
 === Reindexing
 
 The *Indices* page lists the indices that are incompatible with the next

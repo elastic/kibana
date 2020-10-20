@@ -64,7 +64,10 @@ describe('Flyout', () => {
       done: jest.fn(),
       newIndexPatternUrl: '',
       indexPatterns: {
-        getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
+        getCache: jest.fn().mockImplementation(() => [
+          { id: '1', attributes: {} },
+          { id: '2', attributes: {} },
+        ]),
       } as any,
       overlays,
       http,
@@ -267,6 +270,10 @@ describe('Flyout', () => {
 
       expect(component.state('status')).toBe('success');
       expect(component.find('EuiFlyout ImportSummary')).toMatchSnapshot();
+      const cancelButton = await component.find(
+        'EuiButtonEmpty[data-test-subj="importSavedObjectsCancelBtn"]'
+      );
+      expect(cancelButton.prop('disabled')).toBe(true);
     });
   });
 

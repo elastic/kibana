@@ -65,7 +65,7 @@ describe('SearchStrategyRegister', () => {
   });
 
   test('should add a strategy if it is an instance of AbstractSearchStrategy', () => {
-    const anotherSearchStrategy = new MockSearchStrategy({}, {} as any, {});
+    const anotherSearchStrategy = new MockSearchStrategy('es');
     const addedStrategies = registry.addStrategy(anotherSearchStrategy);
 
     expect(addedStrategies.length).toEqual(2);
@@ -75,7 +75,7 @@ describe('SearchStrategyRegister', () => {
   test('should return a MockSearchStrategy instance', async () => {
     const req = {};
     const indexPattern = '*';
-    const anotherSearchStrategy = new MockSearchStrategy({}, {} as any, {});
+    const anotherSearchStrategy = new MockSearchStrategy('es');
     registry.addStrategy(anotherSearchStrategy);
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(req, indexPattern))!;

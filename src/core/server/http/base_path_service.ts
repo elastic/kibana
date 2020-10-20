@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import { modifyUrl } from '@kbn/std';
 
-import { modifyUrl } from '../../utils';
+import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
 
 /**
  * Access or manipulate the Kibana base path

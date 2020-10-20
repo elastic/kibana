@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { DocValueFields } from '../../../../common/search_strategy';
 
 export enum FirstLastSeenHostType {
   FIRST_SEEN = 'first-seen',
@@ -17,47 +18,53 @@ export enum FirstLastSeenHostType {
 }
 
 interface FirstLastSeenHostProps {
+  docValueFields: DocValueFields[];
   hostName: string;
+  indexNames: string[];
   type: FirstLastSeenHostType;
 }
 
-export const FirstLastSeenHost = React.memo<FirstLastSeenHostProps>(({ hostName, type }) => {
-  const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeenHost({
-    hostName,
-  });
-  const valueSeen = useMemo(
-    () => (type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen),
-    [firstSeen, lastSeen, type]
-  );
+export const FirstLastSeenHost = React.memo<FirstLastSeenHostProps>(
+  ({ docValueFields, hostName, type, indexNames }) => {
+    const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeenHost({
+      docValueFields,
+      hostName,
+      indexNames,
+    });
+    const valueSeen = useMemo(
+      () => (type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen),
+      [firstSeen, lastSeen, type]
+    );
 
-  if (errorMessage != null) {
+    if (errorMessage != null) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={errorMessage}
+          data-test-subj="firstLastSeenErrorToolTip"
+          aria-label={`firstLastSeenError-${type}`}
+          id={`firstLastSeenError-${hostName}-${type}`}
+        >
+          <EuiIcon aria-describedby={`firstLastSeenError-${hostName}-${type}`} type="alert" />
+        </EuiToolTip>
+      );
+    }
+
     return (
-      <EuiToolTip
-        position="top"
-        content={errorMessage}
-        data-test-subj="firstLastSeenErrorToolTip"
-        aria-label={`firstLastSeenError-${type}`}
-        id={`firstLastSeenError-${hostName}-${type}`}
-      >
-        <EuiIcon aria-describedby={`firstLastSeenError-${hostName}-${type}`} type="alert" />
-      </EuiToolTip>
+      <>
+        {loading && <EuiLoadingSpinner size="m" />}
+        {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
+          ? valueSeen
+          : !loading &&
+            valueSeen != null && (
+              <EuiText size="s">
+                <FormattedRelativePreferenceDate value={`${valueSeen}`} />
+              </EuiText>
+            )}
+        {!loading && valueSeen == null && getEmptyTagValue()}
+      </>
     );
   }
-
-  return (
-    <>
-      {loading && <EuiLoadingSpinner size="m" />}
-      {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
-        ? valueSeen
-        : !loading &&
-          valueSeen != null && (
-            <EuiText size="s">
-              <FormattedRelativePreferenceDate value={`${valueSeen}`} />
-            </EuiText>
-          )}
-      {!loading && valueSeen == null && getEmptyTagValue()}
-    </>
-  );
-});
+);
 
 FirstLastSeenHost.displayName = 'FirstLastSeenHost';

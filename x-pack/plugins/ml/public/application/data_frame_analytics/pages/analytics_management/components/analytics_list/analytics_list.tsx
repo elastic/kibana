@@ -15,12 +15,8 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-
-import {
-  DataFrameAnalyticsId,
-  useRefreshAnalyticsList,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 import {
@@ -99,13 +95,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [filteredAnalytics, setFilteredAnalytics] = useState<{
-    active: boolean;
-    items: DataFrameAnalyticsListRow[];
-  }>({
-    active: false,
-    items: [],
-  });
+  const [filteredAnalytics, setFilteredAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [searchQueryText, setSearchQueryText] = useState('');
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
@@ -129,12 +119,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     blockRefresh
   );
 
-  const setQueryClauses = (queryClauses: any) => {
+  const updateFilteredItems = (queryClauses: any) => {
     if (queryClauses.length) {
       const filtered = filterAnalytics(analytics, queryClauses);
-      setFilteredAnalytics({ active: true, items: filtered });
+      setFilteredAnalytics(filtered);
     } else {
-      setFilteredAnalytics({ active: false, items: [] });
+      setFilteredAnalytics(analytics);
     }
   };
 
@@ -146,9 +136,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;
       }
-      setQueryClauses(clauses);
+      updateFilteredItems(clauses);
     } else {
-      setQueryClauses([]);
+      updateFilteredItems([]);
     }
   };
 
@@ -192,9 +182,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isMlEnabledInSpace
   );
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings(
-    filteredAnalytics.active ? filteredAnalytics.items : analytics
-  );
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<
+    DataFrameAnalyticsListRow
+  >(DataFrameAnalyticsListColumn.id, filteredAnalytics);
 
   // Before the analytics have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame analytics found' during the initial loading.

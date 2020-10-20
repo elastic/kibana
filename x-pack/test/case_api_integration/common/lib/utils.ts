@@ -5,13 +5,26 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { CasesConfigureRequest, CasesConfigureResponse } from '../../../../plugins/case/common/api';
+import {
+  CasesConfigureRequest,
+  CasesConfigureResponse,
+  CaseConnector,
+  ConnectorTypes,
+} from '../../../../plugins/case/common/api';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const getConfiguration = (connector_id: string = 'connector-1'): CasesConfigureRequest => {
+export const getConfiguration = ({
+  id = 'connector-1',
+  name = 'Connector 1',
+  type = '.none' as ConnectorTypes,
+  fields = null,
+}: Partial<CaseConnector> = {}): CasesConfigureRequest => {
   return {
-    connector_id,
-    connector_name: 'Connector 1',
+    connector: {
+      id,
+      name,
+      type,
+      fields,
+    } as CaseConnector,
     closure_type: 'close-by-user',
   };
 };
@@ -66,11 +79,77 @@ export const getJiraConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     projectKey: 'pkey',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
           target: 'summary',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+    isCaseOwned: true,
+  },
+});
+
+export const getResilientConnector = () => ({
+  name: 'Resilient Connector',
+  actionTypeId: '.resilient',
+  secrets: {
+    apiKeyId: 'id',
+    apiKeySecret: 'secret',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    orgId: 'pkey',
+    incidentConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'name',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+    isCaseOwned: true,
+  },
+});
+
+export const getConnectorWithoutCaseOwned = () => ({
+  name: 'Connector without isCaseOwned',
+  actionTypeId: '.resilient',
+  secrets: {
+    apiKeyId: 'id',
+    apiKeySecret: 'secret',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    orgId: 'pkey',
+    incidentConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'name',
           actionType: 'overwrite',
         },
         {
@@ -88,8 +167,8 @@ export const getJiraConnector = () => ({
   },
 });
 
-export const getResilientConnector = () => ({
-  name: 'Resilient Connector',
+export const getConnectorWithoutMapping = () => ({
+  name: 'Connector without mapping',
   actionTypeId: '.resilient',
   secrets: {
     apiKeyId: 'id',
@@ -98,25 +177,6 @@ export const getResilientConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     orgId: 'pkey',
-    casesConfiguration: {
-      mapping: [
-        {
-          source: 'title',
-          target: 'summary',
-          actionType: 'overwrite',
-        },
-        {
-          source: 'description',
-          target: 'description',
-          actionType: 'overwrite',
-        },
-        {
-          source: 'comments',
-          target: 'comments',
-          actionType: 'append',
-        },
-      ],
-    },
   },
 });
 

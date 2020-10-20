@@ -6,7 +6,7 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-
+import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import {
@@ -168,20 +168,18 @@ const store = createStore(
   storage
 );
 
-describe('StatefulTopN', () => {
-  // Suppress warnings about "react-beautiful-dnd"
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  beforeAll(() => {
-    console.warn = jest.fn();
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-    console.warn = originalWarn;
-  });
+let testProps = {
+  browserFields: mockBrowserFields,
+  field,
+  indexNames: [],
+  indexPattern: mockIndexPattern,
+  timelineId: TimelineId.hostsPageExternalAlerts,
+  toggleTopN: jest.fn(),
+  onFilterAdded: jest.fn(),
+  value,
+};
 
+describe('StatefulTopN', () => {
   describe('rendering in a global NON-timeline context', () => {
     let wrapper: ReactWrapper;
 
@@ -189,16 +187,7 @@ describe('StatefulTopN', () => {
       wrapper = mount(
         <TestProviders store={store}>
           <ManageGlobalTimeline>
-            <StatefulTopN
-              browserFields={mockBrowserFields}
-              field={field}
-              indexPattern={mockIndexPattern}
-              indexToAdd={null}
-              timelineId={TimelineId.hostsPageExternalAlerts}
-              toggleTopN={jest.fn()}
-              onFilterAdded={jest.fn()}
-              value={value}
-            />
+            <StatefulTopN {...testProps} />
           </ManageGlobalTimeline>
         </TestProviders>
       );
@@ -277,19 +266,14 @@ describe('StatefulTopN', () => {
           filterManager,
         },
       };
+      testProps = {
+        ...testProps,
+        timelineId: TimelineId.active,
+      };
       wrapper = mount(
         <TestProviders store={store}>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <StatefulTopN
-              browserFields={mockBrowserFields}
-              field={field}
-              indexPattern={mockIndexPattern}
-              indexToAdd={null}
-              timelineId={TimelineId.active}
-              toggleTopN={jest.fn()}
-              onFilterAdded={jest.fn()}
-              value={value}
-            />
+            <StatefulTopN {...testProps} />
           </ManageGlobalTimeline>
         </TestProviders>
       );
@@ -345,37 +329,34 @@ describe('StatefulTopN', () => {
       expect(props.to).toEqual('2020-04-15T03:46:09.047Z');
     });
   });
+  describe('rendering in a NON-active timeline context', () => {
+    test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, async () => {
+      const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
-  test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, () => {
-    const filterManager = new FilterManager(mockUiSettingsForFilterManager);
+      const manageTimelineForTesting = {
+        [TimelineId.active]: {
+          ...getTimelineDefaults(TimelineId.active),
+          filterManager,
+          documentType: 'alerts',
+        },
+      };
 
-    const manageTimelineForTesting = {
-      [TimelineId.active]: {
-        ...getTimelineDefaults(TimelineId.active),
-        filterManager,
-        documentType: 'alerts',
-      },
-    };
+      testProps = {
+        ...testProps,
+        timelineId: TimelineId.detectionsPage,
+      };
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+            <StatefulTopN {...testProps} />
+          </ManageGlobalTimeline>
+        </TestProviders>
+      );
+      await waitFor(() => {
+        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-          <StatefulTopN
-            browserFields={mockBrowserFields}
-            field={field}
-            indexPattern={mockIndexPattern}
-            indexToAdd={null}
-            timelineId={TimelineId.detectionsPage}
-            toggleTopN={jest.fn()}
-            onFilterAdded={jest.fn()}
-            value={value}
-          />
-        </ManageGlobalTimeline>
-      </TestProviders>
-    );
-
-    const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-    expect(props.defaultView).toEqual('alert');
+        expect(props.defaultView).toEqual('alert');
+      });
+    });
   });
 });
