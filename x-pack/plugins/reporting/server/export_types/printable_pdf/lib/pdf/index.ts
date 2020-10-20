@@ -19,7 +19,7 @@ import { getTemplate } from './get_tempate';
 const assetPath = path.resolve(__dirname, '..', '..', '..', 'common', 'assets');
 const tableBorderWidth = 1;
 
-class PdfMaker {
+export class PdfMaker {
   private _layout: LayoutInstance;
   private _logo: string | undefined;
   private _title: string;
@@ -161,11 +161,3 @@ class PdfMaker {
     return this._pdfDoc;
   }
 }
-
-export const pdf = (() => {
-  return {
-    create(layout: LayoutInstance, logo: string | undefined) {
-      return new PdfMaker(layout, logo);
-    },
-  };
-})();
