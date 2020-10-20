@@ -5,7 +5,7 @@
  */
 
 import path from 'path';
-import { ContextPageSize, PageOrientation } from 'pdfmake/interfaces';
+import { CustomPageSize } from 'pdfmake/interfaces';
 import {
   getDefaultLayoutSelectors,
   Layout,
@@ -26,13 +26,11 @@ export class PreserveLayout extends Layout implements LayoutInstance {
   public readonly width: number;
   private readonly scaledHeight: number;
   private readonly scaledWidth: number;
-  private readonly orientation: PageOrientation;
 
   constructor(size: Size, layoutSelectors?: LayoutSelectorDictionary) {
     super(LayoutTypes.PRESERVE_LAYOUT);
     this.height = size.height;
     this.width = size.width;
-    this.orientation = size.height > size.width ? 'portrait' : 'landscape';
     this.scaledHeight = size.height * ZOOM;
     this.scaledWidth = size.width * ZOOM;
 
@@ -75,7 +73,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
     return undefined;
   }
 
-  public getPdfPageSize(pageSizeParams: PageSizeParams): ContextPageSize {
+  public getPdfPageSize(pageSizeParams: PageSizeParams): CustomPageSize {
     return {
       height:
         this.height +
@@ -85,7 +83,6 @@ export class PreserveLayout extends Layout implements LayoutInstance {
         pageSizeParams.headingHeight +
         pageSizeParams.subheadingHeight,
       width: this.width + pageSizeParams.pageMarginWidth * 2 + pageSizeParams.tableBorderWidth * 2,
-      orientation: this.orientation,
     };
   }
 }
