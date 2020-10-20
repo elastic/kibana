@@ -29,6 +29,9 @@ import {
   euiPalettePositive,
   euiPaletteWarm,
   euiPaletteColorBlindBehindText,
+  euiPaletteForStatus,
+  euiPaletteForTemperature,
+  euiPaletteComplimentary,
 } from '@elastic/eui';
 import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
 import { lightenColor } from './lighten_color';
@@ -43,8 +46,8 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
     chartConfiguration: ChartColorConfiguration = { behindText: false }
   ) {
     const outputColor = chartConfiguration.behindText
-      ? colors[series[0].rankAtDepth % colors.length]
-      : behindTextColors[series[0].rankAtDepth % behindTextColors.length];
+      ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
+      : colors[series[0].rankAtDepth % colors.length];
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
@@ -198,25 +201,39 @@ export const buildPalettes: (
       }),
       ...buildSyncedKibanaPalette(legacyColorsService),
     },
+    status: {
+      title: i18n.translate('charts.palettes.statusLabel', { defaultMessage: 'Status' }),
+      ...buildGradient('status', euiPaletteForStatus),
+    },
+    temperature: {
+      title: i18n.translate('charts.palettes.temperatureLabel', { defaultMessage: 'Temperature' }),
+      ...buildGradient('temperature', euiPaletteForTemperature),
+    },
+    complimentary: {
+      title: i18n.translate('charts.palettes.complimentaryLabel', {
+        defaultMessage: 'Complimentary',
+      }),
+      ...buildGradient('complimentary', euiPaletteComplimentary),
+    },
     negative: {
-      title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'negative' }),
-      ...buildGradient('Negative', euiPaletteNegative),
+      title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),
+      ...buildGradient('negative', euiPaletteNegative),
     },
     positive: {
-      title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'positive' }),
-      ...buildGradient('Positive', euiPalettePositive),
+      title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'Positive' }),
+      ...buildGradient('positive', euiPalettePositive),
     },
     cool: {
-      title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'cool' }),
-      ...buildGradient('Cool', euiPaletteCool),
+      title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'Cool' }),
+      ...buildGradient('cool', euiPaletteCool),
     },
     warm: {
-      title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'warm' }),
-      ...buildGradient('Warm', euiPaletteWarm),
+      title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'Warm' }),
+      ...buildGradient('warm', euiPaletteWarm),
     },
     gray: {
-      title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'gray' }),
-      ...buildGradient('Gray', euiPaletteGray),
+      title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'Gray' }),
+      ...buildGradient('gray', euiPaletteGray),
     },
     custom: buildCustomPalette() as PaletteDefinition<unknown>,
   };
