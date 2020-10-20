@@ -109,15 +109,26 @@ export const registerFieldsForWildcardRoute = ({
           IndexPatternsFetcher
         );
         const fields = payload.fields;
-        const parsedParams = JSON.parse(params);
-        const rollupIndex = parsedParams.rollup_index;
+        const parsedParams = JSON.parse(params); // from request
+        const rollupIndex = parsedParams.rollup_index; // what is this?
         const rollupFields: Field[] = [];
         const fieldsFromFieldCapsApi: { [key: string]: any } = keyBy(fields, 'name');
+
+        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
+          (
+            await context.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
+              index: rollupIndex,
+            })
+          ).body
+        )[rollupIndex].aggs;
+
+        /*
         const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
           await context.rollup!.client.callAsCurrentUser('rollup.rollupIndexCapabilities', {
             indexPattern: rollupIndex,
           })
         )[rollupIndex].aggs;
+        */
 
         // Keep meta fields
         metaFields.forEach(
