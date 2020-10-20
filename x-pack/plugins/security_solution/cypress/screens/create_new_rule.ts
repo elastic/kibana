@@ -31,7 +31,8 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
-export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
+export const CUSTOM_QUERY_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
