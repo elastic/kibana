@@ -17,6 +17,6 @@
  * under the License.
  */
 export const APP_NAME = 'maps';
-export const PLUGIN_ID = 'mapsOss';
+export const PLUGIN_ID_OSS = 'mapsOss';
 export const APP_PATH = '/map';
 export const APP_ICON = 'gisApp';
