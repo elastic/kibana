@@ -7,7 +7,7 @@
 import { interval, merge, of, Observable } from 'rxjs';
 import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { Logger } from '../types';
+import { Logger } from '../../../../../src/core/server';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -31,7 +31,7 @@ interface ManagedConfigurationOpts {
   errors$: Observable<Error>;
 }
 
-interface ManagedConfiguration {
+export interface ManagedConfiguration {
   maxWorkersConfiguration$: Observable<number>;
   pollIntervalConfiguration$: Observable<number>;
 }
