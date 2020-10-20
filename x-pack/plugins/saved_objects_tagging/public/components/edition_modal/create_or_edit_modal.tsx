@@ -97,7 +97,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiForm data-test-subj="tagModalForm" role="form">
+        <EuiForm data-test-subj="tagModalForm" component="form">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
             <EuiFlexItem>
               <EuiFormRow

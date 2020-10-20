@@ -5,7 +5,7 @@
  */
 
 import React, { useRef, useEffect, FC } from 'react';
-import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -50,7 +50,7 @@ export const TagTable: FC<TagTableProps> = ({
   onShowRelations,
   getTagRelationUrl,
 }) => {
-  const tableRef = useRef<EuiInMemoryTable<any>>();
+  const tableRef = useRef<EuiInMemoryTable<TagWithRelations>>(null);
 
   useEffect(() => {
     if (tableRef.current) {
@@ -94,7 +94,7 @@ export const TagTable: FC<TagTableProps> = ({
     });
   }
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.name', {
@@ -162,10 +162,10 @@ export const TagTable: FC<TagTableProps> = ({
   return (
     <EuiInMemoryTable
       data-test-subj="tagsManagementTable"
-      ref={tableRef as any}
+      ref={tableRef}
       loading={loading}
       itemId={'id'}
-      columns={columns as any[]}
+      columns={columns}
       items={tags}
       pagination={tablePagination}
       selection={{
