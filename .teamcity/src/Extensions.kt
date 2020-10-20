@@ -183,6 +183,5 @@ fun BuildSteps.runbld(stepName: String, script: String) {
 
         /usr/local/bin/runbld -d "${'$'}(pwd)" --job-name="elastic+${'$'}project+${'$'}branchName" ${'$'}file
         """.trimIndent()
-    executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
   }
 }
