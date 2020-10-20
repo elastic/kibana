@@ -1,21 +1,14 @@
 package builds.oss
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import runbld
 
 class OssCiGroup(val ciGroup: Int, init: BuildType.() -> Unit = {}) : OssFunctionalBase({
   id("OssCiGroup_$ciGroup")
   name = "CI Group $ciGroup"
 
   steps {
-    script {
-      name = "OSS CI Group $ciGroup"
-      scriptContent =
-        """
-          #!/bin/bash
-          ./.ci/teamcity/oss/ci_group.sh $ciGroup
-        """.trimIndent()
-    }
+    runbld("OSS CI Group $ciGroup", "./.ci/teamcity/oss/ci_group.sh $ciGroup")
   }
 
   init()

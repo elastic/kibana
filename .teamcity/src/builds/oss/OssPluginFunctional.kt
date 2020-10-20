@@ -1,6 +1,8 @@
 package builds.oss
 
+import addTestSettings
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import runbld
 
 object OssPluginFunctional : OssFunctionalBase({
   id("OssPluginFunctional")
@@ -16,17 +18,12 @@ object OssPluginFunctional : OssFunctionalBase({
         """.trimIndent()
     }
 
-    script {
-      name = "OSS Plugin Functional"
-      scriptContent =
-        """
-          #!/bin/bash
-          ./.ci/teamcity/oss/plugin_functional.sh
-        """.trimIndent()
-    }
+    runbld("OSS Plugin Functional", "./.ci/teamcity/oss/plugin_functional.sh")
   }
 
   dependencies {
     ossBuild()
   }
+
+  addTestSettings()
 })
