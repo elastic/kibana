@@ -18,16 +18,11 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { createSavedObjectClass, SavedObjectKibanaServices } from '../../../saved_objects/public';
+import { SavedObjectsStart } from '../../../saved_objects/public';
 
 // Used only by the savedSheets service, usually no reason to change this
-export function createSavedSheetClass(
-  services: SavedObjectKibanaServices,
-  config: IUiSettingsClient
-) {
-  const SavedObjectClass = createSavedObjectClass(services);
-
-  class SavedSheet extends SavedObjectClass {
+export function createSavedSheetClass(savedObjects: SavedObjectsStart, config: IUiSettingsClient) {
+  class SavedSheet extends savedObjects.SavedObjectClass {
     static type = 'timelion-sheet';
 
     // if type:sheet has no mapping, we push this mapping into ES

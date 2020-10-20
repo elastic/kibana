@@ -40,6 +40,7 @@ describe('TelemetryManagementSectionComponent', () => {
         sendUsageFrom: 'browser',
       },
       reportOptInStatusChange: false,
+      currentKibanaVersion: 'mock_kibana_version',
       notifications: coreStart.notifications,
       http: coreSetup.http,
     });
@@ -71,6 +72,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
+      currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
 
@@ -120,6 +122,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
+      currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
 
@@ -164,6 +167,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
+      currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
 
@@ -199,6 +203,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
+      currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
 
@@ -235,6 +240,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
+      currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
 
@@ -271,6 +277,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
+      currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
 
@@ -316,6 +323,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
+      currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
 

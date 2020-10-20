@@ -131,16 +131,16 @@ const PolicyResponseFlyoutPanel = memo<{
         getEndpointListPath({
           name: 'endpointList',
           ...queryParams,
-          selected_endpoint: hostMeta.host.id,
+          selected_endpoint: hostMeta.agent.id,
         })
       ),
       getEndpointListPath({
         name: 'endpointList',
         ...queryParams,
-        selected_endpoint: hostMeta.host.id,
+        selected_endpoint: hostMeta.agent.id,
       }),
     ],
-    [hostMeta.host.id, formatUrl, queryParams]
+    [hostMeta.agent.id, formatUrl, queryParams]
   );
   const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsRoutePath);
   const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {

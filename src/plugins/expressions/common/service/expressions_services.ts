@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
+import { Executor, ExpressionExecOptions } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
@@ -101,7 +101,8 @@ export interface ExpressionsServiceStart {
   run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
   ) => Promise<Output>;
 
   /**
@@ -117,7 +118,8 @@ export interface ExpressionsServiceStart {
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.
     input: Input,
-    context?: ExtraContext
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
   ) => ExecutionContract<ExtraContext, Input, Output>;
 
   /**
@@ -212,8 +214,8 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
     definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
   ): void => this.renderers.register(definition);
 
-  public readonly run: ExpressionsServiceStart['run'] = (ast, input, context) =>
-    this.executor.run(ast, input, context);
+  public readonly run: ExpressionsServiceStart['run'] = (ast, input, context, options) =>
+    this.executor.run(ast, input, context, options);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -244,8 +246,8 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
    */
   public readonly getTypes = (): ReturnType<Executor['getTypes']> => this.executor.getTypes();
 
-  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, context) => {
-    const execution = this.executor.createExecution(ast, context);
+  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, context, options) => {
+    const execution = this.executor.createExecution(ast, context, options);
     execution.start(input);
     return execution.contract;
   }) as ExpressionsServiceStart['execute'];
