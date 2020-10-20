@@ -113,14 +113,19 @@
     margin-bottom: $euiSizeS;
   }
 
+  &--textTruncate {
+    td {
+      @include euiTextTruncate;
+    }
+  }
+
   td {
-    @include euiTextTruncate;
     padding-top: $euiSizeXS;
     padding-bottom: $euiSizeXS;
 
     &.key {
-      color: $euiColorMediumShade;
       max-width: $euiSize * 10;
+      color: $euiColorMediumShade;
       text-align: right;
       padding-right: $euiSizeXS;
     }
@@ -130,7 +135,6 @@
       text-align: left;
     }
   }
-
 
   @media only screen and (max-width: map-get($euiBreakpoints, 'm')) {
     td {
