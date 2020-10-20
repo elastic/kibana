@@ -344,14 +344,42 @@ describe('config schema', () => {
   });
 
   describe('authc.saml', () => {
-    it('fails if authc.providers includes `saml`, but `saml.realm` is not specified', async () => {
-      expect(() => ConfigSchema.validate({ authc: { providers: ['saml'] } })).toThrow(
-        '[authc.saml.realm]: expected value of type [string] but got [undefined]'
-      );
+    it('does not fail if authc.providers includes `saml`, but `saml.realm` is not specified', async () => {
+      expect(ConfigSchema.validate({ authc: { providers: ['saml'] } }).authc)
+        .toMatchInlineSnapshot(`
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "saml",
+          ],
+          "saml": Object {},
+          "selector": Object {},
+        }
+      `);
 
-      expect(() => ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } })).toThrow(
-        '[authc.saml.realm]: expected value of type [string] but got [undefined]'
-      );
+      expect(ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } }).authc)
+        .toMatchInlineSnapshot(`
+        Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "schemes": Array [
+              "apikey",
+            ],
+          },
+          "providers": Array [
+            "saml",
+          ],
+          "saml": Object {},
+          "selector": Object {},
+        }
+      `);
 
       expect(
         ConfigSchema.validate({
