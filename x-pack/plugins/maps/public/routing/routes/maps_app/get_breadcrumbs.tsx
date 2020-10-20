@@ -5,15 +5,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getNavigateToApp } from '../../../kibana_services';
+import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../maps_router';
 
 export const unsavedChangesWarning = i18n.translate(
   'xpack.maps.breadCrumbs.unsavedChangesWarning',
   {
-    defaultMessage: 'Your map has unsaved changes. Are you sure you want to leave?',
+    defaultMessage: 'Leave Maps with unsaved work?',
   }
 );
+
+export const unsavedChangesTitle = i18n.translate('xpack.maps.breadCrumbs.unsavedChangesTitle', {
+  defaultMessage: 'Unsaved changes',
+});
 
 export function getBreadcrumbs({
   title,
@@ -40,10 +44,13 @@ export function getBreadcrumbs({
     text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
       defaultMessage: 'Maps',
     }),
-    onClick: () => {
+    onClick: async () => {
       if (getHasUnsavedChanges()) {
-        const navigateAway = window.confirm(unsavedChangesWarning);
-        if (navigateAway) {
+        const confirmed = await getCoreOverlays().openConfirm(unsavedChangesWarning, {
+          title: unsavedChangesTitle,
+          'data-test-subj': 'appLeaveConfirmModal',
+        });
+        if (confirmed) {
           goToSpecifiedPath('/');
         }
       } else {
