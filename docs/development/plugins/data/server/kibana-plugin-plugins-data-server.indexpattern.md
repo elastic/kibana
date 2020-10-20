@@ -49,8 +49,8 @@ export declare class IndexPattern implements IIndexPattern
 |  [getComputedFields()](./kibana-plugin-plugins-data-server.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-server.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
-|  [getIndex()](./kibana-plugin-plugins-data-server.indexpattern.getindex.md) |  |  |
 |  [getFormatterForFieldNoDefault(fieldname)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfieldnodefault.md) |  | Get formatter for a given field name. Return undefined if none exists |
+|  [getIndex()](./kibana-plugin-plugins-data-server.indexpattern.getindex.md) |  |  |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-server.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
