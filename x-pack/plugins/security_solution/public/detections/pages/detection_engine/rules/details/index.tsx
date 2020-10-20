@@ -23,6 +23,7 @@ import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'reac
 import { useParams, useHistory } from 'react-router-dom';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -88,6 +89,12 @@ import { timelineDefaults } from '../../../../../timelines/store/timeline/defaul
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import {
+  getToolTipContent,
+  canEditRuleWithActions,
+  isBoolean,
+} from '../../../../../common/utils/privileges';
+
 import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 
 enum RuleDetailTabs {
@@ -166,6 +173,19 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
+  const {
+    services: {
+      application: {
+        capabilities: { actions },
+      },
+    },
+  } = useKibana();
+  const hasActionsPrivileges = useMemo(() => {
+    if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
+      return actions.show;
+    }
+    return true;
+  }, [actions, rule?.actions]);
 
   // persist rule until refresh is complete
   useEffect(() => {
@@ -297,6 +317,33 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [history, ruleId]
   );
 
+  const editRule = useMemo(() => {
+    if (!hasActionsPrivileges) {
+      return (
+        <EuiToolTip position="top" content={ruleI18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+          <LinkButton
+            onClick={goToEditRule}
+            iconType="controlsHorizontal"
+            isDisabled={true}
+            href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+          >
+            {ruleI18n.EDIT_RULE_SETTINGS}
+          </LinkButton>
+        </EuiToolTip>
+      );
+    }
+    return (
+      <LinkButton
+        onClick={goToEditRule}
+        iconType="controlsHorizontal"
+        isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+        href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+      >
+        {ruleI18n.EDIT_RULE_SETTINGS}
+      </LinkButton>
+    );
+  }, [canUserCRUD, formatUrl, goToEditRule, hasActionsPrivileges, ruleId]);
+
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
@@ -390,16 +437,14 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content={
-                        isMlRule(rule?.type) && !hasMlPermissions
-                          ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-                          : undefined
-                      }
+                      content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
                     >
                       <RuleSwitch
                         id={rule?.id ?? '-1'}
                         isDisabled={
-                          userHasNoPermissions(canUserCRUD) || (!hasMlPermissions && !rule?.enabled)
+                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+                          userHasNoPermissions(canUserCRUD) ||
+                          (!hasMlPermissions && !rule?.enabled)
                         }
                         enabled={rule?.enabled ?? false}
                         optionLabel={i18n.ACTIVATE_RULE}
@@ -410,20 +455,15 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <LinkButton
-                          onClick={goToEditRule}
-                          iconType="controlsHorizontal"
-                          isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
-                          href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-                        >
-                          {ruleI18n.EDIT_RULE_SETTINGS}
-                        </LinkButton>
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{editRule}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
                           userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
+                          canDuplicateRuleWithActions={canEditRuleWithActions(
+                            rule,
+                            hasActionsPrivileges
+                          )}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

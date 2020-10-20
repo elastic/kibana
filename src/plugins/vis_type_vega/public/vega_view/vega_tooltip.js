@@ -50,6 +50,7 @@ export class TooltipHandler {
     this.position = opts.position;
     this.padding = opts.padding;
     this.centerOnMark = opts.centerOnMark;
+    this.textTruncate = opts.textTruncate;
 
     view.tooltip(this.handler.bind(this));
   }
@@ -72,6 +73,10 @@ export class TooltipHandler {
         el.classList.add(className);
       }
     );
+
+    if (this.textTruncate) {
+      el.classList.add('vgaVis__tooltip--textTruncate');
+    }
 
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.
