@@ -20,150 +20,7 @@ import {
   formatInspect,
   getEventsToBucket,
 } from './helpers';
-
-export const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
-  ({
-    id: 'some-id',
-    rawResponse: {
-      body: {
-        hits: {
-          events: [
-            {
-              _index: 'index',
-              _id: '1',
-              _source: {
-                '@timestamp': '2020-10-04T15:16:54.368707900Z',
-              },
-            },
-            {
-              _index: 'index',
-              _id: '2',
-              _source: {
-                '@timestamp': '2020-10-04T15:50:54.368707900Z',
-              },
-            },
-            {
-              _index: 'index',
-              _id: '3',
-              _source: {
-                '@timestamp': '2020-10-04T15:06:54.368707900Z',
-              },
-            },
-            {
-              _index: 'index',
-              _id: '4',
-              _source: {
-                '@timestamp': '2020-10-04T15:15:54.368707900Z',
-              },
-            },
-          ],
-          total: {
-            value: 4,
-            relation: '',
-          },
-        },
-      },
-      meta: {
-        request: {
-          params: {
-            body: JSON.stringify({
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: '2020-10-07T00:46:12.414Z',
-                    lte: '2020-10-07T01:46:12.414Z',
-                    format: 'strict_date_optional_time',
-                  },
-                },
-              },
-            }),
-            method: 'GET',
-            path: '/_eql/search/',
-          },
-          options: {},
-          id: '',
-        },
-      },
-      statusCode: 200,
-    },
-  } as EqlSearchStrategyResponse<EqlSearchResponse<Source>>);
-
-const getMockSequenceResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
-  (({
-    id: 'some-id',
-    rawResponse: {
-      body: {
-        hits: {
-          sequences: [
-            {
-              join_keys: [],
-              events: [
-                {
-                  _index: 'index',
-                  _id: '1',
-                  _source: {
-                    '@timestamp': '2020-10-04T15:16:54.368707900Z',
-                  },
-                },
-                {
-                  _index: 'index',
-                  _id: '2',
-                  _source: {
-                    '@timestamp': '2020-10-04T15:50:54.368707900Z',
-                  },
-                },
-              ],
-            },
-            {
-              join_keys: [],
-              events: [
-                {
-                  _index: 'index',
-                  _id: '3',
-                  _source: {
-                    '@timestamp': '2020-10-04T15:06:54.368707900Z',
-                  },
-                },
-                {
-                  _index: 'index',
-                  _id: '4',
-                  _source: {
-                    '@timestamp': '2020-10-04T15:15:54.368707900Z',
-                  },
-                },
-              ],
-            },
-          ],
-          total: {
-            value: 4,
-            relation: '',
-          },
-        },
-      },
-      meta: {
-        request: {
-          params: {
-            body: JSON.stringify({
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: '2020-10-07T00:46:12.414Z',
-                    lte: '2020-10-07T01:46:12.414Z',
-                    format: 'strict_date_optional_time',
-                  },
-                },
-              },
-            }),
-            method: 'GET',
-            path: '/_eql/search/',
-          },
-          options: {},
-          id: '',
-        },
-      },
-      statusCode: 200,
-    },
-  } as unknown) as EqlSearchStrategyResponse<EqlSearchResponse<Source>>);
+import { getMockEqlResponse, getMockEqlSequenceResponse } from './eql_search_response.mock';
 
 describe('eql/helpers', () => {
   describe('calculateBucketForHour', () => {
@@ -220,6 +77,15 @@ describe('eql/helpers', () => {
 
       expect(diff).toEqual(0);
     });
+
+    test('returns 2 if event occurred within 2 minutes of "now" but arguments are flipped', () => {
+      const diff = calculateBucketForHour(
+        Number(dateMath.parse('now')?.format('x')),
+        Number(dateMath.parse('now-1m')?.format('x'))
+      );
+
+      expect(diff).toEqual(2);
+    });
   });
 
   describe('calculateBucketForDay', () => {
@@ -267,12 +133,21 @@ describe('eql/helpers', () => {
 
       expect(diff).toEqual(4);
     });
+
+    test('returns 2 if event occurred 60-120 minutes of "now" but arguments are flipped', () => {
+      const diff = calculateBucketForDay(
+        Number(dateMath.parse('now')?.format('x')),
+        Number(dateMath.parse('now-118m')?.format('x'))
+      );
+
+      expect(diff).toEqual(2);
+    });
   });
 
   describe('getEqlAggsData', () => {
     describe('non-sequence', () => {
       test('it returns results bucketed into 2 min intervals when range is "h"', () => {
-        const mockResponse = getMockResponse();
+        const mockResponse = getMockEqlResponse();
 
         const aggs = getEqlAggsData(
           mockResponse,
@@ -326,8 +201,8 @@ describe('eql/helpers', () => {
       });
 
       test('it returns results bucketed into 1 hour intervals when range is "d"', () => {
-        const mockResponse = getMockResponse();
-        const response = {
+        const mockResponse = getMockEqlResponse();
+        const response: EqlSearchStrategyResponse<EqlSearchResponse<Source>> = {
           ...mockResponse,
           rawResponse: {
             ...mockResponse.rawResponse,
@@ -421,7 +296,7 @@ describe('eql/helpers', () => {
       });
 
       test('it correctly returns total hits', () => {
-        const mockResponse = getMockResponse();
+        const mockResponse = getMockEqlResponse();
 
         const aggs = getEqlAggsData(
           mockResponse,
@@ -436,13 +311,12 @@ describe('eql/helpers', () => {
       });
 
       test('it returns array with each item having a "total" of 0 if response returns no hits', () => {
-        const mockResponse = getMockResponse();
-        const response = {
+        const mockResponse = getMockEqlResponse();
+        const response: EqlSearchStrategyResponse<EqlSearchResponse<Source>> = {
           ...mockResponse,
           rawResponse: {
             ...mockResponse.rawResponse,
             body: {
-              id: 'some-id',
               is_partial: false,
               is_running: false,
               timed_out: false,
@@ -473,7 +347,7 @@ describe('eql/helpers', () => {
 
     describe('sequence', () => {
       test('it returns results bucketed into 2 min intervals when range is "h"', () => {
-        const mockResponse = getMockSequenceResponse();
+        const mockResponse = getMockEqlSequenceResponse();
 
         const aggs = getEqlAggsData(
           mockResponse,
@@ -527,8 +401,8 @@ describe('eql/helpers', () => {
       });
 
       test('it returns results bucketed into 1 hour intervals when range is "d"', () => {
-        const mockResponse = getMockSequenceResponse();
-        const response = {
+        const mockResponse = getMockEqlSequenceResponse();
+        const response: EqlSearchStrategyResponse<EqlSearchResponse<Source>> = {
           ...mockResponse,
           rawResponse: {
             ...mockResponse.rawResponse,
@@ -632,7 +506,7 @@ describe('eql/helpers', () => {
       });
 
       test('it correctly returns total hits', () => {
-        const mockResponse = getMockSequenceResponse();
+        const mockResponse = getMockEqlSequenceResponse();
 
         const aggs = getEqlAggsData(
           mockResponse,
@@ -647,13 +521,12 @@ describe('eql/helpers', () => {
       });
 
       test('it returns array with each item having a "total" of 0 if response returns no hits', () => {
-        const mockResponse = getMockSequenceResponse();
-        const response = {
+        const mockResponse = getMockEqlSequenceResponse();
+        const response: EqlSearchStrategyResponse<EqlSearchResponse<Source>> = {
           ...mockResponse,
           rawResponse: {
             ...mockResponse.rawResponse,
             body: {
-              id: 'some-id',
               is_partial: false,
               is_running: false,
               timed_out: false,
@@ -689,41 +562,9 @@ describe('eql/helpers', () => {
       expect(arrayOfNumbers).toEqual([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]);
     });
 
-    test('returns array of 30 numbers from 0 to 60 by 2', () => {
-      const arrayOfNumbers = createIntervalArray(0, 30, 2);
-      expect(arrayOfNumbers).toEqual([
-        0,
-        2,
-        4,
-        6,
-        8,
-        10,
-        12,
-        14,
-        16,
-        18,
-        20,
-        22,
-        24,
-        26,
-        28,
-        30,
-        32,
-        34,
-        36,
-        38,
-        40,
-        42,
-        44,
-        46,
-        48,
-        50,
-        52,
-        54,
-        56,
-        58,
-        60,
-      ]);
+    test('returns array of 5 numbers from 0 to 10 by 2', () => {
+      const arrayOfNumbers = createIntervalArray(0, 5, 2);
+      expect(arrayOfNumbers).toEqual([0, 2, 4, 6, 8, 10]);
     });
 
     test('returns array of numbers from start param to end param if multiplier is 1', () => {
@@ -733,103 +574,46 @@ describe('eql/helpers', () => {
   });
 
   describe('getInterval', () => {
-    test('returns object with 2 minute interval keys if range is "h"', () => {
-      const intervals = getInterval('h', Date.parse('2020-10-04T15:00:00.368707900Z'));
-      const keys = Object.keys(intervals);
-      const date1 = moment(Number(intervals['0'].timestamp));
-      const date2 = moment(Number(intervals['2'].timestamp));
-
-      // This'll be in ms
-      const diff = date1.diff(date2);
-
-      expect(diff).toEqual(120000);
-      expect(keys).toEqual([
-        '0',
-        '2',
-        '4',
-        '6',
-        '8',
-        '10',
-        '12',
-        '14',
-        '16',
-        '18',
-        '20',
-        '22',
-        '24',
-        '26',
-        '28',
-        '30',
-        '32',
-        '34',
-        '36',
-        '38',
-        '40',
-        '42',
-        '44',
-        '46',
-        '48',
-        '50',
-        '52',
-        '54',
-        '56',
-        '58',
-        '60',
-      ]);
-    });
-
     test('returns object with 2 minute interval timestamps if range is "h"', () => {
       const intervals = getInterval('h', 1601856270140);
-      const date1 = moment(Number(intervals['0'].timestamp));
-      const date2 = moment(Number(intervals['2'].timestamp));
 
-      // This'll be in ms
-      const diff = date1.diff(date2);
+      const allAre2MinApart = Object.keys(intervals).every((int) => {
+        const interval1 = intervals[int];
+        const interval2 = intervals[`${Number(int) + 2}`];
+        if (interval1 != null && interval2 != null) {
+          const date1 = moment(Number(interval1.timestamp));
+          const date2 = moment(Number(interval2.timestamp));
+          // This'll be in ms
+          const diff = date1.diff(date2);
 
-      expect(diff).toEqual(120000);
-    });
+          return diff === 120000;
+        }
 
-    test('returns object with 1 hour interval keys if range is "d"', () => {
-      const intervals = getInterval('d', 1601856270140);
-      const keys = Object.keys(intervals);
-      expect(keys).toEqual([
-        '0',
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-        '10',
-        '11',
-        '12',
-        '13',
-        '14',
-        '15',
-        '16',
-        '17',
-        '18',
-        '19',
-        '20',
-        '21',
-        '22',
-        '23',
-        '24',
-      ]);
+        return true;
+      });
+
+      expect(allAre2MinApart).toBeTruthy();
     });
 
     test('returns object with 1 hour interval timestamps if range is "d"', () => {
       const intervals = getInterval('d', 1601856270140);
-      const date1 = moment(Number(intervals['0'].timestamp));
-      const date2 = moment(Number(intervals['1'].timestamp));
 
-      // This'll be in ms
-      const diff = date1.diff(date2);
+      const allAre1HourApart = Object.keys(intervals).every((int) => {
+        const interval1 = intervals[int];
+        const interval2 = intervals[`${Number(int) + 1}`];
+        if (interval1 != null && interval2 != null) {
+          const date1 = moment(Number(interval1.timestamp));
+          const date2 = moment(Number(interval2.timestamp));
+          // This'll be in ms
+          const diff = date1.diff(date2);
 
-      expect(diff).toEqual(3600000);
+          return diff === 3600000;
+        }
+
+        return true;
+      });
+
+      expect(allAre1HourApart).toBeTruthy();
     });
 
     test('returns error if range is anything other than "h" or "d"', () => {
@@ -839,7 +623,7 @@ describe('eql/helpers', () => {
 
   describe('formatInspect', () => {
     test('it should return "dsl" with response params and index info', () => {
-      const { dsl } = formatInspect(getMockResponse(), ['foo-*']);
+      const { dsl } = formatInspect(getMockEqlResponse(), ['foo-*']);
 
       expect(JSON.parse(dsl[0])).toEqual({
         body: {
@@ -856,11 +640,12 @@ describe('eql/helpers', () => {
         index: ['foo-*'],
         method: 'GET',
         path: '/_eql/search/',
+        querystring: 'some query string',
       });
     });
 
     test('it should return "response"', () => {
-      const mockResponse = getMockResponse();
+      const mockResponse = getMockEqlResponse();
       const { response } = formatInspect(mockResponse, ['foo-*']);
 
       expect(JSON.parse(response[0])).toEqual(mockResponse.rawResponse.body);
@@ -869,7 +654,7 @@ describe('eql/helpers', () => {
 
   describe('getEventsToBucket', () => {
     test('returns events for non-sequence queries', () => {
-      const events = getEventsToBucket(false, getMockResponse());
+      const events = getEventsToBucket(false, getMockEqlResponse());
 
       expect(events).toEqual([
         { _id: '1', _index: 'index', _source: { '@timestamp': '2020-10-04T15:16:54.368707900Z' } },
@@ -880,8 +665,8 @@ describe('eql/helpers', () => {
     });
 
     test('returns empty array if no hits', () => {
-      const resp = getMockResponse();
-      const mockResponse = {
+      const resp = getMockEqlResponse();
+      const mockResponse: EqlSearchStrategyResponse<EqlSearchResponse<Source>> = {
         ...resp,
         rawResponse: {
           ...resp.rawResponse,
@@ -902,7 +687,7 @@ describe('eql/helpers', () => {
     });
 
     test('returns events for sequence queries', () => {
-      const events = getEventsToBucket(true, getMockSequenceResponse());
+      const events = getEventsToBucket(true, getMockEqlSequenceResponse());
 
       expect(events).toEqual([
         { _id: '2', _index: 'index', _source: { '@timestamp': '2020-10-04T15:50:54.368707900Z' } },
@@ -911,8 +696,8 @@ describe('eql/helpers', () => {
     });
 
     test('returns empty array if no sequences', () => {
-      const resp = getMockSequenceResponse();
-      const mockResponse = {
+      const resp = getMockEqlSequenceResponse();
+      const mockResponse: EqlSearchStrategyResponse<EqlSearchResponse<Source>> = {
         ...resp,
         rawResponse: {
           ...resp.rawResponse,

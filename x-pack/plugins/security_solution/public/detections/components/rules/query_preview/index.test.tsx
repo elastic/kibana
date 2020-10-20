@@ -13,7 +13,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PreviewQuery } from './';
-import { getMockResponse } from '../../../../common/hooks/eql/helpers.test';
+import { getMockEqlResponse } from '../../../../common/hooks/eql/eql_search_response.mock';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
 
@@ -36,12 +36,16 @@ describe('PreviewQuery', () => {
         data: [],
         buckets: [],
       },
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(of(getMockResponse())),
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of(getMockEqlResponse())
+      ),
     ]);
 
     (useEqlPreview as jest.Mock).mockReturnValue([
       false,
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(of(getMockResponse())),
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of(getMockEqlResponse())
+      ),
       {
         inspect: { dsl: [], response: [] },
         totalCount: 1,
@@ -173,7 +177,9 @@ describe('PreviewQuery', () => {
         data: [],
         buckets: [],
       },
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(of(getMockResponse())),
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of(getMockEqlResponse())
+      ),
     ]);
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
@@ -254,7 +260,9 @@ describe('PreviewQuery', () => {
 
     (useEqlPreview as jest.Mock).mockReturnValue([
       false,
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(of(getMockResponse())),
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of(getMockEqlResponse())
+      ),
       {
         inspect: { dsl: [], response: [] },
         totalCount: 2,
@@ -295,7 +303,9 @@ describe('PreviewQuery', () => {
         data: [],
         buckets: [{ key: 'siem-kibana', doc_count: 500 }],
       },
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(of(getMockResponse())),
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of(getMockEqlResponse())
+      ),
     ]);
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
@@ -338,7 +348,9 @@ describe('PreviewQuery', () => {
           { key: 'siem-windows', doc_count: 300 },
         ],
       },
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(of(getMockResponse())),
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of(getMockEqlResponse())
+      ),
     ]);
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');

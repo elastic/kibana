@@ -22,8 +22,8 @@ export const EQL_QUERY_EVENT_SIZE = 100;
  * @param relativeNow The timestamp we are using to calculate how far from 'now' event occurred
  */
 export const calculateBucketForHour = (eventTimestamp: number, relativeNow: number): number => {
-  const diff: number = relativeNow - eventTimestamp;
-  const minutes: number = Math.floor(diff / 60000);
+  const diff = Math.abs(relativeNow - eventTimestamp);
+  const minutes = Math.floor(diff / 60000);
   return Math.ceil(minutes / 2) * 2;
 };
 
@@ -33,8 +33,8 @@ export const calculateBucketForHour = (eventTimestamp: number, relativeNow: numb
  * @param relativeNow The timestamp we are using to calculate how far from 'now' event occurred
  */
 export const calculateBucketForDay = (eventTimestamp: number, relativeNow: number): number => {
-  const diff: number = relativeNow - eventTimestamp;
-  const minutes: number = Math.floor(diff / 60000);
+  const diff = Math.abs(relativeNow - eventTimestamp);
+  const minutes = Math.floor(diff / 60000);
   return Math.ceil(minutes / 60);
 };
 
@@ -178,6 +178,6 @@ export const getInterval = (range: Unit, relativeNow: number): EqlAggBuckets => 
         };
       }, {});
     default:
-      throw new Error('Invalid time range selected');
+      throw new RangeError('Invalid time range selected. Must be "Last hour" or "Last day".');
   }
 };
