@@ -11,11 +11,10 @@ import { asOk, asErr } from './lib/result_type';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { ConcreteTaskInstance, TaskStatus, TaskDefinition, RunResult } from './task';
 import { TaskManagerRunner } from './task_runner';
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
-import { Logger } from '../../../../src/core/server';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { mockLogger } from './test_utils';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -774,7 +773,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `1m`,
-            // getRetry: () => {},
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -941,7 +939,7 @@ describe('TaskManagerRunner', () => {
   function testOpts(opts: TestOpts) {
     const callCluster = sinon.stub();
     const createTaskRunner = sinon.stub();
-    const logger = loggingSystemMock.create().get();
+    const logger = mockLogger();
 
     const instance = Object.assign(
       {
@@ -1021,7 +1019,7 @@ describe('TaskManagerRunner', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     } else {
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0]).toMatch(/invalid task result/i);
+      expect(logger.warn.mock.calls[0][0]).toMatch(/invalid task result/i);
     }
   }
 

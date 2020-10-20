@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { mockLogger } from '../test_utils';
 import { ensureDeprecatedFieldsAreCorrected } from './correct_deprecated_fields';
 
 describe('ensureDeprecatedFieldsAreCorrected', () => {
@@ -17,7 +17,7 @@ describe('ensureDeprecatedFieldsAreCorrected', () => {
           params: {},
           state: {},
         },
-        loggingSystemMock.create().get()
+        mockLogger()
       )
     ).toEqual({
       id: 'my-foo-id',
@@ -36,7 +36,7 @@ describe('ensureDeprecatedFieldsAreCorrected', () => {
           params: {},
           state: {},
         },
-        loggingSystemMock.create().get()
+        mockLogger()
       )
     ).toEqual({
       id: 'my-foo-id',
@@ -56,7 +56,7 @@ describe('ensureDeprecatedFieldsAreCorrected', () => {
           params: {},
           state: {},
         },
-        loggingSystemMock.create().get()
+        mockLogger()
       )
     ).toEqual({
       id: 'my-foo-id',
@@ -67,7 +67,7 @@ describe('ensureDeprecatedFieldsAreCorrected', () => {
     });
   });
   test('logs a warning when a deprecated inteval is corrected on a task', async () => {
-    const logger = loggingSystemMock.create().get();
+    const logger = mockLogger();
     ensureDeprecatedFieldsAreCorrected(
       {
         taskType: 'foo',
@@ -82,7 +82,7 @@ describe('ensureDeprecatedFieldsAreCorrected', () => {
     );
   });
   test('logs a warning when a deprecated inteval is corrected on a task with an id', async () => {
-    const logger = loggingSystemMock.create().get();
+    const logger = mockLogger();
     ensureDeprecatedFieldsAreCorrected(
       {
         id: 'my-foo-id',

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockLogger } from '../test_utils';
+
 import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 interface TaskInstance extends Entity {
   attempts: number;
@@ -238,7 +239,7 @@ describe('Bulk Operation Buffer', () => {
         }
       );
 
-      const logger = loggingSystemMock.create().get();
+      const logger = mockLogger();
 
       const bufferedUpdate = createBuffer(bulkUpdate, { logger });
 

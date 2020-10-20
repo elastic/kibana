@@ -16,7 +16,7 @@ import {
   SerializedConcreteTaskInstance,
   ConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
@@ -31,6 +31,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { Search, UpdateByQuery } from '@elastic/elasticsearch/api/requestParams';
 import { BoolClauseWithAnyCondition, TermFilter } from './queries/query_clauses';
+import { mockLogger } from './test_utils';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
@@ -48,7 +49,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
   }
 };
 
-const taskDefinitions = new TaskTypeDictionary(loggingSystemMock.create().get());
+const taskDefinitions = new TaskTypeDictionary(mockLogger());
 taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
@@ -351,7 +352,7 @@ describe('TaskStore', () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
 
-      const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
+      const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
@@ -480,7 +481,7 @@ describe('TaskStore', () => {
     test('it supports claiming specific tasks by id', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
-      const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
+      const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',

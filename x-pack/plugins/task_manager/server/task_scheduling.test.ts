@@ -17,11 +17,11 @@ import {
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskScheduling } from './task_scheduling';
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
+import { mockLogger } from './test_utils';
 
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
@@ -29,7 +29,7 @@ describe('TaskScheduling', () => {
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
     taskPollingLifecycle: mockTaskManager,
-    logger: loggingSystemMock.create().get(),
+    logger: mockLogger(),
     middleware: createInitialMiddleware(),
   };
 

@@ -9,15 +9,15 @@ import sinon from 'sinon';
 import { of } from 'rxjs';
 
 import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
+import { mockLogger } from './test_utils';
 
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
 
-  const taskManagerLogger = loggingSystemMock.create().get();
+  const taskManagerLogger = mockLogger();
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config: {
@@ -60,7 +60,7 @@ describe('TaskPollingLifecycle', () => {
 
   describe('claimAvailableTasks', () => {
     test('should claim Available Tasks when there are available workers', () => {
-      const logger = loggingSystemMock.create().get();
+      const logger = mockLogger();
       const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
 
       const availableWorkers = 1;
@@ -71,7 +71,7 @@ describe('TaskPollingLifecycle', () => {
     });
 
     test('should not claim Available Tasks when there are no available workers', () => {
-      const logger = loggingSystemMock.create().get();
+      const logger = mockLogger();
       const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
 
       const availableWorkers = 0;
@@ -86,7 +86,7 @@ describe('TaskPollingLifecycle', () => {
      * This is achieved by setting the `script.allowed_types` flag on Elasticsearch to `none`
      */
     test('handles failure due to inline scripts being disabled', () => {
-      const logger = loggingSystemMock.create().get();
+      const logger = mockLogger();
       const claim = jest.fn(() => {
         throw Object.assign(new Error(), {
           msg: '[illegal_argument_exception] cannot execute [inline] scripts',
