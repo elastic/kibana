@@ -186,6 +186,7 @@ export function PanelHeader({
     ) : (
       <EuiLink
         color="text"
+        data-test-subj={'embeddablePanelTitleLink'}
         aria-label={i18n.translate('embeddableApi.panel.editTitleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
           values: { title: title || placeholderTitle },
