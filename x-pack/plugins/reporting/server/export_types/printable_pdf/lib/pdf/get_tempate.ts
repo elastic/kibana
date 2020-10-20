@@ -109,16 +109,14 @@ export function getTemplate(
         alignment: 'left',
         fontSize: headingFontSize,
         bold: true,
-        marginTop: headingMarginTop,
-        marginBottom: headingMarginBottom,
-      } as Style,
+        margin: [headingMarginTop, 0, headingMarginBottom, 0],
+      },
       subheading: {
         alignment: 'left',
         fontSize: subheadingFontSize,
         italics: true,
-        marginLeft: 20,
-        marginBottom: subheadingMarginBottom,
-      } as Style,
+        margin: [0, 0, subheadingMarginBottom, 20],
+      },
       warning: {
         color: '#f39c12', // same as @brand-warning in Kibana colors.less
       },
