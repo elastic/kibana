@@ -20,11 +20,11 @@ export const taskExecutionFailureThresholdSchema = schema.object(
   {
     error_threshold: schema.number({
       defaultValue: 90,
-      min: 1,
+      min: 0,
     }),
     warn_threshold: schema.number({
       defaultValue: 80,
-      min: 1,
+      min: 0,
     }),
   },
   {
@@ -75,7 +75,7 @@ export const configSchema = schema.object(
       // disable the task manager rather than trying to specify it with 0 workers
       min: 1,
     }),
-    /* The rate at emit fresh monitored stats. By default we'll use the poll_interval (+ a slight buffer) */
+    /* The rate at which we emit fresh monitored stats. By default we'll use the poll_interval (+ a slight buffer) */
     monitored_stats_required_freshness: schema.number({
       defaultValue: (config?: unknown) =>
         ((config as { poll_interval: number })?.poll_interval ?? DEFAULT_POLL_INTERVAL) + 1000,
