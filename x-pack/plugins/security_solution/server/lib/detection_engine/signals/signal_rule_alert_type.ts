@@ -69,6 +69,7 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
+  callAsInternalUser,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
