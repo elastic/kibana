@@ -10,7 +10,12 @@ import { setupEnvironment } from '../helpers/setup_environment';
 import { EditPolicyTestBed, setup } from './edit_policy.helpers';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { DELETE_PHASE_POLICY, NEW_SNAPSHOT_POLICY_NAME, SNAPSHOT_POLICY_NAME } from './constants';
+import {
+  DELETE_PHASE_POLICY,
+  NEW_SNAPSHOT_POLICY_NAME,
+  SNAPSHOT_POLICY_NAME,
+  DEFAULT_POLICY,
+} from './constants';
 
 window.scrollTo = jest.fn();
 
@@ -19,6 +24,83 @@ describe('<EditPolicy />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   afterAll(() => {
     server.restore();
+  });
+
+  describe('hot phase', () => {
+    describe('serialization', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('setting all values', async () => {
+        const { actions } = testBed;
+
+        await actions.hot.setMaxSize('123', 'mb');
+        await actions.hot.setMaxDocs('123');
+        await actions.hot.setMaxAge('123', 'h');
+        await actions.hot.toggleForceMerge(true);
+        await actions.hot.setForcemergeSegments('123');
+        await actions.hot.setBestCompression(true);
+        await actions.hot.setIndexPriority('123');
+
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {
+                  "forcemerge": Object {
+                    "index_codec": "best_compression",
+                    "max_num_segments": 123,
+                  },
+                  "rollover": Object {
+                    "max_age": "123h",
+                    "max_docs": 123,
+                    "max_size": "123mb",
+                  },
+                  "set_priority": Object {
+                    "priority": 123,
+                  },
+                },
+                "min_age": "0ms",
+              },
+            },
+          }
+        `);
+      });
+
+      test('disabling rollover', async () => {
+        const { actions } = testBed;
+        await actions.hot.toggleRollover(false);
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {
+                  "set_priority": Object {
+                    "priority": 100,
+                  },
+                },
+                "min_age": "0ms",
+              },
+            },
+          }
+        `);
+      });
+    });
   });
 
   describe('delete phase', () => {
