@@ -31,7 +31,7 @@ export async function agentPolicyUpdateEventHandler(
   agentPolicyId: string
 ) {
   // If Agents are not setup skip this hook
-  if (!isAgentsSetup(soClient)) {
+  if (!(await isAgentsSetup(soClient))) {
     return;
   }
 

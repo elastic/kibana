@@ -10,12 +10,11 @@ import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 import { getLatestConfigChangeAction } from './actions';
 
-export async function isAgentsSetup(soClient: SavedObjectsClientContract) {
-  const adminUser = await outputService.getAdminUser(soClient);
+export async function isAgentsSetup(soClient: SavedObjectsClientContract): Promise<boolean> {
+  const adminUser = await outputService.getAdminUser(soClient, false);
   const outputId = await outputService.getDefaultOutputId(soClient);
-
   // If admin user (fleet_enroll) and output id exist Agents are correctly setup
-  return adminUser && outputId;
+  return adminUser !== null && outputId !== null;
 }
 
 /**
@@ -26,7 +25,7 @@ export async function isAgentsSetup(soClient: SavedObjectsClientContract) {
  */
 export async function ensureAgentActionPolicyChangeExists(soClient: SavedObjectsClientContract) {
   // If Agents are not setup skip
-  if (!isAgentsSetup(soClient)) {
+  if (!(await isAgentsSetup(soClient))) {
     return;
   }
 
