@@ -145,6 +145,8 @@ fun BuildSteps.runbld(stepName: String, script: String) {
       """
         #!/bin/bash
         branchName="${'$'}GIT_BRANCH"
+        branchName="${'$'}{branchName#refs\/heads\/}"
+
         if [[ "${'$'}GITHUB_PR_NUMBER" ]]; then
           branchName=pull-request
         fi
