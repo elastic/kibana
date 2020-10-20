@@ -54,6 +54,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   // If feature influence was enabled for the legacy job we'll show a callout
   // with some additional information for a workaround.
   const showLegacyFeatureInfluenceFormatCallout =
+    !needsDestIndexPattern &&
     isOutlierAnalysis(jobConfig?.analysis) &&
     jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
     columnsWithCharts.findIndex(
