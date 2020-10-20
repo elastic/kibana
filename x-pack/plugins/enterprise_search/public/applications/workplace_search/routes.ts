@@ -52,7 +52,7 @@ export const SECURITY_PATH = `${ORG_PATH}/security`;
 
 export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
-export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source-prioritization`;
+export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
 export const SOURCES_PATH = '/sources';
 export const ORG_SOURCES_PATH = `${ORG_PATH}${SOURCES_PATH}`;
