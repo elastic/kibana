@@ -10,7 +10,7 @@ import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/pub
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   isEnhancedEmbeddable,
-  embeddableEnhancedContextMenuDrilldownGrouping,
+  embeddableEnhancedDrilldownGrouping,
 } from '../../../../../../embeddable_enhanced/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -30,7 +30,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 12;
-  public grouping = embeddableEnhancedContextMenuDrilldownGrouping;
+  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 

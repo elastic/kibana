@@ -15,7 +15,7 @@ import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import {
   isEnhancedEmbeddable,
-  embeddableEnhancedContextMenuDrilldownGrouping,
+  embeddableEnhancedDrilldownGrouping,
 } from '../../../../../../embeddable_enhanced/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
@@ -31,7 +31,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
-  public grouping = embeddableEnhancedContextMenuDrilldownGrouping;
+  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
