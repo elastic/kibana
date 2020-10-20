@@ -303,6 +303,7 @@ export class AlertingPlugin {
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       esClient: elasticsearch.client.asScoped(request).asCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
+      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request);
       },
