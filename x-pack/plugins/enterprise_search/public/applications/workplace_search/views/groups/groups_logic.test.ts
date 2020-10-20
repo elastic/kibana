@@ -19,11 +19,7 @@ jest.mock('../../../shared/flash_messages', () => ({
   setSuccessMessage: jest.fn(),
   setQueuedSuccessMessage: jest.fn(),
 }));
-import {
-  FlashMessagesLogic,
-  flashAPIErrors,
-  setSuccessMessage,
-} from '../../../shared/flash_messages';
+import { FlashMessagesLogic, flashAPIErrors } from '../../../shared/flash_messages';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { JSON_HEADER as headers } from '../../../../../common/constants';

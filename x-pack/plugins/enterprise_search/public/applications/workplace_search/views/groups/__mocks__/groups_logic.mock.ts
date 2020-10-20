@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IGroupsValues } from '../group_logic';
+import { IGroupsValues } from '../groups_logic';
 
 import { IContentSource, IUser, IGroup } from '../../../types';
 
