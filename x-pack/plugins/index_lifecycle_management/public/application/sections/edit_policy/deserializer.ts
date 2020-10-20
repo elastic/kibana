@@ -10,29 +10,33 @@ import { SerializedPolicy } from '../../../../common/types';
 
 import { splitSizeAndUnits } from '../../services/policies/policy_serialization';
 
+import { determineDataTierAllocationType } from '../../lib';
+import {} from '../../services/policies/policy_serialization';
+
 import { FormInternal } from './types';
 
-export const deserializer = (policy: SerializedPolicy): FormInternal =>
-  produce<FormInternal>(
+export const deserializer = (policy: SerializedPolicy): FormInternal => {
+  const _meta: FormInternal['_meta'] = {
+    hot: {
+      useRollover: Boolean(policy.phases.hot?.actions?.rollover),
+      forceMergeEnabled: Boolean(policy.phases.hot?.actions?.forcemerge),
+      bestCompression: policy.phases.hot?.actions?.forcemerge?.index_codec === 'best_compression',
+    },
+    warm: {
+      enabled: Boolean(policy.phases.warm),
+      warmPhaseOnRollover: Boolean(policy.phases.warm?.min_age === '0ms'),
+      forceMergeEnabled: Boolean(policy.phases.warm?.actions?.forcemerge),
+      bestCompression: policy.phases.warm?.actions?.forcemerge?.index_codec === 'best_compression',
+      dataTierAllocationType: determineDataTierAllocationType(policy.phases.warm?.actions.allocate),
+    },
+  };
+
+  return produce<FormInternal>(
     {
       ...policy,
-      _meta: {
-        hot: {
-          useRollover: Boolean(policy.phases.hot?.actions?.rollover),
-          forceMergeEnabled: Boolean(policy.phases.hot?.actions?.forcemerge),
-          bestCompression:
-            policy.phases.hot?.actions?.forcemerge?.index_codec === 'best_compression',
-        },
-        warm: {
-          enabled: Boolean(policy.phases.warm),
-          warmPhaseOnRollover: Boolean(policy.phases.warm?.min_age === '0ms'),
-          forceMergeEnabled: Boolean(policy.phases.warm?.actions?.forcemerge),
-          bestCompression:
-            policy.phases.warm?.actions?.forcemerge?.index_codec === 'best_compression',
-        },
-      },
+      _meta,
     },
-    (draft) => {
+    (draft: FormInternal) => {
       if (draft.phases.hot?.actions?.rollover) {
         if (draft.phases.hot.actions.rollover.max_size) {
           const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
@@ -46,5 +50,12 @@ export const deserializer = (policy: SerializedPolicy): FormInternal =>
           draft._meta.hot.maxAgeUnit = maxAge.units;
         }
       }
+
+      if (draft.phases.warm?.actions?.allocate?.require) {
+        Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
+          draft._meta.warm.allocationNodeAttribute = entry.join(':');
+        });
+      }
     }
   );
+};

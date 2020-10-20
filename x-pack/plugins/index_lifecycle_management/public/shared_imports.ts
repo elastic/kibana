@@ -26,6 +26,7 @@ export {
   ToggleField,
   NumericField,
   SelectField,
+  SuperSelectField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';

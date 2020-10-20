@@ -11,7 +11,7 @@ import { DataTierAllocationType, AllocateAction } from '../../../../common/types
  *
  * See {@DataTierAllocationType} for more information.
  */
-export const determineDataTierAllocationType = (
+export const determineDataTierAllocationTypeLegacy = (
   allocateAction?: AllocateAction
 ): DataTierAllocationType => {
   if (!allocateAction) {
@@ -31,4 +31,24 @@ export const determineDataTierAllocationType = (
   }
 
   return 'default';
+};
+
+export const determineDataTierAllocationType = (allocateAction?: AllocateAction) => {
+  if (!allocateAction) {
+    return 'node_roles';
+  }
+
+  if (allocateAction.migrate?.enabled === false) {
+    return 'none';
+  }
+
+  if (
+    (allocateAction.require && Object.keys(allocateAction.require).length) ||
+    (allocateAction.include && Object.keys(allocateAction.include).length) ||
+    (allocateAction.exclude && Object.keys(allocateAction.exclude).length)
+  ) {
+    return 'node_attrs';
+  }
+
+  return 'node_roles';
 };

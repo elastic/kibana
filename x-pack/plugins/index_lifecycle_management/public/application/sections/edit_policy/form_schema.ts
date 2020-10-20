@@ -58,6 +58,13 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
         helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
+      dataTierAllocationType: {
+        label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
+      },
+      allocationNodeAttribute: {
+        defaultValue: 'none',
+        label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
     },
   },
   phases: {

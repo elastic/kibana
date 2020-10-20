@@ -6,8 +6,6 @@
 
 import { fieldValidators, ValidationFunc } from '../../../shared_imports';
 
-import { i18nTexts } from './components/phases/hot_phase/i18n_texts';
-
 import { ROLLOVER_FORM_PATHS } from './constants';
 
 import { i18nTexts } from './i18n_texts';
@@ -48,16 +46,22 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
     )
   ) {
     fields[ROLLOVER_FORM_PATHS.maxAge].setErrors([
-      { validationType: ROLLOVER_EMPTY_VALIDATION, message: i18nTexts.maximumAgeRequiredMessage },
+      {
+        validationType: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
+      },
     ]);
     fields[ROLLOVER_FORM_PATHS.maxDocs].setErrors([
       {
         validationType: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.maximumDocumentsRequiredMessage,
+        message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
       },
     ]);
     fields[ROLLOVER_FORM_PATHS.maxSize].setErrors([
-      { validationType: ROLLOVER_EMPTY_VALIDATION, message: i18nTexts.maximumSizeRequiredMessage },
+      {
+        validationType: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
+      },
     ]);
   } else {
     fields[ROLLOVER_FORM_PATHS.maxAge].clearErrors(ROLLOVER_EMPTY_VALIDATION);

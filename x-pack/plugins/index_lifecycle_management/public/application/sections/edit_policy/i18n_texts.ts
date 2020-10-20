@@ -36,6 +36,16 @@ export const i18nTexts = {
           'Use higher compression for stored fields at the cost of slower performance.',
       }
     ),
+    allocationTypeOptionsFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.allocationFieldLabel',
+      { defaultMessage: 'Data tier options' }
+    ),
+    allocationNodeAttributeFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.nodeAllocationFieldLabel',
+      {
+        defaultMessage: 'Select a node attribute',
+      }
+    ),
     errors: {
       numberRequired: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.numberRequiredErrorMessage',
@@ -49,6 +59,39 @@ export const i18nTexts = {
           defaultMessage: 'Only numbers above 0 are allowed.',
         }
       ),
+      maximumAgeRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError',
+        {
+          defaultMessage: 'A maximum age is required.',
+        }
+      ),
+      maximumSizeRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError',
+        {
+          defaultMessage: 'A maximum index size is required.',
+        }
+      ),
+      maximumDocumentsRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.maximumDocumentsMissingError',
+        {
+          defaultMessage: 'Maximum documents is required.',
+        }
+      ),
+      rollOverConfigurationCallout: {
+        title: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.rolloverConfigurationError.title',
+          {
+            defaultMessage: 'Invalid rollover configuration',
+          }
+        ),
+        body: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.rolloverConfigurationError.body',
+          {
+            defaultMessage:
+              'A value for one of maximum size, maximum documents, or maximum age is required.',
+          }
+        ),
+      },
     },
   },
 };

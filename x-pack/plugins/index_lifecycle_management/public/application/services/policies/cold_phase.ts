@@ -13,7 +13,7 @@ import {
   PhaseValidationErrors,
   positiveNumberRequiredMessage,
 } from './policy_validation';
-import { determineDataTierAllocationType } from '../../lib';
+import { determineDataTierAllocationTypeLegacy } from '../../lib';
 import { serializePhaseWithAllocation } from './shared';
 
 export const coldPhaseInitialization: ColdPhase = {
@@ -36,7 +36,7 @@ export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhas
   phase.phaseEnabled = true;
 
   if (phaseSerialized.actions.allocate) {
-    phase.dataTierAllocationType = determineDataTierAllocationType(
+    phase.dataTierAllocationType = determineDataTierAllocationTypeLegacy(
       phaseSerialized.actions.allocate
     );
   }

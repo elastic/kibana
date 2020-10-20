@@ -150,9 +150,6 @@ export const WarmPhase: FunctionComponent<Props> = ({ setPhaseData, phaseData, e
             <DataTierAllocationField
               description={i18nTexts.dataTierAllocation.description}
               phase={warmProperty}
-              setPhaseData={setPhaseData}
-              isShowingErrors={isShowingErrors}
-              phaseData={phaseData}
             />
 
             <DescribedFormField

@@ -11,8 +11,7 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../../../../../shared_imports';
 import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../../common/types';
 import { PhaseValidationErrors } from '../../../../../services/policies/policy_validation';
-import { getAvailableNodeRoleForPhase } from '../../../../../lib/data_tiers';
-import { isNodeRoleFirstPreference } from '../../../../../lib/data_tiers/is_node_role_first_preference';
+import { getAvailableNodeRoleForPhase, isNodeRoleFirstPreference } from '../../../../../lib';
 
 import {
   DataTierAllocation,
@@ -40,7 +39,7 @@ interface Props {
 /**
  * Top-level layout control for the data tier allocation field.
  */
-export const DataTierAllocationField: FunctionComponent<Props> = ({
+export const DataTierAllocationFieldLegacy: FunctionComponent<Props> = ({
   description,
   phase,
   phaseData,

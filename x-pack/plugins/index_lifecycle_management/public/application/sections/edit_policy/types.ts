@@ -6,6 +6,8 @@
 
 import { SerializedPolicy } from '../../../../common/types';
 
+export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
+
 /**
  * Describes the shape of data after deserialization.
  */
@@ -27,6 +29,8 @@ export interface FormInternal extends SerializedPolicy {
       forceMergeEnabled: boolean;
       bestCompression: boolean;
       warmPhaseOnRollover: boolean;
+      dataTierAllocationType: DataTierAllocationType;
+      allocationNodeAttribute?: string;
       minAgeUnit?: string;
     };
   };
