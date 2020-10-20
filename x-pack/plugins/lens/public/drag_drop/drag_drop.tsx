@@ -187,14 +187,6 @@ const DragDropInner = React.memo(function DragDropInner(
     // Setting stopPropgagation causes Chrome failures, so
     // we are manually checking if we've already handled this
     // in a nested child, and doing nothing if so...
-    function clearSelection() {
-      if (window.getSelection) {
-        window.getSelection().removeAllRanges();
-      } else if (document.selection) {
-        document.selection.empty();
-      }
-    }
-    clearSelection();
     if (e.dataTransfer.getData('text')) {
       return;
     }
