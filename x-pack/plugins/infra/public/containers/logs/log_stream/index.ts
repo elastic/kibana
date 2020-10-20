@@ -24,13 +24,18 @@ interface LogStreamState {
   entries: LogEntry[];
   topCursor: LogEntriesCursor | null;
   bottomCursor: LogEntriesCursor | null;
-  hasMoreBefore?: boolean;
-  hasMoreAfter?: boolean;
+  hasMoreBefore: boolean;
+  hasMoreAfter: boolean;
 }
+
+type LoadingState = 'uninitialized' | 'loading' | 'success' | 'error';
 
 interface LogStreamReturn extends LogStreamState {
   fetchEntries: () => void;
-  loadingState: 'uninitialized' | 'loading' | 'success' | 'error';
+  fetchPreviousEntries: () => void;
+  fetchNextEntries: () => void;
+  loadingState: LoadingState;
+  pageLoadingState: LoadingState;
 }
 
 const INITIAL_STATE: LogStreamState = {
@@ -40,6 +45,12 @@ const INITIAL_STATE: LogStreamState = {
   // Assume there are pages available until the API proves us wrong
   hasMoreBefore: true,
   hasMoreAfter: true,
+};
+
+const EMPTY_DATA = {
+  entries: [],
+  topCursor: null,
+  bottomCursor: null,
 };
 
 export function useLogStream({
@@ -88,20 +99,120 @@ export function useLogStream({
     [sourceId, startTimestamp, endTimestamp, query]
   );
 
-  const loadingState = useMemo(() => convertPromiseStateToLoadingState(entriesPromise.state), [
-    entriesPromise.state,
-  ]);
+  const [previousEntriesPromise, fetchPreviousEntries] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'creation',
+      createPromise: () => {
+        if (state.topCursor === null) {
+          throw new Error(
+            'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+          );
+        }
+
+        if (!state.hasMoreBefore) {
+          return Promise.resolve({ data: EMPTY_DATA });
+        }
+
+        return fetchLogEntries(
+          {
+            sourceId,
+            startTimestamp,
+            endTimestamp,
+            query: parsedQuery,
+            before: state.topCursor,
+          },
+          services.http.fetch
+        );
+      },
+      onResolve: ({ data }) => {
+        if (!data.entries.length) {
+          return;
+        }
+        setState((prevState) => ({
+          entries: [...data.entries, ...prevState.entries],
+          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
+          topCursor: data.topCursor ?? prevState.topCursor,
+        }));
+      },
+    },
+    [sourceId, startTimestamp, endTimestamp, query, state.topCursor]
+  );
+
+  const [nextEntriesPromise, fetchNextEntries] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'creation',
+      createPromise: () => {
+        if (state.bottomCursor === null) {
+          throw new Error(
+            'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+          );
+        }
+
+        if (!state.hasMoreAfter) {
+          return Promise.resolve({ data: EMPTY_DATA });
+        }
+
+        return fetchLogEntries(
+          {
+            sourceId,
+            startTimestamp,
+            endTimestamp,
+            query: parsedQuery,
+            after: state.bottomCursor,
+          },
+          services.http.fetch
+        );
+      },
+      onResolve: ({ data }) => {
+        if (!data.entries.length) {
+          return;
+        }
+        setState((prevState) => ({
+          entries: [...prevState.entries, ...data.entries],
+          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+          bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
+        }));
+      },
+    },
+    [sourceId, startTimestamp, endTimestamp, query, state.bottomCursor]
+  );
+
+  const loadingState = useMemo<LoadingState>(
+    () => convertPromiseStateToLoadingState(entriesPromise.state),
+    [entriesPromise.state]
+  );
+
+  const pageLoadingState = useMemo<LoadingState>(() => {
+    const states = [previousEntriesPromise.state, nextEntriesPromise.state];
+
+    if (states.includes('pending')) {
+      return 'loading';
+    }
+
+    if (states.includes('rejected')) {
+      return 'error';
+    }
+
+    if (states.includes('resolved')) {
+      return 'success';
+    }
+
+    return 'uninitialized';
+  }, [previousEntriesPromise.state, nextEntriesPromise.state]);
 
   return {
     ...state,
     fetchEntries,
+    fetchPreviousEntries,
+    fetchNextEntries,
     loadingState,
+    pageLoadingState,
   };
 }
 
 function convertPromiseStateToLoadingState(
   state: 'uninitialized' | 'pending' | 'resolved' | 'rejected'
-): LogStreamReturn['loadingState'] {
+): LoadingState {
   switch (state) {
     case 'uninitialized':
       return 'uninitialized';
