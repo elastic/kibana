@@ -23,6 +23,13 @@ export const deserializer = (policy: SerializedPolicy): FormInternal =>
           bestCompression:
             policy.phases.hot?.actions?.forcemerge?.index_codec === 'best_compression',
         },
+        warm: {
+          enabled: Boolean(policy.phases.warm),
+          warmPhaseOnRollover: Boolean(policy.phases.warm?.min_age === '0ms'),
+          forceMergeEnabled: Boolean(policy.phases.warm?.actions?.forcemerge),
+          bestCompression:
+            policy.phases.warm?.actions?.forcemerge?.index_codec === 'best_compression',
+        },
       },
     },
     (draft) => {

@@ -11,5 +11,30 @@ export const i18nTexts = {
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
     }),
+    maxNumSegmentsFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel',
+      {
+        defaultMessage: 'Number of segments',
+      }
+    ),
+    setPriorityFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel',
+      {
+        defaultMessage: 'Index priority (optional)',
+      }
+    ),
+    bestCompressionFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.forcemerge.bestCompressionLabel',
+      {
+        defaultMessage: 'Compress stored fields',
+      }
+    ),
+    bestCompressionFieldHelpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.forceMerge.bestCompressionText',
+      {
+        defaultMessage:
+          'Use higher compression for stored fields at the cost of slower performance.',
+      }
+    ),
   },
 };

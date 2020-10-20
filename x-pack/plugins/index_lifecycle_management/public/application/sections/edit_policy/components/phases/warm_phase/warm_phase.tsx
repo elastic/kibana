@@ -12,17 +12,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiFormRow,
   EuiFieldNumber,
   EuiSwitch,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
-import { useFormData } from '../../../../../shared_imports';
-import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../../common/types';
-import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
+import {
+  useFormData,
+  UseField,
+  ToggleField,
+  useFormContext,
+} from '../../../../../../shared_imports';
 
-import { useRolloverPath } from './shared';
+import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../../../common/types';
+import { PhaseValidationErrors } from '../../../../../services/policies/policy_validation';
+
+import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared';
 
 import {
   LearnMoreLink,
@@ -30,24 +35,15 @@ import {
   PhaseErrorMessage,
   OptionalLabel,
   ErrableFormRow,
-  SetPriorityInput,
-  MinAgeInput,
   DescribedFormField,
-  Forcemerge,
-} from '../';
+} from '../../index';
 
-import { DataTierAllocationField } from './shared';
+import { DataTierAllocationField } from '../shared';
 
 const i18nTexts = {
   shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
     defaultMessage: 'Shrink index',
   }),
-  moveToWarmPhaseOnRolloverLabel: i18n.translate(
-    'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
-    {
-      defaultMessage: 'Move to warm phase on rollover',
-    }
-  ),
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.description', {
       defaultMessage: 'Move data to nodes optimized for less-frequent, read-only access.',
@@ -67,15 +63,18 @@ interface Props {
   isShowingErrors: boolean;
   errors?: PhaseValidationErrors<WarmPhaseInterface>;
 }
-export const WarmPhase: FunctionComponent<Props> = ({
-  setPhaseData,
-  phaseData,
-  errors,
-  isShowingErrors,
-}) => {
-  const [{ [useRolloverPath]: hotPhaseRolloverEnabled }] = useFormData({
-    watch: [useRolloverPath],
+export const WarmPhase: FunctionComponent<Props> = ({ setPhaseData, phaseData, errors }) => {
+  const form = useFormContext();
+  const [
+    {
+      [useRolloverPath]: hotPhaseRolloverEnabled,
+      '_meta.warm.enabled': enabled,
+      '_meta.warm.warmPhaseOnRollover': warmPhaseOnRollover,
+    },
+  ] = useFormData({
+    watch: [useRolloverPath, '_meta.warm.enabled', '_meta.warm.warmPhaseOnRollover'],
   });
+  const isShowingErrors = form.isValid === false;
   return (
     <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
       <>
@@ -88,7 +87,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                   defaultMessage="Warm phase"
                 />
               </h2>{' '}
-              {phaseData.phaseEnabled && !isShowingErrors ? <ActiveBadge /> : null}
+              {enabled && !isShowingErrors ? <ActiveBadge /> : null}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>
           }
@@ -103,60 +102,47 @@ export const WarmPhase: FunctionComponent<Props> = ({
                     For faster searches, you can reduce the number of shards and force merge segments."
                 />
               </p>
-              <EuiSwitch
-                data-test-subj="enablePhaseSwitch-warm"
-                label={
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.activateWarmPhaseSwitchLabel"
-                    defaultMessage="Activate warm phase"
-                  />
-                }
-                id={`${warmProperty}-${phaseProperty('phaseEnabled')}`}
-                checked={phaseData.phaseEnabled}
-                onChange={(e) => {
-                  setPhaseData(phaseProperty('phaseEnabled'), e.target.checked);
+              <UseField
+                path="_meta.warm.enabled"
+                component={ToggleField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'enablePhaseSwitch-warm',
+                    'aria-controls': 'warmPhaseContent',
+                  },
                 }}
-                aria-controls="warmPhaseContent"
               />
             </Fragment>
           }
           fullWidth
         >
           <Fragment>
-            {phaseData.phaseEnabled ? (
+            {enabled && (
               <Fragment>
-                {hotPhaseRolloverEnabled ? (
-                  <EuiFormRow id={`${warmProperty}-${phaseProperty('warmPhaseOnRollover')}`}>
-                    <EuiSwitch
-                      data-test-subj="warmPhaseOnRolloverSwitch"
-                      label={i18nTexts.moveToWarmPhaseOnRolloverLabel}
-                      id={`${warmProperty}-${phaseProperty('warmPhaseOnRollover')}`}
-                      checked={phaseData.warmPhaseOnRollover}
-                      onChange={(e) => {
-                        setPhaseData(phaseProperty('warmPhaseOnRollover'), e.target.checked);
-                      }}
-                    />
-                  </EuiFormRow>
-                ) : null}
-                {!phaseData.warmPhaseOnRollover || !hotPhaseRolloverEnabled ? (
-                  <Fragment>
+                {hotPhaseRolloverEnabled && (
+                  <UseField
+                    path="_meta.warm.warmPhaseOnRollover"
+                    component={ToggleField}
+                    componentProps={{
+                      fullWidth: false,
+                      euiFieldProps: {
+                        'data-test-subj': `${warmProperty}-${phaseProperty('warmPhaseOnRollover')}`,
+                      },
+                    }}
+                  />
+                )}
+                {(!warmPhaseOnRollover || !hotPhaseRolloverEnabled) && (
+                  <>
                     <EuiSpacer size="m" />
-                    <MinAgeInput<WarmPhaseInterface>
-                      errors={errors}
-                      phaseData={phaseData}
-                      phase={warmProperty}
-                      isShowingErrors={isShowingErrors}
-                      setPhaseData={setPhaseData}
-                      rolloverEnabled={hotPhaseRolloverEnabled}
-                    />
-                  </Fragment>
-                ) : null}
+                    <MinAgeInputField phase="warm" />
+                  </>
+                )}
               </Fragment>
-            ) : null}
+            )}
           </Fragment>
         </EuiDescribedFormGroup>
 
-        {phaseData.phaseEnabled ? (
+        {enabled && (
           <Fragment>
             {/* Data tier allocation section */}
             <DataTierAllocationField
@@ -290,22 +276,12 @@ export const WarmPhase: FunctionComponent<Props> = ({
                 </div>
               </Fragment>
             </EuiDescribedFormGroup>
-            <Forcemerge
-              phase={'warm'}
-              phaseData={phaseData}
-              setPhaseData={setPhaseData}
-              isShowingErrors={isShowingErrors}
-              errors={errors}
-            />
-            <SetPriorityInput<WarmPhaseInterface>
-              errors={errors}
-              phaseData={phaseData}
-              phase={warmProperty}
-              isShowingErrors={isShowingErrors}
-              setPhaseData={setPhaseData}
-            />
+
+            <Forcemerge phase="warm" />
+
+            <SetPriorityInput phase="warm" />
           </Fragment>
-        ) : null}
+        )}
       </>
     </div>
   );

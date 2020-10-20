@@ -22,5 +22,12 @@ export interface FormInternal extends SerializedPolicy {
       maxStorageSizeUnit?: string;
       maxAgeUnit?: string;
     };
+    warm: {
+      enabled: boolean;
+      forceMergeEnabled: boolean;
+      bestCompression: boolean;
+      warmPhaseOnRollover: boolean;
+      minAgeUnit?: string;
+    };
   };
 }

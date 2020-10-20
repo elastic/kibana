@@ -46,6 +46,31 @@ export const schema: FormSchema<FormInternal> = {
         ),
       },
     },
+    warm: {
+      enabled: {
+        defaultValue: false,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.warmPhase.activateWarmPhaseSwitchLabel',
+          { defaultMessage: 'Activate warm phase' }
+        ),
+      },
+      warmPhaseOnRollover: {
+        defaultValue: true,
+        label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel', {
+          defaultMessage: 'Move to warm phase on rollover',
+        }),
+      },
+      minAgeUnit: {
+        defaultValue: 'd',
+      },
+      forceMergeEnabled: {
+        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
+      },
+      bestCompression: {
+        label: i18nTexts.editPolicy.bestCompressionFieldLabel,
+        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
+      },
+    },
   },
   phases: {
     hot: {
@@ -94,9 +119,7 @@ export const schema: FormSchema<FormInternal> = {
         },
         forcemerge: {
           max_num_segments: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel', {
-              defaultMessage: 'Number of segments',
-            }),
+            label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
             validations: [
               {
                 validator: emptyField(
@@ -116,9 +139,46 @@ export const schema: FormSchema<FormInternal> = {
         set_priority: {
           priority: {
             defaultValue: defaultSetPriority as any,
-            label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel', {
-              defaultMessage: 'Index priority (optional)',
-            }),
+            label: i18nTexts.editPolicy.setPriorityFieldLabel,
+            validations: [{ validator: ifExistsNumberGreaterThanZero }],
+            serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
+          },
+        },
+      },
+    },
+    warm: {
+      min_age: {
+        defaultValue: '0',
+        validations: [
+          {
+            validator: ifExistsNumberGreaterThanZero,
+          },
+        ],
+      },
+      actions: {
+        forcemerge: {
+          max_num_segments: {
+            label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
+            validations: [
+              {
+                validator: emptyField(
+                  i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
+                    { defaultMessage: 'A value for number of segments is required.' }
+                  )
+                ),
+              },
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+            serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
+          },
+        },
+        set_priority: {
+          priority: {
+            defaultValue: '50' as any,
+            label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberGreaterThanZero }],
             serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
           },

@@ -20,9 +20,8 @@ interface Props {
   phase: keyof Phases & string;
 }
 
-const forceMergeEnabledPath = '_meta.hot.forceMergeEnabled';
-
 export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
+  const forceMergeEnabledPath = `_meta.${phase}.forceMergeEnabled`;
   const [{ [forceMergeEnabledPath]: forceMergeEnabled }] = useFormData({
     watch: [forceMergeEnabledPath],
   });
@@ -77,8 +76,8 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
               }}
             />
             <UseField
-              key="_meta.hot.bestCompression"
-              path="_meta.hot.bestCompression"
+              key={`_meta.${phase}.bestCompression`}
+              path={`_meta.${phase}.bestCompression`}
               component={ToggleField}
               componentProps={{
                 hasEmptyLabelSpace: true,
