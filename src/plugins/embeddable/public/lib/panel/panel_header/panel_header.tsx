@@ -184,7 +184,14 @@ export function PanelHeader({
     const titleComponent = isViewMode ? (
       titleSpan
     ) : (
-      <EuiLink color="text" onClick={() => customizeTitle.execute({ embeddable })}>
+      <EuiLink
+        color="text"
+        aria-label={i18n.translate('embeddableApi.panel.editTitleAriaLabel', {
+          defaultMessage: 'Click to edit title: {title}',
+          values: { title: title || placeholderTitle },
+        })}
+        onClick={() => customizeTitle.execute({ embeddable })}
+      >
         {titleSpan}
       </EuiLink>
     );

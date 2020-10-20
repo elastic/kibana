@@ -71,6 +71,7 @@ import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { ShallowPromise } from '@kbn/utility-types';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
+import { Start as Start_2 } from 'src/plugins/inspector/public';
 import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
 import { ToastsSetup as ToastsSetup_2 } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
