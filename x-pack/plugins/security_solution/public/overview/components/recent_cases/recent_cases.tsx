@@ -52,7 +52,7 @@ const RecentCasesComponent = ({ cases }: { cases: Case[] }) => {
             {c.description && c.description.length && (
               <MarkdownContainer>
                 <EuiText color="subdued" size="xs">
-                  <MarkdownRenderer>{c.description}</MarkdownRenderer>
+                  <MarkdownRenderer disableLinks={true}>{c.description}</MarkdownRenderer>
                 </EuiText>
               </MarkdownContainer>
             )}

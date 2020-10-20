@@ -16,4 +16,6 @@ export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 export const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
 parsingPlugins.push(timelineMarkdownPlugin.parser);
+
+// This line of code is TS-compatible and it will break if [1][1] change in the future.
 processingPlugins[1][1].components.timeline = timelineMarkdownPlugin.renderer;

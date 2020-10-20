@@ -59,7 +59,7 @@ export const NotePreview = React.memo<Pick<TimelineResultNote, 'note' | 'updated
               </p>
             </EuiText>
           </NotePreviewHeader>
-          <MarkdownRenderer>{note || ''}</MarkdownRenderer>
+          <MarkdownRenderer>{note ?? ''}</MarkdownRenderer>
         </EuiFlexItem>
       </EuiFlexGroup>
     </NotePreviewGroup>
