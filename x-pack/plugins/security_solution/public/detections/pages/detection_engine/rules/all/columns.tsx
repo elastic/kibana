@@ -42,7 +42,7 @@ import { TagsDisplay } from './tag_display';
 export const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
-  history: H.History,
+  historyPush: H.History['push'],
   reFetchRules: (refreshPrePackagedRule?: boolean) => void
 ) => [
   {
@@ -50,7 +50,7 @@ export const getActions = (
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
-    onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
+    onClick: (rowItem: Rule) => editRuleAction(rowItem, historyPush),
   },
   {
     description: i18n.DUPLICATE_RULE,
@@ -92,7 +92,7 @@ interface GetColumns {
   dispatch: React.Dispatch<Action>;
   dispatchToaster: Dispatch<ActionToaster>;
   formatUrl: FormatUrl;
-  history: H.History;
+  historyPush: H.History['push'];
   hasMlPermissions: boolean;
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
@@ -103,7 +103,7 @@ export const getColumns = ({
   dispatch,
   dispatchToaster,
   formatUrl,
-  history,
+  historyPush,
   hasMlPermissions,
   hasNoPermissions,
   loadingRuleIds,
@@ -118,7 +118,7 @@ export const getColumns = ({
           data-test-subj="ruleName"
           onClick={(ev: { preventDefault: () => void }) => {
             ev.preventDefault();
-            history.push(getRuleDetailsUrl(item.id));
+            historyPush(getRuleDetailsUrl(item.id));
           }}
           href={formatUrl(getRuleDetailsUrl(item.id))}
         >
@@ -251,7 +251,7 @@ export const getColumns = ({
   ];
   const actions: RulesColumns[] = [
     {
-      actions: getActions(dispatch, dispatchToaster, history, reFetchRules),
+      actions: getActions(dispatch, dispatchToaster, historyPush, reFetchRules),
       width: '40px',
     } as EuiTableActionsColumnType<Rule>,
   ];
@@ -260,7 +260,7 @@ export const getColumns = ({
 };
 
 export const getMonitoringColumns = (
-  history: H.History,
+  historyPush: H.History['push'],
   formatUrl: FormatUrl
 ): RulesStatusesColumns[] => {
   const cols: RulesStatusesColumns[] = [
@@ -273,7 +273,7 @@ export const getMonitoringColumns = (
             data-test-subj="ruleName"
             onClick={(ev: { preventDefault: () => void }) => {
               ev.preventDefault();
-              history.push(getRuleDetailsUrl(item.id));
+              historyPush(getRuleDetailsUrl(item.id));
             }}
             href={formatUrl(getRuleDetailsUrl(item.id))}
           >

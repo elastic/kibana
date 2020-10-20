@@ -28,8 +28,8 @@ import * as i18n from '../translations';
 import { bucketRulesResponse } from './helpers';
 import { Action } from './reducer';
 
-export const editRuleAction = (rule: Rule, history: H.History) => {
-  history.push(getEditRuleUrl(rule.id));
+export const editRuleAction = (rule: Rule, historyPush: H.History['push']) => {
+  historyPush(getEditRuleUrl(rule.id));
 };
 
 export const duplicateRulesAction = async (

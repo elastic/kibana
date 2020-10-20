@@ -6,9 +6,9 @@
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -21,7 +21,6 @@ import { WrapperPage } from '../../../common/components/wrapper_page';
 import { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { InputsRange } from '../../../common/store/inputs/model';
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
@@ -71,7 +70,8 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
-  const history = useHistory();
+  const { replace: historyReplace, push: historyPush } = useHistory();
+  const location = useLocation();
   const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
@@ -95,9 +95,9 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   const goToRules = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getRulesUrl());
+      historyPush(getRulesUrl());
     },
-    [history]
+    [historyPush]
   );
 
   const alertsHistogramDefaultFilters = useMemo(
@@ -119,6 +119,17 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
+
+  useEffect(() => {
+    historyReplace({
+      ...location,
+      state: {
+        ...(location.state ?? {}),
+        pageName: SecurityPageName.detections,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyReplace, location.pathname, location.state]);
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
@@ -210,7 +221,6 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
           <OverviewEmpty />
         </WrapperPage>
       )}
-      <SpyRoute pageName={SecurityPageName.detections} />
     </>
   );
 };

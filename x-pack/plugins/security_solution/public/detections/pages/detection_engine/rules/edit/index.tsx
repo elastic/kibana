@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
@@ -26,7 +26,6 @@ import {
   getDetectionEngineUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
-import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { StepPanel } from '../../../../components/rules/step_panel';
@@ -58,7 +57,8 @@ import { ruleStepsOrder } from '../utils';
 const formHookNoop = async (): Promise<undefined> => undefined;
 
 const EditRulePageComponent: FC = () => {
-  const history = useHistory();
+  const { replace: historyReplace } = useHistory();
+  const location = useLocation();
   const [, dispatchToaster] = useStateToaster();
   const [
     {
@@ -297,9 +297,9 @@ const EditRulePageComponent: FC = () => {
   const goToDetailsRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.replace(getRuleDetailsUrl(ruleId ?? ''));
+      historyReplace(getRuleDetailsUrl(ruleId ?? ''));
     },
-    [history, ruleId]
+    [historyReplace, ruleId]
   );
 
   useEffect(() => {
@@ -310,9 +310,20 @@ const EditRulePageComponent: FC = () => {
     }
   }, [rule]);
 
+  useEffect(() => {
+    historyReplace({
+      ...location,
+      state: {
+        ...(location.state ?? {}),
+        pageName: SecurityPageName.detections,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyReplace, location.pathname, location.state]);
+
   if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
-    history.replace(getRuleDetailsUrl(ruleId ?? ''));
+    historyReplace(getRuleDetailsUrl(ruleId ?? ''));
     return null;
   }
 
@@ -324,93 +335,89 @@ const EditRulePageComponent: FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    historyReplace(getDetectionEngineUrl());
     return null;
   } else if (userHasNoPermissions(canUserCRUD)) {
-    history.replace(getRuleDetailsUrl(ruleId ?? ''));
+    historyReplace(getRuleDetailsUrl(ruleId ?? ''));
     return null;
   }
 
   return (
-    <>
-      <WrapperPage>
-        <EuiFlexGroup direction="row" justifyContent="spaceAround">
-          <MaxWidthEuiFlexItem>
-            <DetectionEngineHeaderPage
-              backOptions={{
-                href: getRuleDetailsUrl(ruleId ?? ''),
-                text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-                pageId: SecurityPageName.detections,
-              }}
-              isLoading={isLoading}
-              title={i18n.PAGE_TITLE}
-            />
-            {invalidSteps.length > 0 && (
-              <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
-                <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
-                  defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
-                  values={{
-                    countError: invalidSteps.length,
-                    tabHasError: invalidSteps
-                      .map((t) => {
-                        if (t === RuleStep.aboutRule) {
-                          return ruleI18n.ABOUT;
-                        } else if (t === RuleStep.defineRule) {
-                          return ruleI18n.DEFINITION;
-                        } else if (t === RuleStep.scheduleRule) {
-                          return ruleI18n.SCHEDULE;
-                        } else if (t === RuleStep.ruleActions) {
-                          return ruleI18n.RULE_ACTIONS;
-                        }
-                        return t;
-                      })
-                      .join(', '),
-                  }}
-                />
-              </EuiCallOut>
-            )}
+    <WrapperPage>
+      <EuiFlexGroup direction="row" justifyContent="spaceAround">
+        <MaxWidthEuiFlexItem>
+          <DetectionEngineHeaderPage
+            backOptions={{
+              href: getRuleDetailsUrl(ruleId ?? ''),
+              text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
+              pageId: SecurityPageName.detections,
+            }}
+            isLoading={isLoading}
+            title={i18n.PAGE_TITLE}
+          />
+          {invalidSteps.length > 0 && (
+            <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+              <FormattedMessage
+                id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
+                defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
+                values={{
+                  countError: invalidSteps.length,
+                  tabHasError: invalidSteps
+                    .map((t) => {
+                      if (t === RuleStep.aboutRule) {
+                        return ruleI18n.ABOUT;
+                      } else if (t === RuleStep.defineRule) {
+                        return ruleI18n.DEFINITION;
+                      } else if (t === RuleStep.scheduleRule) {
+                        return ruleI18n.SCHEDULE;
+                      } else if (t === RuleStep.ruleActions) {
+                        return ruleI18n.RULE_ACTIONS;
+                      }
+                      return t;
+                    })
+                    .join(', '),
+                }}
+              />
+            </EuiCallOut>
+          )}
 
-            <EuiTabbedContent
-              initialSelectedTab={tabs[0]}
-              selectedTab={tabs.find((t) => t.id === activeStep)}
-              onTabClick={onTabClick}
-              tabs={tabs}
-            />
+          <EuiTabbedContent
+            initialSelectedTab={tabs[0]}
+            selectedTab={tabs.find((t) => t.id === activeStep)}
+            onTabClick={onTabClick}
+            tabs={tabs}
+          />
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              justifyContent="flexEnd"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType="cross" onClick={goToDetailsRule}>
-                  {i18n.CANCEL}
-                </EuiButton>
-              </EuiFlexItem>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            justifyContent="flexEnd"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton iconType="cross" onClick={goToDetailsRule}>
+                {i18n.CANCEL}
+              </EuiButton>
+            </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="ruleEditSubmitButton"
-                  fill
-                  onClick={onSubmit}
-                  iconType="save"
-                  isLoading={isLoading}
-                  isDisabled={loading}
-                >
-                  {i18n.SAVE_CHANGES}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </MaxWidthEuiFlexItem>
-        </EuiFlexGroup>
-      </WrapperPage>
-
-      <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
-    </>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="ruleEditSubmitButton"
+                fill
+                onClick={onSubmit}
+                iconType="save"
+                isLoading={isLoading}
+                isDisabled={loading}
+              >
+                {i18n.SAVE_CHANGES}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </MaxWidthEuiFlexItem>
+      </EuiFlexGroup>
+    </WrapperPage>
   );
 };
 

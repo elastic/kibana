@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { TimelineId } from '../../../../../../common/types/timeline';
@@ -36,7 +36,6 @@ import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
-import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
@@ -123,6 +122,8 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   query,
   setAbsoluteRangeDatePicker,
 }) => {
+  const { push: historyPush, replace: historyReplace } = useHistory();
+  const location = useLocation();
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [
     {
@@ -159,7 +160,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
-  const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
   const { globalFullScreen } = useFullScreen();
 
@@ -292,9 +292,9 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const goToEditRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getEditRuleUrl(ruleId ?? ''));
+      historyPush(getEditRuleUrl(ruleId ?? ''));
     },
-    [history, ruleId]
+    [historyPush, ruleId]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
@@ -334,6 +334,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     }
   }, [rule]);
 
+  useEffect(() => {
+    historyReplace({
+      ...location,
+      state: {
+        ...(location.state ?? {}),
+        pageName: SecurityPageName.detections,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyReplace, location.pathname, location.state]);
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -342,7 +353,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    historyReplace(getDetectionEngineUrl());
     return null;
   }
 
@@ -528,8 +539,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           <OverviewEmpty />
         </WrapperPage>
       )}
-
-      <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
     </>
   );
 };

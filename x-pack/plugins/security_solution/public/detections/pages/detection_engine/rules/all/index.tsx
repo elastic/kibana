@@ -140,7 +140,7 @@ export const AllRules = React.memo<AllRulesProps>(
       dispatch,
     ] = useReducer(allRulesReducer(tableRef), initialState);
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
-    const history = useHistory();
+    const { push: historyPush } = useHistory();
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
@@ -235,7 +235,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch,
         dispatchToaster,
         formatUrl,
-        history,
+        historyPush,
         hasMlPermissions,
         hasNoPermissions,
         loadingRuleIds:
@@ -245,20 +245,19 @@ export const AllRules = React.memo<AllRulesProps>(
             : [],
         reFetchRules: reFetchRulesData,
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
-      dispatch,
       dispatchToaster,
       formatUrl,
       hasMlPermissions,
-      history,
+      hasNoPermissions,
+      historyPush,
       loadingRuleIds,
       loadingRulesAction,
       reFetchRulesData,
     ]);
 
-    const monitoringColumns = useMemo(() => getMonitoringColumns(history, formatUrl), [
-      history,
+    const monitoringColumns = useMemo(() => getMonitoringColumns(historyPush, formatUrl), [
+      historyPush,
       formatUrl,
     ]);
 

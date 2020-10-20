@@ -136,7 +136,7 @@ export type UrlStateContainerPropTypes = RouteSpyState &
   UrlStateProps;
 
 export interface PreviousLocationUrlState {
-  pathName: string | undefined;
+  pathname: string | undefined;
   pageName: string | undefined;
   urlState: UrlState;
 }
@@ -169,19 +169,21 @@ export type DispatchSetInitialStateFromUrl = <TCache>({
 }: SetInitialStateFromUrl<TCache>) => () => void;
 
 export interface ReplaceStateInLocation<T> {
-  history?: H.History;
+  historyReplace: H.History['replace'];
   urlStateToReplace: T;
   urlStateKey: string;
-  pathName: string;
+  pathname: string;
   search: string;
+  state: Record<string, string | undefined>;
 }
 
 export interface UpdateUrlStateString {
   isInitializing: boolean;
-  history?: H.History;
+  historyReplace: H.History['replace'];
   newUrlStateString: string;
-  pathName: string;
+  pathname: string;
   search: string;
+  state: Record<string, string | undefined>;
   updateTimerange: boolean;
   urlKey: KeyUrlState;
 }

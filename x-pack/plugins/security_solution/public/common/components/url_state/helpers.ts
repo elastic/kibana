@@ -195,20 +195,22 @@ export const updateTimerangeUrl = (
 
 export const updateUrlStateString = ({
   isInitializing,
-  history,
+  historyReplace,
   newUrlStateString,
-  pathName,
+  pathname,
   search,
   updateTimerange,
   urlKey,
+  state,
 }: UpdateUrlStateString): string => {
   if (urlKey === CONSTANTS.appQuery) {
     const queryState = decodeRisonUrlState<Query>(newUrlStateString);
     if (queryState != null && queryState.query === '') {
       return replaceStateInLocation({
-        history,
-        pathName,
+        historyReplace,
+        pathname,
         search,
+        state,
         urlStateToReplace: '',
         urlStateKey: urlKey,
       });
@@ -217,9 +219,10 @@ export const updateUrlStateString = ({
     const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
     if (queryState != null && queryState.global != null) {
       return replaceStateInLocation({
-        history,
-        pathName,
+        historyReplace,
+        pathname,
         search,
+        state,
         urlStateToReplace: updateTimerangeUrl(queryState, isInitializing),
         urlStateKey: urlKey,
       });
@@ -228,9 +231,10 @@ export const updateUrlStateString = ({
     const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
     if (sourcererState != null && Object.keys(sourcererState).length > 0) {
       return replaceStateInLocation({
-        history,
-        pathName,
+        historyReplace,
+        pathname,
         search,
+        state,
         urlStateToReplace: sourcererState,
         urlStateKey: urlKey,
       });
@@ -239,9 +243,10 @@ export const updateUrlStateString = ({
     const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {
       return replaceStateInLocation({
-        history,
-        pathName,
+        historyReplace,
+        pathname,
         search,
+        state,
         urlStateToReplace: '',
         urlStateKey: urlKey,
       });
@@ -250,9 +255,10 @@ export const updateUrlStateString = ({
     const queryState = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
     if (queryState != null && queryState.id === '') {
       return replaceStateInLocation({
-        history,
-        pathName,
+        historyReplace,
+        pathname,
         search,
+        state,
         urlStateToReplace: '',
         urlStateKey: urlKey,
       });
@@ -262,23 +268,24 @@ export const updateUrlStateString = ({
 };
 
 export const replaceStateInLocation = <T>({
-  history,
+  historyReplace,
   urlStateToReplace,
   urlStateKey,
-  pathName,
+  pathname,
   search,
+  state = {},
 }: ReplaceStateInLocation<T>) => {
   const newLocation = replaceQueryStringInLocation(
     {
       hash: '',
-      pathname: pathName,
+      pathname,
       search,
-      state: '',
+      state,
     },
     replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(getQueryStringFromLocation(search))
   );
-  if (history) {
-    history.replace(newLocation);
+  if (historyReplace) {
+    historyReplace(newLocation);
   }
   return newLocation.search;
 };

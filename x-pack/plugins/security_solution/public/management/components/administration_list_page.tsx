@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FC, memo } from 'react';
+import React, { FC, memo, useEffect } from 'react';
 import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
 import styled from 'styled-components';
+import { useHistory, useLocation } from 'react-router-dom';
+
 import { SecurityPageName } from '../../../common/constants';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { HeaderPage } from '../../common/components/header_page';
 import { SiemNavigation } from '../../common/components/navigation';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, TRUSTED_APPS_TAB, BETA_BADGE_LABEL } from '../common/translations';
 import { getEndpointListPath, getTrustedAppsListPath } from '../common/routing';
@@ -32,7 +33,20 @@ interface AdministrationListPageProps {
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
   ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
+    const { replace: historyReplace } = useHistory();
+    const location = useLocation();
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
+
+    useEffect(() => {
+      historyReplace({
+        ...location,
+        state: {
+          ...(location.state ?? {}),
+          pageName: SecurityPageName.administration,
+        },
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [historyReplace, location.pathname, location.state]);
 
     return (
       <WrapperPage noTimeline {...otherProps}>
@@ -70,8 +84,6 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         <EuiSpacer />
 
         <EuiPanelStyled>{children}</EuiPanelStyled>
-
-        <SpyRoute pageName={SecurityPageName.administration} />
       </WrapperPage>
     );
   }

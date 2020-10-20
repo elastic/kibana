@@ -5,8 +5,8 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
@@ -16,7 +16,6 @@ import {
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { DetectionEngineHeaderPage } from '../../../components/detection_engine_header_page';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
@@ -38,7 +37,8 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 type Func = (refreshPrePackagedRule?: boolean) => void;
 
 const RulesPageComponent: React.FC = () => {
-  const history = useHistory();
+  const { push: historyPush, replace: historyReplace } = useHistory();
+  const location = useLocation();
   const [showImportModal, setShowImportModal] = useState(false);
   const [showValueListsModal, setShowValueListsModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
@@ -118,9 +118,9 @@ const RulesPageComponent: React.FC = () => {
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getCreateRuleUrl());
+      historyPush(getCreateRuleUrl());
     },
-    [history]
+    [historyPush]
   );
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
@@ -141,6 +141,17 @@ const RulesPageComponent: React.FC = () => {
     [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
   );
 
+  useEffect(() => {
+    historyReplace({
+      ...location,
+      state: {
+        ...(location.state ?? {}),
+        pageName: SecurityPageName.detections,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyReplace, location.pathname, location.state]);
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -149,7 +160,7 @@ const RulesPageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    historyReplace(getDetectionEngineUrl());
     return null;
   }
 
@@ -252,8 +263,6 @@ const RulesPageComponent: React.FC = () => {
           setRefreshRulesData={handleSetRefreshRulesData}
         />
       </WrapperPage>
-
-      <SpyRoute pageName={SecurityPageName.detections} />
     </>
   );
 };

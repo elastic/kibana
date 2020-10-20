@@ -7,7 +7,7 @@
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { FlowTarget, LastEventIndexKey } from '../../../../common/search_strategy';
@@ -33,7 +33,6 @@ import { ConditionalFlexGroup } from '../../pages/navigation/conditional_flex_gr
 import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
@@ -50,7 +49,9 @@ export { getBreadcrumbs } from './utils';
 const NetworkDetailsManage = manageQuery(IpOverview);
 
 const NetworkDetailsComponent: React.FC = () => {
+  const { replace: historyReplace } = useHistory();
   const dispatch = useDispatch();
+  const location = useLocation();
   const { to, from, setQuery, isInitializing } = useGlobalTime();
   const { detailName, flowTarget } = useParams<{
     detailName: string;
@@ -112,6 +113,17 @@ const NetworkDetailsComponent: React.FC = () => {
     flowTarget,
     ip,
   ]);
+
+  useEffect(() => {
+    historyReplace({
+      ...location,
+      state: {
+        ...(location.state ?? {}),
+        pageName: SecurityPageName.network,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyReplace, location.pathname, location.state]);
 
   return (
     <div data-test-subj="network-details-page">
@@ -290,8 +302,6 @@ const NetworkDetailsComponent: React.FC = () => {
           <OverviewEmpty />
         </WrapperPage>
       )}
-
-      <SpyRoute pageName={SecurityPageName.network} />
     </div>
   );
 };

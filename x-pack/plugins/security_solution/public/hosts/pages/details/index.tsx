@@ -8,6 +8,7 @@ import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
@@ -33,7 +34,6 @@ import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors, State } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
@@ -63,6 +63,8 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
     detailName,
     hostDetailsPagePath,
   }) => {
+    const { replace: historyReplace } = useHistory();
+    const location = useLocation();
     const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     useEffect(() => {
@@ -96,122 +98,127 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
       filters: getFilters(),
     });
 
-    return (
+    useEffect(() => {
+      historyReplace({
+        ...location,
+        state: {
+          ...(location.state ?? {}),
+          pageName: SecurityPageName.hosts,
+        },
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [historyReplace, location.pathname, location.state]);
+
+    return indicesExist ? (
       <>
-        {indicesExist ? (
-          <>
-            <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id="global" />
-            </FiltersGlobal>
+        <EuiWindowEvent event="resize" handler={noop} />
+        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <SiemSearchBar indexPattern={indexPattern} id="global" />
+        </FiltersGlobal>
 
-            <WrapperPage noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={
-                    <LastEventTime
-                      docValueFields={docValueFields}
-                      indexKey={LastEventIndexKey.hostDetails}
-                      hostName={detailName}
-                      indexNames={selectedPatterns}
-                    />
-                  }
-                  title={detailName}
-                />
-
-                <HostOverviewByNameQuery
-                  indexNames={selectedPatterns}
-                  sourceId="default"
+        <WrapperPage noPadding={globalFullScreen}>
+          <Display show={!globalFullScreen}>
+            <HeaderPage
+              border
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.hostDetails}
                   hostName={detailName}
-                  skip={isInitializing}
+                  indexNames={selectedPatterns}
+                />
+              }
+              title={detailName}
+            />
+
+            <HostOverviewByNameQuery
+              indexNames={selectedPatterns}
+              sourceId="default"
+              hostName={detailName}
+              skip={isInitializing}
+              startDate={from}
+              endDate={to}
+            >
+              {({ hostOverview, loading, id, inspect, refetch }) => (
+                <AnomalyTableProvider
+                  criteriaFields={hostToCriteria(hostOverview)}
                   startDate={from}
                   endDate={to}
+                  skip={isInitializing}
                 >
-                  {({ hostOverview, loading, id, inspect, refetch }) => (
-                    <AnomalyTableProvider
-                      criteriaFields={hostToCriteria(hostOverview)}
+                  {({ isLoadingAnomaliesData, anomaliesData }) => (
+                    <HostOverviewManage
+                      docValueFields={docValueFields}
+                      id={id}
+                      inspect={inspect}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      data={hostOverview as HostItem}
+                      anomaliesData={anomaliesData}
+                      isLoadingAnomaliesData={isLoadingAnomaliesData}
+                      indexNames={selectedPatterns}
+                      loading={loading}
                       startDate={from}
                       endDate={to}
-                      skip={isInitializing}
-                    >
-                      {({ isLoadingAnomaliesData, anomaliesData }) => (
-                        <HostOverviewManage
-                          docValueFields={docValueFields}
-                          id={id}
-                          inspect={inspect}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          data={hostOverview as HostItem}
-                          anomaliesData={anomaliesData}
-                          isLoadingAnomaliesData={isLoadingAnomaliesData}
-                          indexNames={selectedPatterns}
-                          loading={loading}
-                          startDate={from}
-                          endDate={to}
-                          narrowDateRange={(score, interval) => {
-                            const fromTo = scoreIntervalToDateTime(score, interval);
-                            setAbsoluteRangeDatePicker({
-                              id: 'global',
-                              from: fromTo.from,
-                              to: fromTo.to,
-                            });
-                          }}
-                        />
-                      )}
-                    </AnomalyTableProvider>
+                      narrowDateRange={(score, interval) => {
+                        const fromTo = scoreIntervalToDateTime(score, interval);
+                        setAbsoluteRangeDatePicker({
+                          id: 'global',
+                          from: fromTo.from,
+                          to: fromTo.to,
+                        });
+                      }}
+                    />
                   )}
-                </HostOverviewByNameQuery>
+                </AnomalyTableProvider>
+              )}
+            </HostOverviewByNameQuery>
 
-                <EuiHorizontalRule />
+            <EuiHorizontalRule />
 
-                <HostsDetailsKpiComponent
-                  filterQuery={filterQuery}
-                  from={from}
-                  indexNames={selectedPatterns}
-                  setQuery={setQuery}
-                  to={to}
-                  narrowDateRange={narrowDateRange}
-                  skip={isInitializing}
-                />
+            <HostsDetailsKpiComponent
+              filterQuery={filterQuery}
+              from={from}
+              indexNames={selectedPatterns}
+              setQuery={setQuery}
+              to={to}
+              narrowDateRange={narrowDateRange}
+              skip={isInitializing}
+            />
 
-                <EuiSpacer />
+            <EuiSpacer />
 
-                <SiemNavigation
-                  navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-                />
+            <SiemNavigation
+              navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+            />
 
-                <EuiSpacer />
-              </Display>
+            <EuiSpacer />
+          </Display>
 
-              <HostDetailsTabs
-                docValueFields={docValueFields}
-                indexNames={selectedPatterns}
-                isInitializing={isInitializing}
-                deleteQuery={deleteQuery}
-                pageFilters={hostDetailsPageFilters}
-                to={to}
-                from={from}
-                detailName={detailName}
-                type={type}
-                setQuery={setQuery}
-                filterQuery={filterQuery}
-                hostDetailsPagePath={hostDetailsPagePath}
-                indexPattern={indexPattern}
-                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-              />
-            </WrapperPage>
-          </>
-        ) : (
-          <WrapperPage>
-            <HeaderPage border title={detailName} />
-
-            <OverviewEmpty />
-          </WrapperPage>
-        )}
-
-        <SpyRoute pageName={SecurityPageName.hosts} />
+          <HostDetailsTabs
+            docValueFields={docValueFields}
+            indexNames={selectedPatterns}
+            isInitializing={isInitializing}
+            deleteQuery={deleteQuery}
+            pageFilters={hostDetailsPageFilters}
+            to={to}
+            from={from}
+            detailName={detailName}
+            type={type}
+            setQuery={setQuery}
+            filterQuery={filterQuery}
+            hostDetailsPagePath={hostDetailsPagePath}
+            indexPattern={indexPattern}
+            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          />
+        </WrapperPage>
       </>
+    ) : (
+      <WrapperPage>
+        <HeaderPage border title={detailName} />
+
+        <OverviewEmpty />
+      </WrapperPage>
     );
   }
 );

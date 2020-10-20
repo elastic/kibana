@@ -5,9 +5,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { memo } from 'react';
-import { useHistory, Route, Switch } from 'react-router-dom';
-
+import React, { memo, useEffect } from 'react';
+import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -28,7 +27,6 @@ import { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import { ADMINISTRATION } from '../../app/home/translations';
 import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from '../common/translations';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
@@ -57,30 +55,41 @@ export function getBreadcrumbs(
 }
 
 const NoPermissions = memo(() => {
+  const { replace: historyReplace } = useHistory();
+  const location = useLocation();
+
+  useEffect(() => {
+    historyReplace({
+      ...location,
+      state: {
+        ...(location.state ?? {}),
+        pageName: SecurityPageName.administration,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyReplace, location.pathname, location.state]);
+
   return (
-    <>
-      <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        titleSize="l"
-        data-test-subj="noIngestPermissions"
-        title={
+    <EuiEmptyPrompt
+      iconType="alert"
+      iconColor="danger"
+      titleSize="l"
+      data-test-subj="noIngestPermissions"
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
+          defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
+        />
+      }
+      body={
+        <EuiText color="subdued">
           <FormattedMessage
-            id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
-            defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
+            id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
+            defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
           />
-        }
-        body={
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
-            />
-          </EuiText>
-        }
-      />
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </>
+        </EuiText>
+      }
+    />
   );
 });
 NoPermissions.displayName = 'NoPermissions';

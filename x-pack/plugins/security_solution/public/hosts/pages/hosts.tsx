@@ -6,9 +6,9 @@
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
@@ -29,7 +29,6 @@ import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
@@ -49,6 +48,8 @@ import { useSourcererScope } from '../../common/containers/sourcerer';
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
   ({ filters, graphEventId, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
+    const { replace: historyReplace } = useHistory();
+    const location = useLocation();
     const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     const capabilities = useMlCapabilities();
@@ -88,71 +89,76 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       filters: tabsFilters,
     });
 
-    return (
+    useEffect(() => {
+      historyReplace({
+        ...location,
+        state: {
+          ...(location.state ?? {}),
+          pageName: SecurityPageName.hosts,
+        },
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [historyReplace, location.pathname, location.state]);
+
+    return indicesExist ? (
       <>
-        {indicesExist ? (
-          <>
-            <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id="global" />
-            </FiltersGlobal>
+        <EuiWindowEvent event="resize" handler={noop} />
+        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <SiemSearchBar indexPattern={indexPattern} id="global" />
+        </FiltersGlobal>
 
-            <WrapperPage noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={
-                    <LastEventTime
-                      docValueFields={docValueFields}
-                      indexKey={LastEventIndexKey.hosts}
-                      indexNames={selectedPatterns}
-                    />
-                  }
-                  title={i18n.PAGE_TITLE}
-                />
-
-                <HostsKpiComponent
-                  filterQuery={filterQuery}
+        <WrapperPage noPadding={globalFullScreen}>
+          <Display show={!globalFullScreen}>
+            <HeaderPage
+              border
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.hosts}
                   indexNames={selectedPatterns}
-                  from={from}
-                  setQuery={setQuery}
-                  to={to}
-                  skip={isInitializing}
-                  narrowDateRange={narrowDateRange}
                 />
+              }
+              title={i18n.PAGE_TITLE}
+            />
 
-                <EuiSpacer />
+            <HostsKpiComponent
+              filterQuery={filterQuery}
+              indexNames={selectedPatterns}
+              from={from}
+              setQuery={setQuery}
+              to={to}
+              skip={isInitializing}
+              narrowDateRange={narrowDateRange}
+            />
 
-                <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+            <EuiSpacer />
 
-                <EuiSpacer />
-              </Display>
+            <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
 
-              <HostsTabs
-                deleteQuery={deleteQuery}
-                docValueFields={docValueFields}
-                to={to}
-                filterQuery={tabsFilterQuery}
-                isInitializing={isInitializing}
-                indexNames={selectedPatterns}
-                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                setQuery={setQuery}
-                from={from}
-                type={hostsModel.HostsType.page}
-                hostsPagePath={hostsPagePath}
-              />
-            </WrapperPage>
-          </>
-        ) : (
-          <WrapperPage>
-            <HeaderPage border title={i18n.PAGE_TITLE} />
+            <EuiSpacer />
+          </Display>
 
-            <OverviewEmpty />
-          </WrapperPage>
-        )}
-
-        <SpyRoute pageName={SecurityPageName.hosts} />
+          <HostsTabs
+            deleteQuery={deleteQuery}
+            docValueFields={docValueFields}
+            to={to}
+            filterQuery={tabsFilterQuery}
+            isInitializing={isInitializing}
+            indexNames={selectedPatterns}
+            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+            setQuery={setQuery}
+            from={from}
+            type={hostsModel.HostsType.page}
+            hostsPagePath={hostsPagePath}
+          />
+        </WrapperPage>
       </>
+    ) : (
+      <WrapperPage>
+        <HeaderPage border title={i18n.PAGE_TITLE} />
+
+        <OverviewEmpty />
+      </WrapperPage>
     );
   }
 );

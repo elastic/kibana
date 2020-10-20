@@ -58,11 +58,12 @@ const updateTimelineAtinitialization = (
 export const useUrlStateHooks = ({
   detailName,
   indexPattern,
-  history,
+  historyReplace,
   navTabs,
   pageName,
-  pathName,
+  pathname,
   search,
+  state,
   setInitialStateFromUrl,
   updateTimeline,
   updateTimelineIsLoading,
@@ -70,8 +71,13 @@ export const useUrlStateHooks = ({
 }: UrlStateContainerPropTypes) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const apolloClient = useApolloClient();
-  const { filterManager, savedQueries } = useKibana().services.data.query;
-  const prevProps = usePrevious({ pathName, pageName, urlState });
+  const {
+    chrome: { docTitle },
+    data: {
+      query: { filterManager, savedQueries },
+    },
+  } = useKibana().services;
+  const prevProps = usePrevious({ pathname, pageName, urlState });
 
   const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
     let mySearch = search;
@@ -83,11 +89,12 @@ export const useUrlStateHooks = ({
       );
       if (newUrlStateString) {
         mySearch = updateUrlStateString({
-          history,
+          historyReplace,
           isInitializing,
           newUrlStateString,
-          pathName,
+          pathname,
           search: mySearch,
+          state,
           updateTimerange: (needUpdate ?? false) || isInitializing,
           urlKey,
         });
@@ -113,19 +120,21 @@ export const useUrlStateHooks = ({
         urlState[urlKey]?.query === ''
       ) {
         mySearch = replaceStateInLocation({
-          history,
-          pathName,
+          historyReplace,
+          pathname,
           search: mySearch,
           urlStateToReplace: '',
           urlStateKey: urlKey,
+          state,
         });
       } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
         mySearch = replaceStateInLocation({
-          history,
-          pathName,
+          historyReplace,
+          pathname,
           search: mySearch,
           urlStateToReplace: '',
           urlStateKey: urlKey,
+          state,
         });
       } else if (
         urlKey === CONSTANTS.timeline &&
@@ -133,29 +142,32 @@ export const useUrlStateHooks = ({
         urlState[urlKey].id === ''
       ) {
         mySearch = replaceStateInLocation({
-          history,
-          pathName,
+          historyReplace,
+          pathname,
           search: mySearch,
           urlStateToReplace: '',
           urlStateKey: urlKey,
+          state,
         });
       } else {
         mySearch = replaceStateInLocation({
-          history,
-          pathName,
+          historyReplace,
+          pathname,
           search: mySearch,
           urlStateToReplace: urlState[urlKey] || '',
           urlStateKey: urlKey,
+          state,
         });
       }
     });
     difference(ALL_URL_STATE_KEYS, URL_STATE_KEYS[type]).forEach((urlKey: KeyUrlState) => {
       mySearch = replaceStateInLocation({
-        history,
-        pathName,
+        historyReplace,
+        pathname,
         search: mySearch,
         urlStateToReplace: '',
         urlStateKey: urlKey,
+        state,
       });
     });
 
@@ -186,19 +198,21 @@ export const useUrlStateHooks = ({
           urlState[urlKey]?.query === ''
         ) {
           mySearch = replaceStateInLocation({
-            history,
-            pathName,
+            historyReplace,
+            pathname,
             search: mySearch,
             urlStateToReplace: '',
             urlStateKey: urlKey,
+            state,
           });
         } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
           mySearch = replaceStateInLocation({
-            history,
-            pathName,
+            historyReplace,
+            pathname,
             search: mySearch,
             urlStateToReplace: '',
             urlStateKey: urlKey,
+            state,
           });
         } else if (
           urlKey === CONSTANTS.timeline &&
@@ -206,30 +220,38 @@ export const useUrlStateHooks = ({
           urlState[urlKey].id === ''
         ) {
           mySearch = replaceStateInLocation({
-            history,
-            pathName,
+            historyReplace,
+            pathname,
             search: mySearch,
             urlStateToReplace: '',
             urlStateKey: urlKey,
+            state,
           });
         } else {
           mySearch = replaceStateInLocation({
-            history,
-            pathName,
+            historyReplace,
+            pathname,
             search: mySearch,
             urlStateToReplace: urlState[urlKey] || '',
             urlStateKey: urlKey,
+            state,
           });
         }
       });
-    } else if (pathName !== prevProps.pathName) {
+    } else if (pathname !== prevProps.pathname) {
       handleInitialize(type, pageName === SecurityPageName.detections);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
+  }, [isInitializing, historyReplace, pathname, pageName, prevProps, urlState]);
 
   useEffect(() => {
-    document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
+    const newTitle = getTitle(pageName, detailName, navTabs);
+
+    // console.error('ttt', pageName, detailName, navTabs, getTitle(pageName, detailName, navTabs));
+
+    if (newTitle) {
+      docTitle.change(getTitle(pageName, detailName, navTabs));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageName]);
 

@@ -4,52 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { compose, Dispatch } from 'redux';
-import { connect } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
+import { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 
 import { timelineActions } from '../../../timelines/store/timeline';
-import { RouteSpyState } from '../../utils/route/types';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
 
-import { UrlStateContainerPropTypes, UrlStateProps } from './types';
+import { UrlStateProps } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { makeMapStateToProps } from './helpers';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
-export const UrlStateContainer: React.FC<UrlStateContainerPropTypes> = (
-  props: UrlStateContainerPropTypes
-) => {
-  useUrlStateHooks(props);
-  return null;
-};
+const mapStateToProps = makeMapStateToProps();
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setInitialStateFromUrl: dispatchSetInitialStateFromUrl(dispatch),
-  updateTimeline: dispatchUpdateTimeline(dispatch),
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
-    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
-});
+export const useUrlState = (props: UrlStateProps) => {
+  const { replace: historyReplace } = useHistory();
+  const dispatch = useDispatch();
+  const { urlState } = useDeepEqualSelector(mapStateToProps);
+  const { pathname, search, state } = useLocation();
+  const routeParams = useParams();
 
-export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteSpyState>>(
-  connect(makeMapStateToProps, mapDispatchToProps)
-)(
-  React.memo(
-    UrlStateContainer,
-    (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName && deepEqual(prevProps.urlState, nextProps.urlState)
-  )
-);
+  console.error('location', pathname, search, state);
+  console.error('params', routeParams);
 
-const UseUrlStateComponent: React.FC<UrlStateProps> = (props) => {
-  const [routeProps] = useRouteSpy();
-  const urlStateReduxProps: RouteSpyState & UrlStateProps = {
-    ...routeProps,
+  const setInitialStateFromUrl = useMemo(() => dispatchSetInitialStateFromUrl(dispatch), [
+    dispatch,
+  ]);
+  const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
+
+  const updateTimelineIsLoading = useCallback(
+    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    [dispatch]
+  );
+
+  return useUrlStateHooks({
     ...props,
-  };
-  return <UrlStateRedux {...urlStateReduxProps} />;
+    ...routeParams,
+    pathname,
+    search,
+    state,
+    pageName: state?.pageName,
+    urlState,
+    historyReplace,
+    setInitialStateFromUrl,
+    updateTimeline,
+    updateTimelineIsLoading,
+  });
 };
-
-export const UseUrlState = React.memo(UseUrlStateComponent);

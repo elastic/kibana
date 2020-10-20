@@ -14,7 +14,7 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
-import { UseUrlState } from '../../common/components/url_state';
+import { useUrlState } from '../../common/components/url_state';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
@@ -72,6 +72,12 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
       ? SourcererScopeName.detections
       : SourcererScopeName.default
   );
+
+  useUrlState({
+    indexPattern,
+    navTabs,
+  });
+
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
@@ -85,7 +91,6 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
       <Main paddingTop={mainPaddingTop} data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
-          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />

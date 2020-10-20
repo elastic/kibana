@@ -21,7 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ApplicationStart } from 'kibana/public';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
@@ -38,7 +38,6 @@ import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
@@ -57,7 +56,8 @@ export const PolicyDetails = React.memo(() => {
   } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
-  const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+  const { replace: historyReplace } = useHistory();
+  const { state: locationRouteState, ...location } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -134,6 +134,17 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [locationRouteState, routeState]);
 
+  useEffect(() => {
+    historyReplace({
+      ...location,
+      state: {
+        ...routeState,
+        pageName: SecurityPageName.administration,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyReplace, location.pathname, routeState]);
+
   // Before proceeding - check if we have a policy data.
   // If not, and we are still loading, show spinner.
   // Else, if we have an error, then show error on the page.
@@ -147,7 +158,6 @@ export const PolicyDetails = React.memo(() => {
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
         ) : null}
-        <SpyRoute pageName={SecurityPageName.administration} />
       </WrapperPage>
     );
   }
@@ -246,8 +256,6 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
       </WrapperPage>
-
-      <SpyRoute pageName={SecurityPageName.administration} />
     </>
   );
 });

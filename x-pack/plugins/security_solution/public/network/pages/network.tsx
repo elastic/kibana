@@ -6,9 +6,9 @@
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { SecurityPageName } from '../../app/types';
@@ -29,7 +29,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { State, inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
@@ -55,6 +54,8 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     hasMlUserPermissions,
     capabilitiesFetched,
   }) => {
+    const { replace: historyReplace } = useHistory();
+    const location = useLocation();
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     const kibana = useKibana();
@@ -95,6 +96,17 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
       queries: [query],
       filters: tabsFilters,
     });
+
+    useEffect(() => {
+      historyReplace({
+        ...location,
+        state: {
+          ...(location.state ?? {}),
+          pageName: SecurityPageName.network,
+        },
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [historyReplace, location.pathname, location.state]);
 
     return (
       <>
@@ -174,8 +186,6 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
             <OverviewEmpty />
           </WrapperPage>
         )}
-
-        <SpyRoute pageName={SecurityPageName.network} />
       </>
     );
   }

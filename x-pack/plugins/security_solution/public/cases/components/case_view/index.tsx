@@ -15,6 +15,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import * as i18n from './translations';
 import { Case, CaseConnector } from '../../containers/types';
@@ -30,7 +31,6 @@ import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseStatus } from '../case_status';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
@@ -80,6 +80,8 @@ export interface CaseProps extends Props {
 
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
+    const { replace: historyReplace } = useHistory();
+    const location = useLocation();
     const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
     const allCasesLink = getCaseUrl(search);
     const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
@@ -255,8 +257,6 @@ export const CaseComponent = React.memo<CaseProps>(
       fetchCase();
     }, [caseData.id, fetchCase, fetchCaseUserActions]);
 
-    const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
-
     const caseStatusData = useMemo(
       () =>
         caseData.status === 'open'
@@ -291,12 +291,6 @@ export const CaseComponent = React.memo<CaseProps>(
       [caseDetailsLink, caseData.title]
     );
 
-    useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions) {
-        setInitLoadingData(false);
-      }
-    }, [initLoadingData, isLoadingUserActions]);
-
     const backOptions = useMemo(
       () => ({
         href: allCasesLink,
@@ -306,6 +300,24 @@ export const CaseComponent = React.memo<CaseProps>(
       }),
       [allCasesLink]
     );
+
+    useEffect(() => {
+      if (initLoadingData && !isLoadingUserActions) {
+        setInitLoadingData(false);
+      }
+    }, [initLoadingData, isLoadingUserActions]);
+
+    useEffect(() => {
+      historyReplace({
+        ...location,
+        state: {
+          ...(location.state ?? {}),
+          pageName: SecurityPageName.network,
+          caseTitle: caseData.title,
+        },
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [historyReplace, location.pathname, location.state]);
 
     return (
       <>
@@ -411,7 +423,6 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
-        <SpyRoute state={spyState} pageName={SecurityPageName.case} />
       </>
     );
   }

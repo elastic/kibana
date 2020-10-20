@@ -21,33 +21,21 @@ interface RouterProps {
 }
 
 const PageRouterComponent: FC<RouterProps> = ({ history, children }) => {
-  const dispatch = useDispatch<(action: AppAction) => void>();
-  useEffect(() => {
-    return () => {
-      // When app is dismounted via a non-router method (ex. using Kibana's `services.application.navigateToApp()`)
-      // ensure that one last `userChangedUrl` store action is dispatched, which will help trigger state reset logic
-      dispatch({
-        type: 'userChangedUrl',
-        payload: { pathname: '', search: '', hash: '' },
-      });
-    };
-  }, [dispatch]);
-
   return (
-    <ManageRoutesSpy>
-      <Router history={history}>
-        <RouteCapture>
-          <Switch>
-            <Route path="/">
-              <HomePage>{children}</HomePage>
-            </Route>
-            <Route>
-              <NotFoundPage />
-            </Route>
-          </Switch>
-        </RouteCapture>
-      </Router>
-    </ManageRoutesSpy>
+    // <ManageRoutesSpy>
+    <Router history={history}>
+      {/* <RouteCapture> */}
+      <Switch>
+        <Route path="/">
+          <HomePage>{children}</HomePage>
+        </Route>
+        <Route>
+          <NotFoundPage />
+        </Route>
+      </Switch>
+      {/* </RouteCapture> */}
+    </Router>
+    // </ManageRoutesSpy>
   );
 };
 

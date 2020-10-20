@@ -21,10 +21,10 @@ export interface RouteSpyState {
   detailName: string | undefined;
   tabName: SiemRouteType | undefined;
   search: string;
-  pathName: string;
-  history?: H.History;
+  pathname: string;
+  historyReplace: H.History['replace'];
   flowTarget?: FlowTarget;
-  state?: Record<string, string | undefined>;
+  state: Record<string, string | undefined>;
 }
 
 export interface HostRouteSpyState extends RouteSpyState {
