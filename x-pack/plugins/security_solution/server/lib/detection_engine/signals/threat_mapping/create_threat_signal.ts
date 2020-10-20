@@ -8,8 +8,9 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { CreateThreatSignalOptions, ThreatSignalResults } from './types';
+import { CreateThreatSignalOptions } from './types';
 import { combineResults } from './utils';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
   threatMapping,
@@ -44,7 +45,7 @@ export const createThreatSignal = async ({
   name,
   currentThreatList,
   currentResult,
-}: CreateThreatSignalOptions): Promise<ThreatSignalResults> => {
+}: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
@@ -58,7 +59,7 @@ export const createThreatSignal = async ({
         'Threat list is empty after filtering for missing data, returning without attempting a match'
       )
     );
-    return { results: currentResult };
+    return currentResult;
   } else {
     const esFilter = await getFilter({
       type,
@@ -107,6 +108,6 @@ export const createThreatSignal = async ({
         }ms`
       )
     );
-    return { results };
+    return results;
   }
 };

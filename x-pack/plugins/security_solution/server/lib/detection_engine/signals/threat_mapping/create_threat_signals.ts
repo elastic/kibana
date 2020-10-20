@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chunk from 'lodash/fp/chunk';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { combineConcurrentResults } from './utils';
 
 export const createThreatSignals = async ({
   threatMapping,
@@ -47,6 +49,12 @@ export const createThreatSignals = async ({
   name,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   logger.debug(buildRuleMessage('Starting threat matching'));
+
+  // TODO: Bubble these up to the UI
+  const concurrentSearches = 1;
+  const numberOfItemsPerSearch = 10;
+  const perPage = concurrentSearches * numberOfItemsPerSearch;
+
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
     bulkCreateTimes: [],
@@ -64,7 +72,7 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
   });
-  logger.debug(buildRuleMessage(`Total threat list items ${threatListCount}`));
+  logger.debug(buildRuleMessage(`Count of total threat list items is ${threatListCount}`));
 
   let threatList = await getThreatList({
     callCluster: services.callCluster,
@@ -79,44 +87,73 @@ export const createThreatSignals = async ({
     sortOrder: undefined,
     logger,
     buildRuleMessage,
+    perPage: concurrentSearches * numberOfItemsPerSearch,
   });
 
-  while (threatList.hits.hits.length !== 0 && results.createdSignalsCount <= params.maxSignals) {
-    ({ results } = await createThreatSignal({
-      threatMapping,
-      query,
-      inputIndex,
-      type,
-      filters,
-      language,
-      savedId,
-      services,
-      exceptionItems,
-      gap,
-      previousStartedAt,
-      listClient,
-      logger,
-      eventsTelemetry,
-      alertId,
-      outputIndex,
-      params,
-      searchAfterSize,
-      actions,
-      createdBy,
-      createdAt,
-      updatedBy,
-      updatedAt,
-      interval,
-      enabled,
-      tags,
-      refresh,
-      throttle,
-      buildRuleMessage,
-      name,
-      currentThreatList: threatList.hits.hits,
-      currentResult: results,
-    }));
+  const chunks = chunk(numberOfItemsPerSearch, threatList.hits.hits);
+  logger.debug(
+    buildRuleMessage(
+      `${chunks.length} concurrent threat_match searches starting where each search has ${numberOfItemsPerSearch} threat items per search`
+    )
+  );
+
+  while (threatList.hits.hits.length !== 0) {
+    const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
+      (slicedChunk) =>
+        createThreatSignal({
+          threatMapping,
+          query,
+          inputIndex,
+          type,
+          filters,
+          language,
+          savedId,
+          services,
+          exceptionItems,
+          gap,
+          previousStartedAt,
+          listClient,
+          logger,
+          eventsTelemetry,
+          alertId,
+          outputIndex,
+          params,
+          searchAfterSize,
+          actions,
+          createdBy,
+          createdAt,
+          updatedBy,
+          updatedAt,
+          interval,
+          enabled,
+          tags,
+          refresh,
+          throttle,
+          buildRuleMessage,
+          name,
+          currentThreatList: slicedChunk,
+          currentResult: results,
+        })
+    );
+    const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
+    results = combineConcurrentResults(results, searchesPerformed);
     threatListCount -= threatList.hits.hits.length;
+    logger.debug(
+      buildRuleMessage(
+        `Concurrent threat_match searches completed with total signals of ${results.createdSignalsCount} found`,
+        `search times of ${results.searchAfterTimes}ms,`,
+        `bulk create times ${results.bulkCreateTimes}ms,`,
+        `all successes are ${results.success}`
+      )
+    );
+    if (results.createdSignalsCount >= params.maxSignals) {
+      logger.debug(
+        buildRuleMessage(
+          `threat_match detected max signals has been reached, terminating early with approximate number of threat list items not checked left at ${threatListCount}`
+        )
+      );
+      break;
+    }
     logger.debug(
       buildRuleMessage(
         `Approximate number of threat list items to left to check are ${threatListCount}`
@@ -136,8 +173,10 @@ export const createThreatSignals = async ({
       listClient,
       buildRuleMessage,
       logger,
+      perPage,
     });
   }
+
   logger.debug(buildRuleMessage('Done threat matching'));
   return results;
 };

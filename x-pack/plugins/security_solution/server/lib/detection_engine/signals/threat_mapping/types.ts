@@ -98,10 +98,6 @@ export interface CreateThreatSignalOptions {
   currentResult: SearchAfterAndBulkCreateReturnType;
 }
 
-export interface ThreatSignalResults {
-  results: SearchAfterAndBulkCreateReturnType;
-}
-
 export interface BuildThreatMappingFilterOptions {
   threatMapping: ThreatMapping;
   threatList: ThreatListItem[];

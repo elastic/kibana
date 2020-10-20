@@ -38,7 +38,6 @@ export const getThreatList = async ({
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-
   const queryFilter = getQueryFilter(
     query,
     language ?? 'kuery',
@@ -49,7 +48,7 @@ export const getThreatList = async ({
 
   logger.debug(
     buildRuleMessage(
-      `Querying a threat list from the index: "${index}" searchAfter: "${searchAfter}"`
+      `Querying the threat list from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} threat items`
     )
   );
   const response: SearchResponse<ThreatListItem> = await callCluster('search', {

@@ -38,3 +38,39 @@ export const combineResults = (
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   errors: [...new Set([...currentResult.errors, ...newResult.errors])],
 });
+
+/**
+ * Combines two results together and returns the results combined
+ * @param currentResult The current result to combine with a newResult
+ * @param newResult The new result to combine
+ */
+export const combineConcurrentResults = (
+  currentResult: SearchAfterAndBulkCreateReturnType,
+  newResult: SearchAfterAndBulkCreateReturnType[]
+): SearchAfterAndBulkCreateReturnType => {
+  const maxedNewResult = newResult.reduce((concurrentResults, concurrentItems) => {
+    const maxSearchAfterTimes = concurrentItems.searchAfterTimes.reduce((accum, item) =>
+      String(Math.max(+accum, +item))
+    );
+    const maxBulkCreateTimes = concurrentItems.bulkCreateTimes.reduce((accum, item) =>
+      String(Math.max(+accum, +item))
+    );
+    const lastLookBackDate =
+      concurrentItems.lastLookBackDate != null &&
+      concurrentResults.lastLookBackDate != null &&
+      concurrentItems.lastLookBackDate > concurrentResults.lastLookBackDate
+        ? concurrentItems.lastLookBackDate
+        : concurrentResults.lastLookBackDate;
+    return {
+      success: concurrentResults.success && concurrentItems.success,
+      searchAfterTimes: [maxSearchAfterTimes],
+      bulkCreateTimes: [maxBulkCreateTimes],
+      lastLookBackDate,
+      createdSignalsCount:
+        concurrentResults.createdSignalsCount + concurrentItems.createdSignalsCount,
+      errors: [...new Set([...concurrentResults.errors, ...concurrentItems.errors])],
+    };
+  });
+
+  return combineResults(currentResult, maxedNewResult);
+};

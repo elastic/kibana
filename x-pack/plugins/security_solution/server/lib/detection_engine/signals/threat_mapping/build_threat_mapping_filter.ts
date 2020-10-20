@@ -53,9 +53,9 @@ export const filterThreatMapping = ({
 }: FilterThreatMappingOptions): ThreatMapping =>
   threatMapping
     .map((threatMap) => {
-      const atLeastOneItemMissingInThreatList = threatMap.entries.some(
-        (entry) => get(entry.value, threatListItem) == null
-      );
+      const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
+        return get(entry.value, threatListItem._source) == null;
+      });
       if (atLeastOneItemMissingInThreatList) {
         return { ...threatMap, entries: [] };
       } else {
@@ -69,7 +69,7 @@ export const createInnerAndClauses = ({
   threatListItem,
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
-    const value = get(threatMappingEntry.value, threatListItem);
+    const value = get(threatMappingEntry.value, threatListItem._source);
     if (value != null) {
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
