@@ -23,6 +23,9 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
   const PageObjects = getPageObjects(['header', 'common', 'savedObjects', 'settings']);
   const retry = getService('retry');
 
+  /**
+   * Sub page object to manipulate the create/edit tag modal.
+   */
   class TagModal {
     constructor(private readonly page: TagManagementPage) {}
     /**
@@ -75,6 +78,9 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       };
     }
 
+    /**
+     * Return the validation errors currently displayed for each field.
+     */
     async getValidationErrors(): Promise<TagFormValidation> {
       const errors: TagFormValidation = {};
 
@@ -187,21 +193,21 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
-     * Returns true if the `Create new tag` button is visible, false otherwise.
+     * Return true if the `Create new tag` button is visible, false otherwise.
      */
     async isCreateButtonVisible() {
       return await testSubjects.exists('createTagButton');
     }
 
     /**
-     * Returns true if the `Delete tag` action button in the tag rows is visible, false otherwise.
+     * Return true if the `Delete tag` action button in the tag rows is visible, false otherwise.
      */
     async isDeleteButtonVisible() {
       return await testSubjects.exists('tagsTableAction-delete');
     }
 
     /**
-     * Returns true if the `Edit tag` action button in the tag rows is visible, false otherwise.
+     * Return true if the `Edit tag` action button in the tag rows is visible, false otherwise.
      */
     async isEditButtonVisible() {
       return await testSubjects.exists('tagsTableAction-edit');
@@ -215,12 +221,21 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       return tags.map((tag) => tag.name);
     }
 
+    /**
+     * Return true if the 'connections' link is displayed for given tag name.
+     *
+     * Having the link not displayed can either mean that the user don't have the view
+     * permission to see the connections, or that the tag don't have any.
+     */
     async isConnectionLinkDisplayed(tagName: string) {
       const tags = await this.getDisplayedTagsInfo();
       const tag = tags.find((t) => t.name === tagName);
       return tag ? tag.connectionCount !== undefined : false;
     }
 
+    /**
+     * Click the 'edit' action button in the table for given tag name.
+     */
     async clickEdit(tagName: string) {
       const tagRow = await this.getRowByName(tagName);
       if (tagRow) {
@@ -229,6 +244,9 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       }
     }
 
+    /**
+     * Return the raw `WebElementWrapper` of the table's row for given tag name.
+     */
     async getRowByName(tagName: string) {
       const tagNames = await this.getDisplayedTagNames();
       const tagIndex = tagNames.indexOf(tagName);
@@ -236,6 +254,9 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       return rows[tagIndex];
     }
 
+    /**
+     * Click on the 'connections' link in the table for given tag name.
+     */
     async clickOnConnectionsLink(tagName: string) {
       const tagRow = await this.getRowByName(tagName);
       const connectionLink = await testSubjects.findDescendant(
