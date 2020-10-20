@@ -21,7 +21,6 @@ import {
   ValidationFuncArg,
   FormHook,
   Form,
-  useFormData,
 } from '../../../../../../../shared_imports';
 import { Document } from '../../../../types';
 import { AddDocumentsAccordion } from './add_documents_accordion';
