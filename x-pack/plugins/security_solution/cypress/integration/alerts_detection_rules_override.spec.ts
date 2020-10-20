@@ -132,7 +132,7 @@ describe('Detection rules, override', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newOverrideRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newOverrideRule.severity);
@@ -164,7 +164,7 @@ describe('Detection rules, override', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${newOverrideRule.customQuery} `);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', newOverrideRule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });

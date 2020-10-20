@@ -98,7 +98,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         if (id !== undefined) {
           this.deps.http.delete(`/internal/search/${strategy}/${id}`);
         }
-        return throwError(this.handleSearchError(e, request, timeoutSignal, options?.abortSignal));
+        return throwError(this.handleSearchError(e, request, timeoutSignal, options));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);

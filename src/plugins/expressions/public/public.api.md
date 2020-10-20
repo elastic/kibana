@@ -82,7 +82,7 @@ export interface DatatableColumn {
 // Warning: (ae-missing-release-tag) "DatatableColumnType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
+export type DatatableColumnType = '_source' | 'attachment' | 'boolean' | 'date' | 'geo_point' | 'geo_shape' | 'ip' | 'murmur3' | 'number' | 'string' | 'unknown' | 'conflict' | 'object' | 'nested' | 'histogram' | 'null';
 
 // Warning: (ae-missing-release-tag) "DatatableRow" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -228,7 +228,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext): Promise<Output>;
+    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions): Promise<Output>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -377,6 +377,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     clog: ExpressionFunctionClog;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionCumulativeSum" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    cumulative_sum: ExpressionFunctionCumulativeSum;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionFont" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -512,6 +516,8 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
 // @public (undocumented)
 export interface ExpressionRenderError extends Error {
     // (undocumented)
+    original?: Error;
+    // (undocumented)
     type?: string;
 }
 
@@ -607,12 +613,12 @@ export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | '
 //
 // @public
 export interface ExpressionsServiceStart {
-    execute: <Input = unknown, Output = unknown, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) => ExecutionContract<ExtraContext, Input, Output>;
+    execute: <Input = unknown, Output = unknown, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions) => ExecutionContract<ExtraContext, Input, Output>;
     fork: () => ExpressionsService;
     getFunction: (name: string) => ReturnType<Executor['getFunction']>;
     getRenderer: (name: string) => ReturnType<ExpressionRendererRegistry['get']>;
     getType: (name: string) => ReturnType<Executor['getType']>;
-    run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) => Promise<Output>;
+    run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions) => Promise<Output>;
 }
 
 // Warning: (ae-missing-release-tag) "ExpressionsSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -876,6 +882,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     customRenderers?: [];
     // (undocumented)
+    debug?: boolean;
+    // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
     inspectorAdapters?: Adapters;
@@ -939,54 +947,6 @@ export type KIBANA_CONTEXT_NAME = 'kibana_context';
 //
 // @public (undocumented)
 export type KibanaContext = ExpressionValueSearchContext;
-
-// Warning: (ae-missing-release-tag) "KibanaDatatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatable {
-    // (undocumented)
-    columns: KibanaDatatableColumn[];
-    // (undocumented)
-    rows: KibanaDatatableRow[];
-    // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    type: typeof name_3;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableColumn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableColumn {
-    // (undocumented)
-    formatHint?: SerializedFieldFormat;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    meta?: KibanaDatatableColumnMeta;
-    // (undocumented)
-    name: string;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableColumnMeta" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableColumnMeta {
-    // (undocumented)
-    aggConfigParams?: Record<string, any>;
-    // (undocumented)
-    indexPatternId?: string;
-    // (undocumented)
-    type: string;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableRow" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableRow {
-    // (undocumented)
-    [key: string]: unknown;
-}
 
 // Warning: (ae-missing-release-tag) "KnownTypeToString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1067,11 +1027,13 @@ export interface Range {
     // (undocumented)
     from: number;
     // (undocumented)
+    label?: string;
+    // (undocumented)
     to: number;
     // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    type: typeof name_4;
+    type: typeof name_3;
 }
 
 // Warning: (ae-missing-release-tag) "ReactExpressionRenderer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1095,7 +1057,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
     padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
     reload$?: Observable<unknown>;
     // (undocumented)
-    renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+    renderError?: (message?: string | null, error?: ExpressionRenderError | null) => React.ReactElement | React.ReactElement[];
 }
 
 // Warning: (ae-missing-release-tag) "ReactExpressionRendererType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
