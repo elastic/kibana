@@ -284,7 +284,6 @@ describe('TelemetryManagementSectionComponent', () => {
         sendUsageFrom: 'browser',
       },
       reportOptInStatusChange: false,
-      currentKibanaVersion: 'mock_kibana_version',
       notifications: coreStart.notifications,
       http: coreSetup.http,
     });
