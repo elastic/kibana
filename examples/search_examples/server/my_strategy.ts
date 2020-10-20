@@ -35,7 +35,7 @@ export const mySearchStrategyProvider = (
       ),
     cancel: async (deps, id) => {
       if (es.cancel) {
-        es.cancel(deps, id);
+        await es.cancel(deps, id);
       }
     },
   };
