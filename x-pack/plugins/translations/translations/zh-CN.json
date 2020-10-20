@@ -11710,7 +11710,6 @@
     "xpack.maps.viewControl.latLabel": "纬度：",
     "xpack.maps.viewControl.lonLabel": "经度：",
     "xpack.maps.viewControl.zoomLabel": "缩放：",
-    "xpack.maps.visTypeAlias.legacyMapVizWarning": "使用 Maps 应用而非坐标地图和区域地图。\nMaps 应用提供更多的功能并更加易用。",
     "xpack.maps.visTypeAlias.title": "Maps",
     "xpack.maps.xyztmssource.attributionLink": "属性文本必须附带链接",
     "xpack.maps.xyztmssource.attributionLinkLabel": "属性链接",

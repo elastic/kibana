@@ -11697,7 +11697,6 @@
     "xpack.maps.viewControl.latLabel": "緯度:",
     "xpack.maps.viewControl.lonLabel": "経度:",
     "xpack.maps.viewControl.zoomLabel": "ズーム：",
-    "xpack.maps.visTypeAlias.legacyMapVizWarning": "座標マップと地域マップの代わりに、マップアプリを使用します。\nマップアプリはより機能が豊富で、使いやすくなっています。",
     "xpack.maps.visTypeAlias.title": "マップ",
     "xpack.maps.xyztmssource.attributionLink": "属性テキストにはリンクが必要です",
     "xpack.maps.xyztmssource.attributionLinkLabel": "属性リンク",
