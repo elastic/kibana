@@ -33,7 +33,7 @@ export async function i18nMixin(kbnServer: KbnServer, server: Server, config: Ki
   const translationPaths = await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),
-      glob: I18N_RC,
+      glob: `*/${I18N_RC}`,
     }),
     ...(config.get('plugins.paths') as string[]).map((cwd) =>
       getTranslationPaths({ cwd, glob: I18N_RC })

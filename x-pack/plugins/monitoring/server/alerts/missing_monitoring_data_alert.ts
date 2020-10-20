@@ -65,13 +65,13 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   public static paramDetails = {
     duration: {
       label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
-        defaultMessage: `Notify if monitoring data is missing for`,
+        defaultMessage: `Notify if monitoring data is missing for the last`,
       }),
       type: AlertParamType.Duration,
     } as CommonAlertParamDetail,
     limit: {
       label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.limit.label', {
-        defaultMessage: `Look this far back in time for monitoring data`,
+        defaultMessage: `looking back`,
       }),
       type: AlertParamType.Duration,
     } as CommonAlertParamDetail,
