@@ -139,7 +139,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { form, isJobCreated, estimatedModelMemoryLimit, cloneJob } = state;
+  const { form, isJobCreated, estimatedModelMemoryLimit } = state;
   const {
     computeFeatureInfluence,
     eta,
@@ -160,9 +160,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     outlierFraction,
     predictionFieldName,
     randomizeSeed,
+    useEstimatedMml,
   } = form;
-
-  const [useEstimatedMml, setUseEstimatedMml] = useState<boolean>(cloneJob === undefined);
 
   const [numTopClassesOptions, setNumTopClassesOptions] = useState<EuiComboBoxOptionOption[]>([
     defaultNumTopClassesOption,
@@ -499,7 +498,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 isInvalid={modelMemoryLimitValidationResult !== null}
                 data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
               />
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
               <EuiSwitch
                 disabled={isJobCreated}
                 name="mlDataFrameAnalyticsUseEstimatedMml"
@@ -507,7 +506,11 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                   defaultMessage: 'Use estimated model memory limit',
                 })}
                 checked={useEstimatedMml === true}
-                onChange={() => setUseEstimatedMml(!useEstimatedMml)}
+                onChange={() =>
+                  setFormState({
+                    useEstimatedMml: !useEstimatedMml,
+                  })
+                }
                 data-test-subj="mlAnalyticsCreateJobWizardUseEstimatedMml"
               />
             </>
