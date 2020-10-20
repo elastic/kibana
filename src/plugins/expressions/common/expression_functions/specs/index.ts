@@ -26,6 +26,7 @@ import { variable } from './var';
 import { AnyExpressionFunctionDefinition } from '../types';
 import { theme } from './theme';
 import { cumulativeSum } from './cumulative_sum';
+import { derivative } from './derivative';
 
 export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   clog,
@@ -36,6 +37,7 @@ export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   variable,
   theme,
   cumulativeSum,
+  derivative,
 ];
 
 export * from './clog';
@@ -46,3 +48,4 @@ export * from './var_set';
 export * from './var';
 export * from './theme';
 export * from './cumulative_sum';
+export * from './derivative';
