@@ -7,5 +7,7 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { SavedObjectTaggingPlugin } from './plugin';
 
+export { config } from './config';
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingPlugin(initializerContext);

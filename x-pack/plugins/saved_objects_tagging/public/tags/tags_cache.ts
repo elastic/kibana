@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Duration } from 'moment';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Tag, TagAttributes } from '../../common/types';
@@ -22,6 +23,11 @@ export interface ITagsChangeListener {
 
 export type CacheRefreshHandler = () => Tag[] | Promise<Tag[]>;
 
+interface TagsCacheOptions {
+  refreshHandler: CacheRefreshHandler;
+  refreshInterval?: Duration;
+}
+
 /**
  * Reactive client-side cache of the existing tags, connected to the TagsClient.
  *
@@ -29,17 +35,34 @@ export type CacheRefreshHandler = () => Tag[] | Promise<Tag[]>;
  * needs to retrieve the list of all the existing tags or the tags associated with an object.
  */
 export class TagsCache implements ITagsCache, ITagsChangeListener {
+  private readonly refreshInterval?: Duration;
+  private readonly refreshHandler: CacheRefreshHandler;
+
+  private intervalId?: number;
   private readonly internal$: BehaviorSubject<Tag[]>;
   private readonly public$: Observable<Tag[]>;
   private readonly stop$: Subject<void>;
 
-  constructor(private readonly refreshHandler: CacheRefreshHandler) {
+  constructor({ refreshHandler, refreshInterval }: TagsCacheOptions) {
+    this.refreshHandler = refreshHandler;
+    this.refreshInterval = refreshInterval;
+
     this.stop$ = new Subject();
     this.internal$ = new BehaviorSubject<Tag[]>([]);
     this.public$ = this.internal$.pipe(takeUntil(this.stop$));
   }
 
-  public async populate() {
+  public async initialize() {
+    await this.refresh();
+
+    if (this.refreshInterval) {
+      this.intervalId = window.setInterval(() => {
+        this.refresh();
+      }, this.refreshInterval.asMilliseconds());
+    }
+  }
+
+  private async refresh() {
     try {
       const tags = await this.refreshHandler();
       this.internal$.next(tags);
@@ -82,7 +105,10 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
     this.internal$.next(tags);
   }
 
-  public destroy() {
+  public stop() {
+    if (this.intervalId) {
+      window.clearInterval(this.intervalId);
+    }
     this.stop$.next();
   }
 }

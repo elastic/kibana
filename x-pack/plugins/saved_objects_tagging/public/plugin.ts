@@ -12,6 +12,7 @@ import { tagManagementSectionId } from '../common/constants';
 import { SavedObjectTaggingPluginStart } from './types';
 import { TagsClient, TagsCache } from './tags';
 import { getUiApi } from './ui_api';
+import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
 
 interface SetupDeps {
   management: ManagementSetup;
@@ -21,8 +22,14 @@ interface SetupDeps {
 export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}> {
   private tagClient?: TagsClient;
+  private tagCache?: TagsCache;
+  private readonly config: SavedObjectsTaggingClientConfig;
 
-  constructor(context: PluginInitializerContext) {}
+  constructor(context: PluginInitializerContext) {
+    this.config = new SavedObjectsTaggingClientConfig(
+      context.config.get<SavedObjectsTaggingClientConfigRawType>()
+    );
+  }
 
   public setup(
     core: CoreSetup<{}, SavedObjectTaggingPluginStart>,
@@ -53,15 +60,24 @@ export class SavedObjectTaggingPlugin
   }
 
   public start({ http }: CoreStart) {
-    const tagCache = new TagsCache(() => this.tagClient!.getAll());
-    this.tagClient = new TagsClient({ http, changeListener: tagCache });
+    this.tagCache = new TagsCache({
+      refreshHandler: () => this.tagClient!.getAll(),
+      refreshInterval: this.config.cacheRefreshInterval,
+    });
+    this.tagClient = new TagsClient({ http, changeListener: this.tagCache });
 
     // we don't need to wait for this to resolve.
-    tagCache.populate();
+    this.tagCache.initialize();
 
     return {
       client: this.tagClient,
-      ui: getUiApi({ cache: tagCache, client: this.tagClient }),
+      ui: getUiApi({ cache: this.tagCache, client: this.tagClient }),
     };
+  }
+
+  public stop() {
+    if (this.tagCache) {
+      this.tagCache.stop();
+    }
   }
 }

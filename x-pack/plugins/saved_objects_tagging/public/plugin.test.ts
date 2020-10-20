@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
+import { SavedObjectsTaggingClientConfigRawType } from './config';
+import { TagsCache } from './tags';
+
+jest.mock('./tags/tags_cache');
+const MockedTagsCache = TagsCache as jest.Mock;
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;
@@ -15,7 +21,12 @@ describe('SavedObjectTaggingPlugin', () => {
   let savedObjectsTaggingOssPluginSetup: ReturnType<typeof savedObjectTaggingOssPluginMock.createSetup>;
 
   beforeEach(() => {
-    plugin = new SavedObjectTaggingPlugin(coreMock.createPluginInitializerContext());
+    const rawConfig: SavedObjectsTaggingClientConfigRawType = {
+      cache_refresh_interval: moment.duration('15', 'minute').toString(),
+    };
+    const initializerContext = coreMock.createPluginInitializerContext(rawConfig);
+
+    plugin = new SavedObjectTaggingPlugin(initializerContext);
   });
 
   describe('#setup', () => {
@@ -44,6 +55,32 @@ describe('SavedObjectTaggingPlugin', () => {
       expect(savedObjectsTaggingOssPluginSetup.registerTaggingApi).toHaveBeenCalledWith(
         expect.any(Promise)
       );
+    });
+  });
+
+  describe('#start', () => {
+    beforeEach(() => {
+      managementPluginSetup = managementPluginMock.createSetupContract();
+      savedObjectsTaggingOssPluginSetup = savedObjectTaggingOssPluginMock.createSetup();
+
+      plugin.setup(coreMock.createSetup(), {
+        management: managementPluginSetup,
+        savedObjectsTaggingOss: savedObjectsTaggingOssPluginSetup,
+      });
+      plugin.start(coreMock.createStart());
+    });
+
+    it('creates its cache with correct parameters', () => {
+      expect(MockedTagsCache).toHaveBeenCalledTimes(1);
+      expect(MockedTagsCache).toHaveBeenCalledWith({
+        refreshHandler: expect.any(Function),
+        refreshInterval: expect.any(Object),
+      });
+
+      const refreshIntervalParam = MockedTagsCache.mock.calls[0][0].refreshInterval;
+
+      expect(moment.isDuration(refreshIntervalParam)).toBe(true);
+      expect(refreshIntervalParam.toString()).toBe('PT15M');
     });
   });
 });

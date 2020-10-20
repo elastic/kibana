@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { Tag, TagAttributes } from '../../common/types';
 import { TagsCache, CacheRefreshHandler } from './tags_cache';
 
@@ -32,13 +33,16 @@ const createTags = (ids: string[]): Tag[] =>
     })
   );
 
+const refreshHandler: CacheRefreshHandler = () => createTags(['tag-1', 'tag-2', 'tag-3']);
+
 describe('TagsCache', () => {
   let tagsCache: TagsCache;
 
   beforeEach(async () => {
-    const refreshHandler: CacheRefreshHandler = () => createTags(['tag-1', 'tag-2', 'tag-3']);
-    tagsCache = new TagsCache(refreshHandler);
-    await tagsCache.populate();
+    tagsCache = new TagsCache({
+      refreshHandler,
+    });
+    await tagsCache.initialize();
   });
 
   describe('#onDelete', () => {
@@ -99,6 +103,43 @@ describe('TagsCache', () => {
       tagsCache.onGetAll(newTags);
 
       expect(tagsCache.getState()).toEqual(newTags);
+    });
+  });
+
+  describe('when `refreshInterval` is provided', () => {
+    const refreshInterval = moment.duration('15s');
+
+    let setIntervalSpy: jest.SpyInstance;
+    let clearIntervalSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      tagsCache = new TagsCache({
+        refreshHandler,
+        refreshInterval,
+      });
+      setIntervalSpy = jest.spyOn(window, 'setInterval');
+      clearIntervalSpy = jest.spyOn(window, 'clearInterval');
+    });
+
+    it('calls `setInterval` during `initialize` with correct parameters', async () => {
+      await tagsCache.initialize();
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(setIntervalSpy).toHaveBeenCalledWith(
+        expect.any(Function),
+        refreshInterval.asMilliseconds()
+      );
+    });
+
+    it('calls `clearInterval` during `stop` with correct parameters', async () => {
+      const intervalId = 42;
+      setIntervalSpy.mockReturnValue(intervalId);
+
+      await tagsCache.initialize();
+      tagsCache.stop();
+
+      expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(clearIntervalSpy).toHaveBeenCalledWith(intervalId);
     });
   });
 });

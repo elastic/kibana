@@ -97,7 +97,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
   return mock;
 }
 
-function pluginInitializerContextMock() {
+function pluginInitializerContextMock(config: any = {}) {
   const mock: PluginInitializerContext = {
     opaqueId: Symbol(),
     env: {
@@ -115,7 +115,7 @@ function pluginInitializerContextMock() {
       },
     },
     config: {
-      get: <T>() => ({} as T),
+      get: <T>() => config as T,
     },
   };
 
