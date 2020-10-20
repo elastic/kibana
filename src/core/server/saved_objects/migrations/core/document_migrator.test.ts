@@ -67,7 +67,7 @@ describe('DocumentMigrator', () => {
       );
     });
 
-    it('validates individual migration semvers', () => {
+    it('validates individual migrations are valid semvers', () => {
       const invalidDefinition = {
         kibanaVersion: '3.2.3',
         typeRegistry: createRegistry({
@@ -80,6 +80,22 @@ describe('DocumentMigrator', () => {
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
         /Expected all properties to be semvers/i
+      );
+    });
+
+    it('validates individual migrations are not greater than the current Kibana version', () => {
+      const invalidDefinition = {
+        kibanaVersion: '3.2.3',
+        typeRegistry: createRegistry({
+          name: 'foo',
+          migrations: {
+            '3.2.4': (doc) => doc,
+          },
+        }),
+        log: mockLogger,
+      };
+      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
+        `Invalid migration for type foo. Property '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
       );
     });
 

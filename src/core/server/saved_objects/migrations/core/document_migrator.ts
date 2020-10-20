@@ -116,7 +116,7 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
-    validateMigrationDefinition(typeRegistry);
+    validateMigrationDefinition(typeRegistry, kibanaVersion);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
@@ -158,7 +158,7 @@ export class DocumentMigrator implements VersionedTransformer {
  * language. So, this is just to provide a little developer-friendly error messaging. Joi was
  * giving weird errors, so we're just doing manual validation.
  */
-function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
+function validateMigrationDefinition(registry: ISavedObjectTypeRegistry, kibanaVersion: string) {
   function assertObject(obj: any, prefix: string) {
     if (!obj || typeof obj !== 'object') {
       throw new Error(`${prefix} Got ${obj}.`);
@@ -169,6 +169,11 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
     if (!Semver.valid(version)) {
       throw new Error(
         `Invalid migration for type ${type}. Expected all properties to be semvers, but got ${version}.`
+      );
+    }
+    if (Semver.gt(version, kibanaVersion)) {
+      throw new Error(
+        `Invalid migration for type ${type}. Property '${version}' cannot be greater than the current Kibana version '${kibanaVersion}'.`
       );
     }
   }

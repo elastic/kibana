@@ -72,7 +72,7 @@ export interface SavedObjectMigrationContext {
 
 /**
  * A map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.
- * The map's keys must be valid semver versions.
+ * The map's keys must be valid semver versions, and they cannot exceed the current Kibana version.
  *
  * For a given document, only migrations with a higher version number than that of the document will be applied.
  * Migrations are executed in order, starting from the lowest version and ending with the highest one.
