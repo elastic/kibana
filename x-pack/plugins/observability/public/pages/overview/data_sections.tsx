@@ -64,8 +64,7 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
             />
           </EuiFlexItem>
         )}
-        {/* @ts-ignore see https://github.com/elastic/kibana/issues/81081 */}
-        {hasData?.ux?.hasData && (
+        {(hasData.ux as UXHasDataResponse).hasData && (
           <EuiFlexItem grow={false}>
             <UXSection
               serviceName={(hasData.ux as UXHasDataResponse).serviceName as string}

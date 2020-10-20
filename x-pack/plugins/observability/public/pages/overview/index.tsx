@@ -24,7 +24,7 @@ import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { DataSections } from './data_sections';
-import { useTrackPageview } from '../..';
+import { useTrackPageview, UXHasDataResponse } from '../..';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -89,8 +89,7 @@ export function OverviewPage({ routeParams }: Props) {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
     } else if (id === 'ux') {
-      // @ts-ignore see https://github.com/elastic/kibana/issues/81081
-      return !hasData[id]?.hasData;
+      return !(hasData[id] as UXHasDataResponse).hasData;
     }
     return !hasData[id];
   });
