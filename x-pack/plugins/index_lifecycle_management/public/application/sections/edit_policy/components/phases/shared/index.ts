@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './policy';
+export { useRolloverPath } from '../../../constants';
 
-export * from './ui_metric';
+export { DataTierAllocationField } from './data_tier_allocation_field';
+
+export { Forcemerge } from './forcemerge_field';
+
+export { SetPriorityInput } from './set_priority_input';
