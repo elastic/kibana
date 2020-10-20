@@ -702,10 +702,10 @@ describe('when on the list page', () => {
       });
 
       it('should not show any numbered badges if all actions are successful', () => {
-        const policyResponse = docGenerator.generatePolicyResponse(
-          new Date().getTime(),
-          HostPolicyResponseActionStatus.success
-        );
+        const policyResponse = docGenerator.generatePolicyResponse({
+          ts: new Date().getTime(),
+          allStatus: HostPolicyResponseActionStatus.success,
+        });
         reactTestingLibrary.act(() => {
           store.dispatch({
             type: 'serverReturnedEndpointPolicyResponse',
