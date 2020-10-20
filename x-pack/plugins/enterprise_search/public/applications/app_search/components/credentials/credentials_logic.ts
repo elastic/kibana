@@ -7,11 +7,12 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
-import { ApiTokenTypes } from './constants';
+import { ApiTokenTypes, DELETE_MESSAGE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
+import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+
 import { IMeta } from '../../../../../common/types';
-import { flashAPIErrors } from '../../../shared/flash_messages';
 import { IEngine } from '../../types';
 import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
@@ -22,8 +23,6 @@ const defaultApiToken: IApiToken = {
   write: true,
   access_all_engines: true,
 };
-
-// TODO CREATE_MESSAGE, UPDATE_MESSAGE, and DELETE_MESSAGE from ent-search
 
 export interface ICredentialsLogicActions {
   addEngineName(engineName: string): string;
@@ -247,6 +246,7 @@ export const CredentialsLogic = kea<
         await http.delete(`/api/app_search/credentials/${tokenName}`);
 
         actions.onApiKeyDelete(tokenName);
+        setSuccessMessage(DELETE_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }

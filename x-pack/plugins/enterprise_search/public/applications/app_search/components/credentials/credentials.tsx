@@ -24,6 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { FlashMessages } from '../../../shared/flash_messages';
+
 import { CredentialsLogic } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
 import { CredentialsList } from './credentials_list';
@@ -122,7 +124,8 @@ export const Credentials: React.FC = () => {
             )}
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
+        <FlashMessages />
         <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
       </EuiPageContentBody>
     </>

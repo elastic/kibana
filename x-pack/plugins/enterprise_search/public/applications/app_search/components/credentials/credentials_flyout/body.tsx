@@ -7,6 +7,13 @@
 import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 
+import { FlashMessages } from '../../../../shared/flash_messages';
+
 export const CredentialsFlyoutBody: React.FC = () => {
-  return <EuiFlyoutBody>Details go here</EuiFlyoutBody>;
+  return (
+    <EuiFlyoutBody>
+      <FlashMessages />
+      Details go here
+    </EuiFlyoutBody>
+  );
 };

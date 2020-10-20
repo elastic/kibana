@@ -14,9 +14,10 @@ jest.mock('../../../shared/http', () => ({
 }));
 import { HttpLogic } from '../../../shared/http';
 jest.mock('../../../shared/flash_messages', () => ({
+  setSuccessMessage: jest.fn(),
   flashAPIErrors: jest.fn(),
 }));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -1142,6 +1143,7 @@ describe('CredentialsLogic', () => {
         );
         await promise;
         expect(CredentialsLogic.actions.onApiKeyDelete).toHaveBeenCalledWith(tokenName);
+        expect(setSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
