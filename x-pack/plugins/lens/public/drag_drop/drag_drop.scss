@@ -48,15 +48,15 @@
   }
 }
 
-.lnsDragDrop-reorderableContainer {
+.lnsDragDrop__reorderableContainer {
   position: relative;
 }
 
-.lnsDragDrop-reorderableDrop {
+.lnsDragDrop__reorderableDrop {
   position: absolute;
   width: 100%;
   top: 0;
-  height: calc(100% + 4px); // this is very stiff, depends on the padding between elements
+  height: calc(100% + #{$lnsLayerPanelDimensionMargin});
 }
 
 .lnsDragDrop-isReorderable {
@@ -64,11 +64,11 @@
 }
 
 .lnsDragDrop-isReorderable--up {
-  transform: translateY(-100%);
+  transform: translateY(-100%) translateY(-#{$lnsLayerPanelDimensionMargin});
 }
 
 .lnsDragDrop-isReorderable--down {
-  transform: translateY(100%);
+  transform: translateY(100%) translateY(#{$lnsLayerPanelDimensionMargin});
 }
 
 // Draggable item when it is moving

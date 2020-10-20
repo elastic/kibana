@@ -318,7 +318,7 @@ export const ReorderableDragDrop = ({
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
   return (
-    <div className="lnsDragDrop-reorderableContainer">
+    <div className="lnsDragDrop__reorderableContainer">
       {React.cloneElement(children, {
         ...draggingProps,
         className: classNames(
@@ -332,7 +332,7 @@ export const ReorderableDragDrop = ({
         ),
       })}
       <div
-        data-test-subj="lnsDragDrop-reorderableDrop"
+        data-test-subj="lnsDragDrop__reorderableDrop"
         className={classNames('lnsDragDrop', {
           'lnsDragDrop-reorderableDrop': dragging && droppable,
         })}
