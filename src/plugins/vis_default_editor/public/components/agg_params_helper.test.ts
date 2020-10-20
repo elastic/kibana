@@ -172,7 +172,7 @@ describe('DefaultEditorAggParams helpers', () => {
       });
 
       // Should be grouped using displayName as label
-      expect(groupAndSortBy).toHaveBeenCalledWith(expect.anything(), 'type', 'displayName');
+      expect(groupAndSortBy).toHaveBeenCalledWith(expect.anything(), 'type', 'displayName', 'name');
     });
   });
 
