@@ -14,10 +14,15 @@ jest.mock('../../../shared/http', () => ({
 }));
 import { HttpLogic } from '../../../shared/http';
 jest.mock('../../../shared/flash_messages', () => ({
+  FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn() } },
   setSuccessMessage: jest.fn(),
   flashAPIErrors: jest.fn(),
 }));
-import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  FlashMessagesLogic,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -951,6 +956,13 @@ describe('CredentialsLogic', () => {
             ...values,
             activeApiToken: DEFAULT_VALUES.activeApiToken,
           });
+        });
+      });
+
+      describe('listener side-effects', () => {
+        it('should clear flashMessages whenever the credentials form flyout is opened', () => {
+          CredentialsLogic.actions.showCredentialsForm();
+          expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
         });
       });
     });

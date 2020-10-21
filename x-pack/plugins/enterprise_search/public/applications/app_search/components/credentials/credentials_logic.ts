@@ -10,7 +10,11 @@ import { formatApiName } from '../../utils/format_api_name';
 import { ApiTokenTypes, DELETE_MESSAGE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
-import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  FlashMessagesLogic,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
 
 import { IMeta } from '../../../../../common/types';
 import { IEngine } from '../../types';
@@ -24,7 +28,7 @@ const defaultApiToken: IApiToken = {
   access_all_engines: true,
 };
 
-export interface ICredentialsLogicActions {
+interface ICredentialsLogicActions {
   addEngineName(engineName: string): string;
   onApiKeyDelete(tokenName: string): string;
   onApiTokenCreateSuccess(apiToken: IApiToken): IApiToken;
@@ -47,7 +51,7 @@ export interface ICredentialsLogicActions {
   deleteApiKey(tokenName: string): string;
 }
 
-export interface ICredentialsLogicValues {
+interface ICredentialsLogicValues {
   activeApiToken: IApiToken;
   activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
@@ -78,10 +82,7 @@ export const CredentialsLogic = kea<
     setCredentialsData: (meta, apiTokens) => ({ meta, apiTokens }),
     setCredentialsDetails: (details) => details,
     setNameInputBlurred: (nameInputBlurred) => nameInputBlurred,
-    setTokenReadWrite: ({ name, checked }) => ({
-      name,
-      checked,
-    }),
+    setTokenReadWrite: ({ name, checked }) => ({ name, checked }),
     setTokenName: (name) => name,
     setTokenType: (tokenType) => tokenType,
     showCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
@@ -216,6 +217,9 @@ export const CredentialsLogic = kea<
     ],
   }),
   listeners: ({ actions, values }) => ({
+    showCredentialsForm: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
     initializeCredentialsData: () => {
       actions.fetchCredentials();
       actions.fetchDetails();
