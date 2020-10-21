@@ -10,24 +10,40 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButtonIcon,
+  EuiSwitch,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexItem,
   EuiFormRow,
+  EuiPopover,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { EntityFieldType } from '../../../../../common/types/anomalies';
+import { PartitionFieldConfig } from '../../../../../common/types/storage';
 
 export interface Entity {
   fieldName: string;
+  fieldType: EntityFieldType;
   fieldValue: any;
-  fieldValues: any;
+  fieldValues?: any;
 }
 
-interface EntityControlProps {
+/**
+ * Configuration for entity field dropdown options
+ */
+export interface FieldConfig {
+  isAnomalousOnly: boolean;
+}
+
+export interface EntityControlProps {
   entity: Entity;
   entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
+  config: PartitionFieldConfig;
+  onConfigChange: (fieldType: EntityFieldType, config: PartitionFieldConfig) => void;
   forceSelection: boolean;
   options: Array<EuiComboBoxOptionOption<string>>;
 }
@@ -36,6 +52,7 @@ interface EntityControlState {
   selectedOptions: Array<EuiComboBoxOptionOption<string>> | undefined;
   isLoading: boolean;
   options: Array<EuiComboBoxOptionOption<string>> | undefined;
+  isEntityConfigPopoverOpen: boolean;
 }
 
 export const EMPTY_FIELD_VALUE_LABEL = i18n.translate(
@@ -52,6 +69,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     selectedOptions: undefined,
     options: undefined,
     isLoading: false,
+    isEntityConfigPopoverOpen: false,
   };
 
   componentDidUpdate(prevProps: EntityControlProps) {
@@ -142,6 +160,48 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         isClearable={false}
         renderOption={this.renderOption}
         data-test-subj={`mlSingleMetricViewerEntitySelection ${entity.fieldName}`}
+        prepend={
+          <EuiPopover
+            ownFocus
+            button={
+              <EuiButtonIcon
+                iconSize="xxl"
+                iconType="gear"
+                aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.enterValuePlaceholder', {
+                  defaultMessage: 'Edit ',
+                })}
+                onClick={() => {
+                  this.setState({
+                    isEntityConfigPopoverOpen: !this.state.isEntityConfigPopoverOpen,
+                  });
+                }}
+              />
+            }
+            isOpen={this.state.isEntityConfigPopoverOpen}
+            closePopover={() => {
+              this.setState({
+                isEntityConfigPopoverOpen: false,
+              });
+            }}
+          >
+            <EuiText>
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer."
+                    defaultMessage="Anomalous only"
+                  />
+                }
+                checked={!!this.props.config?.anomalousOnly}
+                onChange={(e) => {
+                  this.props.onConfigChange(this.props.entity.fieldType, {
+                    anomalousOnly: e.target.checked,
+                  });
+                }}
+              />
+            </EuiText>
+          </EuiPopover>
+        }
       />
     );
 
