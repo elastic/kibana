@@ -502,7 +502,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               <EuiSwitch
                 disabled={isJobCreated}
                 name="mlDataFrameAnalyticsUseEstimatedMml"
-                label={i18n.translate('xpack.ml.dataframe.analytics.create.UseEstimatedMmlLabel', {
+                label={i18n.translate('xpack.ml.dataframe.analytics.create.useEstimatedMmlLabel', {
                   defaultMessage: 'Use estimated model memory limit',
                 })}
                 checked={useEstimatedMml === true}
