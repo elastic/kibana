@@ -34,7 +34,7 @@ export const NOT_A_FAVORITE = i18n.translate(
 export const TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.timelineTitleAriaLabel',
   {
-    defaultMessage: 'Timeline title',
+    defaultMessage: 'Title',
   }
 );
 

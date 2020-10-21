@@ -17,6 +17,7 @@ import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../../commo
 
 import * as i18n from './translations';
 import { SaveTimelineButton } from '../header/save_timeline';
+import { enableNewTimeline } from '../../../../../common/constants';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -129,14 +130,16 @@ export const PropertiesLeft = React.memo<Props>(
         </EuiFlexItem>
       ) : null}
 
-      <SaveTimelineButton
-        timelineId={timelineId}
-        showOverlay={showSaveTimelineOverlay}
-        toggleSaveTimeline={onToggleSaveTimeline}
-        onSaveTimeline={saveTimeline}
-        updateTitle={updateTitle}
-        updateDescription={updateDescription}
-      />
+      {enableNewTimeline && (
+        <SaveTimelineButton
+          timelineId={timelineId}
+          showOverlay={showSaveTimelineOverlay}
+          toggleSaveTimeline={onToggleSaveTimeline}
+          onSaveTimeline={saveTimeline}
+          updateTitle={updateTitle}
+          updateDescription={updateDescription}
+        />
+      )}
 
       {showNotesFromWidth ? (
         <EuiFlexItem grow={false}>

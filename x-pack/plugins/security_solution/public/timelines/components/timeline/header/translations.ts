@@ -29,6 +29,13 @@ export const SAVE_TIMELINE = i18n.translate(
   }
 );
 
+export const SAVE_TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimelineTemplate.modal.header',
+  {
+    defaultMessage: 'Save Timeline Template',
+  }
+);
+
 export const SAVE = i18n.translate('xpack.securitySolution.timeline.nameTimeline.modal.header', {
   defaultMessage: 'Save',
 });
@@ -40,6 +47,13 @@ export const NAME_TIMELINE = i18n.translate(
   }
 );
 
+export const NAME_TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.nameTimelineTemplate.modal.header',
+  {
+    defaultMessage: 'Name Timeline Template',
+  }
+);
+
 export const DISCARD_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.discard.title',
   {
@@ -47,7 +61,14 @@ export const DISCARD_TIMELINE = i18n.translate(
   }
 );
 
-export const CLOSE_SAVE_TIMELINE = i18n.translate(
+export const DISCARD_TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimelineTemplate.modal.discard.title',
+  {
+    defaultMessage: 'Discard Timeline Template',
+  }
+);
+
+export const CLOSE_MODAL = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.close.title',
   {
     defaultMessage: 'Close',

@@ -16,6 +16,7 @@ import {
   EuiModal,
   EuiOverlayMask,
   EuiToolTip,
+  EuiTextArea,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
@@ -73,8 +74,24 @@ type CreateTimeline = ({
   timelineType?: TimelineTypeLiteral;
 }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-export type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
-export type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
+export type UpdateTitle = ({
+  id,
+  title,
+  disableAutoSave,
+}: {
+  id: string;
+  title: string;
+  disableAutoSave?: boolean;
+}) => void;
+export type UpdateDescription = ({
+  id,
+  description,
+  disableAutoSave,
+}: {
+  id: string;
+  description: string;
+  disableAutoSave?: boolean;
+}) => void;
 export type SaveTimeline = ({ id }: { id: string }) => void;
 
 export const StarIcon = React.memo<{
@@ -112,24 +129,46 @@ interface DescriptionProps {
   description: string;
   timelineId: string;
   updateDescription: UpdateDescription;
+  isTextArea?: boolean;
+  disableAutoSave?: boolean;
+  marginRight?: number;
 }
 
 export const Description = React.memo<DescriptionProps>(
-  ({ description, timelineId, updateDescription }) => (
-    <DescriptionContainer data-test-subj="description-container">
+  ({
+    description,
+    timelineId,
+    updateDescription,
+    isTextArea = false,
+    disableAutoSave = false,
+    marginRight,
+  }) => (
+    <DescriptionContainer data-test-subj="description-container" marginRight={marginRight}>
       <EuiToolTip
         data-test-subj="timeline-description-tool-tip"
         content={i18n.DESCRIPTION_TOOL_TIP}
       >
-        <EuiFieldText
-          aria-label={i18n.TIMELINE_DESCRIPTION}
-          data-test-subj="timeline-description"
-          fullWidth={true}
-          onChange={(e) => updateDescription({ id: timelineId, description: e.target.value })}
-          placeholder={i18n.DESCRIPTION}
-          spellCheck={true}
-          value={description}
-        />
+        {isTextArea ? (
+          <EuiTextArea
+            aria-label={i18n.TIMELINE_DESCRIPTION}
+            fullWidth={true}
+            onChange={(e) =>
+              updateDescription({ id: timelineId, description: e.target.value, disableAutoSave })
+            }
+            placeholder={i18n.DESCRIPTION}
+            value={description}
+          />
+        ) : (
+          <EuiFieldText
+            aria-label={i18n.TIMELINE_DESCRIPTION}
+            data-test-subj="timeline-description"
+            fullWidth={true}
+            onChange={(e) => updateDescription({ id: timelineId, description: e.target.value })}
+            placeholder={i18n.DESCRIPTION}
+            spellCheck={true}
+            value={description}
+          />
+        )}
       </EuiToolTip>
     </DescriptionContainer>
   )
@@ -143,13 +182,22 @@ interface NameProps {
   updateTitle: UpdateTitle;
   width?: string;
   marginRight?: number;
+  disableAutoSave?: boolean;
 }
 
 export const Name = React.memo<NameProps>(
-  ({ timelineId, timelineType, title, updateTitle, width, marginRight }) => {
+  ({
+    timelineId,
+    timelineType,
+    title,
+    updateTitle,
+    width,
+    marginRight,
+    disableAutoSave = false,
+  }) => {
     const handleChange = useCallback(
-      (e) => updateTitle({ id: timelineId, title: e.target.value }),
-      [timelineId, updateTitle]
+      (e) => updateTitle({ id: timelineId, title: e.target.value, disableAutoSave }),
+      [timelineId, updateTitle, disableAutoSave]
     );
 
     return (

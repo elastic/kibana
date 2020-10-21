@@ -57,9 +57,9 @@ export const NameWrapper = styled.div`
 `;
 NameWrapper.displayName = 'NameWrapper';
 
-export const DescriptionContainer = styled.div`
+export const DescriptionContainer = styled.div<{ marginRight?: number }>`
   animation: ${fadeInEffect} 0.3s;
-  margin-right: 5px;
+  margin-right: ${({ marginRight = 5 }) => marginRight}px;
   min-width: 150px;
 
   .euiToolTipAnchor {
