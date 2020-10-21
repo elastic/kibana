@@ -57,21 +57,21 @@ describe('tabifyDocs', () => {
 
   it('converts fields by default', () => {
     const table = tabifyDocs(response, index);
-    expect(table).toMatchSnapshot('converts fields by default');
+    expect(table).toMatchSnapshot();
   });
 
   it('converts source if option is set', () => {
     const table = tabifyDocs(response, index, { source: true });
-    expect(table).toMatchSnapshot('converts source if option is set');
+    expect(table).toMatchSnapshot();
   });
 
   it('skips nested fields if option is set', () => {
     const table = tabifyDocs(response, index, { shallow: true });
-    expect(table).toMatchSnapshot('skips nested fields if option is set');
+    expect(table).toMatchSnapshot();
   });
 
   it('works without provided index pattern', () => {
     const table = tabifyDocs(response);
-    expect(table).toMatchSnapshot('works without provided index pattern');
+    expect(table).toMatchSnapshot();
   });
 });

@@ -18,9 +18,9 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { first, each, isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash';
 import { IndexPattern } from '../../index_patterns/index_patterns';
-import { Datatable, DatatableColumn } from '../../../../expressions/common';
+import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
 export function flattenHit(
   hit: Record<string, any>,
@@ -37,12 +37,11 @@ export function flattenHit(
 
       if (!shallow) {
         const isNestedField = field?.type === 'nested';
-        const isArrayOfObjects = Array.isArray(val) && isPlainObject(first(val));
-        if (isArrayOfObjects && !isNestedField) {
-          each(val as object, (v) => flatten(v, key + '.'));
+        if (Array.isArray(val) && !isNestedField) {
+          val.forEach((v) => isPlainObject(v) && flatten(v, key + '.'));
           continue;
         }
-      } else if (flat[key] !== void 0) {
+      } else if (flat[key] !== undefined) {
         continue;
       }
 
@@ -86,9 +85,9 @@ export const tabifyDocs = (
       const flat = flattenHit(toConvert, index, params.shallow);
       for (const [key, value] of Object.entries(flat)) {
         const field = index?.fields.getByName(key);
-        if (!columns.find((c) => c.id === (field?.name || key))) {
-          const fieldName = field?.name || key;
-          const fieldType = (field?.type as any) || typeof value;
+        const fieldName = field?.name || key;
+        if (!columns.find((c) => c.id === fieldName)) {
+          const fieldType = (field?.type as DatatableColumnType) || typeof value;
           const formatter = field && index?.getFormatterForField(field);
           columns.push({
             id: fieldName,

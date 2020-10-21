@@ -17,14 +17,24 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { SearchSource } from '../search_source';
 import { tabifyAggResponse } from './tabify';
-import { tabifyDocs } from './tabify_docs';
+import { tabifyDocs, TabifyDocsOptions } from './tabify_docs';
+import { TabbedResponseWriterOptions } from './types';
 
-export const tabify = (searchSource: SearchSource, esResponse: any, opts: any) => {
+export const tabify = (
+  searchSource: SearchSource,
+  esResponse: SearchResponse<unknown>,
+  opts: Partial<TabbedResponseWriterOptions> | TabifyDocsOptions
+) => {
   return !esResponse.aggregations
-    ? tabifyDocs(esResponse, searchSource.getField('index'), opts)
-    : tabifyAggResponse(searchSource.getField('aggs'), esResponse, opts);
+    ? tabifyDocs(esResponse, searchSource.getField('index'), opts as TabifyDocsOptions)
+    : tabifyAggResponse(
+        searchSource.getField('aggs'),
+        esResponse,
+        opts as Partial<TabbedResponseWriterOptions>
+      );
 };
 
 export { tabifyAggResponse } from './tabify';
