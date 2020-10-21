@@ -68,7 +68,7 @@ describe('jira connector validation', () => {
       errors: {
         apiUrl: ['URL is required.'],
         email: [],
-        apiToken: ['API token or Password is required'],
+        apiToken: ['API token or password is required'],
         projectKey: ['Project key is required'],
       },
     });

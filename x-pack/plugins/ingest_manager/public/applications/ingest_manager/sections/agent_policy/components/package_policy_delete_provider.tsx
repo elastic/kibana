@@ -106,7 +106,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 'xpack.ingestManager.deletePackagePolicy.successSingleNotificationTitle',
                 {
                   defaultMessage: "Deleted integration '{id}'",
-                  values: { id: successfulResults[0].id },
+                  values: { id: successfulResults[0].name || successfulResults[0].id },
                 }
               );
           notifications.toasts.addSuccess(successMessage);

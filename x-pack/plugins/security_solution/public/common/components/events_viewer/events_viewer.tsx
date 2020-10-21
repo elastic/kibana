@@ -104,6 +104,7 @@ interface Props {
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
+  onRuleChange?: () => void;
   start: string;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -131,6 +132,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   onChangeItemsPerPage,
   query,
+  onRuleChange,
   start,
   sort,
   toggleColumn,
@@ -286,6 +288,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 docValueFields={docValueFields}
                 id={id}
                 isEventViewer={true}
+                onRuleChange={onRuleChange}
                 refetch={refetch}
                 sort={sort}
                 toggleColumn={toggleColumn}

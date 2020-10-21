@@ -25,7 +25,7 @@ import { getServices } from '../../../../kibana_services';
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
-import { FAILURE_REASONS, LOADING_STATUS } from './constants';
+import { FAILURE_REASONS, LOADING_STATUS } from './index';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
 
 export function QueryActionsProvider(Promise) {
