@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import os from 'os';
 import { resolve } from 'path';
 import execa from 'execa';
 import expect from '@kbn/expect';
@@ -49,10 +50,12 @@ describe('Team Assignment', () => {
   describe(`when the codeowners file contains #CC#`, () => {
     it(`should strip the prefix and still drill down through the fs`, async () => {
       const { stdout } = await execa('grep', ['tre', teamAssignmentsPath], { cwd: ROOT_DIR });
-      expect(stdout).to.be(`x-pack/plugins/code/server/config.ts kibana-tre
-x-pack/plugins/code/server/index.ts kibana-tre
-x-pack/plugins/code/server/plugin.test.ts kibana-tre
-x-pack/plugins/code/server/plugin.ts kibana-tre`);
+      expect(stdout).to.be(
+        [
+          'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/index.ts kibana-tre',
+          'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/plugin.ts kibana-tre',
+        ].join(os.EOL)
+      );
     });
   });
 });
