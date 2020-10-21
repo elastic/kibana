@@ -222,6 +222,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   events: { file: false, network: true, process: true },
                   logging: { file: 'info' },
                   malware: { mode: 'prevent' },
+                  popup: {
+                    malware: {
+                      enabled: true,
+                      message: '',
+                    },
+                  },
                 },
                 windows: {
                   advanced: {
@@ -243,6 +249,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   logging: { file: 'info' },
                   malware: { mode: 'prevent' },
+                  popup: {
+                    malware: {
+                      enabled: true,
+                      message: '',
+                    },
+                  },
                 },
               },
               streams: [],

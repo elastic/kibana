@@ -238,11 +238,23 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
+                    popup: {
+                      malware: {
+                        enabled: true,
+                        message: '',
+                      },
+                    },
                     logging: { file: 'info' },
                   },
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
+                    popup: {
+                      malware: {
+                        enabled: true,
+                        message: '',
+                      },
+                    },
                     logging: { file: 'info' },
                   },
                   linux: {
