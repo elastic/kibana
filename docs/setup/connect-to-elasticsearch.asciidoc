@@ -1,26 +1,25 @@
 [[connect-to-elasticsearch]]
 == Add data to {kib}
+++++
+<titleabbrev>Add data</titleabbrev>
+++++
 
-The fastet way to add data to {kib} is to use one of the built-in options,
-available from the home page. You can:
-
-* Add data from popular apps and services
-* Add data using an Elastic Agent
-* Upload a file
+The fastest way to add data to {kib} is to use one of the built-in options,
+available from the home page.  You can collect data from an app or service
+or upload a file that contains your data.  If you're not ready to use your own data,
+add a <<get-started, sample data set>> and give {kib} a test drive.
 
 [role="screenshot"]
 image::images/add-data-home.png[Built-in options for adding data to Kibana]
 
-If you're not ready to use your own data, you can add a <<get-started, sample data set>>
-to give {kib} a test drive.
-
 [float]
 [[add-data-tutorial-kibana]]
-===  Add data tutorials
+===  Add data
 
-These tutorials guide you through installing and configuring a
-Beats data shipper to collect metrics, logs, security events, and application data and send it to {es}.
-You can then use the pre-built dashboards to explore and analyze the data.
+The *Add data* tutorials help you quickly get up and running with metrics data,
+log analytics, security events, and application data. These tutorials walk you
+through installing and configuring a Beats data shipper to periodically collect
+and send data to {es}. You can then use the pre-built dashboards to explore and analyze the data.
 
 If a tutorial doesn’t exist for your data, go to the {beats-ref}/beats-reference.html[Beats overview]
 to learn about other data shippers in the Beats family.
@@ -28,47 +27,39 @@ to learn about other data shippers in the Beats family.
 [role="screenshot"]
 image::images/add-data-tutorials.png[Add Data tutorials]
 
-
 [discrete]
-[[add-data-fleet-kibana]]
-===  Add an Elatic Agent
+=== Add Elastic Agent
 
-beta[]
+beta[] *Elastic Agent* is alternative to installing and managing Beats individually.
+Using the *Fleet* UI, you can add
+and manage integrations for popular services and platforms, giving you
+an easy way to collect data. The integrations also
+ship with out-of-the-box assets, including dashboards visualizations.
 
-Fleet is a single, unified way to collect logs and metrics from systems
-and services across your organization. You don't have to install multiple
-Beats and other agents, making easier to deploy policies across your infrastructure.
-For more information, see
+To get started, refer to
+{ingest-guide}/ingest-management-getting-started.html[Quick start: Get logs and metrics into the Elastic Stack].
 
 [role="screenshot"]
 image::images/add-data-fleet.png[Add data using Fleet]
 
-[float]
+[discrete]
 [[upload-data-kibana]]
 === Upload a file
 
-experimental[]
-
-To visualize data in a CSV, JSON, or log file, you can upload it using the File
-Data Visualizer. On the home page, click *Upload a file*, and
-then drag your file into the *File Data Visualizer*.
-You can upload a file up to 100 MB. This value is configurable up to 1 GB in
+experimental[] If your data is in a CSV, JSON, or log file, you can upload it using the File
+Data Visualizer. You can upload a file up to 100 MB. This value is configurable up to 1 GB in
 <<kibana-ml-settings, Advanced Settings>>.
 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
 
-The File Data Visualizer uses the {ref}/ml-find-file-structure.html[find_file_structure API] to analyze
-the uploaded file and to suggest ingest pipelines and mappings for your data.
-
 NOTE: This feature is not intended for use as part of a
 repeated production process, but rather for the initial exploration of your data.
 
-To visualize geospatial data in a point or shape file, use the <<import-geospatial-data, GeoJSON Upload>>
-feature in *Maps*.
-
 [discrete]
-=== Or, load your data yourself
+=== Load data on your own
 
-You can also index your data into Elasticsearch with REST APIs or client libraries.
-After you add your data, you'll need to create an <<index-patterns,index pattern>>.
+You can index your data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
+ or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
+After you add your data, you must create an <<index-patterns,index pattern>> to tell
+{kib} where to find the data.

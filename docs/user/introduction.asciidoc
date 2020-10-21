@@ -27,20 +27,15 @@ image::images/intro-kibana.png[]
 === Add data
 
 {kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
-and processes the data, with {kib} sitting on top.
+and processes the data, with {kib} sitting on top. From the home page, {kib} provides
+built-in options for collecting data from popular apps or services and uploading a file:
 
-From the home page, {kib} provides these options for adding data:
-
-* Set up a data flow using popular apps and services
-* Collect data using Elastic Agent
-* Upload data using the
-https://www.elastic.co/blog/importing-csv-and-log-data-into-elasticsearch-with-file-data-visualizer[File Data visualizer]
+[role="screenshot"]
+image::setup/images/add-data-home.png[Ways to get data in from the home page]
 
 If you're not ready to use your own data, you can add a <<get-started, sample data set>>
 to give {kib} a test drive.
 
-[role="screenshot"]
-image::setup/images/add-data-home.png[Ways to get data in from the home page]
 
 [float]
 [[explore-and-query]]
