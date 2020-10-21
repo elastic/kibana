@@ -91,7 +91,7 @@ export default function ({ getService }) {
             { sort: false }
           )}`;
           ({ body } = await supertest.get(uri).expect(404));
-          expect(body.message).to.contain('[index_not_found_exception] no such index [bar]');
+          expect(body.message).to.contain('index_not_found_exception: no such index [bar]');
         });
       });
 

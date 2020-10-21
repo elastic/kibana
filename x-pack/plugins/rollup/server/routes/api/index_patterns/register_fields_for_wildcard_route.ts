@@ -122,14 +122,6 @@ export const registerFieldsForWildcardRoute = ({
           ).body
         )[rollupIndex].aggs;
 
-        /*
-        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
-          await context.rollup!.client.callAsCurrentUser('rollup.rollupIndexCapabilities', {
-            indexPattern: rollupIndex,
-          })
-        )[rollupIndex].aggs;
-        */
-
         // Keep meta fields
         metaFields.forEach(
           (field: string) =>
@@ -143,8 +135,11 @@ export const registerFieldsForWildcardRoute = ({
         );
         return response.ok({ body: { fields: mergedRollupFields } });
       } catch (err) {
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
+        if (err.meta.statusCode) {
+          return response.customError({
+            statusCode: err.meta.statusCode,
+            body: `${err.meta.body.error.type}: ${err.meta.body.error.reason}`,
+          });
         }
         return response.internalError({ body: err });
       }
