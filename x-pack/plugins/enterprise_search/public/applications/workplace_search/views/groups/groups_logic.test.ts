@@ -289,6 +289,7 @@ describe('GroupsLogic', () => {
         (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
 
         GroupsLogic.actions.getSearchResults(true);
+        // Account for `breakpoint` that debounces filter value.
         await delay();
         expect(HttpLogic.values.http.post).toHaveBeenCalledWith(
           '/api/workplace_search/groups/search',
@@ -306,8 +307,9 @@ describe('GroupsLogic', () => {
         try {
           await promise;
         } catch {
+          // Account for `breakpoint` that debounces filter value.
           await delay();
-          expect(flashAPIErrors).toHaveBeenCalled();
+          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         }
       });
     });
