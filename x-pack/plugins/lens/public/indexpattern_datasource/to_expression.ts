@@ -133,6 +133,10 @@ function getExpressionForLayer(
         // To avoid mapping too many ad-hoc arguments, this passes thru a JSON serialization
         if (Object.keys(rangeParameters).length) {
           base.arguments.rangeParameters = [JSON.stringify(rangeParameters)];
+          // this is a special scenario for ranges, where we need to enforce a 0 digit decimals
+          if (base.arguments.decimals == null) {
+            base.arguments.decimals = [0];
+          }
         }
 
         return base;
