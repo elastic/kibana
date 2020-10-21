@@ -25,6 +25,7 @@ import { annotation$ } from '../../../services/annotations_service';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
+  ANNOTATION_SYMBOL_HEIGHT,
   MULTI_BUCKET_SYMBOL_SIZE,
   SCHEDULED_EVENT_SYMBOL_HEIGHT,
   drawLineChartDots,
@@ -228,7 +229,8 @@ class TimeseriesChartIntl extends Component {
     if (
       this.props.renderFocusChartOnly === false ||
       prevProps.svgWidth !== this.props.svgWidth ||
-      prevProps.showAnnotations !== this.props.showAnnotations
+      prevProps.showAnnotations !== this.props.showAnnotations ||
+      prevProps.annotationData !== this.props.annotationData
     ) {
       this.renderChart();
       this.drawContextChartSelection();
@@ -1078,6 +1080,7 @@ class TimeseriesChartIntl extends Component {
 
     cxtGroup.append('g').classed('mlContextAnnotations', true);
 
+    const [contextXRangeStart, contextXRangeEnd] = this.contextXScale.range();
     const ctxAnnotations = cxtGroup
       .select('.mlContextAnnotations')
       .selectAll('g.mlContextAnnotation')
@@ -1099,11 +1102,20 @@ class TimeseriesChartIntl extends Component {
     ctxAnnotationRects
       .attr('x', (d) => {
         const date = moment(d.timestamp);
-        return this.contextXScale(date);
+        let xPos = this.contextXScale(date);
+
+        if (xPos - ANNOTATION_SYMBOL_HEIGHT <= contextXRangeStart) {
+          xPos = 0;
+        }
+        if (xPos + ANNOTATION_SYMBOL_HEIGHT >= contextXRangeEnd) {
+          xPos = contextXRangeEnd - ANNOTATION_SYMBOL_HEIGHT;
+        }
+
+        return xPos;
       })
       .attr('y', cxtChartHeight / 8)
-      .attr('height', 10)
-      .attr('width', 10);
+      .attr('height', ANNOTATION_SYMBOL_HEIGHT)
+      .attr('width', ANNOTATION_SYMBOL_HEIGHT);
 
     ctxAnnotations.classed('mlAnnotationHidden', !showAnnotations);
     ctxAnnotationRects.exit().remove();
@@ -1422,6 +1434,22 @@ class TimeseriesChartIntl extends Component {
             key: seriesKey,
           },
           valueAccessor: 'multi_bucket_impact',
+        });
+      }
+
+      if (marker.metricFunction) {
+        tooltipData.push({
+          label: i18n.translate(
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
+            {
+              defaultMessage: 'function',
+            }
+          ),
+          value: marker.metricFunction,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'metric_function',
         });
       }
 
