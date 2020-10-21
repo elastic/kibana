@@ -201,4 +201,46 @@ describe('#httpRequestEvent', () => {
       }
     `);
   });
+
+  test('uses original URL if rewritten', () => {
+    expect(
+      httpRequestEvent({
+        request: httpServerMock.createKibanaRequest({
+          path: '/path',
+          query: { query: 'param' },
+          kibanaRequestState: {
+            requestId: '123',
+            requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+            rewrittenUrl: {
+              path: '/original/path',
+              pathname: '/original/path',
+              query: 'query=param',
+              search: '?query=param',
+            },
+          },
+        }),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "http_request",
+          "category": "web",
+          "outcome": "unknown",
+        },
+        "http": Object {
+          "request": Object {
+            "method": "get",
+          },
+        },
+        "message": "User is requesting [/original/path] endpoint",
+        "url": Object {
+          "domain": undefined,
+          "path": "/original/path",
+          "port": undefined,
+          "query": "query=param",
+          "scheme": undefined,
+        },
+      }
+    `);
+  });
 });
