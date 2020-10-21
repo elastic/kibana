@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestCase } from '../objects/case';
+import { executeResponses, TestCase } from '../objects/case';
 
 import {
   BACK_TO_CASES_BTN,
@@ -17,6 +17,7 @@ import {
   TITLE_INPUT,
 } from '../screens/create_new_case';
 import {
+  CONNECTOR_RESILIENT,
   CONNECTOR_SELECTOR,
   SELECT_IMPACT,
   SELECT_INCIDENT_TYPE,
@@ -70,16 +71,30 @@ export const createNewCaseWithConnector = (newCase: TestCase) => {
   cy.get(CONNECTOR_SELECTOR).click({ force: true });
   cy.get(SELECT_JIRA).click({ force: true });
   cy.get(SELECT_ISSUE_TYPE).should('exist');
+
   cy.get(SELECT_PRIORITY).should('exist');
+  cy.get(SELECT_ISSUE_TYPE).select('10006');
+  cy.get(SELECT_PRIORITY).select('High');
   cy.get(CONNECTOR_SELECTOR).click({ force: true });
   cy.get(SELECT_SN).click({ force: true });
   cy.get(SELECT_SEVERITY).should('exist');
   cy.get(SELECT_URGENCY).should('exist');
   cy.get(SELECT_IMPACT).should('exist');
+  cy.get(SELECT_URGENCY).select('2');
+  cy.get(SELECT_SEVERITY).select('1');
+  cy.get(SELECT_IMPACT).select('3');
   cy.get(CONNECTOR_SELECTOR).click({ force: true });
   cy.get(SELECT_RESILIENT).click({ force: true });
   cy.get(SELECT_INCIDENT_TYPE).should('exist');
   cy.get(SELECT_SEVERITY).should('exist');
+  cy.get(
+    SELECT_INCIDENT_TYPE
+  ).type(`${executeResponses.resilient.incidentTypes.data[0].name}{enter}`, { force: true });
+  cy.get(
+    SELECT_INCIDENT_TYPE
+  ).type(`${executeResponses.resilient.incidentTypes.data[1].name}{enter}`, { force: true });
+  cy.get(CONNECTOR_RESILIENT).click();
+  cy.get(SELECT_SEVERITY).select('5');
   cy.get(SUBMIT_BTN).click({ force: true });
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');

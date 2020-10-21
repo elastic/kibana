@@ -13,7 +13,8 @@ export const SELECT_SN = `[data-test-subj="dropdown-connector-${connectorIds.sn}
 
 export const SELECT_ISSUE_TYPE = `[data-test-subj="issueTypeSelect"]`;
 export const SELECT_PRIORITY = `[data-test-subj="prioritySelect"]`;
-export const SELECT_INCIDENT_TYPE = `[data-test-subj="incidentTypeComboBox"]`;
+export const SELECT_INCIDENT_TYPE = `[data-test-subj="incidentTypeComboBox"] input[data-test-subj="comboBoxSearchInput"]`;
+export const CONNECTOR_RESILIENT = `[data-test-subj="connector-settings-resilient"]`;
 export const SELECT_SEVERITY = `[data-test-subj="severitySelect"]`;
 
 export const SELECT_URGENCY = `[data-test-subj="urgencySelect"]`;
