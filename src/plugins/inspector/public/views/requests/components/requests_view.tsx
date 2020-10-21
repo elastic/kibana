@@ -155,7 +155,10 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
 
         {this.state.request && this.state.request.searchSessionId && (
           <EuiText size="xs">
-            <p data-test-sujb={'inspectorRequestSearchSessionId'}>
+            <p
+              data-test-subj={'inspectorRequestSearchSessionId'}
+              data-search-session-id={this.state.request.searchSessionId}
+            >
               <FormattedMessage
                 id="inspector.requests.searchSessionId"
                 defaultMessage="Search session id: {searchSessionId}"
