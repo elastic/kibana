@@ -299,20 +299,14 @@ describe('GroupsLogic', () => {
       });
 
       it('handles error', async () => {
-        /**
-         * TODO: There is some sort of issue with Kea's `breakpoint` functionality that causes the
-         * catch to break the tests. Because this functionality is tested elsewhere successfully,
-         * without the breakpoint, I'm leaving this in now for 100% coverage and will reach out
-         * to the plugin author for help with the issue with the test breaking.
-         */
-        const promise = Promise.resolve(undefined);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(undefined);
+        const promise = Promise.reject('this is an error');
+        (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
 
         GroupsLogic.actions.getSearchResults();
-        await delay();
         try {
           await promise;
         } catch {
+          await delay();
           expect(flashAPIErrors).toHaveBeenCalled();
         }
       });
