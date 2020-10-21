@@ -124,8 +124,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         await alert?.accept();
 
         // accept app leave modal if it pops up
-        const confirmButtonExists = await testSubjects.exists('confirmModalConfirmButton');
-        if (confirmButtonExists) {
+        const appLeaveModalExists = await testSubjects.exists('appLeaveConfirmModal');
+        if (appLeaveModalExists) {
           await testSubjects.click('confirmModalConfirmButton');
         }
 
