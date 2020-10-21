@@ -14,7 +14,7 @@ import { Content, ContentText } from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../../lib/layouts';
 import { getDocOptions } from './get_doc_options';
 import { getFont } from './get_font';
-import { getTemplate } from './get_tempate';
+import { getTemplate } from './get_template';
 
 const assetPath = path.resolve(__dirname, '..', '..', '..', 'common', 'assets');
 const tableBorderWidth = 1;
