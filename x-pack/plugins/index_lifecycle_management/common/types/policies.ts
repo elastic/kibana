@@ -110,7 +110,6 @@ export interface ForcemergeAction {
 export interface LegacyPolicy {
   name: string;
   phases: {
-    warm: WarmPhase;
     cold: ColdPhase;
     delete: DeletePhase;
   };
@@ -152,17 +151,6 @@ export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
   bestCompressionEnabled: boolean;
-}
-
-export interface WarmPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority,
-    PhaseWithForcemergeAction {
-  warmPhaseOnRollover: boolean;
-  shrinkEnabled: boolean;
-  selectedPrimaryShardCount: string;
 }
 
 export interface ColdPhase

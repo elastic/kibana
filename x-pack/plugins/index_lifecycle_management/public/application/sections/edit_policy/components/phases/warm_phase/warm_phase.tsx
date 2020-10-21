@@ -24,7 +24,7 @@ import {
   NumericField,
 } from '../../../../../../shared_imports';
 
-import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../../../common/types';
+import { Phases } from '../../../../../../../common/types';
 
 import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared';
 
@@ -46,7 +46,6 @@ const i18nTexts = {
 };
 
 const warmProperty: keyof Phases = 'warm';
-const phaseProperty = (propertyName: keyof WarmPhaseInterface) => propertyName;
 
 export const WarmPhase: FunctionComponent = () => {
   const { originalPolicy } = useEditPolicyContext();
@@ -112,7 +111,7 @@ export const WarmPhase: FunctionComponent = () => {
                     componentProps={{
                       fullWidth: false,
                       euiFieldProps: {
-                        'data-test-subj': `${warmProperty}-${phaseProperty('warmPhaseOnRollover')}`,
+                        'data-test-subj': `${warmProperty}-warmPhaseOnRollover`,
                       },
                     }}
                   />
@@ -168,7 +167,7 @@ export const WarmPhase: FunctionComponent = () => {
                 componentProps={{
                   fullWidth: false,
                   euiFieldProps: {
-                    'data-test-subj': `${warmProperty}-${phaseProperty('selectedReplicaCount')}`,
+                    'data-test-subj': `${warmProperty}-selectedReplicaCount}`,
                     min: 0,
                   },
                 }}
@@ -211,9 +210,7 @@ export const WarmPhase: FunctionComponent = () => {
                       component={NumericField}
                       componentProps={{
                         euiFieldProps: {
-                          'data-test-subj': `${warmProperty}-${phaseProperty(
-                            'selectedPrimaryShardCount'
-                          )}`,
+                          'data-test-subj': `${warmProperty}-selectedPrimaryShardCount`,
                           min: 1,
                         },
                       }}

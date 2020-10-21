@@ -14,7 +14,6 @@ import {
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
   defaultNewColdPhase,
-  defaultNewWarmPhase,
   defaultSetPriority,
 } from '../constants';
 

@@ -5,14 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ColdPhase,
-  DeletePhase,
-  LegacyPolicy,
-  PolicyFromES,
-  WarmPhase,
-} from '../../../../common/types';
-import { validateWarmPhase } from './warm_phase';
+import { ColdPhase, DeletePhase, LegacyPolicy, PolicyFromES } from '../../../../common/types';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
 
@@ -89,7 +82,6 @@ export type PhaseValidationErrors<T> = {
 };
 
 export interface ValidationErrors {
-  warm: PhaseValidationErrors<WarmPhase>;
   cold: PhaseValidationErrors<ColdPhase>;
   delete: PhaseValidationErrors<DeletePhase>;
   policyName: string[];
@@ -128,19 +120,16 @@ export const validatePolicy = (
     }
   }
 
-  const warmPhaseErrors = validateWarmPhase(policy.phases.warm);
   const coldPhaseErrors = validateColdPhase(policy.phases.cold);
   const deletePhaseErrors = validateDeletePhase(policy.phases.delete);
   const isValid =
     policyNameErrors.length === 0 &&
-    Object.keys(warmPhaseErrors).length === 0 &&
     Object.keys(coldPhaseErrors).length === 0 &&
     Object.keys(deletePhaseErrors).length === 0;
   return [
     isValid,
     {
       policyName: [...policyNameErrors],
-      warm: warmPhaseErrors,
       cold: coldPhaseErrors,
       delete: deletePhaseErrors,
     },
@@ -156,9 +145,6 @@ export const findFirstError = (errors?: ValidationErrors): string | undefined =>
     return propertyof<ValidationErrors>('policyName');
   }
 
-  if (Object.keys(errors.warm).length > 0) {
-    return `${propertyof<ValidationErrors>('warm')}.${Object.keys(errors.warm)[0]}`;
-  }
   if (Object.keys(errors.cold).length > 0) {
     return `${propertyof<ValidationErrors>('cold')}.${Object.keys(errors.cold)[0]}`;
   }
