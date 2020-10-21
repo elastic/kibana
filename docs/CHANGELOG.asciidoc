@@ -47,7 +47,13 @@ This section summarizes the changes in each release.
 [[release-notes-7.9.3]]
 == {kib} 7.9.3
 
-See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+For breaking changes, refer to <<breaking-changes-7.9,breaking changes in 7.9>>.
+
+[float]
+[[enhancement-v7.9.3]]
+=== Enhancement
+Reporting::
+* Increases openUrl timeout config default to 1min {kibana-pull}78322[#78322]
 
 [float]
 [[bug-v7.9.3]]
