@@ -6,13 +6,11 @@
 
 import { resetContext } from 'kea';
 
-import { CredentialsLogic } from './credentials_logic';
-import { ApiTokenTypes } from './constants';
-
+import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: { http: { get: jest.fn(), delete: jest.fn() } } },
+  HttpLogic: { values: mockHttpValues },
 }));
-import { HttpLogic } from '../../../shared/http';
+const { http } = mockHttpValues;
 
 jest.mock('../../../shared/flash_messages', () => ({
   FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn() } },
@@ -31,6 +29,9 @@ jest.mock('../../app_logic', () => ({
   },
 }));
 import { AppLogic } from '../../app_logic';
+
+import { ApiTokenTypes } from './constants';
+import { CredentialsLogic } from './credentials_logic';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -1089,10 +1090,10 @@ describe('CredentialsLogic', () => {
         mount();
         jest.spyOn(CredentialsLogic.actions, 'setCredentialsData').mockImplementationOnce(() => {});
         const promise = Promise.resolve({ meta, results });
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchCredentials(2);
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
           query: {
             'page[current]': 2,
           },
@@ -1104,7 +1105,7 @@ describe('CredentialsLogic', () => {
       it('handles errors', async () => {
         mount();
         const promise = Promise.reject('An error occured');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchCredentials();
         try {
@@ -1122,12 +1123,10 @@ describe('CredentialsLogic', () => {
           .spyOn(CredentialsLogic.actions, 'setCredentialsDetails')
           .mockImplementationOnce(() => {});
         const promise = Promise.resolve(credentialsDetails);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchDetails();
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-          '/api/app_search/credentials/details'
-        );
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials/details');
         await promise;
         expect(CredentialsLogic.actions.setCredentialsDetails).toHaveBeenCalledWith(
           credentialsDetails
@@ -1137,7 +1136,7 @@ describe('CredentialsLogic', () => {
       it('handles errors', async () => {
         mount();
         const promise = Promise.reject('An error occured');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchDetails();
         try {
@@ -1155,12 +1154,10 @@ describe('CredentialsLogic', () => {
         mount();
         jest.spyOn(CredentialsLogic.actions, 'onApiKeyDelete').mockImplementationOnce(() => {});
         const promise = Promise.resolve();
-        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(promise);
+        http.delete.mockReturnValue(promise);
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        expect(HttpLogic.values.http.delete).toHaveBeenCalledWith(
-          `/api/app_search/credentials/${tokenName}`
-        );
+        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/credentials/${tokenName}`);
         await promise;
         expect(CredentialsLogic.actions.onApiKeyDelete).toHaveBeenCalledWith(tokenName);
         expect(setSuccessMessage).toHaveBeenCalled();
@@ -1169,7 +1166,7 @@ describe('CredentialsLogic', () => {
       it('handles errors', async () => {
         mount();
         const promise = Promise.reject('An error occured');
-        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(promise);
+        http.delete.mockReturnValue(promise);
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
         try {
