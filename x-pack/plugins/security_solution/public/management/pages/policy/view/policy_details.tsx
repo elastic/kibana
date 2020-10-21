@@ -6,7 +6,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -53,31 +52,7 @@ import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 const AdvancedPolicyForms = React.memo(() => {
   return (
-    // <EuiFlexGroup>
-    <EuiFlexGrid>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.securitySolution.policyAdvanced.fieldName"
-            defaultMessage="Field Name"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.securitySolution.policyAdvanced.supportedEndpointVersion"
-            defaultMessage="Supported endpoint version"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.securitySolution.policyAdvanced.value"
-            defaultMessage="Value"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer />
-
+    <>
       {AdvancedPolicySchema.map((advancedField, index) => {
         const configPath = advancedField.key.split('.');
         return (
@@ -89,7 +64,7 @@ const AdvancedPolicyForms = React.memo(() => {
           />
         );
       })}
-    </EuiFlexGrid>
+    </>
   );
 });
 
@@ -116,6 +91,7 @@ export const PolicyDetails = React.memo(() => {
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
+  const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
 
@@ -173,6 +149,14 @@ export const PolicyDetails = React.memo(() => {
 
   const handleSaveCancel = useCallback(() => {
     setShowConfirm(false);
+  }, []);
+
+  const handleShowAdvancedPolicyClick = useCallback(() => {
+    setShowAdvancedPolicy(true);
+  }, []);
+
+  const handleHideAdvancedPolicyClick = useCallback(() => {
+    setShowAdvancedPolicy(false);
   }, []);
 
   useEffect(() => {
@@ -293,8 +277,32 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
 
+        {showAdvancedPolicy && (
+          <EuiButtonEmpty
+            data-test-subj="hideAdvancedPolicyButton"
+            onClick={handleHideAdvancedPolicyClick}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.advanced.hide"
+              defaultMessage="Hide advanced settings"
+            />
+          </EuiButtonEmpty>
+        )}
+
+        {!showAdvancedPolicy && (
+          <EuiButtonEmpty
+            data-test-subj="showAdvancedPolicyButton"
+            onClick={handleShowAdvancedPolicyClick}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.advanced.show"
+              defaultMessage="Show advanced settings"
+            />
+          </EuiButtonEmpty>
+        )}
+
         <EuiSpacer size="l" />
-        <AdvancedPolicyForms />
+        {showAdvancedPolicy && <AdvancedPolicyForms />}
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />

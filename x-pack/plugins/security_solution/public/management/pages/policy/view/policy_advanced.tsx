@@ -6,7 +6,7 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
@@ -71,147 +71,22 @@ export const PolicyAdvanced = React.memo(
 
     return (
       <>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <h1>{configPath.join('.')}</h1>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <h1>
+        <EuiFormRow
+          fullWidth
+          label={configPath.join('.')}
+          labelAppend={
+            <EuiText size="xs">
               {lastSupportedVersion
                 ? `${firstSupportedVersion}-${lastSupportedVersion}`
                 : `${firstSupportedVersion}+`}
-            </h1>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFieldText value={value as string} onChange={onChange} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiText>
+          }
+        >
+          <EuiFieldText fullWidth value={value as string} onChange={onChange} />
+        </EuiFormRow>
       </>
     );
   }
 );
-
-// export const PolicyAdvanced = React.memo(() => {
-//   const dispatch = useDispatch();
-//   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
-
-//   const onChange = useCallback(
-//     (configPath: string[]) => (event) => {
-//       if (policyDetailsConfig) {
-//         const newPayload = cloneDeep(policyDetailsConfig);
-
-//         setValue(
-//           (newPayload as unknown) as Record<string, unknown>,
-//           event.target.value,
-//           configPath
-//         );
-//         dispatch({
-//           type: 'userChangedPolicyConfig',
-//           payload: { policyConfig: newPayload },
-//         });
-//         //event.target.focus();
-//       }
-//     },
-//     [dispatch, policyDetailsConfig]
-//   );
-
-// const rawData = [];
-// const columns = [
-//   {
-//     id: 'Field name',
-//   },
-//   {
-//     id: 'Supported endpoint version',
-//   },
-//   {
-//     id: 'Value',
-//     // rowCellRender: function RowCellRender() {
-//     //   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-//     //   return (
-
-//     //   );
-//     // },
-//   },
-// ];
-
-// ((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map((advancedField, index) => {
-//   const configPath = advancedField.key.split('.');
-
-//   const value =
-//     policyDetailsConfig &&
-//     getValue((policyDetailsConfig as unknown) as Record<string, unknown>, configPath);
-
-// const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-// // console.log(configPath, value);
-// return rawData.push({
-//   'Field name': advancedField.key,
-//   'Supported endpoint version': advancedField.last_supported_version
-//     ? `${advancedField.first_supported_version}-${advancedField.last_supported_version}`
-//     : `${advancedField.first_supported_version}+`,
-//   Value: /*<EuiFieldText value={value as string} onChange={onChange(configPath)}/>,*/
-//   <EuiPopover
-//   isOpen={isPopoverOpen}
-//   anchorPosition="upCenter"
-//   button={
-//     <EuiButtonIcon
-//       aria-label="show actions"
-//       iconType="boxesHorizontal"
-//       color="text"
-//       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-//     />
-//   }
-//   closePopover={() => setIsPopoverOpen(false)}
-//   ownFocus={true}>
-// <EuiFieldText value={value as string} onChange={onChange(configPath)}/>
-// </EuiPopover>
-// });
-// });
-
-// Column visibility
-// const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id)); // initialize to the full set of columns
-
-// const renderCellValue = useMemo(() => {
-//   return ({ rowIndex, columnId, setCellProps }) => {
-//     // eslint-disable-next-line react-hooks/rules-of-hooks
-//     useEffect(() => {
-//       if (columnId === 'Value') {
-//         // if (rawData.hasOwnProperty(rowIndex)) {
-//         setCellProps({
-//           style: {
-//             backgroundColor: '#fffcdd',
-//           },
-//         });
-//         // }
-//       }
-//     }, [rowIndex, columnId, setCellProps]);
-
-//     return Object.prototype.hasOwnProperty.call(rawData, rowIndex)
-//       ? rawData[rowIndex][columnId]
-//       : null;
-//   };
-// }, [rawData]);
-
-//   return (
-//     <EuiDataGrid
-//       aria-label="Advanced policy data grid"
-//       columns={columns}
-//       columnVisibility={{ visibleColumns, setVisibleColumns }}
-//       // trailingControlColumns={trailingControlColumns}
-//       rowCount={rawData.length}
-//       renderCellValue={renderCellValue}
-//       // inMemory={{ level: 'sorting' }}
-//       // sorting={{ columns: sortingColumns, onSort }}
-//       // pagination={{
-//       //   ...pagination,
-//       //   pageSizeOptions: [10, 50, 100],
-//       //   onChangeItemsPerPage: onChangeItemsPerPage,
-//       //   onChangePage: onChangePage,
-//       // }}
-//       onColumnResize={(eventData) => {
-//         // console.log(eventData);
-//       }}
-//     />
-//   );
-// });
 
 PolicyAdvanced.displayName = 'PolicyAdvanced';
