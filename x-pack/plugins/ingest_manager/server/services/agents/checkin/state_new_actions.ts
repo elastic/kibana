@@ -5,7 +5,7 @@
  */
 
 import semver from 'semver';
-import Rx, { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
+import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
   shareReplay,

@@ -45,8 +45,6 @@ describe('test agent checkin new action services', () => {
       (getNewActionsSince as jest.MockedFunction<typeof getNewActionsSince>).mockReset();
     });
     it('should work, call get actions until there is new action', async () => {
-      // const scheduler = new VirtualTimeScheduler(undefined, 20000);
-
       const observable = createNewActionsSharedObservable();
 
       getMockedNewActionSince()
