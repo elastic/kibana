@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await performRequest();
-      const defaultHeadersTimeout = 40_000;
+      const defaultHeadersTimeout = 40 * oneSec;
       await delay(defaultHeadersTimeout + oneSec);
       await performRequest();
     });
