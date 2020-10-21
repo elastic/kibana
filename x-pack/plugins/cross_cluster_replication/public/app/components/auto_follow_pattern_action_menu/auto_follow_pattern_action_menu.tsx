@@ -143,7 +143,6 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
       closePopover={() => setShowPopover(false)}
       button={button}
       panelPaddingSize="none"
-      withTitle
       repositionOnScroll
     >
       <EuiContextMenu

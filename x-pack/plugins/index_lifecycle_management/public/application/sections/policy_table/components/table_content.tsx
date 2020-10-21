@@ -306,7 +306,6 @@ export const TableContent: React.FunctionComponent<Props> = ({
           isOpen={isPolicyPopoverOpen(policy.name)}
           closePopover={closePolicyPopover}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="rightUp"
           repositionOnScroll
         >

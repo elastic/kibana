@@ -189,7 +189,6 @@ function AddVariableButton({
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
-      withTitle
     >
       <EuiSelectable
         singleSelection={true}

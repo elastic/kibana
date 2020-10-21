@@ -94,7 +94,6 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         isOpen={showPopover === true}
         closePopover={() => setShowPopover(null)}
         panelPaddingSize="none"
-        withTitle
         anchorPosition="downLeft"
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
@@ -178,7 +177,6 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
           isOpen={showPopover === type}
           closePopover={() => setShowPopover(null)}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="downLeft"
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />

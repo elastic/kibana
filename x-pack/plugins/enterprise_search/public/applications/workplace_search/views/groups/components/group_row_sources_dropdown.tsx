@@ -56,7 +56,6 @@ export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = 
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        withTitle={true}
       >
         <EuiPopoverTitle>{contentSourceCountHeading}</EuiPopoverTitle>
         <div className="euiFilterSelect__items">{sources}</div>

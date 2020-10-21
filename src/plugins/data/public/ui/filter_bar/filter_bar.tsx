@@ -105,7 +105,6 @@ function FilterBarUI(props: Props) {
           isOpen={isAddFilterPopoverOpen}
           closePopover={() => setIsAddFilterPopoverOpen(false)}
           anchorPosition="downLeft"
-          withTitle
           panelPaddingSize="none"
           ownFocus={true}
           initialFocus=".filterEditor__hiddenItem"

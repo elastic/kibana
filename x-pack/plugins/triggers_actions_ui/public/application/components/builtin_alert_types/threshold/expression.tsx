@@ -314,7 +314,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         isOpen={indexPopoverOpen}
         closePopover={closeIndexPopover}
         ownFocus
-        withTitle
         anchorPosition="downLeft"
         zIndex={8000}
         display="block"

@@ -93,7 +93,6 @@ export const FilterPopover = ({
       id={id}
       isOpen={isOpen || forceOpen}
       ownFocus={true}
-      withTitle
       zIndex={10000}
     >
       <EuiPopoverTitle>

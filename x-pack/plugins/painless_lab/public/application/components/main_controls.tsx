@@ -102,7 +102,6 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
                 isOpen={isHelpOpen}
                 closePopover={() => setIsHelpOpen(false)}
                 panelPaddingSize="none"
-                withTitle
                 anchorPosition="upLeft"
               >
                 <EuiContextMenuPanel items={items} />
