@@ -137,7 +137,6 @@ const metricBeatData = [
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const log = getService('log');
 
   describe('existing_fields apis', () => {
     before(async () => {
@@ -163,7 +162,6 @@ export default ({ getService }: FtrProviderContext) => {
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
           })
-          .expect((res) => (res.status !== 200 ? log.warning(res.body) : 0))
           .expect(200);
 
         expect(body.indexPatternTitle).to.eql('logstash-*');

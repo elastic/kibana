@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
@@ -28,7 +28,7 @@ export interface Field {
   script?: string;
 }
 
-export async function existingFieldsRoute(setup: CoreSetup) {
+export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
   const router = setup.http.createRouter();
 
   router.post(
@@ -56,6 +56,9 @@ export async function existingFieldsRoute(setup: CoreSetup) {
           }),
         });
       } catch (e) {
+        logger.info(
+          `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
+        );
         if (e.status === 404) {
           return res.notFound({ body: e.message });
         }
