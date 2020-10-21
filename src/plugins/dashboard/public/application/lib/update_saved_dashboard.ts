@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
+import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { DashboardAppState } from '../../types';
@@ -28,6 +29,7 @@ export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
   appState: DashboardAppState,
   timeFilter: TimefilterContract,
+  hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard,
   toJson: <T>(object: T) => string
 ) {
   savedDashboard.title = appState.title;
@@ -35,6 +37,10 @@ export function updateSavedDashboard(
   savedDashboard.timeRestore = appState.timeRestore;
   savedDashboard.panelsJSON = toJson(appState.panels);
   savedDashboard.optionsJSON = toJson(appState.options);
+
+  if (hasTaggingCapabilities(savedDashboard)) {
+    savedDashboard.setTags(appState.tags);
+  }
 
   savedDashboard.timeFrom = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)

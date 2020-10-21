@@ -42,6 +42,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
+    tags?: string[];
   }
 
   class DashboardPage {
@@ -341,6 +342,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
+      if (saveOptions.tags) {
+        await this.selectDashboardTags(saveOptions.tags);
+      }
+
       await this.clickSave();
       if (saveOptions.waitDialogIsClosed) {
         await testSubjects.waitForDeleted(modalDialog);
@@ -349,6 +354,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async ensureDuplicateTitleCallout() {
       await testSubjects.existOrFail('titleDupicateWarnMsg');
+    }
+
+    public async selectDashboardTags(tagIds: string[]) {
+      await testSubjects.click('savedObjectTagSelector');
+      for (const tagId of tagIds) {
+        await testSubjects.click(`tagSelectorOption-${tagId}`);
+      }
+      await testSubjects.click('savedObjectTitle');
     }
 
     /**

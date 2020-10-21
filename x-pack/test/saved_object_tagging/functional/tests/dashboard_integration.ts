@@ -79,12 +79,45 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('creating', () => {
-      // feature not implemented yet
+    describe('creating', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+
+      it('allow to select tags for a new dashboard', async () => {
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await PageObjects.dashboard.saveDashboard('my-new-dashboard', {
+          tags: ['tag-1', 'tag-3'],
+        });
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await selectFilterTags('tag-1');
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('my-new-dashboard');
+      });
     });
 
-    describe.skip('editing', () => {
-      // feature not implemented yet
+    describe('editing', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+
+      it('allow to select tags for an existing dashboard', async () => {
+        await listingTable.clickItemLink('dashboard', 'dashboard 4 with real data (tag-1)');
+
+        await PageObjects.dashboard.switchToEditMode();
+        await PageObjects.dashboard.saveDashboard('dashboard 4 with real data (tag-1)', {
+          tags: ['tag-3'],
+        });
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await selectFilterTags('tag-3');
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('dashboard 4 with real data (tag-1)');
+      });
     });
   });
 }

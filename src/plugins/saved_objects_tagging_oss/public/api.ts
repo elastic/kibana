@@ -34,6 +34,11 @@ export interface SavedObjectsTaggingApi {
 }
 
 /**
+ * @public
+ */
+export type SavedObjectTagDecoratorTypeGuard = SavedObjectsTaggingApiUi['hasTagDecoration'];
+
+/**
  * React components and utility methods to use the SO tagging feature
  *
  * @public

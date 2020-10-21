@@ -32,6 +32,7 @@ export {
   ParsedSearchQuery,
   ParseSearchQueryOptions,
   SavedObjectSaveModalTagSelectorComponentProps,
+  SavedObjectTagDecoratorTypeGuard,
 } from './api';
 
 export { TagDecoratedSavedObject } from './decorator';

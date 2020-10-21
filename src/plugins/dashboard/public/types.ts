@@ -81,6 +81,7 @@ export interface DashboardAppState {
   fullScreenMode: boolean;
   title: string;
   description: string;
+  tags: string[];
   timeRestore: boolean;
   options: {
     hidePanelTitles: boolean;
