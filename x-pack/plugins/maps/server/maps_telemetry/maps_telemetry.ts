@@ -298,43 +298,49 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
   };
 }
 
-export async function getMapsTelemetry(config: MapsConfigType) {
+export async function execTransformOverMultipleSavedObjectPages(
+  savedObjectType: string,
+  transform: (savedObjects: Array<SavedObject<T>>) => void
+) {
   const savedObjectsClient = getInternalRepository();
 
-  // Harvest layers lists from saved maps for each page of results
   let currentPage = 1;
-  let perPage = 2; // Seed value
-  let total = 3; // Seed value
+  // Seed values
+  let page = 1;
+  let perPage = 2;
+  let total = 3;
   let savedObjects = [];
-  let layerLists: LayerDescriptor[][] = [];
-  while (currentPage <= Math.ceil(total / perPage)) {
-    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find<
-      SavedObjectAttributes
-    >({
-      type: MAP_SAVED_OBJECT_TYPE,
+
+  do {
+    const savedObjectsFindResult = await savedObjectsClient.find<SavedObjectAttributes>({
+      type: savedObjectType,
       page: currentPage++,
-    }));
-    const currentPageLayerLists = getLayerLists(savedObjects);
-    layerLists = layerLists.concat(currentPageLayerLists);
-  }
+    });
+    ({ page, per_page: perPage, saved_objects: savedObjects, total } = savedObjectsFindResult);
+    transform(savedObjects);
+  } while (page * perPage < total);
+}
+
+export async function getMapsTelemetry(config: MapsConfigType) {
+  // Get layer descriptors for Maps saved objects. This is not set up
+  // to be done incrementally (i.e. - per page) but minimally we at least
+  // build a list of small footprint objects
+  let layerLists: LayerDescriptor[][] = [];
+  await execTransformOverMultipleSavedObjectPages(
+    MAP_SAVED_OBJECT_TYPE,
+    (savedObjects) => (layerLists = layerLists.concat(getLayerLists(savedObjects)))
+  );
   const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
 
-  // Harvest index patterns saved objects
-  currentPage = 1;
+  // Incrementally harvest index pattern saved objects telemetry
   const indexPatternsTelemetry = {};
-  while (currentPage <= Math.ceil(total / perPage)) {
-    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find<
-      IndexPatternAttributes
-    >({
-      type: 'index-pattern',
-      page: currentPage++,
-    }));
+  await execTransformOverMultipleSavedObjectPages('index-pattern', (savedObjects) =>
     _.mergeWith(
       indexPatternsTelemetry,
       buildMapsIndexPatternsTelemetry((savedObjects as unknown) as IIndexPattern[], layerLists),
-      (srcVal, objVal) => srcVal || 0 + objVal || 0
-    );
-  }
+      (prevVal, currVal) => prevVal || 0 + currVal || 0 // Additive merge
+    )
+  );
 
   return {
     settings: {
