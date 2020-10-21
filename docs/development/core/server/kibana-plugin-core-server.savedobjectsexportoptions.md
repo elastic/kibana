@@ -21,6 +21,7 @@ export interface SavedObjectsExportOptions
 |  [includeReferencesDeep](./kibana-plugin-core-server.savedobjectsexportoptions.includereferencesdeep.md) | <code>boolean</code> | flag to also include all related saved objects in the export stream. |
 |  [namespace](./kibana-plugin-core-server.savedobjectsexportoptions.namespace.md) | <code>string</code> | optional namespace to override the namespace used by the savedObjectsClient. |
 |  [objects](./kibana-plugin-core-server.savedobjectsexportoptions.objects.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;</code> | optional array of objects to export. |
+|  [references](./kibana-plugin-core-server.savedobjectsexportoptions.references.md) | <code>SavedObjectsFindOptionsReference[]</code> | optional array of references to search object for when exporting by types |
 |  [savedObjectsClient](./kibana-plugin-core-server.savedobjectsexportoptions.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> | an instance of the SavedObjectsClient. |
 |  [search](./kibana-plugin-core-server.savedobjectsexportoptions.search.md) | <code>string</code> | optional query string to filter exported objects. |
 |  [types](./kibana-plugin-core-server.savedobjectsexportoptions.types.md) | <code>string[]</code> | optional array of saved object types. |

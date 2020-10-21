@@ -728,7 +728,7 @@ export interface Explanation {
 }
 
 // @public
-export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
+export function exportSavedObjectsToStream({ types, references, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
 // @public
 export interface FakeRequest {
@@ -2158,6 +2158,7 @@ export interface SavedObjectsExportOptions {
         id: string;
         type: string;
     }>;
+    references?: SavedObjectsFindOptionsReference[];
     savedObjectsClient: SavedObjectsClientContract;
     search?: string;
     types?: string[];
