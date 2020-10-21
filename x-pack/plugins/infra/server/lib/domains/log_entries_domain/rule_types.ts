@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { JsonValue } from '../../../../common/typed_json';
+
 export interface LogMessageFormattingRule {
   when: LogMessageFormattingCondition;
   format: LogMessageFormattingInstruction[];
@@ -19,9 +21,11 @@ export interface LogMessageFormattingExistsCondition {
 
 export interface LogMessageFormattingFieldValueCondition {
   values: {
-    [fieldName: string]: string | number | boolean | null;
+    [fieldName: string]: LogMessageFormattingFieldValueConditionValue;
   };
 }
+
+export type LogMessageFormattingFieldValueConditionValue = JsonValue;
 
 export type LogMessageFormattingInstruction =
   | LogMessageFormattingFieldReference

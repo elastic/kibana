@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import stringify from 'json-stable-stringify';
-
-import { InfraLogMessageSegment } from '../../../graphql/types';
+import { LogMessagePart } from '../../../../common/http_api/log_entries';
+import { JsonArray, JsonValue } from '../../../../common/typed_json';
 import {
   LogMessageFormattingCondition,
+  LogMessageFormattingFieldValueConditionValue,
   LogMessageFormattingInstruction,
   LogMessageFormattingRule,
 } from './rule_types';
@@ -30,7 +30,7 @@ export function compileFormattingRules(
         )
       )
     ),
-    format(fields, highlights): InfraLogMessageSegment[] {
+    format(fields, highlights): LogMessagePart[] {
       for (const compiledRule of compiledRules) {
         if (compiledRule.fulfillsCondition(fields)) {
           return compiledRule.format(fields, highlights);
@@ -83,8 +83,8 @@ const compileFieldValueCondition = (condition: LogMessageFormattingCondition) =>
     ? {
         conditionFields: Object.keys(condition.values),
         fulfillsCondition: (fields: Fields) =>
-          Object.entries(condition.values).every(
-            ([fieldName, expectedValue]) => fields[fieldName] === expectedValue
+          Object.entries(condition.values).every(([fieldName, expectedValue]) =>
+            equalsOrContains(fields[fieldName] ?? [], expectedValue)
           ),
       }
     : null;
@@ -138,13 +138,13 @@ const compileFieldReferenceFormattingInstruction = (
     ? {
         formattingFields: [formattingInstruction.field],
         format: (fields, highlights) => {
-          const value = fields[formattingInstruction.field];
-          const highlightedValues = highlights[formattingInstruction.field];
+          const value = fields[formattingInstruction.field] ?? [];
+          const highlightedValues = highlights[formattingInstruction.field] ?? [];
           return [
             {
               field: formattingInstruction.field,
-              value: typeof value === 'object' ? stringify(value) : `${value}`,
-              highlights: highlightedValues || [],
+              value,
+              highlights: highlightedValues,
             },
           ];
         },
@@ -165,8 +165,21 @@ const compileConstantFormattingInstruction = (
       }
     : null;
 
+const equalsOrContains = (
+  operand: JsonValue,
+  value: LogMessageFormattingFieldValueConditionValue
+): boolean => {
+  if (Array.isArray(operand)) {
+    return operand.includes(value);
+  } else if (typeof operand === 'object' && operand !== null) {
+    return Object.values(operand).includes(value);
+  } else {
+    return operand === value;
+  }
+};
+
 export interface Fields {
-  [fieldName: string]: string | number | object | boolean | null;
+  [fieldName: string]: JsonArray;
 }
 
 export interface Highlights {
@@ -176,7 +189,7 @@ export interface Highlights {
 export interface CompiledLogMessageFormattingRule {
   requiredFields: string[];
   fulfillsCondition(fields: Fields): boolean;
-  format(fields: Fields, highlights: Highlights): InfraLogMessageSegment[];
+  format(fields: Fields, highlights: Highlights): LogMessagePart[];
 }
 
 export interface CompiledLogMessageFormattingCondition {
@@ -186,5 +199,5 @@ export interface CompiledLogMessageFormattingCondition {
 
 export interface CompiledLogMessageFormattingInstruction {
   formattingFields: string[];
-  format(fields: Fields, highlights: Highlights): InfraLogMessageSegment[];
+  format(fields: Fields, highlights: Highlights): LogMessagePart[];
 }

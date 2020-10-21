@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
 import { timeMilliseconds } from 'd3-time';
+import { fold, map } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
 import { compact, first } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
-import { identity, constant } from 'fp-ts/lib/function';
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonValue } from '../../../../common/typed_json';
+import { JsonArray } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
   LogEntriesParams,
@@ -231,13 +229,14 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
 function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): LogEntryDocument[] {
   return hits.map((hit) => {
-    const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
-      (flattenedFields, field) => {
-        if (field in hit.fields) {
-          flattenedFields[field] = hit.fields[field][0];
-        }
-        return flattenedFields;
-      },
+    const logFields = fields.reduce<{ [fieldName: string]: JsonArray }>(
+      (flattenedFields, field) =>
+        field in hit.fields
+          ? {
+              ...flattenedFields,
+              [field]: hit.fields[field],
+            }
+          : flattenedFields,
       {}
     );
 
@@ -338,8 +337,9 @@ const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
   }),
 ]);
 
-export interface LogSummaryDateRangeBucket
-  extends runtimeTypes.TypeOf<typeof LogSummaryDateRangeBucketRuntimeType> {}
+export type LogSummaryDateRangeBucket = runtimeTypes.TypeOf<
+  typeof LogSummaryDateRangeBucketRuntimeType
+>;
 
 const LogSummaryResponseRuntimeType = runtimeTypes.type({
   aggregations: runtimeTypes.type({
@@ -349,5 +349,4 @@ const LogSummaryResponseRuntimeType = runtimeTypes.type({
   }),
 });
 
-export interface LogSummaryResponse
-  extends runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType> {}
+export type LogSummaryResponse = runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType>;

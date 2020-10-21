@@ -5,17 +5,16 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import stringify from 'json-stable-stringify';
-
 import { euiStyled } from '../../../../../observability/public';
+import { LogColumn, LogMessagePart } from '../../../../common/http_api';
 import {
   isConstantSegment,
   isFieldSegment,
+  isHighlightFieldSegment,
   isHighlightMessageColumn,
   isMessageColumn,
-  isHighlightFieldSegment,
 } from '../../../utils/log_entry';
-import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
+import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
 import {
   longWrappedContentStyle,
@@ -23,7 +22,6 @@ import {
   unwrappedContentStyle,
   WrapMode,
 } from './text_styles';
-import { LogColumn, LogMessagePart } from '../../../../common/http_api';
 
 interface LogEntryMessageColumnProps {
   columnValue: LogColumn;
@@ -65,10 +63,10 @@ const formatMessageSegments = (
   highlights: LogColumn[],
   isActiveHighlight: boolean
 ) =>
-  messageSegments.map((messageSegment, index) =>
-    formatMessageSegment(
-      messageSegment,
-      highlights.map((highlight) => {
+  messageSegments.map((messageSegment, index) => {
+    if (isFieldSegment(messageSegment)) {
+      // we only support one highlight for now
+      const [firstHighlight = []] = highlights.map((highlight) => {
         if (isHighlightMessageColumn(highlight)) {
           const segment = highlight.message[index];
           if (isHighlightFieldSegment(segment)) {
@@ -76,30 +74,19 @@ const formatMessageSegments = (
           }
         }
         return [];
-      }),
-      isActiveHighlight
-    )
-  );
+      });
 
-const formatMessageSegment = (
-  messageSegment: LogMessagePart,
-  [firstHighlight = []]: string[][], // we only support one highlight for now
-  isActiveHighlight: boolean
-): React.ReactNode => {
-  if (isFieldSegment(messageSegment)) {
-    const value =
-      typeof messageSegment.value === 'string'
-        ? messageSegment.value
-        : stringify(messageSegment.value);
+      return (
+        <FieldValue
+          highlightTerms={firstHighlight}
+          isActiveHighlight={isActiveHighlight}
+          key={`MessageSegment-${index}`}
+          value={messageSegment.value}
+        />
+      );
+    } else if (isConstantSegment(messageSegment)) {
+      return messageSegment.constant;
+    }
 
-    return highlightFieldValue(
-      value,
-      firstHighlight,
-      isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
-    );
-  } else if (isConstantSegment(messageSegment)) {
-    return messageSegment.constant;
-  }
-
-  return 'failed to format message';
-};
+    return 'failed to format message';
+  });
