@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -26,9 +26,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['visualize', 'timePicker', 'visEditor', 'visChart']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'timePicker',
+    'visEditor',
+    'visChart',
+    'legacyDataTableVis',
+  ]);
 
-  describe('data table', function indexPatternCreation() {
+  describe('legacy data table visualization', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';
 
     before(async function () {
@@ -98,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show percentage columns', async () => {
       async function expectValidTableData() {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           ['≥ 0B and < 1,000B', '1,351', '64.703%'],
           ['≥ 1,000B and < 1.953KB', '737', '35.297%'],
@@ -141,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
       await PageObjects.visEditor.clickOptionsTab();
 
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await PageObjects.legacyDataTableVis.getTableVisContent();
       expect(data).to.be.eql([
         ['≥ 0B and < 1,000B', '344.094B'],
         ['≥ 1,000B and < 1.953KB', '1.697KB'],
@@ -158,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Terms', 'metrics', true);
       await PageObjects.visEditor.selectField('geo.src', 'metrics', true);
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await PageObjects.legacyDataTableVis.getTableVisContent();
       expect(data).to.be.eql([['14,004', '1,412.6']]);
     });
 
@@ -172,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectField('@timestamp');
       await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await PageObjects.legacyDataTableVis.getTableVisContent();
       expect(data).to.be.eql([
         ['2015-09-20', '4,757'],
         ['2015-09-21', '4,614'],
@@ -183,14 +189,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await PageObjects.legacyDataTableVis.getTableVisContent();
       expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
 
     it('should correctly filter for pinned filters', async () => {
       await filterBar.toggleFilterPinned('@timestamp');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await PageObjects.legacyDataTableVis.getTableVisContent();
       expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
 
@@ -203,7 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Top Hit', 'metrics');
       await PageObjects.visEditor.selectField('agent.raw', 'metrics');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await PageObjects.legacyDataTableVis.getTableVisContent();
       log.debug(data);
       expect(data.length).to.be.greaterThan(0);
     });
@@ -217,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Range');
       await PageObjects.visEditor.selectField('bytes');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await PageObjects.legacyDataTableVis.getTableVisContent();
       expect(data).to.be.eql([
         ['≥ 0B and < 1,000B', '1,351'],
         ['≥ 1,000B and < 1.953KB', '737'],
@@ -242,7 +248,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show correct data', async () => {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', '9,109'],
           ['css', '2,159'],
@@ -251,9 +257,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should apply correct filter', async () => {
-        await PageObjects.visChart.filterOnTableCell(1, 3);
+        await PageObjects.legacyDataTableVis.filterOnTableCell(1, 3);
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           ['png', '1,373'],
           ['gif', '918'],
@@ -281,7 +287,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show correct data without showMetricsAtAllLevels', async () => {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', 'CN', '1,718'],
           ['jpg', 'IN', '1,511'],
@@ -300,7 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickOptionsTab();
         await testSubjects.setCheckbox('showPartialRows', 'check');
         await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', 'CN', '1,718'],
           ['jpg', 'IN', '1,511'],
@@ -319,7 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickOptionsTab();
         await testSubjects.setCheckbox('showMetricsAtAllLevels', 'check');
         await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', '9,109', 'CN', '1,718'],
           ['jpg', '9,109', 'IN', '1,511'],
@@ -340,7 +346,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Average', 'metrics');
         await PageObjects.visEditor.selectField('bytes', 'metrics');
         await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', '9,109', '5.469KB', 'CN', '1,718', '5.477KB'],
           ['jpg', '9,109', '5.469KB', 'IN', '1,511', '5.456KB'],
@@ -381,7 +387,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should have a splitted table', async () => {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           [
             ['CN', 'CN', '330'],
@@ -412,7 +418,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickOptionsTab();
         await testSubjects.setCheckbox('showMetricsAtAllLevels', 'check');
         await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await PageObjects.legacyDataTableVis.getTableVisContent();
         expect(data).to.be.eql([
           [
             ['CN', '1,718', 'CN', '330'],
