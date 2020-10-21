@@ -105,6 +105,7 @@ function GroupSelection(props: GroupSelectionProps) {
                 <EuiCard
                   titleSize="xs"
                   layout="horizontal"
+                  onClick={() => props.toggleGroups(false)}
                   title={
                     <span data-test-subj="visGroupAggBasedTitle">
                       {i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
