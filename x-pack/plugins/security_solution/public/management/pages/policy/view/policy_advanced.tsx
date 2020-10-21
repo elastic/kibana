@@ -6,10 +6,12 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
+import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
@@ -35,7 +37,37 @@ function getValue(obj: Record<string, unknown>, path: string[]) {
   return currentPolicyConfig[path[path.length - 1]];
 }
 
-export const PolicyAdvanced = React.memo(
+export const AdvancedPolicyForms = React.memo(() => {
+  return (
+    <>
+      <EuiText size="xs" color="subdued">
+        <h4>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.advanced"
+            defaultMessage="Advanced settings"
+          />
+        </h4>
+      </EuiText>
+      <EuiPanel paddingSize="s">
+        {AdvancedPolicySchema.map((advancedField, index) => {
+          const configPath = advancedField.key.split('.');
+          return (
+            <PolicyAdvanced
+              key={index}
+              configPath={configPath}
+              firstSupportedVersion={advancedField.first_supported_version}
+              lastSupportedVersion={advancedField.last_supported_version}
+            />
+          );
+        })}
+      </EuiPanel>
+    </>
+  );
+});
+
+AdvancedPolicyForms.displayName = 'AdvancedPolicyForms';
+
+const PolicyAdvanced = React.memo(
   ({
     configPath,
     firstSupportedVersion,

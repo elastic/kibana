@@ -47,28 +47,7 @@ import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { PolicyAdvanced } from './policy_advanced';
-import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
-
-const AdvancedPolicyForms = React.memo(() => {
-  return (
-    <>
-      {AdvancedPolicySchema.map((advancedField, index) => {
-        const configPath = advancedField.key.split('.');
-        return (
-          <PolicyAdvanced
-            key={index}
-            configPath={configPath}
-            firstSupportedVersion={advancedField.first_supported_version}
-            lastSupportedVersion={advancedField.last_supported_version}
-          />
-        );
-      })}
-    </>
-  );
-});
-
-AdvancedPolicyForms.displayName = 'AdvancedPolicyForms';
+import { AdvancedPolicyForms } from './policy_advanced';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -151,13 +130,9 @@ export const PolicyDetails = React.memo(() => {
     setShowConfirm(false);
   }, []);
 
-  const handleShowAdvancedPolicyClick = useCallback(() => {
-    setShowAdvancedPolicy(true);
-  }, []);
-
-  const handleHideAdvancedPolicyClick = useCallback(() => {
-    setShowAdvancedPolicy(false);
-  }, []);
+  const handleAdvancedPolicyClick = useCallback(() => {
+    setShowAdvancedPolicy(!showAdvancedPolicy);
+  }, [showAdvancedPolicy]);
 
   useEffect(() => {
     if (!routeState && locationRouteState) {
@@ -277,29 +252,13 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
 
-        {showAdvancedPolicy && (
-          <EuiButtonEmpty
-            data-test-subj="hideAdvancedPolicyButton"
-            onClick={handleHideAdvancedPolicyClick}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.advanced.hide"
-              defaultMessage="Hide advanced settings"
-            />
-          </EuiButtonEmpty>
-        )}
-
-        {!showAdvancedPolicy && (
-          <EuiButtonEmpty
-            data-test-subj="showAdvancedPolicyButton"
-            onClick={handleShowAdvancedPolicyClick}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.advanced.show"
-              defaultMessage="Show advanced settings"
-            />
-          </EuiButtonEmpty>
-        )}
+        <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.advanced"
+            defaultMessage="{status} advanced settings"
+            values={{ status: showAdvancedPolicy ? 'Hide' : 'Show' }}
+          />
+        </EuiButtonEmpty>
 
         <EuiSpacer size="l" />
         {showAdvancedPolicy && <AdvancedPolicyForms />}

@@ -199,26 +199,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               },
               policy: {
                 linux: {
-                  advanced: {
-                    elasticsearch: {
-                      tls: {
-                        verify_hostname: '',
-                        verify_peer: '',
-                      },
-                    },
-                  },
                   events: { file: false, network: true, process: true },
                   logging: { file: 'info' },
                 },
                 mac: {
-                  advanced: {
-                    elasticsearch: {
-                      tls: {
-                        verify_hostname: '',
-                        verify_peer: '',
-                      },
-                    },
-                  },
                   events: { file: false, network: true, process: true },
                   logging: { file: 'info' },
                   malware: { mode: 'prevent' },
@@ -230,14 +214,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                 },
                 windows: {
-                  advanced: {
-                    elasticsearch: {
-                      tls: {
-                        verify_hostname: '',
-                        verify_peer: '',
-                      },
-                    },
-                  },
                   events: {
                     dll_and_driver_load: true,
                     dns: true,
