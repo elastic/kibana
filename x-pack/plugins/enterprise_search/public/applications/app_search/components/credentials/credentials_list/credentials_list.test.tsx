@@ -8,11 +8,14 @@ import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 
-import { CredentialsList } from './credentials_list';
-import { EuiBasicTable, EuiCopy } from '@elastic/eui';
 import { IApiToken } from '../types';
 import { ApiTokenTypes } from '../constants';
+
+import { HiddenText } from '../../../../shared/hidden_text';
+import { Key } from './key';
+import { CredentialsList } from './credentials_list';
 
 describe('Credentials', () => {
   const apiToken: IApiToken = {
@@ -26,7 +29,7 @@ describe('Credentials', () => {
 
   // Kea mocks
   const values = {
-    apiTokens: [],
+    apiTokens: [apiToken],
     meta: {
       page: {
         current: 1,
@@ -75,6 +78,19 @@ describe('Credentials', () => {
       const wrapper = shallow(<CredentialsList />);
       const { items } = wrapper.find(EuiBasicTable).props();
       expect(items.map((i: IApiToken) => i.id)).toEqual([undefined, 1, 2]);
+    });
+  });
+
+  describe('empty state', () => {
+    it('renders an EuiEmptyState when no credentials are available', () => {
+      setMockValues({
+        ...values,
+        apiTokens: [],
+      });
+
+      const wrapper = shallow(<CredentialsList />);
+      expect(wrapper.exists(EuiEmptyPrompt)).toBe(true);
+      expect(wrapper.exists(EuiBasicTable)).toBe(false);
     });
   });
 
@@ -149,20 +165,10 @@ describe('Credentials', () => {
     });
 
     describe('column 3 (key)', () => {
-      const testToken = {
+      const token = {
         ...apiToken,
         key: 'abc-123',
       };
-
-      it('renders the credential and a button to copy it', () => {
-        const copyMock = jest.fn();
-        const column = columns[2];
-        const wrapper = shallow(<div>{column.render(testToken)}</div>);
-        const children = wrapper.find(EuiCopy).props().children;
-        const copyEl = shallow(<div>{children(copyMock)}</div>);
-        expect(copyEl.find('EuiButtonIcon').props().onClick).toEqual(copyMock);
-        expect(copyEl.text()).toContain('abc-123');
-      });
 
       it('renders nothing if no key is present', () => {
         const tokenWithNoKey = {
@@ -171,6 +177,35 @@ describe('Credentials', () => {
         const column = columns[2];
         const wrapper = shallow(<div>{column.render(tokenWithNoKey)}</div>);
         expect(wrapper.text()).toBe('');
+      });
+
+      it('renders an EuiCopy component with the key', () => {
+        const column = columns[2];
+        const wrapper = shallow(<div>{column.render(token)}</div>);
+        expect(wrapper.find(EuiCopy).props().textToCopy).toEqual('abc-123');
+      });
+
+      it('renders a HiddenText component with the key', () => {
+        const column = columns[2];
+        const wrapper = shallow(<div>{column.render(token)}</div>)
+          .find(EuiCopy)
+          .dive();
+        expect(wrapper.find(HiddenText).props().text).toEqual('abc-123');
+      });
+
+      it('renders a Key component', () => {
+        const column = columns[2];
+        const wrapper = shallow(<div>{column.render(token)}</div>)
+          .find(EuiCopy)
+          .dive()
+          .find(HiddenText)
+          .dive();
+        expect(wrapper.find(Key).props()).toEqual({
+          copy: expect.any(Function),
+          toggleIsHidden: expect.any(Function),
+          isHidden: expect.any(Boolean),
+          text: <span aria-label="Hidden text">•••••••</span>,
+        });
       });
     });
 

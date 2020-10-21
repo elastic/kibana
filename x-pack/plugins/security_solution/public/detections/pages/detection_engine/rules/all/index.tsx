@@ -34,6 +34,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
@@ -53,6 +54,7 @@ import { hasMlAdminPermissions } from '../../../../../../common/machine_learning
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { isBoolean } from '../../../../../common/utils/privileges';
 
 const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -179,6 +181,17 @@ export const AllRules = React.memo<AllRulesProps>(
       rulesNotInstalled,
       rulesNotUpdated
     );
+    const {
+      services: {
+        application: {
+          capabilities: { actions },
+        },
+      },
+    } = useKibana();
+
+    const hasActionsPrivileges = useMemo(() => (isBoolean(actions.show) ? actions.show : true), [
+      actions,
+    ]);
 
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
@@ -188,6 +201,7 @@ export const AllRules = React.memo<AllRulesProps>(
             dispatch,
             dispatchToaster,
             hasMlPermissions,
+            hasActionsPrivileges,
             loadingRuleIds,
             selectedRuleIds,
             reFetchRules: reFetchRulesData,
@@ -203,6 +217,7 @@ export const AllRules = React.memo<AllRulesProps>(
         reFetchRulesData,
         rules,
         selectedRuleIds,
+        hasActionsPrivileges,
       ]
     );
 
@@ -244,6 +259,7 @@ export const AllRules = React.memo<AllRulesProps>(
             ? loadingRuleIds
             : [],
         reFetchRules: reFetchRulesData,
+        hasReadActionsPrivileges: hasActionsPrivileges,
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
