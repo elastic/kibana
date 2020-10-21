@@ -50,7 +50,6 @@ describe('SessionManagementService', () => {
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         [SESSION_INDEX_CLEANUP_TASK_NAME]: {
           title: 'Cleanup expired or invalid user sessions',
-          type: SESSION_INDEX_CLEANUP_TASK_NAME,
           createTaskRunner: expect.any(Function),
         },
       });
