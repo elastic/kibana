@@ -17,8 +17,12 @@
  * under the License.
  */
 
-import { IndexPattern, IndexPatternField, FieldFormatInstanceType } from 'src/plugins/data/public';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import {
+  IndexPattern,
+  IndexPatternField,
+  FieldFormatInstanceType,
+  IndexPatternsService,
+} from 'src/plugins/data/public';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -96,7 +100,11 @@ const field = {
   format: new Format(),
 };
 
-const services = { redirectAway: () => {}, saveIndexPattern: async () => {} };
+const services = {
+  redirectAway: () => {},
+  saveIndexPattern: async () => {},
+  indexPatternService: {} as IndexPatternsService,
+};
 
 describe('FieldEditor', () => {
   let indexPattern: IndexPattern;
@@ -117,6 +125,7 @@ describe('FieldEditor', () => {
     indexPattern = ({
       fields,
       getFormatterForField: () => ({ params: () => ({}) }),
+      getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
     } as unknown) as IndexPattern;
   });
 

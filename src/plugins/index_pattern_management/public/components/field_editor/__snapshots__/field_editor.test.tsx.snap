@@ -30,6 +30,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -281,6 +282,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -532,6 +534,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -812,6 +815,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -1144,6 +1148,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             "getByName": [Function],
           },
           "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}

@@ -29,6 +29,7 @@ import {
   ExpressionFunctionVarSet,
   ExpressionFunctionVar,
   ExpressionFunctionTheme,
+  ExpressionFunctionCumulativeSum,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
 import { PersistableStateDefinition } from '../../../kibana_utils/common';
@@ -131,4 +132,5 @@ export interface ExpressionFunctionDefinitions {
   var_set: ExpressionFunctionVarSet;
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;
+  cumulative_sum: ExpressionFunctionCumulativeSum;
 }

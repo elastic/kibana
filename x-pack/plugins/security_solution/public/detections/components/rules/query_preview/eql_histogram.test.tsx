@@ -39,7 +39,6 @@ describe('PreviewEqlQueryHistogram', () => {
           <PreviewEqlQueryHistogram
             to="2020-07-08T08:20:18.966Z"
             from="2020-07-07T08:20:18.966Z"
-            query="file where true"
             data={[]}
             totalCount={0}
             inspect={{ dsl: [], response: [] }}
@@ -53,7 +52,7 @@ describe('PreviewEqlQueryHistogram', () => {
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
-    ).toEqual(i18n.PREVIEW_SUBTITLE_LOADING);
+    ).toEqual(i18n.QUERY_PREVIEW_SUBTITLE_LOADING);
   });
 
   test('it configures data and subtitle', () => {
@@ -63,7 +62,6 @@ describe('PreviewEqlQueryHistogram', () => {
           <PreviewEqlQueryHistogram
             to="2020-07-08T08:20:18.966Z"
             from="2020-07-07T08:20:18.966Z"
-            query="file where true"
             data={[
               { x: 1602247050000, y: 2314, g: 'All others' },
               { x: 1602247162500, y: 3471, g: 'All others' },
@@ -115,7 +113,6 @@ describe('PreviewEqlQueryHistogram', () => {
           <PreviewEqlQueryHistogram
             to="2020-07-08T08:20:18.966Z"
             from="2020-07-07T08:20:18.966Z"
-            query="file where true"
             data={[]}
             totalCount={0}
             inspect={{ dsl: ['some dsl'], response: ['query response'] }}
@@ -132,5 +129,33 @@ describe('PreviewEqlQueryHistogram', () => {
       loading: false,
       refetch: mockRefetch,
     });
+  });
+
+  test('it displays histogram', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <TestProviders>
+          <PreviewEqlQueryHistogram
+            to="2020-07-08T08:20:18.966Z"
+            from="2020-07-07T08:20:18.966Z"
+            data={[
+              { x: 1602247050000, y: 2314, g: 'All others' },
+              { x: 1602247162500, y: 3471, g: 'All others' },
+              { x: 1602247275000, y: 3369, g: 'All others' },
+            ]}
+            totalCount={9154}
+            inspect={{ dsl: [], response: [] }}
+            refetch={jest.fn()}
+            isLoading={false}
+          />
+        </TestProviders>
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-subj="sharedPreviewQueryNoHistogramAvailable"]').exists()
+    ).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="sharedPreviewQueryHistogram"]').exists()).toBeTruthy();
   });
 });
