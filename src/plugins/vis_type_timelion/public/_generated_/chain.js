@@ -1,4 +1,4 @@
-module.exports = (function() {
+const { parse } = (function() {
   "use strict";
 
   /*
@@ -1778,3 +1778,4 @@ module.exports = (function() {
     parse:       peg$parse
   };
 })();
+export { parse };
