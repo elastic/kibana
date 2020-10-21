@@ -42,7 +42,7 @@ export const VislibWrapper = ({
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<any>(null);
 
-  const updateChartSize = useMemo(
+  const updateChart = useMemo(
     () =>
       debounce(() => {
         if (visController.current) {
@@ -63,10 +63,18 @@ export const VislibWrapper = ({
     };
   }, [Controller, chartDiv, handlers]);
 
-  useEffect(updateChartSize, [updateChartSize]);
+  useEffect(updateChart, [updateChart]);
+
+  useEffect(() => {
+    if (handlers.uiState) {
+      handlers.uiState.on('colorChanged', () => {
+        updateChart();
+      });
+    }
+  }, [handlers.uiState, updateChart]);
 
   return (
-    <EuiResizeObserver onResize={updateChartSize}>
+    <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
         <div className="vislib__wrapper" ref={resizeRef}>
           <div className="vislib__container" ref={chartDiv} />

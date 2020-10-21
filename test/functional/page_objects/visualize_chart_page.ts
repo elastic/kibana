@@ -218,7 +218,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async expectError() {
-      await testSubjects.existOrFail('visLibVisualizeError');
+      await testSubjects.existOrFail('vislibVisualizeError');
     }
 
     public async getVisualizationRenderingCount() {
