@@ -1244,13 +1244,14 @@
     utility-types "^3.10.0"
     uuid "^3.3.2"
 
-"@elastic/elasticsearch@7.9.1":
-  version "7.9.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.9.1.tgz#40f1c38e8f70d783851c13be78a7cb346891c15e"
-  integrity sha512-NfPADbm9tRK/4ohpm9+aBtJ8WPKQqQaReyBKT225pi2oKQO1IzRlfM+OPplAvbhoH1efrSj1NKk27L+4BCrzXQ==
+"@elastic/elasticsearch@7.10.0-rc.1":
+  version "7.10.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.10.0-rc.1.tgz#c23fc5cbfdb40cf2ce6f9cd796b75940e8c9dc8a"
+  integrity sha512-STaBlEwYbT8yT3HJ+mbO1kx+Kb7Ft7Q0xG5GxZbqbAJ7PZvgGgJWwN7jUg4oKJHbTfxV3lPvFa+PaUK2TqGuYg==
   dependencies:
     debug "^4.1.1"
     decompress-response "^4.2.0"
+    hpagent "^0.1.1"
     ms "^2.1.1"
     pump "^3.0.0"
     secure-json-parse "^2.1.0"
@@ -1268,10 +1269,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@29.3.0":
-  version "29.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-29.3.0.tgz#5fd74110d9e3c9634566b37f5696947bce27c083"
-  integrity sha512-Ga/IsPXQajmYySliuGmux1UgqIQWNZssoCdT6ZGylZSVMdiKk+TJTh06eebGoTLrMXBJcNRV3JauQxeErQaarw==
+"@elastic/eui@29.5.0":
+  version "29.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-29.5.0.tgz#024e6c60c6468bbcccd7ce68bf8526e0db7d8598"
+  integrity sha512-Hgb+NF4jYs0VmsfTgC25l3cW0Ki15YxOjZc7DHaSM+SI6bnW7+3d31BZI4ioGcL6Fy8Bpc7OHEdLJijKNiaPCA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -15099,6 +15100,11 @@ hpack.js@^2.1.6:
     obuf "^1.0.0"
     readable-stream "^2.0.1"
     wbuf "^1.1.0"
+
+hpagent@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/hpagent/-/hpagent-0.1.1.tgz#66f67f16e5c7a8b59a068e40c2658c2c749ad5e2"
+  integrity sha512-IxJWQiY0vmEjetHdoE9HZjD4Cx+mYTr25tR7JCxXaiI3QxW0YqYyM11KyZbHufoa/piWhMb2+D3FGpMgmA2cFQ==
 
 html-element-map@^1.2.0:
   version "1.2.0"

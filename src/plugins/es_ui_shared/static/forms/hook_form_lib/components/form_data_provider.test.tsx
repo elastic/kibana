@@ -133,7 +133,7 @@ describe('<FormDataProvider />', () => {
       find('btn').simulate('click').update();
     });
 
-    expect(onFormData.mock.calls.length).toBe(1);
+    expect(onFormData.mock.calls.length).toBe(2);
 
     const [formDataUpdated] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
       OnUpdateHandler

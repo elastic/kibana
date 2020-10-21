@@ -6,7 +6,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useUrlState } from '../../../../../util/url_state';
@@ -70,6 +70,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
 }) => {
   const {
     indexPattern,
+    indexPatternErrorMessage,
     isInitialized,
     isLoadingJobConfig,
     jobCapsServiceErrorMessage,
@@ -98,6 +99,22 @@ export const ExplorationPageWrapper: FC<Props> = ({
       });
     }
   }, [jobConfig?.dest.results_field]);
+
+  if (indexPatternErrorMessage !== undefined) {
+    return (
+      <EuiPanel grow={false}>
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
+            defaultMessage: 'An error occurred loading the index data.',
+          })}
+          color="danger"
+          iconType="cross"
+        >
+          <p>{indexPatternErrorMessage}</p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
 
   if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (
@@ -144,12 +161,19 @@ export const ExplorationPageWrapper: FC<Props> = ({
         <ExpandableSectionAnalytics jobId={jobConfig.id} />
       )}
 
-      {isLoadingJobConfig === true && totalFeatureImportance === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && totalFeatureImportance !== undefined && (
-        <>
-          <FeatureImportanceSummaryPanel totalFeatureImportance={totalFeatureImportance} />
-        </>
-      )}
+      {isLoadingJobConfig === true &&
+        jobConfig !== undefined &&
+        totalFeatureImportance === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false &&
+        jobConfig !== undefined &&
+        totalFeatureImportance !== undefined && (
+          <>
+            <FeatureImportanceSummaryPanel
+              totalFeatureImportance={totalFeatureImportance}
+              jobConfig={jobConfig}
+            />
+          </>
+        )}
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (

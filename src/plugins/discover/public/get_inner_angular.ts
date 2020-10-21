@@ -36,6 +36,7 @@ import {
   createToolBarPagerButtonsDirective,
   createToolBarPagerTextDirective,
 } from './application/angular/doc_table/components/pager';
+import { createContextAppLegacy } from './application/components/context_app/context_app_legacy_directive';
 import { createTableRowDirective } from './application/angular/doc_table/components/table_row';
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
@@ -55,7 +56,6 @@ import { createContextErrorMessageDirective } from './application/components/con
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
-
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary
@@ -190,5 +190,6 @@ function createDocTableModule() {
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
-    .directive('docViewer', createDocViewerDirective);
+    .directive('docViewer', createDocViewerDirective)
+    .directive('contextAppLegacy', createContextAppLegacy);
 }
