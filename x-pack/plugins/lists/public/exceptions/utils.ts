@@ -6,14 +6,14 @@
 
 import { NamespaceType } from '../../common/schemas';
 
-import { ExceptionIdentifiers } from './types';
+import { ExceptionListIdentifiers } from './types';
 
 export const getIdsAndNamespaces = ({
   lists,
   showDetection,
   showEndpoint,
 }: {
-  lists: ExceptionIdentifiers[];
+  lists: ExceptionListIdentifiers[];
   showDetection: boolean;
   showEndpoint: boolean;
 }): { ids: string[]; namespaces: NamespaceType[] } =>
