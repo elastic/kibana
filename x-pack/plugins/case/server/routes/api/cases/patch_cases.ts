@@ -7,6 +7,7 @@
 import { escapeHatch, wrapError } from '../utils';
 import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
+import { CasesPatchRequest } from '../../../../common/api';
 
 export function initPatchCasesApi({ router }: RouteDeps) {
   router.patch(
@@ -22,11 +23,11 @@ export function initPatchCasesApi({ router }: RouteDeps) {
       }
 
       const caseClient = context.case.getCaseClient();
-      const theCase = request.body;
+      const cases = request.body as CasesPatchRequest;
 
       try {
         return response.ok({
-          body: await caseClient.update({ request, theCase }),
+          body: await caseClient.update({ request, cases }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { escapeHatch, wrapError } from '../../utils';
 import { RouteDeps } from '../../types';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CommentRequest } from '../../../../../common/api';
 
 export function initPostCommentApi({ router }: RouteDeps) {
   router.post(
@@ -27,7 +28,7 @@ export function initPostCommentApi({ router }: RouteDeps) {
 
       const caseClient = context.case.getCaseClient();
       const caseId = request.params.case_id;
-      const comment = request.body;
+      const comment = request.body as CommentRequest;
 
       try {
         return response.ok({

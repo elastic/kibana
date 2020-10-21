@@ -8,6 +8,7 @@ import { wrapError, escapeHatch } from '../utils';
 
 import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
+import { CasePostRequest } from '../../../../common/api';
 
 export function initPostCaseApi({ router }: RouteDeps) {
   router.post(
@@ -22,7 +23,7 @@ export function initPostCaseApi({ router }: RouteDeps) {
         return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
       }
       const caseClient = context.case.getCaseClient();
-      const theCase = request.body;
+      const theCase = request.body as CasePostRequest;
 
       try {
         return response.ok({
