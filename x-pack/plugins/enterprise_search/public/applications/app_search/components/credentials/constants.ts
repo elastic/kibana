@@ -93,3 +93,5 @@ export const TOKEN_TYPE_INFO = [
 ];
 
 export const FLYOUT_ARIA_LABEL_ID = 'credentialsFlyoutTitle';
+
+export const DOCS_HREF = 'https://www.elastic.co/guide/en/app-search/current/authentication.html';
