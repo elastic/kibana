@@ -27,7 +27,7 @@ export interface CaseClientCreate extends CaseClientFunctionArguments {
 }
 
 export interface CaseClientUpdate extends CaseClientFunctionArguments {
-  theCase: CasesPatchRequest;
+  cases: CasesPatchRequest;
 }
 
 export interface CaseClientAddComment extends CaseClientFunctionArguments {

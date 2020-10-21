@@ -9,6 +9,8 @@ import { create } from './create';
 import { update } from './update';
 import { addComment } from './add_comment';
 
+export { CaseClient } from './types';
+
 export const createCaseClient = ({
   savedObjectsClient,
   caseConfigureService,

@@ -5,7 +5,13 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { IContextProvider, Logger, PluginInitializerContext, RequestHandler } from 'kibana/server';
+import {
+  IContextProvider,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  RequestHandler,
+} from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -39,15 +45,12 @@ export interface PluginsSetup {
 
 export class CasePlugin {
   private readonly log: Logger;
-  private caseService: CaseService;
-  private caseConfigureService: CaseConfigureService;
-  private userActionService: CaseUserActionService;
+  private caseService?: CaseServiceSetup;
+  private caseConfigureService?: CaseConfigureServiceSetup;
+  private userActionService?: CaseUserActionServiceSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
-    this.caseService = new CaseService(this.log);
-    this.caseConfigureService = new CaseConfigureService(this.log);
-    this.userActionService = new CaseUserActionService(this.log);
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
@@ -68,28 +71,47 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    const caseService = await this.caseService.setup({
+    this.caseService = await new CaseService(this.log).setup({
       authentication: plugins.security != null ? plugins.security.authc : null,
     });
-    const caseConfigureService = await this.caseConfigureService.setup();
-    const userActionService = await this.userActionService.setup();
+    this.caseConfigureService = await new CaseConfigureService(this.log).setup();
+    this.userActionService = await new CaseUserActionService(this.log).setup();
 
     core.http.registerRouteHandlerContext(
       APP_ID,
-      this.createRouteHandlerContext({ core, caseService, caseConfigureService, userActionService })
+      this.createRouteHandlerContext({
+        core,
+        caseService: this.caseService,
+        caseConfigureService: this.caseConfigureService,
+        userActionService: this.userActionService,
+      })
     );
 
     const router = core.http.createRouter();
     initCaseApi({
-      caseService,
-      caseConfigureService,
-      userActionService,
+      caseService: this.caseService,
+      caseConfigureService: this.caseConfigureService,
+      userActionService: this.userActionService,
       router,
     });
   }
 
-  public start() {
+  public async start(core: CoreSetup) {
     this.log.debug(`Starting Case Workflow`);
+    const [{ savedObjects }] = await core.getStartServices();
+
+    const getCaseClientWithRequest = async (request: KibanaRequest) => {
+      return createCaseClient({
+        savedObjectsClient: savedObjects.getScopedClient(request),
+        caseService: this.caseService!,
+        caseConfigureService: this.caseConfigureService!,
+        userActionService: this.userActionService!,
+      });
+    };
+
+    return {
+      getCaseClientWithRequest,
+    };
   }
 
   public stop() {

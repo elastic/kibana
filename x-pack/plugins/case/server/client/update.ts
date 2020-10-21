@@ -31,10 +31,10 @@ export const update = ({
   userActionService,
 }: CaseClientFactoryArguments) => async ({
   request,
-  theCase,
+  cases,
 }: CaseClientUpdate): Promise<CasesResponse> => {
   const query = pipe(
-    excess(CasesPatchRequestRt).decode(theCase),
+    excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
