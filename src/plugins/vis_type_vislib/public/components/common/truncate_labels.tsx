@@ -37,7 +37,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
         defaultMessage: 'Truncate',
       })}
       fullWidth
-      compressed
+      display="rowCompressed"
     >
       <EuiFieldNumber
         disabled={disabled}

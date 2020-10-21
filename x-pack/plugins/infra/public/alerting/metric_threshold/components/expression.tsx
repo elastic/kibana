@@ -364,7 +364,7 @@ export const Expressions: React.FC<Props> = (props) => {
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
-        compressed
+        display="rowCompressed"
       >
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
@@ -392,7 +392,7 @@ export const Expressions: React.FC<Props> = (props) => {
             'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
         })}
         fullWidth
-        compressed
+        display="rowCompressed"
       >
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}

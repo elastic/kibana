@@ -110,7 +110,7 @@ function NumberIntervalParamEditor({
 
   return (
     <EuiFormRow
-      compressed
+      display="rowCompressed"
       label={label}
       fullWidth={true}
       isInvalid={showValidation && !isValid}

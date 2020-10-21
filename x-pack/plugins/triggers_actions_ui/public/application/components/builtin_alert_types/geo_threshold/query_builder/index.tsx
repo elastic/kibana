@@ -188,7 +188,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiSpacer size="m" />
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
-          <EuiFormRow fullWidth compressed label={labelForDelayOffset}>
+          <EuiFormRow fullWidth display="rowCompressed" label={labelForDelayOffset}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber

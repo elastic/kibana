@@ -54,7 +54,7 @@ function RowsOrColumnsControl({ editorStateParams, setStateParamValue }: AggCont
 
   return (
     <>
-      <EuiFormRow compressed fullWidth={true}>
+      <EuiFormRow display="rowCompressed" fullWidth={true}>
         <EuiButtonGroup
           data-test-subj="visEditorSplitBy"
           legend={i18n.translate('visDefaultEditor.controls.splitByLegend', {

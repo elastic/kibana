@@ -52,7 +52,7 @@ function PercentileRanksEditor({
       fullWidth={true}
       id={`visEditorPercentileRanksLabel${agg.id}`}
       isInvalid={showValidation ? !isValid : false}
-      compressed
+      display="rowCompressed"
       data-test-subj="visEditorPercentileRanks"
     >
       <NumberList

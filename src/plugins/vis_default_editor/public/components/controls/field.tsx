@@ -108,7 +108,7 @@ function FieldParamEditor({
       isInvalid={showErrorMessage}
       fullWidth={true}
       error={errors}
-      compressed
+      display="rowCompressed"
     >
       <EuiComboBox
         compressed

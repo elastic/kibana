@@ -129,7 +129,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               <EuiFormRow
                 label={strings.getNameInputLabel()}
                 helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
-                compressed
+                display="rowCompressed"
               >
                 <EuiFieldText
                   value={name}
@@ -161,7 +161,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               <EuiFormRow
                 className="canvasCustomElementForm__thumbnail"
                 label={strings.getImageInputLabel()}
-                compressed
+                display="rowCompressed"
               >
                 <EuiFilePicker
                   initialPromptText={strings.getImageFilePickerPlaceholder()}

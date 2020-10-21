@@ -77,7 +77,12 @@ function OrderByParamEditor({
   const options = useAvailableOptions(termsAggFilter, metricAggs, DEFAULT_OPTIONS);
 
   return (
-    <EuiFormRow label={label} fullWidth isInvalid={showValidation && !isValid} compressed>
+    <EuiFormRow
+      label={label}
+      fullWidth
+      isInvalid={showValidation && !isValid}
+      display="rowCompressed"
+    >
       <EuiSelect
         options={options}
         value={value}
