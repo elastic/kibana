@@ -18,6 +18,7 @@ describe('CredentialsFlyoutFooter', () => {
   };
   const actions = {
     hideCredentialsForm: jest.fn(),
+    onApiTokenChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -59,6 +60,6 @@ describe('CredentialsFlyoutFooter', () => {
     const button = wrapper.find('[data-test-subj="APIKeyActionButton"]');
     button.simulate('click');
 
-    // TODO: Expect onApiTokenChange to have been called
+    expect(actions.onApiTokenChange).toHaveBeenCalled();
   });
 });
