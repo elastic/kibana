@@ -2731,7 +2731,6 @@
     "inputControl.listControl.disableTooltip": "「{label}」が設定されるまで無効です。",
     "inputControl.listControl.unableToFetchTooltip": "用語を取得できません、エラー: {errorMessage}",
     "inputControl.rangeControl.unableToFetchTooltip": "範囲 (最低値と最高値) を取得できません、エラー: {errorMessage}",
-    "inputControl.register.controlsDescription": "ダッシュボードを簡単に操作できるように、インタラクティブなコントロールを作成します。",
     "inputControl.register.controlsTitle": "コントロール",
     "inputControl.register.tabs.controlsTitle": "コントロール",
     "inputControl.register.tabs.optionsTitle": "オプション",

@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should take users to Maps application when Maps is clicked', async () => {
-      await PageObjects.visualize.goBacktoGroups();
+      await PageObjects.visualize.goBackToGroups();
       await PageObjects.visualize.clickMapsApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();

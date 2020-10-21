@@ -51,7 +51,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('visGroupAggBasedExploreLink');
     }
 
-    public async goBacktoGroups() {
+    public async goBackToGroups() {
       await testSubjects.click('goBackLink');
     }
 

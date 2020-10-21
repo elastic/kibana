@@ -2732,7 +2732,6 @@
     "inputControl.listControl.disableTooltip": "设置 “{label}” 之前禁用。",
     "inputControl.listControl.unableToFetchTooltip": "无法提取词，错误：{errorMessage}",
     "inputControl.rangeControl.unableToFetchTooltip": "无法提取范围最小值和最大值，错误：{errorMessage}",
-    "inputControl.register.controlsDescription": "创建交互控件，以方便仪表板操控。",
     "inputControl.register.controlsTitle": "控件",
     "inputControl.register.tabs.controlsTitle": "控件",
     "inputControl.register.tabs.optionsTitle": "选项",

@@ -32,7 +32,6 @@ import {
   getDocLinks,
 } from '../services';
 
-// @ts-ignore
 const NewVisModal = lazy(() => import('./new_vis_modal'));
 
 export interface ShowNewVisModalParams {

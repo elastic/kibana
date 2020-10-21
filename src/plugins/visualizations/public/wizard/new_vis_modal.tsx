@@ -199,5 +199,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   }
 }
 
+// Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export { NewVisModal as default };

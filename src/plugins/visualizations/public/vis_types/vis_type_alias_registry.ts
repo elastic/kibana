@@ -61,6 +61,7 @@ export interface VisTypeAlias {
 }
 
 let registry: VisTypeAlias[] = [];
+let discardOnRegister: string[] = [];
 
 interface VisTypeAliasRegistry {
   get: () => VisTypeAlias[];
@@ -71,12 +72,26 @@ interface VisTypeAliasRegistry {
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
   add: (newVisTypeAlias) => {
-    if (registry.find((visTypeAlias) => visTypeAlias.name === newVisTypeAlias.name)) {
-      throw new Error(`${newVisTypeAlias.name} already registered`);
+    // if it exists on discardOnRegister array then we don't allow it to be registered
+    if (discardOnRegister.find((aliasName) => aliasName === newVisTypeAlias.name)) {
+      discardOnRegister = discardOnRegister.filter(
+        (aliasName) => aliasName === newVisTypeAlias.name
+      );
+    } else {
+      if (registry.find((visTypeAlias) => visTypeAlias.name === newVisTypeAlias.name)) {
+        throw new Error(`${newVisTypeAlias.name} already registered`);
+      }
+      registry.push(newVisTypeAlias);
     }
-    registry.push(newVisTypeAlias);
   },
   remove: (visTypeAliasName) => {
-    registry = registry.filter((visTypeAlias) => visTypeAlias.name !== visTypeAliasName);
+    const isAliasPresent = registry.find((visTypeAlias) => visTypeAlias.name === visTypeAliasName);
+    // in case the alias has not registered yet we store it on an array, in order to not allow it to
+    // be registered in case of a race condition
+    if (!isAliasPresent) {
+      discardOnRegister.push(visTypeAliasName);
+    } else {
+      registry = registry.filter((visTypeAlias) => visTypeAlias.name !== visTypeAliasName);
+    }
   },
 };
