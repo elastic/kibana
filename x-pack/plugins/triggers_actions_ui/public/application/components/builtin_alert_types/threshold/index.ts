@@ -18,7 +18,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
-      'xpack.triggers_actions_ui.builtin_alert_types.threshold.alertDefaultActionMessage',
+      'xpack.triggersActionsUI.builtin_alert_types.threshold.alertDefaultActionMessage',
       {
         defaultMessage: `alert \\{\\{alertName\\}\\} group \\{\\{context.group\\}\\} value \\{\\{context.value\\}\\} exceeded threshold \\{\\{context.function\\}\\} over \\{\\{context.window\\}\\} on \\{\\{context.date\\}\\}`,
       }
