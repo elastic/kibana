@@ -42,7 +42,7 @@ export const readIndexRoute = (router: IRouter) => {
           } catch (err) {
             const error = transformError(err);
             // Some users may not have the view_index_metadata permission necessary to check the index mapping version
-            // so just continue and return undefined for index_mapping_outdated if the error is a 403
+            // so just continue and return null for index_mapping_outdated if the error is a 403
             if (error.statusCode !== 403) {
               return siemResponse.error({
                 body: error.message,
