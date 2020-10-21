@@ -11371,7 +11371,6 @@
     "xpack.maps.layerWizardSelect.solutionsCategoryLabel": "ソリューション",
     "xpack.maps.loadMap.errorAttemptingToLoadSavedMap": "マップを読み込めません",
     "xpack.maps.map.initializeErrorTitle": "マップを初期化できません",
-    "xpack.maps.mapController.mapsBreadcrumbLabel": "マップ",
     "xpack.maps.mapEmbeddableFactory.invalidLayerList": "不正な形式のレイヤーリストによりマップを読み込めません",
     "xpack.maps.mapEmbeddableFactory.invalidSavedObject": "不正な形式の保存済みオブジェクトによりマップを読み込めません",
     "xpack.maps.mapListing.advancedSettingsLinkText": "高度な設定",
