@@ -7,6 +7,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiCallOut,
   EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
@@ -18,10 +19,10 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiText,
   EuiTitle,
   EuiSwitch,
   EuiButtonEmpty,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
@@ -307,17 +308,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       </EuiFlexGroup>
       {hasAuth ? (
         <>
-          {action.id ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                size="s"
-                title="Username and password are encrypted. Please reenter values for these fields."
-                iconType="iInCircle"
-              />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
+          {getEncryptedFieldNotifyLabel(!action.id)}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiFormRow
@@ -422,6 +413,33 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
     </Fragment>
   );
 };
+
+function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <EuiText size="s" data-test-subj="rememberValuesMessage">
+        <FormattedMessage
+          id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.rememberValuesLabel"
+          defaultMessage="Remember these values. You must reenter them each time you edit the connector."
+        />
+      </EuiText>
+    );
+  }
+  return (
+    <EuiCallOut
+      size="s"
+      iconType="iInCircle"
+      data-test-subj="reenterValuesMessage"
+      title={i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.reenterValuesLabel',
+        {
+          defaultMessage:
+            'Username and password are encrypted. Please reenter values for these fields.',
+        }
+      )}
+    />
+  );
+}
 
 // eslint-disable-next-line import/no-default-export
 export { WebhookActionConnectorFields as default };

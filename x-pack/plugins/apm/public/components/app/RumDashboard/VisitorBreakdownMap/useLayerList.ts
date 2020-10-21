@@ -22,8 +22,14 @@ import {
 } from '../../../../../../maps/common/constants';
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 
-const ES_TERM_SOURCE: ESTermSourceDescriptor = {
+const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   type: 'ES_TERM_SOURCE',
   id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
   indexPatternTitle: 'apm-*',
@@ -37,6 +43,26 @@ const ES_TERM_SOURCE: ESTermSourceDescriptor = {
   ],
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
+};
+
+const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
+  type: 'ES_TERM_SOURCE',
+  id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
+  indexPatternTitle: 'apm-*',
+  term: 'client.geo.region_iso_code',
+  metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
+  whereQuery: {
+    query: 'transaction.type : "page-load"',
+    language: 'kuery',
+  },
+  indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
+};
+
+const getWhereQuery = (serviceName: string) => {
+  return {
+    query: `${TRANSACTION_TYPE} : "${TRANSACTION_PAGE_LOAD}" and ${SERVICE_NAME} : "${serviceName}"`,
+    language: 'kuery',
+  };
 };
 
 export const REGION_NAME = 'region_name';
@@ -56,7 +82,11 @@ interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
 }
 
-export function getLayerList() {
+export function useLayerList() {
+  const { urlParams } = useUrlParams();
+
+  const { serviceName } = urlParams;
+
   const baseLayer: LayerDescriptor = {
     sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
     id: 'b7af286d-2580-4f47-be93-9653d594ce7e',
@@ -68,6 +98,8 @@ export function getLayerList() {
     style: { type: 'TILE' },
     type: 'VECTOR_TILE',
   };
+
+  ES_TERM_SOURCE_COUNTRY.whereQuery = getWhereQuery(serviceName!);
 
   const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
     return {
@@ -119,7 +151,7 @@ export function getLayerList() {
     joins: [
       {
         leftField: 'iso2',
-        right: ES_TERM_SOURCE,
+        right: ES_TERM_SOURCE_COUNTRY,
       },
     ],
     sourceDescriptor: {
@@ -138,18 +170,13 @@ export function getLayerList() {
     type: 'VECTOR',
   };
 
+  ES_TERM_SOURCE_REGION.whereQuery = getWhereQuery(serviceName!);
+
   const pageLoadDurationByAdminRegionLayer: VectorLayerDescriptor = {
     joins: [
       {
         leftField: 'region_iso_code',
-        right: {
-          type: 'ES_TERM_SOURCE',
-          id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
-          indexPatternTitle: 'apm-*',
-          term: 'client.geo.region_iso_code',
-          metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
-          indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
-        },
+        right: ES_TERM_SOURCE_REGION,
       },
     ],
     sourceDescriptor: {
@@ -166,6 +193,7 @@ export function getLayerList() {
     visible: true,
     type: 'VECTOR',
   };
+
   return [
     baseLayer,
     pageLoadDurationByCountryLayer,

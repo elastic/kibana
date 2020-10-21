@@ -16,13 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ContextAppLegacy } from './context_app_legacy';
 
-import { LOADING_STATUS } from './index';
-
-export function createInitialLoadingStatusState() {
-  return {
-    anchor: LOADING_STATUS.UNINITIALIZED,
-    predecessors: LOADING_STATUS.UNINITIALIZED,
-    successors: LOADING_STATUS.UNINITIALIZED,
-  };
+export function createContextAppLegacy(reactDirective: any) {
+  return reactDirective(ContextAppLegacy, [
+    ['filter', { watchDepth: 'reference' }],
+    ['hits', { watchDepth: 'reference' }],
+    ['indexPattern', { watchDepth: 'reference' }],
+    ['sorting', { watchDepth: 'reference' }],
+    ['columns', { watchDepth: 'collection' }],
+    ['infiniteScroll', { watchDepth: 'reference' }],
+    ['minimumVisibleRows', { watchDepth: 'reference' }],
+    ['status', { watchDepth: 'reference' }],
+  ]);
 }
