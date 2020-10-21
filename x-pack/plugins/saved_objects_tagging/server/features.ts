@@ -16,7 +16,6 @@ export const savedObjectsTaggingFeature: KibanaFeatureConfig = {
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   order: 1800,
-  icon: 'savedObjectsApp',
   app: [],
   management: {
     kibana: [tagManagementSectionId],
