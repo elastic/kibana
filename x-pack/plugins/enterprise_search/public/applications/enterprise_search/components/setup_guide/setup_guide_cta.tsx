@@ -5,14 +5,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiPanel } from '../../../shared/react_router_helpers';
 
 import CtaImage from './assets/getting_started.png';
 import './setup_guide_cta.scss';
 
 export const SetupGuideCta: React.FC = () => (
-  <EuiPanel paddingSize="l" className="enterpriseSearchSetupCta">
+  <EuiPanel to="/setup_guide" paddingSize="l" className="enterpriseSearchSetupCta">
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem className="enterpriseSearchSetupCta__text">
         <EuiTitle size="s">
