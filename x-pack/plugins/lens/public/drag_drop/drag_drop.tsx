@@ -10,7 +10,7 @@ import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { DragContext, DragContextState, ReorderContext } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { keys } from '@elastic/eui';
+import { keys, EuiScreenReaderOnly } from '@elastic/eui';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
@@ -298,41 +298,42 @@ const DragDropInner = React.memo(function DragDropInner(
     );
   }
 
-  if (!draggable) {
+  if (!itemsInGroup?.length || itemsInGroup.length < 2 || !value || !dropTo) {
     return element;
   }
   return (
-    <div
-      tabIndex={0}
-      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!itemsInGroup?.length || itemsInGroup.length < 2 || !value || !dropTo) {
-          return;
-        }
-
-        if (e.key === keys.ENTER || e.key === keys.SPACE) {
-          setState({ ...state, keyboardInteraction: !state.keyboardInteraction });
-        } else if (e.key === keys.ESCAPE) {
-          setState({ ...state, keyboardInteraction: false });
-        }
-        if (state.keyboardInteraction) {
-          e.stopPropagation();
-          e.preventDefault();
-
-          const draggingIndex = itemsInGroup.indexOf(value.id);
-          if (keys.ARROW_DOWN === e.key) {
-            if (draggingIndex < itemsInGroup.length - 1) {
-              dropTo(itemsInGroup[draggingIndex + 1]);
+    <>
+      <EuiScreenReaderOnly>
+        <button
+          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (e.key === keys.ENTER || e.key === keys.SPACE) {
+              setState({ ...state, keyboardInteraction: !state.keyboardInteraction });
+            } else if (e.key === keys.ESCAPE) {
+              setState({ ...state, keyboardInteraction: false });
             }
-          } else if (keys.ARROW_UP === e.key) {
-            if (draggingIndex > 0) {
-              dropTo(itemsInGroup[draggingIndex - 1]);
+            if (state.keyboardInteraction) {
+              e.stopPropagation();
+              e.preventDefault();
+
+              const draggingIndex = itemsInGroup.indexOf(value.id);
+              if (keys.ARROW_DOWN === e.key) {
+                if (draggingIndex < itemsInGroup.length - 1) {
+                  dropTo(itemsInGroup[draggingIndex + 1]);
+                }
+              } else if (keys.ARROW_UP === e.key) {
+                if (draggingIndex > 0) {
+                  dropTo(itemsInGroup[draggingIndex - 1]);
+                }
+              }
             }
-          }
-        }
-      }}
-    >
+          }}
+        >
+          Move to reorder
+        </button>
+      </EuiScreenReaderOnly>
+
       {element}
-    </div>
+    </>
   );
 });
 
