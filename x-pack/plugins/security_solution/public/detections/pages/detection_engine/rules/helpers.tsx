@@ -119,12 +119,19 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
 
   const fromDuration = moment.duration(intervalValue.diff(fromValue));
 
-  if (Number.isInteger(fromDuration.asHours())) {
-    return `${fromDuration.asHours()}h`;
-  } else if (Number.isInteger(fromDuration.asMinutes())) {
-    return `${fromDuration.asMinutes()}m`;
+  // Basing calculations off floored seconds count as moment durations weren't precise
+  const intervalDuration = Math.floor(fromDuration.asSeconds());
+  // For consistency of display value
+  if (intervalDuration === 0) {
+    return `0s`;
+  }
+
+  if (intervalDuration % 3600 === 0) {
+    return `${intervalDuration / 3600}h`;
+  } else if (intervalDuration % 60 === 0) {
+    return `${intervalDuration / 60}m`;
   } else {
-    return `${Math.floor(fromDuration.asSeconds())}s`;
+    return `${intervalDuration}s`;
   }
 };
 
