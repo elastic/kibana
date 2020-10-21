@@ -26,7 +26,7 @@ Array [
 ]
 `;
 
-exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div role=\\"dialog\\" class=\\"euiFlyout euiFlyout--medium\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiFlyout__closeButton\\" type=\\"button\\" aria-label=\\"Close this dialog\\" data-test-subj=\\"euiFlyoutCloseButton\\"><div data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\"></div></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div></div>"`;
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div role=\\"dialog\\" class=\\"euiFlyout euiFlyout--medium\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiFlyout__closeButton\\" type=\\"button\\" aria-label=\\"Close this dialog\\" data-test-subj=\\"euiFlyoutCloseButton\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\"></span></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div></div>"`;
 
 exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
 Array [
@@ -59,4 +59,4 @@ Array [
 ]
 `;
 
-exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div role=\\"dialog\\" class=\\"euiFlyout euiFlyout--medium\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiFlyout__closeButton\\" type=\\"button\\" aria-label=\\"Close this dialog\\" data-test-subj=\\"euiFlyoutCloseButton\\"><div data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\"></div></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div></div>"`;
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div role=\\"dialog\\" class=\\"euiFlyout euiFlyout--medium\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiFlyout__closeButton\\" type=\\"button\\" aria-label=\\"Close this dialog\\" data-test-subj=\\"euiFlyoutCloseButton\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\"></span></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div></div>"`;

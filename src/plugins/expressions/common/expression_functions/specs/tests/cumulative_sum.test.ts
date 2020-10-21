@@ -1,0 +1,361 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { functionWrapper } from './utils';
+import { cumulativeSum, CumulativeSumArgs } from '../cumulative_sum';
+import { ExecutionContext } from '../../../execution/types';
+import { Datatable } from '../../../expression_types/specs/datatable';
+
+describe('interpreter/functions#cumulative_sum', () => {
+  const fn = functionWrapper(cumulativeSum);
+  const runFn = (input: Datatable, args: CumulativeSumArgs) =>
+    fn(input, args, {} as ExecutionContext) as Datatable;
+
+  it('calculates cumulative sum', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([5, 12, 15, 17]);
+  });
+
+  it('replaces null or undefined data with zeroes until there is real data', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{}, { val: null }, { val: undefined }, { val: 1 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([0, 0, 0, 1]);
+  });
+
+  it('calculates cumulative sum for multiple series', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, split: 'A' },
+          { val: 2, split: 'B' },
+          { val: 3, split: 'B' },
+          { val: 4, split: 'A' },
+          { val: 5, split: 'A' },
+          { val: 6, split: 'A' },
+          { val: 7, split: 'B' },
+          { val: 8, split: 'B' },
+        ],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+
+    expect(result.rows.map((row) => row.output)).toEqual([
+      1,
+      2,
+      2 + 3,
+      1 + 4,
+      1 + 4 + 5,
+      1 + 4 + 5 + 6,
+      2 + 3 + 7,
+      2 + 3 + 7 + 8,
+    ]);
+  });
+
+  it('treats missing split column as separate series', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, split: 'A' },
+          { val: 2, split: 'B' },
+          { val: 3 },
+          { val: 4, split: 'A' },
+          { val: 5 },
+          { val: 6, split: 'A' },
+          { val: 7, split: 'B' },
+          { val: 8, split: 'B' },
+        ],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([
+      1,
+      2,
+      3,
+      1 + 4,
+      3 + 5,
+      1 + 4 + 6,
+      2 + 7,
+      2 + 7 + 8,
+    ]);
+  });
+
+  it('treats null like undefined and empty string for split columns', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, split: 'A' },
+          { val: 2, split: 'B' },
+          { val: 3 },
+          { val: 4, split: 'A' },
+          { val: 5 },
+          { val: 6, split: 'A' },
+          { val: 7, split: null },
+          { val: 8, split: 'B' },
+          { val: 9, split: '' },
+        ],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([
+      1,
+      2,
+      3,
+      1 + 4,
+      3 + 5,
+      1 + 4 + 6,
+      3 + 5 + 7,
+      2 + 8,
+      3 + 5 + 7 + 9,
+    ]);
+  });
+
+  it('calculates cumulative sum for multiple series by multiple split columns', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+          { id: 'split2', name: 'split2', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, split: 'A', split2: 'C' },
+          { val: 2, split: 'B', split2: 'C' },
+          { val: 3, split2: 'C' },
+          { val: 4, split: 'A', split2: 'C' },
+          { val: 5 },
+          { val: 6, split: 'A', split2: 'D' },
+          { val: 7, split: 'B', split2: 'D' },
+          { val: 8, split: 'B', split2: 'D' },
+        ],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split', 'split2'] }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([1, 2, 3, 1 + 4, 5, 6, 7, 7 + 8]);
+  });
+
+  it('splits separate series by the string representation of the cell values', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, split: { anObj: 3 } },
+          { val: 2, split: { anotherObj: 5 } },
+          { val: 10, split: 5 },
+          { val: 11, split: '5' },
+        ],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+
+    expect(result.rows.map((row) => row.output)).toEqual([1, 1 + 2, 10, 21]);
+  });
+
+  it('casts values to number before calculating cumulative sum', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 5 }, { val: '7' }, { val: '3' }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([5, 12, 15, 17]);
+  });
+
+  it('casts values to number before calculating cumulative sum for NaN like values', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 5 }, { val: '7' }, { val: {} }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([5, 12, NaN, NaN]);
+  });
+
+  it('skips undefined and null values', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [
+          { val: null },
+          { val: 7 },
+          { val: undefined },
+          { val: undefined },
+          { val: undefined },
+          { val: undefined },
+          { val: '3' },
+          { val: 2 },
+          { val: null },
+        ],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([0, 7, 7, 7, 7, 7, 10, 12, 12]);
+  });
+
+  it('copies over meta information from the source column', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'val',
+            name: 'val',
+            meta: {
+              type: 'number',
+
+              field: 'afield',
+              index: 'anindex',
+              params: { id: 'number', params: { pattern: '000' } },
+              source: 'synthetic',
+              sourceParams: {
+                some: 'params',
+              },
+            },
+          },
+        ],
+        rows: [{ val: 5 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: {
+        type: 'number',
+
+        field: 'afield',
+        index: 'anindex',
+        params: { id: 'number', params: { pattern: '000' } },
+        source: 'synthetic',
+        sourceParams: {
+          some: 'params',
+        },
+      },
+    });
+  });
+
+  it('sets output name on output column if specified', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'val',
+            name: 'val',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        rows: [{ val: 5 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', outputColumnName: 'Output name' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'Output name',
+      meta: { type: 'number' },
+    });
+  });
+
+  it('returns source table if input column does not exist', () => {
+    const input: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'val',
+          name: 'val',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ val: 5 }],
+    };
+    expect(runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(input);
+  });
+
+  it('throws an error if output column exists already', () => {
+    expect(() =>
+      runFn(
+        {
+          type: 'datatable',
+          columns: [
+            {
+              id: 'val',
+              name: 'val',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+          rows: [{ val: 5 }],
+        },
+        { inputColumnId: 'val', outputColumnId: 'val' }
+      )
+    ).toThrow();
+  });
+});
