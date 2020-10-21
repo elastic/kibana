@@ -7,6 +7,7 @@
 import React, { FunctionComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 import { EuiFieldNumber, EuiDescribedFormGroup, EuiSwitch, EuiTextColor } from '@elastic/eui';
 
@@ -56,9 +57,11 @@ export const ColdPhase: FunctionComponent<Props> = ({
   errors,
   isShowingErrors,
 }) => {
-  const [{ [useRolloverPath]: hotPhaseRolloverEnabled }] = useFormData({
+  const [formData] = useFormData({
     watch: [useRolloverPath],
   });
+
+  const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
 
   return (
     <div id="coldPhaseContent" aria-live="polite" role="region">

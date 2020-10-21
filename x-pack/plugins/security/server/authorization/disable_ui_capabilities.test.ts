@@ -81,7 +81,6 @@ describe('usingPrivileges', () => {
             name: 'Foo KibanaFeature',
             app: ['fooApp', 'foo'],
             category: { id: 'foo', label: 'foo' },
-            navLinkId: 'foo',
             privileges: null,
           }),
         ],
@@ -170,7 +169,6 @@ describe('usingPrivileges', () => {
             name: 'Foo KibanaFeature',
             app: ['foo'],
             category: { id: 'foo', label: 'foo' },
-            navLinkId: 'foo',
             privileges: null,
           }),
         ],
@@ -322,7 +320,6 @@ describe('usingPrivileges', () => {
         new KibanaFeature({
           id: 'fooFeature',
           name: 'Foo KibanaFeature',
-          navLinkId: 'foo',
           app: [],
           category: { id: 'foo', label: 'foo' },
           privileges: null,
@@ -330,7 +327,6 @@ describe('usingPrivileges', () => {
         new KibanaFeature({
           id: 'barFeature',
           name: 'Bar KibanaFeature',
-          navLinkId: 'bar',
           app: ['bar'],
           category: { id: 'foo', label: 'foo' },
           privileges: null,
@@ -471,7 +467,6 @@ describe('usingPrivileges', () => {
         new KibanaFeature({
           id: 'fooFeature',
           name: 'Foo KibanaFeature',
-          navLinkId: 'foo',
           app: [],
           category: { id: 'foo', label: 'foo' },
           privileges: null,
@@ -479,7 +474,6 @@ describe('usingPrivileges', () => {
         new KibanaFeature({
           id: 'barFeature',
           name: 'Bar KibanaFeature',
-          navLinkId: 'bar',
           app: [],
           category: { id: 'foo', label: 'foo' },
           privileges: null,
@@ -559,7 +553,6 @@ describe('all', () => {
           name: 'Foo KibanaFeature',
           app: ['foo'],
           category: { id: 'foo', label: 'foo' },
-          navLinkId: 'foo',
           privileges: null,
         }),
       ],

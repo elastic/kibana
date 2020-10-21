@@ -7,6 +7,7 @@
 import React, { Fragment, FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 import {
   EuiTextColor,
@@ -50,16 +51,15 @@ const warmProperty: keyof Phases = 'warm';
 export const WarmPhase: FunctionComponent = () => {
   const { originalPolicy } = useEditPolicyContext();
   const form = useFormContext();
-  const [
-    {
-      [useRolloverPath]: hotPhaseRolloverEnabled,
-      '_meta.warm.enabled': enabled,
-      '_meta.warm.warmPhaseOnRollover': warmPhaseOnRollover,
-    },
-  ] = useFormData({
+  const [formData] = useFormData({
     watch: [useRolloverPath, '_meta.warm.enabled', '_meta.warm.warmPhaseOnRollover'],
   });
+
+  const enabled = get(formData, '_meta.warm.enabled');
+  const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
+  const warmPhaseOnRollover = get(formData, '_meta.warm.warmPhaseOnRollover');
   const isShowingErrors = form.isValid === false;
+
   return (
     <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
       <>
