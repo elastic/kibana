@@ -38,10 +38,9 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
   useEffect(() => {
     if (!hasInitialized) {
       initializeAppData(props);
+      renderHeaderActions(WorkplaceSearchHeaderActions);
     }
   }, [hasInitialized]);
-
-  renderHeaderActions(WorkplaceSearchHeaderActions);
 
   return (
     <Switch>

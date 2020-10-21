@@ -9,7 +9,7 @@ Array [
     <div
       class="euiCallOutHeader"
     >
-      <div
+      <span
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         data-euiicon-type="help"

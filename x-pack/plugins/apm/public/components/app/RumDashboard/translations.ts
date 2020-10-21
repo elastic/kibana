@@ -7,6 +7,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const I18LABELS = {
+  dataMissing: i18n.translate('xpack.apm.rum.dashboard.dataMissing', {
+    defaultMessage: 'N/A',
+  }),
   backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
     defaultMessage: 'Backend',
   }),
