@@ -98,6 +98,7 @@ export class SearchEmbeddable
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
+  private prevSearchSessionId?: string;
 
   constructor(
     {
@@ -266,6 +267,8 @@ export class SearchEmbeddable
   }
 
   private fetch = async () => {
+    const searchSessionId = this.input.searchSessionId;
+
     if (!this.searchScope) return;
 
     const { searchSource } = this.savedSearch;
@@ -292,7 +295,11 @@ export class SearchEmbeddable
     const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
-    const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
+
+    const inspectorRequest = this.inspectorAdaptors.requests.start(title, {
+      description,
+      sessionId: searchSessionId,
+    });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
@@ -303,6 +310,7 @@ export class SearchEmbeddable
       // Make the request
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
+        sessionId: searchSessionId,
       });
       this.updateOutput({ loading: false, error: undefined });
 
@@ -324,7 +332,8 @@ export class SearchEmbeddable
       !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);
+      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort) ||
+      this.prevSearchSessionId !== this.input.searchSessionId;
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -341,6 +350,7 @@ export class SearchEmbeddable
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
+      this.prevSearchSessionId = this.input.searchSessionId;
     } else if (this.searchScope) {
       // trigger a digest cycle to make sure non-fetch relevant changes are propagated
       this.searchScope.$applyAsync();

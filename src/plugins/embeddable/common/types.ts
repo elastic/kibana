@@ -67,4 +67,9 @@ export type EmbeddableInput = {
    * Visualization filters used to narrow down results.
    */
   filters?: Filter[];
+
+  /**
+   * Search session id to group searches
+   */
+  searchSessionId?: string;
 };

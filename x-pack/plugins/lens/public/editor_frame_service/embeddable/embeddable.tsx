@@ -84,6 +84,7 @@ export class Embeddable
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
+    sessionId?: string;
     lastReloadRequestTime?: number;
   } = {};
 
@@ -149,12 +150,14 @@ export class Embeddable
     if (
       !_.isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
       !_.isEqual(containerState.query, this.externalSearchContext.query) ||
-      !_.isEqual(cleanedFilters, this.externalSearchContext.filters)
+      !_.isEqual(cleanedFilters, this.externalSearchContext.filters) ||
+      containerState.searchSessionId !== this.externalSearchContext.sessionId
     ) {
       this.externalSearchContext = {
         timeRange: containerState.timeRange,
         query: containerState.query,
         lastReloadRequestTime: this.externalSearchContext.lastReloadRequestTime,
+        sessionId: containerState.searchSessionId,
         filters: cleanedFilters,
       };
 
@@ -177,6 +180,7 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
+        sessionId={this.externalSearchContext.sessionId}
         handleEvent={this.handleEvent}
       />,
       domNode
@@ -206,6 +210,7 @@ export class Embeddable
     }
 
     output.filters = injectFilterReferences(output.filters, this.savedVis.references);
+
     return output;
   }
 

@@ -195,14 +195,14 @@ export abstract class Embeddable<
 
   private onResetInput(newInput: TEmbeddableInput) {
     if (!isEqual(this.input, newInput)) {
-      if (this.input.lastReloadRequestTime !== newInput.lastReloadRequestTime) {
-        this.reload();
-      }
       this.input = newInput;
       this.input$.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
+      if (this.input.lastReloadRequestTime !== newInput.lastReloadRequestTime) {
+        this.reload();
+      }
     }
   }
 
