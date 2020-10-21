@@ -195,12 +195,6 @@ export const buildPalettes: (
       }),
       ...buildRoundRobinCategoricalWithMappedColors(),
     },
-    kibana_palette: {
-      title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
-        defaultMessage: 'Synced',
-      }),
-      ...buildSyncedKibanaPalette(legacyColorsService),
-    },
     status: {
       title: i18n.translate('charts.palettes.statusLabel', { defaultMessage: 'Status' }),
       ...buildGradient('status', euiPaletteForStatus),
@@ -234,6 +228,12 @@ export const buildPalettes: (
     gray: {
       title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'Gray' }),
       ...buildGradient('gray', euiPaletteGray),
+    },
+    kibana_palette: {
+      title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
+        defaultMessage: 'Compatibility',
+      }),
+      ...buildSyncedKibanaPalette(legacyColorsService),
     },
     custom: buildCustomPalette() as PaletteDefinition<unknown>,
   };

@@ -105,6 +105,10 @@ export interface PaletteDefinition<T = unknown> {
     chartConfiguration?: ChartColorConfiguration,
     state?: T
   ) => string | null;
+  /**
+   * Get a spectrum of colors of the current palette.
+   * This can be used if the chart wants to control color assignment locally.
+   */
   getColors: (size: number, state?: T) => string[];
 }
 
