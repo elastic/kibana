@@ -17,29 +17,70 @@
  * under the License.
  */
 
+import dedent from 'dedent';
 import { parseDependencyTree, parseCircular, prettyCircular } from 'dpdm';
 import { run } from '@kbn/dev-utils';
 
-run(async ({ log }) => {
-  const depTree = await parseDependencyTree(['{src,x-pack}/plugins/**/*'], {
-    include: /(src|x-pack)\/plugins\/.*/,
-  });
+interface Options {
+  ci?: boolean;
+}
 
-  const circulars = parseCircular(depTree);
-  const filteredCirculars = circulars.filter((circularDeps) => {
-    const first = circularDeps[0];
-    const last = circularDeps[circularDeps.length - 1];
-    const firstMatch = first.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
-    const lastMatch = last.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
+const allowedList = {};
 
-    if (firstMatch && lastMatch && firstMatch.length === 3 && lastMatch.length === 3) {
-      const firstPlugin = `${firstMatch[1]}/plugins/${firstMatch[2]}`;
-      const lastPlugin = `${lastMatch[1]}/plugins/${lastMatch[2]}`;
-      return firstPlugin !== lastPlugin;
+run(
+  async ({ flags, log }) => {
+    const { ci = false } = flags as Options;
+    const foundList: any = {};
+    const depTree = await parseDependencyTree(['{src,x-pack}/plugins/**/*'], {
+      include: /(src|x-pack)\/plugins\/.*/,
+    });
+
+    // Build list of circular dependencies as well as the circular dependencies full paths
+    const circularDependenciesFullPaths = parseCircular(depTree).filter((circularDeps) => {
+      const first = circularDeps[0];
+      const last = circularDeps[circularDeps.length - 1];
+      const firstMatch = first.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
+      const lastMatch = last.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
+
+      if (firstMatch && lastMatch && firstMatch.length === 3 && lastMatch.length === 3) {
+        const firstPlugin = `${firstMatch[1]}/plugins/${firstMatch[2]}`;
+        const lastPlugin = `${lastMatch[1]}/plugins/${lastMatch[2]}`;
+
+        if (firstPlugin !== lastPlugin) {
+          foundList[firstPlugin] = lastPlugin;
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+    // Log the full circular dependencies path if we are not on CI
+    if (!ci && circularDependenciesFullPaths.length > 0) {
+      log.error(
+        dedent(`
+      !!!!!!!!!!!!!! CIRCULAR DEPENDENCIES FOUND !!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! Circular dependencies were found, you can find below  !
+      ! all the paths involved.                               !
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      `)
+      );
+      log.error(prettyCircular(circularDependenciesFullPaths));
     }
 
-    return false;
-  });
-
-  log.warning(prettyCircular(filteredCirculars));
-});
+    // Always log the result of comparing the found list with the allowed list
+  },
+  {
+    flags: {
+      boolean: ['ci'],
+      default: {
+        ci: false,
+      },
+      allowUnexpected: false,
+      help: `
+        --ci            Run the script in CI mode
+      `,
+    },
+  }
+);
