@@ -122,7 +122,7 @@ describe('GroupSelection', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="groupModalHeader"]').at(0).text()).toBe(
-      'New Visualization'
+      'New visualization'
     );
   });
 
