@@ -12,14 +12,14 @@ import { useMlKibana } from '../kibana';
  * @param key - Storage key
  * @param initValue
  */
-export function useStorage(key: string, initValue?: any) {
+export function useStorage<T>(key: string, initValue?: T): [T, (value: T) => void] {
   const {
     services: { storage },
   } = useMlKibana();
 
-  const [val, setVal] = useState(storage.get(key) ?? initValue);
+  const [val, setVal] = useState<T>(storage.get(key) ?? initValue);
 
-  const setStorage = useCallback((value) => {
+  const setStorage = useCallback((value: T): void => {
     try {
       storage.set(key, value);
       setVal(value);

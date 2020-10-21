@@ -17,7 +17,10 @@ import { EMPTY_FIELD_VALUE_LABEL, EntityControlProps } from '../entity_control/e
 import { getControlsForDetector } from '../../get_controls_for_detector';
 // @ts-ignore
 import { getViewableDetectors } from '../../timeseriesexplorer';
-import { ML_PARTITION_FIELD_CONFIG } from '../../../../../common/types/storage';
+import {
+  ML_PARTITION_FIELDS_CONFIG,
+  PartitionFieldsConfig,
+} from '../../../../../common/types/storage';
 import { useStorage } from '../../../contexts/ml/use_storage';
 
 function getEntityControlOptions(fieldValues: any[]) {
@@ -59,8 +62,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     },
   } = useMlKibana();
 
-  const [partitionFieldsConfig, setPartitionFieldsConfig] = useStorage(
-    ML_PARTITION_FIELD_CONFIG,
+  const [partitionFieldsConfig, setPartitionFieldsConfig] = useStorage<PartitionFieldsConfig>(
+    ML_PARTITION_FIELDS_CONFIG,
     {}
   );
 
@@ -92,6 +95,14 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     // for the selected detector across the full time range. No need to pass through finish().
     const detectorIndex = selectedDetectorIndex;
 
+    const fieldsConfig = partitionFieldsConfig
+      ? Object.fromEntries(
+          Object.entries(partitionFieldsConfig).filter(([k]) =>
+            entityControls.some((v) => v.fieldType === k)
+          )
+        )
+      : undefined;
+
     const {
       partition_field: partitionField,
       over_field: overField,
@@ -107,7 +118,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
           },
         ],
         bounds.min.valueOf(),
-        bounds.max.valueOf()
+        bounds.max.valueOf(),
+        fieldsConfig
       )
       .toPromise();
 
@@ -133,7 +145,12 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   useEffect(() => {
     loadEntityValues();
-  }, [selectedJobId, selectedDetectorIndex, selectedEntities]);
+  }, [
+    selectedJobId,
+    selectedDetectorIndex,
+    JSON.stringify(selectedEntities),
+    partitionFieldsConfig,
+  ]);
 
   const entityFieldSearchChanged = debounce(async (entity, queryTerm) => {
     await loadEntityValues({
@@ -208,7 +225,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
               entityFieldValueChanged={entityFieldValueChanged}
               isLoading={entitiesLoading}
               onSearchChange={entityFieldSearchChanged}
-              config={partitionFieldsConfig[entity.fieldType]}
+              config={partitionFieldsConfig?.[entity.fieldType]}
               onConfigChange={onConfigChange}
               forceSelection={forceSelection}
               key={entityKey}

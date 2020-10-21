@@ -42,7 +42,7 @@ export interface EntityControlProps {
   entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
-  config: PartitionFieldConfig;
+  config?: PartitionFieldConfig;
   onConfigChange: (fieldType: EntityFieldType, config: PartitionFieldConfig) => void;
   forceSelection: boolean;
   options: Array<EuiComboBoxOptionOption<string>>;

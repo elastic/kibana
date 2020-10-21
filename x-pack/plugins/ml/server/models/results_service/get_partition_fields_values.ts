@@ -10,6 +10,7 @@ import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
+import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
 
 type SearchTerm =
   | {
@@ -21,9 +22,10 @@ type SearchTerm =
  * Gets an object for aggregation query to retrieve field name and values.
  * @param fieldType - Field type
  * @param query - Optional query string for partition value
+ * @param fieldConfig - Optional config for filtering and sorting
  * @returns {Object}
  */
-function getFieldAgg(fieldType: PartitionFieldsType, query?: string) {
+function getFieldAgg(fieldType: PartitionFieldsType, query?: string, fieldConfig?: FieldConfig) {
   const AGG_SIZE = 100;
 
   const fieldNameKey = `${fieldType}_name`;
@@ -37,10 +39,31 @@ function getFieldAgg(fieldType: PartitionFieldsType, query?: string) {
     },
     [fieldValueKey]: {
       filter: {
-        wildcard: {
-          [fieldValueKey]: {
-            value: query ? `*${query}*` : '*',
-          },
+        bool: {
+          must: [
+            ...(query
+              ? [
+                  {
+                    wildcard: {
+                      [fieldValueKey]: {
+                        value: `*${query}*`,
+                      },
+                    },
+                  },
+                ]
+              : []),
+            ...(fieldConfig?.anomalousOnly
+              ? [
+                  {
+                    range: {
+                      record_score: {
+                        gt: 0,
+                      },
+                    },
+                  },
+                ]
+              : []),
+          ],
         },
       },
       aggs: {
@@ -82,13 +105,15 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
    * @param criteriaFields - key - value pairs of the term field, e.g. { detector_index: 0 }
    * @param earliestMs
    * @param latestMs
+   * @param fieldsConfig
    */
   async function getPartitionFieldsValues(
     jobId: string,
     searchTerm: SearchTerm = {},
     criteriaFields: CriteriaField[],
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    fieldsConfig: FieldsConfig = {}
   ) {
     const { body: jobsResponse } = await asInternalUser.ml.getJobs({ job_id: jobId });
     if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
@@ -99,51 +124,56 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
 
+    const requestBody = {
+      query: {
+        bool: {
+          filter: [
+            ...criteriaFields.map(({ fieldName, fieldValue }) => {
+              return {
+                term: {
+                  [fieldName]: fieldValue,
+                },
+              };
+            }),
+            {
+              term: {
+                job_id: jobId,
+              },
+            },
+            {
+              range: {
+                timestamp: {
+                  gte: earliestMs,
+                  lte: latestMs,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+            {
+              term: {
+                result_type:
+                  isModelPlotEnabled && Object.values(fieldsConfig).every((v) => !v?.anomalousOnly)
+                    ? 'model_plot'
+                    : 'record',
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        ...PARTITION_FIELDS.reduce((acc, key) => {
+          return {
+            ...acc,
+            ...getFieldAgg(key, searchTerm[key], fieldsConfig[key]),
+          };
+        }, {}),
+      },
+    };
+
     const { body } = await asInternalUser.search({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...criteriaFields.map(({ fieldName, fieldValue }) => {
-                return {
-                  term: {
-                    [fieldName]: fieldValue,
-                  },
-                };
-              }),
-              {
-                term: {
-                  job_id: jobId,
-                },
-              },
-              {
-                range: {
-                  timestamp: {
-                    gte: earliestMs,
-                    lte: latestMs,
-                    format: 'epoch_millis',
-                  },
-                },
-              },
-              {
-                term: {
-                  result_type: isModelPlotEnabled ? 'model_plot' : 'record',
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          ...PARTITION_FIELDS.reduce((acc, key) => {
-            return {
-              ...acc,
-              ...getFieldAgg(key, searchTerm[key]),
-            };
-          }, {}),
-        },
-      },
+      body: requestBody,
     });
 
     return PARTITION_FIELDS.reduce((acc, key) => {
