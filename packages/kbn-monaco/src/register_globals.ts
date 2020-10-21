@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import defaultWorkerSrc from 'raw-loader!monaco-editor/min/vs/base/worker/workerMain.js';
+
 import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
 import { EsqlLang } from './esql';
 import { monaco } from './monaco_imports';
 // @ts-ignore
 import xJsonWorkerSrc from '!!raw-loader!../target/public/xjson.editor.worker.js';
+// @ts-ignore
+import defaultWorkerSrc from '!!raw-loader!../target/public/default.editor.worker.js';
 
 /**
  * Register languages and lexer rules
