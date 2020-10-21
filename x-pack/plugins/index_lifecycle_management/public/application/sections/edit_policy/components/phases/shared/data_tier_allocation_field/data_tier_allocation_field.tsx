@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -44,8 +45,9 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
     services: { cloud },
   } = useKibana();
 
-  const allocationTypePath = `_meta.${phase}.dataTierAllocationType`;
-  const [{ [allocationTypePath]: allocationType }] = useFormData({ watch: [allocationTypePath] });
+  const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
+  const [formData] = useFormData({ watch: dataTierAllocationTypePath });
+  const allocationType = get(formData, dataTierAllocationTypePath);
 
   return (
     <NodesDataProvider>

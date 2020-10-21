@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiSpacer, EuiSuperSelectOption } from '@elastic/eui';
 
@@ -93,9 +94,11 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
 
   const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
 
-  const [{ [dataTierAllocationTypePath]: dataTierAllocationType }] = useFormData({
-    watch: [dataTierAllocationTypePath],
+  const [formData] = useFormData({
+    watch: dataTierAllocationTypePath,
   });
+
+  const dataTierAllocationType = get(formData, dataTierAllocationTypePath);
 
   return (
     <div data-test-subj={`${phase}-dataTierAllocationControls`}>

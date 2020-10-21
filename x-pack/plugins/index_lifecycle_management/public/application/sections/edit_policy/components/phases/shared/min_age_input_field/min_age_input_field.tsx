@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import React, { FunctionComponent } from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -29,7 +29,8 @@ interface Props {
 }
 
 export const MinAgeInputField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
-  const [{ [useRolloverPath]: rolloverEnabled }] = useFormData({ watch: useRolloverPath });
+  const [formData] = useFormData({ watch: useRolloverPath });
+  const rolloverEnabled = get(formData, useRolloverPath);
 
   let daysOptionLabel;
   let hoursOptionLabel;

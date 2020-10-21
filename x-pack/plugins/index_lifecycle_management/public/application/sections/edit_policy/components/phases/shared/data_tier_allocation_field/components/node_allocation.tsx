@@ -5,6 +5,7 @@
  */
 
 import React, { useState, FunctionComponent } from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -43,9 +44,11 @@ const i18nTexts = {
 export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes }) => {
   const allocationNodeAttributePath = `_meta.${phase}.allocationNodeAttribute`;
 
-  const [{ [allocationNodeAttributePath]: selectedAllocationNodeAttribute }] = useFormData({
+  const [formData] = useFormData({
     watch: [allocationNodeAttributePath],
   });
+
+  const selectedAllocationNodeAttribute = get(formData, allocationNodeAttributePath);
 
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
     null
