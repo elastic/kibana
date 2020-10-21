@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to execute and get 10 signals', async () => {
           const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
           await createRule(supertest, rule);
-          await waitForSignalsToBePresent(supertest);
+          await waitForSignalsToBePresent(supertest, 10);
           const signalsOpen = await getAllSignals(supertest);
           expect(signalsOpen.hits.hits.length).equal(10);
         });
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to get a count of 10 closed signals when closing 10', async () => {
           const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
           await createRule(supertest, rule);
-          await waitForSignalsToBePresent(supertest);
+          await waitForSignalsToBePresent(supertest, 10);
           const signalsOpen = await getAllSignals(supertest);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsClosed.hits.hits.length).to.equal(10);
         });
 
-        it('should be able close 10 signals immediately and they all should be closed', async () => {
+        it('should be able close signals immediately and they all should be closed', async () => {
           const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
           await createRule(supertest, rule);
           await waitForSignalsToBePresent(supertest);
