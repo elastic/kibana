@@ -14,7 +14,7 @@ import { waitsForEventsToBeLoaded, openEventsViewerFieldsBrowser } from '../task
 import { removeColumn, resetFields } from '../tasks/timeline';
 
 // FLAKY: https://github.com/elastic/kibana/issues/75794
-describe.skip('persistent timeline', () => {
+describe('persistent timeline', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     openEvents();
