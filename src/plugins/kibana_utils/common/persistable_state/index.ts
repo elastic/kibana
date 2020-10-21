@@ -32,7 +32,7 @@ export type MigrateFunction<
   ToVersion extends SerializableState = SerializableState
 > = (state: FromVersion) => ToVersion;
 
-export type PersistableState<P extends SerializableState = SerializableState> = {
+export interface PersistableState<P extends SerializableState = SerializableState> {
   /**
    *  function to extract telemetry information
    * @param state
@@ -66,7 +66,7 @@ export type PersistableState<P extends SerializableState = SerializableState> = 
    * @param version
    */
   migrate?: (state: SerializableState, version: string) => SerializableState;
-};
+}
 
 export type PersistableStateDefinition<P extends SerializableState = SerializableState> = Partial<
   Omit<PersistableState<P>, 'migrate'>
