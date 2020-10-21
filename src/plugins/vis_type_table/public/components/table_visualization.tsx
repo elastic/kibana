@@ -59,13 +59,15 @@ const TableVisualizationComponent = ({
       <KibanaContextProvider services={core}>
         <div className={className} data-test-subj="tbvChart">
           {table ? (
-            <TableVisBasic
-              fireEvent={handlers.event}
-              table={table}
-              sort={sort}
-              setSort={setSort}
-              visConfig={visConfig}
-            />
+            <div className="tbvChart__split">
+              <TableVisBasic
+                fireEvent={handlers.event}
+                table={table}
+                sort={sort}
+                setSort={setSort}
+                visConfig={visConfig}
+              />
+            </div>
           ) : (
             <TableVisSplit
               fireEvent={handlers.event}
