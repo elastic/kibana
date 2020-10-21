@@ -181,9 +181,7 @@ export class IngestManagerPlugin
       deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
         name: 'Ingest Manager',
-        icon: 'savedObjectsApp',
         category: DEFAULT_APP_CATEGORIES.management,
-        navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
         catalogue: ['ingestManager'],
         privileges: {
