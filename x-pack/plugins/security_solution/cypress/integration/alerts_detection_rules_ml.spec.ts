@@ -44,6 +44,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -78,6 +79,7 @@ describe('Detection rules, machine learning', () => {
   });
 
   after(() => {
+    deleteRule();
     esArchiverUnload('prebuilt_rules_loaded');
   });
 
@@ -115,7 +117,7 @@ describe('Detection rules, machine learning', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);

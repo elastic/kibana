@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiIconTip, euiPaletteForStatus, EuiSpacer, EuiStat } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiIconTip,
+  euiPaletteForStatus,
+  EuiSpacer,
+  EuiStat,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './palette_legends';
@@ -14,6 +21,7 @@ import {
   CV_GOOD_LABEL,
   LESS_LABEL,
   MORE_LABEL,
+  NO_DATA,
   CV_POOR_LABEL,
   IS_LABEL,
   TAKES_LABEL,
@@ -26,7 +34,7 @@ export interface Thresholds {
 
 interface Props {
   title: string;
-  value: string;
+  value?: string;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;
@@ -80,6 +88,9 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
+  if (value === undefined && ranks[0] === 100 && !loading) {
+    return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
+  }
   return (
     <>
       <EuiStat

@@ -51,7 +51,7 @@ export function createExecutionEnqueuerFunction({
       id
     );
 
-    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
 
