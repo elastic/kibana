@@ -171,8 +171,6 @@ export class MapsPlugin implements Plugin {
       }),
       order: 400,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      icon: APP_ICON,
-      navLinkId: APP_ID,
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {
