@@ -65,7 +65,7 @@ export function DiscoverNoResults({
             defaultMessage="We encountered an error retrieving search results"
           />
         }
-        color="warning"
+        color="danger"
         iconType="alert"
         data-test-subj="discoverNoResultsError"
       >
