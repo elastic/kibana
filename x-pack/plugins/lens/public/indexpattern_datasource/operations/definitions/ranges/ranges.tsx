@@ -62,16 +62,10 @@ export const isValidRange = (range: RangeTypeLens): boolean => {
   return true;
 };
 
-function getFieldDefaultFormat(
-  indexPattern: IndexPattern,
-  field: IndexPatternField | undefined
-): RangeIndexPatternColumn['params']['format'] {
+function getFieldDefaultFormat(indexPattern: IndexPattern, field: IndexPatternField | undefined) {
   if (field) {
-    if (field.format) {
-      return field.format;
-    }
     if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
-      return indexPattern.fieldFormatMap[field.name] as RangeIndexPatternColumn['params']['format'];
+      return indexPattern.fieldFormatMap[field.name];
     }
   }
   return undefined;
@@ -177,23 +171,19 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     const currentField = indexPattern.fields.find(
       (field) => field.name === currentColumn.sourceField
     );
-    const numberFormat = (currentColumn.params.format ||
-      getFieldDefaultFormat(indexPattern, currentField)) as
-      | undefined
-      | {
-          id: string;
-          params: { decimals: number };
-        };
+    const numberFormat = currentColumn.params.format;
     const numberFormatterPattern =
       numberFormat &&
       supportedFormats[numberFormat.id] &&
-      supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params.decimals || 0);
+      supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
     const rangeFormatter = data.fieldFormats.deserialize({
       ...currentColumn.params.parentFormat,
       params: {
         ...currentColumn.params.parentFormat?.params,
-        ...(numberFormat && { id: numberFormat.id, params: { pattern: numberFormatterPattern } }),
+        ...(numberFormat
+          ? { id: numberFormat.id, params: { pattern: numberFormatterPattern } }
+          : getFieldDefaultFormat(indexPattern, currentField)),
       },
     });
 

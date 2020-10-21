@@ -103,7 +103,9 @@ export async function loadIndexPatterns({
         id: indexPattern.id!, // id exists for sure because we got index patterns by id
         title,
         timeFieldName,
-        fieldFormatMap,
+        fieldFormatMap: Object.fromEntries(
+          Object.entries(fieldFormatMap).map(([id, format]) => [id, format.toJSON()])
+        ),
         fields: newFields,
         hasRestrictions: !!typeMeta?.aggs,
       };

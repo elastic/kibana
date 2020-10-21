@@ -120,6 +120,21 @@ export const formatColumn: ExpressionFunctionDefinition<
               },
             };
           }
+          if (rangeParameters) {
+            return {
+              ...col,
+              meta: {
+                ...col.meta,
+                params: {
+                  id: format,
+                  params: {
+                    ...col.meta.params?.params,
+                    ...extraParams,
+                  },
+                },
+              },
+            };
+          }
           return {
             ...col,
             meta: {

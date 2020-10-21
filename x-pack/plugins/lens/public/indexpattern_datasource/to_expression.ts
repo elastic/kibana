@@ -107,15 +107,9 @@ function getExpressionForLayer(
 
         if (parentFormat) {
           base.arguments.format = [parentFormat.id];
-          const currentField = indexPattern.fields.find((field) => field.name === col.sourceField);
-          // If a format override is present use it,
-          // otherwise pick from either the field or indexPattern the set formatter when available
+          // If a format override is present use it
           if (format) {
             rangeParameters.nestedFormat = format.id;
-          } else if (currentField) {
-            const indexPatternFieldFormatter = indexPattern.fieldFormatMap?.[currentField.name];
-            if (indexPatternFieldFormatter || currentField.format)
-              rangeParameters.nestedFormat = (indexPatternFieldFormatter || currentField.format).id;
           }
         }
         if (parentFormat?.params?.template) {
@@ -133,10 +127,6 @@ function getExpressionForLayer(
         // To avoid mapping too many ad-hoc arguments, this passes thru a JSON serialization
         if (Object.keys(rangeParameters).length) {
           base.arguments.rangeParameters = [JSON.stringify(rangeParameters)];
-          // this is a special scenario for ranges, where we need to enforce a 0 digit decimals
-          if (base.arguments.decimals == null) {
-            base.arguments.decimals = [0];
-          }
         }
 
         return base;
