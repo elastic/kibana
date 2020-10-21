@@ -20,6 +20,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { cloneDeep, mapValues } from 'lodash';
+import semver from 'semver';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -266,8 +267,9 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   migrateToLatest(ast: unknown, version: string) {
     return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
       for (const key in Object.keys(fn.migrations)) {
-        if (key < version) continue;
-        link = fn.migrations[key](link) as ExpressionAstFunction;
+        if (semver.gte(key, version)) {
+          link = fn.migrations[key](link) as ExpressionAstFunction;
+        }
       }
     });
   }
