@@ -19,7 +19,6 @@
 
 import $ from 'jquery';
 import React, { RefObject } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 
 import { mountReactNode } from '../../../core/public/utils';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -32,13 +31,13 @@ import { BasicVislibParams } from './types';
 import { PieVisParams } from './pie';
 
 const legendClassName = {
-  top: 'visLib--legend-top',
-  bottom: 'visLib--legend-bottom',
-  left: 'visLib--legend-left',
-  right: 'visLib--legend-right',
+  top: 'vislib--legend-top',
+  bottom: 'vislib--legend-bottom',
+  left: 'vislib--legend-left',
+  right: 'vislib--legend-right',
 };
 
-export type VislibVisController = InstanceType<ReturnType<typeof createVislibVisController>>;
+export type VislibVisController = ReturnType<typeof createVislibVisController>;
 
 export const createVislibVisController = (
   core: VisTypeVislibCoreSetup,
@@ -46,38 +45,31 @@ export const createVislibVisController = (
 ) => {
   return class VislibVisController {
     private removeListeners?: () => void;
-    private ro?: ResizeObserver;
 
-    unmount?: () => void;
+    _unmountLegend?: () => void;
     legendRef: RefObject<VisLegend>;
     container: HTMLDivElement;
     chartEl: HTMLDivElement;
     legendEl: HTMLDivElement;
-    visEl: HTMLDivElement;
     vislibVis?: any;
 
-    constructor(public el: Element) {
+    constructor(public el: HTMLDivElement) {
       this.el = el;
       this.legendRef = React.createRef();
 
-      // vis container mount point
-      this.visEl = document.createElement('div');
-      this.visEl.className = 'visualization';
-      this.el.appendChild(this.visEl);
-
       // vis mount point
       this.container = document.createElement('div');
-      this.container.className = 'visLib';
-      this.visEl.appendChild(this.container);
+      this.container.className = 'vislib';
+      this.el.appendChild(this.container);
 
       // chart mount point
       this.chartEl = document.createElement('div');
-      this.chartEl.className = 'visLib__chart';
+      this.chartEl.className = 'vislib__chart';
       this.container.appendChild(this.chartEl);
 
       // legend mount point
       this.legendEl = document.createElement('div');
-      this.legendEl.className = 'visLib__legend';
+      this.legendEl.className = 'vislib__legend';
       this.container.appendChild(this.legendEl);
     }
 
@@ -87,7 +79,7 @@ export const createVislibVisController = (
       handlers: IInterpreterRenderHandlers
     ): Promise<void> {
       if (this.vislibVis) {
-        this.destroy();
+        this.destroy(false);
       }
 
       // Used in functional tests to know when chart is loaded by type
@@ -119,7 +111,7 @@ export const createVislibVisController = (
       if (visParams.addLegend) {
         $(this.container)
           .attr('class', (i, cls) => {
-            return cls.replace(/visLib--legend-\S+/g, '');
+            return cls.replace(/vislib--legend-\S+/g, '');
           })
           .addClass((legendClassName as any)[visParams.legendPosition]);
 
@@ -139,16 +131,6 @@ export const createVislibVisController = (
         this.mountLegend(esResponse, visParams, fireEvent, uiState);
         this.vislibVis.render(esResponse, uiState);
       }
-
-      if (this.ro) {
-        this.ro.disconnect();
-      }
-
-      // watch for size changes of chart element
-      this.ro = new ResizeObserver(() => {
-        this.vislibVis.render(esResponse, uiState);
-      });
-      this.ro.observe(this.chartEl);
     }
 
     mountLegend(
@@ -157,7 +139,7 @@ export const createVislibVisController = (
       fireEvent: IInterpreterRenderHandlers['event'],
       uiState?: PersistedState
     ) {
-      this.unmount = mountReactNode(
+      this._unmountLegend = mountReactNode(
         <VisLegend
           ref={this.legendRef}
           vislibVis={this.vislibVis}
@@ -171,17 +153,20 @@ export const createVislibVisController = (
     }
 
     unmountLegend() {
-      this.unmount?.();
+      this._unmountLegend?.();
     }
 
-    destroy() {
-      this.unmount?.();
-      this.ro?.disconnect();
+    destroy(clearElement = true) {
+      this.unmountLegend();
+
+      if (clearElement) {
+        this.el.innerHTML = '';
+      }
 
       if (this.vislibVis) {
         this.removeListeners?.();
         this.vislibVis.destroy();
-        delete this.vislibVis;
+        this.vislibVis = null;
       }
     }
   };

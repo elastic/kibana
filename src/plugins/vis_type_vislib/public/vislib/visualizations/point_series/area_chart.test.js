@@ -38,7 +38,7 @@ const dataTypesArray = {
   stackedSeries: import('../../../fixtures/mock_data/date_histogram/_stacked_series'),
 };
 
-const visLibParams = {
+const vislibParams = {
   type: 'area',
   addLegend: true,
   addTooltip: true,
@@ -61,7 +61,7 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
     });
 
     beforeEach(async () => {
-      vis = getVis(visLibParams);
+      vis = getVis(vislibParams);
       mockUiState = getMockUiState();
       vis.on('brush', _.noop);
       vis.render(await dataType, mockUiState);

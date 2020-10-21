@@ -19,62 +19,56 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 
-import { TagCloudVisDependencies } from '../plugin';
-import { TagCloudVisRenderValue } from '../tag_cloud_fn';
-// @ts-ignore
-import { TagCloudVisualization } from './tag_cloud_visualization';
+import { IInterpreterRenderHandlers } from '../../expressions/public';
 
-import './tag_cloud.scss';
+import { VislibRenderValue } from './vis_type_vislib_vis_fn';
+import { VislibVisController } from './vis_controller';
 
-type TagCloudChartProps = TagCloudVisDependencies &
-  TagCloudVisRenderValue & {
-    fireEvent: (event: any) => void;
-    renderComplete: () => void;
-  };
+import './index.scss';
 
-export const TagCloudChart = ({
-  colors,
+type VislibWrapperProps = VislibRenderValue & {
+  handlers: IInterpreterRenderHandlers;
+  controller: VislibVisController;
+};
+
+export const VislibWrapper = ({
   visData,
-  visParams,
-  fireEvent,
-  renderComplete,
-}: TagCloudChartProps) => {
+  visConfig,
+  handlers,
+  controller: Controller,
+}: VislibWrapperProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<any>(null);
 
+  const updateChartSize = useMemo(
+    () =>
+      debounce(() => {
+        if (visController.current) {
+          visController.current.render(visData, visConfig, handlers);
+        }
+      }, 100),
+    [visConfig, visData, handlers]
+  );
+
   useEffect(() => {
     if (chartDiv.current) {
-      visController.current = new TagCloudVisualization(chartDiv.current, colors, fireEvent);
+      visController.current = new Controller(chartDiv.current);
     }
     return () => {
       visController.current.destroy();
       visController.current = null;
     };
-  }, [colors, fireEvent]);
+  }, [Controller, chartDiv]);
 
-  useEffect(() => {
-    if (visController.current) {
-      visController.current.render(visData, visParams).then(renderComplete);
-    }
-  }, [visData, visParams, renderComplete]);
-
-  const updateChartSize = useMemo(
-    () =>
-      throttle(() => {
-        if (visController.current) {
-          visController.current.render().then(renderComplete);
-        }
-      }, 300),
-    [renderComplete]
-  );
+  useEffect(updateChartSize, [updateChartSize]);
 
   return (
     <EuiResizeObserver onResize={updateChartSize}>
       {(resizeRef) => (
-        <div className="tgcChart__wrapper" ref={resizeRef}>
-          <div className="tgcChart__container" ref={chartDiv} />
+        <div className="vislib__wrapper" ref={resizeRef}>
+          <div className="vislib__container" ref={chartDiv} />
         </div>
       )}
     </EuiResizeObserver>
@@ -83,4 +77,4 @@ export const TagCloudChart = ({
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { TagCloudChart as default };
+export { VislibWrapper as default };

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 
 import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
