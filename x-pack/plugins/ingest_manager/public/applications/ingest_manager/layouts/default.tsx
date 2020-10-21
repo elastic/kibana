@@ -18,7 +18,7 @@ interface Props {
 }
 
 const Container = styled.div`
-  min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
+  min-height: calc(100vh - ${(props) => parseFloat(props.theme.eui.euiHeaderChildSize) * 2}px);
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
   display: flex;
   flex-direction: column;
