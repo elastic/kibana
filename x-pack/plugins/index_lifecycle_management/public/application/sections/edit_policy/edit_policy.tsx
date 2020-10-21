@@ -91,6 +91,7 @@ const mergeAllSerializedPolicies = (
     phases: {
       ...legacySerializedPolicy.phases,
       hot: serializedPolicy.phases.hot,
+      warm: serializedPolicy.phases.warm,
     },
   };
 };
@@ -135,22 +136,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
   const backToPolicyList = () => {
     history.push('/policies');
   };
-
-  const setWarmPhaseOnRollover = useCallback(
-    (value: boolean) => {
-      setPolicy((p) => ({
-        ...p,
-        phases: {
-          ...p.phases,
-          warm: {
-            ...p.phases.warm,
-            warmPhaseOnRollover: value,
-          },
-        },
-      }));
-    },
-    [setPolicy]
-  );
 
   const submit = async () => {
     setIsShowingErrors(true);
@@ -210,10 +195,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     [setPolicy]
   );
 
-  const setWarmPhaseData = useCallback(
-    (key: string, value: any) => setPhaseData('warm', key, value),
-    [setPhaseData]
-  );
   const setColdPhaseData = useCallback(
     (key: string, value: any) => setPhaseData('cold', key, value),
     [setPhaseData]
@@ -353,18 +334,11 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
                 <EuiSpacer />
 
-                <HotPhase setWarmPhaseOnRollover={setWarmPhaseOnRollover} />
+                <HotPhase />
 
                 <EuiHorizontalRule />
 
-                <WarmPhase
-                  errors={errors?.warm}
-                  isShowingErrors={
-                    isShowingErrors && !!errors && Object.keys(errors.warm).length > 0
-                  }
-                  setPhaseData={setWarmPhaseData}
-                  phaseData={policy.phases.warm}
-                />
+                <WarmPhase />
 
                 <EuiHorizontalRule />
 

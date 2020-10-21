@@ -25,6 +25,7 @@ import {
 import { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
+import { FormInternal } from '../types';
 
 interface Props {
   legacyPolicy: SerializedPolicy;
@@ -45,7 +46,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
   const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
 
   const form = useFormContext();
-  const [formData, getFormData] = useFormData();
+  const [formData, getFormData] = useFormData<FormInternal>();
 
   useEffect(() => {
     (async function checkPolicy() {
@@ -57,6 +58,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
           phases: {
             ...legacyPolicy.phases,
             hot: p.phases.hot,
+            warm: p.phases.warm,
           },
         });
       } else {

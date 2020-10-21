@@ -7,12 +7,12 @@
 import React, { Fragment, FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+
 import {
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiFieldNumber,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
@@ -25,19 +25,12 @@ import {
 } from '../../../../../../shared_imports';
 
 import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../../../common/types';
-import { PhaseValidationErrors } from '../../../../../services/policies/policy_validation';
 
 import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import {
-  LearnMoreLink,
-  ActiveBadge,
-  PhaseErrorMessage,
-  ErrableFormRow,
-  DescribedFormField,
-} from '../../';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, DescribedFormField } from '../../';
 
 import { DataTierAllocationField } from '../shared';
 
@@ -55,16 +48,7 @@ const i18nTexts = {
 const warmProperty: keyof Phases = 'warm';
 const phaseProperty = (propertyName: keyof WarmPhaseInterface) => propertyName;
 
-interface Props {
-  setPhaseData: (
-    key: keyof WarmPhaseInterface & string,
-    value: boolean | string | undefined
-  ) => void;
-  phaseData: WarmPhaseInterface;
-  isShowingErrors: boolean;
-  errors?: PhaseValidationErrors<WarmPhaseInterface>;
-}
-export const WarmPhase: FunctionComponent<Props> = ({ setPhaseData, phaseData, errors }) => {
+export const WarmPhase: FunctionComponent = () => {
   const { originalPolicy } = useEditPolicyContext();
   const form = useFormContext();
   const [
@@ -222,26 +206,18 @@ export const WarmPhase: FunctionComponent<Props> = ({ setPhaseData, phaseData, e
                 <EuiSpacer />
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
-                    <ErrableFormRow
-                      id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
-                      label={i18n.translate(
-                        'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
-                        {
-                          defaultMessage: 'Number of primary shards',
-                        }
-                      )}
-                      isShowingErrors={isShowingErrors}
-                      errors={errors?.selectedPrimaryShardCount}
-                    >
-                      <EuiFieldNumber
-                        id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
-                        value={phaseData.selectedPrimaryShardCount}
-                        onChange={(e) => {
-                          setPhaseData(phaseProperty('selectedPrimaryShardCount'), e.target.value);
-                        }}
-                        min={1}
-                      />
-                    </ErrableFormRow>
+                    <UseField
+                      path="phases.warm.actions.shrink.number_of_shards"
+                      component={NumericField}
+                      componentProps={{
+                        euiFieldProps: {
+                          'data-test-subj': `${warmProperty}-${phaseProperty(
+                            'selectedPrimaryShardCount'
+                          )}`,
+                          min: 1,
+                        },
+                      }}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer />

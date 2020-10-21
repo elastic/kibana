@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent, useEffect, useState } from 'react';
+import React, { Fragment, FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -40,18 +40,12 @@ import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
 const hotProperty: keyof Phases = 'hot';
 
-export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) => void }> = ({
-  setWarmPhaseOnRollover,
-}) => {
+export const HotPhase: FunctionComponent = () => {
   const [{ [useRolloverPath]: isRolloverEnabled }] = useFormData({ watch: [useRolloverPath] });
   const form = useFormContext();
 
   const isShowingErrors = form.isValid === false;
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
-
-  useEffect(() => {
-    setWarmPhaseOnRollover(isRolloverEnabled ?? false);
-  }, [setWarmPhaseOnRollover, isRolloverEnabled]);
 
   return (
     <>

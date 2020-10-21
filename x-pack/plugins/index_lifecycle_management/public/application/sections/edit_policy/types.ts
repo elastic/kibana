@@ -8,6 +8,27 @@ import { SerializedPolicy } from '../../../../common/types';
 
 export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
 
+export interface DataAllocationMetaFields {
+  dataTierAllocationType: DataTierAllocationType;
+  allocationNodeAttribute?: string;
+}
+
+interface HotPhaseMetaFields {
+  useRollover: boolean;
+  forceMergeEnabled: boolean;
+  bestCompression: boolean;
+  maxStorageSizeUnit?: string;
+  maxAgeUnit?: string;
+}
+
+interface WarmPhaseMetaFields extends DataAllocationMetaFields {
+  enabled: boolean;
+  forceMergeEnabled: boolean;
+  bestCompression: boolean;
+  warmPhaseOnRollover: boolean;
+  minAgeUnit?: string;
+}
+
 /**
  * Describes the shape of data after deserialization.
  */
@@ -17,21 +38,7 @@ export interface FormInternal extends SerializedPolicy {
    * certain form fields which affects what is ultimately serialized.
    */
   _meta: {
-    hot: {
-      useRollover: boolean;
-      forceMergeEnabled: boolean;
-      bestCompression: boolean;
-      maxStorageSizeUnit?: string;
-      maxAgeUnit?: string;
-    };
-    warm: {
-      enabled: boolean;
-      forceMergeEnabled: boolean;
-      bestCompression: boolean;
-      warmPhaseOnRollover: boolean;
-      dataTierAllocationType: DataTierAllocationType;
-      allocationNodeAttribute?: string;
-      minAgeUnit?: string;
-    };
+    hot: HotPhaseMetaFields;
+    warm: WarmPhaseMetaFields;
   };
 }

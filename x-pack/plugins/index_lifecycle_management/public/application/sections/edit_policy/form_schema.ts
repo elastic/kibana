@@ -17,6 +17,10 @@ import { i18nTexts } from './i18n_texts';
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
+const serializers = {
+  stringToNumber: (v: string): any => (v ? parseInt(v, 10) : undefined),
+};
+
 export const schema: FormSchema<FormInternal> = {
   _meta: {
     hot: {
@@ -96,7 +100,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
-            serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
+            serializer: serializers.stringToNumber,
           },
           max_size: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
@@ -128,7 +132,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
-            serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
+            serializer: serializers.stringToNumber,
           },
         },
         set_priority: {
@@ -136,7 +140,7 @@ export const schema: FormSchema<FormInternal> = {
             defaultValue: defaultSetPriority as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberGreaterThanZero }],
-            serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
+            serializer: serializers.stringToNumber,
           },
         },
       },
@@ -146,7 +150,11 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: '0',
         validations: [
           {
-            validator: ifExistsNumberGreaterThanZero,
+            validator: numberGreaterThanField({
+              than: 0,
+              allowEquality: true,
+              message: i18nTexts.editPolicy.errors.positiveNumberRequired,
+            }),
           },
         ],
       },
@@ -161,10 +169,14 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            serializer: serializers.stringToNumber,
           },
         },
         shrink: {
           number_of_shards: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel', {
+              defaultMessage: 'Number of primary shards',
+            }),
             validations: [
               {
                 validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -176,6 +188,7 @@ export const schema: FormSchema<FormInternal> = {
                 }),
               },
             ],
+            serializer: serializers.stringToNumber,
           },
         },
         forcemerge: {
@@ -194,7 +207,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
-            serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
+            serializer: serializers.stringToNumber,
           },
         },
         set_priority: {
@@ -202,7 +215,7 @@ export const schema: FormSchema<FormInternal> = {
             defaultValue: '50' as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberGreaterThanZero }],
-            serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
+            serializer: serializers.stringToNumber,
           },
         },
       },

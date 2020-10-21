@@ -92,6 +92,12 @@ export const i18nTexts = {
           }
         ),
       },
+      positiveNumberRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.positiveNumberRequiredError',
+        {
+          defaultMessage: 'Only positive numbers are allowed.',
+        }
+      ),
     },
   },
 };

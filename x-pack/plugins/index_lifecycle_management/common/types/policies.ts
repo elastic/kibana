@@ -87,8 +87,8 @@ export interface SerializedDeletePhase extends SerializedPhase {
 
 export interface AllocateAction {
   number_of_replicas?: number;
-  include: {};
-  exclude: {};
+  include?: {};
+  exclude?: {};
   require?: {
     [attribute: string]: string;
   };

@@ -50,10 +50,18 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
         }
       }
 
-      if (draft.phases.warm?.actions?.allocate?.require) {
-        Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
-          draft._meta.warm.allocationNodeAttribute = entry.join(':');
-        });
+      if (draft.phases.warm) {
+        if (draft.phases.warm.actions?.allocate?.require) {
+          Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
+            draft._meta.warm.allocationNodeAttribute = entry.join(':');
+          });
+        }
+
+        if (draft.phases.warm.min_age) {
+          const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
+          draft.phases.warm.min_age = minAge.size;
+          draft._meta.warm.minAgeUnit = minAge.units;
+        }
       }
     }
   );
