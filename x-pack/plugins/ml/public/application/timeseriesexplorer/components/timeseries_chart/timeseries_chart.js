@@ -54,6 +54,7 @@ import {
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
 const focusHeight = focusZoomPanelHeight + focusChartHeight;
+const annotationHeight = ANNOTATION_SYMBOL_HEIGHT + 4;
 const contextChartHeight = 60;
 const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
@@ -83,7 +84,13 @@ const anomalyGrayScale = d3.scale
 
 function getSvgHeight() {
   return (
-    focusHeight + contextChartHeight + swimlaneHeight + chartSpacing + margin.top + margin.bottom
+    focusHeight +
+    contextChartHeight +
+    swimlaneHeight +
+    annotationHeight +
+    chartSpacing +
+    margin.top +
+    margin.bottom
   );
 }
 
@@ -374,7 +381,13 @@ class TimeseriesChartIntl extends Component {
 
     // Draw each of the component elements.
     createFocusChart(focus, this.vizWidth, focusHeight);
-    drawContextElements(context, this.vizWidth, contextChartHeight, swimlaneHeight);
+    drawContextElements(
+      context,
+      this.vizWidth,
+      contextChartHeight,
+      swimlaneHeight,
+      annotationHeight
+    );
   }
 
   contextChartInitialized = false;
@@ -1113,7 +1126,7 @@ class TimeseriesChartIntl extends Component {
 
         return xPos;
       })
-      .attr('y', cxtChartHeight / 8)
+      .attr('y', cxtChartHeight + swlHeight + 1)
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
       .attr('width', ANNOTATION_SYMBOL_HEIGHT);
 
@@ -1175,7 +1188,7 @@ class TimeseriesChartIntl extends Component {
       .call(brush)
       .selectAll('rect')
       .attr('y', -1)
-      .attr('height', contextChartHeight + swimlaneHeight + 1);
+      .attr('height', contextChartHeight + swimlaneHeight + annotationHeight + 1);
 
     // move the left and right resize areas over to
     // be under the handles
