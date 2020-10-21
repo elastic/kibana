@@ -38,6 +38,7 @@ import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
+import { createVersionMock } from './version.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -145,6 +146,7 @@ function createCoreSetupMock({
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
+    version: createVersionMock(),
   };
 
   return mock;
@@ -160,6 +162,7 @@ function createCoreStartMock() {
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
+    version: createVersionMock(),
   };
 
   return mock;
@@ -180,6 +183,7 @@ function createInternalCoreSetupMock() {
     auditTrail: auditTrailServiceMock.createSetupContract(),
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
+    version: createVersionMock(),
   };
   return setupDeps;
 }
@@ -194,6 +198,7 @@ function createInternalCoreStartMock() {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     auditTrail: auditTrailServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
+    version: createVersionMock(),
   };
   return startDeps;
 }

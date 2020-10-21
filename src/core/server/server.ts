@@ -46,7 +46,7 @@ import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { ContextService } from './context';
-import { RequestHandlerContext } from '.';
+import { RequestHandlerContext, Version } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
@@ -74,6 +74,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
   private readonly coreUsageData: CoreUsageDataService;
+  private readonly version: Version;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -106,6 +107,7 @@ export class Server {
     this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
+    this.version = new Version(env.packageInfo.version);
   }
 
   public async setup() {
@@ -203,6 +205,7 @@ export class Server {
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      version: this.version,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -254,6 +257,7 @@ export class Server {
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
       coreUsageData: coreUsageDataStart,
+      version: this.version,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);

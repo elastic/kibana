@@ -1,0 +1,7 @@
+{
+  "prefix": "versionBranchingExamples",
+  "paths": {
+    "versionBranchingExamples": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

@@ -222,6 +222,7 @@ export class LegacyService implements CoreService {
           throw new Error('core.start.coreUsageData.getCoreUsageData is unsupported in legacy');
         },
       },
+      version: startDeps.core.version,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -286,6 +287,7 @@ export class LegacyService implements CoreService {
       },
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
+      version: setupDeps.core.version,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires

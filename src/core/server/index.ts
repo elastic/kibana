@@ -327,6 +327,8 @@ export {
   StringValidationRegexString,
 } from './ui_settings';
 
+import { Version } from './version';
+
 export {
   OpsMetrics,
   OpsOsMetrics,
@@ -436,6 +438,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link AuditTrailSetup} */
   auditTrail: AuditTrailSetup;
+  /** {@link Version} */
+  version: Version;
 }
 
 /**
@@ -473,6 +477,8 @@ export interface CoreStart {
   auditTrail: AuditTrailStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
+  /** {@link Version} */
+  version: Version;
 }
 
 export {
@@ -484,6 +490,7 @@ export {
   PluginsServiceStart,
   PluginOpaqueId,
   AuditTrailStart,
+  Version,
 };
 
 /**

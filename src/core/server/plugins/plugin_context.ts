@@ -202,6 +202,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     getStartServices: () => plugin.startDependencies,
     auditTrail: deps.auditTrail,
+    version: deps.version,
   };
 }
 
@@ -252,5 +253,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     auditTrail: deps.auditTrail,
     coreUsageData: deps.coreUsageData,
+    version: deps.version,
   };
 }
