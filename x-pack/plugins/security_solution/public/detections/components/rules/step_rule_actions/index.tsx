@@ -93,10 +93,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ throttle: formThrottle }] = (useFormData({
+  const [{ throttle: formThrottle }] = useFormData<ActionsStepRule>({
     form,
     watch: ['throttle'],
-  }) as unknown) as [Partial<ActionsStepRule>];
+  });
   const throttle = formThrottle || initialState.throttle;
 
   const handleSubmit = useCallback(
