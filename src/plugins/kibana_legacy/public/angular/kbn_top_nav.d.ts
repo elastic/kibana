@@ -17,11 +17,6 @@
  * under the License.
  */
 
-export type DeeplyMockedKeys<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => any
-    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
-    : DeeplyMockedKeys<T[P]>;
-} &
-  T;
-
-export type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+export function createTopNavDirective(): unknown;
+export const createTopNavHelper: (options: unknown) => (reactDirective: unknown) => unknown;
+export function loadKbnTopNavDirectives(navUi: unknown): void;
