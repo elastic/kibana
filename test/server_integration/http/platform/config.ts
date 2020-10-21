@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function ({ readConfigFile }) {
+// eslint-disable-next-line import/no-default-export
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
 
   return {
-    testFiles: [require.resolve('./')],
+    testFiles: [require.resolve('./cache'), require.resolve('./headers')],
     services: httpConfig.get('services'),
     servers: httpConfig.get('servers'),
     junit: {
-      reportName: 'Http Cache-Control Integration Tests',
+      reportName: 'Http Headers Timeout Integration Tests',
     },
     esTestCluster: httpConfig.get('esTestCluster'),
     kbnTestServer: httpConfig.get('kbnTestServer'),
