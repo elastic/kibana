@@ -69,7 +69,11 @@ export function DiscoverNoResults({
         iconType="alert"
         data-test-subj="discoverNoResultsError"
       >
-        <EuiButton size="s" color="danger" onClick={() => (data ? data.search.showError(error) : void 0)}>
+        <EuiButton
+          size="s"
+          color="danger"
+          onClick={() => (data ? data.search.showError(error) : void 0)}
+        >
           <FormattedMessage
             id="discover.showErrorMessageAgain"
             defaultMessage="Show error message"
