@@ -25,6 +25,7 @@ import {
   KibanaResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
+  KibanaRequestState,
 } from '../router';
 
 enum ResultType {
@@ -108,6 +109,9 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
       }
 
       if (preRoutingResult.isRewriteUrl(result)) {
+        const appState = request.app as KibanaRequestState;
+        appState.rewrittenUrl = appState.rewrittenUrl ?? request.url;
+
         const { url } = result;
         request.setUrl(url);
         // We should update raw request as well since it can be proxied to the old platform

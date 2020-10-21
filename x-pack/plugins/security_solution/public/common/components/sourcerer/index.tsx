@@ -54,6 +54,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       value: indexSelected,
     }))
   );
+  const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
 
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
 
@@ -205,6 +206,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={handleSaveIndices}
+                disabled={isSavingDisabled}
                 data-test-subj="add-index"
                 fill
                 fullWidth

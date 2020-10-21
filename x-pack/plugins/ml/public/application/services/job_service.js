@@ -805,7 +805,7 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   }
 
   path += `?_g=(ml:(jobIds:!(${idString}))`;
-  path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
+  path += `,refreshInterval:(display:Off,pause:!t,value:0),time:(from:'${from}'`;
   path += `,to:'${to}'`;
   if (mode === 'invalid') {
     path += `,mode:invalid`;

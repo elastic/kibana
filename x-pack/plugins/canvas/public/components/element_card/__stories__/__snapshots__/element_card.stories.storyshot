@@ -15,7 +15,7 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
     <div
       className="euiCard__top"
     >
-      <div
+      <span
         className="euiCard__icon"
         data-euiicon-type="canvasApp"
         size="xxl"
@@ -116,7 +116,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
     <div
       className="euiCard__top"
     >
-      <div
+      <span
         className="euiCard__icon"
         data-euiicon-type="canvasApp"
         size="xxl"
@@ -283,7 +283,7 @@ exports[`Storyshots components/Elements/ElementCard with title and description 1
     <div
       className="euiCard__top"
     >
-      <div
+      <span
         className="euiCard__icon"
         data-euiicon-type="canvasApp"
         size="xxl"
