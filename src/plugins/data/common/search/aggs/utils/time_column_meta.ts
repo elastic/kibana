@@ -24,17 +24,19 @@ import { TimeRange } from '../../../types';
 import { AggParamsDateHistogram, BUCKET_TYPES } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 
+export interface DateMetaByColumnDeps {
+  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
+  getIndexPattern: (id: string) => Promise<IndexPattern>;
+  isDefaultTimezone: () => boolean;
+  getConfig: <T = any>(key: string) => T;
+}
+
 export const getDateMetaByDatatableColumn = ({
   calculateAutoTimeExpression,
   getIndexPattern,
   isDefaultTimezone,
   getConfig,
-}: {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
-  getIndexPattern: (id: string) => Promise<IndexPattern>;
-  isDefaultTimezone: () => boolean;
-  getConfig: <T = any>(key: string) => T;
-}) => async (
+}: DateMetaByColumnDeps) => async (
   column: DatatableColumn
 ): Promise<undefined | { timeZone?: string; timeRange: TimeRange; interval?: string }> => {
   if (column.meta.source !== 'esaggs') return;
