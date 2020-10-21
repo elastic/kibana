@@ -113,11 +113,15 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       esQuery
     );
 
-    const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
+    const hits = esResult.hits.hits;
     const hasMore = hits.length > size;
 
     if (hasMore) {
       hits.pop();
+    }
+
+    if (sortDirection === 'desc') {
+      hits.reverse();
     }
 
     return {
