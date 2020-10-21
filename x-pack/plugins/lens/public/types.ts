@@ -180,11 +180,6 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-
-  getErrorMessage: (
-    state: T,
-    dimensionGroups: VisualizationDimensionGroupConfig[]
-  ) => { shortMessage: string; longMessage: string } | undefined;
 }
 
 /**
@@ -237,7 +232,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
-  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
