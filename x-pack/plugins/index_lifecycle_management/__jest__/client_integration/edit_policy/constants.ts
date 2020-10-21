@@ -14,17 +14,52 @@ export const DEFAULT_POLICY: PolicyFromES = {
   version: 1,
   modified_date: Date.now().toString(),
   policy: {
-    name: '',
+    name: 'my_policy',
     phases: {
       hot: {
-        min_age: '123ms',
+        min_age: '0ms',
         actions: {
-          rollover: {},
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
         },
       },
     },
   },
-  name: '',
+  name: 'my_policy',
+};
+
+export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: 'my_policy',
+    phases: {
+      hot: {
+        min_age: '123ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          allocate: {
+            include: {
+              abc: '123',
+            },
+            exclude: {
+              def: '456',
+            },
+          },
+        },
+      },
+    },
+  },
+  name: 'my_policy',
 };
 
 export const DELETE_PHASE_POLICY: PolicyFromES = {

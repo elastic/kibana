@@ -151,6 +151,7 @@ export const WarmPhase: FunctionComponent = () => {
                 }
               )}
               switchProps={{
+                'data-test-subj': 'warm-setReplicasSwitch',
                 label: i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
                   { defaultMessage: 'Set replicas' }
@@ -167,7 +168,7 @@ export const WarmPhase: FunctionComponent = () => {
                 componentProps={{
                   fullWidth: false,
                   euiFieldProps: {
-                    'data-test-subj': `${warmProperty}-selectedReplicaCount}`,
+                    'data-test-subj': `${warmProperty}-selectedReplicaCount`,
                     min: 0,
                   },
                 }}

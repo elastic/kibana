@@ -13,6 +13,7 @@ import { POLICY_NAME } from './constants';
 import { TestSubjects } from '../helpers';
 
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
+import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -54,6 +55,22 @@ export const setup = async () => {
 
   const { find, component } = testBed;
 
+  const createFormClickAction = (dataTestSubject: string) => async () => {
+    await act(async () => {
+      find(dataTestSubject).simulate('click');
+    });
+    component.update();
+  };
+
+  function createFormSetValueAction<V = string>(dataTestSubject: string) {
+    return async (value: V) => {
+      await act(async () => {
+        find(dataTestSubject).simulate('change', { target: { value } });
+      });
+      component.update();
+    };
+  }
+
   const setWaitForSnapshotPolicy = async (snapshotPolicyName: string) => {
     act(() => {
       find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
@@ -68,12 +85,7 @@ export const setup = async () => {
     component.update();
   };
 
-  const toggleRollover = async (checked: boolean) => {
-    await act(async () => {
-      find('rolloverSwitch').simulate('click', { target: { checked } });
-    });
-    component.update();
-  };
+  const toggleRollover = createFormClickAction('rolloverSwitch');
 
   const setMaxSize = async (value: string, units?: string) => {
     await act(async () => {
@@ -87,12 +99,7 @@ export const setup = async () => {
     component.update();
   };
 
-  const setMaxDocs = async (value: string) => {
-    await act(async () => {
-      find('hot-selectedMaxDocuments').simulate('change', { target: { value } });
-    });
-    component.update();
-  };
+  const setMaxDocs = createFormSetValueAction('hot-selectedMaxDocuments');
 
   const setMaxAge = async (value: string, units?: string) => {
     await act(async () => {
@@ -104,32 +111,56 @@ export const setup = async () => {
     component.update();
   };
 
-  const toggleForceMerge = (phase: string) => async (checked: boolean) => {
+  const toggleForceMerge = (phase: string) => createFormClickAction(`${phase}-forceMergeSwitch`);
+
+  const setForcemergeSegmentsCount = (phase: string) =>
+    createFormSetValueAction(`${phase}-selectedForceMergeSegments`);
+
+  const setBestCompression = (phase: string) => createFormClickAction(`${phase}-bestCompression`);
+
+  const setIndexPriority = (phase: string) =>
+    createFormSetValueAction(`${phase}-phaseIndexPriority`);
+
+  const enable = (phase: string) => createFormClickAction(`enablePhaseSwitch-${phase}`);
+
+  const warmPhaseOnRollover = createFormClickAction(`warm-warmPhaseOnRollover`);
+
+  const setMinAgeValue = (phase: string) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
+
+  const setMinAgeUnits = (phase: string) =>
+    createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`);
+
+  const setDataAllocation = (phase: string) => async (value: DataTierAllocationType) => {
+    act(() => {
+      find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
+    });
+    component.update();
     await act(async () => {
-      find(`${phase}-forceMergeSwitch`).simulate('click', { target: { checked } });
+      switch (value) {
+        case 'node_roles':
+          find(`${phase}-dataTierAllocationControls.defaultDataAllocationOption`).simulate('click');
+          break;
+        case 'node_attrs':
+          find(`${phase}-dataTierAllocationControls.customDataAllocationOption`).simulate('click');
+          break;
+        default:
+          find(`${phase}-dataTierAllocationControls.noneDataAllocationOption`).simulate('click');
+      }
     });
     component.update();
   };
 
-  const setForcemergeSegmentsCount = (phase: string) => async (value: string) => {
-    await act(async () => {
-      find(`${phase}-selectedForceMergeSegments`).simulate('change', { target: { value } });
-    });
-    component.update();
+  const setSelectedNodeAttribute = (phase: string) =>
+    createFormSetValueAction(`${phase}-selectedNodeAttrs`);
+
+  const setReplicas = async (value: string) => {
+    await createFormClickAction('warm-setReplicasSwitch')();
+    await createFormSetValueAction('warm-selectedReplicaCount')(value);
   };
 
-  const setBestCompression = (phase: string) => async (checked: boolean) => {
-    await act(async () => {
-      find(`${phase}-bestCompression`).simulate('click', { target: { checked } });
-    });
-    component.update();
-  };
-
-  const setIndexPriority = (phase: string) => async (value: string) => {
-    await act(async () => {
-      find(`${phase}-phaseIndexPriority`).simulate('change', { target: { value } });
-    });
-    component.update();
+  const setShrink = async (value: string) => {
+    await createFormClickAction('shrinkSwitch')();
+    await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
   };
 
   return {
@@ -146,6 +177,20 @@ export const setup = async () => {
         setForcemergeSegments: setForcemergeSegmentsCount('hot'),
         setBestCompression: setBestCompression('hot'),
         setIndexPriority: setIndexPriority('hot'),
+      },
+      warm: {
+        enable: enable('warm'),
+        warmPhaseOnRollover,
+        setMinAgeValue: setMinAgeValue('warm'),
+        setMinAgeUnits: setMinAgeUnits('warm'),
+        setDataAllocation: setDataAllocation('warm'),
+        setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
+        setReplicas,
+        setShrink,
+        toggleForceMerge: toggleForceMerge('warm'),
+        setForcemergeSegments: setForcemergeSegmentsCount('warm'),
+        setBestCompression: setBestCompression('warm'),
+        setIndexPriority: setIndexPriority('warm'),
       },
     },
   };

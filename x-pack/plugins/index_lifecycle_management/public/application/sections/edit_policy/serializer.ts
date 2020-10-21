@@ -16,22 +16,39 @@ const unsafeSerializePhaseWithAllocation = (
   actions: SerializedPhase['actions'] = {},
   originalAllocation: AllocateAction = {}
 ) => {
-  if (
-    dataAllocationMetaFields.dataTierAllocationType === 'node_attrs' &&
-    dataAllocationMetaFields.allocationNodeAttribute
-  ) {
-    const [name, value] = dataAllocationMetaFields.allocationNodeAttribute.split(':');
-    actions.allocate = {
-      require: {
-        [name]: value,
-      },
-      // copy over the original include and exclude values until we can set them in the form.
-      include: !isEmpty(originalAllocation.include) ? { ...originalAllocation.include } : undefined,
-      exclude: !isEmpty(originalAllocation.exclude) ? { ...originalAllocation.exclude } : undefined,
-    };
+  if (dataAllocationMetaFields.dataTierAllocationType === 'node_attrs') {
+    if (dataAllocationMetaFields.allocationNodeAttribute) {
+      const [name, value] = dataAllocationMetaFields.allocationNodeAttribute.split(':');
+      actions.allocate = {
+        // copy over any other allocate details like "number_of_replicas"
+        ...actions.allocate,
+        require: {
+          [name]: value,
+        },
+      };
+    }
+
+    // copy over the original include and exclude values until we can set them in the form.
+    if (!isEmpty(originalAllocation.include)) {
+      actions.allocate = {
+        ...actions.allocate,
+        include: { ...originalAllocation.include },
+      };
+    }
+
+    if (!isEmpty(originalAllocation.exclude)) {
+      actions.allocate = {
+        ...actions.allocate,
+        exclude: { ...originalAllocation.exclude },
+      };
+    }
   } else if (dataAllocationMetaFields.dataTierAllocationType === 'none') {
     actions.migrate = { enabled: false };
-    delete actions.allocate;
+    if (actions.allocate) {
+      delete actions.allocate.require;
+      delete actions.allocate.include;
+      delete actions.allocate.exclude;
+    }
   } else if (dataAllocationMetaFields.dataTierAllocationType === 'node_roles') {
     if (actions.allocate) {
       delete actions.allocate.require;

@@ -15,6 +15,7 @@ import {
   NEW_SNAPSHOT_POLICY_NAME,
   SNAPSHOT_POLICY_NAME,
   DEFAULT_POLICY,
+  POLICY_WITH_INCLUDE_EXCLUDE,
 } from './constants';
 
 window.scrollTo = jest.fn();
@@ -46,9 +47,9 @@ describe('<EditPolicy />', () => {
         await actions.hot.setMaxSize('123', 'mb');
         await actions.hot.setMaxDocs('123');
         await actions.hot.setMaxAge('123', 'h');
-        await actions.hot.toggleForceMerge(true);
+        await actions.hot.toggleForceMerge();
         await actions.hot.setForcemergeSegments('123');
-        await actions.hot.setBestCompression(true);
+        await actions.hot.setBestCompression();
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -81,7 +82,7 @@ describe('<EditPolicy />', () => {
 
       test('disabling rollover', async () => {
         const { actions } = testBed;
-        await actions.hot.toggleRollover(false);
+        await actions.hot.toggleRollover();
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
@@ -103,8 +104,254 @@ describe('<EditPolicy />', () => {
     });
   });
 
+  describe('warm phase', () => {
+    describe('serialization', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('default values', async () => {
+        const { actions } = testBed;
+        await actions.warm.enable();
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {
+                  "rollover": Object {
+                    "max_age": "30d",
+                    "max_size": "50gb",
+                  },
+                  "set_priority": Object {
+                    "priority": 100,
+                  },
+                },
+                "min_age": "0ms",
+              },
+              "warm": Object {
+                "actions": Object {
+                  "set_priority": Object {
+                    "priority": 50,
+                  },
+                },
+                "min_age": "0ms",
+              },
+            },
+          }
+        `);
+      });
+
+      test('setting all values', async () => {
+        const { actions } = testBed;
+        await actions.warm.enable();
+        await actions.warm.setMinAgeValue('123');
+        await actions.warm.setMinAgeUnits('d');
+        await actions.warm.setDataAllocation('node_attrs');
+        await actions.warm.setSelectedNodeAttribute('test:123');
+        await actions.warm.setReplicas('123');
+        await actions.warm.setShrink('123');
+        await actions.warm.toggleForceMerge();
+        await actions.warm.setForcemergeSegments('123');
+        await actions.warm.setBestCompression();
+        await actions.warm.setIndexPriority('123');
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {
+                  "rollover": Object {
+                    "max_age": "30d",
+                    "max_size": "50gb",
+                  },
+                  "set_priority": Object {
+                    "priority": 100,
+                  },
+                },
+                "min_age": "0ms",
+              },
+              "warm": Object {
+                "actions": Object {
+                  "allocate": Object {
+                    "number_of_replicas": 123,
+                    "require": Object {
+                      "test": "123",
+                    },
+                  },
+                  "forcemerge": Object {
+                    "index_codec": "best_compression",
+                    "max_num_segments": 123,
+                  },
+                  "set_priority": Object {
+                    "priority": 123,
+                  },
+                  "shrink": Object {
+                    "number_of_shards": 123,
+                  },
+                },
+                "min_age": "123d",
+              },
+            },
+          }
+        `);
+      });
+
+      test('default allocation with replicas set', async () => {
+        const { actions } = testBed;
+        await actions.warm.enable();
+        await actions.warm.setReplicas('123');
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {
+                  "rollover": Object {
+                    "max_age": "30d",
+                    "max_size": "50gb",
+                  },
+                  "set_priority": Object {
+                    "priority": 100,
+                  },
+                },
+                "min_age": "0ms",
+              },
+              "warm": Object {
+                "actions": Object {
+                  "allocate": Object {
+                    "number_of_replicas": 123,
+                  },
+                  "set_priority": Object {
+                    "priority": 50,
+                  },
+                },
+                "min_age": "0ms",
+              },
+            },
+          }
+        `);
+      });
+
+      test('setting warm phase on rollover to "true"', async () => {
+        const { actions } = testBed;
+        await actions.warm.enable();
+        await actions.warm.warmPhaseOnRollover();
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {
+                  "rollover": Object {
+                    "max_age": "30d",
+                    "max_size": "50gb",
+                  },
+                  "set_priority": Object {
+                    "priority": 100,
+                  },
+                },
+                "min_age": "0ms",
+              },
+              "warm": Object {
+                "actions": Object {
+                  "set_priority": Object {
+                    "priority": 50,
+                  },
+                },
+              },
+            },
+          }
+        `);
+      });
+    });
+
+    describe('policy with include and exclude', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_INCLUDE_EXCLUDE]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('preserves include, exclude allocation settings', async () => {
+        const { actions } = testBed;
+        await actions.warm.setDataAllocation('node_attrs');
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {
+                  "rollover": Object {
+                    "max_age": "30d",
+                    "max_size": "50gb",
+                  },
+                  "set_priority": Object {
+                    "priority": 100,
+                  },
+                },
+                "min_age": "123ms",
+              },
+              "warm": Object {
+                "actions": Object {
+                  "allocate": Object {
+                    "exclude": Object {
+                      "def": "456",
+                    },
+                    "include": Object {
+                      "abc": "123",
+                    },
+                  },
+                  "set_priority": Object {
+                    "priority": 50,
+                  },
+                },
+                "min_age": "0ms",
+              },
+            },
+          }
+        `);
+      });
+    });
+  });
+
   describe('delete phase', () => {
     beforeEach(async () => {
+      server.respondImmediately = true;
       httpRequestsMockHelpers.setLoadPolicies([DELETE_PHASE_POLICY]);
       httpRequestsMockHelpers.setLoadSnapshotPolicies([
         SNAPSHOT_POLICY_NAME,

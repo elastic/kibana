@@ -56,7 +56,7 @@ export const schema: FormSchema<FormInternal> = {
         }),
       },
       minAgeUnit: {
-        defaultValue: 'd',
+        defaultValue: 'ms',
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
