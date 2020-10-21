@@ -42,6 +42,7 @@ describe('webhook connector validation', () => {
         method: 'PUT',
         url: 'http://test.com',
         headers: { 'content-type': 'text' },
+        hasAuth: true,
       },
     } as WebhookActionConnector;
 

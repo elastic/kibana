@@ -263,6 +263,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
+      hasAuth: true,
     };
     await actionType.executor({
       actionId: 'some-id',
@@ -320,6 +321,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = { user: null, password: null };
     await actionType.executor({
