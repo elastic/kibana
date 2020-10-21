@@ -35,7 +35,7 @@ export const RangeType = ({ field }: Props) => {
 
         <FormDataProvider pathsToWatch="subType">
           {(formData) =>
-            formData.subType === 'date_range' ? (
+            formData.subType?.[0]?.value === 'date_range' ? (
               <FormatParameter
                 defaultValue={field.source.format as string}
                 defaultToggleValue={getDefaultToggleValue('format', field.source)}
