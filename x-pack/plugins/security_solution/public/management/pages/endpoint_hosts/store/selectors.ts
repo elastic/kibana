@@ -27,7 +27,7 @@ import { Query } from '../../../../../../../../src/plugins/data/common/query/typ
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
-export const pageIndex = (state: Immutable<EndpointState>): number => state.pageIndex;
+export const searchAfter = (state: Immutable<EndpointState>) => state.searchAfter;
 
 export const pageSize = (state: Immutable<EndpointState>): number => state.pageSize;
 

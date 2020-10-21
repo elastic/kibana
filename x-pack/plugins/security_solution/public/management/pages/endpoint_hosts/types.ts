@@ -22,8 +22,8 @@ export interface EndpointState {
   hosts: HostInfo[];
   /** number of items per page */
   pageSize: number;
-  /** which page to show */
-  pageIndex: number;
+  /** sort ID for requesting next page */
+  searchAfter: Array<string | number>;
   /** total number of hosts returned */
   total: number;
   /** list page is retrieving data */
@@ -95,8 +95,8 @@ export interface EndpointIndexUIQueryParams {
   selected_endpoint?: string;
   /** How many items to show in list */
   page_size?: string;
-  /** Which page to show */
-  page_index?: string;
+  /** Last item in current page sorting id */
+  after?: Array<string | number>;
   /** show the policy response or host details */
   show?: 'policy_response' | 'details';
   /** Query text from search bar*/
