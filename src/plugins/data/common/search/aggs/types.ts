@@ -18,7 +18,9 @@
  */
 
 import { Assign } from '@kbn/utility-types';
+import { DatatableColumn } from 'src/plugins/expressions';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { TimeRange } from '../../query';
 import {
   AggConfigSerialized,
   AggConfigs,
@@ -60,7 +62,6 @@ import {
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
   BUCKET_TYPES,
-  getDateMetaByDatatableColumn,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -91,7 +92,9 @@ export interface AggsCommonStart {
    * * `timeRange` total time range of the fetch data (to infer partial buckets at the beginning and end of the data)
    * * `interval` Interval used on elasticsearch (`auto` resolved to the actual interval)
    */
-  getDateMetaByDatatableColumn: ReturnType<typeof getDateMetaByDatatableColumn>;
+  getDateMetaByDatatableColumn: (
+    column: DatatableColumn
+  ) => Promise<undefined | { timeZone?: string; timeRange: TimeRange; interval?: string }>;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
