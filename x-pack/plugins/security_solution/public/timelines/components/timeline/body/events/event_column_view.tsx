@@ -54,6 +54,7 @@ interface Props {
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   showNotes: boolean;
@@ -88,6 +89,7 @@ export const EventColumnView = React.memo<Props>(
     onRowSelected,
     onUnPinEvent,
     refetch,
+    onRuleChange,
     selectedEventIds,
     showCheckboxes,
     showNotes,
@@ -157,6 +159,7 @@ export const EventColumnView = React.memo<Props>(
           timelineId={timelineId}
           disabled={eventType !== 'signal'}
           refetch={refetch}
+          onRuleChange={onRuleChange}
         />,
       ],
       [
@@ -171,6 +174,7 @@ export const EventColumnView = React.memo<Props>(
         isEventPinned,
         isEventViewer,
         refetch,
+        onRuleChange,
         showNotes,
         status,
         timelineId,
