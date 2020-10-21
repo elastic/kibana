@@ -167,6 +167,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     const jobIds = await getIds(jobType, key);
     // check to see if any of the ids supplied contain a wildcard
     if (allowWildcards === false || ids.join().match('\\*') === null) {
+      // wildcards are not allowed or no wildcards could be found
       return ids.filter((id) => jobIds.includes(id));
     }
 

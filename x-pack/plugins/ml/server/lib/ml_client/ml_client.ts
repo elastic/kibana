@@ -6,7 +6,8 @@
 
 import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
 
-import { JobSavedObjectService, JobType } from '../../saved_objects';
+import { JobSavedObjectService } from '../../saved_objects';
+import { JobType } from '../../../common/types/saved_objects';
 
 import {
   Job,
@@ -18,6 +19,7 @@ import { Calendar } from '../../../common/types/calendars';
 import { searchProvider } from './search';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
+import { InferenceConfigResponse, TrainedModelStat } from '../../../common/types/trained_models';
 import { MLJobNotFound } from './errors';
 
 type OrigMlClient = ElasticsearchClient['ml'];
@@ -33,7 +35,7 @@ export function getMlClient(
   const mlClient = client.asInternalUser.ml;
 
   async function jobIdsCheck(jobType: JobType, p: any) {
-    const jobIds = getADJobIds(p);
+    const jobIds = jobType === 'anomaly-detector' ? getADJobIds(p) : getDFAJobIds(p);
     if (jobIds.length) {
       const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
       const missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
@@ -55,6 +57,8 @@ export function getMlClient(
       }
     }
   }
+
+  // async function trainedModelIdCheck(ids: string[]) {}
 
   return {
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
@@ -151,13 +155,14 @@ export function getMlClient(
       const groups = calJobIds.filter((j) => allJobIds.includes(j) === false);
 
       // get list of calendar jobs which are allowed in this space
-      const filteredJobs = await jobSavedObjectService.filterJobIdsForSpace(
+      const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(
         'anomaly-detector',
         calJobIds
       );
       const calendars = body.calendars.map((c) => ({
         ...c,
-        job_ids: c.job_ids.filter((id) => filteredJobs.includes(id) || groups.includes(id)),
+        job_ids: c.job_ids.filter((id) => filteredJobIds.includes(id) || groups.includes(id)),
+        total_job_count: calJobIds.length,
       }));
       return { body: { ...body, calendars } };
     },
@@ -166,29 +171,41 @@ export function getMlClient(
       return mlClient.getCategories(...p);
     },
     async getDataFrameAnalytics(...p: Parameters<MlClient['getDataFrameAnalytics']>) {
-      await jobIdsCheck('data-frame-analytics', p);
-      const { body } = await mlClient.getDataFrameAnalytics<{
-        data_frame_analytics: DataFrameAnalyticsConfig[];
-      }>(...p);
-      const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
-        'data-frame-analytics',
-        body.data_frame_analytics,
-        'id'
-      );
-      return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
+      try {
+        const { body } = await mlClient.getDataFrameAnalytics<{
+          data_frame_analytics: DataFrameAnalyticsConfig[];
+        }>(...p);
+        const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
+          'data-frame-analytics',
+          body.data_frame_analytics,
+          'id'
+        );
+        return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLJobNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async getDataFrameAnalyticsStats(...p: Parameters<MlClient['getDataFrameAnalyticsStats']>) {
       // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
-      await jobIdsCheck('data-frame-analytics', p);
-      const { body } = await mlClient.getDataFrameAnalyticsStats<{
-        data_frame_analytics: DataFrameAnalyticsConfig[];
-      }>(...p);
-      const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
-        'data-frame-analytics',
-        body.data_frame_analytics,
-        'id'
-      );
-      return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
+      try {
+        const { body } = await mlClient.getDataFrameAnalyticsStats<{
+          data_frame_analytics: DataFrameAnalyticsConfig[];
+        }>(...p);
+        const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
+          'data-frame-analytics',
+          body.data_frame_analytics,
+          'id'
+        );
+        return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLJobNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async getDatafeedStats(...p: Parameters<MlClient['getDatafeedStats']>) {
       const { body } = await mlClient.getDatafeedStats<{ datafeeds: DatafeedStats[] }>(...p);
@@ -261,10 +278,35 @@ export function getMlClient(
       return mlClient.getRecords(...p);
     },
     async getTrainedModels(...p: Parameters<MlClient['getTrainedModels']>) {
-      return mlClient.getTrainedModels(...p);
+      const {
+        body: { trained_model_configs: configs },
+      } = await mlClient.getTrainedModels<InferenceConfigResponse>(...p);
+      const modelJobIds: string[] = configs
+        .map((m) => m.metadata?.analytics_config.id)
+        .filter((id) => id !== undefined);
+      const filteredModelJobIds = await jobSavedObjectService.filterJobIdsForSpace(
+        'data-frame-analytics',
+        modelJobIds
+      );
+
+      const models = configs.filter((m) => {
+        const jobId = m.metadata?.analytics_config.id;
+        return jobId === undefined || filteredModelJobIds.includes(jobId);
+      });
+      return { body: { trained_model_configs: models } };
     },
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
-      return mlClient.getTrainedModelsStats(...p);
+      // call getTrainedModels to get the filtered models
+      // then use the ids to filter the stats
+      const { body: models } = await this.getTrainedModels<InferenceConfigResponse>(...p);
+      const filteredModelIds = models.trained_model_configs.map((m) => m.model_id);
+      const { body: allModelStats } = await mlClient.getTrainedModelsStats<{
+        trained_model_stats: TrainedModelStat[];
+      }>(...p);
+      const modelStats = allModelStats.trained_model_stats.filter((m) =>
+        filteredModelIds.includes(m.model_id)
+      );
+      return { body: { trained_model_stats: modelStats } };
     },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
