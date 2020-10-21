@@ -9,7 +9,6 @@ import {
   MetricsAPIRequest,
   MetricsExplorerRequestBody,
   afterKeyObjectRT,
-  MetricsAPIMetric,
 } from '../../../../common/http_api';
 import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';
 
