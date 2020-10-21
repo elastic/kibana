@@ -59,7 +59,6 @@ describe('Mappings editor: date range datatype', () => {
       component,
       find,
       exists,
-      form,
       actions: { startEditField, updateFieldAndCloseFlyout, toggleFormRow },
     } = testBed;
 
