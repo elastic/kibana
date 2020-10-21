@@ -32,7 +32,7 @@ import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableState, SerializableState } from '../../../kibana_utils/common';
 
 export interface ExpressionExecOptions {
   /**
@@ -255,6 +255,21 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     });
 
     return telemetryData;
+  }
+
+  migrate(ast: SerializableState, version: string) {
+    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      link = fn.migrations[version](link) as ExpressionAstFunction;
+    });
+  }
+
+  migrateToLatest(ast: unknown, version: string) {
+    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      for (const key in Object.keys(fn.migrations)) {
+        if (key < version) continue;
+        link = fn.migrations[key](link) as ExpressionAstFunction;
+      }
+    });
   }
 
   public fork(): Executor<Context> {

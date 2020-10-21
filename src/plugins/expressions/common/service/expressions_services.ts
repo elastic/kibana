@@ -24,7 +24,7 @@ import { ExecutionContract } from '../execution/execution_contract';
 import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableState, SerializableState } from '../../../kibana_utils/common';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -288,6 +288,26 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
    */
   public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
     return this.executor.inject(state, references);
+  };
+
+  /**
+   * Injects saved object references into expression AST
+   * @param state expression AST to update
+   * @param references array of saved object references
+   * @returns new expression AST with references injected
+   */
+  public readonly migrate = (state: SerializableState, version: string) => {
+    return this.executor.migrate(state, version);
+  };
+
+  /**
+   * Injects saved object references into expression AST
+   * @param state expression AST to update
+   * @param references array of saved object references
+   * @returns new expression AST with references injected
+   */
+  public readonly migrateToLatest = (state: unknown, version: string) => {
+    return this.executor.migrateToLatest(state, version);
   };
 
   /**
