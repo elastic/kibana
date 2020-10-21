@@ -183,6 +183,20 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('setFieldFormat and deleteFieldFormaat', () => {
+    test('should persist changes', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      indexPattern.setFieldFormat('bytes', { id: 'bytes' });
+      expect(indexPattern.toSpec().fieldFormats).toEqual({ bytes: { id: 'bytes' } });
+
+      indexPattern.deleteFieldFormat('bytes');
+      expect(indexPattern.toSpec().fieldFormats).toEqual({});
+    });
+  });
+
   describe('toSpec', () => {
     test('should match snapshot', () => {
       const formatter = {
@@ -209,7 +223,6 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
-      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
     });
   });
 });
