@@ -1,3 +1,9 @@
+body.euiDataGrid__restrictBody {
+  .application {
+    z-index: $euiZLevel1;
+  }
+}
+
 .dscAppWrapper {
   display: flex;
   flex-direction: column;
