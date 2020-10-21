@@ -159,12 +159,12 @@ source .ci/teamcity/util.sh
 branchName="${'$'}GIT_BRANCH"
 branchName="${'$'}{branchName#refs\/heads\/}"
 
-if [[ "${'$'}GITHUB_PR_NUMBER" ]]; then
+if [[ "${'$'}{GITHUB_PR_NUMBER-}" ]]; then
   branchName=pull-request
 fi
 
 project=kibana
-if [[ "${'$'}ES_SNAPSHOT_MANIFEST" ]]; then
+if [[ "${'$'}{ES_SNAPSHOT_MANIFEST-}" ]]; then
   project=kibana-es-snapshot-verify
 fi
 
