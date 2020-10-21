@@ -50,7 +50,7 @@ export const NumericType = ({ field }: Props) => {
         {/* scaling_factor */}
         <FormDataProvider pathsToWatch="subType">
           {(formData) =>
-            formData.subType === 'scaled_float' ? (
+            formData.subType?.[0]?.value === 'scaled_float' ? (
               <EditFieldFormRow
                 title={PARAMETERS_DEFINITION.scaling_factor.title!}
                 description={PARAMETERS_DEFINITION.scaling_factor.description}
