@@ -11,6 +11,10 @@ import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
+export function isBoomError(error: { isBoom?: boolean }): error is Boom {
+  return error.isBoom === true;
+}
+
 /**
  * The number of docs to sample to determine field empty status.
  */
@@ -53,13 +57,13 @@ export async function existingFieldsRoute(setup: CoreSetup) {
         });
       } catch (e) {
         if (e.status === 404) {
-          return res.notFound();
+          return res.notFound({ body: e.message });
         }
-        if (e.isBoom) {
+        if (isBoomError(e)) {
           if (e.output.statusCode === 404) {
-            return res.notFound();
+            return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError(e.output.message);
+          return res.internalError({ body: e.output.payload.message });
         } else {
           return res.internalError({
             body: Boom.internal(e.message || e.name),

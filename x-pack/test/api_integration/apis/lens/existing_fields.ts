@@ -137,6 +137,7 @@ const metricBeatData = [
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('existing_fields apis', () => {
     before(async () => {
@@ -151,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
+          .post(`/api/lens/existing_fields/sdfsd${encodeURIComponent('logstash-*')}`)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
@@ -162,6 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
           })
+          .expect((res) => (res.status !== 200 ? log.warning(res.body) : 0))
           .expect(200);
 
         expect(body.indexPatternTitle).to.eql('logstash-*');
