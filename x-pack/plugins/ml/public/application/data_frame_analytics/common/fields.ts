@@ -17,7 +17,7 @@ import {
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
-import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
+import { FEATURE_IMPORTANCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
 import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export type EsId = string;
@@ -179,7 +179,6 @@ export const getDefaultFieldsFromJobCaps = (
   const resultsField = jobConfig.dest.results_field;
 
   const featureImportanceFields = [];
-  const featureInfluenceFields = [];
   const topClassesFields = [];
   const allFields: any = [];
   let type: ES_FIELD_TYPES | undefined;
@@ -193,16 +192,6 @@ export const getDefaultFieldsFromJobCaps = (
         name: `${resultsField}.${OUTLIER_SCORE}`,
         type: KBN_FIELD_TYPES.NUMBER,
       });
-
-      featureInfluenceFields.push(
-        ...fields
-          .filter((d) => !jobConfig.analyzed_fields.excludes.includes(d.id))
-          .map((d) => ({
-            id: `${resultsField}.${FEATURE_INFLUENCE}.${d.id}`,
-            name: `${resultsField}.${FEATURE_INFLUENCE}.${d.name}`,
-            type: KBN_FIELD_TYPES.NUMBER,
-          }))
-      );
     }
   }
 
@@ -247,12 +236,7 @@ export const getDefaultFieldsFromJobCaps = (
     }
   }
 
-  allFields.push(
-    ...fields,
-    ...featureImportanceFields,
-    ...featureInfluenceFields,
-    ...topClassesFields
-  );
+  allFields.push(...fields, ...featureImportanceFields, ...topClassesFields);
   allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
     sortExplorationResultsFields(a, b, jobConfig)
   );

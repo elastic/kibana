@@ -44,7 +44,7 @@ describe('getServiceMapServiceNodeInfo', () => {
     it('returns data', async () => {
       jest.spyOn(getErrorRateModule, 'getErrorRate').mockResolvedValueOnce({
         average: 0.5,
-        erroneousTransactionsRate: [],
+        transactionErrorRate: [],
         noHits: false,
       });
 

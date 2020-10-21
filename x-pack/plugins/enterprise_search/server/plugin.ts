@@ -85,7 +85,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      icon: 'logoEnterpriseSearch',
       app: [
         'kibana',
         ENTERPRISE_SEARCH_PLUGIN.ID,
