@@ -52,7 +52,6 @@ jest.mock('../../../kibana_services', () => ({
 function getComponent({
   selected = false,
   showDetails = false,
-  useShortDots = false,
   field,
 }: {
   selected?: boolean;
@@ -70,19 +69,16 @@ function getComponent({
 
   const finalField =
     field ??
-    new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    new IndexPatternField({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
 
   const props = {
     indexPattern,
@@ -115,17 +111,14 @@ describe('discover sidebar field', function () {
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
   it('should not allow clicking on _source', function () {
-    const field = new IndexPatternField(
-      {
-        name: '_source',
-        type: '_source',
-        esTypes: ['_source'],
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      '_source'
-    );
+    const field = new IndexPatternField({
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
     const { comp, props } = getComponent({
       selected: true,
       field,

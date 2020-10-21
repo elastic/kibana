@@ -213,7 +213,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldFormatId: indexPattern.fieldFormatMap
         ? indexPattern.fieldFormatMap[spec.name]?.type?.id
         : undefined,
-      customName: indexPattern.attributes?.fields[spec.name]?.customName || '',
+      customName: spec.customName || '',
       fieldFormatParams: format.params(),
     });
   }
