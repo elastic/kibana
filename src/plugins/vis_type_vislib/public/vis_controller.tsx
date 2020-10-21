@@ -166,7 +166,7 @@ export const createVislibVisController = (
       if (this.vislibVis) {
         this.removeListeners?.();
         this.vislibVis.destroy();
-        this.vislibVis = null;
+        delete this.vislibVis;
       }
     }
   };

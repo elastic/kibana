@@ -44,13 +44,15 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
     splitColumn: schemas.split_column,
   };
 
-  const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
+  const responseAggs = vis.data.aggs?.getResponseAggs() ?? [];
 
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === 'date_histogram') {
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
+      (dimensions.x.params as DateHistogramParams).intervalESUnit = esUnit;
+      (dimensions.x.params as DateHistogramParams).intervalESValue = esValue;
       (dimensions.x.params as DateHistogramParams).interval = moment
         .duration(esValue, esUnit)
         .asMilliseconds();
@@ -70,7 +72,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
   const visConfig = vis.params;
 
   (dimensions.y || []).forEach((yDimension) => {
-    const yAgg = responseAggs[yDimension.accessor];
+    const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];
     const seriesParam = (visConfig.seriesParams || []).find(
       (param: any) => param.data.id === yAgg.id
     );
