@@ -73,8 +73,15 @@ export const useExplorationResults = (
     dataGrid.resetPagination();
   }, [JSON.stringify(searchQuery)]);
 
+  // The pattern using `didCancel` allows us to abort out of date remote request.
+  // We wrap `didCancel` in a object so we can mutate the value as it's being
+  // passed on to `getIndexData`.
   useEffect(() => {
-    getIndexData(jobConfig, dataGrid, searchQuery);
+    const options = { didCancel: false };
+    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    return () => {
+      options.didCancel = true;
+    };
     // custom comparison
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
