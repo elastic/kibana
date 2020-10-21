@@ -31,7 +31,7 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
           <div
             class="euiPopover__anchor"
           >
-            <div
+            <span
               data-euiicon-type="arrowDown"
               data-test-subj="monitoringCellIcon-testCell2"
               role="button"
@@ -78,7 +78,7 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
           <div
             class="euiPopover__anchor"
           >
-            <div
+            <span
               data-euiicon-type="arrowDown"
               data-test-subj="monitoringCellIcon-testCell"
               role="button"

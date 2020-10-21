@@ -7,7 +7,7 @@
 import crypto from 'crypto';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Logger } from '../../../../src/core/server';
+import { Logger, config as coreConfig } from '../../../../src/core/server';
 
 export type ConfigType = ReturnType<typeof createConfig>;
 
@@ -203,9 +203,30 @@ export const ConfigSchema = schema.object({
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
     }),
   }),
-  audit: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
+  audit: schema.object(
+    {
+      enabled: schema.boolean({ defaultValue: false }),
+      appender: schema.maybe(coreConfig.logging.appenders),
+      ignore_filters: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          })
+        )
+      ),
+    },
+    {
+      validate: (auditConfig) => {
+        if (auditConfig.ignore_filters && !auditConfig.appender) {
+          return 'xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.';
+        }
+      },
+    }
+  ),
 });
 
 export function createConfig(
