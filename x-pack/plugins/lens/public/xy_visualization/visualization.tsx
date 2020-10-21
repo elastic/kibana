@@ -15,7 +15,7 @@ import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel'
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { toExpression, toPreviewExpression } from './to_expression';
+import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
@@ -161,12 +161,9 @@ export const xyVisualization: Visualization<State> = {
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
-    const originalOrder = datasource
-      .getTableSpec()
-      .map(({ columnId }) => columnId)
-      .filter((columnId) => layer.accessors.includes(columnId));
-    // When we add a column it could be empty, and therefore have no order
-    const sortedAccessors = Array.from(new Set(originalOrder.concat(layer.accessors)));
+
+    const sortedAccessors = getSortedAccessors(datasource, layer);
+
     return {
       groups: [
         {
