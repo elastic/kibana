@@ -57,3 +57,19 @@ export const LodashFp = require('lodash/fp');
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
+export const BabelRuntimeAssertThisInitialized = require('@babel/runtime/helpers/assertThisInitialized');
+export const BabelRuntimeAsyncToGenerator = require('@babel/runtime/helpers/asyncToGenerator');
+export const BabelRuntimeClassCallCheck = require('@babel/runtime/helpers/classCallCheck');
+export const BabelRuntimeCreateClass = require('@babel/runtime/helpers/createClass');
+export const BabelRuntimeDefineProperty = require('@babel/runtime/helpers/defineProperty');
+export const BabelRuntimeExtends = require('@babel/runtime/helpers/extends');
+export const BabelRuntimeGetPrototypeOf = require('@babel/runtime/helpers/getPrototypeOf');
+export const BabelRuntimeInherits = require('@babel/runtime/helpers/inherits');
+export const BabelRuntimeInheritsLoose = require('@babel/runtime/helpers/inheritsLoose');
+export const BabelRuntimeInteropRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+export const BabelRuntimeInteropRequireWildcard = require('@babel/runtime/helpers/interopRequireWildcard');
+export const BabelRuntimeObjectWithoutPropertiesLoose = require('@babel/runtime/helpers/objectWithoutPropertiesLoose');
+export const BabelRuntimePossibleConstructorReturn = require('@babel/runtime/helpers/possibleConstructorReturn');
+export const BabelRuntimeTypeof = require('@babel/runtime/helpers/typeof');
+export const BabelRuntimeWrapNativeSuper = require('@babel/runtime/helpers/wrapNativeSuper');
+export const BabelRuntimeRegenerator = require('@babel/runtime/regenerator');

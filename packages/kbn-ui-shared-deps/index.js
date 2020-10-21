@@ -68,5 +68,26 @@ exports.externals = {
    * runtime deps which don't need to be copied across all bundles
    */
   tslib: '__kbnSharedDeps__.TsLib',
+  '@babel/runtime/helpers/assertThisInitialized':
+    '__kbnSharedDeps__.BabelRuntimeAssertThisInitialized',
+  '@babel/runtime/helpers/asyncToGenerator': '__kbnSharedDeps__.BabelRuntimeAsyncToGenerator',
+  '@babel/runtime/helpers/classCallCheck': '__kbnSharedDeps__.BabelRuntimeClassCallCheck',
+  '@babel/runtime/helpers/createClass': '__kbnSharedDeps__.BabelRuntimeCreateClass',
+  '@babel/runtime/helpers/defineProperty': '__kbnSharedDeps__.BabelRuntimeDefineProperty',
+  '@babel/runtime/helpers/extends': '__kbnSharedDeps__.BabelRuntimeExtends',
+  '@babel/runtime/helpers/getPrototypeOf': '__kbnSharedDeps__.BabelRuntimeGetPrototypeOf',
+  '@babel/runtime/helpers/inherits': '__kbnSharedDeps__.BabelRuntimeInherits',
+  '@babel/runtime/helpers/inheritsLoose': '__kbnSharedDeps__.BabelRuntimeInheritsLoose',
+  '@babel/runtime/helpers/interopRequireDefault':
+    '__kbnSharedDeps__.BabelRuntimeInteropRequireDefault',
+  '@babel/runtime/helpers/interopRequireWildcard':
+    '__kbnSharedDeps__.BabelRuntimeInteropRequireWildcard',
+  '@babel/runtime/helpers/objectWithoutPropertiesLoose':
+    '__kbnSharedDeps__.BabelRuntimeObjectWithoutPropertiesLoose',
+  '@babel/runtime/helpers/possibleConstructorReturn':
+    '__kbnSharedDeps__.BabelRuntimePossibleConstructorReturn',
+  '@babel/runtime/helpers/typeof': '__kbnSharedDeps__.BabelRuntimeTypeof',
+  '@babel/runtime/helpers/wrapNativeSuper': '__kbnSharedDeps__.BabelRuntimeWrapNativeSuper',
+  '@babel/runtime/regenerator': '__kbnSharedDeps__.BabelRuntimeRegenerator',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');
