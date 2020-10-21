@@ -21,7 +21,6 @@ import {
   ValidationFuncArg,
   FormHook,
   Form,
-  useFormData,
 } from '../../../../../../../shared_imports';
 import { Document } from '../../../../types';
 import { AddDocumentsAccordion } from './add_documents_accordion';
@@ -149,16 +148,15 @@ export const DocumentsTab: FunctionComponent<Props> = ({
   resetTestOutput,
 }) => {
   const { services } = useKibana();
-
-  const [, formatData] = useFormData({ form });
+  const { getFormData, reset } = form;
 
   const onAddDocumentHandler = useCallback(
     (document) => {
-      const { documents: existingDocuments = [] } = formatData();
+      const { documents: existingDocuments = [] } = getFormData();
 
-      form.reset({ defaultValue: { documents: [...existingDocuments, document] } });
+      reset({ defaultValue: { documents: [...existingDocuments, document] } });
     },
-    [form, formatData]
+    [reset, getFormData]
   );
 
   const [showResetModal, setShowResetModal] = useState<boolean>(false);

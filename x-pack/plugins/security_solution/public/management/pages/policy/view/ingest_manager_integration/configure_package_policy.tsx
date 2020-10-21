@@ -158,7 +158,7 @@ const EditFlowMessage = memo<{
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionSecurityPolicy"
-          defaultMessage="Edit Security Policy"
+          defaultMessage="Edit Policy"
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
@@ -168,7 +168,7 @@ const EditFlowMessage = memo<{
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionTrustedApps"
-          defaultMessage="View Trusted Applications"
+          defaultMessage="Edit Trusted Applications"
         />
       </EuiContextMenuItem>,
     ];
@@ -179,7 +179,7 @@ const EditFlowMessage = memo<{
       <EuiFlexItem>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.message"
-          defaultMessage="More advanced configuration options can be found by selecting an action from the menu"
+          defaultMessage="Access additional configuration options from the action menu"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

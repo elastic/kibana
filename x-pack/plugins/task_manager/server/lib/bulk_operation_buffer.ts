@@ -8,7 +8,7 @@ import { map } from 'lodash';
 import { Subject, race, from } from 'rxjs';
 import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs/operators';
 import { either, Result, asOk, asErr, Ok, Err } from './result_type';
-import { Logger } from '../types';
+import { Logger } from '../../../../../src/core/server';
 
 export interface BufferOptions {
   bufferMaxDuration?: number;
