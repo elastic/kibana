@@ -10,55 +10,105 @@ import { inputsModel } from '../../../common/store';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { InspectResponse } from '../../../types';
 import { EqlPreviewResponse, Source } from './types';
-import { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import { BaseHit, EqlSearchResponse } from '../../../../common/detection_engine/types';
 
 type EqlAggBuckets = Record<string, { timestamp: string; total: number }>;
 
 export const EQL_QUERY_EVENT_SIZE = 100;
 
-// Calculates which 2 min bucket segment, event should be
-// sorted into
+/**
+ * Calculates which 2 min bucket segment, event should be sorted into
+ * @param eventTimestamp The event to be bucketed timestamp
+ * @param relativeNow The timestamp we are using to calculate how far from 'now' event occurred
+ */
 export const calculateBucketForHour = (eventTimestamp: number, relativeNow: number): number => {
-  const diff: number = relativeNow - eventTimestamp;
-  const minutes: number = Math.floor(diff / 60000);
+  const diff = Math.abs(relativeNow - eventTimestamp);
+  const minutes = Math.floor(diff / 60000);
   return Math.ceil(minutes / 2) * 2;
 };
 
-// Calculates which 1 hour bucket segment, event should be
-// sorted into
+/**
+ * Calculates which 1 hour bucket segment, event should be sorted into
+ * @param eventTimestamp The event to be bucketed timestamp
+ * @param relativeNow The timestamp we are using to calculate how far from 'now' event occurred
+ */
 export const calculateBucketForDay = (eventTimestamp: number, relativeNow: number): number => {
-  const diff: number = relativeNow - eventTimestamp;
-  const minutes: number = Math.floor(diff / 60000);
+  const diff = Math.abs(relativeNow - eventTimestamp);
+  const minutes = Math.floor(diff / 60000);
   return Math.ceil(minutes / 60);
 };
 
+/**
+ * Formats the response for the UI inspect modal
+ * @param response The query search response
+ * @param indices The indices the query searched
+ * TODO: Update eql search strategy to return index in it's meta
+ * params info, currently not being returned, but expected for
+ * inspect modal display
+ */
 export const formatInspect = (
-  response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>
+  response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
+  indices: string[]
 ): InspectResponse => {
   const body = response.rawResponse.meta.request.params.body;
-  const bodyParse = typeof body === 'string' ? JSON.parse(body) : body;
+  const bodyParse: Record<string, unknown> | undefined =
+    typeof body === 'string' ? JSON.parse(body) : body;
   return {
     dsl: [
-      JSON.stringify({ ...response.rawResponse.meta.request.params, body: bodyParse }, null, 2),
+      JSON.stringify(
+        { ...response.rawResponse.meta.request.params, index: indices, body: bodyParse },
+        null,
+        2
+      ),
     ],
     response: [JSON.stringify(response.rawResponse.body, null, 2)],
   };
 };
 
-// NOTE: Eql does not support aggregations, this is an in-memory
-// hand-spun aggregation for the events to give the user a visual
-// representation of their query results
+/**
+ * Gets the events out of the response based on type of query
+ * @param isSequence Is the eql query a sequence query
+ * @param response The query search response
+ */
+export const getEventsToBucket = (
+  isSequence: boolean,
+  response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>
+): Array<BaseHit<Source>> => {
+  const hits = response.rawResponse.body.hits ?? [];
+  if (isSequence) {
+    return (
+      hits.sequences?.map((seq) => {
+        return seq.events[seq.events.length - 1];
+      }) ?? []
+    );
+  } else {
+    return hits.events ?? [];
+  }
+};
+
+/**
+ * Eql does not support aggregations, this is an in-memory
+ * hand-spun aggregation for the events to give the user a visual
+ * representation of their query results
+ * @param response The query search response
+ * @param range User chosen timeframe (last hour, day)
+ * @param to Based on range chosen
+ * @param refetch Callback used in inspect button, ref just passed through
+ * @param indices Indices searched by query
+ * @param isSequence Is the eql query a sequence query
+ */
 export const getEqlAggsData = (
   response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
   range: Unit,
   to: string,
-  refetch: inputsModel.Refetch
+  refetch: inputsModel.Refetch,
+  indices: string[],
+  isSequence: boolean
 ): EqlPreviewResponse => {
-  const { dsl, response: inspectResponse } = formatInspect(response);
-  // The upper bound of the timestamps
+  const { dsl, response: inspectResponse } = formatInspect(response, indices);
   const relativeNow = Date.parse(to);
   const accumulator = getInterval(range, relativeNow);
-  const events = response.rawResponse.body.hits.events ?? [];
+  const events = getEventsToBucket(isSequence, response);
   const totalCount = response.rawResponse.body.hits.total.value;
 
   const buckets = events.reduce<EqlAggBuckets>((acc, hit) => {
@@ -94,12 +144,23 @@ export const getEqlAggsData = (
   };
 };
 
-export const createIntervalArray = (start: number, end: number, multiplier: number) => {
+/**
+ * Helper method to create an array to be used for calculating bucket intervals
+ * @param start
+ * @param end
+ * @param multiplier
+ */
+export const createIntervalArray = (start: number, end: number, multiplier: number): number[] => {
   return Array(end - start + 1)
     .fill(0)
     .map((_, idx) => start + idx * multiplier);
 };
 
+/**
+ * Helper method to create an array to be used for calculating bucket intervals
+ * @param range User chosen timeframe (last hour, day)
+ * @param relativeNow Based on range chosen
+ */
 export const getInterval = (range: Unit, relativeNow: number): EqlAggBuckets => {
   switch (range) {
     case 'h':
@@ -117,38 +178,6 @@ export const getInterval = (range: Unit, relativeNow: number): EqlAggBuckets => 
         };
       }, {});
     default:
-      throw new Error('Invalid time range selected');
+      throw new RangeError('Invalid time range selected. Must be "Last hour" or "Last day".');
   }
-};
-
-export const getSequenceAggs = (
-  response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
-  refetch: inputsModel.Refetch
-): EqlPreviewResponse => {
-  const { dsl, response: inspectResponse } = formatInspect(response);
-  const sequences = response.rawResponse.body.hits.sequences ?? [];
-  const totalCount = response.rawResponse.body.hits.total.value;
-
-  const data = sequences.map((sequence, i) => {
-    return sequence.events.map((seqEvent) => {
-      if (seqEvent._source['@timestamp'] == null) {
-        return {};
-      }
-      return {
-        x: seqEvent._source['@timestamp'],
-        y: 1,
-        g: `Seq. ${i + 1}`,
-      };
-    });
-  });
-
-  return {
-    data: data.flat(),
-    totalCount,
-    inspect: {
-      dsl,
-      response: inspectResponse,
-    },
-    refetch,
-  };
 };
