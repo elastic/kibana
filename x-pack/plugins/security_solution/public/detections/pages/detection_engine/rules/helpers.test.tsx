@@ -306,10 +306,22 @@ describe('rule helpers', () => {
       expect(result).toEqual('2s');
     });
 
+    test('returns from as seconds if from duration is specified in seconds greater than 60', () => {
+      const result = getHumanizedDuration('now-122s', '1m');
+
+      expect(result).toEqual('62s');
+    });
+
     test('returns from as minutes if from duration is specified in minutes', () => {
       const result = getHumanizedDuration('now-660s', '5m');
 
       expect(result).toEqual('6m');
+    });
+
+    test('returns from as minutes if from duration is specified in minutes greater than 60', () => {
+      const result = getHumanizedDuration('now-6600s', '5m');
+
+      expect(result).toEqual('105m');
     });
 
     test('returns from as hours if from duration is specified in hours', () => {
