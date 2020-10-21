@@ -21,6 +21,7 @@ import { get, memoize, trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   getCombinedSignal,
   AbortError,
@@ -253,12 +254,16 @@ export class SearchInterceptor {
       return;
     } else if (e instanceof EsError) {
       this.deps.toasts.addDanger({
-        title: 'Search Error',
+        title: i18n.translate('data.search.esErrorTitle', {
+          defaultMessage: 'Cannot retrieve search results',
+        }),
         text: toMountPoint(e.getErrorMessage(this.application)),
       });
     } else if (e.constructor.name === 'HttpFetchError') {
       this.deps.toasts.addDanger({
-        title: 'Search Error',
+        title: i18n.translate('data.search.httpErrorTitle', {
+          defaultMessage: 'Cannot retrieve your data',
+        }),
         text: toMountPoint(getHttpError(e.message)),
       });
     } else {

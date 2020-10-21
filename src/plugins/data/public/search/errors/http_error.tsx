@@ -26,7 +26,7 @@ export function getHttpError(message: string) {
     <>
       {i18n.translate('data.errors.fetchError', {
         defaultMessage:
-          'Failed to fetch data. This might indicate a network or a proxy configuration error. If the issue persists, please contact support.',
+          'Check your network and proxy configuration. If the problem persists, contact your network administrator.',
       })}
       <EuiSpacer size="s" />
       <EuiSpacer size="s" />

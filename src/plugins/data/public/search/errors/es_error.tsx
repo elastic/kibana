@@ -35,10 +35,6 @@ export class EsError extends KbnError {
 
     return (
       <>
-        {i18n.translate('data.esError.errorMessage', {
-          defaultMessage: 'A search error has occured',
-        })}
-        <EuiSpacer size="s" />
         <EuiSpacer size="s" />
         {rootCause ? (
           <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
