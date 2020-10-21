@@ -202,7 +202,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(js|tsx?)$/,
-          exclude: /node_modules/,
+          exclude: [/node_modules/, Path.resolve(worker.repoRoot, 'packages')],
           use: {
             loader: 'babel-loader',
             options: {
