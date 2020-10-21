@@ -79,7 +79,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         return response.ok({
           body: logEntriesHighlightsResponseRT.encode({
-            data: entriesPerHighlightTerm.map((entries) => {
+            data: entriesPerHighlightTerm.map(({ entries }) => {
               if (entries.length > 0) {
                 return {
                   entries,
