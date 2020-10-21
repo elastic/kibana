@@ -79,8 +79,8 @@ describe('Detection rules, machine learning', () => {
   });
 
   after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
     deleteRule();
+    esArchiverUnload('prebuilt_rules_loaded');
   });
 
   it('Creates and activates a new ml rule', () => {
