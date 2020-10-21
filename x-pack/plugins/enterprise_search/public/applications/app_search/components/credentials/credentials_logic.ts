@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
-import { ApiTokenTypes, DELETE_MESSAGE } from './constants';
+import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
 import {
@@ -50,6 +50,7 @@ interface ICredentialsLogicActions {
   fetchCredentials(page?: number): number;
   fetchDetails(): { value: boolean };
   deleteApiKey(tokenName: string): string;
+  onApiTokenChange(): void;
   onEngineSelect(engineName: string): string;
 }
 
@@ -94,6 +95,7 @@ export const CredentialsLogic = kea<
     fetchCredentials: (page) => page,
     fetchDetails: true,
     deleteApiKey: (tokenName) => tokenName,
+    onApiTokenChange: () => null,
     onEngineSelect: (engineName) => engineName,
   }),
   reducers: () => ({
@@ -261,7 +263,48 @@ export const CredentialsLogic = kea<
         flashAPIErrors(e);
       }
     },
-    // TODO onApiTokenChange from ent-search
+    onApiTokenChange: async () => {
+      const { myRole } = AppLogic.values;
+      const {
+        id,
+        name,
+        engines,
+        type,
+        read,
+        write,
+        access_all_engines: accessAllEngines,
+      } = values.activeApiToken;
+
+      const data: IApiToken = {
+        name,
+        type,
+      };
+      if (type === ApiTokenTypes.Private) {
+        data.read = read;
+        data.write = write;
+      }
+      if (type !== ApiTokenTypes.Admin) {
+        data.access_all_engines = !!(accessAllEngines && myRole.canAccessAllEngines);
+        data.engines = engines;
+      }
+
+      try {
+        const { http } = HttpLogic.values;
+        const body = JSON.stringify(data);
+
+        if (id) {
+          const response = await http.put(`/api/app_search/credentials/${name}`, { body });
+          actions.onApiTokenUpdateSuccess(response);
+          setSuccessMessage(UPDATE_MESSAGE);
+        } else {
+          const response = await http.post('/api/app_search/credentials', { body });
+          actions.onApiTokenCreateSuccess(response);
+          setSuccessMessage(CREATE_MESSAGE);
+        }
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     onEngineSelect: (engineName: string) => {
       if (values.activeApiToken?.engines?.includes(engineName)) {
         actions.removeEngineName(engineName);

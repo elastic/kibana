@@ -26,6 +26,7 @@ import {
 jest.mock('../../app_logic', () => ({
   AppLogic: {
     selectors: { myRole: jest.fn(() => ({})) },
+    values: { myRole: jest.fn(() => ({})) },
   },
 }));
 import { AppLogic } from '../../app_logic';
@@ -1169,6 +1170,70 @@ describe('CredentialsLogic', () => {
         http.delete.mockReturnValue(promise);
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
+        try {
+          await promise;
+        } catch {
+          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+        }
+      });
+    });
+
+    describe('onApiTokenChange', () => {
+      it('calls a POST API endpoint that creates a new token', async () => {
+        const createdToken = {
+          name: 'new-key',
+          type: ApiTokenTypes.Admin,
+        };
+        mount({
+          activeApiToken: createdToken,
+        });
+        jest.spyOn(CredentialsLogic.actions, 'onApiTokenCreateSuccess');
+        const promise = Promise.resolve(createdToken);
+        http.post.mockReturnValue(promise);
+
+        CredentialsLogic.actions.onApiTokenChange();
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+          body: JSON.stringify(createdToken),
+        });
+        await promise;
+        expect(CredentialsLogic.actions.onApiTokenCreateSuccess).toHaveBeenCalledWith(createdToken);
+        expect(setSuccessMessage).toHaveBeenCalled();
+      });
+
+      it('calls a PUT endpoint that updates existing API tokens', async () => {
+        const updatedToken = {
+          name: 'test-key',
+          type: ApiTokenTypes.Private,
+          read: true,
+          write: false,
+          access_all_engines: false,
+          engines: ['engine1'],
+        };
+        mount({
+          activeApiToken: {
+            ...updatedToken,
+            id: 'some-id',
+          },
+        });
+        jest.spyOn(CredentialsLogic.actions, 'onApiTokenUpdateSuccess');
+        const promise = Promise.resolve(updatedToken);
+        http.put.mockReturnValue(promise);
+
+        CredentialsLogic.actions.onApiTokenChange();
+        expect(http.put).toHaveBeenCalledWith('/api/app_search/credentials/test-key', {
+          body: JSON.stringify(updatedToken),
+        });
+        await promise;
+        expect(CredentialsLogic.actions.onApiTokenUpdateSuccess).toHaveBeenCalledWith(updatedToken);
+        expect(setSuccessMessage).toHaveBeenCalled();
+      });
+
+      it('handles errors', async () => {
+        mount();
+        const promise = Promise.reject('An error occured');
+        http.post.mockReturnValue(promise);
+
+        CredentialsLogic.actions.onApiTokenChange();
         try {
           await promise;
         } catch {
