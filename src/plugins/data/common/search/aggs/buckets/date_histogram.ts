@@ -34,7 +34,7 @@ import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 import { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
-import { inferTimeZone } from '../utils/infer_time_zone';
+import { inferTimeZone } from '../utils';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;

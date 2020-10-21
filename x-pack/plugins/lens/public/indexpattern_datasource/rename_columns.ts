@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ExpressionFunctionDefinition, Datatable, DatatableColumn } from 'src/plugins/expressions';
 import { IndexPatternColumn } from './operations';
 
@@ -15,10 +14,12 @@ interface RemapArgs {
 
 export type OriginalColumn = { id: string } & IndexPatternColumn;
 
-// TODO this is just a test for the new helper function
-export const getRenameColumns = (
-  dataStart: DataPublicPluginStart
-): ExpressionFunctionDefinition<'lens_rename_columns', Datatable, RemapArgs, Datatable> => ({
+export const renameColumns: ExpressionFunctionDefinition<
+  'lens_rename_columns',
+  Datatable,
+  RemapArgs,
+  Datatable
+> = {
   name: 'lens_rename_columns',
   type: 'datatable',
   help: i18n.translate('xpack.lens.functions.renameColumns.help', {
@@ -36,12 +37,6 @@ export const getRenameColumns = (
   inputTypes: ['datatable'],
   fn(data, { idMap: encodedIdMap }) {
     const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
-
-    data.columns.forEach((column) => {
-      if (column.meta.type === 'date') {
-        dataStart.search.aggs.getDateMetaByDatatableColumn(column).then((i) => console.log(i));
-      }
-    });
 
     return {
       type: 'datatable',
@@ -76,7 +71,7 @@ export const getRenameColumns = (
       }),
     };
   },
-});
+};
 
 function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColumn) {
   if (originalColumn && originalColumn.operationType === 'date_histogram') {

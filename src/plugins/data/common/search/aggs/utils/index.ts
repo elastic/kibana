@@ -18,9 +18,9 @@
  */
 
 export * from './calculate_auto_time_expression';
-export * from './time_column_meta';
 export * from './date_interval_utils';
 export * from './get_format_with_aggs';
 export * from './ipv4_address';
 export * from './prop_filter';
 export * from './to_angular_json';
+export * from './infer_time_zone';

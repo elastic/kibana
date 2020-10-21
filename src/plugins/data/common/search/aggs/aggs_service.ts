@@ -28,7 +28,7 @@ import {
   getCalculateAutoTimeExpression,
 } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
-import { getDateMetaByDatatableColumn } from './utils';
+import { getDateMetaByDatatableColumn } from './utils/time_column_meta';
 
 /** @internal */
 export const aggsRequiredUiSettings = [
