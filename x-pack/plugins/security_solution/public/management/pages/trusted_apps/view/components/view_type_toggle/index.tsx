@@ -7,6 +7,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { ViewType } from '../../../state';
 import { GRID_VIEW_TOGGLE_LABEL, LIST_VIEW_TOGGLE_LABEL } from '../../translations';
 
@@ -35,6 +36,9 @@ export const ViewTypeToggle = memo(({ selectedOption, onToggle }: ViewTypeToggle
         { id: 'list', iconType: 'list', label: LIST_VIEW_TOGGLE_LABEL },
       ]}
       onChange={handleChange}
+      legend={i18n.translate('xpack.securitySolution.trustedapps.viewTypeToggle.controlLegend', {
+        defaultMessage: 'View type toggle control',
+      })}
     />
   );
 });

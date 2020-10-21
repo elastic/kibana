@@ -54,6 +54,7 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
         }}
         buttonSize="compressed"
         isFullWidth
+        legend={strings.getBooleanOptionsLegend()}
       />
     );
   }

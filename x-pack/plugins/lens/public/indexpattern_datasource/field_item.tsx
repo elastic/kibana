@@ -325,7 +325,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             id: 'histogram',
           },
         ]}
-        onChange={(optionId) => {
+        onChange={(optionId: string) => {
           setShowingHistogram(optionId === 'histogram');
         }}
         idSelected={showingHistogram ? 'histogram' : 'topValues'}

@@ -30,7 +30,7 @@ import {
   EuiButtonEmpty,
   EuiPopoverProps,
   EuiButtonGroup,
-  EuiButtonGroupOption,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 
 import { legendColors, LegendItem } from './models';
@@ -74,7 +74,7 @@ const VisLegendItemComponent = ({
     }
   };
 
-  const filterOptions: EuiButtonGroupOption[] = [
+  const filterOptions: EuiButtonGroupOptionProps[] = [
     {
       id: 'filterIn',
       label: i18n.translate('visTypeVislib.vislib.legend.filterForValueButtonAriaLabel', {
