@@ -53,15 +53,18 @@ uiRoutes.when('/loading', {
         (clusters) => {
           if (!clusters || !clusters.length) {
             window.location.hash = '#/no-data';
+            $scope.$apply();
             return;
           }
           if (clusters.length === 1) {
             // Bypass the cluster listing if there is just 1 cluster
             window.history.replaceState(null, null, '#/overview');
+            $scope.$apply();
             return;
           }
 
           window.history.replaceState(null, null, '#/home');
+          $scope.$apply();
         }
       );
     }
