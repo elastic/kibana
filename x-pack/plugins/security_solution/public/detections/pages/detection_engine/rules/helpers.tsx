@@ -118,15 +118,14 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
 
   const fromDuration = moment.duration(intervalValue.diff(fromValue));
-  const fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
 
-  if (fromDuration.asSeconds() < 60) {
+  if (Number.isInteger(fromDuration.asHours())) {
+    return `${fromDuration.asHours()}h`;
+  } else if (Number.isInteger(fromDuration.asMinutes())) {
+    return `${fromDuration.asMinutes()}m`;
+  } else {
     return `${Math.floor(fromDuration.asSeconds())}s`;
-  } else if (fromDuration.asMinutes() < 60) {
-    return `${Math.floor(fromDuration.asMinutes())}m`;
   }
-
-  return fromHumanize;
 };
 
 export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
