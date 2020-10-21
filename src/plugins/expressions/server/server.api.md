@@ -97,7 +97,7 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     cancel(): void;
     // (undocumented)
     cast(value: any, toTypeNames?: string[]): any;
-    readonly context: ExecutionContext<Input, InspectorAdapters>;
+    readonly context: ExecutionContext<InspectorAdapters>;
     // Warning: (ae-forgotten-export) The symbol "ExecutionContract" needs to be exported by the entry point index.d.ts
     readonly contract: ExecutionContract<Input, Output, InspectorAdapters>;
     // (undocumented)
@@ -131,17 +131,15 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // Warning: (ae-missing-release-tag) "ExecutionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ExecutionContext<Input = unknown, InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
     abortSignal: AbortSignal;
-    getInitialInput: () => Input;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
     getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;
-    // (undocumented)
-    getSessionId: () => string | undefined;
-    inspectorAdapters: InspectorAdapters;
     // Warning: (ae-forgotten-export) The symbol "ExecutionContextSearch" needs to be exported by the entry point index.d.ts
-    search?: ExecutionContextSearch;
+    getSearchContext: () => ExecutionContextSearch;
+    getSearchSessionId: () => string | undefined;
+    inspectorAdapters: InspectorAdapters;
     types: Record<string, ExpressionType>;
     variables: Record<string, unknown>;
 }

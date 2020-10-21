@@ -20,7 +20,7 @@ export declare class Execution<Input = unknown, Output = unknown, InspectorAdapt
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [context](./kibana-plugin-plugins-expressions-public.execution.context.md) |  | <code>ExecutionContext&lt;Input, InspectorAdapters&gt;</code> | Execution context - object that allows to do side-effects. Context is passed to every function. |
+|  [context](./kibana-plugin-plugins-expressions-public.execution.context.md) |  | <code>ExecutionContext&lt;InspectorAdapters&gt;</code> | Execution context - object that allows to do side-effects. Context is passed to every function. |
 |  [contract](./kibana-plugin-plugins-expressions-public.execution.contract.md) |  | <code>ExecutionContract&lt;Input, Output, InspectorAdapters&gt;</code> | Contract is a public representation of <code>Execution</code> instances. Contract we can return to other plugins for their consumption. |
 |  [execution](./kibana-plugin-plugins-expressions-public.execution.execution.md) |  | <code>ExecutionParams</code> |  |
 |  [expression](./kibana-plugin-plugins-expressions-public.execution.expression.md) |  | <code>string</code> |  |
