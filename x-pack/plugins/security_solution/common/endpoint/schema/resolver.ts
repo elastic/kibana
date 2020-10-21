@@ -23,6 +23,73 @@ export const validateTree = {
   }),
 };
 
+// {
+//   id: ["host.id", "process.pid"]
+//   parent: ["host.id", "process.parent.pid"]
+// }
+
+// {
+//   id_definition: [
+//     {
+//       entity_id_field: "name",
+//       parent_id_field: "name_parent",
+//     },
+//     {
+//       entity_id_field: "age",
+//       parent_id_field: "age_parent",
+//     }
+//   ],
+//   id: [
+//     {
+//       "name": "Jon",
+//       "age": "50",
+//     },
+//     {
+//       "name": "Mike",
+//       "age": "~30",
+//     }
+//   ],
+//   levels: 10,
+//   limit: 50,
+// }
+
+// toID(): string
+
+/**
+ * Used to validate GET requests for a complete resolver tree.
+ */
+export const validateTree2 = {
+  body: schema.object({
+    // optional
+    levels: schema.nullable(
+      schema.object({
+        ancestors: schema.number({ min: 0, max: 1000 }),
+        descendants: schema.number({ min: 0, max: 1000 }),
+      })
+    ),
+    // levels supersedes limit if it is defined
+    descendants: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
+    ancestors: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
+    timerange: schema.object({
+      start: schema.string(),
+      end: schema.string(),
+    }),
+    userFieldsDef: schema.object({
+      // the ancestry field is optional
+      ancestry: schema.maybe(schema.string()),
+      relationship: schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          parentID: schema.string(),
+        })
+      ),
+    }),
+    // TODO would be great if we could enforce that the keys are the same as those defined in the userFieldsDef.relationship
+    // somehow
+    nodes: schema.arrayOf(schema.recordOf(schema.string(), schema.string())),
+  }),
+};
+
 /**
  * Used to validate POST requests for `/resolver/events` api.
  */
