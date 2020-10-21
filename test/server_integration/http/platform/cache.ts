@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { FtrProviderContext } from '../../services/types';
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('kibana server cache-control', () => {

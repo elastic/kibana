@@ -18,7 +18,7 @@
  */
 import Http from 'http';
 import Url from 'url';
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { FtrProviderContext } from '../../services/types';
 
 // @ts-ignore
 import getUrl from '../../../../src/test_utils/get_url';
@@ -27,7 +27,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const oneSec = 1_000;
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: GenericFtrProviderContext<{}, {}>) {
+export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   describe('headers timeout ', () => {
