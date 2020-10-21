@@ -62,10 +62,10 @@ export const TagCloudChart = ({
     () =>
       throttle(() => {
         if (visController.current) {
-          visController.current.render().then(renderComplete);
+          visController.current.render(visData, visParams).then(renderComplete);
         }
       }, 300),
-    [renderComplete]
+    [renderComplete, visData, visParams]
   );
 
   return (

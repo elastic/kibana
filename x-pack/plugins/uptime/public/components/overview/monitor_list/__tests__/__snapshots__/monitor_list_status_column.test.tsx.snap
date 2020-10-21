@@ -205,7 +205,7 @@ exports[`MonitorListStatusColumn will render display location status 1`] = `
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
+          <span
             color="success"
             data-euiicon-type="dot"
           />
