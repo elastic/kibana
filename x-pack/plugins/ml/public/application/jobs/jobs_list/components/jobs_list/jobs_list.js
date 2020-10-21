@@ -14,9 +14,10 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
+import { JobSpacesList } from '../../../../components/job_spaces_list';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
@@ -251,7 +252,7 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
           defaultMessage: 'Spaces',
         }),
-        render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+        render: (item) => <JobSpacesList spaces={item.spaces} />,
       });
       // Remove actions if Ml not enabled in current space
       if (this.props.isMlEnabledInSpace === false) {

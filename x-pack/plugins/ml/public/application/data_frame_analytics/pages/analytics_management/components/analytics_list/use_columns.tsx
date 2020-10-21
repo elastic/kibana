@@ -32,6 +32,7 @@ import {
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -278,7 +279,7 @@ export const useColumns = (
       name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
         defaultMessage: 'Spaces',
       }),
-      render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+      render: (item: DataFrameAnalyticsListRow) => <JobSpacesList spaces={item.spaces} />,
       width: '75px',
     });
 
