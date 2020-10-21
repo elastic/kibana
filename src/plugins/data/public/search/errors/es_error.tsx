@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
