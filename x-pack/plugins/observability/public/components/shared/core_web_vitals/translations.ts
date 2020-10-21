@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const NO_DATA = i18n.translate('xpack.observability.ux.coreVitals.noData', {
+  defaultMessage: 'No data is available.',
+});
+
 export const LCP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.lcp', {
   defaultMessage: 'Largest contentful paint',
 });
