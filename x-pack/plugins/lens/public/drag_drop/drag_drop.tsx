@@ -354,7 +354,7 @@ const DragDropInner = React.memo(function DragDropInner(
             }
           }}
         >
-          {i18n.translate('xpack.lens.dragDrop.reorderActive', {
+          {i18n.translate('xpack.lens.dragDrop.screenReaderButtonLabel', {
             defaultMessage: 'Press enter to reorder (copy pending)',
           })}
         </button>
