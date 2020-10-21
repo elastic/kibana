@@ -111,7 +111,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
-  private fetchIndexPatternsAbortController: AbortController = new AbortController();
+  private fetchIndexPatternsAbortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
@@ -128,7 +128,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
       (indexPattern) => typeof indexPattern !== 'string'
     ) as IIndexPattern[];
 
+    // abort the previous fetch to avoid overriding with outdated data
+    // issue https://github.com/elastic/kibana/issues/80831
+    if (this.fetchIndexPatternsAbortController) this.fetchIndexPatternsAbortController.abort();
     this.fetchIndexPatternsAbortController = new AbortController();
+    const currentAbortController = this.fetchIndexPatternsAbortController;
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.services.savedObjects!.client,
@@ -136,11 +140,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
       this.services.uiSettings!
     )) as IIndexPattern[];
 
-    if (!this.fetchIndexPatternsAbortController.signal.aborted) {
-      // abort the previous fetch to avoid overriding with outdated data
-      // issue https://github.com/elastic/kibana/issues/80831
-      this.fetchIndexPatternsAbortController.abort();
-
+    if (!currentAbortController.signal.aborted) {
       this.setState({
         indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
       });
