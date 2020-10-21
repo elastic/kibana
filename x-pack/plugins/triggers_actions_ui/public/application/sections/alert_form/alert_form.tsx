@@ -105,9 +105,7 @@ export const AlertForm = ({
   } = alertsContext;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
-    alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
-  );
+  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | undefined>(

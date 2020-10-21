@@ -22,7 +22,7 @@ describe('health check', () => {
 
     const { queryByText, container } = render(
       <HealthContextProvider>
-        <HealthCheck http={http} docLinks={docLinks}>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
           <p>{'shouldnt render'}</p>
         </HealthCheck>
       </HealthContextProvider>
@@ -58,7 +58,7 @@ describe('health check', () => {
 
     const { queryByText } = render(
       <HealthContextProvider>
-        <HealthCheck http={http} docLinks={docLinks}>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
           <p>{'should render'}</p>
         </HealthCheck>
       </HealthContextProvider>
@@ -77,7 +77,7 @@ describe('health check', () => {
 
     const { queryAllByText } = render(
       <HealthContextProvider>
-        <HealthCheck http={http} docLinks={docLinks}>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
           <p>{'should render'}</p>
         </HealthCheck>
       </HealthContextProvider>
@@ -107,7 +107,7 @@ describe('health check', () => {
 
     const { queryByText, queryByRole } = render(
       <HealthContextProvider>
-        <HealthCheck http={http} docLinks={docLinks}>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
           <p>{'should render'}</p>
         </HealthCheck>
       </HealthContextProvider>
@@ -136,7 +136,7 @@ describe('health check', () => {
 
     const { queryByText } = render(
       <HealthContextProvider>
-        <HealthCheck http={http} docLinks={docLinks}>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
           <p>{'should render'}</p>
         </HealthCheck>
       </HealthContextProvider>

@@ -24,15 +24,15 @@ interface Props {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
   http: HttpSetup;
   inFlyout?: boolean;
-  waitForCheck?: boolean;
+  waitForCheck: boolean;
 }
 
 export const HealthCheck: React.FunctionComponent<Props> = ({
   docLinks,
   http,
   children,
+  waitForCheck,
   inFlyout = false,
-  waitForCheck = true,
 }) => {
   const { setLoadingHealthCheck } = useHealthContext();
   const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);

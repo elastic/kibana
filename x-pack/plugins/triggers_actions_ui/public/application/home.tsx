@@ -141,7 +141,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               path={routeToConnectors}
               component={() => (
                 <HealthContextProvider>
-                  <HealthCheck docLinks={docLinks} http={http}>
+                  <HealthCheck docLinks={docLinks} http={http} waitForCheck={true}>
                     <ActionsConnectorsList />
                   </HealthCheck>
                 </HealthContextProvider>
@@ -153,7 +153,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             path={routeToAlerts}
             component={() => (
               <HealthContextProvider>
-                <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
+                <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={true}>
                   <AlertsList />
                 </HealthCheck>
               </HealthContextProvider>
