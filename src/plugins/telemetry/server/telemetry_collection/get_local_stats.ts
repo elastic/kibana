@@ -68,10 +68,10 @@ export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
  */
 export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
   clustersDetails, // array of cluster uuid's
-  config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+  config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end and the saved objects client scoped to the request or the internal repository
   context // StatsCollectionContext contains logger and version (string)
 ) => {
-  const { callCluster, usageCollection, esClient } = config;
+  const { callCluster, usageCollection, esClient, soClient } = config;
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
@@ -79,7 +79,7 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
         getClusterInfo(esClient), // cluster info
         getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
         getNodesUsage(esClient), // nodes_usage info
-        getKibana(usageCollection, callCluster, esClient),
+        getKibana(usageCollection, callCluster, esClient, soClient),
         getDataTelemetry(esClient),
       ]);
       return handleLocalStats(

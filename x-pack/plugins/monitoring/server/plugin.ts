@@ -21,6 +21,7 @@ import {
   CustomHttpResponseOptions,
   ResponseError,
   IClusterClient,
+  SavedObjectsServiceStart,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
@@ -76,6 +77,7 @@ export class Plugin {
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader: IBulkUploader = {} as IBulkUploader;
   private telemetryElasticsearchClient: IClusterClient | undefined;
+  private telemetrySavedObjectsService: SavedObjectsServiceStart | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -140,19 +142,20 @@ export class Plugin {
         kibanaUrl,
         isCloud
       );
-      plugins.alerts.registerType(alert.getAlertType());
+      plugins.alerts?.registerType(alert.getAlertType());
     }
 
     // Initialize telemetry
     if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(
-        plugins.telemetryCollectionManager,
-        this.cluster,
-        () => this.telemetryElasticsearchClient,
-        {
+      registerMonitoringCollection({
+        telemetryCollectionManager: plugins.telemetryCollectionManager,
+        esCluster: this.cluster,
+        esClientGetter: () => this.telemetryElasticsearchClient,
+        soServiceGetter: () => this.telemetrySavedObjectsService,
+        customContext: {
           maxBucketSize: config.ui.max_bucket_size,
-        }
-      );
+        },
+      });
     }
 
     // Register collector objects for stats to show up in the APIs
@@ -249,12 +252,15 @@ export class Plugin {
     };
   }
 
-  start({ elasticsearch }: CoreStart) {
+  start({ elasticsearch, savedObjects }: CoreStart) {
     // TODO: For the telemetry plugin to work, we need to provide the new ES client.
     // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
-    // the new client in Monitoring Telemetry collection yet, setting the local client allos progress for now.
+    // the new client in Monitoring Telemetry collection yet, setting the local client allows progress for now.
+    // The usage collector `fetch` method has been refactored to accept a `collectorFetchContext` object,
+    // exposing both es clients and the saved objects client.
     // We will update the client in a follow up PR.
     this.telemetryElasticsearchClient = elasticsearch.client;
+    this.telemetrySavedObjectsService = savedObjects;
   }
 
   stop() {
@@ -273,8 +279,6 @@ export class Plugin {
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'monitoringApp',
-      navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,

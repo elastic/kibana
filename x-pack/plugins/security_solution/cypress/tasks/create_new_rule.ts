@@ -11,6 +11,7 @@ import {
   OverrideRule,
   ThresholdRule,
 } from '../objects/rule';
+import { NUMBER_OF_ALERTS } from '../screens/alerts';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -62,6 +63,7 @@ import {
   EQL_QUERY_INPUT,
 } from '../screens/create_new_rule';
 import { TIMELINE } from '../screens/timelines';
+import { refreshPage } from './security_header';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -190,7 +192,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timelineId)).click();
-  cy.get(CUSTOM_QUERY_INPUT).should('have.text', rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
@@ -208,7 +210,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const threshold = 1;
 
   cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
-  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -263,12 +265,27 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForTheRuleToBeExecuted = async () => {
-  let status = '';
-  while (status !== 'succeeded') {
+export const waitForTheRuleToBeExecuted = () => {
+  cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click();
-    status = await cy.get(RULE_STATUS).invoke('text').promisify();
-  }
+    return cy
+      .get(RULE_STATUS)
+      .invoke('text')
+      .then((ruleStatus) => ruleStatus === 'succeeded');
+  });
+};
+
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(() => {
+    refreshPage();
+    return cy
+      .get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .then((countText) => {
+        const alertCount = parseInt(countText, 10) || 0;
+        return alertCount > 0;
+      });
+  });
 };
 
 export const selectEqlRuleType = () => {

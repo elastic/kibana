@@ -1,0 +1,9 @@
+{
+  "id": "session_notifications",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["session_notifications"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data", "navigation"]
+}

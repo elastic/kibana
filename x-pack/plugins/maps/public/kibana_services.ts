@@ -28,7 +28,7 @@ export const getFileUploadComponent = async () => {
 };
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
-export const getIndexPatternSelectComponent = (): any => pluginsStart.data.ui.IndexPatternSelect;
+export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
 export const getHttp = () => coreStart.http;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
@@ -39,6 +39,7 @@ export const getVisualizeCapabilities = () => coreStart.application.capabilities
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
+export const getSavedObjects = () => pluginsStart.savedObjects;
 export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;

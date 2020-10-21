@@ -64,16 +64,17 @@ Override it by providing a different `stroke`, `fill`, or `color` (Vega-Lite) va
 [[vega-queries]]
 ==== Writing {es} queries in Vega
 
-experimental[] {kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
-with support for direct {es} queries specified as a `url`.
+{kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
+with support for direct {es} queries specified as `url`.
 
-Because of this, {kib} is **unable to support dynamically loaded data**,
+{kib} is **unable to support dynamically loaded data**,
 which would otherwise work in Vega. All data is fetched before it's passed to
 the Vega renderer.
 
-To define an {es} query in Vega, set the `url` to an object. {kib} will parse
+To define an {es} query in Vega, set the `url` to an object. {kib} parses
 the object looking for special tokens that allow your query to integrate with {kib}.
-These tokens are:
+
+Tokens include the following:
 
 * `%context%: true`: Set at the top level, and replaces the `query` section with filters from dashboard
 * `%timefield%: <name>`: Set at the top level, integrates the query with the dashboard time filter
@@ -87,8 +88,7 @@ These tokens are:
 * `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
 * `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
 
-Putting this together, an example query that counts the number of documents in 
-a specific index:
+For example, the following query counts the number of documents in a specific index:
 
 [source,yaml]
 ----
@@ -296,7 +296,8 @@ a configuration option for changing the tooltip position and padding:
     kibana: {
       tooltips: {
         position: 'top',
-        padding: 15
+        padding: 15,
+        textTruncate: true,
       }
     }
   }

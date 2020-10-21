@@ -38,10 +38,13 @@ import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const OverlayContainer = styled.div`
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+  ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
+    `
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: ${$restrictWidth ? 'calc(100% - 36px)' : '100%'};
+    `}
 `;
 
 const StyledResolver = styled(Resolver)`
@@ -54,6 +57,7 @@ const FullScreenButtonIcon = styled(EuiButtonIcon)`
 
 interface OwnProps {
   graphEventId?: string;
+  isEventViewer: boolean;
   timelineId: string;
   timelineType: TimelineType;
 }
@@ -75,8 +79,8 @@ const Navigation = ({
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty onClick={onCloseOverlay} size="xs">
-        {i18n.BACK_TO_EVENTS}
+      <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+        {i18n.CLOSE_ANALYZER}
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -100,6 +104,7 @@ const Navigation = ({
 
 const GraphOverlayComponent = ({
   graphEventId,
+  isEventViewer,
   status,
   timelineId,
   title,
@@ -151,7 +156,10 @@ const GraphOverlayComponent = ({
   }, [signalIndexName, siemDefaultIndices]);
 
   return (
-    <OverlayContainer>
+    <OverlayContainer
+      data-test-subj="overlayContainer"
+      $restrictWidth={isEventViewer && fullScreen}
+    >
       <EuiHorizontalRule margin="none" />
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

@@ -20,6 +20,7 @@ import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elast
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
@@ -123,9 +124,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       badges = badges.filter((badge) => disabledActions.indexOf(badge.id) === -1);
     }
 
-    this.setState({
-      badges,
-    });
+    if (!deepEqual(this.state.badges, badges)) {
+      this.setState({
+        badges,
+      });
+    }
   }
 
   private async refreshNotifications() {
@@ -139,9 +142,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       notifications = notifications.filter((badge) => disabledActions.indexOf(badge.id) === -1);
     }
 
-    this.setState({
-      notifications,
-    });
+    if (!deepEqual(this.state.notifications, notifications)) {
+      this.setState({
+        notifications,
+      });
+    }
   }
 
   public UNSAFE_componentWillMount() {

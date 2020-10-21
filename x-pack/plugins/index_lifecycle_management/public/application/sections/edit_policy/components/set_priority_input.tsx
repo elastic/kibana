@@ -3,6 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/**
+ * PLEASE NOTE: This component is currently duplicated. A version of this component wired up with
+ * the form lib lives in ./phases/shared
+ */
+
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
