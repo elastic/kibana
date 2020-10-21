@@ -42,6 +42,10 @@ import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import { transactionByTraceIdRoute } from './transaction';
 import {
+  correlationsForRangesRoute,
+  correlationsForSlowTransactionsRoute,
+} from './correlations';
+import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
@@ -121,6 +125,10 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(createOrUpdateAgentConfigurationRoute)
+
+    // Correlations
+    .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsForRangesRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)
