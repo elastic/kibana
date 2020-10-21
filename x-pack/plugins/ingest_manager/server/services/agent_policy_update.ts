@@ -6,8 +6,7 @@
 
 import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
-import { unenrollForAgentPolicyId } from './agents';
-import { outputService } from './output';
+import { isAgentsSetup, unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
@@ -31,11 +30,8 @@ export async function agentPolicyUpdateEventHandler(
   action: string,
   agentPolicyId: string
 ) {
-  const adminUser = await outputService.getAdminUser(soClient);
-  const outputId = await outputService.getDefaultOutputId(soClient);
-
-  // If no admin user and no default output fleet is not enabled just skip this hook
-  if (!adminUser || !outputId) {
+  // If Agents are not setup skip this hook
+  if (!(await isAgentsSetup(soClient))) {
     return;
   }
 

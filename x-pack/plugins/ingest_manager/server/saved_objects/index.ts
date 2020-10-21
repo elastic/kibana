@@ -6,6 +6,7 @@
 
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import { migratePackagePolicyToV7110 } from '../../../security_solution/common';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -268,6 +269,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
+      '7.11.0': migratePackagePolicyToV7110,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

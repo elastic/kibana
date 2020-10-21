@@ -34,6 +34,7 @@ import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
+import { isAgentsSetup } from './agents/setup';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -287,6 +288,8 @@ class AgentPolicyService {
       throw new Error('Copied agent policy not found');
     }
 
+    await this.createFleetPolicyChangeAction(soClient, newAgentPolicy.id);
+
     return updatedAgentPolicy;
   }
 
@@ -433,6 +436,11 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ) {
+    // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
+    // the action will be created during the fleet setup
+    if (!(await isAgentsSetup(soClient))) {
+      return;
+    }
     const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
     if (!policy || !policy.revision) {
       return;
