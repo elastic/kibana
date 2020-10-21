@@ -21,14 +21,12 @@ import {
   prepareJson,
   prepareString,
   buildPipelineVisFunction,
-  buildVislibDimensions,
   buildPipeline,
   SchemaConfig,
   Schemas,
 } from './build_pipeline';
 import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
-import { IndexPattern, IAggConfigs } from '../../../../plugins/data/public';
 import { parseExpression } from '../../../expressions/common';
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
