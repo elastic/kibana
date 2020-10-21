@@ -18,15 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunctionDefinition,
-  KibanaDatatable,
-  Render,
-} from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from 'src/plugins/expressions/public';
 import { tableVisLegacyResponseHandler, TableContext } from './table_vis_legacy_response_handler';
 import { TableVisConfig } from '../types';
 
-export type Input = KibanaDatatable;
+export type Input = Datatable;
 
 interface Arguments {
   visConfig: string | null;
@@ -48,7 +44,7 @@ export type TableExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export const createTableVisLegacyFn = (): TableExpressionFunctionDefinition => ({
   name: 'kibana_table',
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeTable.function.help', {
     defaultMessage: 'Table visualization',
   }),

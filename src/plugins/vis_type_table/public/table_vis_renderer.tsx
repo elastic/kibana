@@ -40,13 +40,12 @@ export const getTableVisRenderer: (
     const showNoResult =
       visData.table?.rows.length === 0 || (!visData.table && visData.tables.length === 0);
 
-    if (showNoResult) {
-      // notify that rendering is done, since the visualization doesn't have data to display
-      handlers.done();
-    }
-
     render(
-      <VisualizationContainer data-test-subj="tbvChartContainer" showNoResult={showNoResult}>
+      <VisualizationContainer
+        data-test-subj="tbvChartContainer"
+        handlers={handlers}
+        showNoResult={showNoResult}
+      >
         <TableVisualizationComponent
           core={core}
           handlers={handlers}

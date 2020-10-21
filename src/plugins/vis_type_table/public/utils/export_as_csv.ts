@@ -22,7 +22,7 @@ import { isObject } from 'lodash';
 import { saveAs } from '@elastic/filesaver';
 
 import { CoreStart } from 'kibana/public';
-import { KibanaDatatableRow, KibanaDatatableColumn } from 'src/plugins/expressions';
+import { DatatableRow, DatatableColumn } from 'src/plugins/expressions';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import { FormattedColumn } from '../types';
 import { Table } from '../table_vis_response_handler';
@@ -33,7 +33,7 @@ const allDoubleQuoteRE = /"/g;
 interface ToCsvData {
   filename?: string;
   cols: FormattedColumn[];
-  rows: KibanaDatatableRow[];
+  rows: DatatableRow[];
   table: Table;
   splitRow?: FormattedColumn;
   uiSettings: CoreStart['uiSettings'];
@@ -75,8 +75,8 @@ const toCsv = (formatted: boolean, { cols, rows, table, splitRow, uiSettings }: 
 
   // add the columns to the rows
   csvRows.unshift(
-    (columns as Array<FormattedColumn | KibanaDatatableColumn>).map((col) =>
-      escape(formatted ? (col as FormattedColumn).title : (col as KibanaDatatableColumn).name)
+    (columns as Array<FormattedColumn | DatatableColumn>).map((col) =>
+      escape(formatted ? (col as FormattedColumn).title : (col as DatatableColumn).name)
     )
   );
 

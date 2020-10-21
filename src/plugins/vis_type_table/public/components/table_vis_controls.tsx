@@ -21,7 +21,7 @@ import React, { memo, useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { KibanaDatatableRow } from 'src/plugins/expressions';
+import { DatatableRow } from 'src/plugins/expressions';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../kibana_react/public';
 import { FormattedColumn } from '../types';
@@ -31,7 +31,7 @@ import { exportAsCsv } from '../utils';
 interface TableVisControlsProps {
   filename?: string;
   cols: FormattedColumn[];
-  rows: KibanaDatatableRow[];
+  rows: DatatableRow[];
   table: Table;
   splitRow?: FormattedColumn;
 }

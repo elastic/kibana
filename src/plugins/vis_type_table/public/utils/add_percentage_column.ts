@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaDatatableRow } from 'src/plugins/expressions';
+import { DatatableRow } from 'src/plugins/expressions';
 import { getFormatService } from '../services';
 import { FormattedColumn } from '../types';
 import { Table } from '../table_vis_response_handler';
@@ -55,7 +55,7 @@ export function addPercentageColumn(
     formatter,
     filterable: false,
   });
-  const newRows = rows.map<KibanaDatatableRow>((row) => ({
+  const newRows = rows.map<DatatableRow>((row) => ({
     [newId]: (row[id] as number) / (sumTotal as number),
     ...row,
   }));
