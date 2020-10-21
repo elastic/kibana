@@ -34,6 +34,13 @@ module.exports = () => {
     ],
     plugins: [
       [
+        require.resolve('@babel/plugin-transform-runtime'),
+        {
+          esm: true,
+          absoluteRuntime: true,
+        },
+      ],
+      [
         require.resolve('babel-plugin-styled-components'),
         {
           fileName: false,

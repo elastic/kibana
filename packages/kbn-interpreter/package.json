@@ -9,7 +9,6 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@babel/runtime": "^7.11.2",
     "@kbn/i18n": "1.0.0",
     "lodash": "^4.17.20",
     "uuid": "3.3.2"
@@ -18,7 +17,7 @@
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.6",
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.11.0",
+    "@babel/plugin-transform-runtime": "^7.12.1",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "babel-loader": "^8.0.6",

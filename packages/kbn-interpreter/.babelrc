@@ -3,6 +3,7 @@
   "plugins": [
     "@babel/plugin-transform-modules-commonjs",
     ["@babel/plugin-transform-runtime", {
+      "esm": false,
       "regenerator": true
     }]
   ]
