@@ -17,4 +17,5 @@ export const {
   sortByField,
   hasField,
   updateLayerIndexPattern,
+  mergeLayer,
 } = actual;

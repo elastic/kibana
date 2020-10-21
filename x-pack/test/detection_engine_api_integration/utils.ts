@@ -8,6 +8,15 @@ import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
+import { SearchResponse } from 'elasticsearch';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
+import {
+  CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '../../plugins/lists/common';
+import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   Status,
   SignalIds,
@@ -17,6 +26,9 @@ import { UpdateRulesSchema } from '../../plugins/security_solution/common/detect
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
   DETECTION_ENGINE_INDEX_URL,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_RULES_URL,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
 
@@ -689,4 +701,141 @@ export const countDownTest = async (
     // eslint-disable-next-line no-console
     console.log(`Could not ${name}, no retries are left`);
   }
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not try to any retries.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createRule = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  rule: CreateRulesSchema
+): Promise<RulesSchema> => {
+  const { body } = await supertest
+    .post(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(rule)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not try to any retries. Creates exception lists
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createExceptionList = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  exceptionList: CreateExceptionListSchema
+): Promise<ExceptionListSchema> => {
+  const { body } = await supertest
+    .post(EXCEPTION_LIST_URL)
+    .set('kbn-xsrf', 'true')
+    .send(exceptionList)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not try to any retries. Creates exception lists
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createExceptionListItem = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  exceptionListItem: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> => {
+  const { body } = await supertest
+    .post(EXCEPTION_LIST_ITEM_URL)
+    .set('kbn-xsrf', 'true')
+    .send(exceptionListItem)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This gets
+ * a particular rule.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const getRule = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleId: string
+): Promise<RulesSchema> => {
+  const { body } = await supertest
+    .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+    .set('kbn-xsrf', 'true')
+    .expect(200);
+  return body;
+};
+
+/**
+ * Waits for the rule in find status to be succeeded before continuing
+ * @param supertest Deps
+ */
+export const waitForRuleSuccess = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  id: string
+): Promise<void> => {
+  // wait for Task Manager to finish executing the rule
+  await waitFor(async () => {
+    const { body } = await supertest
+      .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+      .set('kbn-xsrf', 'true')
+      .send({ ids: [id] })
+      .expect(200);
+    return body[id]?.current_status?.status === 'succeeded';
+  });
+};
+
+/**
+ * Waits for the signal hits to be greater than the supplied number
+ * before continuing with a default of at least one signal
+ * @param supertest Deps
+ * @param numberOfSignals The number of signals to wait for, default is 1
+ */
+export const waitForSignalsToBePresent = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  numberOfSignals = 1
+): Promise<void> => {
+  await waitFor(async () => {
+    const {
+      body: signalsOpen,
+    }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQueryAllSignals())
+      .expect(200);
+    return signalsOpen.hits.hits.length >= numberOfSignals;
+  });
+};
+
+/**
+ * Returns all signals both closed and opened
+ * @param supertest Deps
+ */
+export const getAllSignals = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<
+  SearchResponse<{
+    signal: Signal;
+  }>
+> => {
+  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQueryAllSignals())
+    .expect(200);
+  return signalsOpen;
+};
+
+export const installPrePackagedRules = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<void> => {
+  await supertest.put(DETECTION_ENGINE_PREPACKAGED_URL).set('kbn-xsrf', 'true').send().expect(200);
 };
