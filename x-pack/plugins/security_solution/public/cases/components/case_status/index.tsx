@@ -8,8 +8,8 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
-  EuiButtonToggle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -92,15 +92,17 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonToggle
+          <EuiButton
             data-test-subj="toggle-case-status"
             isDisabled={disabled}
             iconType={icon}
             isLoading={isLoading}
             isSelected={isSelected}
-            label={buttonLabel}
+            fill={isSelected}
             onChange={toggleStatusCase}
-          />
+          >
+            {buttonLabel}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <CaseViewActions

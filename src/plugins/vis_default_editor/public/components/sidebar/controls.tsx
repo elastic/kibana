@@ -23,7 +23,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonToggle,
+  EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -131,18 +131,17 @@ function DefaultEditorControls({
             defaultMessage: 'Auto updates the visualization on every change.',
           })}
         >
-          <EuiButtonToggle
-            label={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesAriaLabel', {
+          <EuiButtonIcon
+            aria-label={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesAriaLabel', {
               defaultMessage: 'Auto apply editor changes',
             })}
             className="visEditorSidebar__autoApplyButton"
             data-test-subj="visualizeEditorAutoButton"
-            fill={autoApplyEnabled}
             iconType="refresh"
+            color={autoApplyEnabled ? 'primary' : 'subdued'}
             isSelected={autoApplyEnabled}
             onChange={toggleAutoApply}
             size="s"
-            isIconOnly
           />
         </EuiToolTip>
       )}

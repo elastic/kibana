@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiButtonToggle,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -358,15 +358,17 @@ export const CaseComponent = React.memo<CaseProps>(
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButtonToggle
+                        <EuiButton
                           data-test-subj={caseStatusData['data-test-subj']}
                           iconType={caseStatusData.icon}
                           isDisabled={!userCanCrud}
                           isSelected={caseStatusData.isSelected}
                           isLoading={isLoading && updateKey === 'status'}
-                          label={caseStatusData.buttonLabel}
+                          fill={caseStatusData.isSelected}
                           onChange={toggleStatusCase}
-                        />
+                        >
+                          {caseStatusData.buttonLabel}
+                        </EuiButton>
                       </EuiFlexItem>
                       {hasDataToPush && (
                         <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
