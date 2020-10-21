@@ -6,7 +6,9 @@
 
 import React, { useState, FC } from 'react';
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import {
   useColorRange,
@@ -15,7 +17,8 @@ import {
 } from '../../../../../components/color_range_legend';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { defaultSearchQuery, useResultsViewConfig } from '../../../../common';
+import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
 import { ExpandableSectionAnalytics, ExpandableSectionResults } from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
@@ -30,17 +33,54 @@ interface ExplorationProps {
 }
 
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
-  const { indexPattern, jobConfig, needsDestIndexPattern } = useResultsViewConfig(jobId);
+  const {
+    indexPattern,
+    indexPatternErrorMessage,
+    jobConfig,
+    needsDestIndexPattern,
+  } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
   const { columnsWithCharts, tableItems } = outlierData;
 
-  const colorRange = useColorRange(
-    COLOR_RANGE.BLUE,
-    COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
-  );
+  const featureCount = getFeatureCount(jobConfig?.dest?.results_field || '', tableItems);
+  const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
+
+  // Show the color range only if feature influence is enabled and there's more than 0 features.
+  const showColorRange =
+    featureCount > 0 &&
+    isOutlierAnalysis(jobConfig?.analysis) &&
+    jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
+
+  const resultsField = jobConfig?.dest.results_field ?? '';
+
+  // Identify if the results index has a legacy feature influence format.
+  // If feature influence was enabled for the legacy job we'll show a callout
+  // with some additional information for a workaround.
+  const showLegacyFeatureInfluenceFormatCallout =
+    !needsDestIndexPattern &&
+    isOutlierAnalysis(jobConfig?.analysis) &&
+    jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
+    columnsWithCharts.findIndex(
+      (d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}.feature_name`
+    ) === -1;
+
+  if (indexPatternErrorMessage !== undefined) {
+    return (
+      <EuiPanel grow={false}>
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
+            defaultMessage: 'An error occurred loading the index data.',
+          })}
+          color="danger"
+          iconType="cross"
+        >
+          <p>{indexPatternErrorMessage}</p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
 
   return (
     <>
@@ -58,8 +98,26 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+      {showLegacyFeatureInfluenceFormatCallout && (
+        <>
+          <EuiCallOut
+            size="s"
+            title={i18n.translate(
+              'xpack.ml.dataframe.analytics.outlierExploration.legacyFeatureInfluenceFormatCalloutTitle',
+              {
+                defaultMessage:
+                  'Color coded table cells based on feature influence are not available because the results index uses an unsupported legacy format. Please clone and rerun the job.',
+              }
+            )}
+            iconType="pin"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <ExpandableSectionResults
-        colorRange={colorRange}
+        colorRange={
+          showColorRange && !showLegacyFeatureInfluenceFormatCallout ? colorRange : undefined
+        }
         indexData={outlierData}
         indexPattern={indexPattern}
         jobConfig={jobConfig}
