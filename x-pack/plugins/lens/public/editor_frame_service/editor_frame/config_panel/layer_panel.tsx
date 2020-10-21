@@ -243,6 +243,20 @@ export function LayerPanel(
                           isFromCompatibleGroup ||
                           isFromTheSameGroup
                         }
+                        dropTo={(dropTarget: string) => {
+                          layerDatasource.onDrop({
+                            isReorder: true,
+                            ...layerDatasourceDropProps,
+                            droppedItem: {
+                              columnId: accessor,
+                              groupId: group.groupId,
+                              layerId,
+                              id: accessor,
+                            },
+                            columnId: dropTarget,
+                            filterOperations: group.filterOperations,
+                          });
+                        }}
                         onDrop={(droppedItem) => {
                           const isReorder =
                             isDraggedOperation(droppedItem) &&

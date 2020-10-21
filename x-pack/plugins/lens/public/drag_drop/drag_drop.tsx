@@ -10,6 +10,7 @@ import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { DragContext, DragContextState, ReorderContext } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { keys } from '@elastic/eui';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
@@ -17,6 +18,11 @@ export type DroppableEvent = React.DragEvent<HTMLElement>;
  * A function that handles a drop event.
  */
 export type DropHandler = (item: unknown) => void;
+
+/**
+ * A function that handles a drop event.
+ */
+export type DropToHandler = (dropTargetId: string) => void;
 
 /**
  * The base props to the DragDrop component.
@@ -27,6 +33,12 @@ interface BaseProps {
    */
   className?: string;
 
+  /**
+   * The event handler that fires when this item
+   * is dropped to the one with passed id
+   *
+   */
+  dropTo?: DropToHandler;
   /**
    * The event handler that fires when an item
    * is dropped onto this DragDrop component.
@@ -149,6 +161,7 @@ const DragDropInner = React.memo(function DragDropInner(
   const [state, setState] = useState({
     isActive: false,
     dragEnterClassNames: '',
+    keyboardInteraction: false,
   });
   const {
     className,
@@ -163,6 +176,7 @@ const DragDropInner = React.memo(function DragDropInner(
     isNotDroppable,
     dragType = 'copy',
     dropType = 'add',
+    dropTo,
     itemsInGroup,
   } = props;
 
@@ -197,6 +211,7 @@ const DragDropInner = React.memo(function DragDropInner(
 
     // Chrome causes issues if you try to render from within a
     // dragStart event, so we drop a setTimeout to avoid that.
+    setState({ ...state, keyboardInteraction: false });
     setTimeout(() => setDragging(value));
   };
 
@@ -241,6 +256,17 @@ const DragDropInner = React.memo(function DragDropInner(
     }
   };
 
+  let element = React.cloneElement(children, {
+    'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
+    className: classNames(children.props.className, classes),
+    onDragOver: dragOver,
+    onDragLeave: dragLeave,
+    onDrop: drop,
+    draggable,
+    onDragEnd: dragEnd,
+    onDragStart: dragStart,
+  });
+
   if (
     droppable &&
     dropType === 'reorder' &&
@@ -248,7 +274,7 @@ const DragDropInner = React.memo(function DragDropInner(
     itemsInGroup.length > 1 &&
     value?.id
   ) {
-    return (
+    element = (
       <ReorderableDragDrop
         draggingProps={{
           className: classNames(children.props.className, classes),
@@ -271,16 +297,43 @@ const DragDropInner = React.memo(function DragDropInner(
       </ReorderableDragDrop>
     );
   }
-  return React.cloneElement(children, {
-    'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
-    className: classNames(children.props.className, classes),
-    onDragOver: dragOver,
-    onDragLeave: dragLeave,
-    onDrop: drop,
-    draggable,
-    onDragEnd: dragEnd,
-    onDragStart: dragStart,
-  });
+
+  if (!draggable) {
+    return element;
+  }
+  return (
+    <div
+      tabIndex={0}
+      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!itemsInGroup?.length || itemsInGroup.length < 2 || !value || !dropTo) {
+          return;
+        }
+
+        if (e.key === keys.ENTER || e.key === keys.SPACE) {
+          setState({ ...state, keyboardInteraction: !state.keyboardInteraction });
+        } else if (e.key === keys.ESCAPE) {
+          setState({ ...state, keyboardInteraction: false });
+        }
+        if (state.keyboardInteraction) {
+          e.stopPropagation();
+          e.preventDefault();
+
+          const draggingIndex = itemsInGroup.indexOf(value.id);
+          if (keys.ARROW_DOWN === e.key) {
+            if (draggingIndex < itemsInGroup.length - 1) {
+              dropTo(itemsInGroup[draggingIndex + 1]);
+            }
+          } else if (keys.ARROW_UP === e.key) {
+            if (draggingIndex > 0) {
+              dropTo(itemsInGroup[draggingIndex - 1]);
+            }
+          }
+        }
+      }}
+    >
+      {element}
+    </div>
+  );
 });
 
 export const ReorderableDragDrop = ({
