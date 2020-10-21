@@ -38,7 +38,7 @@ export function createInputControlVisTypeDefinition(
     icon: 'controlsHorizontal',
     group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
-      defaultMessage: 'Create interactive controls for easy dashboard manipulation.',
+      defaultMessage: 'Create controls to interact with your dashboard.',
     }),
     stage: 'experimental',
     visualization: InputControlVisController,

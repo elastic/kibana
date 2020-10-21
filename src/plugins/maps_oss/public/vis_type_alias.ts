@@ -29,7 +29,7 @@ export const getMapsAliasConfig = (): VisTypeAlias => ({
     defaultMessage: 'Maps',
   }),
   description: i18n.translate('mapsOss.visTypeAlias.description', {
-    defaultMessage: 'Create all map visualizations using your geo data.',
+    defaultMessage: 'Plot and style your geo data in a multi layer map.',
   }),
   icon: APP_ICON,
   stage: 'production',

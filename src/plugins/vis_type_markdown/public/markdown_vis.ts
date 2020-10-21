@@ -32,7 +32,7 @@ export const markdownVisDefinition = {
   icon: 'visText',
   group: VisGroups.TOOLS,
   description: i18n.translate('visTypeMarkdown.markdownDescription', {
-    defaultMessage: 'Create a document using markdown syntax',
+    defaultMessage: 'Create a document using Markdown syntax.',
   }),
   toExpressionAst,
   visConfig: {

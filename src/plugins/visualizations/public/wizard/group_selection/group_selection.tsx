@@ -79,7 +79,7 @@ function GroupSelection(props: GroupSelectionProps) {
         <EuiModalHeaderTitle data-test-subj="groupModalHeader">
           <FormattedMessage
             id="visualizations.newVisWizard.title"
-            defaultMessage="New Visualization"
+            defaultMessage="New visualization"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -117,7 +117,7 @@ function GroupSelection(props: GroupSelectionProps) {
                     'visualizations.newVisWizard.aggBasedGroupDescription',
                     {
                       defaultMessage:
-                        'A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about',
+                        'Choose your visualization, specify your search criteria, and select an aggregation to reveal trends, spikes, and dips.',
                     }
                   )}
                   icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
@@ -129,7 +129,7 @@ function GroupSelection(props: GroupSelectionProps) {
                   >
                     <EuiText size="s">
                       {i18n.translate('visualizations.newVisWizard.exploreOptionLinkText', {
-                        defaultMessage: 'Explore Options',
+                        defaultMessage: 'Explore options',
                       })}{' '}
                       <EuiIcon type="sortRight" />
                     </EuiText>

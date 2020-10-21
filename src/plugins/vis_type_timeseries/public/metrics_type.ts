@@ -31,8 +31,7 @@ export const metricsVisDefinition = {
   name: 'metrics',
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
-    defaultMessage:
-      'Advanced time series editor that allows user to use complex calculations and add annotations.',
+    defaultMessage: 'Perform advanced analysis of your time series data.',
   }),
   icon: 'visVisualBuilder',
   group: VisGroups.PROMOTED,

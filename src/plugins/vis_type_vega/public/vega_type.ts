@@ -43,8 +43,7 @@ export const createVegaTypeDefinition = (
     title: 'Vega',
     getInfoMessage,
     description: i18n.translate('visTypeVega.type.vegaDescription', {
-      defaultMessage:
-        'Use Vega library to develop new types of visualizations. Requires knowledge of Vega and programming.',
+      defaultMessage: 'Define new visualization types. Requires knowledge of Vega and programming.',
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     icon: 'visVega',
