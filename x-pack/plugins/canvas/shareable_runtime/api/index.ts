@@ -5,7 +5,7 @@
  */
 
 import 'core-js/stable';
-import 'regenerator-runtime/runtime';
+import '@babel/runtime/regenerator';
 import 'whatwg-fetch';
 
 export * from './shareable';

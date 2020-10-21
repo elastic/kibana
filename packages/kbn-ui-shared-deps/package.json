@@ -29,7 +29,6 @@
     "react-is": "^16.8.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "regenerator-runtime": "^0.13.3",
     "rxjs": "^6.5.5",
     "styled-components": "^5.1.0",
     "symbol-observable": "^1.2.0",

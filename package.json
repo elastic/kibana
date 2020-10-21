@@ -202,7 +202,6 @@
     "react-use": "^13.27.0",
     "redux-actions": "^2.6.5",
     "redux-thunk": "^2.3.0",
-    "regenerator-runtime": "^0.13.3",
     "request": "^2.88.0",
     "require-in-the-middle": "^5.0.2",
     "rison-node": "1.0.2",

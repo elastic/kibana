@@ -63,7 +63,6 @@
     "react-router-redux": "^4.0.8",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "regenerator-runtime": "^0.13.3",
     "sass-loader": "^8.0.2",
     "sinon": "^7.4.2",
     "style-loader": "^1.1.3",

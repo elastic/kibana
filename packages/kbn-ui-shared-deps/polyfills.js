@@ -18,7 +18,6 @@
  */
 
 require('core-js/stable');
-require('regenerator-runtime/runtime');
 require('custom-event-polyfill');
 
 if (typeof window.Event === 'object') {
