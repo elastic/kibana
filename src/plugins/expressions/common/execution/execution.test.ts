@@ -70,7 +70,7 @@ describe('Execution', () => {
   test('creates default ExecutionContext', () => {
     const execution = createExecution();
     expect(execution.context).toMatchObject({
-      getInitialInput: expect.any(Function),
+      getSearchContext: expect.any(Function),
       variables: expect.any(Object),
       types: expect.any(Object),
     });
