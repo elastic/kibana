@@ -145,19 +145,4 @@ export class PdfMaker {
       this._pdfDoc.end();
     });
   }
-
-  getStream() {
-    if (!this._pdfDoc) {
-      throw new Error(
-        i18n.translate(
-          'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
-          {
-            defaultMessage: 'Document stream has not been generated',
-          }
-        )
-      );
-    }
-    this._pdfDoc.end();
-    return this._pdfDoc;
-  }
 }
