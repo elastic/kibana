@@ -87,7 +87,7 @@ export function getActionType(): ActionTypeModel<
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
         errors.password.push(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
+            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthPasswordText',
             {
               defaultMessage: 'Password is required.',
             }
