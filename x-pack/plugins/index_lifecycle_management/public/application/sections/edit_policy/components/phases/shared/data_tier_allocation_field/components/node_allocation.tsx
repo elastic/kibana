@@ -98,9 +98,10 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes })
           ) : undefined,
           euiFieldProps: {
             'data-test-subj': `${phase}-${nodeAttrsProperty}`,
-            options: [{ text: i18nTexts.doNotModifyAllocationOption, value: 'none' }].concat(
+            options: [{ text: i18nTexts.doNotModifyAllocationOption, value: '' }].concat(
               nodeOptions
             ),
+            hasNoInitialSelection: false,
           },
         }}
       />

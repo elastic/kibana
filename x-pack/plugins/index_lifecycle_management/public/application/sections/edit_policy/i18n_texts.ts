@@ -48,54 +48,54 @@ export const i18nTexts = {
     ),
     errors: {
       numberRequired: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.numberRequiredErrorMessage',
+        'xpack.indexLifecycleMgmt.editPolicy.errors.numberRequiredErrorMessage',
         {
           defaultMessage: 'A number is required.',
         }
       ),
       numberGreatThan0Required: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.numberAboveZeroRequiredError',
+        'xpack.indexLifecycleMgmt.editPolicy.errors.numberAboveZeroRequiredError',
         {
           defaultMessage: 'Only numbers above 0 are allowed.',
         }
       ),
       maximumAgeRequiredMessage: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError',
+        'xpack.indexLifecycleMgmt.editPolicy.errors.maximumAgeMissingError',
         {
           defaultMessage: 'A maximum age is required.',
         }
       ),
       maximumSizeRequiredMessage: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError',
+        'xpack.indexLifecycleMgmt.editPolicy.errors.maximumIndexSizeMissingError',
         {
           defaultMessage: 'A maximum index size is required.',
         }
       ),
       maximumDocumentsRequiredMessage: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.maximumDocumentsMissingError',
+        'xpack.indexLifecycleMgmt.editPolicy.errors.maximumDocumentsMissingError',
         {
           defaultMessage: 'Maximum documents is required.',
         }
       ),
       rollOverConfigurationCallout: {
         title: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.rolloverConfigurationError.title',
+          'xpack.indexLifecycleMgmt.editPolicy.errors.rolloverConfigurationError.title',
           {
             defaultMessage: 'Invalid rollover configuration',
           }
         ),
         body: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.rolloverConfigurationError.body',
+          'xpack.indexLifecycleMgmt.editPolicy.errors.rolloverConfigurationError.body',
           {
             defaultMessage:
               'A value for one of maximum size, maximum documents, or maximum age is required.',
           }
         ),
       },
-      positiveNumberRequired: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.errors.positiveNumberRequiredError',
+      nonNegativeNumberRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.nonNegativeNumberRequiredError',
         {
-          defaultMessage: 'Only positive numbers are allowed.',
+          defaultMessage: 'Only non-negative numbers are allowed.',
         }
       ),
     },

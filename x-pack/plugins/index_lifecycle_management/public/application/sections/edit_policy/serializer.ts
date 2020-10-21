@@ -18,8 +18,7 @@ const unsafeSerializePhaseWithAllocation = (
 ) => {
   if (
     dataAllocationMetaFields.dataTierAllocationType === 'node_attrs' &&
-    dataAllocationMetaFields.allocationNodeAttribute &&
-    dataAllocationMetaFields.allocationNodeAttribute !== 'none'
+    dataAllocationMetaFields.allocationNodeAttribute
   ) {
     const [name, value] = dataAllocationMetaFields.allocationNodeAttribute.split(':');
     actions.allocate = {

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../shared_imports';
-import { defaultSetPriority } from '../../constants';
+import { defaultSetPriority, defaultPhaseIndexPriority } from '../../constants';
 
 import { FormInternal } from './types';
 
@@ -66,7 +66,6 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
       },
       allocationNodeAttribute: {
-        defaultValue: 'none',
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
     },
@@ -150,11 +149,15 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: '0',
         validations: [
           {
-            validator: numberGreaterThanField({
-              than: 0,
-              allowEquality: true,
-              message: i18nTexts.editPolicy.errors.positiveNumberRequired,
-            }),
+            validator: (arg) =>
+              numberGreaterThanField({
+                than: 0,
+                allowEquality: true,
+                message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
+              })({
+                ...arg,
+                value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
+              }),
           },
         ],
       },
@@ -212,7 +215,7 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: '50' as any,
+            defaultValue: defaultPhaseIndexPriority as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberGreaterThanZero }],
             serializer: serializers.stringToNumber,

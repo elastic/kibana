@@ -8,6 +8,8 @@ import { SerializedPhase, ColdPhase, DeletePhase, SerializedPolicy } from '../..
 
 export const defaultSetPriority: string = '100';
 
+export const defaultPhaseIndexPriority: string = '50';
+
 export const defaultPolicy: SerializedPolicy = {
   name: '',
   phases: {
