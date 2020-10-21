@@ -61,6 +61,7 @@ const createAlertServicesMock = () => {
     callCluster: elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser,
     getLegacyScopedClusterClient: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

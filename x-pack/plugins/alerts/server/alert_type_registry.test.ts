@@ -7,9 +7,9 @@
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertType } from './types';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 
-const taskManager = taskManagerMock.setup();
+const taskManager = taskManagerMock.createSetup();
 const alertTypeRegistryParams = {
   taskManager,
   taskRunnerFactory: new TaskRunnerFactory(),
@@ -118,7 +118,6 @@ describe('register()', () => {
           "alerting:test": Object {
             "createTaskRunner": [Function],
             "title": "Test",
-            "type": "alerting:test",
           },
         },
       ]
