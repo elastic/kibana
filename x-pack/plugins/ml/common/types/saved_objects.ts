@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { setupSavedObjects } from './saved_objects';
-export { JobSavedObjectService, jobSavedObjectServiceFactory } from './service';
-export { checksFactory } from './checks';
+export type JobType = 'anomaly-detector' | 'data-frame-analytics';

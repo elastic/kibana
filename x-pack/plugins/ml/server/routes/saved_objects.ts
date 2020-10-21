@@ -34,10 +34,10 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
       async ({ client, mlClient, request, response, jobSavedObjectService }) => {
         try {
           const { checkStatus } = checksFactory(client, jobSavedObjectService);
-          const savedObjects = await checkStatus();
+          const status = await checkStatus();
 
           return response.ok({
-            body: savedObjects,
+            body: status,
           });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -109,10 +109,10 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
       try {
         const { jobType, jobIds, spaces } = request.body;
 
-        const ww = await jobSavedObjectService.assignJobsToSpaces(jobType, jobIds, spaces);
+        const body = await jobSavedObjectService.assignJobsToSpaces(jobType, jobIds, spaces);
 
         return response.ok({
-          body: ww,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -147,10 +147,52 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
       try {
         const { jobType, jobIds, spaces } = request.body;
 
-        const ww = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, spaces);
+        const body = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, spaces);
 
         return response.ok({
-          body: ww,
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
+   * @apiName ForceStartDatafeeds
+   * @apiDescription Starts one or more datafeeds
+   *
+   * @apiSchema (body) forceStartDatafeedSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/saved_objects/jobs_spaces',
+      validate: false,
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
+      try {
+        const { checkStatus } = checksFactory(client, jobSavedObjectService);
+        const allStatuses = Object.values((await checkStatus()).savedObjects).flat();
+
+        const body = allStatuses
+          .filter((s) => s.checks.jobExists)
+          .reduce((acc, cur) => {
+            const type = cur.type;
+            if (acc[type] === undefined) {
+              acc[type] = {};
+            }
+            acc[type][cur.jobId] = cur.namespaces;
+            return acc;
+          }, {} as { [id: string]: { [id: string]: string[] | undefined } });
+
+        return response.ok({
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

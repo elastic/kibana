@@ -6,20 +6,30 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import type { JobSavedObjectService, JobType } from './service';
+import type { JobSavedObjectService } from './service';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import { JobType } from '../../common/types/saved_objects';
 
 import { Job } from '../../common/types/anomaly_detection_jobs';
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 
-interface JobStatus {
+interface JobSavedObjectStatus {
   jobId: string;
   type: JobType;
   datafeedId?: string | null;
+  namespaces: string[] | undefined;
   checks: {
     jobExists: boolean;
     datafeedExists?: boolean;
+  };
+}
+
+interface JobStatus {
+  jobId: string;
+  datafeedId?: string | null;
+  checks: {
+    savedObjectExits: boolean;
   };
 }
 
@@ -31,12 +41,21 @@ interface SavedObjectJob {
   namespaces: string[];
 }
 
+interface StatusResponse {
+  savedObjects: {
+    [type in JobType]: JobSavedObjectStatus[];
+  };
+  jobs: {
+    [type in JobType]: JobStatus[];
+  };
+}
+
 export function checksFactory(
   client: IScopedClusterClient,
   jobSavedObjectService: JobSavedObjectService
 ) {
-  async function checkStatus() {
-    const jobObjects = await jobSavedObjectService.getAllJobObjects();
+  async function checkStatus(): Promise<StatusResponse> {
+    const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
@@ -46,31 +65,34 @@ export function checksFactory(
       data_frame_analytics: DataFrameAnalyticsConfig[];
     }>();
 
-    const savedObjects: JobStatus[] = jobObjects.map(({ attributes }) => {
-      const type: JobType = attributes.type;
-      const jobId = attributes.job_id;
-      const datafeedId = type === 'anomaly-detector' ? attributes.datafeed_id : undefined;
+    const savedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
+      ({ attributes, namespaces }) => {
+        const type: JobType = attributes.type;
+        const jobId = attributes.job_id;
+        const datafeedId = type === 'anomaly-detector' ? attributes.datafeed_id : undefined;
 
-      let jobExists = false;
-      let datafeedExists: boolean | undefined;
+        let jobExists = false;
+        let datafeedExists: boolean | undefined;
 
-      if (type === 'anomaly-detector') {
-        jobExists = adJobs.jobs.some((j) => j.job_id === jobId);
-        datafeedExists = datafeeds.datafeeds.some((d) => d.job_id === jobId);
-      } else {
-        jobExists = dfaJobs.data_frame_analytics.some((j) => j.id === jobId);
+        if (type === 'anomaly-detector') {
+          jobExists = adJobs.jobs.some((j) => j.job_id === jobId);
+          datafeedExists = datafeeds.datafeeds.some((d) => d.job_id === jobId);
+        } else {
+          jobExists = dfaJobs.data_frame_analytics.some((j) => j.id === jobId);
+        }
+
+        return {
+          jobId,
+          type,
+          datafeedId,
+          namespaces,
+          checks: {
+            jobExists,
+            datafeedExists,
+          },
+        };
       }
-
-      return {
-        jobId,
-        type,
-        datafeedId,
-        checks: {
-          jobExists,
-          datafeedExists,
-        },
-      };
-    });
+    );
 
     const nonSpaceSavedObjects = await _loadAllJobSavedObjects();
     const nonSpaceADObjectIds = new Set(
@@ -85,10 +107,12 @@ export function checksFactory(
     );
 
     const adObjectIds = new Set(
-      savedObjects.filter(({ type }) => type === 'anomaly-detector').map(({ jobId }) => jobId)
+      savedObjectsStatus.filter(({ type }) => type === 'anomaly-detector').map(({ jobId }) => jobId)
     );
     const dfaObjectIds = new Set(
-      savedObjects.filter(({ type }) => type === 'data-frame-analytics').map(({ jobId }) => jobId)
+      savedObjectsStatus
+        .filter(({ type }) => type === 'data-frame-analytics')
+        .map(({ jobId }) => jobId)
     );
 
     const anomalyDetectors = adJobs.jobs
@@ -117,6 +141,7 @@ export function checksFactory(
       .map(({ id: jobId }) => {
         return {
           jobId,
+          datafeedId: null,
           checks: {
             savedObjectExits: nonSpaceDFAObjectIds.has(jobId),
           },
@@ -125,12 +150,14 @@ export function checksFactory(
 
     return {
       savedObjects: {
-        anomalyDetectors: savedObjects.filter(({ type }) => type === 'anomaly-detector'),
-        dataFrameAnalytics: savedObjects.filter(({ type }) => type === 'data-frame-analytics'),
+        'anomaly-detector': savedObjectsStatus.filter(({ type }) => type === 'anomaly-detector'),
+        'data-frame-analytics': savedObjectsStatus.filter(
+          ({ type }) => type === 'data-frame-analytics'
+        ),
       },
       jobs: {
-        anomalyDetectors,
-        dataFrameAnalytics,
+        'anomaly-detector': anomalyDetectors,
+        'data-frame-analytics': dataFrameAnalytics,
       },
     };
   }
@@ -155,7 +182,7 @@ export function checksFactory(
     const tasks: Array<() => Promise<void>> = [];
 
     const status = await checkStatus();
-    for (const job of status.jobs.anomalyDetectors) {
+    for (const job of status.jobs['anomaly-detector']) {
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
@@ -163,7 +190,7 @@ export function checksFactory(
           const datafeedId = job.datafeedId;
           tasks.push(async () => {
             await jobSavedObjectService.createAnomalyDetectionJob(jobId);
-            if (datafeedId !== null) {
+            if (datafeedId !== undefined && datafeedId !== null) {
               //
               await jobSavedObjectService.addDatafeed(datafeedId, jobId);
             }
@@ -171,7 +198,7 @@ export function checksFactory(
         }
       }
     }
-    for (const job of status.jobs.dataFrameAnalytics) {
+    for (const job of status.jobs['data-frame-analytics']) {
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
@@ -182,7 +209,7 @@ export function checksFactory(
       }
     }
 
-    for (const job of status.savedObjects.anomalyDetectors) {
+    for (const job of status.savedObjects['anomaly-detector']) {
       if (job.checks.jobExists === false) {
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
@@ -192,7 +219,7 @@ export function checksFactory(
         }
       }
     }
-    for (const job of status.savedObjects.dataFrameAnalytics) {
+    for (const job of status.savedObjects['data-frame-analytics']) {
       if (job.checks.jobExists === false) {
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
@@ -203,7 +230,7 @@ export function checksFactory(
       }
     }
 
-    for (const job of status.savedObjects.anomalyDetectors) {
+    for (const job of status.savedObjects['anomaly-detector']) {
       if (job.checks.datafeedExists === true && job.datafeedId === null) {
         //
         results.datafeedsAdded.push(job.jobId);

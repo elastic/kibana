@@ -7,8 +7,7 @@
 import RE2 from 're2';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
-
-export type JobType = 'anomaly-detector' | 'data-frame-analytics';
+import { JobType } from '../../common/types/saved_objects';
 
 interface JobObject {
   job_id: string;
@@ -19,13 +18,18 @@ interface JobObject {
 export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
 
 export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-  async function _getJobObjects(jobType?: JobType, jobId?: string, datafeedId?: string) {
+  async function _getJobObjects(
+    jobType?: JobType,
+    jobId?: string,
+    datafeedId?: string,
+    currentSpaceOnly: boolean = true
+  ) {
     const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
       searchFields: [],
       search: '',
       perPage: 10000,
-      namespaces: ['*'],
+      ...(currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
     };
 
     const allJobs = jobId === undefined && datafeedId === undefined;
@@ -92,8 +96,8 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     await _deleteJob('data-frame-analytics', jobId);
   }
 
-  async function getAllJobObjects() {
-    return await _getJobObjects();
+  async function getAllJobObjects(jobType?: JobType, currentSpaceOnly: boolean = true) {
+    return await _getJobObjects(jobType, undefined, undefined, currentSpaceOnly);
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -211,15 +215,21 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
   async function assignJobsToSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
     const results: Record<string, { success: boolean; error?: any }> = {};
     const jobs = await _getJobObjects(jobType);
-    for (const job of jobs) {
-      if (jobIds.includes(job.attributes.job_id)) {
+    for (const id of jobIds) {
+      const job = jobs.find((j) => j.attributes.job_id === id);
+      if (job === undefined) {
+        results[id] = {
+          success: false,
+          error: createError(id, 'job_id'),
+        };
+      } else {
         try {
           await savedObjectsClient.addToNamespaces(ML_SAVED_OBJECT_TYPE, job.id, spaces);
-          results[job.attributes.job_id] = {
+          results[id] = {
             success: true,
           };
         } catch (error) {
-          results[job.attributes.job_id] = {
+          results[id] = {
             success: false,
             error,
           };
