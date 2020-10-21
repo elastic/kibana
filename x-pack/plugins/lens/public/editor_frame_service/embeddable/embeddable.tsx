@@ -151,7 +151,7 @@ export class Embeddable
       !_.isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
       !_.isEqual(containerState.query, this.externalSearchContext.query) ||
       !_.isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      containerState.searchSessionId !== this.externalSearchContext.sessionId
+      containerState.searchSessionId !== this.externalSearchContext.searchSessionId
     ) {
       this.externalSearchContext = {
         timeRange: containerState.timeRange,
