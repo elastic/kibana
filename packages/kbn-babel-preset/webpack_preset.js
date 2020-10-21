@@ -36,8 +36,12 @@ module.exports = () => {
       [
         require.resolve('@babel/plugin-transform-runtime'),
         {
-          esm: true,
           absoluteRuntime: false,
+          corejs: false,
+          helpers: true,
+          regenerator: true,
+          useESModules: true,
+          version: '7.12.1',
         },
       ],
       [
