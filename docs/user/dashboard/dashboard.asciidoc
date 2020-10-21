@@ -22,7 +22,7 @@ With *Dashboard*, you can:
 
 * Generate reports based on your findings.
 
-To begin, open the menu, click *Dashboard*, then click *Create dashboard*.
+To begin, open the main menu, click *Dashboard*, then click *Create dashboard*.
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
@@ -433,7 +433,7 @@ visualizations in *Dashboard*, *Visualize*, and *Canvas*.
 
 To migrate a *Timelion* worksheet to a dashboard:
 
-. Open the menu, click *Dashboard*, then click *Create dashboard*.
+. Open the main menu, click *Dashboard*, then click *Create dashboard*.
 
 . For each *Timelion* app worksheet, complete the following steps.
 

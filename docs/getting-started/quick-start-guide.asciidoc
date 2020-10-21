@@ -39,7 +39,7 @@ image::getting-started/images/add-sample-data.png[Add data UI]
 
 *Discover* displays an interactive histogram that shows the distribution of of data, or documents, over time, and a table that lists the fields for each document that matches the index. By default, all fields are shown for each matching document.
 
-. Open the menu, then click *Discover*.
+. Open the main menu, then click *Discover*.
 
 . Change the <<set-time-filter, time filter>> to *Last 7 days*.
 +
@@ -71,7 +71,7 @@ For more information, refer to <<discover, *Discover*>>.
 
 A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, Markdown, and more.
 
-. Open the menu, then click *Dashboard*. 
+. Open the main menu, then click *Dashboard*. 
 
 . Click *[eCommerce] Revenue Dashboard*.
 +
