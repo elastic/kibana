@@ -58,6 +58,20 @@ describe('getSearchBarFilter', () => {
     expect(fetched).toEqual(tags.map((tag) => expectTagOption(tag, true)));
   });
 
+  it('sorts the tags by name', async () => {
+    const tag1 = createTag({ id: 'id-1', name: 'aaa' });
+    const tag2 = createTag({ id: 'id-2', name: 'ccc' });
+    const tag3 = createTag({ id: 'id-3', name: 'bbb' });
+
+    cache.getState.mockReturnValue([tag1, tag2, tag3]);
+
+    // EUI types for filters are incomplete
+    const { options } = getSearchBarFilter() as any;
+
+    const fetched = await options();
+    expect(fetched).toEqual([tag1, tag3, tag2].map((tag) => expectTagOption(tag, true)));
+  });
+
   it('uses the `useName` option', async () => {
     const tags = [
       createTag({ id: 'id-1', name: 'name-1' }),

@@ -32,3 +32,7 @@ export const convertTagNameToId = (tagName: string, allTags: Tag[]): string | un
   const found = allTags.find((tag) => tag.name === tagName);
   return found?.id;
 };
+
+export const byNameTagSorter = (tagA: Tag, tagB: Tag): number => {
+  return tagA.name.localeCompare(tagB.name);
+};

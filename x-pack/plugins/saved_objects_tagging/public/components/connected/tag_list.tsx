@@ -12,16 +12,19 @@ import { Tag } from '../../../common/types';
 import { getObjectTags } from '../../utils';
 import { TagList } from '../base';
 import { ITagsCache } from '../../tags';
+import { byNameTagSorter } from '../../utils';
 
 interface SavedObjectTagListProps {
   object: SavedObject;
   tags: Tag[];
 }
 
-const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags }) => {
-  const { tags: objectTags } = useMemo(() => {
-    return getObjectTags(object, tags);
-  }, [object, tags]);
+const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags: allTags }) => {
+  const objectTags = useMemo(() => {
+    const { tags } = getObjectTags(object, allTags);
+    tags.sort(byNameTagSorter);
+    return tags;
+  }, [object, allTags]);
 
   return <TagList tags={objectTags} />;
 };

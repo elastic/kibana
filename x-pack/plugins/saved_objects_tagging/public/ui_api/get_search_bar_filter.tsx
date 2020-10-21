@@ -12,6 +12,7 @@ import {
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { ITagsCache } from '../tags';
 import { TagSearchBarOption } from '../components';
+import { byNameTagSorter } from '../utils';
 
 export interface BuildGetSearchBarFilterOptions {
   cache: ITagsCache;
@@ -33,13 +34,16 @@ export const buildGetSearchBarFilter = ({
         // everytime the filter is opened. That way we can keep in sync in case of tags
         // that would be added without the searchbar having trigger a re-render.
         return Promise.resolve(
-          cache.getState().map((tag) => {
-            return {
-              value: useName ? tag.name : tag.id,
-              name: tag.name,
-              view: <TagSearchBarOption tag={tag} />,
-            };
-          })
+          cache
+            .getState()
+            .sort(byNameTagSorter)
+            .map((tag) => {
+              return {
+                value: useName ? tag.name : tag.id,
+                name: tag.name,
+                view: <TagSearchBarOption tag={tag} />,
+              };
+            })
         );
       },
     };

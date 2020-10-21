@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectReference } from 'src/core/types';
-import { getObjectTags, convertTagNameToId } from './utils';
+import { getObjectTags, convertTagNameToId, byNameTagSorter } from './utils';
 
 const createTag = (id: string, name: string = id) => ({
   id,
@@ -63,5 +63,20 @@ describe('convertTagNameToId', () => {
 
   it('returns undefined if no tag was found', () => {
     expect(convertTagNameToId('name-4', allTags)).toBeUndefined();
+  });
+});
+
+describe('byNameTagSorter', () => {
+  it('sorts tags by name', () => {
+    const tags = [
+      createTag('id-1', 'tag-b'),
+      createTag('id-2', 'tag-a'),
+      createTag('id-3', 'tag-d'),
+      createTag('id-4', 'tag-c'),
+    ];
+
+    tags.sort(byNameTagSorter);
+
+    expect(tags.map(({ id }) => id)).toEqual(['id-2', 'id-1', 'id-4', 'id-3']);
   });
 });
