@@ -429,6 +429,29 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   /**
+   * Loads the full list of annotations for job without any aggs or time boundaries
+   * used to indicate existence of annotations that are beyond the selected time
+   * in the time series brush area
+   */
+  loadAnnotations = async (jobId) => {
+    ml.annotations
+      .getAnnotations({
+        jobIds: [jobId],
+        earliestMs: null,
+        latestMs: null,
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+      })
+      .then((resp) => {
+        if (!this.unmounted && resp?.success === true) {
+          this.setState({ annotationData: resp.annotations[jobId] ?? [] });
+        }
+      })
+      .catch((error) => {
+        this.setState({ annotationData: [], annotationError: extractErrorMessage(error) });
+      });
+  };
+
+  /**
    * Loads available entity values.
    * @param {Array} entities - Entity controls configuration
    * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
@@ -838,22 +861,6 @@ export class TimeSeriesExplorer extends React.Component {
     mlFieldFormatService.populateFormats([jobId]).catch((err) => {
       console.log('Error populating field formats:', err);
     });
-
-    ml.annotations
-      .getAnnotations({
-        jobIds: [jobId],
-        earliestMs: null,
-        latestMs: null,
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-      })
-      .then((resp) => {
-        if (!this.unmounted && resp?.success === true) {
-          this.setState({ annotationData: resp.annotations[jobId] ?? [] });
-        }
-      })
-      .catch((error) => {
-        this.setState({ annotationData: [], annotationError: extractErrorMessage(error) });
-      });
   }
 
   componentDidMount() {
@@ -1022,6 +1029,7 @@ export class TimeSeriesExplorer extends React.Component {
         previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId;
       this.loadSingleMetricData(fullRefresh);
+      this.loadAnnotations(this.props.selectedJobId);
     }
 
     if (previousProps === undefined) {
@@ -1137,7 +1145,6 @@ export class TimeSeriesExplorer extends React.Component {
       isEqual(this.previousChartProps.focusForecastData, chartProps.focusForecastData) &&
       isEqual(this.previousChartProps.focusChartData, chartProps.focusChartData) &&
       isEqual(this.previousChartProps.focusAnnotationData, chartProps.focusAnnotationData) &&
-      this.previousShowAnnotations === showAnnotations &&
       this.previousShowForecast === showForecast &&
       this.previousShowModelBounds === showModelBounds &&
       this.props.previousRefresh === lastRefresh
@@ -1146,7 +1153,6 @@ export class TimeSeriesExplorer extends React.Component {
     }
 
     this.previousChartProps = chartProps;
-    this.previousShowAnnotations = showAnnotations;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
 
