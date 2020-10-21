@@ -49,4 +49,56 @@ describe('PagerDutyActionConnectorFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="pagerdutyRoutingKeyInput"]').length > 0).toBeTruthy();
   });
+
+  test('should display a message on create to remember credentials', () => {
+    const actionConnector = {
+      actionTypeId: '.pagerduty',
+      secrets: {},
+      config: {},
+    } as PagerDutyActionConnector;
+    const deps = {
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
+    };
+    const wrapper = mountWithIntl(
+      <PagerDutyActionConnectorFields
+        action={actionConnector}
+        errors={{ index: [], routingKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={deps!.docLinks}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message on edit to re-enter credentials', () => {
+    const actionConnector = {
+      secrets: {
+        routingKey: 'test',
+      },
+      id: 'test',
+      actionTypeId: '.pagerduty',
+      name: 'pagerduty',
+      config: {
+        apiUrl: 'http:\\test',
+      },
+    } as PagerDutyActionConnector;
+    const deps = {
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
+    };
+    const wrapper = mountWithIntl(
+      <PagerDutyActionConnectorFields
+        action={actionConnector}
+        errors={{ index: [], routingKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={deps!.docLinks}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+  });
 });
