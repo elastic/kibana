@@ -184,7 +184,8 @@ describe('CaseView ', () => {
     );
     await waitFor(() => {
       wrapper
-        .find('input[data-test-subj="toggle-case-status"]')
+        .find('[data-test-subj="toggle-case-status"]')
+        .first()
         .simulate('change', { target: { checked: true } });
       expect(updateCaseProperty).toHaveBeenCalled();
     });

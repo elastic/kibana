@@ -30,10 +30,20 @@ export const ViewTypeToggle = memo(({ selectedOption, onToggle }: ViewTypeToggle
     <EuiButtonGroup
       color="primary"
       idSelected={selectedOption}
-      data-test-subj="viewTypeToggleButton"
+      data-test-subj="viewTypeToggleButtonGroup"
       options={[
-        { id: 'grid', iconType: 'grid', label: GRID_VIEW_TOGGLE_LABEL },
-        { id: 'list', iconType: 'list', label: LIST_VIEW_TOGGLE_LABEL },
+        {
+          id: 'grid',
+          iconType: 'grid',
+          label: GRID_VIEW_TOGGLE_LABEL,
+          'data-test-subj': 'viewTypeToggleButton',
+        },
+        {
+          id: 'list',
+          iconType: 'list',
+          label: LIST_VIEW_TOGGLE_LABEL,
+          'data-test-subj': 'viewTypeToggleButton',
+        },
       ]}
       onChange={handleChange}
       legend={i18n.translate('xpack.securitySolution.trustedapps.viewTypeToggle.controlLegend', {
