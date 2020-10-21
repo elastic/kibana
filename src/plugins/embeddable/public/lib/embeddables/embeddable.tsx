@@ -26,6 +26,7 @@ import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
+import { ErrorEmbeddable } from '.';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -49,6 +50,8 @@ export abstract class Embeddable<
 
   private readonly input$: Rx.BehaviorSubject<TEmbeddableInput>;
   private readonly output$: Rx.BehaviorSubject<TEmbeddableOutput>;
+
+  private onError$: Rx.Subject<ErrorEmbeddable> = new Rx.Subject<ErrorEmbeddable>();
 
   protected renderComplete = new RenderCompleteDispatcher();
 
@@ -111,6 +114,10 @@ export abstract class Embeddable<
     return this.output$.asObservable();
   }
 
+  public getError$(): Readonly<Rx.Observable<ErrorEmbeddable>> {
+    return this.onError$.asObservable();
+  }
+
   public getOutput(): Readonly<TEmbeddableOutput> {
     return this.output;
   }
@@ -133,6 +140,10 @@ export abstract class Embeddable<
       root = root.parent;
     }
     return root;
+  }
+
+  public addError(errorEmbeddable: ErrorEmbeddable) {
+    this.onError$.next(errorEmbeddable);
   }
 
   public updateInput(changes: Partial<TEmbeddableInput>): void {

@@ -50,7 +50,7 @@ import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
-import { EmbeddableStateTransfer } from '..';
+import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -163,6 +163,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
           this.refreshBadges();
           this.refreshNotifications();
+        }
+      })
+    );
+
+    this.subscription.add(
+      embeddable.getError$().subscribe((error: ErrorEmbeddable) => {
+        this.props.embeddable.destroy();
+        if (this.embeddableRoot.current) {
+          error.render(this.embeddableRoot.current);
         }
       })
     );

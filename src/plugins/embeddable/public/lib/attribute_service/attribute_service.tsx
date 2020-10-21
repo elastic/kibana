@@ -30,6 +30,7 @@ import {
   Container,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
+  ErrorEmbeddable,
 } from '../index';
 
 /**
@@ -86,8 +87,12 @@ export class AttributeService<
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
     if (this.inputIsRefType(input)) {
       return this.options.unwrapMethod
-        ? await this.options.unwrapMethod(input.savedObjectId)
-        : await this.defaultUnwrapMethod(input);
+        ? await this.options.unwrapMethod(input.savedObjectId).catch((e: Error) => {
+            throw e;
+          })
+        : await this.defaultUnwrapMethod(input).catch((e: Error) => {
+            throw e;
+          });
     }
     return input[ATTRIBUTE_SERVICE_KEY];
   }

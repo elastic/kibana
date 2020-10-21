@@ -22,6 +22,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
 import { EmbeddableInput } from '../../../common/types';
+import { ErrorEmbeddable } from '.';
 
 export interface EmbeddableError {
   name: string;
@@ -129,6 +130,11 @@ export interface IEmbeddable<
    * Returns an observable which will be notified when output state changes.
    */
   getOutput$(): Readonly<Observable<O>>;
+
+  /**
+   * Returns an observable which will be notified when the error state changes.
+   */
+  getError$(): Readonly<Observable<ErrorEmbeddable>>;
 
   /**
    * Returns the title of this embeddable.
