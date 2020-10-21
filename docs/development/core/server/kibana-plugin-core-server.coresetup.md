@@ -16,7 +16,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [auditTrail](./kibana-plugin-core-server.coresetup.audittrail.md) | <code>AuditTrailSetup</code> | [AuditTrailSetup](./kibana-plugin-core-server.audittrailsetup.md) |
 |  [capabilities](./kibana-plugin-core-server.coresetup.capabilities.md) | <code>CapabilitiesSetup</code> | [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [context](./kibana-plugin-core-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-core-server.contextsetup.md) |
 |  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |

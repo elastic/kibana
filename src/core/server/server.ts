@@ -21,7 +21,6 @@ import { config as pathConfig } from '@kbn/utils';
 import { mapToObject } from '@kbn/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
-import { AuditTrailService } from './audit_trail';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
@@ -72,7 +71,6 @@ export class Server {
   private readonly status: StatusService;
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
-  private readonly auditTrail: AuditTrailService;
   private readonly coreUsageData: CoreUsageDataService;
 
   #pluginsInitialized?: boolean;
@@ -103,7 +101,6 @@ export class Server {
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
     this.httpResources = new HttpResourcesService(core);
-    this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
   }
@@ -138,8 +135,6 @@ export class Server {
         [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
       ]),
     });
-
-    const auditTrailSetup = this.auditTrail.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -200,7 +195,6 @@ export class Server {
       uiSettings: uiSettingsSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
-      auditTrail: auditTrailSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
     };
@@ -225,11 +219,7 @@ export class Server {
     this.log.debug('starting server');
     const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
 
-    const auditTrailStart = this.auditTrail.start();
-
-    const elasticsearchStart = await this.elasticsearch.start({
-      auditTrail: auditTrailStart,
-    });
+    const elasticsearchStart = await this.elasticsearch.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -252,7 +242,6 @@ export class Server {
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
-      auditTrail: auditTrailStart,
       coreUsageData: coreUsageDataStart,
     };
 
@@ -285,7 +274,6 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
-    await this.auditTrail.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {

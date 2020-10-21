@@ -214,6 +214,13 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
+export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
+  {
+    defaultMessage: 'You do not have Kibana Actions privileges',
+  }
+);
+
 export const DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateTitle',
   {
