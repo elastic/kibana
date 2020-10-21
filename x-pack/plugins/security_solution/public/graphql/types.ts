@@ -274,6 +274,11 @@ export enum HostPolicyResponseActionStatus {
   warning = 'warning',
 }
 
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
+}
+
 export enum DataProviderType {
   default = 'default',
   template = 'template',
@@ -299,11 +304,6 @@ export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
   immutable = 'immutable',
-}
-
-export enum TimelineType {
-  default = 'default',
-  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -490,6 +490,8 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
+  agent?: Maybe<AgentFields>;
+
   cloud?: Maybe<CloudFields>;
 
   endpoint?: Maybe<EndpointFields>;
@@ -499,6 +501,10 @@ export interface HostItem {
   inspect?: Maybe<Inspect>;
 
   lastSeen?: Maybe<string>;
+}
+
+export interface AgentFields {
+  id?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -1599,6 +1605,8 @@ export interface SourceQueryArgs {
 }
 export interface GetOneTimelineQueryArgs {
   id: string;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface GetAllTimelineQueryArgs {
   pageInfo: PageInfoTimeline;
@@ -1726,6 +1734,8 @@ export namespace GetHostOverviewQuery {
 
     _id: Maybe<string>;
 
+    agent: Maybe<Agent>;
+
     host: Maybe<Host>;
 
     cloud: Maybe<Cloud>;
@@ -1734,6 +1744,12 @@ export namespace GetHostOverviewQuery {
 
     endpoint: Maybe<Endpoint>;
   };
+
+  export type Agent = {
+    __typename?: 'AgentFields';
+
+    id: Maybe<string>;
+  }
 
   export type Host = {
     __typename?: 'HostEcsFields';
@@ -2166,6 +2182,7 @@ export namespace PersistTimelineNoteMutation {
 export namespace GetOneTimeline {
   export type Variables = {
     id: string;
+    timelineType?: Maybe<TimelineType>;
   };
 
   export type Query = {

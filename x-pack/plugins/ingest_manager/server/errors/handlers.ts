@@ -17,6 +17,7 @@ import {
   IngestManagerError,
   RegistryError,
   PackageNotFoundError,
+  AgentPolicyNameExistsError,
   PackageUnsupportedMediaTypeError,
 } from './index';
 
@@ -56,6 +57,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
   if (error instanceof PackageNotFoundError) {
     return 404; // Not Found
+  }
+  if (error instanceof AgentPolicyNameExistsError) {
+    return 409; // Conflict
   }
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415; // Unsupported Media Type

@@ -19,7 +19,9 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
@@ -104,6 +106,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   alertStatus,
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
+  const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule } = useRuleAsync(ruleId);
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
@@ -156,10 +159,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-    }): void => {
+      errorExists: boolean;
+    }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
@@ -308,12 +314,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
       fetchOrCreateListError != null ||
-      exceptionItemsToAdd.every((item) => item.entries.length === 0),
-    [fetchOrCreateListError, exceptionItemsToAdd]
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      errorsExist,
+    [fetchOrCreateListError, exceptionItemsToAdd, errorsExist]
   );
 
   const addExceptionMessage =
     exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION;
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
 
   return (
     <EuiOverlayMask onClick={onCancel}>
@@ -353,6 +367,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
+                {isRuleEQLSequenceStatement && (
+                  <>
+                    <EuiCallOut
+                      data-test-subj="eql-sequence-callout"
+                      title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
+                    />
+                    <EuiSpacer />
+                  </>
+                )}
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilderComponent
@@ -368,6 +391,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   data-test-subj="alert-exception-builder"
                   id-aria="alert-exception-builder"
                   onChange={handleBuilderOnChange}
+                  ruleType={maybeRule?.type}
                 />
 
                 <EuiSpacer />

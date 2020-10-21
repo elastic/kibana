@@ -11,7 +11,7 @@ import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
-  KibanaDatatable,
+  Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
@@ -22,6 +22,7 @@ import {
   SELECT_RANGE_TRIGGER,
   TriggerContext,
   VALUE_CLICK_TRIGGER,
+  VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -40,6 +41,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
   // This should be replaced with a top-down state
@@ -145,7 +147,11 @@ export interface Datasource<T = unknown, P = unknown> {
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments
-  initialize: (state?: P, savedObjectReferences?: SavedObjectReference[]) => Promise<T>;
+  initialize: (
+    state?: P,
+    savedObjectReferences?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext
+  ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
@@ -166,6 +172,11 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForVisualizeField: (
+    state: T,
+    indexPatternId: string,
+    fieldName: string
+  ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
@@ -293,7 +304,7 @@ export interface OperationMetadata {
 
 export interface LensMultiTable {
   type: 'lens_multitable';
-  tables: Record<string, KibanaDatatable>;
+  tables: Record<string, Datatable>;
   dateRange?: {
     fromDate: Date;
     toDate: Date;
@@ -419,10 +430,26 @@ export interface FramePublicAPI {
   removeLayers: (layerIds: string[]) => void;
 }
 
+/**
+ * A visualization type advertised to the user in the chart switcher
+ */
 export interface VisualizationType {
+  /**
+   * Unique id of the visualization type within the visualization defining it
+   */
   id: string;
+  /**
+   * Icon used in the chart switcher
+   */
   icon: IconType;
+  /**
+   * Visible label used in the chart switcher and above the workspace panel in collapsed state
+   */
   label: string;
+  /**
+   * Optional label used in chart type search if chart switcher is expanded and for tooltips
+   */
+  fullLabel?: string;
 }
 
 export interface Visualization<T = unknown> {

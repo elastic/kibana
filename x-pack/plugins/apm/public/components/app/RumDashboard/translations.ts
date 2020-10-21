@@ -7,6 +7,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const I18LABELS = {
+  dataMissing: i18n.translate('xpack.apm.rum.dashboard.dataMissing', {
+    defaultMessage: 'N/A',
+  }),
   backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
     defaultMessage: 'Backend',
   }),
@@ -92,7 +95,7 @@ export const I18LABELS = {
     }
   ),
   searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
-    defaultMessage: 'Search by url',
+    defaultMessage: 'Search by URL',
   }),
   getSearchResultsLabel: (total: number) =>
     i18n.translate('xpack.apm.rum.filters.searchResults', {
@@ -107,9 +110,6 @@ export const I18LABELS = {
   }),
   url: i18n.translate('xpack.apm.rum.filters.url', {
     defaultMessage: 'Url',
-  }),
-  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
-    defaultMessage: 'Match this query',
   }),
   loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
     defaultMessage: 'Loading results',

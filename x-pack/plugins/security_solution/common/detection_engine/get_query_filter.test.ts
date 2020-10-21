@@ -1105,11 +1105,18 @@ describe('get_filter', () => {
           size: 100,
           query: 'process where true',
           filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-5m',
-                lte: 'now',
-              },
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
             },
           },
         },
@@ -1135,11 +1142,18 @@ describe('get_filter', () => {
           size: 100,
           query: 'process where true',
           filter: {
-            range: {
-              'event.ingested': {
-                gte: 'now-5m',
-                lte: 'now',
-              },
+            bool: {
+              filter: [
+                {
+                  range: {
+                    'event.ingested': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
             },
           },
         },
@@ -1164,44 +1178,53 @@ describe('get_filter', () => {
           size: 100,
           query: 'process where true',
           filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-5m',
-                lte: 'now',
-              },
-            },
             bool: {
-              must_not: {
-                bool: {
-                  should: [
-                    {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
                       bool: {
-                        filter: [
-                          {
-                            nested: {
-                              path: 'some.parentField',
-                              query: {
-                                bool: {
-                                  minimum_should_match: 1,
-                                  should: [
-                                    {
-                                      match_phrase: {
-                                        'some.parentField.nested.field': 'some value',
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              score_mode: 'none',
-                            },
-                          },
+                        should: [
                           {
                             bool: {
-                              minimum_should_match: 1,
-                              should: [
+                              filter: [
                                 {
-                                  match_phrase: {
-                                    'some.not.nested.field': 'some value',
+                                  nested: {
+                                    path: 'some.parentField',
+                                    query: {
+                                      bool: {
+                                        minimum_should_match: 1,
+                                        should: [
+                                          {
+                                            match_phrase: {
+                                              'some.parentField.nested.field': 'some value',
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                    score_mode: 'none',
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    minimum_should_match: 1,
+                                    should: [
+                                      {
+                                        match_phrase: {
+                                          'some.not.nested.field': 'some value',
+                                        },
+                                      },
+                                    ],
                                   },
                                 },
                               ],
@@ -1210,9 +1233,9 @@ describe('get_filter', () => {
                         ],
                       },
                     },
-                  ],
+                  },
                 },
-              },
+              ],
             },
           },
         },

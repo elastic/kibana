@@ -41,8 +41,11 @@ import {
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE,
+  TIMELINE_TITLE_BY_ID,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
+  CREATE_NEW_TIMELINE_TEMPLATE,
+  OPEN_TIMELINE_TEMPLATE_ICON,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -68,8 +71,7 @@ export const addNotesToTimeline = (notes: string) => {
 
 export const addFilter = (filter: TimelineFilter) => {
   cy.get(ADD_FILTER).click();
-  cy.get(TIMELINE_FILTER_FIELD).type(filter.field);
-  cy.get(COMBO_BOX).contains(filter.field).click();
+  cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
   cy.get(COMBO_BOX).contains(filter.operator).click();
   if (filter.operator !== 'exists') {
@@ -114,6 +116,11 @@ export const createNewTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
 
+export const createNewTimelineTemplate = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).click();
+};
+
 export const executeTimelineKQL = (query: string) => {
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
 };
@@ -138,6 +145,12 @@ export const openTimelineInspectButton = () => {
 export const openTimelineFromSettings = () => {
   cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
   cy.get(OPEN_TIMELINE_ICON).click({ force: true });
+};
+
+export const openTimelineTemplateFromSettings = (id: string) => {
+  openTimelineFromSettings();
+  cy.get(OPEN_TIMELINE_TEMPLATE_ICON).click({ force: true });
+  cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
 };
 
 export const openTimelineSettings = () => {

@@ -5,7 +5,14 @@
  */
 import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CLS_LABEL, FID_LABEL, LCP_LABEL } from './translations';
+import {
+  CLS_HELP_LABEL,
+  CLS_LABEL,
+  FID_HELP_LABEL,
+  FID_LABEL,
+  LCP_HELP_LABEL,
+  LCP_LABEL,
+} from './translations';
 import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
@@ -43,6 +50,13 @@ interface Props {
   serviceName?: string;
 }
 
+function formatValue(value?: number) {
+  if (typeof value === 'undefined') {
+    return undefined;
+  }
+  return formatToSec(value, 'ms');
+}
+
 export function CoreVitals({ data, loading, displayServiceName, serviceName }: Props) {
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
 
@@ -56,28 +70,32 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={LCP_LABEL}
-            value={formatToSec(lcp, 'ms')}
+            value={formatValue(lcp)}
             ranks={lcpRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
+            helpLabel={LCP_HELP_LABEL}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={FID_LABEL}
-            value={formatToSec(fid, 'ms')}
+            value={formatValue(fid)}
             ranks={fidRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.FID}
+            helpLabel={FID_HELP_LABEL}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={CLS_LABEL}
-            value={cls ?? '0'}
+            value={cls}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}
+            isCls={true}
+            helpLabel={CLS_HELP_LABEL}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

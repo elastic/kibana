@@ -41,4 +41,5 @@ export interface RuleEcs {
   updated_by?: string[];
   version?: string[];
   note?: string[];
+  building_block_type?: string[];
 }

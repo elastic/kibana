@@ -6,6 +6,7 @@
 
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import { migratePackagePolicyToV7110 } from '../../../security_solution/common';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -207,6 +208,7 @@ const getSavedObjectTypes = (
         fleet_enroll_username: { type: 'binary' },
         fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
+        config_yaml: { type: 'text' },
       },
     },
   },
@@ -267,6 +269,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
+      '7.11.0': migratePackagePolicyToV7110,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -347,6 +350,7 @@ export function registerEncryptedSavedObjects(
       'hosts',
       'ca_sha256',
       'config',
+      'config_yaml',
     ]),
   });
   encryptedSavedObjects.registerType({

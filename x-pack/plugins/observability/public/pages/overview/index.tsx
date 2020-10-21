@@ -24,7 +24,7 @@ import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { DataSections } from './data_sections';
-import { useTrackPageview } from '../..';
+import { useTrackPageview, UXHasDataResponse } from '../..';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -37,11 +37,18 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 export function OverviewPage({ routeParams }: Props) {
-  const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+  const { core, plugins } = usePluginContext();
+
+  // read time from state and update the url
+  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+
+  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
 
   const relativeTime = {
-    start: routeParams.query.rangeFrom ?? timePickerTime.from,
-    end: routeParams.query.rangeTo ?? timePickerTime.to,
+    start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
+    end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
   };
 
   const absoluteTime = {
@@ -51,8 +58,6 @@ export function OverviewPage({ routeParams }: Props) {
 
   useTrackPageview({ app: 'observability', path: 'overview' });
   useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
-
-  const { core } = usePluginContext();
 
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });
@@ -83,6 +88,8 @@ export function OverviewPage({ routeParams }: Props) {
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
+    } else if (id === 'ux') {
+      return !(hasData[id] as UXHasDataResponse).hasData;
     }
     return !hasData[id];
   });

@@ -83,7 +83,7 @@ export class EditorFrameService {
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,
     plugins: EditorFrameSetupPlugins,
-    getAttributeService: () => LensAttributeService
+    getAttributeService: () => Promise<LensAttributeService>
   ): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
     plugins.expressions.registerFunction(() => formatColumn);
@@ -91,7 +91,7 @@ export class EditorFrameService {
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
       const [coreStart, deps] = await core.getStartServices();
       return {
-        attributeService: getAttributeService(),
+        attributeService: await getAttributeService(),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
@@ -127,7 +127,17 @@ export class EditorFrameService {
       return {
         mount: async (
           element,
-          { doc, onError, dateRange, query, filters, savedQuery, onChange, showNoDataPopover }
+          {
+            doc,
+            onError,
+            dateRange,
+            query,
+            filters,
+            savedQuery,
+            onChange,
+            showNoDataPopover,
+            initialContext,
+          }
         ) => {
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
@@ -156,6 +166,7 @@ export class EditorFrameService {
                 savedQuery={savedQuery}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
+                initialContext={initialContext}
               />
             </I18nProvider>,
             domElement

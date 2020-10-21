@@ -33,14 +33,9 @@ describe('UXSection', () => {
     expect(getByText('View in app')).toBeInTheDocument();
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
     expect(getByText('Largest contentful paint')).toBeInTheDocument();
-    expect(getByText('Largest contentful paint 1.94 s')).toBeInTheDocument();
-    expect(getByText('First input delay 14 ms')).toBeInTheDocument();
-    expect(getByText('Cumulative layout shift 0.01')).toBeInTheDocument();
-
-    expect(getByText('Largest contentful paint')).toBeInTheDocument();
-    expect(getByText('Largest contentful paint 1.94 s')).toBeInTheDocument();
-    expect(getByText('First input delay 14 ms')).toBeInTheDocument();
-    expect(getByText('Cumulative layout shift 0.01')).toBeInTheDocument();
+    expect(getByText('1.94 s')).toBeInTheDocument();
+    expect(getByText('14 ms')).toBeInTheDocument();
+    expect(getByText('0.01')).toBeInTheDocument();
 
     // LCP Rank Values
     expect(getByText('Good (65%)')).toBeInTheDocument();
@@ -77,7 +72,30 @@ describe('UXSection', () => {
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
-    expect(getAllByText('Statistic is loading')).toHaveLength(3);
+    expect(getAllByText('--')).toHaveLength(3);
+    expect(queryAllByText('View in app')).toEqual([]);
+    expect(getByText('elastic-co-frontend')).toBeInTheDocument();
+  });
+  it('shows empty state', () => {
+    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      data: undefined,
+      status: fetcherHook.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+    const { getByText, queryAllByText, getAllByText } = render(
+      <UXSection
+        absoluteTime={{
+          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
+          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
+        }}
+        relativeTime={{ start: 'now-15m', end: 'now' }}
+        bucketSize="60s"
+        serviceName="elastic-co-frontend"
+      />
+    );
+
+    expect(getByText('User Experience')).toBeInTheDocument();
+    expect(getAllByText('No data is available.')).toHaveLength(3);
     expect(queryAllByText('View in app')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });

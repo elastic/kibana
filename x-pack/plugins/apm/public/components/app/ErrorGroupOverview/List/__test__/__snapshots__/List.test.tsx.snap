@@ -111,7 +111,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                       <span
                         className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                       >
-                        <div
+                        <span
                           className="euiButtonContent__icon"
                           data-euiicon-type="arrowDown"
                           size="m"
@@ -166,7 +166,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
-                    <div
+                    <span
                       aria-label="Info"
                       className="eui-alignTop"
                       color="subdued"
@@ -271,7 +271,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   >
                     Occurrences
                   </span>
-                  <div
+                  <span
                     aria-label="Sorted in descending order"
                     className="euiTableSortIcon"
                     data-euiicon-type="sortDown"
@@ -535,7 +535,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                       <span
                         className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                       >
-                        <div
+                        <span
                           className="euiButtonContent__icon"
                           data-euiicon-type="arrowDown"
                           size="m"
@@ -590,7 +590,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
-                    <div
+                    <span
                       aria-label="Info"
                       className="eui-alignTop"
                       color="subdued"
@@ -695,7 +695,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     Occurrences
                   </span>
-                  <div
+                  <span
                     aria-label="Sorted in descending order"
                     className="euiTableSortIcon"
                     data-euiicon-type="sortDown"
@@ -770,7 +770,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  <div
+                  <span
                     aria-label="Info"
                     className="eui-alignTop"
                     color="subdued"
@@ -1009,7 +1009,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  <div
+                  <span
                     aria-label="Info"
                     className="eui-alignTop"
                     color="subdued"
@@ -1248,7 +1248,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  <div
+                  <span
                     aria-label="Info"
                     className="eui-alignTop"
                     color="subdued"
@@ -1487,7 +1487,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  <div
+                  <span
                     aria-label="Info"
                     className="eui-alignTop"
                     color="subdued"
@@ -1736,7 +1736,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="arrowLeft"
@@ -1779,7 +1779,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="arrowRight"

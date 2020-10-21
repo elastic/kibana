@@ -72,15 +72,14 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       data-test-subj="paging-control-container"
       grow={false}
     >
-      <PaginationEuiFlexItem>
-        <PagingControl
-          activePage={0}
-          data-test-subj="paging-control"
-          isLoading={false}
-          onPageClick={[Function]}
-          totalPages={5}
-        />
-      </PaginationEuiFlexItem>
+      <PagingControl
+        activePage={0}
+        data-test-subj="paging-control"
+        isLoading={false}
+        onPageClick={[Function]}
+        totalCount={15546}
+        totalPages={7773}
+      />
     </EuiFlexItem>
     <EuiFlexItem
       data-test-subj="last-updated-container"

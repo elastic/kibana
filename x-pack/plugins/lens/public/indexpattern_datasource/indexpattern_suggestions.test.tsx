@@ -10,6 +10,7 @@ import { IndexPatternPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
+  getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
 jest.mock('./loader');
@@ -1077,6 +1078,70 @@ describe('IndexPattern Data Source suggestions', () => {
       });
     });
   });
+  describe('#getDatasourceSuggestionsForVisualizeField', () => {
+    describe('with no layer', () => {
+      function stateWithoutLayer() {
+        return {
+          ...testInitialState(),
+          layers: {},
+        };
+      }
+
+      it('should return an empty array if the field does not exist', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithoutLayer(),
+          '1',
+          'field_not_exist'
+        );
+
+        expect(suggestions).toEqual([]);
+      });
+
+      it('should apply a bucketed aggregation for a string field', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithoutLayer(),
+          '1',
+          'source'
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                id1: expect.objectContaining({
+                  columnOrder: ['id2', 'id3'],
+                  columns: {
+                    id2: expect.objectContaining({
+                      operationType: 'terms',
+                      sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
+                    }),
+                    id3: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'id2',
+                }),
+                expect.objectContaining({
+                  columnId: 'id3',
+                }),
+              ],
+              layerId: 'id1',
+            },
+          })
+        );
+      });
+    });
+  });
 
   describe('#getDatasourceSuggestionsFromCurrentState', () => {
     it('returns no suggestions if there are no columns', () => {
@@ -1310,6 +1375,126 @@ describe('IndexPattern Data Source suggestions', () => {
                 },
               },
             ],
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
+    it('does not create an over time suggestion if tables with numeric buckets with time dimension', async () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['colb', 'cola'],
+            columns: {
+              cola: {
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'dest',
+                label: 'Unique count of dest',
+                operationType: 'cardinality',
+              },
+              colb: {
+                label: 'My Op',
+                dataType: 'number',
+                isBucketed: true,
+                operationType: 'range',
+                sourceField: 'bytes',
+                scale: 'interval',
+                params: {
+                  type: 'histogram',
+                  maxBars: 100,
+                  ranges: [],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(getDatasourceSuggestionsFromCurrentState(state)).not.toContainEqual(
+        expect.objectContaining({
+          table: {
+            isMultiRow: true,
+            label: 'Over time',
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
+    it('adds date histogram over default time field for custom range intervals', async () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['colb', 'cola'],
+            columns: {
+              cola: {
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'dest',
+                label: 'Unique count of dest',
+                operationType: 'cardinality',
+              },
+              colb: {
+                label: 'My Custom Range',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'range',
+                sourceField: 'bytes',
+                scale: 'ordinal',
+                params: {
+                  type: 'range',
+                  maxBars: 100,
+                  ranges: [{ from: 1, to: 2, label: '' }],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(getDatasourceSuggestionsFromCurrentState(state)).toContainEqual(
+        expect.objectContaining({
+          table: {
+            changeType: 'extended',
+            columns: [
+              {
+                columnId: 'colb',
+                operation: {
+                  dataType: 'string',
+                  isBucketed: true,
+                  label: 'My Custom Range',
+                  scale: 'ordinal',
+                },
+              },
+              {
+                columnId: 'id1',
+                operation: {
+                  dataType: 'date',
+                  isBucketed: true,
+                  label: 'timestampLabel',
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'cola',
+                operation: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'Unique count of dest',
+                  scale: undefined,
+                },
+              },
+            ],
+            isMultiRow: true,
+            label: 'Over time',
             layerId: 'first',
           },
         })
