@@ -298,7 +298,7 @@ export class SearchEmbeddable
 
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, {
       description,
-      sessionId: searchSessionId,
+      searchSessionId,
     });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {

@@ -84,7 +84,7 @@ export class Embeddable
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
-    sessionId?: string;
+    searchSessionId?: string;
     lastReloadRequestTime?: number;
   } = {};
 
@@ -157,7 +157,7 @@ export class Embeddable
         timeRange: containerState.timeRange,
         query: containerState.query,
         lastReloadRequestTime: this.externalSearchContext.lastReloadRequestTime,
-        sessionId: containerState.searchSessionId,
+        searchSessionId: containerState.searchSessionId,
         filters: cleanedFilters,
       };
 
@@ -180,7 +180,7 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
-        sessionId={this.externalSearchContext.sessionId}
+        searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode
@@ -210,7 +210,6 @@ export class Embeddable
     }
 
     output.filters = injectFilterReferences(output.filters, this.savedVis.references);
-
     return output;
   }
 

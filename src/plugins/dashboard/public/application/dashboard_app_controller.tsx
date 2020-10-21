@@ -412,9 +412,9 @@ export class DashboardAppController {
     >(DASHBOARD_CONTAINER_TYPE);
 
     if (dashboardFactory) {
-      const sessionId = searchService.session.start();
+      const searchSessionId = searchService.session.start();
       dashboardFactory
-        .create({ ...getDashboardInput(), searchSessionId: sessionId })
+        .create({ ...getDashboardInput(), searchSessionId })
         .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
           if (container && !isErrorEmbeddable(container)) {
             dashboardContainer = container;
@@ -591,8 +591,8 @@ export class DashboardAppController {
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
       if (changes && dashboardContainer) {
-        const sessionId = searchService.session.start();
-        dashboardContainer.updateInput({ ...changes, searchSessionId: sessionId });
+        const searchSessionId = searchService.session.start();
+        dashboardContainer.updateInput({ ...changes, searchSessionId });
       }
     };
 

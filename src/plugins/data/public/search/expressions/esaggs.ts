@@ -65,7 +65,7 @@ export interface RequestHandlerParams {
   metricsAtAllLevels?: boolean;
   visParams?: any;
   abortSignal?: AbortSignal;
-  sessionId?: string;
+  searchSessionId?: string;
 }
 
 const name = 'esaggs';
@@ -83,7 +83,7 @@ const handleCourierRequest = async ({
   inspectorAdapters,
   filterManager,
   abortSignal,
-  sessionId,
+  searchSessionId,
 }: RequestHandlerParams) => {
   // Create a new search source that inherits the original search source
   // but has the appropriate timeRange applied via a filter.
@@ -145,7 +145,7 @@ const handleCourierRequest = async ({
         defaultMessage:
           'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
-      sessionId,
+      searchSessionId,
     }
   );
   request.stats(getRequestInspectorStats(requestSearchSource));
@@ -153,7 +153,7 @@ const handleCourierRequest = async ({
   try {
     const response = await requestSearchSource.fetch({
       abortSignal,
-      sessionId,
+      sessionId: searchSessionId,
     });
 
     request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
@@ -252,7 +252,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       multi: true,
     },
   },
-  async fn(input, args, { inspectorAdapters, abortSignal, getSessionId }) {
+  async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
     const searchService = getSearchService();
@@ -280,7 +280,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
-      sessionId: getSessionId(),
+      searchSessionId: getSearchSessionId(),
     });
 
     const table: Datatable = {

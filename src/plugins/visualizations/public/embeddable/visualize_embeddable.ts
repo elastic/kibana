@@ -380,7 +380,7 @@ export class VisualizeEmbeddable
         query: this.input.query,
         filters: this.input.filters,
       },
-      sessionId: this.searchSessionId,
+      searchSessionId: this.searchSessionId,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };

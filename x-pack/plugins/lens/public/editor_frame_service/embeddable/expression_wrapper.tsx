@@ -19,7 +19,7 @@ export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
   searchContext: ExecutionContextSearch;
-  sessionId?: string;
+  searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
 }
 
@@ -28,7 +28,7 @@ export function ExpressionWrapper({
   expression,
   searchContext,
   handleEvent,
-  sessionId,
+  searchSessionId,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -53,7 +53,7 @@ export function ExpressionWrapper({
             padding="m"
             expression={expression}
             searchContext={searchContext}
-            sessionId={sessionId}
+            searchSessionId={searchSessionId}
             renderError={(errorMessage, error) => (
               <div data-test-subj="expression-renderer-error">
                 <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">

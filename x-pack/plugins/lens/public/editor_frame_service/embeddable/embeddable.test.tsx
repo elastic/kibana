@@ -218,9 +218,10 @@ describe('embeddable', () => {
         timeRange,
         query: [query, savedVis.state.query],
         filters,
-        sessionId: input.searchSessionId,
       })
     );
+
+    expect(expressionRenderer.mock.calls[0][0].searchSessionId).toBe(input.searchSessionId);
   });
 
   it('should merge external context with query and filters of the saved object', async () => {
