@@ -50,6 +50,7 @@ interface ICredentialsLogicActions {
   fetchCredentials(page?: number): number;
   fetchDetails(): { value: boolean };
   deleteApiKey(tokenName: string): string;
+  onEngineSelect(engineName: string): string;
 }
 
 interface ICredentialsLogicValues {
@@ -93,6 +94,7 @@ export const CredentialsLogic = kea<
     fetchCredentials: (page) => page,
     fetchDetails: true,
     deleteApiKey: (tokenName) => tokenName,
+    onEngineSelect: (engineName) => engineName,
   }),
   reducers: () => ({
     apiTokens: [
@@ -260,6 +262,12 @@ export const CredentialsLogic = kea<
       }
     },
     // TODO onApiTokenChange from ent-search
-    // TODO onEngineSelect from ent-search
+    onEngineSelect: (engineName: string) => {
+      if (values.activeApiToken?.engines?.includes(engineName)) {
+        actions.removeEngineName(engineName);
+      } else {
+        actions.addEngineName(engineName);
+      }
+    },
   }),
 });

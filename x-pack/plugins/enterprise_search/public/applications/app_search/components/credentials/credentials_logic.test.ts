@@ -1179,6 +1179,36 @@ describe('CredentialsLogic', () => {
         }
       });
     });
+
+    describe('onEngineSelect', () => {
+      it('calls addEngineName if the engine is not selected', () => {
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            engines: [],
+          },
+        });
+        jest.spyOn(CredentialsLogic.actions, 'addEngineName');
+
+        CredentialsLogic.actions.onEngineSelect('engine1');
+        expect(CredentialsLogic.actions.addEngineName).toHaveBeenCalledWith('engine1');
+        expect(CredentialsLogic.values.activeApiToken.engines).toEqual(['engine1']);
+      });
+
+      it('calls removeEngineName if the engine is already selected', () => {
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            engines: ['engine1', 'engine2'],
+          },
+        });
+        jest.spyOn(CredentialsLogic.actions, 'removeEngineName');
+
+        CredentialsLogic.actions.onEngineSelect('engine1');
+        expect(CredentialsLogic.actions.removeEngineName).toHaveBeenCalledWith('engine1');
+        expect(CredentialsLogic.values.activeApiToken.engines).toEqual(['engine2']);
+      });
+    });
   });
 
   describe('selectors', () => {
