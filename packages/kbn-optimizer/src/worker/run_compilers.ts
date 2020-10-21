@@ -117,7 +117,7 @@ const observeCompiler = (
         referencedFiles.add(bundle.manifestPath);
       }
 
-      for (const module of stats.compilation.modules) {
+      function trackModule(module: any) {
         if (isNormalModule(module)) {
           moduleCount += 1;
           const path = getModulePath(module);
@@ -134,7 +134,7 @@ const observeCompiler = (
               }
             }
 
-            continue;
+            return;
           }
 
           const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
@@ -146,24 +146,30 @@ const observeCompiler = (
               'package.json'
             )
           );
-          continue;
+          return;
         }
 
         if (module instanceof BundleRefModule) {
           bundleRefExportIds.push(module.ref.exportId);
-          continue;
+          return;
         }
 
         if (isConcatenatedModule(module)) {
-          moduleCount += module.modules.length;
-          continue;
+          for (const subModule of module.modules) {
+            trackModule(subModule);
+          }
+          return;
         }
 
         if (isExternalModule(module) || isIgnoredModule(module)) {
-          continue;
+          return;
         }
 
         throw new Error(`Unexpected module type: ${inspect(module)}`);
+      }
+
+      for (const module of stats.compilation.modules) {
+        trackModule(module);
       }
 
       const files = Array.from(referencedFiles).sort(ascending((p) => p));
