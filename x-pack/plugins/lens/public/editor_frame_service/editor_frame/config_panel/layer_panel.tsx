@@ -245,7 +245,7 @@ export function LayerPanel(
                           isFromCompatibleGroup ||
                           isFromTheSameGroup
                         }
-                        dropTo={(dropTarget: string) => {
+                        dropTo={(dropTargetId: string) => {
                           layerDatasource.onDrop({
                             isReorder: true,
                             ...layerDatasourceDropProps,
@@ -255,7 +255,7 @@ export function LayerPanel(
                               layerId,
                               id: accessor,
                             },
-                            columnId: dropTarget,
+                            columnId: dropTargetId,
                             filterOperations: group.filterOperations,
                           });
                         }}
