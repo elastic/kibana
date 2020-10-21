@@ -76,4 +76,27 @@ describe('UXSection', () => {
     expect(queryAllByText('View in app')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
+  it('shows empty state', () => {
+    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      data: undefined,
+      status: fetcherHook.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+    const { getByText, queryAllByText, getAllByText } = render(
+      <UXSection
+        absoluteTime={{
+          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
+          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
+        }}
+        relativeTime={{ start: 'now-15m', end: 'now' }}
+        bucketSize="60s"
+        serviceName="elastic-co-frontend"
+      />
+    );
+
+    expect(getByText('User Experience')).toBeInTheDocument();
+    expect(getAllByText('No data is available.')).toHaveLength(3);
+    expect(queryAllByText('View in app')).toEqual([]);
+    expect(getByText('elastic-co-frontend')).toBeInTheDocument();
+  });
 });

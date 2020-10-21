@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { Credentials } from './credentials';
-import { EuiCopy, EuiPageContentBody } from '@elastic/eui';
+import { EuiCopy, EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
 
@@ -48,10 +48,11 @@ describe('Credentials', () => {
     expect(actions.resetCredentials).toHaveBeenCalledTimes(1);
   });
 
-  it('renders nothing if data is still loading', () => {
+  it('renders a limited UI if data is still loading', () => {
     setMockValues({ dataLoading: true });
     const wrapper = shallow(<Credentials />);
-    expect(wrapper.find(EuiPageContentBody)).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="CreateAPIKeyButton"]')).toHaveLength(0);
+    expect(wrapper.find(EuiLoadingContent)).toHaveLength(1);
   });
 
   it('renders the API endpoint and a button to copy it', () => {
