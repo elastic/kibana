@@ -19,7 +19,11 @@
 
 import Boom from 'boom';
 import { createListStream } from '../../utils/streams';
-import { SavedObjectsClientContract, SavedObject } from '../types';
+import {
+  SavedObjectsClientContract,
+  SavedObject,
+  SavedObjectsFindOptionsReference,
+} from '../types';
 import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
@@ -30,6 +34,8 @@ import { sortObjects } from './sort_objects';
 export interface SavedObjectsExportOptions {
   /** optional array of saved object types. */
   types?: string[];
+  /** optional array of references to search object for when exporting by types */
+  references?: SavedObjectsFindOptionsReference[];
   /** optional array of objects to export. */
   objects?: Array<{
     /** the saved object id. */
@@ -71,6 +77,7 @@ export interface SavedObjectsExportResultDetails {
 
 async function fetchObjectsToExport({
   objects,
+  references,
   types,
   search,
   exportSizeLimit,
@@ -78,6 +85,7 @@ async function fetchObjectsToExport({
   namespace,
 }: {
   objects?: SavedObjectsExportOptions['objects'];
+  references?: SavedObjectsFindOptionsReference[];
   types?: string[];
   search?: string;
   exportSizeLimit: number;
@@ -94,6 +102,12 @@ async function fetchObjectsToExport({
     if (typeof search === 'string') {
       throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
+    if (references && references.length) {
+      throw Boom.badRequest(
+        `Can't specify both "references" and "objects" properties when exporting`
+      );
+    }
+
     const bulkGetResult = await savedObjectsClient.bulkGet(objects, { namespace });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
@@ -107,6 +121,8 @@ async function fetchObjectsToExport({
   } else if (types && types.length > 0) {
     const findResponse = await savedObjectsClient.find({
       type: types,
+      hasReference: references,
+      hasReferenceOperator: references ? 'OR' : undefined,
       search,
       perPage: exportSizeLimit,
       namespaces: namespace ? [namespace] : undefined,
@@ -135,6 +151,7 @@ async function fetchObjectsToExport({
  */
 export async function exportSavedObjectsToStream({
   types,
+  references,
   objects,
   search,
   savedObjectsClient,
@@ -145,6 +162,7 @@ export async function exportSavedObjectsToStream({
 }: SavedObjectsExportOptions) {
   const rootObjects = await fetchObjectsToExport({
     types,
+    references,
     objects,
     search,
     savedObjectsClient,

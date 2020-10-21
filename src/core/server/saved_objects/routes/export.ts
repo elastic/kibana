@@ -28,12 +28,18 @@ import { validateTypes, validateObjects } from './utils';
 export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) => {
   const { maxImportExportSize } = config;
 
+  const referenceSchema = schema.object({
+    type: schema.string(),
+    id: schema.string(),
+  });
+
   router.post(
     {
       path: '/_export',
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          references: schema.maybe(schema.arrayOf(referenceSchema)),
           objects: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -51,7 +57,14 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const savedObjectsClient = context.core.savedObjects.client;
-      const { type, objects, search, excludeExportDetails, includeReferencesDeep } = req.body;
+      const {
+        type,
+        references,
+        objects,
+        search,
+        excludeExportDetails,
+        includeReferencesDeep,
+      } = req.body;
       const types = typeof type === 'string' ? [type] : type;
 
       // need to access the registry for type validation, can't use the schema for this
@@ -82,6 +95,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,
         types,
+        references,
         search,
         objects,
         exportSizeLimit: maxImportExportSize,

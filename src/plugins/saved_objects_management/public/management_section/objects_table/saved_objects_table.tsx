@@ -168,37 +168,54 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   fetchCounts = async () => {
-    const { allowedTypes } = this.props;
-    const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
+    const { allowedTypes, taggingApi } = this.props;
+    const { queryText, visibleTypes, selectedTags } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = allowedTypes.filter(
+    const selectedTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
 
-    // These are the saved objects visible in the table.
-    const filteredSavedObjectCounts = await getSavedObjectCounts(
-      this.props.http,
-      filteredTypes,
-      queryText
-    );
-
-    const exportAllOptions: ExportAllOption[] = [];
-    const exportAllSelectedOptions: Record<string, boolean> = {};
-
-    Object.keys(filteredSavedObjectCounts).forEach((id) => {
-      // Add this type as a bulk-export option.
-      exportAllOptions.push({
-        id,
-        label: `${id} (${filteredSavedObjectCounts[id] || 0})`,
+    const references: SavedObjectsFindOptionsReference[] = [];
+    if (taggingApi && selectedTags) {
+      selectedTags.forEach((tagName) => {
+        const ref = taggingApi.ui.convertNameToReference(tagName);
+        if (ref) {
+          references.push(ref);
+        }
       });
+    }
 
-      // Select it by default.
-      exportAllSelectedOptions[id] = true;
+    // These are the saved objects visible in the table.
+    const filteredSavedObjectCounts = await getSavedObjectCounts({
+      http: this.props.http,
+      typesToInclude: selectedTypes,
+      searchString: queryText,
+      references: references.length ? references : undefined,
     });
+
+    const exportAllOptions: ExportAllOption[] = Object.entries(filteredSavedObjectCounts).map(
+      ([id, count]) => ({
+        id,
+        label: `${id} (${count || 0})`,
+      })
+    );
+    const exportAllSelectedOptions: Record<string, boolean> = exportAllOptions.reduce(
+      (record, { id }) => {
+        return {
+          ...record,
+          [id]: true,
+        };
+      },
+      {}
+    );
 
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
-    const savedObjectCounts = await getSavedObjectCounts(this.props.http, allowedTypes, queryText);
+    const savedObjectCounts = await getSavedObjectCounts({
+      http: this.props.http,
+      typesToInclude: allowedTypes,
+      searchString: queryText,
+    });
 
     this.setState((state) => ({
       ...state,
@@ -393,8 +410,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
-    const { notifications, http } = this.props;
-    const { queryText } = parseQuery(activeQuery);
+    const { notifications, http, taggingApi } = this.props;
+    const { queryText, selectedTags } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
@@ -402,14 +419,25 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return accum;
     }, [] as string[]);
 
+    const references: SavedObjectsFindOptionsReference[] = [];
+    if (taggingApi && selectedTags) {
+      selectedTags.forEach((tagName) => {
+        const ref = taggingApi.ui.convertNameToReference(tagName);
+        if (ref) {
+          references.push(ref);
+        }
+      });
+    }
+
     let blob;
     try {
-      blob = await fetchExportByTypeAndSearch(
+      blob = await fetchExportByTypeAndSearch({
         http,
-        exportTypes,
-        queryText ? `${queryText}*` : undefined,
-        isIncludeReferencesDeepChecked
-      );
+        search: queryText ? `${queryText}*` : undefined,
+        types: exportTypes,
+        references: references.length ? references : undefined,
+        includeReferencesDeep: isIncludeReferencesDeepChecked,
+      });
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
