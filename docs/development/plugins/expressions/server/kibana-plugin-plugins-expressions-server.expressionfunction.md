@@ -29,6 +29,7 @@ export declare class ExpressionFunction implements PersistableState<ExpressionAs
 |  [help](./kibana-plugin-plugins-expressions-server.expressionfunction.help.md) |  | <code>string</code> | A short help text. |
 |  [inject](./kibana-plugin-plugins-expressions-server.expressionfunction.inject.md) |  | <code>(state: ExpressionAstFunction['arguments'], references: SavedObjectReference[]) =&gt; ExpressionAstFunction['arguments']</code> |  |
 |  [inputTypes](./kibana-plugin-plugins-expressions-server.expressionfunction.inputtypes.md) |  | <code>string[] &#124; undefined</code> | Type of inputs that this function supports. |
+|  [migrations](./kibana-plugin-plugins-expressions-server.expressionfunction.migrations.md) |  | <code>{</code><br/><code>        [key: string]: (state: SerializableState) =&gt; SerializableState;</code><br/><code>    }</code> |  |
 |  [name](./kibana-plugin-plugins-expressions-server.expressionfunction.name.md) |  | <code>string</code> | Name of function |
 |  [telemetry](./kibana-plugin-plugins-expressions-server.expressionfunction.telemetry.md) |  | <code>(state: ExpressionAstFunction['arguments'], telemetryData: Record&lt;string, any&gt;) =&gt; Record&lt;string, any&gt;</code> |  |
 |  [type](./kibana-plugin-plugins-expressions-server.expressionfunction.type.md) |  | <code>string</code> | Return type of function. This SHOULD be supplied. We use it for UI and autocomplete hinting. We may also use it for optimizations in the future. |
