@@ -49,7 +49,7 @@ export type ExpressionFunctionDerivative = ExpressionFunctionDefinition<
  * * Will write the derivative of `inputColumnId` into `outputColumnId`
  * * If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`
  * * Derivative always start with an undefined value for the first row of a series, a cell will contain its own value minus the
- *   value of the next previous cell of the same series.
+ *   value of the previous cell of the same series.
  *
  * Edge cases:
  * * Will return the input table if `inputColumnId` does not exist
@@ -57,8 +57,7 @@ export type ExpressionFunctionDerivative = ExpressionFunctionDefinition<
  * * If there is no previous row of the current series with a non `null` or `undefined` value, the output cell of the current row
  *   will be set to `undefined`.
  * * If the row value contains `null` or `undefined`, it will be ignored and the output cell will be set to `undefined`
- * * If the row value contains `null` or `undefined`, it will also be ignored for calculating the value of the next row of the same series.
- *   The value of the next previous cell of the same series containing neither `null` nor `undefined` will be used instead.
+ * * If the value of the previous row of the same series contains `null` or `undefined`, the output cell of the current row will be set to `undefined` as well
  * * For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the
  *   calculation of the current series even if this results in `NaN` (like in case of objects).
  * * To determine separate series defined by the `by` columns, the values of these columns will be cast to strings
@@ -138,6 +137,8 @@ export const derivative: ExpressionFunctionDerivative = {
 
         if (currentValue != null) {
           previousValues[bucketIdentifier] = Number(currentValue);
+        } else {
+          previousValues[bucketIdentifier] = undefined;
         }
 
         return newRow;

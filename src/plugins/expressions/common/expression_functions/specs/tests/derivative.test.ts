@@ -58,6 +58,7 @@ describe('interpreter/functions#derivative', () => {
           { val: undefined },
           { val: undefined },
           { val: 4 },
+          { val: 8 },
         ],
       },
       { inputColumnId: 'val', outputColumnId: 'output' }
@@ -75,7 +76,8 @@ describe('interpreter/functions#derivative', () => {
       2 - 1,
       undefined,
       undefined,
-      4 - 2,
+      undefined,
+      8 - 4,
     ]);
   });
 
@@ -181,7 +183,7 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
-  it('calculates cumulative sum for multiple series by multiple split columns', () => {
+  it('calculates derivative for multiple series by multiple split columns', () => {
     const result = runFn(
       {
         type: 'datatable',
@@ -236,7 +238,7 @@ describe('interpreter/functions#derivative', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 2 - 1, undefined, 11 - 10]);
   });
 
-  it('casts values to number before calculating cumulative sum', () => {
+  it('casts values to number before calculating derivative', () => {
     const result = runFn(
       {
         type: 'datatable',
