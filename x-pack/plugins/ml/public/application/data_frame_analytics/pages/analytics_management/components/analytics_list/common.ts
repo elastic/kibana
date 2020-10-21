@@ -112,7 +112,7 @@ export interface DataFrameAnalyticsListRow {
   mode: string;
   state: DataFrameAnalyticsStats['state'];
   stats: DataFrameAnalyticsStats;
-  spaces: string[];
+  spaces?: string[];
 }
 
 // Used to pass on attribute names to table columns

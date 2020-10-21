@@ -279,7 +279,7 @@ export const useColumns = (
       name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
         defaultMessage: 'Spaces',
       }),
-      render: (item: DataFrameAnalyticsListRow) => <JobSpacesList spaces={item.spaces} />,
+      render: (item: DataFrameAnalyticsListRow) => <JobSpacesList spaces={item.spaces ?? []} />,
       width: '75px',
     });
 
