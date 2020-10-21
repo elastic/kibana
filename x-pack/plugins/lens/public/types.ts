@@ -180,6 +180,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  uniqueLabels: (state: T) => Record<string, string>;
 }
 
 /**

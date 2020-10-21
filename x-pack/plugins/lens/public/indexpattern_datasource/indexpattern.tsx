@@ -73,40 +73,6 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
-/**
- * Return a map of columnId => unique column label. Exported for testing reasons.
- */
-export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
-  const columnLabelMap = {} as Record<string, string>;
-  const counts = {} as Record<string, number>;
-
-  const makeUnique = (label: string) => {
-    let uniqueLabel = label;
-
-    while (counts[uniqueLabel] >= 0) {
-      const num = ++counts[uniqueLabel];
-      uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-        defaultMessage: '{label} [{num}]',
-        values: { label, num },
-      });
-    }
-
-    counts[uniqueLabel] = 0;
-    return uniqueLabel;
-  };
-
-  Object.values(layers).forEach((layer) => {
-    if (!layer.columns) {
-      return;
-    }
-    Object.entries(layer.columns).forEach(([columnId, column]) => {
-      columnLabelMap[columnId] = makeUnique(column.label);
-    });
-  });
-
-  return columnLabelMap;
-}
-
 export * from './rename_columns';
 
 export function getIndexPatternDatasource({
@@ -229,11 +195,43 @@ export function getIndexPatternDatasource({
       );
     },
 
+    uniqueLabels(state: IndexPatternPrivateState) {
+      const layers = state.layers;
+      const columnLabelMap = {} as Record<string, string>;
+      const counts = {} as Record<string, number>;
+
+      const makeUnique = (label: string) => {
+        let uniqueLabel = label;
+
+        while (counts[uniqueLabel] >= 0) {
+          const num = ++counts[uniqueLabel];
+          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
+            defaultMessage: '{label} [{num}]',
+            values: { label, num },
+          });
+        }
+
+        counts[uniqueLabel] = 0;
+        return uniqueLabel;
+      };
+
+      Object.values(layers).forEach((layer) => {
+        if (!layer.columns) {
+          return;
+        }
+        Object.entries(layer.columns).forEach(([columnId, column]) => {
+          columnLabelMap[columnId] = makeUnique(column.label);
+        });
+      });
+
+      return columnLabelMap;
+    },
+
     renderDimensionTrigger: (
       domElement: Element,
       props: DatasourceDimensionTriggerProps<IndexPatternPrivateState>
     ) => {
-      const columnLabelMap = uniqueLabels(props.state.layers);
+      const columnLabelMap = indexPatternDatasource.uniqueLabels(props.state);
 
       render(
         <I18nProvider>
@@ -258,7 +256,7 @@ export function getIndexPatternDatasource({
       domElement: Element,
       props: DatasourceDimensionEditorProps<IndexPatternPrivateState>
     ) => {
-      const columnLabelMap = uniqueLabels(props.state.layers);
+      const columnLabelMap = indexPatternDatasource.uniqueLabels(props.state);
 
       render(
         <I18nProvider>
@@ -316,7 +314,7 @@ export function getIndexPatternDatasource({
     onDrop,
 
     getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
-      const columnLabelMap = uniqueLabels(state.layers);
+      const columnLabelMap = indexPatternDatasource.uniqueLabels(state);
 
       return {
         datasourceId: 'indexpattern',

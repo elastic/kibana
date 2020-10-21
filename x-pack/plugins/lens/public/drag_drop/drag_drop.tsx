@@ -8,9 +8,10 @@ import './drag_drop.scss';
 
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
+import { keys, EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DragContext, DragContextState, ReorderContext } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { keys, EuiScreenReaderOnly } from '@elastic/eui';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
@@ -161,7 +162,7 @@ const DragDropInner = React.memo(function DragDropInner(
   const [state, setState] = useState({
     isActive: false,
     dragEnterClassNames: '',
-    keyboardInteraction: false,
+    keyboardMode: false,
   });
   const {
     className,
@@ -211,7 +212,7 @@ const DragDropInner = React.memo(function DragDropInner(
 
     // Chrome causes issues if you try to render from within a
     // dragStart event, so we drop a setTimeout to avoid that.
-    setState({ ...state, keyboardInteraction: false });
+    setState({ ...state, keyboardMode: false });
     setTimeout(() => setDragging(value));
   };
 
@@ -298,37 +299,64 @@ const DragDropInner = React.memo(function DragDropInner(
     );
   }
 
-  if (!itemsInGroup?.length || itemsInGroup.length < 2 || !value || !dropTo) {
+  if (!itemsInGroup?.length || itemsInGroup.length < 2 || !value || !dropTo || !draggable) {
     return element;
   }
+  const groupLength = itemsInGroup.length;
+  const currentIndex = itemsInGroup.indexOf(value.id);
+
+  const { label } = props as DraggableProps;
+
   return (
     <>
       <EuiScreenReaderOnly>
         <button
+          aria-label={
+            !state.keyboardMode
+              ? i18n.translate('xpack.lens.dragDrop.reorderInactive', {
+                  defaultMessage:
+                    '{label} is in position {position} of {groupLength}. Press enter/space to initiate re-order. Then use the up/down arrow keys to re-order.',
+                  values: {
+                    label,
+                    position: currentIndex + 1,
+                    groupLength,
+                  },
+                })
+              : i18n.translate('xpack.lens.dragDrop.reorderActive', {
+                  defaultMessage:
+                    '{label} is in position {position} of {groupLength}. Use the up/down arrow keys to re-order. Press escape to leave re-ordering.',
+                  values: {
+                    label,
+                    position: currentIndex + 1,
+                    groupLength,
+                  },
+                })
+          }
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
-              setState({ ...state, keyboardInteraction: !state.keyboardInteraction });
+              setState({ ...state, keyboardMode: !state.keyboardMode });
             } else if (e.key === keys.ESCAPE) {
-              setState({ ...state, keyboardInteraction: false });
+              setState({ ...state, keyboardMode: false });
             }
-            if (state.keyboardInteraction) {
+            if (state.keyboardMode) {
               e.stopPropagation();
               e.preventDefault();
 
-              const draggingIndex = itemsInGroup.indexOf(value.id);
               if (keys.ARROW_DOWN === e.key) {
-                if (draggingIndex < itemsInGroup.length - 1) {
-                  dropTo(itemsInGroup[draggingIndex + 1]);
+                if (currentIndex < groupLength - 1) {
+                  dropTo(itemsInGroup[currentIndex + 1]);
                 }
               } else if (keys.ARROW_UP === e.key) {
-                if (draggingIndex > 0) {
-                  dropTo(itemsInGroup[draggingIndex - 1]);
+                if (currentIndex > 0) {
+                  dropTo(itemsInGroup[currentIndex - 1]);
                 }
               }
             }
           }}
         >
-          Move to reorder
+          {i18n.translate('xpack.lens.dragDrop.reorderActive', {
+            defaultMessage: 'Press enter to reorder (copy pending)',
+          })}
         </button>
       </EuiScreenReaderOnly>
 

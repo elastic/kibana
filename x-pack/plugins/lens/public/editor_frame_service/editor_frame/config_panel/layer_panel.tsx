@@ -116,6 +116,8 @@ export function LayerPanel(
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
+
+  const columnLabelMap = layerDatasource.uniqueLabels(layerDatasourceConfigProps.state);
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
@@ -237,7 +239,7 @@ export function LayerPanel(
                           id: accessor,
                         }}
                         isValueEqual={isSameConfiguration}
-                        label={group.groupLabel}
+                        label={columnLabelMap[accessor]}
                         droppable={
                           (dragging && !isDraggedOperation(dragging)) ||
                           isFromCompatibleGroup ||
