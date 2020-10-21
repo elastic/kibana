@@ -26,6 +26,7 @@ interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
   http: CoreStart['http'];
   notifications: CoreStart['notifications'];
+  currentKibanaVersion: string;
   reportOptInStatusChange?: boolean;
 }
 
@@ -36,15 +37,19 @@ export class TelemetryService {
   private readonly defaultConfig: TelemetryPluginConfig;
   private updatedConfig?: TelemetryPluginConfig;
 
+  public readonly currentKibanaVersion: string;
+
   constructor({
     config,
     http,
     notifications,
+    currentKibanaVersion,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
     this.defaultConfig = config;
     this.reportOptInStatusChange = reportOptInStatusChange;
     this.notifications = notifications;
+    this.currentKibanaVersion = currentKibanaVersion;
     this.http = http;
   }
 
@@ -194,6 +199,7 @@ export class TelemetryService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Elastic-Stack-Version': this.currentKibanaVersion,
         },
         body: JSON.stringify(optInPayload),
       });

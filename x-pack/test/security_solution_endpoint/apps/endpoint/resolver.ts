@@ -194,7 +194,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
       });
 
-      it('Check Child events for event.file Node', async () => {
+      it('Check Related Events for event.file Node', async () => {
         const expectedData = [
           '17 authentication',
           '1 registry',
@@ -225,7 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.deleteDataStreams();
       });
 
-      it('Check Child events for event.process Node', async () => {
+      it('Check Related Events for event.process Node', async () => {
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.process'
@@ -233,7 +233,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.runNodeEvents(expectedData);
       });
 
-      it('Check Child events for event.security Node', async () => {
+      it('Check Related Events for event.security Node', async () => {
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.security'
@@ -241,7 +241,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.runNodeEvents(expectedData);
       });
 
-      it('Check Child events for event.registry Node', async () => {
+      it('Check Related Events for event.registry Node', async () => {
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.registry'
@@ -249,12 +249,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.runNodeEvents(expectedData);
       });
 
-      it('Check Child events for event.network Node', async () => {
+      it('Check Related Events for event.network Node', async () => {
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.network'
         );
         await pageObjects.hosts.runNodeEvents(expectedData);
+      });
+
+      it('Check Related Events for event.library Node', async () => {
+        await esArchiver.load('empty_kibana');
+        await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        const expectedLibraryData = ['329 network', '1 library', '1 library'];
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver(
+          'event.dataset : endpoint.events.library'
+        );
+        await pageObjects.hosts.runNodeEvents(expectedLibraryData);
       });
     });
   });
