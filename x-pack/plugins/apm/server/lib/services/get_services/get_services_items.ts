@@ -58,14 +58,27 @@ export async function getServicesItems({
     }),
   ]);
 
-  const allMetrics = [
-    ...transactionDurationAverages,
-    ...agentNames,
-    ...transactionRates,
-    ...transactionErrorRates,
-    ...environments,
-    ...healthStatuses,
-  ];
+  const apmServiceMetrics = joinByKey(
+    [
+      ...transactionDurationAverages,
+      ...agentNames,
+      ...transactionRates,
+      ...transactionErrorRates,
+      ...environments,
+    ],
+    'serviceName'
+  );
+
+  const apmServices = apmServiceMetrics.map(({ serviceName }) => serviceName);
+
+  // make sure to exclude health statuses from services
+  // that are not found in APM data
+
+  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+    apmServices.includes(serviceName)
+  );
+
+  const allMetrics = [...apmServiceMetrics, ...matchedHealthStatuses];
 
   return joinByKey(allMetrics, 'serviceName');
 }

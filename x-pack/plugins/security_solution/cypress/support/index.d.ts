@@ -14,5 +14,12 @@ declare namespace Cypress {
       searchStrategyName?: string
     ): Chainable<Subject>;
     attachFile(fileName: string, fileType?: string): Chainable<JQuery>;
+    waitUntil(
+      fn: (subject: Subject) => boolean | Chainable<boolean>,
+      options?: {
+        interval: number;
+        timeout: number;
+      }
+    ): Chainable<Subject>;
   }
 }
