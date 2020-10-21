@@ -59,8 +59,9 @@ export const VislibWrapper = ({
     return () => {
       visController.current.destroy();
       visController.current = null;
+      handlers.reload();
     };
-  }, [Controller, chartDiv]);
+  }, [Controller, chartDiv, handlers]);
 
   useEffect(updateChartSize, [updateChartSize]);
 
