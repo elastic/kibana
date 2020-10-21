@@ -88,9 +88,10 @@ export interface SavedObjectsClientCommon {
 export interface GetFieldsOptions {
   pattern?: string;
   type?: string;
-  params?: any;
+  params?: any; // is this still needed?
   lookBack?: boolean;
   metaFields?: string[];
+  rollupIndex?: string;
 }
 
 export interface IIndexPatternsApiClient {

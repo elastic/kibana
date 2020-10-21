@@ -18,8 +18,15 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import { keyBy } from 'lodash';
 
-import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
+import {
+  getFieldCapabilities,
+  resolveTimePattern,
+  createNoMatchingIndicesError,
+  getCapabilitiesForRollupIndices,
+  mergeCapabilitiesWithFields,
+} from './lib';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
@@ -58,11 +65,36 @@ export class IndexPatternsFetcher {
     pattern: string | string[];
     metaFields?: string[];
     fieldCapsOptions?: { allow_no_indices: boolean };
+    type?: string;
+    rollupIndex?: string;
   }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields, fieldCapsOptions } = options;
-    return await getFieldCapabilities(this.elasticsearchClient, pattern, metaFields, {
-      allow_no_indices: fieldCapsOptions ? fieldCapsOptions.allow_no_indices : this.allowNoIndices,
-    });
+    const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
+    const fieldCapsResponse = keyBy(
+      await getFieldCapabilities(this.elasticsearchClient, pattern, metaFields, {
+        allow_no_indices: fieldCapsOptions
+          ? fieldCapsOptions.allow_no_indices
+          : this.allowNoIndices,
+      }),
+      'name'
+    );
+    if (type === 'rollup' && rollupIndex) {
+      const rollupFields: FieldDescriptor[] = [];
+      const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
+        (
+          await this.elasticsearchClient.rollup.getRollupIndexCaps({
+            index: rollupIndex,
+          })
+        ).body
+      )[rollupIndex].aggs;
+
+      // Keep meta fields
+      metaFields!.forEach(
+        (field: string) => fieldCapsResponse[field] && rollupFields.push(fieldCapsResponse[field])
+      );
+
+      return mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldCapsResponse, rollupFields);
+    }
+    return Object.values(fieldCapsResponse);
   }
 
   /**

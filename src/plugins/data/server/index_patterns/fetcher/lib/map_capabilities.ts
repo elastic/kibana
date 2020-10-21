@@ -16,12 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export * from './utils';
-export {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-  shouldReadFieldFromDocValues,
-  mergeCapabilitiesWithFields,
-  getCapabilitiesForRollupIndices,
-} from './fetcher';
-export { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns_service';
+
+import { mergeJobConfigurations } from './jobs_compatibility';
+
+export function getCapabilitiesForRollupIndices(indices: { [key: string]: any }) {
+  const indexNames = Object.keys(indices);
+  const capabilities = {} as { [key: string]: any };
+
+  indexNames.forEach((index) => {
+    try {
+      capabilities[index] = mergeJobConfigurations(indices[index].rollup_jobs);
+    } catch (e) {
+      capabilities[index] = {
+        error: e.message,
+      };
+    }
+  });
+
+  return capabilities;
+}
