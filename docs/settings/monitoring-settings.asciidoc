@@ -76,6 +76,9 @@ a|`monitoring.cluster_alerts.`
   health checks. By default, it matches the <<elasticsearch-pingTimeout, `elasticsearch.pingTimeout`>> setting,
   which has a default value of `30000`.
 
+| `monitoring.ui.elasticsearch.ssl`
+  | Shares the same configuration as <<elasticsearch-ssl-cert-key, `elasticsearch.ssl`>>. These settings configure encrypted communication between {kib} and the monitoring cluster.
+
 |===
 
 [float]
