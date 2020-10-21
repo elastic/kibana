@@ -44,7 +44,7 @@ checks on a schedule time of 1 minute with a re-notify internal of 1 day.
 [[kibana-alerts-jvm-memory-threshold]]
 == JVM memory threshold
 
-This alert is triggered when a node is nearly at disk capacity. By
+This alert is triggered when a node runs a consistently high JVM memory usage. By
 default, the trigger condition is set at 85% or more averaged over the last 5
 minutes. The alert is grouped across all the nodes of the cluster by running
 checks on a schedule time of 1 minute with a re-notify internal of 1 day. 
