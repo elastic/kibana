@@ -95,8 +95,14 @@ export async function isFieldVisualizable(
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {
-  if (field.name === '_id' || !indexPatternId) {
+  const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
+  if (
+    field.name === '_id' ||
+    notVisualizableFieldTypes.includes(field.spec.type) ||
+    !indexPatternId
+  ) {
     // for first condition you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
+    // for second condition we can't visualize unknown and conflict type fields
     return false;
   }
   const trigger = getTriggerConstant(field.type);
