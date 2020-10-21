@@ -22,6 +22,7 @@ import { AlertMessage, AlertState } from '../../server/alerts/types';
 import { AlertPanel } from './panel';
 import { Legacy } from '../legacy_shims';
 import { isInSetupMode } from '../lib/setup_mode';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 function getDateFromState(state: CommonAlertState) {
   const timestamp = state.state.ui.triggeredMS;
@@ -44,7 +45,7 @@ interface Props {
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const { stateFilter = () => true, nextStepsFilter = () => true } = props;
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
-  const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alerts = Object.values(props.alerts).filter(Boolean);
 
   if (alerts.length === 0) {
