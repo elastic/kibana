@@ -43,14 +43,14 @@ export function registerRoutes(http: HttpServiceSetup) {
             defaultValue: [],
           }),
           type: schema.maybe(schema.string()),
-          rollup_index: schema.maybe(schema.string()),
+          rollupIndex: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
       const { asCurrentUser } = context.core.elasticsearch.client;
       const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
-      const { pattern, meta_fields: metaFields, type, rollup_index: rollupIndex } = request.query;
+      const { pattern, meta_fields: metaFields, type, rollupIndex } = request.query;
 
       let parsedFields: string[] = [];
       try {

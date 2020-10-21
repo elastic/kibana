@@ -220,7 +220,8 @@ export class IndexPatternsService {
       pattern: options.pattern,
       metaFields,
       type: options.type,
-      params: options.params || {},
+      rollupIndex: options.rollupIndex,
+      // params: options.params || {},
     });
   };
 

@@ -69,13 +69,15 @@ export class IndexPatternsFetcher {
     rollupIndex?: string;
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
-    const fieldCapsResponse = keyBy(
-      await getFieldCapabilities(this.elasticsearchClient, pattern, metaFields, {
+    const fieldCapsResponse = await getFieldCapabilities(
+      this.elasticsearchClient,
+      pattern,
+      metaFields,
+      {
         allow_no_indices: fieldCapsOptions
           ? fieldCapsOptions.allow_no_indices
           : this.allowNoIndices,
-      }),
-      'name'
+      }
     );
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
@@ -86,13 +88,20 @@ export class IndexPatternsFetcher {
           })
         ).body
       )[rollupIndex].aggs;
+      const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
+      console.log('FIELDS', fieldCapsResponse);
 
       // Keep meta fields
       metaFields!.forEach(
-        (field: string) => fieldCapsResponse[field] && rollupFields.push(fieldCapsResponse[field])
+        (field: string) =>
+          fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
 
-      return mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldCapsResponse, rollupFields);
+      return mergeCapabilitiesWithFields(
+        rollupIndexCapabilities,
+        fieldCapsResponseObj,
+        rollupFields
+      );
     }
     return Object.values(fieldCapsResponse);
   }
