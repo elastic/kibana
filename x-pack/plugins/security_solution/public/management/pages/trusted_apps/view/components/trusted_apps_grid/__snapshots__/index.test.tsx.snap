@@ -2643,7 +2643,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+              class="euiPopover euiPopover--anchorUpRight"
             >
               <div
                 class="euiPopover__anchor"
@@ -5443,7 +5443,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+              class="euiPopover euiPopover--anchorUpRight"
             >
               <div
                 class="euiPopover__anchor"
@@ -8201,7 +8201,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+              class="euiPopover euiPopover--anchorUpRight"
             >
               <div
                 class="euiPopover__anchor"

@@ -77,15 +77,6 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           "warning": "#ffce7a",
         },
         "euiButtonMinWidth": "112px",
-        "euiButtonToggleBorderColor": "#343741",
-        "euiButtonToggleTypes": Object {
-          "danger": "#ff6666",
-          "ghost": "#ffffff",
-          "primary": "#1ba9f5",
-          "secondary": "#7de2d1",
-          "text": "#98a2b3",
-          "warning": "#ffce7a",
-        },
         "euiButtonTypes": Object {
           "danger": "#ff6666",
           "ghost": "#ffffff",
@@ -340,15 +331,6 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           "small": "14px",
           "xSmall": "12px",
         },
-        "euiNavDrawerBackgroundColor": "#1d1e24",
-        "euiNavDrawerContractingDelay": "150ms",
-        "euiNavDrawerExpandingDelay": "250ms",
-        "euiNavDrawerExtendedDelay": "1000ms",
-        "euiNavDrawerMenuAddedDelay": "90ms",
-        "euiNavDrawerSideShadow": "2px 0 2px -1px rgba(0, 0, 0, 0.3)",
-        "euiNavDrawerTopPosition": "49px",
-        "euiNavDrawerWidthCollapsed": "48px",
-        "euiNavDrawerWidthExpanded": "240px",
         "euiPageBackgroundColor": "#1a1b20",
         "euiPaletteColorBlind": Object {
           "euiColorVis0": Object {

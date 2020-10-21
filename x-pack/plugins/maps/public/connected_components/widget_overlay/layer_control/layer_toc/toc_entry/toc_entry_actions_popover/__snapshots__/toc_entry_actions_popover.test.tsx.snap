@@ -57,7 +57,6 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     data-test-subj="layerTocActionsPanellayer1"
@@ -185,7 +184,6 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     data-test-subj="layerTocActionsPanellayer1"
@@ -313,7 +311,6 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     data-test-subj="layerTocActionsPanellayer1"
@@ -441,7 +438,6 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     data-test-subj="layerTocActionsPanellayer1"

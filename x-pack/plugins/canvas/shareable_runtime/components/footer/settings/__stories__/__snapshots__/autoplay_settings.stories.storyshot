@@ -139,7 +139,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": "auto",
+                    "minWidth": undefined,
                   }
                 }
                 type="submit"
@@ -302,7 +302,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": "auto",
+                    "minWidth": undefined,
                   }
                 }
                 type="submit"
@@ -465,7 +465,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": "auto",
+                    "minWidth": undefined,
                   }
                 }
                 type="submit"

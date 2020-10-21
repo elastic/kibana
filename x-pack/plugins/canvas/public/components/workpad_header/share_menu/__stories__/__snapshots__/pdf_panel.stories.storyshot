@@ -22,6 +22,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
       onClick={[Function]}
       style={
         Object {
+          "minWidth": undefined,
           "width": "100%",
         }
       }
@@ -62,6 +63,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
         className="euiButton euiButton--primary euiButton--small"
         style={
           Object {
+            "minWidth": undefined,
             "width": "100%",
           }
         }

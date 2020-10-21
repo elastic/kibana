@@ -71,14 +71,21 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
         href="/mock-base-path/"
       >
         <EuiButtonDisplay
+          baseClassName="euiButton"
           element="a"
           href="/mock-base-path/"
           rel="noreferrer"
         >
           <a
             className="euiButton euiButton--primary"
+            disabled={false}
             href="/mock-base-path/"
             rel="noreferrer"
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
           >
             <EuiButtonContent
               className="euiButton__content"

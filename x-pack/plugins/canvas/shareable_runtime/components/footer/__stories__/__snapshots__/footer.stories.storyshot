@@ -1398,7 +1398,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <div
-                  className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                  className="euiPopover euiPopover--anchorUpRight"
                   id="settings"
                   onKeyDown={[Function]}
                   onMouseDown={[Function]}
@@ -1649,7 +1649,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <div
-                  className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                  className="euiPopover euiPopover--anchorUpRight"
                   id="settings"
                   onKeyDown={[Function]}
                   onMouseDown={[Function]}
