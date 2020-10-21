@@ -57,3 +57,24 @@ is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
   false
 }
+
+# This function is specifcally for retrying test runner steps one time
+# A different solution should be used for retrying general steps (e.g. bootstrap)
+tc_retry() {
+  tc_start_block "Retryable Step - Attempt #1"
+  "$@" || {
+    tc_end_block "Retryable Step - Attempt #1"
+    tc_start_block "Retryable Step - Attempt #2"
+    >&2 echo "First attempt failed. Retrying $*"
+    if "$@"; then
+      echo 'Second attempt successful'
+      echo "##teamcity[buildStatus status='SUCCESS' text='{build.status.text} with a flaky failure']"
+      echo "##teamcity[setParameter name='elastic.build.flaky' value='true']"
+      tc_end_block "Retryable Step - Attempt #2"
+    else
+      tc_end_block "Retryable Step - Attempt #2"
+      return "$?"
+    fi
+  }
+  tc_end_block "Retryable Step - Attempt #1"
+}

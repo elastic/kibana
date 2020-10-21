@@ -142,6 +142,8 @@ fun BuildSteps.failedTestReporter(init: ScriptBuildStep.() -> Unit = {}) {
   }
 }
 
+// Note: This is currently only used for tests and has a retry in it for flaky tests.
+// The retry should be refactored if runbld is ever needed for other tasks.
 fun BuildSteps.runbld(stepName: String, script: String) {
   script {
     name = stepName
@@ -149,6 +151,11 @@ fun BuildSteps.runbld(stepName: String, script: String) {
     // The indentation for this string is like this to ensure 100% that the RUNBLD-SCRIPT heredoc termination will not have spaces at the beginning
     scriptContent =
 """#!/bin/bash
+
+set -euo pipefail
+
+source .ci/teamcity/util.sh
+
 branchName="${'$'}GIT_BRANCH"
 branchName="${'$'}{branchName#refs\/heads\/}"
 
@@ -182,7 +189,7 @@ $script
 RUNBLD-SCRIPT
 ) > ${'$'}file
 
-/usr/local/bin/runbld -d "${'$'}(pwd)" --job-name="elastic+${'$'}project+${'$'}branchName" ${'$'}file
+tc_retry /usr/local/bin/runbld -d "${'$'}(pwd)" --job-name="elastic+${'$'}project+${'$'}branchName" ${'$'}file
 """
   }
 }
