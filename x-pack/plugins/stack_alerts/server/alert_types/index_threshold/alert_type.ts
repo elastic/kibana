@@ -86,14 +86,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
   const actionVariableContextFunctionLabel = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionVariableContextFunctionLabel',
     {
-      defaultMessage: 'A string formatted values combining threshold comparator and threshold',
-    }
-  );
-
-  const actionVariableContextWindowLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextWindowLabel',
-    {
-      defaultMessage: 'A string formatted values combining time window size and time window unit',
+      defaultMessage: 'A string describing the threshold comparator and threshold',
     }
   );
 
@@ -122,7 +115,6 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
         { name: 'function', description: actionVariableContextFunctionLabel },
-        { name: 'window', description: actionVariableContextWindowLabel },
       ],
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
@@ -179,14 +171,11 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
       const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
       const humanFn = `${agg} ${params.thresholdComparator} ${params.threshold.join(',')}`;
 
-      const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
-
       const baseContext: BaseActionContext = {
         date,
         group: instanceId,
         value,
         function: humanFn,
-        window,
       };
       const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);

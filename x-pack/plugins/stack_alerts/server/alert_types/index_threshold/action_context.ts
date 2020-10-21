@@ -29,8 +29,6 @@ export interface BaseActionContext extends AlertInstanceContext {
   value: number;
   // the function that is used
   function: string;
-  // the time window for aggregation
-  window: string;
 }
 
 export function addMessages(
@@ -46,6 +44,7 @@ export function addMessages(
     },
   });
 
+  const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate(
     'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
     {
@@ -56,7 +55,7 @@ export function addMessages(
         group: baseContext.group,
         value: baseContext.value,
         function: baseContext.function,
-        window: baseContext.window,
+        window,
         date: baseContext.date,
       },
     }
