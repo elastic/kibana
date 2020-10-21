@@ -8,7 +8,7 @@ by an index pattern, and then rolls it into a new index. Rollup indices are a go
 compactly store months or years of historical
 data for use in visualizations and reports.
 
-To get started, open the menu, then click *Stack Management > Rollup Jobs*.
+To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
 
 [role="screenshot"]
 image::images/management_rollup_list.png[][List of currently active rollup jobs]
@@ -21,7 +21,7 @@ Before using this feature, you should be familiar with how rollups work.
 
 The `manage_rollup` cluster privilege is required to access *Rollup jobs*.
 
-To add the privilege, open the menu, then click *Stack Management > Roles*.
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 [float]
 [[create-and-manage-rollup-job]]
@@ -133,7 +133,7 @@ Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
 
 
-. Open the menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Index Patterns*.
 
 . Click *Create index pattern*, and select *Rollup index pattern* from the dropdown.
 +
@@ -148,7 +148,7 @@ is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_log
 matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
 pattern for raw data.
 
-. Open the menu, click *Dashboard*, then create and add a vertical bar chart.
+. Open the main menu, click *Dashboard*, then create and add a vertical bar chart.
  
 . Choose `rollup_logstash,kibana_sample_data_logs`
 as your source to see both the raw and rolled up data.

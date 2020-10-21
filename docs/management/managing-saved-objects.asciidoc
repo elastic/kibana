@@ -5,7 +5,7 @@ The *Saved Objects* UI helps you keep track of and manage your saved objects. Th
 store data for later use, including dashboards, visualizations, maps, index patterns,
 Canvas workpads, and more.
 
-To get started, open the menu, then click *Stack Management > Saved Objects*. 
+To get started, open the main menu, then click *Stack Management > Saved Objects*. 
 
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]

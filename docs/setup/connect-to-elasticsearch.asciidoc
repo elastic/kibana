@@ -79,7 +79,7 @@ create an index pattern that matches the names of the indices that you want to e
 When you add data with the File Data Visualizer, GeoJSON Upload feature,
 or built-in tutorial, an index pattern is created for you.
 
-. Open the menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Index Patterns*.
 
 . Click *Create index pattern*.
 
