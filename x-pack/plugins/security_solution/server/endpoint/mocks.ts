@@ -6,6 +6,8 @@
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { securityMock } from '../../../security/server/mocks';
+import { alertsMock } from '../../../alerts/server/mocks';
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
@@ -14,6 +16,7 @@ import {
   PackageService,
 } from '../../../ingest_manager/server';
 import { createPackagePolicyServiceMock } from '../../../ingest_manager/server/mocks';
+import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
@@ -57,12 +60,19 @@ export const createMockEndpointAppContextService = (
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
   EndpointAppContextServiceStartContract
 > => {
+  const factory = new AppClientFactory();
+  const config = createMockConfig();
+  factory.setup({ getSpaceId: () => 'mockSpace', config });
   return {
     agentService: createMockAgentService(),
     packageService: createMockPackageService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
+    appClientFactory: factory,
+    security: securityMock.createSetup(),
+    alerts: alertsMock.createStart(),
+    config,
     registerIngestCallback: jest.fn<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,
       Parameters<IngestManagerStartContract['registerExternalCallback']>
