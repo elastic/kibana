@@ -21,7 +21,7 @@ export const config = {
     serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
     serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
     serviceMapFingerprintGlobalBucketSize: schema.number({
-      defaultValue: 1000,
+      defaultValue: 500,
     }),
     serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
     serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
