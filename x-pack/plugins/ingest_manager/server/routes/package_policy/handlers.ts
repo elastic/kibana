@@ -90,7 +90,7 @@ export const createPackagePolicyHandler: RequestHandler<
         try {
           // ensure that the returned value by the callback passes schema validation
           updatedNewData = CreatePackagePolicyRequestSchema.body.validate(
-            await callback(updatedNewData)
+            await callback(updatedNewData, context, request)
           );
         } catch (error) {
           // Log the error, but keep going and process the other callbacks
