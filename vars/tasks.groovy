@@ -41,7 +41,14 @@ def test() {
 }
 
 def functionalOss(Map params = [:]) {
-  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, serverIntegration: true, visualRegression: false]
+  def config = params ?: [
+    serverIntegration: true,
+    ciGroups: true,
+    firefox: true,
+    accessibility: true,
+    pluginFunctional: true,
+    visualRegression: false,
+  ]
 
   task {
     kibanaPipeline.buildOss(6)
