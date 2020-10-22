@@ -5,14 +5,15 @@
  */
 
 import path from 'path';
+import { CustomPageSize } from 'pdfmake/interfaces';
 import {
   getDefaultLayoutSelectors,
   Layout,
+  LayoutInstance,
   LayoutSelectorDictionary,
   LayoutTypes,
   PageSizeParams,
   Size,
-  LayoutInstance,
 } from './';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
@@ -72,7 +73,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
     return undefined;
   }
 
-  public getPdfPageSize(pageSizeParams: PageSizeParams) {
+  public getPdfPageSize(pageSizeParams: PageSizeParams): CustomPageSize {
     return {
       height:
         this.height +
