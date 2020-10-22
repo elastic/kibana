@@ -29,7 +29,13 @@ export const PDFPanel = ({ pdfURL, onExport, onCopy }: Props) => (
       <p>{strings.getPDFPanelGenerateDescription()}</p>
     </EuiText>
     <EuiSpacer size="s" />
-    <EuiButton fill onClick={onExport} size="s" style={{ width: '100%' }}>
+    <EuiButton
+      fill
+      onClick={onExport}
+      size="s"
+      style={{ width: '100%' }}
+      data-test-subj="generateReportButton"
+    >
       {strings.getPDFPanelGenerateButtonLabel()}
     </EuiButton>
     <EuiSpacer size="s" />

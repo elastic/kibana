@@ -6,12 +6,12 @@
 
 import rison from 'rison-node';
 import { IBasePath } from 'kibana/public';
+import moment from 'moment-timezone';
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-// type of the desired pdf output (print or preserve_layout)
-const PDF_LAYOUT_TYPE = 'preserve_layout';
+const CANVAS_LAYOUT_TYPE = 'canvas';
 
 interface PageCount {
   pageCount: number;
@@ -50,10 +50,10 @@ function getPdfUrlParts(
   }
 
   const jobParams = {
-    browserTimezone: 'America/Phoenix', // TODO: get browser timezone, or Kibana setting?
+    browserTimezone: moment.tz.guess(),
     layout: {
       dimensions: { width, height },
-      id: PDF_LAYOUT_TYPE,
+      id: CANVAS_LAYOUT_TYPE,
     },
     objectType: 'canvas workpad',
     relativeUrls: workpadUrls,

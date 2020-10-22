@@ -79,6 +79,7 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
           title: strings.getShareDownloadPDFTitle(),
           content: getPDFPanel(closePopover),
         },
+        'data-test-subj': 'sharePanel-PDFReports',
       },
       {
         name: strings.getShareWebsiteTitle(),
@@ -92,7 +93,12 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
   });
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonEmpty size="xs" aria-label={strings.getShareWorkpadMessage()} onClick={togglePopover}>
+    <EuiButtonEmpty
+      size="xs"
+      aria-label={strings.getShareWorkpadMessage()}
+      onClick={togglePopover}
+      data-test-subj="shareTopNavButton"
+    >
       {strings.getShareMenuButtonLabel()}
     </EuiButtonEmpty>
   );

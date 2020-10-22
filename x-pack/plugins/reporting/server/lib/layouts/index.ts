@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HeadlessChromiumDriver } from '../../browsers';
 import { LevelLogger } from '../';
+import { HeadlessChromiumDriver } from '../../browsers';
 import { Layout } from './layout';
 
 export { createLayout } from './create_layout';
 export { Layout } from './layout';
 export { PreserveLayout } from './preserve_layout';
+export { CanvasLayout } from './canvas_layout';
 export { PrintLayout } from './print_layout';
 
 export const LayoutTypes = {
   PRESERVE_LAYOUT: 'preserve_layout',
   PRINT: 'print',
+  CANVAS: 'canvas', // no margins or branding in the layout
 };
 
 export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({

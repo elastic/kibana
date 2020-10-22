@@ -6,6 +6,7 @@
 
 import { CaptureConfig } from '../../types';
 import { LayoutInstance, LayoutParams, LayoutTypes } from './';
+import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 
@@ -15,6 +16,10 @@ export function createLayout(
 ): LayoutInstance {
   if (layoutParams && layoutParams.dimensions && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new PreserveLayout(layoutParams.dimensions);
+  }
+
+  if (layoutParams && layoutParams.dimensions && layoutParams.id === LayoutTypes.CANVAS) {
+    return new CanvasLayout(layoutParams.dimensions);
   }
 
   // this is the default because some jobs won't have anything specified
