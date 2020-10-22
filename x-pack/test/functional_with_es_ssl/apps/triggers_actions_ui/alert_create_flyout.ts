@@ -61,69 +61,82 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('alertsTab');
     });
 
-    it('should filter alerts by the status', async () => {
+    it('should create an alert', async () => {
       const alertName = generateUniqueKey();
       await defineAlert(alertName);
+
+      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('addNewActionConnectorButton-.slack');
+      const slackConnectorName = generateUniqueKey();
+      await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.setValue('messageTextArea', 'test message ');
+      await testSubjects.click('messageAddVariableButton');
+      await testSubjects.click('variableMenuButton-0');
+      const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
+      expect(await messageTextArea.getAttribute('value')).to.eql('test message {{alertId}}');
+      await messageTextArea.type(' some additional text ');
+
+      await testSubjects.click('messageAddVariableButton');
+      await testSubjects.click('variableMenuButton-1');
+
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'test message {{alertId}} some additional text {{alertInstanceId}}'
+      );
+
+      await testSubjects.click('saveAlertButton');
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterSave).to.eql([
+        {
+          name: alertName,
+          tagsText: '',
+          alertType: 'Index threshold',
+          interval: '1m',
+        },
+      ]);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
+    it('should show save confirmation before creating alert with no actions', async () => {
+      const alertName = generateUniqueKey();
+      await defineAlert(alertName);
+
+      await testSubjects.click('saveAlertButton');
+      await testSubjects.existOrFail('confirmAlertSaveModal');
+      await testSubjects.click('confirmAlertSaveModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmAlertSaveModal');
+      await find.existsByCssSelector('[data-test-subj="saveAlertButton"]:not(disabled)');
 
       await testSubjects.click('saveAlertButton');
       await testSubjects.existOrFail('confirmAlertSaveModal');
       await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmAlertSaveModal');
 
-      await pageObjects.common.closeToast();
-      // initialy alert get Pending status, which will be changed after the first execution to the Active, Error or Ok
-      await testSubjects.click('alertStatusFilterButton');
-      await testSubjects.click('alertStatuspendingFilerOption');
-      const filterActiveOnlyResults = await pageObjects.triggersActionsUI.getAlertsList(true);
-      expect(filterActiveOnlyResults).to.eql([
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterSave).to.eql([
         {
+          name: alertName,
+          tagsText: '',
           alertType: 'Index threshold',
           interval: '1m',
-          name: alertName,
-          status: 'Pending',
-          tagsText: '',
         },
       ]);
-      // Unselect Pending filter
-      await testSubjects.click('alertStatuspendingFilerOption');
 
-      retry.try(async () => {
-        await testSubjects.click('alertStatusokFilerOption');
-
-        const filterOkOnlyResults = await pageObjects.triggersActionsUI.getAlertsList(true);
-        expect(filterOkOnlyResults).to.eql([
-          {
-            status: 'Ok',
-            name: alertName,
-            tagsText: '',
-            alertType: 'Index threshold',
-            interval: '1m',
-          },
-        ]);
-      });
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
-
-    /* it('should display error banner when exists alerts with status error', async () => {
-
-    });
-
-    it('should display total alerts by status', async () => {
-
-    });
-
-    it('should filter alerts by the action type', async () => {
-      const activeAlert = await createAlert();
-      const okAlert = await createAlert();
-      const errorAlert = await createAlert();
-    });
-
-    it('should filter alerts by the alert type', async () => {
-      const activeAlert = await createAlert();
-      const okAlert = await createAlert();
-      const errorAlert = await createAlert();
-    });*/
   });
 };
