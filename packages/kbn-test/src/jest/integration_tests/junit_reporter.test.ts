@@ -24,13 +24,13 @@ import { readFileSync } from 'fs';
 import del from 'del';
 import execa from 'execa';
 import xml2js from 'xml2js';
-import { makeJunitReportPath } from '@kbn/test';
+import { getUniqueJunitReportPath } from '@kbn/test';
 import { REPO_ROOT } from '@kbn/utils';
 
 const MINUTE = 1000 * 60;
 const FIXTURE_DIR = resolve(__dirname, '__fixtures__');
 const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
-const XML_PATH = makeJunitReportPath(FIXTURE_DIR, 'JUnit Reporter Integration Test');
+const XML_PATH = getUniqueJunitReportPath(FIXTURE_DIR, 'JUnit Reporter Integration Test');
 
 afterAll(async () => {
   await del(TARGET_DIR);
