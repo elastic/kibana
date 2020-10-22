@@ -5,12 +5,10 @@
  */
 
 import React from 'react';
-import { OverlayStart } from 'src/core/public';
+import { OverlayStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { Tag } from '../../../common/types';
 import { ITagInternalClient } from '../../tags';
-import { CreateTagModal } from './create_modal';
-import { EditTagModal } from './edit_modal';
 
 interface GetModalOpenerOptions {
   overlays: OverlayStart;
@@ -21,12 +19,13 @@ interface OpenCreateModalOptions {
   onCreate: (tag: Tag) => void;
 }
 
-export type CreateModalOpener = (options: OpenCreateModalOptions) => void;
+export type CreateModalOpener = (options: OpenCreateModalOptions) => Promise<OverlayRef>;
 
 export const getCreateModalOpener = ({
   overlays,
   tagClient,
-}: GetModalOpenerOptions): CreateModalOpener => ({ onCreate }: OpenCreateModalOptions) => {
+}: GetModalOpenerOptions): CreateModalOpener => async ({ onCreate }: OpenCreateModalOptions) => {
+  const { CreateTagModal } = await import('./create_modal');
   const modal = overlays.openModal(
     toMountPoint(
       <CreateTagModal
@@ -41,6 +40,7 @@ export const getCreateModalOpener = ({
       />
     )
   );
+  return modal;
 };
 
 interface OpenEditModalOptions {
@@ -52,6 +52,7 @@ export const getEditModalOpener = ({ overlays, tagClient }: GetModalOpenerOption
   tagId,
   onUpdate,
 }: OpenEditModalOptions) => {
+  const { EditTagModal } = await import('./edit_modal');
   const tag = await tagClient.get(tagId);
 
   const modal = overlays.openModal(
@@ -69,4 +70,6 @@ export const getEditModalOpener = ({ overlays, tagClient }: GetModalOpenerOption
       />
     )
   );
+
+  return modal;
 };
