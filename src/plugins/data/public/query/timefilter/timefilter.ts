@@ -23,9 +23,14 @@ import moment from 'moment';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { getForceNow } from './lib/get_force_now';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { calculateBounds, getTime, RefreshInterval, TimeRange } from '../../../common';
+import {
+  calculateBounds,
+  getTime,
+  IIndexPattern,
+  RefreshInterval,
+  TimeRange,
+} from '../../../common';
 import { TimeHistoryContract } from './time_history';
-import { IndexPattern } from '../../index_patterns';
 
 // TODO: remove!
 
@@ -169,7 +174,7 @@ export class Timefilter {
     }
   };
 
-  public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
+  public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.getForceNow(),
     });

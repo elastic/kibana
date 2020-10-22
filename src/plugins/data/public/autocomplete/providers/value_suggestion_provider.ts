@@ -19,13 +19,14 @@
 
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
+import { IIndexPattern, IFieldType, UI_SETTINGS, buildQueryFromFilters } from '../../../common';
+import { getQueryService } from '../../services';
 
-function resolver(title: string, field: IFieldType, query: string, boolFilter: any) {
+function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
   // Only cache results for a minute
   const ttl = Math.floor(Date.now() / 1000 / 60);
 
-  return [ttl, query, title, field.name, JSON.stringify(boolFilter)].join('|');
+  return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
 }
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
@@ -42,10 +43,10 @@ export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSugg
 
 export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsGetFn => {
   const requestSuggestions = memoize(
-    (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
+    (index: string, field: IFieldType, query: string, filters: any = [], signal?: AbortSignal) =>
       core.http.fetch(`/api/kibana/suggestions/values/${index}`, {
         method: 'POST',
-        body: JSON.stringify({ query, field: field.name, boolFilter }),
+        body: JSON.stringify({ query, field: field.name, filters }),
         signal,
       }),
     resolver
@@ -69,6 +70,9 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       return [];
     }
 
-    return await requestSuggestions(title, field, query, boolFilter, signal);
+    const timeFilter = getQueryService().timefilter.timefilter.createFilter(indexPattern);
+    const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
+    const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
+    return await requestSuggestions(title, field, query, filters, signal);
   };
 };
