@@ -400,9 +400,9 @@ const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
 
 const getContextFromDoc = (doc: LogEntryDocument): LogEntry['context'] => {
   // Get all context fields, then test for the presence and type of the ones that go together
-  const containerId = doc.fields['container.id'];
-  const hostName = doc.fields['host.name'];
-  const logFilePath = doc.fields['log.file.path'];
+  const containerId = doc.fields['container.id']?.[0];
+  const hostName = doc.fields['host.name']?.[0];
+  const logFilePath = doc.fields['log.file.path']?.[0];
 
   if (typeof containerId === 'string') {
     return { 'container.id': containerId };
