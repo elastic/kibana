@@ -27,7 +27,7 @@ export const filebeatOsqueryRules = [
         constant: ' ',
       },
       {
-        field: 'osquery.result.columns',
+        fieldsPrefix: 'osquery.result.columns',
       },
     ],
   },
