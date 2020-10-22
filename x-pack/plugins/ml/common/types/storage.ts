@@ -10,6 +10,10 @@ export const ML_PARTITION_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields
 
 export type PartitionFieldConfig = {
   anomalousOnly?: boolean;
+  sort?: {
+    by: string; // 'anomaly_score' | 'name';
+    order?: string; // 'asc' | 'desc';
+  };
 } | null;
 
 export type PartitionFieldsConfig = Partial<Record<EntityFieldType, PartitionFieldConfig>> | null;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
@@ -62,10 +62,9 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     },
   } = useMlKibana();
 
-  const [partitionFieldsConfig, setPartitionFieldsConfig] = useStorage<PartitionFieldsConfig>(
-    ML_PARTITION_FIELDS_CONFIG,
-    {}
-  );
+  const [partitionFieldsConfig, setPartitionFieldsConfig] = useStorage<
+    Exclude<PartitionFieldsConfig, null>
+  >(ML_PARTITION_FIELDS_CONFIG, {});
 
   const selectedJob = useMemo(() => mlJobService.getJob(selectedJobId), [selectedJobId]);
 
@@ -173,24 +172,33 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 
-  const detectorIndexChangeHandler: EuiSelectProps['onChange'] = (e) => {
-    const id = e.target.value;
-    if (id !== undefined) {
-      appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, +id);
-    }
-  };
+  const detectorIndexChangeHandler: EuiSelectProps['onChange'] = useCallback(
+    (e) => {
+      const id = e.target.value;
+      if (id !== undefined) {
+        appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, +id);
+      }
+    },
+    [appStateHandler]
+  );
 
   const detectorSelectOptions = detectors.map((d) => ({
     value: d.index,
     text: d.detector_description,
   }));
 
-  const onConfigChange: EntityControlProps['onConfigChange'] = (fieldType, config) => {
-    setPartitionFieldsConfig({
-      ...partitionFieldsConfig,
-      [fieldType]: config,
-    });
-  };
+  const onConfigChange: EntityControlProps['onConfigChange'] = useCallback(
+    (fieldType, config) => {
+      setPartitionFieldsConfig({
+        ...partitionFieldsConfig,
+        [fieldType]: {
+          ...(partitionFieldsConfig[fieldType] ? partitionFieldsConfig[fieldType] : {}),
+          ...config,
+        },
+      });
+    },
+    [partitionFieldsConfig, setPartitionFieldsConfig]
+  );
 
   /** Indicates if any of the previous controls is empty */
   let hasEmptyFieldValues = false;

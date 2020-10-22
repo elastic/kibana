@@ -19,6 +19,8 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
+  EuiRadioGroup,
+  EuiSpacer,
 } from '@elastic/eui';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { PartitionFieldConfig } from '../../../../../common/types/storage';
@@ -135,6 +137,21 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     return label === EMPTY_FIELD_VALUE_LABEL ? <i>{label}</i> : label;
   };
 
+  private readonly sortOptions = [
+    {
+      id: 'anomaly_score',
+      label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByScoreLabel', {
+        defaultMessage: 'Anomaly score',
+      }),
+    },
+    {
+      id: 'name',
+      label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByNameLabel', {
+        defaultMessage: 'Name',
+      }),
+    },
+  ];
+
   render() {
     const { entity, forceSelection } = this.props;
     const { isLoading, options, selectedOptions } = this.state;
@@ -165,9 +182,10 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
             ownFocus
             button={
               <EuiButtonIcon
+                color="text"
                 iconSize="xxl"
                 iconType="gear"
-                aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.enterValuePlaceholder', {
+                aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.editControlConfiguration', {
                   defaultMessage: 'Edit ',
                 })}
                 onClick={() => {
@@ -175,6 +193,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                     isEntityConfigPopoverOpen: !this.state.isEntityConfigPopoverOpen,
                   });
                 }}
+                data-test-subj={`mlSingleMetricViewerEntitySelectionConfigButton_${entity.fieldName}`}
               />
             }
             isOpen={this.state.isEntityConfigPopoverOpen}
@@ -188,7 +207,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
               <EuiSwitch
                 label={
                   <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer."
+                    id="xpack.ml.timeSeriesExplorer.anomalousOnlyLabel"
                     defaultMessage="Anomalous only"
                   />
                 }
@@ -198,7 +217,32 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                     anomalousOnly: e.target.checked,
                   });
                 }}
+                compressed
+                data-test-subj={`mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entity.fieldName}`}
               />
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.sortByLabel"
+                    defaultMessage="Sort by"
+                  />
+                }
+              >
+                <EuiRadioGroup
+                  options={this.sortOptions}
+                  idSelected={this.props.config?.sort?.by}
+                  onChange={(id) => {
+                    this.props.onConfigChange(this.props.entity.fieldType, {
+                      sort: {
+                        by: id,
+                      },
+                    });
+                  }}
+                  compressed
+                  data-test-subj={`mlSingleMetricViewerEntitySelectionConfigSortBy_${entity.fieldName}`}
+                />
+              </EuiFormRow>
             </EuiText>
           </EuiPopover>
         }
