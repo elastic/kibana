@@ -371,4 +371,142 @@ describe('xy_visualization', () => {
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
     });
   });
+
+  describe('#getErrorMessage', () => {
+    it("should not return an error when there's only one dimension", () => {
+      expect(
+        xyVisualization.getErrorMessage(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
+    it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
+      expect(
+        xyVisualization.getErrorMessage(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
+    it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
+      expect(
+        xyVisualization.getErrorMessage(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: ['a'],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).toEqual({
+        shortMessage: 'Some layers are missing the X dimension',
+        longMessage: 'Layer 2 has no dimension field set for the X axis',
+      });
+    });
+    it('should return an error with batched messages for the same error with multiple layers', () => {
+      expect(
+        xyVisualization.getErrorMessage(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: ['a'],
+              },
+              {
+                layerId: 'third',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: ['a'],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).toEqual({
+        shortMessage: 'Some layers are missing the X dimension',
+        longMessage: 'Layers 2, 3 have no dimension field set for the X axis',
+      });
+    });
+    it("should return an error when some layers are complete but other layers aren't", () => {
+      expect(
+        xyVisualization.getErrorMessage(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'third',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).toEqual({
+        shortMessage: 'Some layers are missing the Y dimension',
+        longMessage: 'Layer 1 has no dimension field set for the Y axis',
+      });
+    });
+  });
 });
