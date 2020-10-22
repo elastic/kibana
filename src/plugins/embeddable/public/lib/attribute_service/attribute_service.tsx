@@ -30,7 +30,6 @@ import {
   Container,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
-  ErrorEmbeddable,
 } from '../index';
 
 /**

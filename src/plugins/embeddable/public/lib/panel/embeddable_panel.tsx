@@ -167,15 +167,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       })
     );
 
-    this.subscription.add(
-      embeddable.getError$().subscribe((error: ErrorEmbeddable) => {
-        this.props.embeddable.destroy();
-        if (this.embeddableRoot.current) {
-          error.render(this.embeddableRoot.current);
-        }
-      })
-    );
-
     if (parent) {
       this.parentSubscription = parent.getInput$().subscribe(async () => {
         if (this.mounted && parent) {
@@ -255,12 +246,21 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe((output: EmbeddableOutput) => {
-          this.setState({
-            error: output.error,
-            loading: output.loading,
-          });
-        })
+        this.props.embeddable.getOutput$().subscribe(
+          (output: EmbeddableOutput) => {
+            this.setState({
+              error: output.error,
+              loading: output.loading,
+            });
+          },
+          (error: Error) => {
+            if (this.embeddableRoot.current) {
+              this.props.embeddable.destroy();
+              const errorEmbeddable = new ErrorEmbeddable(error, this.props.embeddable.getInput());
+              errorEmbeddable.render(this.embeddableRoot.current);
+            }
+          }
+        )
       );
       this.props.embeddable.render(this.embeddableRoot.current);
     }

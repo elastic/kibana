@@ -32,8 +32,6 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-  isErrorEmbeddable,
-  ErrorEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
@@ -128,21 +126,14 @@ export class Embeddable
     }
   }
 
-  private isErrorEmbeddable(
-    attributes: LensSavedObjectAttributes | ErrorEmbeddable
-  ): attributes is ErrorEmbeddable {
-    return Boolean((attributes as ErrorEmbeddable).error);
-  }
-
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes = await this.deps.attributeService
-      .unwrapAttributes(input)
-      .catch((e: Error) => {
-        const errorEmbeddable = new ErrorEmbeddable(e, input);
-        return errorEmbeddable;
-      });
-    if (this.isErrorEmbeddable(attributes)) {
-      this.addError(attributes);
+    const attributes:
+      | LensSavedObjectAttributes
+      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
+      this.updateError(e);
+      return false;
+    });
+    if (!attributes) {
       return;
     }
     this.savedVis = {

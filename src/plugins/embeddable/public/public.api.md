@@ -317,6 +317,8 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     // (undocumented)
     abstract readonly type: string;
     // (undocumented)
+    protected updateError(e: Error): void;
+    // (undocumented)
     updateInput(changes: Partial<TEmbeddableInput>): void;
     // (undocumented)
     protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void;

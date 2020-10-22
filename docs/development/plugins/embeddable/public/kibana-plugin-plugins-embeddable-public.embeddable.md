@@ -46,6 +46,7 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 |  [reload()](./kibana-plugin-plugins-embeddable-public.embeddable.reload.md) |  | Reload will be called when there is a request to refresh the data or view, even if the input data did not change. |
 |  [render(el)](./kibana-plugin-plugins-embeddable-public.embeddable.render.md) |  |  |
 |  [supportedTriggers()](./kibana-plugin-plugins-embeddable-public.embeddable.supportedtriggers.md) |  |  |
+|  [updateError(e)](./kibana-plugin-plugins-embeddable-public.embeddable.updateerror.md) |  |  |
 |  [updateInput(changes)](./kibana-plugin-plugins-embeddable-public.embeddable.updateinput.md) |  |  |
 |  [updateOutput(outputChanges)](./kibana-plugin-plugins-embeddable-public.embeddable.updateoutput.md) |  |  |
 
