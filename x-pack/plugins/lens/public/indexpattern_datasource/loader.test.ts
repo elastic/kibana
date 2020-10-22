@@ -117,6 +117,7 @@ const indexPattern2 = ({
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
   hasRestrictions: true,
+  fieldFormatMap: {},
   fields: [
     {
       name: 'timestamp',

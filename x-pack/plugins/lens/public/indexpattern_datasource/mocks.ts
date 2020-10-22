@@ -82,6 +82,7 @@ export const createMockedRestrictedIndexPattern = () => ({
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
   hasRestrictions: true,
+  fieldFormatMap: { bytes: null },
   fields: [
     {
       name: 'timestamp',
