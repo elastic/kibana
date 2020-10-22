@@ -25,6 +25,11 @@ export const mockLayerList = [
           id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
           indexPatternTitle: 'apm-*',
           term: 'client.geo.country_iso_code',
+          whereQuery: {
+            language: 'kuery',
+            query:
+              'transaction.type : "page-load" and service.name : "undefined"',
+          },
           metrics: [
             {
               type: 'avg',
@@ -95,6 +100,11 @@ export const mockLayerList = [
           id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
           indexPatternTitle: 'apm-*',
           term: 'client.geo.region_iso_code',
+          whereQuery: {
+            language: 'kuery',
+            query:
+              'transaction.type : "page-load" and service.name : "undefined"',
+          },
           metrics: [{ type: 'avg', field: 'transaction.duration.us' }],
           indexPatternId: 'apm_static_index_pattern_id',
         },
