@@ -19,17 +19,27 @@
 
 import dedent from 'dedent';
 import { parseDependencyTree, parseCircular, prettyCircular } from 'dpdm';
+import { differenceWith, fromPairs, isEqual, toPairs } from 'lodash';
 import { run } from '@kbn/dev-utils';
 
 interface Options {
-  ci?: boolean;
+  debug?: boolean;
 }
 
-const allowedList = {};
+const allowedList = {
+  'src/plugins/data': 'src/plugins/visualizations',
+  'src/plugins/home': 'src/plugins/discover',
+  'src/plugins/ui_actions': 'src/plugins/embeddable',
+  'src/plugins/vis_default_editor': 'src/plugins/visualize',
+  'src/plugins/visualizations': 'src/plugins/vis_default_editor',
+  'x-pack/plugins/apm': 'x-pack/plugins/infra',
+  'x-pack/plugins/lists': 'x-pack/plugins/security_solution',
+  'x-pack/plugins/security': 'x-pack/plugins/spaces',
+};
 
 run(
   async ({ flags, log }) => {
-    const { ci = false } = flags as Options;
+    const { debug = false } = flags as Options;
     const foundList: any = {};
     const depTree = await parseDependencyTree(['{src,x-pack}/plugins/**/*'], {
       include: /(src|x-pack)\/plugins\/.*/,
@@ -55,9 +65,9 @@ run(
       return false;
     });
 
-    // Log the full circular dependencies path if we are not on CI
-    if (!ci && circularDependenciesFullPaths.length > 0) {
-      log.error(
+    // Log the full circular dependencies path if we are under debug flag
+    if (debug && circularDependenciesFullPaths.length > 0) {
+      log.debug(
         dedent(`
       !!!!!!!!!!!!!! CIRCULAR DEPENDENCIES FOUND !!!!!!!!!!!!!!
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -66,20 +76,56 @@ run(
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       `)
       );
-      log.error(prettyCircular(circularDependenciesFullPaths));
+      log.debug(prettyCircular(circularDependenciesFullPaths));
     }
 
     // Always log the result of comparing the found list with the allowed list
+    const diffObject = (first: any, second: any) =>
+      fromPairs(differenceWith(toPairs(first), toPairs(second), isEqual));
+
+    const printList = (list: any) => {
+      return Object.keys(list).reduce((listStr, key) => {
+        return listStr ? `${listStr}\n${key} -> ${list[key]}` : `${key} -> ${list[key]}`;
+      }, '');
+    };
+
+    const foundDifferences = diffObject(foundList, allowedList);
+
+    if (Object.keys(foundDifferences).length > 0) {
+      log.error(
+        dedent(`
+      !!!!!!!!!!!!!!!!! OUT OF DATE ALLOWED LIST !!!!!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! The declared circular dependencies allowed list is out   !
+      ! of date. Please run the following locally to know more:  !
+      !                                                          !
+      ! 'node scripts/find_plugins_with_circular_deps --debug'   !
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      The allowed circular dependencies list is:
+      ${printList(allowedList)}
+
+      The found circular dependencies list is:
+      ${printList(foundList)}
+
+      The differences between both are:
+      ${printList(foundDifferences)}
+      `)
+      );
+      return;
+    }
+
+    log.success('None non allowed circular dependencies were found');
   },
   {
     flags: {
-      boolean: ['ci'],
+      boolean: ['debug'],
       default: {
-        ci: false,
+        debug: false,
       },
       allowUnexpected: false,
       help: `
-        --ci            Run the script in CI mode
+        --debug            Run the script in debug mode which enables detailed path logs for circular dependencies
       `,
     },
   }
