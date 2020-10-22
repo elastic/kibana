@@ -118,7 +118,7 @@ function GroupSelection(props: GroupSelectionProps) {
                     'visualizations.newVisWizard.aggBasedGroupDescription',
                     {
                       defaultMessage:
-                        'Choose your visualization, specify your search criteria, and select an aggregation to reveal trends, spikes, and dips.',
+                        'Use our classic visualize library to create charts based on aggregations.',
                     }
                   )}
                   icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
@@ -217,7 +217,12 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         data-test-subj={`visType-${visType.name}`}
         data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
         aria-label={`visType-${visType.name}`}
-        description={visType.description || ''}
+        description={
+          <>
+            <span>{visType.description || ''}</span>
+            <em> {visType.note || ''}</em>
+          </>
+        }
         layout="horizontal"
         icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="secondary" />}
         className="visNewVisDialog__groupsCard"

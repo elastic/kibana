@@ -41,7 +41,7 @@ interface CommonBaseVisTypeOptions<TVisParams>
     >,
     Pick<
       Partial<VisType<TVisParams>>,
-      'editorConfig' | 'hidden' | 'stage' | 'useCustomNoDataScreen' | 'visConfig' | 'group'
+      'editorConfig' | 'hidden' | 'stage' | 'useCustomNoDataScreen' | 'visConfig' | 'group' | 'note'
     > {
   options?: Partial<VisType<TVisParams>['options']>;
 }
@@ -72,6 +72,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly name;
   public readonly title;
   public readonly description;
+  public readonly note;
   public readonly getSupportedTriggers;
   public readonly icon;
   public readonly image;
@@ -99,6 +100,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
 
     this.name = opts.name;
     this.description = opts.description ?? '';
+    this.note = opts.note ?? '';
     this.getSupportedTriggers = opts.getSupportedTriggers;
     this.title = opts.title;
     this.icon = opts.icon;

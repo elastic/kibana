@@ -2,6 +2,7 @@
   "id": "mapsOss",
   "version": "kibana",
   "ui": true,
+  "server": true,
   "requiredPlugins": [
     "visualizations"
   ],

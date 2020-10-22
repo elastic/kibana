@@ -13,7 +13,7 @@ export function getMapsVisTypeAlias(visualizations, showMapVisualizationTypes) {
   }
 
   const description = i18n.translate('xpack.maps.visTypeAlias.description', {
-    defaultMessage: 'Plot and style your geo data in a multi layer map.',
+    defaultMessage: 'Create and style maps with multiple layers and indices.',
   });
 
   return {

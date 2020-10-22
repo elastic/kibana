@@ -47,6 +47,7 @@ export interface VisType<TVisParams = unknown> {
   readonly name: string;
   readonly title: string;
   readonly description?: string;
+  readonly note: string;
   readonly getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   readonly isAccessible?: boolean;
   readonly requestHandler?: string | unknown;
