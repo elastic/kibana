@@ -17,14 +17,24 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import Fs from 'fs';
+import Path from 'path';
+
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 
-export function makeJunitReportPath(rootDirectory: string, reportName: string) {
-  return resolve(
+export function getUniqueJunitReportPath(
+  rootDirectory: string,
+  reportName: string,
+  counter?: number
+): string {
+  const path = Path.resolve(
     rootDirectory,
     'target/junit',
     process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}.xml`
+    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}${counter ? `-${counter}` : ''}.xml`
   );
+
+  return Fs.existsSync(path)
+    ? getUniqueJunitReportPath(rootDirectory, reportName, (counter ?? 0) + 1)
+    : path;
 }

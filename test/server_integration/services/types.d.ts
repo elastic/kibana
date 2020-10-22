@@ -17,17 +17,11 @@
  * under the License.
  */
 
-export default async function ({ readConfigFile }) {
-  const httpConfig = await readConfigFile(require.resolve('../../config'));
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { services as kibanaCommonServices } from '../../common/services';
+import { services as kibanaApiIntegrationServices } from '../../api_integration/services';
 
-  return {
-    testFiles: [require.resolve('./')],
-    services: httpConfig.get('services'),
-    servers: httpConfig.get('servers'),
-    junit: {
-      reportName: 'Http Cache-Control Integration Tests',
-    },
-    esTestCluster: httpConfig.get('esTestCluster'),
-    kbnTestServer: httpConfig.get('kbnTestServer'),
-  };
-}
+export type FtrProviderContext = GenericFtrProviderContext<
+  typeof kibanaCommonServices & { supertest: typeof kibanaApiIntegrationServices.supertest },
+  {}
+>;
