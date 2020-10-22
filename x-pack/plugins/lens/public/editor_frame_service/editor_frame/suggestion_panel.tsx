@@ -8,7 +8,6 @@ import './suggestion_panel.scss';
 
 import _, { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
-import { useDebounce } from 'react-use';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiIcon,
@@ -25,7 +24,6 @@ import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
-import { EuiProgress } from '@elastic/eui';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -79,6 +77,7 @@ const PreviewRenderer = ({
         className="lnsSuggestionPanel__expressionRenderer"
         padding="s"
         expression={expression}
+        debounce={2000}
         renderError={() => {
           return (
             <div className="lnsSuggestionPanel__suggestionIcon">
@@ -118,17 +117,6 @@ const SuggestionPreview = ({
   selected: boolean;
   showTitleAsLabel?: boolean;
 }) => {
-  const [renderedExpression, setRenderedExpression] = useState(
-    () => preview.expression && toExpression(preview.expression)
-  );
-  const currentExpression = preview.expression && toExpression(preview.expression);
-  useDebounce(
-    () => {
-      setRenderedExpression(preview.expression && toExpression(preview.expression));
-    },
-    2000,
-    [preview.expression]
-  );
   return (
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
@@ -141,13 +129,10 @@ const SuggestionPreview = ({
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
         >
-          {preview.expression && currentExpression !== renderedExpression && (
-            <EuiProgress size="xs" color="accent" position="absolute" />
-          )}
           {preview.expression ? (
             <PreviewRenderer
               ExpressionRendererComponent={ExpressionRendererComponent}
-              expression={renderedExpression || toExpression(preview.expression)}
+              expression={toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}
             />
           ) : (
