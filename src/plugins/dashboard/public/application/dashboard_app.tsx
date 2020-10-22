@@ -22,7 +22,15 @@ import React, { useEffect, useCallback, useState } from 'react';
 
 import _, { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { distinctUntilChanged, filter, map, mapTo, startWith, switchMap } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  mapTo,
+  startWith,
+  switchMap,
+} from 'rxjs/operators';
 import { merge, Observable, pipe, Subscription } from 'rxjs';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { SavedObjectNotFound } from '../../../kibana_utils/public';
@@ -38,7 +46,9 @@ import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import {
   connectToQueryState,
   esFilters,
+  FilterManager,
   IndexPattern,
+  QueryStart,
   QueryState,
   syncQueryStateWithUrl,
 } from '../../../data/public';
@@ -76,6 +86,155 @@ interface UrlParamsSelectedMap {
 // interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTER_BAR> {
 //   [UrlParams.HIDE_FILTER_BAR]: boolean;
 // }
+
+const getChangesFromAppStateForContainerState = ({
+  dashboardContainer,
+  appStateDashboardInput,
+}: {
+  dashboardContainer: DashboardContainer;
+  appStateDashboardInput: DashboardContainerInput;
+}) => {
+  if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
+    return appStateDashboardInput;
+  }
+
+  const containerInput = dashboardContainer.getInput();
+  const differences: Partial<DashboardContainerInput> = {};
+
+  // Filters shouldn't  be compared using regular isEqual
+  if (
+    !esFilters.compareFilters(
+      containerInput.filters,
+      appStateDashboardInput.filters,
+      esFilters.COMPARE_ALL_OPTIONS
+    )
+  ) {
+    differences.filters = appStateDashboardInput.filters;
+  }
+
+  Object.keys(_.omit(containerInput, ['filters'])).forEach((key) => {
+    const containerValue = (containerInput as { [key: string]: unknown })[key];
+    const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[key];
+    if (!_.isEqual(containerValue, appStateValue)) {
+      (differences as { [key: string]: unknown })[key] = appStateValue;
+    }
+  });
+
+  // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
+  // but values from appStateValue are deeply frozen, as they can't be mutated directly
+  return Object.values(differences).length === 0 ? undefined : _.cloneDeep(differences);
+};
+
+const getDashboardContainerInput = ({
+  dashboardStateManager,
+  query,
+}: {
+  dashboardStateManager: DashboardStateManager;
+  query: QueryStart;
+}): DashboardContainerInput => {
+  const embeddablesMap: {
+    [key: string]: DashboardPanelState;
+  } = {};
+  dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
+    embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
+  });
+
+  // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+  // if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+  //   const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
+  //   embeddablesMap[incomingEmbeddable.embeddableId] = {
+  //     gridData: originalPanelState.gridData,
+  //     type: incomingEmbeddable.type,
+  //     explicitInput: {
+  //       ...originalPanelState.explicitInput,
+  //       ...incomingEmbeddable.input,
+  //       id: incomingEmbeddable.embeddableId,
+  //     },
+  //   };
+  //   incomingEmbeddable = undefined;
+  // }
+
+  // const shouldShowEditHelp = getShouldShowEditHelp();
+  // const shouldShowViewHelp = getShouldShowViewHelp();
+  // const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
+  return {
+    id: dashboardStateManager.savedDashboard.id || '',
+    filters: query.filterManager.getFilters(),
+    hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
+    query: query.queryString.getQuery(),
+    timeRange: {
+      ..._.cloneDeep(query.timefilter.timefilter.getTime()),
+    },
+    refreshConfig: query.timefilter.timefilter.getRefreshInterval(),
+    viewMode: dashboardStateManager.getViewMode(),
+    panels: embeddablesMap,
+    isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+    // isEmbeddedExternally,
+    // isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
+    useMargins: dashboardStateManager.getUseMargins(),
+    // lastReloadRequestTime,
+    title: dashboardStateManager.getTitle(),
+    description: dashboardStateManager.getDescription(),
+    expandedPanelId: dashboardStateManager.getExpandedPanelId(),
+  };
+};
+
+const getInputSubscription = (props: {
+  dashboardContainer: DashboardContainer;
+  dashboardStateManager: DashboardStateManager;
+  filterManager: FilterManager;
+}) => {
+  const { dashboardContainer, dashboardStateManager, filterManager } = props;
+  return dashboardContainer.getInput$().subscribe(() => {
+    // let dirty = false;
+
+    // This has to be first because handleDashboardContainerChanges causes
+    // appState.save which will cause refreshDashboardContainer to be called.
+
+    if (
+      !esFilters.compareFilters(
+        dashboardContainer.getInput().filters,
+        filterManager.getFilters(),
+        esFilters.COMPARE_ALL_OPTIONS
+      )
+    ) {
+      // Add filters modifies the object passed to it, hence the clone deep.
+      filterManager.addFilters(_.cloneDeep(dashboardContainer.getInput().filters));
+
+      dashboardStateManager.applyFilters(
+        dashboardStateManager.getQuery(),
+        dashboardContainer.getInput().filters
+      );
+    }
+
+    dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
+    // $scope.$evalAsync(() => {
+    //   if (dirty) {
+    //     updateState();
+    //   }
+    // });
+  });
+};
+
+const getFiltersSubscription = (props: {
+  query: QueryStart;
+  dashboardContainer: DashboardContainer;
+  dashboardStateManager: DashboardStateManager;
+}) => {
+  const { dashboardContainer, dashboardStateManager, query } = props;
+  return merge(query.filterManager.getUpdates$(), query.queryString.getUpdates$())
+    .pipe(debounceTime(100))
+    .subscribe(() => {
+      dashboardStateManager.applyFilters(
+        query.queryString.getQuery(),
+        query.filterManager.getFilters()
+      );
+      dashboardContainer.updateInput({
+        filters: query.filterManager.getFilters(),
+        query: query.queryString.getQuery(),
+      });
+    });
+};
 
 export function DashboardApp({
   savedDashboardId,
@@ -125,7 +284,7 @@ export function DashboardApp({
   };
 
   const initializeStateSyncing = useCallback(
-    (savedDashboard: DashboardSavedObject) => {
+    ({ savedDashboard }: { savedDashboard: DashboardSavedObject }) => {
       const filterManager = data.query.filterManager;
       const timefilter = data.query.timefilter.timefilter;
       const queryStringManager = data.query.queryString;
@@ -208,100 +367,22 @@ export function DashboardApp({
     ]
   );
 
-  const getDashboardInput = useCallback(
-    ({
-      dashboardStateManager,
-    }: {
-      dashboardStateManager: DashboardStateManager;
-    }): DashboardContainerInput => {
-      const embeddablesMap: {
-        [key: string]: DashboardPanelState;
-      } = {};
-      dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
-        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-      });
-
-      // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
-      // if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
-      //   const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
-      //   embeddablesMap[incomingEmbeddable.embeddableId] = {
-      //     gridData: originalPanelState.gridData,
-      //     type: incomingEmbeddable.type,
-      //     explicitInput: {
-      //       ...originalPanelState.explicitInput,
-      //       ...incomingEmbeddable.input,
-      //       id: incomingEmbeddable.embeddableId,
-      //     },
-      //   };
-      //   incomingEmbeddable = undefined;
-      // }
-
-      // const shouldShowEditHelp = getShouldShowEditHelp();
-      // const shouldShowViewHelp = getShouldShowViewHelp();
-      // const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
-      return {
-        id: dashboardStateManager.savedDashboard.id || '',
-        filters: data.query.filterManager.getFilters(),
-        hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
-        query: data.query.queryString.getQuery(),
-        timeRange: {
-          ..._.cloneDeep(data.query.timefilter.timefilter.getTime()),
-        },
-        refreshConfig: data.query.timefilter.timefilter.getRefreshInterval(),
-        viewMode: dashboardStateManager.getViewMode(),
-        panels: embeddablesMap,
-        isFullScreenMode: dashboardStateManager.getFullScreenMode(),
-        // isEmbeddedExternally,
-        // isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
-        useMargins: dashboardStateManager.getUseMargins(),
-        // lastReloadRequestTime,
-        title: dashboardStateManager.getTitle(),
-        description: dashboardStateManager.getDescription(),
-        expandedPanelId: dashboardStateManager.getExpandedPanelId(),
-      };
-    },
-    [data.query]
-  );
-
-  const getInputSubscription = useCallback(
-    (props: {
-      dashboardContainer: DashboardContainer;
-      dashboardStateManager: DashboardStateManager;
-    }) => {
-      const { dashboardContainer, dashboardStateManager } = props;
-      return dashboardContainer.getInput$().subscribe(() => {
-        // let dirty = false;
-
-        // This has to be first because handleDashboardContainerChanges causes
-        // appState.save which will cause refreshDashboardContainer to be called.
-
-        if (
-          !esFilters.compareFilters(
-            dashboardContainer.getInput().filters,
-            data.query.filterManager.getFilters(),
-            esFilters.COMPARE_ALL_OPTIONS
-          )
-        ) {
-          // Add filters modifies the object passed to it, hence the clone deep.
-          data.query.filterManager.addFilters(_.cloneDeep(dashboardContainer.getInput().filters));
-
-          // dashboardStateManager.applyFilters(
-          //   // $scope.model.query,
-          //   dashboardContainer.getInput().filters
-          // );
-          // dirty = true;
-        }
-
-        dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
-        // $scope.$evalAsync(() => {
-        //   if (dirty) {
-        //     updateState();
-        //   }
-        // });
-      });
-    },
-    [data.query.filterManager]
-  );
+  const refreshDashboardContainer = useCallback(() => {
+    if (!isActiveState(state)) {
+      return;
+    }
+    const { dashboardStateManager, dashboardContainer } = state;
+    const changes = getChangesFromAppStateForContainerState({
+      appStateDashboardInput: getDashboardContainerInput({
+        dashboardStateManager,
+        query: data.query,
+      }),
+      dashboardContainer,
+    });
+    if (changes && dashboardContainer) {
+      dashboardContainer.updateInput(changes);
+    }
+  }, [state, data.query]);
 
   const getOutputSubscription = useCallback(
     (props: { dashboardContainer: DashboardContainer }) => {
@@ -376,9 +457,6 @@ export function DashboardApp({
       return;
     }
 
-    let inputSubscription: Subscription | undefined;
-    let outputSubscription: Subscription | undefined;
-
     data.indexPatterns
       .ensureDefaultIndexPattern()
       ?.then(() => savedDashboards.get(savedDashboardId) as Promise<DashboardSavedObject>)
@@ -396,7 +474,7 @@ export function DashboardApp({
           dashboardStateManager,
           stopSyncingQueryServiceStateWithUrl,
           stopSyncingAppFilters,
-        } = initializeStateSyncing(savedDashboard);
+        } = initializeStateSyncing({ savedDashboard });
 
         const dashboardFactory = embeddable.getEmbeddableFactory<
           DashboardContainerInput,
@@ -409,15 +487,35 @@ export function DashboardApp({
           );
         }
 
+        const subscriptions = new Subscription();
         dashboardFactory
-          .create(getDashboardInput({ dashboardStateManager }))
+          .create(getDashboardContainerInput({ dashboardStateManager, query: data.query }))
           .then((dashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
             if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
               return;
             }
 
-            inputSubscription = getInputSubscription({ dashboardContainer, dashboardStateManager });
-            outputSubscription = getOutputSubscription({ dashboardContainer });
+            subscriptions.add(
+              getInputSubscription({
+                dashboardContainer,
+                dashboardStateManager,
+                filterManager: data.query.filterManager,
+              })
+            );
+            subscriptions.add(
+              getFiltersSubscription({
+                query: data.query,
+                dashboardContainer,
+                dashboardStateManager,
+              })
+            );
+            subscriptions.add(getOutputSubscription({ dashboardContainer }));
+
+            dashboardStateManager.registerChangeListener(() => {
+              // we aren't checking dirty state because there are changes the container needs to know about
+              // that won't make the dashboard "dirty" - like a view mode change.
+              refreshDashboardContainer();
+            });
 
             setState({
               dashboardContainer,
@@ -431,8 +529,7 @@ export function DashboardApp({
         return () => {
           dashboardStateManager.destroy();
           state.dashboardContainer?.destroy();
-          inputSubscription?.unsubscribe();
-          outputSubscription?.unsubscribe();
+          subscriptions.unsubscribe();
           stopSyncingQueryServiceStateWithUrl();
           stopSyncingAppFilters();
         };
@@ -466,16 +563,16 @@ export function DashboardApp({
     savedDashboardId,
     state?.savedDashboard?.id,
     embeddable,
+    data.query,
     history,
     savedDashboards,
     data.indexPatterns,
     chrome.recentlyAccessed,
     core.notifications.toasts,
+    refreshDashboardContainer,
     data.query.filterManager,
     state.dashboardContainer?.destroy,
     initializeStateSyncing,
-    getDashboardInput,
-    getInputSubscription,
     getOutputSubscription,
   ]);
 
@@ -483,6 +580,7 @@ export function DashboardApp({
     <>
       {isActiveState(state) && (
         <DashboardTopNav
+          refreshDashboardContainer={refreshDashboardContainer}
           indexPatterns={state.indexPatterns}
           dashboardStateManager={state.dashboardStateManager}
           timefilter={data.query.timefilter.timefilter}

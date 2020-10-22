@@ -89,6 +89,7 @@ export type DashboardAppComponentActiveState = Required<DashboardAppComponentSta
 export type DashboardTopNavProps = Required<DashboardAppComponentState> & {
   timefilter: TimefilterContract;
   redirectToDashboard: RedirectToDashboard;
+  refreshDashboardContainer: () => void;
   lastDashboardId?: string;
   embedSettings?: DashboardEmbedSettings;
 };

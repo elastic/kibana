@@ -53,6 +53,7 @@ export function DashboardTopNav({
   lastDashboardId,
   embedSettings,
   indexPatterns,
+  refreshDashboardContainer,
 }: DashboardTopNavProps) {
   const {
     core,
@@ -328,7 +329,7 @@ export function DashboardTopNav({
       // onSavedQueryIdChange,
       savedQueryId: dashboardStateManager.getSavedQueryId(),
       useDefaultBehaviors: true,
-      // onQuerySubmit: $scope.handleRefresh,
+      onQuerySubmit: refreshDashboardContainer,
     };
   };
 
