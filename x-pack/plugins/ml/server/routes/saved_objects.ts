@@ -8,26 +8,26 @@ import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { checksFactory } from '../saved_objects';
+import { jobsAndSpaces } from './schemas/saved_objects';
 
 /**
- * Routes for job service
+ * Routes for job saved object management
  */
 export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
   /**
-   * @apiGroup JobService
+   * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
-   * @apiName ForceStartDatafeeds
-   * @apiDescription Starts one or more datafeeds
+   * @api {get} /api/ml/saved_objects/status Get job saved object status
+   * @apiName SavedObjectsStatus
+   * @apiDescription Lists all jobs and saved objects to view the relationship status between them
    *
-   * @apiSchema (body) forceStartDatafeedSchema
    */
   router.get(
     {
       path: '/api/ml/saved_objects/status',
       validate: false,
       options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(
@@ -47,13 +47,15 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
   );
 
   /**
-   * @apiGroup JobService
+   * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
-   * @apiName ForceStartDatafeeds
-   * @apiDescription Starts one or more datafeeds
+   * @api {get} /api/ml/saved_objects/repair Repair job saved objects
+   * @apiName RepairJobSavedObjects
+   * @apiDescription Create saved objects for jobs which are missing them.
+   *                 Delete saved objects for jobs which no longer exist.
+   *                 Update missing datafeed ids in saved objects for datafeeds which exist.
+   *                 Remove datafeed ids for datafeeds which no longer exist.
    *
-   * @apiSchema (body) forceStartDatafeedSchema
    */
   router.get(
     {
@@ -62,7 +64,7 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         query: schema.object({ simulate: schema.maybe(schema.boolean()) }),
       },
       options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(
@@ -83,26 +85,22 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
   );
 
   /**
-   * @apiGroup JobService
+   * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
-   * @apiName ForceStartDatafeeds
-   * @apiDescription Starts one or more datafeeds
+   * @api {post} /api/ml/saved_objects/assign_job_to_space Assign jobs to spaces
+   * @apiName AssignJobsToSpaces
+   * @apiDescription Add list of spaces to a list of jobs
    *
-   * @apiSchema (body) forceStartDatafeedSchema
+   * @apiSchema (body) jobsAndSpaces
    */
   router.post(
     {
       path: '/api/ml/saved_objects/assign_job_to_space',
       validate: {
-        body: schema.object({
-          jobType: schema.string(),
-          jobIds: schema.arrayOf(schema.string()),
-          spaces: schema.arrayOf(schema.string()),
-        }),
+        body: jobsAndSpaces,
       },
       options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
@@ -121,26 +119,22 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
   );
 
   /**
-   * @apiGroup JobService
+   * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
-   * @apiName ForceStartDatafeeds
-   * @apiDescription Starts one or more datafeeds
+   * @api {post} /api/ml/saved_objects/remove_job_from_space Remove jobs from spaces
+   * @apiName RemoveJobsFromSpaces
+   * @apiDescription Remove a list of spaces from a list of jobs
    *
-   * @apiSchema (body) forceStartDatafeedSchema
+   * @apiSchema (body) jobsAndSpaces
    */
   router.post(
     {
       path: '/api/ml/saved_objects/remove_job_from_space',
       validate: {
-        body: schema.object({
-          jobType: schema.string(),
-          jobIds: schema.arrayOf(schema.string()),
-          spaces: schema.arrayOf(schema.string()),
-        }),
+        body: jobsAndSpaces,
       },
       options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
@@ -159,20 +153,19 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
   );
 
   /**
-   * @apiGroup JobService
+   * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
-   * @apiName ForceStartDatafeeds
-   * @apiDescription Starts one or more datafeeds
+   * @api {get} /api/ml/saved_objects/jobs_spaces All spaces in all jobs
+   * @apiName JobsSpaces
+   * @apiDescription List all jobs and their spaces
    *
-   * @apiSchema (body) forceStartDatafeedSchema
    */
   router.get(
     {
       path: '/api/ml/saved_objects/jobs_spaces',
       validate: false,
       options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {

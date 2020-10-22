@@ -12,14 +12,12 @@ interface Props {
   spaces: string[];
 }
 
-export const JobSpacesList: FC<Props> = ({ spaces }) => {
-  return (
-    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-      {spaces.map((space) => (
-        <EuiFlexItem grow={false} key={space}>
-          <EuiBadge color={'hollow'}>{space}</EuiBadge>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-};
+export const JobSpacesList: FC<Props> = ({ spaces }) => (
+  <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+    {spaces.map((space) => (
+      <EuiFlexItem grow={false} key={space}>
+        <EuiBadge color={'hollow'}>{space}</EuiBadge>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+);

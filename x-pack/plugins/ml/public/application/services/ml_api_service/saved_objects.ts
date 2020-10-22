@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Service for querying filters, which hold lists of entities,
-// for example a list of known safe URL domains.
+// Service for managing job saved objects
 
 import { http } from '../http_service';
 

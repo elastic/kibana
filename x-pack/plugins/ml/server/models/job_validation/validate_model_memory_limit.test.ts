@@ -178,7 +178,7 @@ describe('ML - validateModelMemoryLimit', () => {
       expect(ids).toEqual(['estimated_mml_greater_than_max_mml']);
     });
   });
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   it('Called with small number of detectors, so estimated mml is under max', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);

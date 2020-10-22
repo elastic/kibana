@@ -186,12 +186,13 @@ export function checksFactory(
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
+          // create AD saved objects for jobs which are missing them
           const jobId = job.jobId;
           const datafeedId = job.datafeedId;
           tasks.push(async () => {
             await jobSavedObjectService.createAnomalyDetectionJob(jobId);
             if (datafeedId !== undefined && datafeedId !== null) {
-              //
+              // add datafeed id after saved object has been created
               await jobSavedObjectService.addDatafeed(datafeedId, jobId);
             }
           });
@@ -202,7 +203,7 @@ export function checksFactory(
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
-          //
+          // create DFA saved objects for jobs which are missing them
           const jobId = job.jobId;
           tasks.push(async () => await jobSavedObjectService.createDataFrameAnalyticsJob(jobId));
         }
@@ -213,7 +214,7 @@ export function checksFactory(
       if (job.checks.jobExists === false) {
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
-          //
+          // Delete AD saved objects for jobs which no longer exist
           const jobId = job.jobId;
           tasks.push(async () => await jobSavedObjectService.deleteAnomalyDetectionJob(jobId));
         }
@@ -223,7 +224,7 @@ export function checksFactory(
       if (job.checks.jobExists === false) {
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
-          //
+          // Delete DFA saved objects for jobs which no longer exist
           const jobId = job.jobId;
           tasks.push(async () => await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId));
         }
@@ -232,10 +233,9 @@ export function checksFactory(
 
     for (const job of status.savedObjects['anomaly-detector']) {
       if (job.checks.datafeedExists === true && job.datafeedId === null) {
-        //
+        // add datafeed id for jobs where the datafeed exists but the id is missing from the saved object
         results.datafeedsAdded.push(job.jobId);
         if (simulate === false) {
-          //
           const df = datafeeds.datafeeds.find((d) => d.job_id === job.jobId);
           const jobId = job.jobId;
           const datafeedId = df?.datafeed_id;
@@ -252,9 +252,9 @@ export function checksFactory(
         job.datafeedId !== null &&
         job.datafeedId !== undefined
       ) {
+        // remove datafeed id for jobs where the datafeed no longer exists but the id is populated in the saved object
         results.datafeedsRemoved.push(job.jobId);
         if (simulate === false) {
-          //
           const datafeedId = job.datafeedId;
           tasks.push(async () => await jobSavedObjectService.deleteDatafeed(datafeedId));
         }

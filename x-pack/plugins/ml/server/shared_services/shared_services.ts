@@ -112,13 +112,11 @@ function getRequestItemsProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
   savedObjectsClient: SavedObjectsClientContract
-  // getSavedObjectsStart: () => SavedObjectsServiceStart | null
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
     let hasMlCapabilities: HasMlCapabilities;
     let scopedClient: IScopedClusterClient;
-    // let scopedSavedObjectsClient: SavedObjectsClient;
     let mlClient: MlClient;
     // While https://github.com/elastic/kibana/issues/64588 exists we
     // will not receive a real request object when being called from an alert.

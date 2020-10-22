@@ -138,7 +138,6 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         const results = await recognize(
           client,
           mlClient,
-
           context.core.savedObjects.client,
           request,
           indexPatternTitle
@@ -280,7 +279,6 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         const results = await getModule(
           client,
           mlClient,
-
           context.core.savedObjects.client,
           request,
           moduleId
