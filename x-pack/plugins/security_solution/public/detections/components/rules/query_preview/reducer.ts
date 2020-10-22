@@ -82,13 +82,11 @@ export const queryPreviewReducer = () => (state: State, action: Action): State =
           filters,
           queryFilter,
           showHistogram: false,
-          warnings: [],
         };
       }
 
       return {
         ...state,
-        warnings: [],
         showHistogram: false,
       };
     }

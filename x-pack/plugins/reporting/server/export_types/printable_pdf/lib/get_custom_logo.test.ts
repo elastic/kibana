@@ -31,7 +31,7 @@ test(`gets logo from uiSettings`, async () => {
   };
 
   const mockGet = jest.fn();
-  mockGet.mockImplementationOnce((...args: any[]) => {
+  mockGet.mockImplementationOnce((...args: string[]) => {
     if (args[0] === 'xpackReporting:customPdfLogo') {
       return 'purple pony';
     }

@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent, Fragment } from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
@@ -48,9 +49,11 @@ export const DeletePhase: FunctionComponent<Props> = ({
   isShowingErrors,
   getUrlForApp,
 }) => {
-  const [{ [useRolloverPath]: hotPhaseRolloverEnabled }] = useFormData({
-    watch: [useRolloverPath],
+  const [formData] = useFormData({
+    watch: useRolloverPath,
   });
+
+  const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
 
   return (
     <div id="deletePhaseContent" aria-live="polite" role="region">

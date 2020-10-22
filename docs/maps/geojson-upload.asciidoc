@@ -19,7 +19,7 @@ GeoJSON is the most commonly used and flexible option.
 Follow these instructions to upload a GeoJSON data file, or try the
 <<indexing-geojson-data-tutorial, end-to-end integrated example>>.
 
-. Open the menu, go to *Maps*, and then click *Add layer*.
+. Open the main menu, click *Maps*, and then click *Add layer*.
 . Click *Uploaded GeoJSON*.
 +
 [role="screenshot"]
