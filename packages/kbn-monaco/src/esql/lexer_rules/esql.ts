@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { monaco } from '../../monaco';
-
-export const ID = 'esql';
+import { monaco } from '../../monaco_imports';
 
 const brackets = [
   { open: '[', close: ']', token: 'delimiter.square' },
