@@ -102,7 +102,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   }
 
   return (
-    <EuiPageBody>
+    <div className="indNarrowContainer">
       <EuiPageContent>
         <EuiTitle size="l">
           <h1 data-test-subj="pageTitle">
@@ -116,6 +116,6 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
         <EuiSpacer size="l" />
         {content}
       </EuiPageContent>
-    </EuiPageBody>
+    </div>
   );
 };

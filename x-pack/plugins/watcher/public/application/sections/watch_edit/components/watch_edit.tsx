@@ -185,7 +185,9 @@ export const WatchEdit = ({
 
   return (
     <WatchContext.Provider value={{ watch, setWatchProperty, addAction }}>
-      <EditComponent pageTitle={pageTitle} />
+      <div className="watcherNarrowContainer">
+        <EditComponent pageTitle={pageTitle} />
+      </div>
     </WatchContext.Provider>
   );
 };

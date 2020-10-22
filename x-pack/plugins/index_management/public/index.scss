@@ -24,3 +24,13 @@
 .indDetail__codeBlock {
   background: transparent;
 }
+
+.indNarrowContainer {
+  max-width: map-get($euiBreakpoints, 'xl');
+  margin: 0 auto;
+}
+
+// Override enclosing container width.
+.mgtPage__body {
+  max-width: 100% !important;
+}

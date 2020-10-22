@@ -158,8 +158,8 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   }
 
   return (
-    <EuiPageBody>
+    <div className="indNarrowContainer">
       <EuiPageContent>{content}</EuiPageContent>
-    </EuiPageBody>
+    </div>
   );
 };

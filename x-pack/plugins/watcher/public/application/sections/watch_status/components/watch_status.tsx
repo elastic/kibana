@@ -155,97 +155,99 @@ export const WatchStatus = ({
 
     return (
       <WatchDetailsContext.Provider value={{ watchDetailError, watchDetail, isWatchDetailLoading }}>
-        <EuiPageContent>
-          <DeleteWatchesModal
-            callback={(deleted?: string[]) => {
-              if (deleted) {
-                goToWatchList();
-              }
-              setWatchesToDelete([]);
-            }}
-            watchesToDelete={watchesToDelete}
-          />
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h1 data-test-subj="pageTitle">
-                  <FormattedMessage
-                    id="xpack.watcher.sections.watchDetail.header"
-                    defaultMessage="Current status for '{watch}'"
-                    values={{
-                      watch: watchName ? watchName : watchId,
-                    }}
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            {isSystemWatch ? (
+        <div className="watcherNarrowContainer">
+          <EuiPageContent>
+            <DeleteWatchesModal
+              callback={(deleted?: string[]) => {
+                if (deleted) {
+                  goToWatchList();
+                }
+                setWatchesToDelete([]);
+              }}
+              watchesToDelete={watchesToDelete}
+            />
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
+                <EuiTitle size="m">
+                  <h1 data-test-subj="pageTitle">
                     <FormattedMessage
-                      id="xpack.watcher.sections.watchDetail.headerBadgeToolipText"
-                      defaultMessage="You cannot deactivate or delete a system watch."
-                    />
-                  }
-                >
-                  <EuiBadge color="hollow">
-                    <FormattedMessage
-                      id="xpack.watcher.sections.watchDetail.headerBadgeText"
-                      defaultMessage="System watch"
-                    />
-                  </EuiBadge>
-                </EuiToolTip>
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="toggleWatchActivationButton"
-                      onClick={() => toggleWatchActivation()}
-                      isLoading={isTogglingActivation}
-                    >
-                      {activationButtonText}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="deleteWatchButton"
-                      onClick={() => {
-                        setWatchesToDelete([watchId]);
+                      id="xpack.watcher.sections.watchDetail.header"
+                      defaultMessage="Current status for '{watch}'"
+                      values={{
+                        watch: watchName ? watchName : watchId,
                       }}
-                      color="danger"
-                      disabled={false}
-                    >
-                      <FormattedMessage
-                        id="xpack.watcher.sections.watchHistory.deleteWatchButtonLabel"
-                        defaultMessage="Delete"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                    />
+                  </h1>
+                </EuiTitle>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiTabs>
-            {WATCH_STATUS_TABS.map((tab, index) => (
-              <EuiTab
-                onClick={() => {
-                  setSelectedTab(tab.id);
-                }}
-                isSelected={tab.id === selectedTab}
-                key={index}
-                data-test-subj="tab"
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiSpacer size="l" />
-          {selectedTab === WATCH_ACTIONS_TAB ? <WatchDetail /> : <WatchHistory />}
-        </EuiPageContent>
+              {isSystemWatch ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchDetail.headerBadgeToolipText"
+                        defaultMessage="You cannot deactivate or delete a system watch."
+                      />
+                    }
+                  >
+                    <EuiBadge color="hollow">
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchDetail.headerBadgeText"
+                        defaultMessage="System watch"
+                      />
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem>
+                  <EuiFlexGroup justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        data-test-subj="toggleWatchActivationButton"
+                        onClick={() => toggleWatchActivation()}
+                        isLoading={isTogglingActivation}
+                      >
+                        {activationButtonText}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        data-test-subj="deleteWatchButton"
+                        onClick={() => {
+                          setWatchesToDelete([watchId]);
+                        }}
+                        color="danger"
+                        disabled={false}
+                      >
+                        <FormattedMessage
+                          id="xpack.watcher.sections.watchHistory.deleteWatchButtonLabel"
+                          defaultMessage="Delete"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiTabs>
+              {WATCH_STATUS_TABS.map((tab, index) => (
+                <EuiTab
+                  onClick={() => {
+                    setSelectedTab(tab.id);
+                  }}
+                  isSelected={tab.id === selectedTab}
+                  key={index}
+                  data-test-subj="tab"
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="l" />
+            {selectedTab === WATCH_ACTIONS_TAB ? <WatchDetail /> : <WatchHistory />}
+          </EuiPageContent>
+        </div>
       </WatchDetailsContext.Provider>
     );
   }

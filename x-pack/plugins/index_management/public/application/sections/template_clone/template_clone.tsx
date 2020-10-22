@@ -116,8 +116,8 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   }
 
   return (
-    <EuiPageBody>
+    <div className="indNarrowContainer">
       <EuiPageContent>{content}</EuiPageContent>
-    </EuiPageBody>
+    </div>
   );
 };

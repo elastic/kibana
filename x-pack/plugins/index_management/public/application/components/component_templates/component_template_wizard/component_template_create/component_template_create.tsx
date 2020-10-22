@@ -57,7 +57,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   }, [breadcrumbs]);
 
   return (
-    <EuiPageBody>
+    <div className="indNarrowContainer">
       <EuiPageContent>
         <EuiTitle size="l">
           <h1 data-test-subj="pageTitle">
@@ -78,6 +78,6 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
           clearSaveError={clearSaveError}
         />
       </EuiPageContent>
-    </EuiPageBody>
+    </div>
   );
 };

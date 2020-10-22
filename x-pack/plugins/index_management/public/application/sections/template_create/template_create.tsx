@@ -49,7 +49,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
   }, []);
 
   return (
-    <EuiPageBody>
+    <div className="indNarrowContainer">
       <EuiPageContent>
         <TemplateForm
           title={
@@ -76,6 +76,6 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
           isLegacy={isLegacy}
         />
       </EuiPageContent>
-    </EuiPageBody>
+    </div>
   );
 };
