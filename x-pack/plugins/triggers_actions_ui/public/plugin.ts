@@ -20,7 +20,6 @@ import {
   ManagementAppMountParams,
   ManagementSetup,
 } from '../../../../src/plugins/management/public';
-import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -86,6 +85,9 @@ export class Plugin
           PluginsStart,
           unknown
         ];
+
+        const { boot } = await import('./application/boot');
+
         return boot({
           dataPlugin: pluginsStart.data,
           charts: pluginsStart.charts,
