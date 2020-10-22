@@ -84,5 +84,7 @@ export const WizardHorizontalSteps: FC<Props> = ({
     };
   }
 
+  // TODO: Remove
+  // @ts-ignore
   return <EuiStepsHorizontal steps={stepsConfig} style={{ backgroundColor: 'inherit' }} />;
 };
