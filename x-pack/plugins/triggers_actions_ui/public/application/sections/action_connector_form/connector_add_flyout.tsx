@@ -37,12 +37,14 @@ export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   actionTypes?: ActionType[];
+  onTestConnector?: (connector: ActionConnector) => void;
 }
 
 export const ConnectorAddFlyout = ({
   addFlyoutVisible,
   setAddFlyoutVisibility,
   actionTypes,
+  onTestConnector,
 }: ConnectorAddFlyoutProps) => {
   let hasErrors = false;
   const {
@@ -153,6 +155,19 @@ export const ConnectorAddFlyout = ({
         return undefined;
       });
 
+  const onSaveClicked = async () => {
+    setIsSaving(true);
+    const savedAction = await onActionConnectorSave();
+    setIsSaving(false);
+    if (savedAction) {
+      closeFlyout();
+      if (reloadConnectors) {
+        await reloadConnectors();
+      }
+    }
+    return savedAction;
+  };
+
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
       <EuiFlyoutHeader hasBorder>
@@ -236,44 +251,78 @@ export const ConnectorAddFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout}>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          {canSave && actionTypeModel && actionType ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                data-test-subj="saveNewActionButton"
-                type="submit"
-                iconType="check"
-                isDisabled={hasErrors}
-                isLoading={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  const savedAction = await onActionConnectorSave();
-                  setIsSaving(false);
-                  if (savedAction) {
-                    closeFlyout();
-                    if (reloadConnectors) {
-                      reloadConnectors();
-                    }
+            {!actionType ? (
+              <EuiButtonEmpty data-test-subj="cancelButton" onClick={closeFlyout}>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel',
+                  {
+                    defaultMessage: 'Cancel',
                   }
+                )}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                data-test-subj="backButton"
+                onClick={() => {
+                  setActionType(undefined);
+                  setConnector(initialConnector);
                 }}
               >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel',
+                  {
+                    defaultMessage: 'Back',
+                  }
+                )}
+              </EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              {canSave && actionTypeModel && actionType ? (
+                <Fragment>
+                  {onTestConnector && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="secondary"
+                        data-test-subj="saveAndTestNewActionButton"
+                        type="submit"
+                        isDisabled={hasErrors}
+                        isLoading={isSaving}
+                        onClick={async () => {
+                          const savedConnector = await onSaveClicked();
+                          if (savedConnector) {
+                            onTestConnector(savedConnector);
+                          }
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
+                          defaultMessage="Save & Test"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      color="secondary"
+                      data-test-subj="saveNewActionButton"
+                      type="submit"
+                      isDisabled={hasErrors}
+                      isLoading={isSaving}
+                      onClick={onSaveClicked}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
+                        defaultMessage="Save"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </Fragment>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

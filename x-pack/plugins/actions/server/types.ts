@@ -14,6 +14,7 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
+  ElasticsearchClient,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
@@ -30,6 +31,7 @@ export type ActionTypeParams = Record<string, unknown>;
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 

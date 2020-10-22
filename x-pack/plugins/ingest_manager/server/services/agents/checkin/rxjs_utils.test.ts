@@ -15,9 +15,13 @@ describe('createRateLimiter', () => {
 
     scheduler.run(({ expectObservable, cold }) => {
       const source = cold('a-b-c-d-e-f|');
-      const rateLimiter = createRateLimiter(10, 1, 2, scheduler);
+      const intervalMs = 10;
+      const perInterval = 1;
+      const maxDelayMs = 50;
+      const rateLimiter = createRateLimiter(intervalMs, perInterval, maxDelayMs, scheduler);
       const obs = source.pipe(rateLimiter());
-      const results = 'a 9ms b 9ms c 9ms d 9ms e 9ms (f|)';
+      // f should be dropped because of maxDelay
+      const results = 'a 9ms b 9ms c 9ms d 9ms (e|)';
       expectObservable(obs).toBe(results);
     });
   });

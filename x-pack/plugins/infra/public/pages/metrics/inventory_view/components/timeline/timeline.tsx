@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -18,11 +18,16 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
+  RectAnnotation,
+  RectAnnotationDatum,
 } from '@elastic/charts';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
-import { Color } from '../../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { useSourceContext } from '../../../../../containers/source';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
@@ -35,6 +40,8 @@ import { calculateDomain } from '../../../metrics_explorer/components/helpers/ca
 
 import { euiStyled } from '../../../../../../../observability/public';
 import { InfraFormatter } from '../../../../../lib/lib';
+import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
+import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
 
 interface Props {
   interval: string;
@@ -47,7 +54,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
-  const { loading, error, timeseries, reload } = useTimeline(
+
+  const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
     filterQueryAsJson,
     [metric],
     nodeType,
@@ -59,12 +67,47 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     isVisible
   );
 
+  const anomalyParams = {
+    sourceId: 'default',
+    startTime,
+    endTime,
+    defaultSortOptions: {
+      direction: 'desc' as const,
+      field: 'anomalyScore' as const,
+    },
+    defaultPaginationOptions: { pageSize: 100 },
+  };
+
+  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
+    anomalyParams
+  );
+  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults(
+    anomalyParams
+  );
+
+  const getAnomalies = useMemo(() => {
+    if (nodeType === 'host') {
+      return getMetricsHostsAnomalies;
+    } else if (nodeType === 'pod') {
+      return getMetricsK8sAnomalies;
+    }
+  }, [nodeType, getMetricsK8sAnomalies, getMetricsHostsAnomalies]);
+
+  const anomalies = useMemo(() => {
+    if (nodeType === 'host') {
+      return metricsHostsAnomalies;
+    } else if (nodeType === 'pod') {
+      return metricsK8sAnomalies;
+    }
+  }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
+
   const metricLabel = toMetricOpt(metric.type)?.textLC;
+  const metricPopoverLabel = toMetricOpt(metric.type)?.text;
 
   const chartMetric = {
     color: Color.color0,
     aggregation: 'avg' as MetricsExplorerAggregation,
-    label: metricLabel,
+    label: metricPopoverLabel,
   };
 
   const dateFormatter = useMemo(() => {
@@ -104,6 +147,25 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     [jumpToTime, stopAutoReload]
   );
 
+  const anomalyMetricName = useMemo(() => {
+    const metricType = metric.type;
+    if (metricType === 'memory') {
+      return 'memory_usage';
+    }
+    if (metricType === 'rx') {
+      return 'network_in';
+    }
+    if (metricType === 'tx') {
+      return 'network_out';
+    }
+  }, [metric]);
+
+  useEffect(() => {
+    if (getAnomalies && anomalyMetricName) {
+      getAnomalies(anomalyMetricName);
+    }
+  }, [getAnomalies, anomalyMetricName]);
+
   if (loading) {
     return (
       <TimelineContainer>
@@ -130,21 +192,83 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     );
   }
 
+  function generateAnnotationData(results: Array<[number, string[]]>): RectAnnotationDatum[] {
+    return results.map((anomaly) => {
+      const [val, influencers] = anomaly;
+      return {
+        coordinates: {
+          x0: val,
+          x1: moment(val).add(15, 'minutes').valueOf(),
+          y0: dataDomain?.min,
+          y1: dataDomain?.max,
+        },
+        details: influencers.join(','),
+      };
+    });
+  }
+
   return (
     <TimelineContainer>
       <TimelineHeader>
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="xpack.infra.inventoryTimeline.header"
-              defaultMessage="Average {metricLabel}"
-              values={{ metricLabel }}
-            />
-          </strong>
-        </EuiText>
+        <EuiFlexItem grow={true}>
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="xpack.infra.inventoryTimeline.header"
+                defaultMessage="Average {metricLabel}"
+                values={{ metricLabel }}
+              />
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems={'center'}>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size={'xs'}>
+                    <FormattedMessage
+                      id="xpack.infra.inventoryTimeline.header"
+                      defaultMessage="Average {metricLabel}"
+                      values={{ metricLabel }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                <EuiFlexItem
+                  grow={false}
+                  style={{ backgroundColor: '#D36086', height: 5, width: 10 }}
+                />
+                <EuiFlexItem>
+                  <EuiText size={'xs'}>
+                    <FormattedMessage
+                      id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
+                      defaultMessage="Anomaly detected"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </TimelineHeader>
       <TimelineChartContainer>
         <Chart>
+          {anomalies && (
+            <RectAnnotation
+              id={'anomalies'}
+              dataValues={generateAnnotationData(
+                anomalies.map((a) => [a.startTime, a.influencers])
+              )}
+              style={{ fill: '#D36086' }}
+            />
+          )}
           <MetricExplorerSeriesChart
             type={MetricsExplorerChartType.area}
             metric={chartMetric}
@@ -196,7 +320,7 @@ const TimelineHeader = euiStyled.div`
 `;
 
 const TimelineChartContainer = euiStyled.div`
-  padding-left: ${(props) => props.theme.eui.paddingSizes.xs}; 
+  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
   width: 100%;
   height: 100%;
 `;
@@ -209,11 +333,11 @@ const TimelineLoadingContainer = euiStyled.div`
 `;
 
 const noHistoryDataTitle = i18n.translate('xpack.infra.inventoryTimeline.noHistoryDataTitle', {
-  defaultMessage: 'There is no history data to display.',
+  defaultMessage: 'There is no historical data to display.',
 });
 
 const errorTitle = i18n.translate('xpack.infra.inventoryTimeline.errorTitle', {
-  defaultMessage: 'Unable to display history data.',
+  defaultMessage: 'Unable to show historical data.',
 });
 
 const checkNewDataButtonLabel = i18n.translate(

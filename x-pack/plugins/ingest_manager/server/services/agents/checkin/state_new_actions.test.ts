@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { createAgentActionFromPolicyAction } from './state_new_actions';
-import { OutputType, Agent, AgentPolicyAction } from '../../../types';
+import { take } from 'rxjs/operators';
+import {
+  createAgentActionFromPolicyAction,
+  createNewActionsSharedObservable,
+} from './state_new_actions';
+import { getNewActionsSince } from '../actions';
+import { OutputType, Agent, AgentAction, AgentPolicyAction } from '../../../types';
 
 jest.mock('../../app_context', () => ({
   appContextService: {
+    getInternalUserSOClient: () => {
+      return {};
+    },
     getEncryptedSavedObjects: () => ({
       getDecryptedAsInternalUser: () => ({
         attributes: {
@@ -19,7 +27,83 @@ jest.mock('../../app_context', () => ({
   },
 }));
 
+jest.mock('../actions');
+
+jest.useFakeTimers();
+
+function waitForPromiseResolved() {
+  return new Promise((resolve) => setImmediate(resolve));
+}
+
+function getMockedNewActionSince() {
+  return getNewActionsSince as jest.MockedFunction<typeof getNewActionsSince>;
+}
+
 describe('test agent checkin new action services', () => {
+  describe('newAgetActionObservable', () => {
+    beforeEach(() => {
+      (getNewActionsSince as jest.MockedFunction<typeof getNewActionsSince>).mockReset();
+    });
+    it('should work, call get actions until there is new action', async () => {
+      const observable = createNewActionsSharedObservable();
+
+      getMockedNewActionSince()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          ({ id: 'action1', created_at: new Date().toISOString() } as unknown) as AgentAction,
+        ])
+        .mockResolvedValueOnce([
+          ({ id: 'action2', created_at: new Date().toISOString() } as unknown) as AgentAction,
+        ]);
+      // First call
+      const promise = observable.pipe(take(1)).toPromise();
+
+      jest.advanceTimersByTime(5000);
+      await waitForPromiseResolved();
+      jest.advanceTimersByTime(5000);
+      await waitForPromiseResolved();
+
+      const res = await promise;
+      expect(getNewActionsSince).toBeCalledTimes(2);
+      expect(res).toHaveLength(1);
+      expect(res[0].id).toBe('action1');
+      // Second call
+      const secondSubscription = observable.pipe(take(1)).toPromise();
+
+      jest.advanceTimersByTime(5000);
+      await waitForPromiseResolved();
+
+      const secondRes = await secondSubscription;
+      expect(secondRes).toHaveLength(1);
+      expect(secondRes[0].id).toBe('action2');
+      expect(getNewActionsSince).toBeCalledTimes(3);
+      // It should call getNewActionsSince with the last action returned
+      expect(getMockedNewActionSince().mock.calls[2][1]).toBe(res[0].created_at);
+    });
+
+    it('should not fetch actions concurrently', async () => {
+      const observable = createNewActionsSharedObservable();
+
+      const resolves: Array<() => void> = [];
+      getMockedNewActionSince().mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolves.push(resolve);
+        });
+      });
+
+      observable.pipe(take(1)).toPromise();
+
+      jest.advanceTimersByTime(5000);
+      await waitForPromiseResolved();
+      jest.advanceTimersByTime(5000);
+      await waitForPromiseResolved();
+      jest.advanceTimersByTime(5000);
+      await waitForPromiseResolved();
+
+      expect(getNewActionsSince).toBeCalledTimes(1);
+    });
+  });
+
   describe('createAgentActionFromPolicyAction()', () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
     const mockAgent: Agent = {
@@ -80,7 +164,15 @@ describe('test agent checkin new action services', () => {
       expect(
         await createAgentActionFromPolicyAction(
           mockSavedObjectsClient,
-          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.10.1-SNAPSHOT' } } } },
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.10.0-SNAPSHOT' } } } },
+          mockPolicyAction
+        )
+      ).toEqual(expectedResult);
+
+      expect(
+        await createAgentActionFromPolicyAction(
+          mockSavedObjectsClient,
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.10.2' } } } },
           mockPolicyAction
         )
       ).toEqual(expectedResult);
@@ -131,7 +223,7 @@ describe('test agent checkin new action services', () => {
       expect(
         await createAgentActionFromPolicyAction(
           mockSavedObjectsClient,
-          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.1-SNAPSHOT' } } } },
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.3' } } } },
           mockPolicyAction
         )
       ).toEqual(expectedResult);
@@ -139,7 +231,7 @@ describe('test agent checkin new action services', () => {
       expect(
         await createAgentActionFromPolicyAction(
           mockSavedObjectsClient,
-          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.3' } } } },
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.1-SNAPSHOT' } } } },
           mockPolicyAction
         )
       ).toEqual(expectedResult);

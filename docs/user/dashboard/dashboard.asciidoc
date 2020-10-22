@@ -8,7 +8,7 @@ A _dashboard_ is a collection of panels that you use to analyze your data. On a 
 you can rearrange and tell a story about your data. Panels contain everything you need, including visualizations,
 interactive controls, markdown, and more.
 
-With *Dashboard*s, you can:
+With *Dashboard*, you can:
 
 * Add multiple panels to see many aspects and views of your data in one place.
 
@@ -22,7 +22,7 @@ With *Dashboard*s, you can:
 
 * Generate reports based on your findings.
 
-To begin, open the menu, go to *Dashboard*, then click *Create dashboard*.
+To begin, open the main menu, click *Dashboard*, then click *Create dashboard*.
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
@@ -209,18 +209,18 @@ visualization, configure the customization options for your visualization.
 
 The data fields that are displayed are based on the selected <<index-patterns,index pattern>> and the <<set-time-filter,time filter>>.
 
-To view the data fields in a different index pattern, click the index pattern, then select a new one. The data fields automatically update.
+To view the data fields in a different index pattern, click the *Change Index Pattern* dropdown, then select a new one.
 
 To filter the data fields:
 
-* Enter the name in the *Search field names*.
-* Click *Field by type*, then select the filter. To show all fields in the index pattern, deselect *Only show fields with data*.
+* Enter the data field name in *Search field names*.
+* Click *Field filters*, then select the filter.
 
 [float]
 [[view-data-summaries]]
-==== View data summaries
+==== View data field summaries
 
-To help you decide exactly the data you want to display, get a quick summary of each field. The summary shows the distribution of
+To help you decide exactly the data you want to display, get a quick summary of each data field. The summary shows the distribution of
 values within the specified time range.
 
 To view the data field summary information, navigate to the field, then click *i*.
@@ -252,11 +252,9 @@ When there is an exclamation point (!) next to a visualization type, *Lens* is u
 
 For each visualization type, you can customize the aggregation and labels. The options available depend on the selected visualization type.
 
-. Click a data field name in the editor, or click *Drop a field here*.
-. Change the options that appear.
-+
-[role="screenshot"]
-image::images/lens_aggregation_labels.png[Quick function options]
+. From the editor, click a data field, or click *Drop a field or click to add*.
+
+. Change the options, then click *Close*.
 
 [float]
 [[add-layers-and-indices]]
@@ -426,33 +424,37 @@ Ready to try out Timelion? For step-by-step tutorials, refer to:
 [[timelion-deprecation]]
 ==== Timelion app deprecation
 
-Deprecated since 7.0, the Timelion app will be removed in 8.0. If you have any Timelion worksheets, you must migrate them to a dashboard.
+In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
 
-NOTE: Only the Timelion app is deprecated. {kib} continues to support Timelion
-visualizations on dashboards and in Visualize and Canvas.
+NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
+visualizations in *Dashboard*, *Visualize*, and *Canvas*.
 
-To migrate a Timelion worksheet to a dashboard:
+To migrate a *Timelion* worksheet to a dashboard:
 
-. Open the menu, click **Dashboard**, then click **Create dashboard**.
+. Open the main menu, click *Dashboard*, then click *Create dashboard*.
 
-. On the dashboard, click **Create New**, then select the Timelion visualization.
+. For each *Timelion* app worksheet, complete the following steps.
 
-. On a new tab, open the Timelion app, select the chart you want to copy, and copy its expression.
+.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
+
+.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
 +
 [role="screenshot"]
-image::images/timelion-copy-expression.png[]
+image::images/timelion-copy-expression.png[Timelion app chart]
 
-. Return to the other tab and paste the copied expression to the *Timelion Expression* field and click **Update**.
+.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
 +
 [role="screenshot"]
-image::images/timelion-vis-paste-expression.png[]
+image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
 
-. Save the new visualization, give it a name, and click **Save and Return**.
+.. In the toolbar, click *Save*.
+
+.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
 +
-Your Timelion visualization will appear on the dashboard. Repeat this for all your charts on each worksheet.
+The Timelion visualization panel appears on the dashboard.
 +
 [role="screenshot"]
-image::images/timelion-dashboard.png[]
+image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
 
 [float]
 [[save-panels]]
@@ -460,7 +462,7 @@ image::images/timelion-dashboard.png[]
 
 When you’ve finished making changes, save the panels.
 
-. Click *Save*.
+. In the toolbar, click *Save*.
 . Add the *Title* and optional *Description*.
 . Click *Save and return*.
 

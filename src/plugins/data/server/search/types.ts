@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from '../../../../core/server';
-import { ISearchOptions, IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
+import { Observable } from 'rxjs';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import {
+  ISearchOptions,
+  ISearchStartSearchSource,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
@@ -52,6 +58,22 @@ export interface ISearchSetup {
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
+/**
+ * Search strategy interface contains a search method that takes in a request and returns a promise
+ * that resolves to a response.
+ */
+export interface ISearchStrategy<
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+> {
+  search: (
+    request: SearchStrategyRequest,
+    options: ISearchOptions,
+    context: RequestHandlerContext
+  ) => Observable<SearchStrategyResponse>;
+  cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
+}
+
 export interface ISearchStart<
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
@@ -64,25 +86,8 @@ export interface ISearchStart<
   getSearchStrategy: (
     name: string
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
-  search: (
-    context: RequestHandlerContext,
-    request: SearchStrategyRequest,
-    options: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
-}
-
-/**
- * Search strategy interface contains a search method that takes in a request and returns a promise
- * that resolves to a response.
- */
-export interface ISearchStrategy<
-  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-> {
-  search: (
-    context: RequestHandlerContext,
-    request: SearchStrategyRequest,
-    options?: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
-  cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
+  search: ISearchStrategy['search'];
+  searchSource: {
+    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
+  };
 }

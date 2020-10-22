@@ -20,6 +20,7 @@ import {
   SavedObjectsUtils,
   ISavedObjectTypeRegistry,
 } from '../../../../../src/core/server';
+import { ALL_SPACES_ID } from '../../common/constants';
 import { SpacesServiceSetup } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
 import { SpacesClient } from '../lib/spaces_client';
@@ -169,7 +170,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
       try {
         const availableSpaces = await spacesClient.getAll('findSavedObjects');
-        if (namespaces.includes('*')) {
+        if (namespaces.includes(ALL_SPACES_ID)) {
           namespaces = availableSpaces.map((space) => space.id);
         } else {
           namespaces = namespaces.filter((namespace) =>

@@ -214,6 +214,13 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
+export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
+  {
+    defaultMessage: 'You do not have Kibana Actions privileges',
+  }
+);
+
 export const DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateTitle',
   {
@@ -312,6 +319,13 @@ export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsPopoverTitle',
+  {
+    defaultMessage: 'See all',
   }
 );
 
@@ -486,46 +500,6 @@ export const DELETE = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
-
-export const LOAD_PREPACKAGED_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.loadPrePackagedRulesButton',
-  {
-    defaultMessage: 'Load Elastic prebuilt rules and timeline templates',
-  }
-);
-
-export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedRulesButton',
-    {
-      values: { missingRules },
-      defaultMessage:
-        'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
-    }
-  );
-
-export const RELOAD_MISSING_PREPACKAGED_TIMELINES = (missingTimelines: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedTimelinesButton',
-    {
-      values: { missingTimelines },
-      defaultMessage:
-        'Install {missingTimelines} Elastic prebuilt {missingTimelines, plural, =1 {timeline} other {timelines}} ',
-    }
-  );
-
-export const RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES = (
-  missingRules: number,
-  missingTimelines: number
-) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedRulesAndTimelinesButton',
-    {
-      values: { missingRules, missingTimelines },
-      defaultMessage:
-        'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} and {missingTimelines} Elastic prebuilt {missingTimelines, plural, =1 {timeline} other {timelines}} ',
-    }
-  );
 
 export const IMPORT_RULE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.importRuleTitle',

@@ -20,6 +20,7 @@ import './visualize_editor.scss';
 import React, { RefObject } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
+import { AppMountParameters } from 'kibana/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import {
@@ -38,6 +39,7 @@ interface VisualizeEditorCommonProps {
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
   isEmbeddableRendered: boolean;
+  onAppLeave: AppMountParameters['onAppLeave'];
   visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
@@ -54,6 +56,7 @@ export const VisualizeEditorCommon = ({
   setHasUnsavedChanges,
   hasUnappliedChanges,
   isEmbeddableRendered,
+  onAppLeave,
   originatingApp,
   setOriginatingApp,
   visualizationIdFromUrl,
@@ -76,37 +79,33 @@ export const VisualizeEditorCommon = ({
           stateContainer={appState}
           visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
+          onAppLeave={onAppLeave}
         />
       )}
-      {visInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
-      {visInstance?.vis?.type?.isDeprecated &&
-        visInstance?.vis?.type?.getDeprecationMessage &&
-        visInstance.vis.type.getDeprecationMessage(visInstance?.vis)}
+      {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
+      {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {visInstance && (
         <EuiScreenReaderOnly>
           <h1>
-            {
-              // @ts-expect-error
-              'savedVis' in visInstance && visInstance.savedVis.id ? (
-                <FormattedMessage
-                  id="visualize.pageHeading"
-                  defaultMessage="{chartName} {chartType} visualization"
-                  values={{
-                    chartName: (visInstance as SavedVisInstance).savedVis.title,
-                    chartType: (visInstance as SavedVisInstance).vis.type.title,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="visualize.byValue_pageHeading"
-                  defaultMessage="Visualization of type {chartType} embedded into {originatingApp} app"
-                  values={{
-                    chartType: visInstance.vis.type.title,
-                    originatingApp: originatingApp || 'dashboards',
-                  }}
-                />
-              )
-            }
+            {'savedVis' in visInstance && visInstance.savedVis.id ? (
+              <FormattedMessage
+                id="visualize.pageHeading"
+                defaultMessage="{chartName} {chartType} visualization"
+                values={{
+                  chartName: (visInstance as SavedVisInstance).savedVis.title,
+                  chartType: (visInstance as SavedVisInstance).vis.type.title,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="visualize.byValue_pageHeading"
+                defaultMessage="Visualization of type {chartType} embedded into {originatingApp} app"
+                values={{
+                  chartType: visInstance.vis.type.title,
+                  originatingApp: originatingApp || 'dashboards',
+                }}
+              />
+            )}
           </h1>
         </EuiScreenReaderOnly>
       )}

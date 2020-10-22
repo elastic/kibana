@@ -16,7 +16,7 @@ NOTE:
 [discrete]
 === src/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -48,7 +48,7 @@ NOTE:
 
 
 |{kib-repo}blob/{branch}/src/plugins/data/README.md[data]
-|data plugin provides common data access services.
+|The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
 |{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
@@ -62,16 +62,28 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Contains the Discover application and the saved search embeddable.
 
 
-|{kib-repo}blob/{branch}/src/plugins/embeddable/README.md[embeddable]
-|Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable containers.
+|<<embeddable-plugin>>
+|Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable _containers_.
 
 
 |{kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
 |This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expressions/README.md[expressions]
-|This plugin provides methods which will parse & execute an expression pipeline
+|<<kibana-expressions-plugin>>
+|Expression pipeline is a chain of functions that *pipe* its output to the
+input of the next function. Functions can be configured using arguments provided
+by the user. The final output of the expression pipeline can be rendered using
+one of the *renderers* registered in `expressions` plugin.
+
+All the arguments to expression functions need to be serializable, as well as input and output.
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+make it possible to serialize the whole chain as well as output at every step of execution.
+
+Expressions power visualizations in Dashboard and Lens, as well as, every
+*element* in Canvas is backed by an expression.
+
+This plugin provides methods which will parse & execute an *expression pipeline*
 string for you, as well as a series of registries for advanced users who might
 want to incorporate their own functions, types, and renderers into the service
 for use in their own application.
@@ -96,6 +108,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_legacy/README.md[kibanaLegacy]
 |This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
+
+
+|{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
+|An overview page highlighting Kibana apps
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_react/README.md[kibanaReact]
@@ -143,6 +159,11 @@ It also provides a stateful version of it on the start contract.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
+|securityOss is responsible for educating users about Elastic's free security features,
+so they can properly protect the data within their clusters.
+
+
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |Replaces the legacy ui/share module for registering share context menus.
 
@@ -156,7 +177,7 @@ It also provides a stateful version of it on the start contract.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry_management_section/README.md[telemetryManagementSection]
-|This plugin adds the Advanced Settings section for the Usage Data collection (aka Telemetry).
+|This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
 |{kib-repo}blob/{branch}/src/plugins/tile_map[tileMap]
@@ -168,8 +189,15 @@ It also provides a stateful version of it on the start contract.
 which also contains the timelion APIs and backend, look at the vis_type_timelion plugin.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ui_actions/README.md[uiActions]
+|<<uiactions-plugin>>
 |An API for:
+
+- creating custom functionality (`actions`)
+- creating custom user interaction events (`triggers`)
+- attaching and detaching `actions` to `triggers`.
+- emitting `trigger` events
+- executing `actions` attached to a given `trigger`.
+- exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
@@ -240,7 +268,7 @@ which will load the visualization's editor.
 [discrete]
 === x-pack/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -250,23 +278,12 @@ which will load the visualization's editor.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/alerting_builtins/README.md[alertingBuiltins]
-|This plugin provides alertTypes shipped with Kibana for use with the
-the alerts plugin.  When enabled, it will register
-the built-in alertTypes with the alerting plugin, register associated HTTP
-routes, etc.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/alerts/README.md[alerts]
 |The Kibana alerting plugin provides a common place to set up alerts. You can:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
 |To access an elasticsearch instance that has live data you have two options:
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/audit_trail[auditTrail]
-|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
@@ -378,7 +395,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_manager/README.md[ingestManager]
-|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.ingestManager.fleet.tlsCheckDisabled=false)
+|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
@@ -414,8 +431,9 @@ using the CURL scripts in the scripts folder.
 |This plugin provides access to the detailed tile map services from Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ml[ml]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
+|This plugin provides access to the machine learning features provided by
+Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]
@@ -447,7 +465,8 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security/README.md[security]
-|See Configuring security in Kibana.
+|See Configuring security in
+Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
@@ -462,6 +481,13 @@ using the CURL scripts in the scripts folder.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
+|This plugin provides alertTypes shipped with Kibana for use with the
+the alerts plugin.  When enabled, it will register
+the alertTypes by the Stack in the alerting plugin, register associated HTTP
+routes, etc.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/task_manager[taskManager]
 |WARNING: Missing README.
 
@@ -470,15 +496,15 @@ using the CURL scripts in the scripts folder.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/transform[transform]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
+|This plugin provides access to the transforms features provided by Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggers_actions_ui]
+|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
 |The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions.
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
@@ -496,6 +522,10 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 in their infrastructure.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+|NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
 |This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 
@@ -504,12 +534,11 @@ in their infrastructure.
 |Contains HTTP endpoints and UiSettings that are slated for removal.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
-|NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
-
-
 |===
 
 include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/src/plugins/embeddable/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]

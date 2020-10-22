@@ -75,7 +75,7 @@ export function createLimitedPreAuthHandler({
 }
 
 export function registerLimitedConcurrencyRoutes(core: CoreSetup, config: IngestManagerConfigType) {
-  const max = config.fleet.maxConcurrentConnections;
+  const max = config.agents.maxConcurrentConnections;
   if (!max) return;
 
   core.http.registerOnPreAuth(

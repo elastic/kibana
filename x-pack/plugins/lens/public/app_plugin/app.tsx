@@ -47,6 +47,7 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
+  initialContext,
 }: LensAppProps) {
   const {
     data,
@@ -67,7 +68,7 @@ export function App({
   const [state, setState] = useState<LensAppState>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
-      query: data.query.queryString.getDefaultQuery(),
+      query: data.query.queryString.getQuery(),
       filters: data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
@@ -142,8 +143,11 @@ export function App({
 
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
-    // can be loaded without a full page refresh
-    data.query.filterManager.setAppFilters([]);
+    // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+    // we keep the filters
+    if (!initialContext) {
+      data.query.filterManager.setAppFilters([]);
+    }
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
@@ -187,6 +191,7 @@ export function App({
     uiSettings,
     data.query,
     history,
+    initialContext,
   ]);
 
   useEffect(() => {
@@ -406,6 +411,15 @@ export function App({
         return;
       }
 
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
+          defaultMessage: `Saved '{visTitle}'`,
+          values: {
+            visTitle: docToSave.title,
+          },
+        })
+      );
+
       if (
         attributeService.inputIsRefType(newInput) &&
         newInput.savedObjectId !== originalSavedObjectId
@@ -576,6 +590,7 @@ export function App({
               doc: state.persistedDoc,
               onError,
               showNoDataPopover,
+              initialContext,
               onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));

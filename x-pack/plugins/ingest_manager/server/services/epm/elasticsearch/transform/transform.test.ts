@@ -114,10 +114,10 @@ describe('test transform install', () => {
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata',
+            dataset: 'endpoint.metadata',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -131,7 +131,7 @@ describe('test transform install', () => {
           },
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata Current',
             release: 'experimental',
             package: 'endpoint',
@@ -146,7 +146,7 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       [
-        'endpoint-0.16.0-dev.0/dataset/policy/elasticsearch/ingest_pipeline/default.json',
+        'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
@@ -160,6 +160,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [
@@ -302,10 +303,10 @@ describe('test transform install', () => {
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -404,10 +405,10 @@ describe('test transform install', () => {
       ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
-        datasets: [
+        data_streams: [
           {
             type: 'metrics',
-            name: 'endpoint.metadata',
+            dataset: 'endpoint.metadata',
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
@@ -421,7 +422,7 @@ describe('test transform install', () => {
           },
           {
             type: 'metrics',
-            name: 'endpoint.metadata_current',
+            dataset: 'endpoint.metadata_current',
             title: 'Endpoint Metadata Current',
             release: 'experimental',
             package: 'endpoint',
@@ -446,6 +447,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [

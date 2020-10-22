@@ -15,3 +15,5 @@ export const SPACES = {
     spaceId: 'default',
   },
 };
+
+export const ALL_SPACES_ID = '*';

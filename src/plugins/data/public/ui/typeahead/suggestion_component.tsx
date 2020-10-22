@@ -72,7 +72,9 @@ export function SuggestionComponent(props: Props) {
         <div className="kbnSuggestionItem__type">
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
-        <div className="kbnSuggestionItem__text">{props.suggestion.text}</div>
+        <div className="kbnSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
+          {props.suggestion.text}
+        </div>
         {props.shouldDisplayDescription && (
           <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
         )}

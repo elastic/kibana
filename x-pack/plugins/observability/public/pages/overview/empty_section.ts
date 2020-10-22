@@ -70,6 +70,21 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
       href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
     },
     {
+      id: 'ux',
+      title: i18n.translate('xpack.observability.emptySection.apps.ux.title', {
+        defaultMessage: 'User Experience',
+      }),
+      icon: 'logoAPM',
+      description: i18n.translate('xpack.observability.emptySection.apps.ux.description', {
+        defaultMessage:
+          'Performance is a distribution. Measure the experiences of all visitors to your web application and understand how to improve the experience for everyone.',
+      }),
+      linkTitle: i18n.translate('xpack.observability.emptySection.apps.ux.link', {
+        defaultMessage: 'Install RUM Agent',
+      }),
+      href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
+    },
+    {
       id: 'alert',
       title: i18n.translate('xpack.observability.emptySection.apps.alert.title', {
         defaultMessage: 'No alerts found.',

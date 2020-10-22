@@ -41,7 +41,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
   const { isSubmitted, isSubmitting, isValid } = form;
   const {
     http,
-    triggers_actions_ui: { actionTypeRegistry },
+    triggersActionsUi: { actionTypeRegistry },
     notifications,
     docLinks,
     application: { capabilities },

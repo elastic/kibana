@@ -69,6 +69,8 @@ Priority::              The priority of the incident.
 Labels::              The labels of the incident.
 Title::    A title for the issue, used for searching the contents of the knowledge base. 
 Description::          The details about the incident.
+Parent::              The parent issue id or key. Only for `Sub-task` issue types.
+Priority::              The priority of the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-jira]]

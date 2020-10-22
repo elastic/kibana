@@ -20,20 +20,13 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_provider_plugin/types';
 
-export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'settings']);
 
-  describe('index patterns', function () {
+  // skipping the tests as it deletes index patterns created by other test causing unexpected failures
+  // https://github.com/elastic/kibana/issues/79886
+  describe.skip('index patterns', function () {
     let indexPatternId = '';
-    before(async () => {
-      await esArchiver.loadIfNeeded(
-        '../functional/fixtures/es_archiver/getting_started/shakespeare'
-      );
-      await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('shakespeare', '');
-    });
 
     it('can get all ids', async () => {
       const body = await (await supertest.get('/api/index-patterns-plugin/get-all').expect(200))

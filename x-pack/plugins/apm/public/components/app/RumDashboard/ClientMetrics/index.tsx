@@ -9,8 +9,9 @@ import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { I18LABELS } from '../translations';
+import { useUxQuery } from '../hooks/useUxQuery';
+import { formatToSec } from '../UXMetrics/KeyUXMetrics';
 import { CsmSharedContext } from '../CsmSharedContext';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
@@ -21,30 +22,42 @@ const ClFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-export function ClientMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
+function formatTitle(unit: string, value?: number) {
+  if (typeof value === 'undefined') return I18LABELS.dataMissing;
+  return formatToSec(value, unit);
+}
 
-  const { start, end, searchTerm } = urlParams;
+function PageViewsTotalTitle({ pageViews }: { pageViews?: number }) {
+  if (typeof pageViews === 'undefined') {
+    return <>{I18LABELS.dataMissing}</>;
+  }
+  return pageViews < 10000 ? (
+    <>{numeral(pageViews).format('0,0')}</>
+  ) : (
+    <EuiToolTip content={numeral(pageViews).format('0,0')}>
+      <>{numeral(pageViews).format('0 a')}</>
+    </EuiToolTip>
+  );
+}
+
+export function ClientMetrics() {
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
             query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
+              ...uxQuery,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, uiFilters, searchTerm]
+    [uxQuery]
   );
 
   const { setSharedData } = useContext(CsmSharedContext);
@@ -60,9 +73,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={
-            (((data?.backEnd?.value ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'
-          }
+          title={formatTitle('ms', data?.backEnd?.value)}
           description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
@@ -70,7 +81,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={((data?.frontEnd?.value ?? 0)?.toFixed(2) ?? '-') + ' s'}
+          title={formatTitle('ms', data?.frontEnd?.value)}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
@@ -78,11 +89,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={
-            <EuiToolTip content={data?.pageViews?.value}>
-              <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
-            </EuiToolTip>
-          }
+          title={<PageViewsTotalTitle pageViews={data?.pageViews?.value} />}
           description={I18LABELS.pageViews}
           isLoading={status !== 'success'}
         />

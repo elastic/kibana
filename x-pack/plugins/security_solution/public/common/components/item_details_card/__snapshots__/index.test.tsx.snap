@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`item_details_card ItemDetailsAction should render correctly 1`] = `
+<div>
+  <EuiButton
+    className="eui-fullWidth "
+    color="primary"
+    size="s"
+  >
+    primary
+  </EuiButton>
+</div>
+`;
+
+exports[`item_details_card ItemDetailsCard should render correctly with actions 1`] = `
+<EuiPanel
+  paddingSize="none"
+>
+  <EuiFlexGroup
+    direction="row"
+  >
+    <Styled(EuiFlexItem)
+      grow={2}
+    >
+      <EuiDescriptionList
+        compressed={true}
+        type="column"
+      >
+        <ItemPropertySummary
+          key=".0"
+          name="name 1"
+          value="value 1"
+        />
+        <ItemPropertySummary
+          key=".1"
+          name="name 2"
+          value="value 2"
+        />
+        <ItemPropertySummary
+          key=".2"
+          name="name 3"
+          value="value 3"
+        />
+      </EuiDescriptionList>
+    </Styled(EuiFlexItem)>
+    <Styled(EuiFlexItem)
+      grow={5}
+    >
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+      >
+        <EuiFlexItem
+          grow={1}
+        >
+          <div>
+            some text
+            <strong
+              key=".4"
+            >
+              some node
+            </strong>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            gutterSize="s"
+            justifyContent="flexEnd"
+          >
+            <EuiFlexItem
+              grow={false}
+              key="0"
+            >
+              <ItemDetailsAction
+                color="primary"
+                key=".5"
+                size="s"
+              >
+                primary
+              </ItemDetailsAction>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              key="1"
+            >
+              <ItemDetailsAction
+                color="secondary"
+                key=".6"
+                size="s"
+              >
+                secondary
+              </ItemDetailsAction>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              key="2"
+            >
+              <ItemDetailsAction
+                color="danger"
+                key=".7"
+                size="s"
+              >
+                danger
+              </ItemDetailsAction>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Styled(EuiFlexItem)>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`item_details_card ItemDetailsCard should render correctly with no actions 1`] = `
+<EuiPanel
+  paddingSize="none"
+>
+  <EuiFlexGroup
+    direction="row"
+  >
+    <Styled(EuiFlexItem)
+      grow={2}
+    >
+      <EuiDescriptionList
+        compressed={true}
+        type="column"
+      >
+        <ItemPropertySummary
+          key=".0"
+          name="name 1"
+          value="value 1"
+        />
+        <ItemPropertySummary
+          key=".1"
+          name="name 2"
+          value="value 2"
+        />
+        <ItemPropertySummary
+          key=".2"
+          name="name 3"
+          value="value 3"
+        />
+      </EuiDescriptionList>
+    </Styled(EuiFlexItem)>
+    <Styled(EuiFlexItem)
+      grow={5}
+    >
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+      >
+        <EuiFlexItem
+          grow={1}
+        >
+          <div>
+            some text
+            <strong
+              key=".4"
+            >
+              some node
+            </strong>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            gutterSize="s"
+            justifyContent="flexEnd"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Styled(EuiFlexItem)>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`item_details_card ItemDetailsPropertySummary should render correctly 1`] = `
+<Fragment>
+  <Styled(EuiDescriptionListTitle)>
+    name 1
+  </Styled(EuiDescriptionListTitle)>
+  <Styled(EuiDescriptionListDescription)>
+    value 1
+  </Styled(EuiDescriptionListDescription)>
+</Fragment>
+`;

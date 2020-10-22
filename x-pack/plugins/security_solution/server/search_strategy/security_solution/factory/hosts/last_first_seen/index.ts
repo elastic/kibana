@@ -28,7 +28,6 @@ export const firstLastSeenHost: SecuritySolutionFactory<HostsQueries.firstLastSe
     const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildFirstLastSeenHostQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
 
     return {

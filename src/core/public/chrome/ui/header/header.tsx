@@ -22,7 +22,9 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
+  EuiHideFor,
   EuiIcon,
+  EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -110,19 +112,26 @@ export function Header({
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
+                    loadingCount$={observables.loadingCount$}
                   />,
-                  <LoadingIndicator loadingCount$={observables.loadingCount$} />,
                 ],
                 borders: 'none',
               },
               {
                 ...(observables.navControlsCenter$ && {
-                  items: [<HeaderNavControls navControls$={observables.navControlsCenter$} />],
+                  items: [
+                    <EuiShowFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    </EuiShowFor>,
+                  ],
                 }),
                 borders: 'none',
               },
               {
                 items: [
+                  <EuiHideFor sizes={['m', 'l', 'xl']}>
+                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                  </EuiHideFor>,
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
@@ -153,8 +162,6 @@ export function Header({
                   <EuiIcon type="menu" size="m" />
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem border="right" />
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>

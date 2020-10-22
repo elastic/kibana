@@ -7,22 +7,17 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
-import { ADMIN, PRIVATE } from './constants';
+import { ApiTokenTypes } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
 import { IMeta } from '../../../../../common/types';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { IEngine } from '../../types';
-import { IApiToken, ICredentialsDetails } from './types';
-
-interface ITokenReadWrite {
-  name: 'read' | 'write';
-  checked: boolean;
-}
+import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
 const defaultApiToken: IApiToken = {
   name: '',
-  type: PRIVATE,
+  type: ApiTokenTypes.Private,
   read: true,
   write: true,
   access_all_engines: true,
@@ -44,7 +39,7 @@ export interface ICredentialsLogicActions {
   setTokenReadWrite(tokenReadWrite: ITokenReadWrite): ITokenReadWrite;
   setTokenName(name: string): string;
   setTokenType(tokenType: string): string;
-  toggleCredentialsForm(apiToken?: IApiToken): IApiToken;
+  showCredentialsForm(apiToken?: IApiToken): IApiToken;
   hideCredentialsForm(): { value: boolean };
   resetCredentials(): { value: boolean };
   initializeCredentialsData(): { value: boolean };
@@ -55,7 +50,7 @@ export interface ICredentialsLogicActions {
 
 export interface ICredentialsLogicValues {
   activeApiToken: IApiToken;
-  activeApiTokenIsExisting: boolean;
+  activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
   apiTokens: IApiToken[];
   dataLoading: boolean;
@@ -66,7 +61,7 @@ export interface ICredentialsLogicValues {
   fullEngineAccessChecked: boolean;
   meta: Partial<IMeta>;
   nameInputBlurred: boolean;
-  showCredentialsForm: boolean;
+  shouldShowCredentialsForm: boolean;
 }
 
 export const CredentialsLogic = kea<
@@ -90,7 +85,7 @@ export const CredentialsLogic = kea<
     }),
     setTokenName: (name) => name,
     setTokenType: (tokenType) => tokenType,
-    toggleCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
+    showCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
     hideCredentialsForm: false,
     resetCredentials: false,
     initializeCredentialsData: true,
@@ -169,36 +164,30 @@ export const CredentialsLogic = kea<
         }),
         setTokenType: (activeApiToken, tokenType) => ({
           ...activeApiToken,
-          access_all_engines: tokenType === ADMIN ? false : activeApiToken.access_all_engines,
-          engines: tokenType === ADMIN ? [] : activeApiToken.engines,
-          write: tokenType === PRIVATE,
-          read: tokenType === PRIVATE,
-          type: tokenType,
+          access_all_engines:
+            tokenType === ApiTokenTypes.Admin ? false : activeApiToken.access_all_engines,
+          engines: tokenType === ApiTokenTypes.Admin ? [] : activeApiToken.engines,
+          write: tokenType === ApiTokenTypes.Private,
+          read: tokenType === ApiTokenTypes.Private,
+          type: tokenType as ApiTokenTypes,
         }),
-        toggleCredentialsForm: (_, activeApiToken) => activeApiToken,
+        showCredentialsForm: (_, activeApiToken) => activeApiToken,
       },
     ],
     activeApiTokenRawName: [
       '',
       {
         setTokenName: (_, activeApiTokenRawName) => activeApiTokenRawName,
-        toggleCredentialsForm: (activeApiTokenRawName, activeApiToken) =>
-          activeApiToken.name || activeApiTokenRawName,
+        showCredentialsForm: (_, activeApiToken) => activeApiToken.name,
         hideCredentialsForm: () => '',
         onApiTokenCreateSuccess: () => '',
         onApiTokenUpdateSuccess: () => '',
       },
     ],
-    activeApiTokenIsExisting: [
+    shouldShowCredentialsForm: [
       false,
       {
-        toggleCredentialsForm: (_, activeApiToken) => !!activeApiToken.id,
-      },
-    ],
-    showCredentialsForm: [
-      false,
-      {
-        toggleCredentialsForm: (showCredentialsForm) => !showCredentialsForm,
+        showCredentialsForm: () => true,
         hideCredentialsForm: () => false,
         onApiTokenCreateSuccess: () => false,
         onApiTokenUpdateSuccess: () => false,
@@ -209,7 +198,7 @@ export const CredentialsLogic = kea<
       {
         onApiTokenError: (_, formErrors) => formErrors,
         onApiTokenCreateSuccess: () => [],
-        toggleCredentialsForm: () => [],
+        showCredentialsForm: () => [],
         resetCredentials: () => [],
       },
     ],
@@ -221,6 +210,10 @@ export const CredentialsLogic = kea<
       (isCredentialsDetailsComplete, isCredentialsDataComplete) => {
         return isCredentialsDetailsComplete === false || isCredentialsDataComplete === false;
       },
+    ],
+    activeApiTokenExists: [
+      () => [selectors.activeApiToken],
+      (activeApiToken) => !!activeApiToken.id,
     ],
   }),
   listeners: ({ actions, values }) => ({

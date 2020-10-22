@@ -149,7 +149,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     return { field: find(testSubject as TestSubjects), testSubject };
   };
 
-  const addField = async (name: string, type: string) => {
+  const addField = async (name: string, type: string, subType?: string) => {
     await act(async () => {
       form.setInputValue('nameParameterInput', name);
       find('createFieldForm.fieldType').simulate('change', [
@@ -159,6 +159,17 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
         },
       ]);
     });
+
+    component.update();
+
+    if (subType !== undefined) {
+      await act(async () => {
+        if (type === 'other') {
+          // subType is a text input
+          form.setInputValue('createFieldForm.fieldSubType', subType);
+        }
+      });
+    }
 
     await act(async () => {
       find('createFieldForm.addButton').simulate('click');
@@ -347,9 +358,11 @@ export type TestSubjects =
   | 'toggleExpandButton'
   | 'createFieldForm'
   | 'createFieldForm.fieldType'
+  | 'createFieldForm.fieldSubType'
   | 'createFieldForm.addButton'
   | 'mappingsEditorFieldEdit'
   | 'mappingsEditorFieldEdit.fieldType'
+  | 'mappingsEditorFieldEdit.fieldSubType'
   | 'mappingsEditorFieldEdit.editFieldUpdateButton'
   | 'mappingsEditorFieldEdit.flyoutTitle'
   | 'mappingsEditorFieldEdit.documentationLink'
@@ -372,4 +385,7 @@ export type TestSubjects =
   | 'searchQuoteAnalyzer-custom.input'
   | 'useSameAnalyzerForSearchCheckBox.input'
   | 'metaParameterEditor'
+  | 'scalingFactor.input'
+  | 'formatParameter'
+  | 'formatParameter.formatInput'
   | string;

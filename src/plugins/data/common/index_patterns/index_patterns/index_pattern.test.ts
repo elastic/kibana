@@ -34,34 +34,6 @@ class MockFieldFormatter {}
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
-jest.mock('../../field_mapping', () => {
-  const originalModule = jest.requireActual('../../field_mapping');
-
-  return {
-    ...originalModule,
-    expandShorthand: jest.fn(() => ({
-      id: true,
-      title: true,
-      fieldFormatMap: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => []),
-      },
-      fields: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation((fields) => fields),
-      },
-      sourceFilters: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-      typeMeta: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-    })),
-  };
-});
-
 // helper function to create index patterns
 function create(id: string) {
   const {
@@ -72,7 +44,6 @@ function create(id: string) {
 
   return new IndexPattern({
     spec: { id, type, version, timeFieldName, fields, title },
-    savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -89,7 +60,6 @@ describe('IndexPattern', () => {
 
   describe('api', () => {
     test('should have expected properties', () => {
-      expect(indexPattern).toHaveProperty('popularizeField');
       expect(indexPattern).toHaveProperty('getScriptedFields');
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
       expect(indexPattern).toHaveProperty('addScriptedField');
@@ -212,6 +182,20 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('setFieldFormat and deleteFieldFormaat', () => {
+    test('should persist changes', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      indexPattern.setFieldFormat('bytes', { id: 'bytes' });
+      expect(indexPattern.toSpec().fieldFormats).toEqual({ bytes: { id: 'bytes' } });
+
+      indexPattern.deleteFieldFormat('bytes');
+      expect(indexPattern.toSpec().fieldFormats).toEqual({});
+    });
+  });
+
   describe('toSpec', () => {
     test('should match snapshot', () => {
       const formatter = {
@@ -229,7 +213,6 @@ describe('IndexPattern', () => {
       const spec = indexPattern.toSpec();
       const restoredPattern = new IndexPattern({
         spec,
-        savedObjectsClient: {} as any,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,
         metaFields: [],
@@ -238,53 +221,6 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
-      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
-    });
-  });
-
-  describe('popularizeField', () => {
-    test('should increment the popularity count by default', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-
-        await indexPattern.popularizeField(field.name);
-
-        expect(field.count).toEqual(oldCount + 1);
-      });
-    });
-
-    test('should increment the popularity count', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-        const incrementAmount = 4;
-
-        await indexPattern.popularizeField(field.name, incrementAmount);
-
-        expect(field.count).toEqual(oldCount + incrementAmount);
-      });
-    });
-
-    test('should decrement the popularity count', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-        const incrementAmount = 4;
-        const decrementAmount = -2;
-
-        await indexPattern.popularizeField(field.name, incrementAmount);
-        await indexPattern.popularizeField(field.name, decrementAmount);
-
-        expect(field.count).toEqual(oldCount + incrementAmount + decrementAmount);
-      });
-    });
-
-    test('should not go below 0', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const decrementAmount = -Number.MAX_VALUE;
-
-        await indexPattern.popularizeField(field.name, decrementAmount);
-
-        expect(field.count).toEqual(0);
-      });
     });
   });
 });

@@ -38,6 +38,9 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
+    false
+  );
   const setAlert = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
   };
@@ -107,7 +110,6 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
-        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
@@ -156,6 +158,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
               errors={errors}
               canChangeTrigger={false}
               setHasActionsDisabled={setHasActionsDisabled}
+              setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
               operation="i18n.translate('xpack.triggersActionsUI.sections.alertEdit.operationName', {
                 defaultMessage: 'edit',
               })"
@@ -177,7 +180,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
                   data-test-subj="saveEditedAlertButton"
                   type="submit"
                   iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
+                  isDisabled={hasErrors || hasActionErrors || hasActionsWithBrokenConnector}
                   isLoading={isSaving}
                   onClick={async () => {
                     setIsSaving(true);

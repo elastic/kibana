@@ -82,6 +82,16 @@ describe('rule helpers', () => {
           field: ['host.name'],
           value: '50',
         },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
@@ -217,6 +227,16 @@ describe('rule helpers', () => {
           field: [],
           value: '100',
         },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
@@ -249,6 +269,16 @@ describe('rule helpers', () => {
           field: [],
           value: '100',
         },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
@@ -270,28 +300,40 @@ describe('rule helpers', () => {
   });
 
   describe('getHumanizedDuration', () => {
-    test('returns from as seconds if from duration is less than a minute', () => {
+    test('returns from as seconds if from duration is specified in seconds', () => {
       const result = getHumanizedDuration('now-62s', '1m');
 
       expect(result).toEqual('2s');
     });
 
-    test('returns from as minutes if from duration is less than an hour', () => {
+    test('returns from as seconds if from duration is specified in seconds greater than 60', () => {
+      const result = getHumanizedDuration('now-122s', '1m');
+
+      expect(result).toEqual('62s');
+    });
+
+    test('returns from as minutes if from duration is specified in minutes', () => {
       const result = getHumanizedDuration('now-660s', '5m');
 
       expect(result).toEqual('6m');
     });
 
-    test('returns from as hours if from duration is more than 60 minutes', () => {
-      const result = getHumanizedDuration('now-7400s', '5m');
+    test('returns from as minutes if from duration is specified in minutes greater than 60', () => {
+      const result = getHumanizedDuration('now-6600s', '5m');
 
-      expect(result).toEqual('1h');
+      expect(result).toEqual('105m');
+    });
+
+    test('returns from as hours if from duration is specified in hours', () => {
+      const result = getHumanizedDuration('now-7500s', '5m');
+
+      expect(result).toEqual('2h');
     });
 
     test('returns from as if from is not parsable as dateMath', () => {
       const result = getHumanizedDuration('randomstring', '5m');
 
-      expect(result).toEqual('NaNh');
+      expect(result).toEqual('NaNs');
     });
 
     test('returns from as 5m if interval is not parsable as dateMath', () => {

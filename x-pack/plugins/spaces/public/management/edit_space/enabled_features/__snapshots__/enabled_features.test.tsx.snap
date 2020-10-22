@@ -2,10 +2,8 @@
 
 exports[`EnabledFeatures renders as expected 1`] = `
 <SectionPanel
-  collapsible={false}
   data-test-subj="enabled-features-panel"
   description="Customize visible features"
-  initiallyCollapsed={false}
   title={
     <span>
       <FormattedMessage
@@ -95,7 +93,6 @@ exports[`EnabledFeatures renders as expected 1`] = `
                 "label": "Kibana",
                 "order": 1000,
               },
-              "icon": "spacesApp",
               "id": "feature-1",
               "name": "Feature 1",
               "privileges": null,
@@ -108,7 +105,6 @@ exports[`EnabledFeatures renders as expected 1`] = `
                 "label": "Kibana",
                 "order": 1000,
               },
-              "icon": "spacesApp",
               "id": "feature-2",
               "name": "Feature 2",
               "privileges": null,

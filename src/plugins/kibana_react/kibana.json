@@ -2,5 +2,6 @@
   "id": "kibanaReact",
   "version": "kibana",
   "ui": true,
+  "server": false,
   "requiredBundles": ["kibanaUtils"]
 }

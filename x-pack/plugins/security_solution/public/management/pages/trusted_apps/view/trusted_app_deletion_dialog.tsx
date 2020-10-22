@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonProps,
+  PropsForButton,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -66,6 +68,21 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   ),
 });
 
+const AutoFocusButton: FC<PropsForButton<EuiButtonProps>> = memo((props) => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const button = <EuiButton buttonRef={buttonRef} {...props} />;
+
+  useEffect(() => {
+    if (buttonRef.current) {
+      buttonRef.current.focus();
+    }
+  }, []);
+
+  return button;
+});
+
+AutoFocusButton.displayName = 'AutoFocusButton';
+
 export const TrustedAppDeletionDialog = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const isBusy = useTrustedAppsSelector(isDeletionInProgress);
@@ -100,9 +117,15 @@ export const TrustedAppDeletionDialog = memo(() => {
               {translations.cancelButton}
             </EuiButtonEmpty>
 
-            <EuiButton fill onClick={onConfirm} isLoading={isBusy} data-test-subj={CONFIRM_SUBJ}>
+            <AutoFocusButton
+              fill
+              color="danger"
+              onClick={onConfirm}
+              isLoading={isBusy}
+              data-test-subj={CONFIRM_SUBJ}
+            >
               {translations.confirmButton}
-            </EuiButton>
+            </AutoFocusButton>
           </EuiModalFooter>
         </EuiModal>
       </EuiOverlayMask>

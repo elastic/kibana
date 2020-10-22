@@ -17,46 +17,12 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 
-import { SearchResponse } from 'elasticsearch';
 import { IRouter } from 'src/core/server';
 import { SearchRouteDependencies } from '../search_service';
-import { shimHitsTotal } from './shim_hits_total';
-import { getShardTimeout, getDefaultSearchParams, toSnakeCase } from '..';
 
-interface MsearchHeaders {
-  index: string;
-  preference?: number | string;
-}
-
-interface MsearchRequest {
-  header: MsearchHeaders;
-  body: any;
-}
-
-interface RequestBody {
-  searches: MsearchRequest[];
-}
-
-/** @internal */
-export function convertRequestBody(
-  requestBody: RequestBody,
-  { timeout }: { timeout?: string }
-): string {
-  return requestBody.searches.reduce((req, curr) => {
-    const header = JSON.stringify({
-      ignore_unavailable: true,
-      ...curr.header,
-    });
-    const body = JSON.stringify({
-      timeout,
-      ...curr.body,
-    });
-    return `${req}${header}\n${body}\n`;
-  }, '');
-}
+import { getCallMsearch } from './call_msearch';
 
 /**
  * The msearch route takes in an array of searches, each consisting of header
@@ -93,35 +59,15 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
       },
     },
     async (context, request, res) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
-
-      // get shardTimeout
-      const config = await deps.globalConfig$.pipe(first()).toPromise();
-      const timeout = getShardTimeout(config);
-
-      const body = convertRequestBody(request.body, timeout);
-
-      // trackTotalHits is not supported by msearch
-      const { trackTotalHits, ...defaultParams } = await getDefaultSearchParams(
-        context.core.uiSettings.client
-      );
+      const callMsearch = getCallMsearch({
+        esClient: context.core.elasticsearch.client,
+        globalConfig$: deps.globalConfig$,
+        uiSettings: context.core.uiSettings.client,
+      });
 
       try {
-        const response = await client.transport.request({
-          method: 'GET',
-          path: '/_msearch',
-          body,
-          querystring: toSnakeCase(defaultParams),
-        });
-
-        return res.ok({
-          body: {
-            ...response,
-            body: {
-              responses: response.body.responses?.map((r: SearchResponse<any>) => shimHitsTotal(r)),
-            },
-          },
-        });
+        const response = await callMsearch({ body: request.body });
+        return res.ok(response);
       } catch (err) {
         return res.customError({
           statusCode: err.statusCode || 500,
