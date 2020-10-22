@@ -30,7 +30,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="none"
-      withTitle={true}
     >
       <div
         style={
@@ -229,7 +228,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="none"
-      withTitle={true}
     >
       <div
         style={
