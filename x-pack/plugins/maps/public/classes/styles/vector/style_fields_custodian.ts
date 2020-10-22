@@ -20,8 +20,8 @@ export interface StyleField {
   supportsAutoDomain: boolean;
 }
 
-export async function styleFieldsCustodianFactory(fields: IField[]): Promise<StyleFields> {
-  const promises: Promise<StyleField> = fields.map(async (field: IField) => {
+export async function styleFieldsCustodianFactory(fields: IField[]): Promise<StyleFieldsCustodian> {
+  const promises: Array<Promise<StyleField>> = fields.map(async (field: IField) => {
     return {
       label: await field.getLabel(),
       name: field.getName(),

@@ -27,9 +27,9 @@ export class MockField extends AbstractField {
     supportsAutoDomain = true,
   }: {
     fieldName: string;
-    origin: FIELD_ORIGIN;
-    dataType: string;
-    supportsAutoDomain: boolean;
+    origin?: FIELD_ORIGIN;
+    dataType?: string;
+    supportsAutoDomain?: boolean;
   }) {
     super({ fieldName, origin });
     this._dataType = dataType;
