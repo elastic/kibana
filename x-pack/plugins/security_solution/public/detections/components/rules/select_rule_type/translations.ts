@@ -66,13 +66,14 @@ export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
 export const THREAT_MATCH_TYPE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchTitle',
   {
-    defaultMessage: 'Threat Match',
+    defaultMessage: 'Indicator Match',
   }
 );
 
 export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchDescription',
   {
-    defaultMessage: 'Configure rules matching fields from threat feed indices.',
+    defaultMessage:
+      'Use indicators from intelligence sources to detect matching events and alerts.',
   }
 );
