@@ -28,8 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     // list paths to the files that contain your plugins tests
     testFiles: [
       resolve(__dirname, './test_suites/resolver'),
-      // Disabling this suite as it is broken.
-      // resolve(__dirname, './test_suites/global_search'),
+      resolve(__dirname, './test_suites/global_search'),
     ],
 
     services,
