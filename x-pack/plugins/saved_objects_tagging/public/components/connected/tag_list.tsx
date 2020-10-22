@@ -29,7 +29,13 @@ const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags: allTags
   return <TagList tags={objectTags} />;
 };
 
-export const getConnectedTagListComponent = (cache: ITagsCache): FC<TagListComponentProps> => {
+interface GetConnectedTagListOptions {
+  cache: ITagsCache;
+}
+
+export const getConnectedTagListComponent = ({
+  cache,
+}: GetConnectedTagListOptions): FC<TagListComponentProps> => {
   return (props: TagListComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
     return <SavedObjectTagList {...props} tags={tags} />;

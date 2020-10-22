@@ -9,12 +9,22 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectSaveModalTagSelectorComponentProps } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { TagsCapabilities } from '../../../common';
 import { TagSelector } from '../base';
 import { ITagsCache } from '../../tags';
+import { CreateModalOpener } from '../edition_modal';
 
-export const getConnectedSavedObjectModalTagSelectorComponent = (
-  cache: ITagsCache
-): FC<SavedObjectSaveModalTagSelectorComponentProps> => {
+interface GetConnectedTagSelectorOptions {
+  cache: ITagsCache;
+  capabilities: TagsCapabilities;
+  openCreateModal: CreateModalOpener;
+}
+
+export const getConnectedSavedObjectModalTagSelectorComponent = ({
+  cache,
+  capabilities,
+  openCreateModal,
+}: GetConnectedTagSelectorOptions): FC<SavedObjectSaveModalTagSelectorComponentProps> => {
   return ({
     initialSelection,
     setSelected: notifySelectionChange,
@@ -45,6 +55,8 @@ export const getConnectedSavedObjectModalTagSelectorComponent = (
           setSelected={setSelectedInternal}
           tags={tags}
           data-test-subj="savedObjectTagSelector"
+          allowCreate={capabilities.create}
+          openCreateModal={openCreateModal}
         />
       </EuiFormRow>
     );

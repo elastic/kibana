@@ -69,22 +69,38 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
 
   const openCreateModal = useCallback(() => {
     createModalOpener({
-      onCreate: () => {
+      onCreate: (createdTag) => {
         fetchTags();
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.savedObjectsTagging.notifications.createTagSuccessTitle', {
+            defaultMessage: 'Created "{name}" tag',
+            values: {
+              name: createdTag.name,
+            },
+          }),
+        });
       },
     });
-  }, [createModalOpener, fetchTags]);
+  }, [notifications, createModalOpener, fetchTags]);
 
   const openEditModal = useCallback(
     (tag: TagWithRelations) => {
       editModalOpener({
         tagId: tag.id,
-        onUpdate: () => {
+        onUpdate: (updatedTag) => {
           fetchTags();
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.savedObjectsTagging.notifications.editTagSuccessTitle', {
+              defaultMessage: 'Saved changes to "{name}" tag',
+              values: {
+                name: updatedTag.name,
+              },
+            }),
+          });
         },
       });
     },
-    [editModalOpener, fetchTags]
+    [notifications, editModalOpener, fetchTags]
   );
 
   const getTagRelationUrl = useCallback(
@@ -105,19 +121,22 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     async (tag: TagWithRelations) => {
       const confirmed = await overlays.openConfirm(
         i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.text', {
-          defaultMessage: 'Are you sure you want to delete tag "{name}"?',
-          values: {
-            name: tag.name,
-          },
+          defaultMessage:
+            'By deleting this tag, you will no longer be able to assign it to saved objects. ' +
+            'This tag will be removed from any saved objects that currently use it. ' +
+            'Are you sure you wish to proceed?',
         }),
         {
           title: i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.title', {
-            defaultMessage: 'Delete tag',
+            defaultMessage: 'Delete "{name}" tag',
+            values: {
+              name: tag.name,
+            },
           }),
           confirmButtonText: i18n.translate(
             'xpack.savedObjectsTagging.modals.confirmDelete.confirmButtonText',
             {
-              defaultMessage: 'Delete',
+              defaultMessage: 'Delete tag',
             }
           ),
           buttonColor: 'danger',
@@ -125,15 +144,17 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       );
       if (confirmed) {
         await tagClient.delete(tag.id);
+
+        fetchTags();
+
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.savedObjectsTagging.notifications.deleteTagSuccessTitle', {
-            defaultMessage: 'Tag "{name}" was deleted.',
+            defaultMessage: 'Deleted "{name}" tag',
             values: {
               name: tag.name,
             },
           }),
         });
-        fetchTags();
       }
     },
     [overlays, notifications, fetchTags, tagClient]

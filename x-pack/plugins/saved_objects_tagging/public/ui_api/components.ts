@@ -4,24 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { OverlayStart } from 'src/core/public';
 import { SavedObjectsTaggingApiUiComponent } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../tags';
+import { TagsCapabilities } from '../../common';
+import { ITagInternalClient, ITagsCache } from '../tags';
 import {
   getConnectedTagListComponent,
   getConnectedTagSelectorComponent,
   getConnectedSavedObjectModalTagSelectorComponent,
 } from '../components/connected';
+import { getCreateModalOpener } from '../components/edition_modal';
 
 export interface GetComponentsOptions {
+  capabilities: TagsCapabilities;
   cache: ITagsCache;
+  overlays: OverlayStart;
+  tagClient: ITagInternalClient;
 }
 
 export const getComponents = ({
+  capabilities,
   cache,
+  overlays,
+  tagClient,
 }: GetComponentsOptions): SavedObjectsTaggingApiUiComponent => {
+  const openCreateModal = getCreateModalOpener({ overlays, tagClient });
   return {
-    TagList: getConnectedTagListComponent(cache),
-    TagSelector: getConnectedTagSelectorComponent(cache),
-    SavedObjectSaveModalTagSelector: getConnectedSavedObjectModalTagSelectorComponent(cache),
+    TagList: getConnectedTagListComponent({ cache }),
+    TagSelector: getConnectedTagSelectorComponent({ cache, capabilities, openCreateModal }),
+    SavedObjectSaveModalTagSelector: getConnectedSavedObjectModalTagSelectorComponent({
+      cache,
+      capabilities,
+      openCreateModal,
+    }),
   };
 };

@@ -21,9 +21,12 @@ interface OpenCreateModalOptions {
   onCreate: (tag: Tag) => void;
 }
 
-export const getCreateModalOpener = ({ overlays, tagClient }: GetModalOpenerOptions) => ({
-  onCreate,
-}: OpenCreateModalOptions) => {
+export type CreateModalOpener = (options: OpenCreateModalOptions) => void;
+
+export const getCreateModalOpener = ({
+  overlays,
+  tagClient,
+}: GetModalOpenerOptions): CreateModalOpener => ({ onCreate }: OpenCreateModalOptions) => {
   const modal = overlays.openModal(
     toMountPoint(
       <CreateTagModal
@@ -49,7 +52,6 @@ export const getEditModalOpener = ({ overlays, tagClient }: GetModalOpenerOption
   tagId,
   onUpdate,
 }: OpenEditModalOptions) => {
-  // TODO / try/catch + add onError handler
   const tag = await tagClient.get(tagId);
 
   const modal = overlays.openModal(

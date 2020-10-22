@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getCreateModalOpener, getEditModalOpener } from './open_modal';
+export { getCreateModalOpener, getEditModalOpener, CreateModalOpener } from './open_modal';

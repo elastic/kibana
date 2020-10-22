@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_objects_tagging_oss/public';
 import { tagManagementSectionId } from '../common/constants';
+import { getTagsCapabilities } from '../common/capabilities';
 import { SavedObjectTaggingPluginStart } from './types';
 import { TagsClient, TagsCache } from './tags';
 import { getUiApi } from './ui_api';
@@ -59,7 +60,7 @@ export class SavedObjectTaggingPlugin
     return {};
   }
 
-  public start({ http }: CoreStart) {
+  public start({ http, application, overlays }: CoreStart) {
     this.tagCache = new TagsCache({
       refreshHandler: () => this.tagClient!.getAll(),
       refreshInterval: this.config.cacheRefreshInterval,
@@ -71,7 +72,12 @@ export class SavedObjectTaggingPlugin
 
     return {
       client: this.tagClient,
-      ui: getUiApi({ cache: this.tagCache, client: this.tagClient }),
+      ui: getUiApi({
+        cache: this.tagCache,
+        client: this.tagClient,
+        capabilities: getTagsCapabilities(application.capabilities),
+        overlays,
+      }),
     };
   }
 
