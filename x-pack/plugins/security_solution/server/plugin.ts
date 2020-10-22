@@ -190,9 +190,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: 'logoSecurity',
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
