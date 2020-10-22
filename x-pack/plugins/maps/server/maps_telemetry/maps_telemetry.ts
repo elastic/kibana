@@ -331,10 +331,10 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
   // Get layer descriptors for Maps saved objects. This is not set up
   // to be done incrementally (i.e. - per page) but minimally we at least
   // build a list of small footprint objects
-  let layerLists: LayerDescriptor[][] = [];
+  const layerLists: LayerDescriptor[][] = [];
   await execTransformOverMultipleSavedObjectPages<MapSavedObjectAttributes>(
     MAP_SAVED_OBJECT_TYPE,
-    (savedObjects) => (layerLists = layerLists.concat(getLayerLists(savedObjects)))
+    (savedObjects) => layerLists.push(...getLayerLists(savedObjects))
   );
   const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
 
