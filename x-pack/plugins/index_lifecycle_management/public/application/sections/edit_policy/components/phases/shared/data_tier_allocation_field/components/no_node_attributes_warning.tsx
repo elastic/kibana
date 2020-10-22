@@ -8,7 +8,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { PhaseWithAllocation } from '../../../../../../common/types';
+import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel', {
