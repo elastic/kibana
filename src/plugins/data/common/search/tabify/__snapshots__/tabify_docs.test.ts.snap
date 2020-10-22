@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tabifyDocs converts fields by default 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "fieldTest",
+      "meta": Object {
+        "field": "fieldTest",
+        "index": "test-index",
+        "params": Object {
+          "id": "number",
+        },
+        "type": "number",
+      },
+      "name": "fieldTest",
+    },
+    Object {
+      "id": "invalidMapping",
+      "meta": Object {
+        "field": "invalidMapping",
+        "index": "test-index",
+        "params": undefined,
+        "type": "number",
+      },
+      "name": "invalidMapping",
+    },
+    Object {
+      "id": "nested.field",
+      "meta": Object {
+        "field": "nested.field",
+        "index": "test-index",
+        "params": Object {
+          "id": "number",
+        },
+        "type": "number",
+      },
+      "name": "nested.field",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "fieldTest": 123,
+      "invalidMapping": 345,
+      "nested.field": 123,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`tabifyDocs converts source if option is set 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "sourceTest",
+      "meta": Object {
+        "field": "sourceTest",
+        "index": "test-index",
+        "params": Object {
+          "id": "number",
+        },
+        "type": "number",
+      },
+      "name": "sourceTest",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "sourceTest": 123,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`tabifyDocs skips nested fields if option is set 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "fieldTest",
+      "meta": Object {
+        "field": "fieldTest",
+        "index": "test-index",
+        "params": Object {
+          "id": "number",
+        },
+        "type": "number",
+      },
+      "name": "fieldTest",
+    },
+    Object {
+      "id": "invalidMapping",
+      "meta": Object {
+        "field": "invalidMapping",
+        "index": "test-index",
+        "params": undefined,
+        "type": "number",
+      },
+      "name": "invalidMapping",
+    },
+    Object {
+      "id": "nested",
+      "meta": Object {
+        "field": "nested",
+        "index": "test-index",
+        "params": undefined,
+        "type": "object",
+      },
+      "name": "nested",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "fieldTest": 123,
+      "invalidMapping": 345,
+      "nested": Array [
+        Object {
+          "field": 123,
+        },
+      ],
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`tabifyDocs works without provided index pattern 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "fieldTest",
+      "meta": Object {
+        "field": "fieldTest",
+        "index": undefined,
+        "params": undefined,
+        "type": "number",
+      },
+      "name": "fieldTest",
+    },
+    Object {
+      "id": "invalidMapping",
+      "meta": Object {
+        "field": "invalidMapping",
+        "index": undefined,
+        "params": undefined,
+        "type": "number",
+      },
+      "name": "invalidMapping",
+    },
+    Object {
+      "id": "nested.field",
+      "meta": Object {
+        "field": "nested.field",
+        "index": undefined,
+        "params": undefined,
+        "type": "number",
+      },
+      "name": "nested.field",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "fieldTest": 123,
+      "invalidMapping": 345,
+      "nested.field": 123,
+    },
+  ],
+  "type": "datatable",
+}
+`;

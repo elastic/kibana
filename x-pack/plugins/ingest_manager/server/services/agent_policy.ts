@@ -34,6 +34,7 @@ import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
+import { isAgentsSetup } from './agents/setup';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -82,7 +83,12 @@ class AgentPolicyService {
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
-  public async ensureDefaultAgentPolicy(soClient: SavedObjectsClientContract) {
+  public async ensureDefaultAgentPolicy(
+    soClient: SavedObjectsClientContract
+  ): Promise<{
+    created: boolean;
+    defaultAgentPolicy: AgentPolicy;
+  }> {
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -94,12 +100,18 @@ class AgentPolicyService {
         ...DEFAULT_AGENT_POLICY,
       };
 
-      return this.create(soClient, newDefaultAgentPolicy);
+      return {
+        created: true,
+        defaultAgentPolicy: await this.create(soClient, newDefaultAgentPolicy),
+      };
     }
 
     return {
-      id: agentPolicies.saved_objects[0].id,
-      ...agentPolicies.saved_objects[0].attributes,
+      created: false,
+      defaultAgentPolicy: {
+        id: agentPolicies.saved_objects[0].id,
+        ...agentPolicies.saved_objects[0].attributes,
+      },
     };
   }
 
@@ -287,6 +299,8 @@ class AgentPolicyService {
       throw new Error('Copied agent policy not found');
     }
 
+    await this.createFleetPolicyChangeAction(soClient, newAgentPolicy.id);
+
     return updatedAgentPolicy;
   }
 
@@ -401,7 +415,9 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    const { id: defaultAgentPolicyId } = await this.ensureDefaultAgentPolicy(soClient);
+    const {
+      defaultAgentPolicy: { id: defaultAgentPolicyId },
+    } = await this.ensureDefaultAgentPolicy(soClient);
     if (id === defaultAgentPolicyId) {
       throw new Error('The default agent policy cannot be deleted');
     }
@@ -426,6 +442,7 @@ class AgentPolicyService {
     await this.triggerAgentPolicyUpdatedEvent(soClient, 'deleted', id);
     return {
       id,
+      name: agentPolicy.name,
     };
   }
 
@@ -433,6 +450,11 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ) {
+    // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
+    // the action will be created during the fleet setup
+    if (!(await isAgentsSetup(soClient))) {
+      return;
+    }
     const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
     if (!policy || !policy.revision) {
       return;

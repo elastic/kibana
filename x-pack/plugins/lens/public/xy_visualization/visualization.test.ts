@@ -312,6 +312,37 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
+    it('should return the correct labels for the 3 dimensios', () => {
+      const options = xyVisualization.getConfiguration({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+      }).groups;
+      expect(options.map((o) => o.groupLabel)).toEqual([
+        'Horizontal axis',
+        'Vertical axis',
+        'Break down by',
+      ]);
+    });
+
+    it('should return the correct labels for the 3 dimensios for a horizontal chart', () => {
+      const initialState = exampleState();
+      const state = {
+        ...initialState,
+        layers: [{ ...initialState.layers[0], seriesType: 'bar_horizontal' as SeriesType }],
+      };
+      const options = xyVisualization.getConfiguration({
+        state,
+        frame,
+        layerId: 'first',
+      }).groups;
+      expect(options.map((o) => o.groupLabel)).toEqual([
+        'Vertical axis',
+        'Horizontal axis',
+        'Break down by',
+      ]);
+    });
+
     it('should only accept bucketed operations for x', () => {
       const options = xyVisualization.getConfiguration({
         state: exampleState(),

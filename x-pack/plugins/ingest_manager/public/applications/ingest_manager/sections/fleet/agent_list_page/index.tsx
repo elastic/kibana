@@ -173,6 +173,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
+
   // Table and search states
   const [search, setSearch] = useState<string>(defaultKuery);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
@@ -188,11 +189,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [isStatusFilterOpen, setIsStatutsFilterOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
+  const isUsingFilter =
+    search.trim() ||
+    selectedAgentPolicies.length ||
+    selectedStatus.length ||
+    showInactive ||
+    showUpgradeable;
+
   const clearFilters = useCallback(() => {
     setSearch('');
     setSelectedAgentPolicies([]);
     setSelectedStatus([]);
-  }, [setSearch, setSelectedAgentPolicies, setSelectedStatus]);
+    setShowInactive(false);
+    setShowUpgradeable(false);
+  }, [setSearch, setSelectedAgentPolicies, setSelectedStatus, setShowInactive, setShowUpgradeable]);
 
   // Add a agent policy id to current search
   const addAgentPolicyFilter = (policyId: string) => {
@@ -638,7 +648,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               id="xpack.ingestManager.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"
             />
-          ) : search.trim() || selectedAgentPolicies.length || selectedStatus.length ? (
+          ) : isUsingFilter ? (
             <FormattedMessage
               id="xpack.ingestManager.agentList.noFilteredAgentsPrompt"
               defaultMessage="No agents found. {clearFiltersLink}"
