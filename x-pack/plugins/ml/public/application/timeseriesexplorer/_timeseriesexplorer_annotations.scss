@@ -77,36 +77,6 @@ $mlAnnotationRectDefaultFillOpacity: 0.05;
   display: none;
 }
 
-.mlAnnotationText {
-  text-anchor: middle;
-  font-size: $euiFontSizeXS;
-  font-family: $euiFontFamily;
-  font-weight: $euiFontWeightMedium;
-
-  fill: $euiColorFullShade;
-  transition: fill $euiAnimSpeedFast;
-}
-
-.mlAnnotationText-isBlur {
-  fill: $euiColorMediumShade;
-  transition: fill $euiAnimSpeedFast;
-}
-
-.mlAnnotationTextRect {
-  fill: $euiColorLightShade;
-  transition: fill $euiAnimSpeedFast;
-}
-
-.mlAnnotationTextRect-isBlur {
-  fill: $euiColorLightestShade;
-  transition: fill $euiAnimSpeedFast;
-}
-
-.mlAnnotationHidden {
-  display: none;
-}
-
-
 // context annotation marker
 .mlContextAnnotationRect {
   stroke: $euiColorFullShade;
