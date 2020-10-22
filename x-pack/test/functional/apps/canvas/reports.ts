@@ -47,6 +47,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
+        expect(res.header['content-disposition']).to.equal(
+          'inline; filename="The Very Cool Workpad for PDF Tests.pdf"'
+        );
+
+        /* Check the value of the PDF data that was generated
+         * PDF files include dynamic meta info such as creation date
+         * but the first 636 characters of base64 should match the baseline PDF
+         */
+        const encodedPdf = (res.body as Buffer).toString('base64');
+        const commonString = encodedPdf.slice(0, 636);
+        expect(commonString).to.eql(
+          `JVBERi0xLjMKJf////8KOSAwIG9iago8PAovVHlwZSAvRXh0R1N0YXRlCi9jYSAxCi9DQSAxCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9UeXBlIC9QYWdlCi9QYXJlbn` +
+            `QgMSAwIFIKL01lZGlhQm94IFswIDAgMTYgMTZdCi9Db250ZW50cyA2IDAgUgovUmVzb3VyY2VzIDcgMCBSCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9Qcm9jU2V0IFsv` +
+            `UERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJXQovRXh0R1N0YXRlIDw8Ci9HczEgOSAwIFIKPj4KL1hPYmplY3QgPDwKL0kxIDUgMCBSCj4+Cj4+CmVuZG` +
+            `9iago2IDAgb2JqCjw8Ci9MZW5ndGggNDYKL0ZpbHRlciAvRmxhdGVEZWNvZGUKPj4Kc3RyZWFtCnicM1QwAEJdQyBhaKaQnMul715sqJBezFXIBeRD5MwQkp6GCi75` +
+            `XIFcADOJCycKZW5kc3RyZWFtCmVuZG9iagoxMSAwIG9iagoocGRmbWFrZSkKZW5kb2JqCjEyIDAgb2JqCihwZGZtYWtlKQplbmRvYmoKMTMgMCBvYmoKKEQ6MjAyMD` +
+            `EwMjIx`
+        );
       });
     });
   });
