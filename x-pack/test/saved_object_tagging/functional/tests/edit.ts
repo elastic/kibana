@@ -73,12 +73,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         {
           name: 'invalid&$%name',
         },
-        { submit: false }
+        { submit: true }
       );
 
-      expect(await tagModal.isConfirmDisabled()).to.be(true);
-      const errors = await tagModal.getValidationErrors();
+      expect(await tagModal.isOpened()).to.be(true);
+      expect(await tagModal.hasError()).to.be(true);
 
+      const errors = await tagModal.getValidationErrors();
       expect(errors.name).not.to.be(undefined);
       expect(errors.color).to.be(undefined);
     });
@@ -91,21 +92,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'edited description',
           color: '#FF00CC',
         },
-        { submit: false }
+        { submit: true }
       );
 
-      expect(await tagModal.isConfirmDisabled()).to.be(true);
+      expect(await tagModal.isOpened()).to.be(true);
+      expect(await tagModal.hasError()).to.be(true);
 
       await tagModal.fillForm(
         {
           name: 'edited name',
         },
-        { submit: false }
+        { submit: true }
       );
 
-      expect(await tagModal.isConfirmDisabled()).to.be(false);
-
-      await tagModal.clickConfirm();
       await tagModal.waitUntilClosed();
       await tagManagementPage.waitUntilTableIsLoaded();
 

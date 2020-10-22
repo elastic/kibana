@@ -6,7 +6,7 @@
 
 // eslint-disable-next-line no-restricted-imports
 import omit from 'lodash/omit';
-import React, { FC, useState, useCallback, useEffect } from 'react';
+import React, { FC, useState, useCallback } from 'react';
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { TagValidation } from '../../../common/validation';
 import { isServerValidationError } from '../../tags';
@@ -27,7 +27,6 @@ const initialValidation: TagValidation = {
 };
 
 export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagClient }) => {
-  const [pristine, setPristine] = useState<boolean>(true);
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(omit(tag, 'id'));
 
@@ -37,21 +36,17 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
         ...current,
         [field]: value,
       }));
-      setPristine(false);
     },
     []
   );
 
-  useEffect(() => {
-    const newValidation = validateTag(tagAttributes);
-    // we don't want to display error if the form has not been touched.
-    if (pristine) {
-      newValidation.errors = {};
-    }
-    setValidation(newValidation);
-  }, [tagAttributes, pristine]);
-
   const onSubmit = useCallback(async () => {
+    const clientValidation = validateTag(tagAttributes);
+    setValidation(clientValidation);
+    if (!clientValidation.valid) {
+      return;
+    }
+
     try {
       const createdTag = await tagClient.update(tag.id, tagAttributes);
       onSave(createdTag);

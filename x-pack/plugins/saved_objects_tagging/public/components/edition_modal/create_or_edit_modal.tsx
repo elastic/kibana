@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useIfMounted } from '../../../../../../src/plugins/kibana_react/public';
 import {
   TagAttributes,
   TagValidation,
@@ -52,6 +53,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   tag,
   mode,
 }) => {
+  const ifMounted = useIfMounted();
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   // we don't want this value to change when the user edit the name.
@@ -73,14 +75,13 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   }, [tag]);
 
   const onFormSubmit = useCallback(async () => {
-    if (!validation.valid) {
-      return;
-    }
-
     setSubmitting(true);
     await onSubmit();
-    setSubmitting(false);
-  }, [validation, onSubmit]);
+    // onSubmit can close the modal, causing errors in the console when the component tries to setState.
+    ifMounted(() => {
+      setSubmitting(false);
+    });
+  }, [ifMounted, onSubmit]);
 
   return (
     <EuiModal onClose={onClose} initialFocus="[name=name]" style={{ minWidth: '600px' }}>
@@ -222,7 +223,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   fill
                   data-test-subj="createModalConfirmButton"
                   onClick={onFormSubmit}
-                  isDisabled={!validation.valid && !submitting}
+                  isDisabled={submitting}
                 >
                   {isEdit ? (
                     <FormattedMessage

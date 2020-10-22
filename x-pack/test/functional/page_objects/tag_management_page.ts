@@ -98,6 +98,14 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
+     * Returns true if the form as at least one error displayed, false otherwise
+     */
+    async hasError() {
+      const errors = await this.getValidationErrors();
+      return Boolean(errors.name || errors.color || errors.description);
+    }
+
+    /**
      * Click on the 'cancel' button in the create/edit modal.
      */
     async clickCancel() {
@@ -108,10 +116,8 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
      * Click on the 'confirm' button in the create/edit modal if not disabled.
      */
     async clickConfirm() {
-      if (!(await this.isConfirmDisabled())) {
-        await testSubjects.click('createModalConfirmButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-      }
+      await testSubjects.click('createModalConfirmButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     /**

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useCallback, useEffect } from 'react';
+import React, { FC, useState, useCallback } from 'react';
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { TagValidation } from '../../../common/validation';
 import { isServerValidationError } from '../../tags';
@@ -30,7 +30,6 @@ const initialValidation: TagValidation = {
 };
 
 export const CreateTagModal: FC<CreateTagModalProps> = ({ tagClient, onClose, onSave }) => {
-  const [pristine, setPristine] = useState<boolean>(true);
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(createEmptyTag());
 
@@ -40,21 +39,17 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({ tagClient, onClose, on
         ...current,
         [field]: value,
       }));
-      setPristine(false);
     },
     []
   );
 
-  useEffect(() => {
-    const newValidation = validateTag(tagAttributes);
-    // we don't want to display error if the form has not been touched.
-    if (pristine) {
-      newValidation.errors = {};
-    }
-    setValidation(newValidation);
-  }, [tagAttributes, pristine]);
-
   const onSubmit = useCallback(async () => {
+    const clientValidation = validateTag(tagAttributes);
+    setValidation(clientValidation);
+    if (!clientValidation.valid) {
+      return;
+    }
+
     try {
       const createdTag = await tagClient.create(tagAttributes);
       onSave(createdTag);
