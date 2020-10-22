@@ -440,8 +440,6 @@ export const AlertsList: React.FunctionComponent = () => {
                   defaultMessage="Error found in {totalStausesError, plural, one {# alert} other {# alerts}}."
                   values={{
                     totalStausesError: alertsStatusesTotal.error,
-                    singleTitle: 'alert',
-                    multipleTitle: 'alerts',
                   }}
                 />
               }
