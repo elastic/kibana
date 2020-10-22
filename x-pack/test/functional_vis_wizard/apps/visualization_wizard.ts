@@ -14,10 +14,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens and maps disabled', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('visualize/default');
     });
 
-    after(function () {
-      return esArchiver.unload('logstash_functional');
+    after(async function () {
+      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('visualize/default');
     });
 
     it('should not display lens and maps cards', async function () {
