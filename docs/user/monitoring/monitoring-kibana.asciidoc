@@ -48,7 +48,7 @@ By default, if you are running {kib} locally, go to `http://localhost:5601/`.
 If {security-features} are enabled, log in.
 --
 
-... Open the menu, then go to *Stack Monitoring*. If data collection is
+... Open the main menu, then click *Stack Monitoring*. If data collection is
 disabled, you are prompted to turn it on. 
 
 ** From the Console or command line, set `xpack.monitoring.collection.enabled`
