@@ -4,56 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { ECSField } from '../../../../../../common/endpoint/types';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { UniqueID } from './unique_id';
-
-/**
- * This type represents the document returned from ES for a legacy event when using the ChildrenQuery to fetch legacy events.
- * It contains only the necessary fields that the children api needs to process the results before
- * it requests the full lifecycle information for the children in a later query.
- */
-export type LegacyChildEvent = Partial<{
-  '@timestamp': ECSField<number>;
-  event: Partial<{
-    type: ECSField<string>;
-    action: ECSField<string>;
-  }>;
-  endgame: Partial<{
-    serial_event_id: ECSField<number>;
-    unique_pid: ECSField<number>;
-    unique_ppid: ECSField<number>;
-  }>;
-}>;
-
-/**
- * This type represents the document returned from ES for an event when using the ChildrenQuery to fetch legacy events.
- * It contains only the necessary fields that the children api needs to process the results before
- * it requests the full lifecycle information for the children in a later query.
- */
-export type EndpointChildEvent = Partial<{
-  '@timestamp': ECSField<number>;
-  event: Partial<{
-    type: ECSField<string>;
-    sequence: ECSField<number>;
-  }>;
-  process: Partial<{
-    entity_id: ECSField<string>;
-    parent: Partial<{
-      entity_id: ECSField<string>;
-    }>;
-    Ext: Partial<{
-      ancestry: ECSField<string>;
-    }>;
-  }>;
-}>;
-
-export type ChildEvent = EndpointChildEvent | LegacyChildEvent;
 
 interface Timerange {
   start: string;
   end: string;
 }
+
+type Nodes = Array<Map<string, string>>;
 
 /**
  * Builds a query for retrieving descendants of a node.
@@ -69,10 +30,10 @@ export class DescendantsQuery {
     private readonly size: number
   ) {}
 
-  private query(nodes: Array<Map<string, string>>): JsonObject {
+  private query(nodes: Nodes): JsonObject {
     return {
       // TODO look into switching this to doc_values
-      _source: this.uniqueID.sourceFilter,
+      _source: ['@timestamp', ...this.uniqueID.sourceFilter],
       size: 0,
       query: {
         bool: {
@@ -87,7 +48,7 @@ export class DescendantsQuery {
                 },
               },
             },
-            this.uniqueID.buildQueryFilters(nodes),
+            this.uniqueID.buildDescendantsQueryFilters(nodes),
             ...this.uniqueID.buildEmptyRestraints(),
             {
               term: { 'event.category': 'process' },
@@ -98,44 +59,22 @@ export class DescendantsQuery {
           ],
         },
       },
-      aggs: {
-        by_id: {
-          terms: {
-            field:
-          }
-        }
-      },
+      aggs: this.uniqueID.buildAggregations(this.size),
     };
   }
 
-  formatResponse(response: SearchResponse<ChildEvent>): ChildEvent[] {
-    return response.hits.hits.map((hit) => hit._source);
+  /**
+   * TODO get rid of the unknowns
+   */
+  async search(client: IScopedClusterClient, nodes: Nodes): Promise<unknown> {
+    const query = this.query(nodes);
+    console.log(JSON.stringify(query, null, 2));
+    const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
+      body: this.query(nodes),
+      index: this.indexPattern,
+    });
+    console.log(JSON.stringify(response, null, 2));
+    // return response.body.hits.hits.map((hit) => hit._source);
+    return this.uniqueID.getNodesFromAggs(response);
   }
 }
-
-/**
- * "aggs": {
-    "by_entity_id": {
-      "terms": {
-        "field": "process.entity_id",
-        "size": 100,
-        "order": {
-          "ancestry": "asc"
-        }
-      },
-      "aggs": {
-        "top_children": {
-          "top_hits": {
-            "_source": ["process.Ext.ancestry", "process.entity_id", "process.parent.entity_id"],
-            "size": 100,
-            "sort": [
-              {
-                "@timestamp": {
-                  "order": "asc"
-                }
-              }
-            ]
-          }
-        },
- *
- */

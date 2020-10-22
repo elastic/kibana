@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+
+import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 
 interface IDParts {
   ancestry?: string;
@@ -13,9 +16,11 @@ interface IDParts {
 export class UniqueID {
   public readonly sourceFilter: string[];
   private readonly parts: Set<string>;
-  constructor(public readonly idParts: IDParts, public readonly nodes: Array<Map<string, string>>) {
+  private readonly idToParent: Map<string, string>;
+  constructor(public readonly idParts: IDParts) {
     this.sourceFilter = this.createSourceFilter();
     this.parts = this.createMapParts();
+    this.idToParent = this.createIDToParent();
   }
 
   private createMapParts(): Set<string> {
@@ -31,6 +36,14 @@ export class UniqueID {
     return parts;
   }
 
+  private createIDToParent(): Map<string, string> {
+    const idToParent = new Map<string, string>();
+    for (const connection of this.idParts.connections) {
+      idToParent.set(connection.id, connection.parentID);
+    }
+    return idToParent;
+  }
+
   private createSourceFilter(): string[] {
     const filter = this.idParts.connections.reduce((sourceFilterAcc: string[], connection) => {
       sourceFilterAcc.push(connection.id, connection.parentID);
@@ -44,7 +57,19 @@ export class UniqueID {
   }
 
   /**
-   * Transforms this:
+   * Given a spec like:
+   * [
+   *    {
+   *      id: "process.pid",
+   *      parentID: "process.ppid"
+   *    },
+   *    {
+   *      id: "host.id",
+   *      parentID: "host.id"
+   *    }
+   * ]
+   *
+   * This function transforms this:
    * nodes
    * [
    *    {
@@ -63,7 +88,7 @@ export class UniqueID {
    *    {
    *      filter: [
    *        {
-   *          term: { "process.pid": "100"}
+   *          term: { "process.ppid": "100"}
    *        },
    *        {
    *          term: { "host.id": my-awesome-id}
@@ -73,7 +98,7 @@ export class UniqueID {
    *    {
    *      filter: [
    *        {
-   *          term: { "process.pid": 5},
+   *          term: { "process.ppid": 5},
    *        },
    *        {
    *          term: {"host.id": "other-id"}
@@ -83,7 +108,7 @@ export class UniqueID {
    *  ]
    * }
    */
-  public buildQueryFilters(nodes: Array<Map<string, string>>) {
+  public buildDescendantsQueryFilters(nodes: Array<Map<string, string>>) {
     const validateKeys = (keys: IterableIterator<string>) => {
       for (const key of keys) {
         if (!this.parts.has(key)) {
@@ -97,11 +122,18 @@ export class UniqueID {
       validateKeys(node.keys());
       const filterArray = [];
       for (const [key, value] of node.entries()) {
-        filterArray.push({
-          term: { [key]: value },
-        });
+        const parentKey = this.idToParent.get(key);
+        if (parentKey) {
+          filterArray.push({
+            term: { [parentKey]: value },
+          });
+        }
       }
-      return { filter: filterArray };
+      return {
+        bool: {
+          filter: filterArray,
+        },
+      };
     });
 
     return {
@@ -122,22 +154,8 @@ export class UniqueID {
           },
         },
         {
-          bool: {
-            must_not: {
-              term: { [connection.id]: '' },
-            },
-          },
-        },
-        {
           exists: {
             field: connection.parentID,
-          },
-        },
-        {
-          bool: {
-            must_not: {
-              term: { [connection.parentID]: '' },
-            },
           },
         }
       );
@@ -145,41 +163,72 @@ export class UniqueID {
     return filter;
   }
 
-  private buildFinalAgg() {
-    return {
-      aggs: {
-        singleEvent: {
-          top_hits: {
-            // TODO figure out if we can use doc_values
-            _source: this.sourceFilter,
-            size: 1,
-            // TODO there might a use case to the order configurable
-            sort: [{ '@timestamp': { order: 'asc' } }],
-          },
+  private buildFinalAgg(nestedAggs: any) {
+    nestedAggs.aggs = {
+      singleEvent: {
+        top_hits: {
+          // TODO figure out if we can use doc_values
+          _source: this.sourceFilter,
+          size: 1,
+          // TODO there might a use case to make the order configurable
+          sort: [{ '@timestamp': { order: 'asc' } }],
         },
       },
     };
   }
 
-  private buildSingleAgg(field: string, size: number) {
-    return {
-      aggs: {
-        [field]: {
-          terms: {
-            field,
-            size,
-          },
+  private buildSingleAgg(nestedAggs: any, field: string, size: number) {
+    nestedAggs.aggs = {
+      [field]: {
+        terms: {
+          field,
+          size,
         },
       },
     };
+    return nestedAggs.aggs[field];
   }
 
-  private buildAggsHelper(aggs: JsonObject) {}
-
-  public buildAggregations(): JsonObject {
-    const aggs = [];
-
+  public buildAggregations(size: number): JsonValue {
+    const accumulatedAggs: any = { aggs: {} };
+    let current: JsonObject = accumulatedAggs;
     for (const connection of this.idParts.connections) {
+      current = this.buildSingleAgg(current, connection.id, size);
     }
+
+    this.buildFinalAgg(current);
+    return accumulatedAggs.aggs;
+  }
+
+  private nodesFromAggsHelper(aggsResult: any, spec: Array<{ id: string; parentID: string }>) {
+    const nextAggsLevel = (aggs: any, field: string) => {
+      return aggs[field].buckets;
+    };
+
+    console.log('aggsResult', JSON.stringify(aggsResult, null, 2));
+    console.log('spec', spec);
+    if (spec && spec.length > 0 && aggsResult[spec[0].id].buckets) {
+      const connection = spec.shift();
+      if (!connection) {
+        throw new Error('this should never happen');
+      }
+      return this.nodesFromAggsHelper(nextAggsLevel(aggsResult, connection.id), spec);
+    }
+
+    console.log('node recursion', JSON.stringify(aggsResult, null, 2));
+    const results = [];
+    for (const bucket of aggsResult) {
+      results.push(...bucket.singleEvent.hits.hits.map((hit) => hit._source));
+    }
+    return results;
+  }
+
+  private nodesFromAggsHelper2(buckets: any, spec: Array<{ id: string; parentID: string }>) {}
+
+  public getNodesFromAggs(response: ApiResponse<SearchResponse<unknown>>) {
+    const spec = [...this.idParts.connections];
+    const firstField = spec[0];
+    spec.shift();
+    return this.nodesFromAggsHelper(response.body.aggregations[firstField.id], spec);
   }
 }

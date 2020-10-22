@@ -18,7 +18,7 @@ import {
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
 import { handleTree } from './resolver/tree';
-import { handleTree as handleTree2 } from './resolver/new_tree/tree';
+import { handleTree as handleTree2 } from './resolver/new_tree/tree_route';
 import { handleAlerts } from './resolver/alerts';
 import { handleEntities } from './resolver/entity';
 import { handleEvents } from './resolver/events';

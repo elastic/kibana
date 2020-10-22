@@ -6,16 +6,16 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { eventsIndexPattern, alertsIndexPattern } from '../../../../../common/endpoint/constants';
+import { eventsIndexPattern } from '../../../../../common/endpoint/constants';
 import { validateTree2 } from '../../../../../common/endpoint/schema/resolver';
-import { Fetcher } from '../utils/fetch';
+import { Fetcher } from './utils/fetch';
 
 export function handleTree(
   log: Logger
 ): RequestHandler<unknown, unknown, TypeOf<typeof validateTree2.body>> {
   return async (context, req, res) => {
     try {
-      const client = context.core.elasticsearch.legacy.client;
+      const client = context.core.elasticsearch.client;
 
       /* const fetcher = new Fetcher(
         client,
@@ -26,13 +26,15 @@ export function handleTree(
       );
 
       const tree = await fetcher.tree(req.query);*/
-
+      const fetcher = new Fetcher(client);
+      const body = await fetcher.tree(req.body);
       return res.ok({
         // body: tree.render(),
-        body: null,
+        body,
       });
     } catch (err) {
       log.warn(err);
+      log.warn(JSON.stringify(err, null, 2));
       return res.internalError({ body: 'Error retrieving tree.' });
     }
   };

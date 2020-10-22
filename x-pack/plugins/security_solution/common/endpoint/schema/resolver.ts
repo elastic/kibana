@@ -77,7 +77,7 @@ export const validateTree2 = {
     userFieldsDef: schema.object({
       // the ancestry field is optional
       ancestry: schema.maybe(schema.string()),
-      relationship: schema.arrayOf(
+      connections: schema.arrayOf(
         schema.object({
           id: schema.string(),
           parentID: schema.string(),
@@ -86,7 +86,8 @@ export const validateTree2 = {
     }),
     // TODO would be great if we could enforce that the keys are the same as those defined in the userFieldsDef.relationship
     // somehow
-    nodes: schema.arrayOf(schema.recordOf(schema.string(), schema.string())),
+    nodes: schema.arrayOf(schema.mapOf(schema.string(), schema.any())),
+    indexPatterns: schema.arrayOf(schema.string()),
   }),
 };
 
