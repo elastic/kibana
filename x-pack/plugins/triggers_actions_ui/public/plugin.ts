@@ -5,10 +5,10 @@
  */
 
 import {
-  CoreStart,
   CoreSetup,
-  PluginInitializerContext,
+  CoreStart,
   Plugin as CorePlugin,
+  PluginInitializerContext,
 } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
@@ -17,8 +17,8 @@ import { registerBuiltInAlertTypes } from './application/components/builtin_aler
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
-  ManagementSetup,
   ManagementAppMountParams,
+  ManagementSetup,
 } from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
@@ -63,11 +63,9 @@ export class Plugin
   private initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    this.actionTypeRegistry = actionTypeRegistry;
+    this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
 
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    this.alertTypeRegistry = alertTypeRegistry;
+    this.alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
 
     this.initializerContext = initializerContext;
   }
@@ -88,7 +86,7 @@ export class Plugin
           PluginsStart,
           unknown
         ];
-        boot({
+        return boot({
           dataPlugin: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
@@ -107,7 +105,6 @@ export class Plugin
           actionTypeRegistry,
           alertTypeRegistry,
         });
-        return () => {};
       },
     });
 
