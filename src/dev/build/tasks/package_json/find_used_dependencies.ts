@@ -28,7 +28,7 @@ async function getDependencies(cwd: string, entries: string[]) {
   return Object.keys(await parseEntries(cwd, entries, dependenciesParseStrategy, {}));
 }
 
-export async function findUsedDependencies(listedPkgDependencies: any, baseDir: any, isOss: any) {
+export async function findUsedDependencies(listedPkgDependencies: any, baseDir: any) {
   // Define the entry points for the server code in order to
   // start here later looking for the server side dependencies
   const mainCodeEntries = [
@@ -40,6 +40,8 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   const discoveredPluginEntries = await globby([
     `${baseDir}/src/plugins/*/server/index.js`,
     `!${baseDir}/src/plugins/**/public`,
+    `${baseDir}/x-pack/plugins/*/server/index.js`,
+    `!${baseDir}/x-pack/plugins/**/public`,
   ]);
 
   // It will include entries that cannot be discovered
@@ -54,15 +56,6 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
 
   // Compose all the needed entries
   const serverEntries = [...mainCodeEntries, ...discoveredPluginEntries, ...dynamicRequiredEntries];
-
-  if (!isOss) {
-    serverEntries.push(
-      ...(await globby([
-        `${baseDir}/x-pack/plugins/*/server/index.js`,
-        `!${baseDir}/x-pack/plugins/**/public`,
-      ]))
-    );
-  }
 
   // Get the dependencies found searching through the server
   // side code entries that were provided
