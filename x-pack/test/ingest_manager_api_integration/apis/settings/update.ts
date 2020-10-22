@@ -81,6 +81,24 @@ export default function (providerContext: FtrProviderContext) {
         });
       createdAgentPolicyIds.push(testPolicyRes.item.id);
 
+      const beforeRes = await esClient.search({
+        index: '.kibana',
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    type: ['fleet-agent-actions'],
+                  },
+                },
+                { match: { 'fleet-agent-actions.policy_id': testPolicyRes.item.id } },
+              ],
+            },
+          },
+        },
+      });
+
       await supertest
         .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
@@ -105,7 +123,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      expect(res.hits.hits.length).equal(2);
+      expect(res.hits.hits.length).equal(beforeRes.hits.hits.length + 1);
     });
   });
 }

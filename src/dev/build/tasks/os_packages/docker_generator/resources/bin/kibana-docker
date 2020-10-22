@@ -138,6 +138,7 @@ kibana_vars=(
     tilemap.url
     timelion.enabled
     vega.enableExternalUrls
+    xpack.actions.proxyUrl
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
