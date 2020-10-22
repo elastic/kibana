@@ -1,0 +1,14 @@
+{
+  "id": "runtimeFields",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+  ],
+  "optionalPlugins": [
+  ],
+  "configPath": ["xpack", "runtime_fields"],
+  "requiredBundles": [
+    "esUiShared"
+  ]
+}
