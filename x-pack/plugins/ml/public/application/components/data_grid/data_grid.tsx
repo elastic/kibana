@@ -120,6 +120,7 @@ export const DataGrid: FC<Props> = memo(
               const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
               const parsedFIArray = row[mlResultsField].feature_importance;
               let predictedValue: string | number | undefined;
+              let predictedProbability: number | undefined;
               let topClasses: TopClasses = [];
               if (
                 predictionFieldName !== undefined &&
@@ -128,12 +129,14 @@ export const DataGrid: FC<Props> = memo(
               ) {
                 predictedValue = row[mlResultsField][predictionFieldName];
                 topClasses = row[mlResultsField].top_classes;
+                predictedProbability = row[mlResultsField].prediction_probability;
               }
 
               return (
                 <DecisionPathPopover
                   analysisType={analysisType}
                   predictedValue={predictedValue}
+                  predictedProbability={predictedProbability}
                   baseline={baseline}
                   featureImportance={parsedFIArray}
                   topClasses={topClasses}

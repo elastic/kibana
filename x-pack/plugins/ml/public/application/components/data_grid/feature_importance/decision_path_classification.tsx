@@ -23,6 +23,7 @@ import { MissingDecisionPathCallout } from './missing_decision_path_callout';
 
 interface ClassificationDecisionPathProps {
   predictedValue: string | boolean;
+  predictedProbability: number | undefined;
   predictionFieldName?: string;
   featureImportance: FeatureImportance[];
   topClasses: TopClasses;
@@ -34,6 +35,7 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
   predictedValue,
   topClasses,
   predictionFieldName,
+  predictedProbability,
   baseline,
 }) => {
   const [currentClass, setCurrentClass] = useState<string>(
@@ -43,6 +45,7 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
     baseline,
     featureImportance,
     predictedValue: currentClass,
+    predictedProbability,
   });
   const options = useMemo(() => {
     const predictionValueStr = getStringBasedClassName(predictedValue);

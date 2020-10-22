@@ -28,6 +28,7 @@ interface DecisionPathPopoverProps {
   predictionFieldName?: string;
   baseline?: FeatureImportanceBaseline;
   predictedValue?: number | string | undefined;
+  predictedProbability?: number; // for classification
   topClasses?: TopClasses;
 }
 
@@ -47,6 +48,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   topClasses,
   analysisType,
   predictionFieldName,
+  predictedProbability,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
   const {
@@ -122,6 +124,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
                 featureImportance={featureImportance}
                 topClasses={topClasses as TopClasses}
                 predictedValue={getStringBasedClassName(predictedValue)}
+                predictedProbability={predictedProbability}
                 predictionFieldName={predictionFieldName}
                 baseline={baseline}
               />

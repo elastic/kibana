@@ -22,6 +22,7 @@ interface UseDecisionPathDataParams {
   featureImportance: FeatureImportance[];
   baseline?: FeatureImportanceBaseline;
   predictedValue?: string | number | undefined;
+  predictedProbability?: number | undefined;
   topClasses?: TopClasses;
 }
 
@@ -33,7 +34,13 @@ interface RegressionDecisionPathProps {
 }
 const FEATURE_NAME = 'feature_name';
 const FEATURE_IMPORTANCE = 'importance';
-
+const RESIDUAL_IMPORTANCE_ERROR_MARGIN = 1e-5;
+const decisionPathFeatureOtherTitle = i18n.translate(
+  'xpack.ml.dataframe.analytics.decisionPathFeatureOtherTitle',
+  {
+    defaultMessage: 'other',
+  }
+);
 export const isDecisionPathData = (decisionPathData: any): boolean => {
   return (
     Array.isArray(decisionPathData) &&
@@ -67,6 +74,7 @@ export const useDecisionPathData = ({
   baseline,
   featureImportance,
   predictedValue,
+  predictedProbability,
 }: UseDecisionPathDataParams): { decisionPathData: DecisionPathPlotData | undefined } => {
   const decisionPathData = useMemo(() => {
     if (baseline === undefined) return;
@@ -82,6 +90,7 @@ export const useDecisionPathData = ({
         baselines: baseline.classes,
         featureImportance,
         currentClass: predictedValue as string | undefined,
+        predictedProbability,
       });
     }
   }, [baseline, featureImportance, predictedValue]);
@@ -126,14 +135,9 @@ export const buildRegressionDecisionPathData = ({
     });
 
     // if the difference is small enough then no need to plot the residual feature importance
-    if (Math.abs(adjustedImportance) > 1e-5) {
+    if (Math.abs(adjustedImportance) > RESIDUAL_IMPORTANCE_ERROR_MARGIN) {
       mappedFeatureImportance.push({
-        [FEATURE_NAME]: i18n.translate(
-          'xpack.ml.dataframe.analytics.decisionPathFeatureOtherTitle',
-          {
-            defaultMessage: 'other',
-          }
-        ),
+        [FEATURE_NAME]: decisionPathFeatureOtherTitle,
         [FEATURE_IMPORTANCE]: adjustedImportance,
         absImportance: 0, // arbitrary importance so this will be of higher importance than baseline
       });
@@ -164,11 +168,15 @@ export const buildRegressionDecisionPathData = ({
 export const processBinaryClassificationDecisionPathData = ({
   decisionPlotData,
   startingBaseline,
+  predictedProbability,
 }: {
   decisionPlotData: DecisionPathPlotData;
   startingBaseline: number;
+  predictedProbability: number | undefined;
 }): DecisionPathPlotData | undefined => {
+  // array is arranged from final prediction at the top to the starting point at the bottom
   const finalResult = decisionPlotData;
+
   // transform the numbers into the probability space
   // starting with the baseline retrieved from trained_models metadata
   let logOddSoFar = startingBaseline;
@@ -176,6 +184,21 @@ export const processBinaryClassificationDecisionPathData = ({
     logOddSoFar += finalResult[i][1];
     const predictionProbabilitySoFar = Math.exp(logOddSoFar) / (Math.exp(logOddSoFar) + 1);
     finalResult[i][2] = predictionProbabilitySoFar;
+  }
+
+  if (predictedProbability && finalResult.length > 0) {
+    const adjustedResidualImportance = predictedProbability - finalResult[0][2];
+    // in the case where the final prediction_probability is less than the actual predicted probability
+    // which happens when number of features > top_num
+    // adjust the path to account for the residual feature importance as well
+    if (Math.abs(adjustedResidualImportance) > RESIDUAL_IMPORTANCE_ERROR_MARGIN) {
+      finalResult.forEach((row) => (row[2] = row[2] + adjustedResidualImportance));
+      finalResult.push([
+        decisionPathFeatureOtherTitle,
+        adjustedResidualImportance,
+        finalResult[finalResult.length - 1][2] - adjustedResidualImportance,
+      ]);
+    }
   }
   return finalResult;
 };
@@ -250,10 +273,12 @@ export const buildClassificationDecisionPathData = ({
   baselines,
   featureImportance,
   currentClass,
+  predictedProbability,
 }: {
   baselines: ClassificationFeatureImportanceBaseline['classes'];
   featureImportance: FeatureImportance[];
   currentClass: string | number | boolean | undefined;
+  predictedProbability?: number | undefined;
 }): DecisionPathPlotData | undefined => {
   if (currentClass === undefined || !(Array.isArray(baselines) && baselines.length >= 2)) return [];
 
@@ -298,6 +323,7 @@ export const buildClassificationDecisionPathData = ({
     return processBinaryClassificationDecisionPathData({
       startingBaseline,
       decisionPlotData,
+      predictedProbability,
     });
   }
   // else if multiclass classification
