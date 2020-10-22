@@ -17,12 +17,13 @@
  * under the License.
  */
 import React from 'react';
+import { DiscoverGridSelection } from './discover_grid_doc_selection';
 
 export interface GridContext {
   viewed: number;
   setViewed: (id: number) => void;
-  selected: number[];
-  setSelected: (ids: number[]) => void;
+  selected: DiscoverGridSelection;
+  setSelected: (map: DiscoverGridSelection) => void;
   showSelected: boolean;
   setShowSelected: (value: boolean) => void;
 }
@@ -30,7 +31,7 @@ export interface GridContext {
 export const DiscoverGridContext = React.createContext<GridContext>({
   viewed: -1,
   setViewed: () => void 0,
-  selected: [],
+  selected: new Map(),
   setSelected: () => void 0,
   showSelected: false,
   setShowSelected: () => void 0,

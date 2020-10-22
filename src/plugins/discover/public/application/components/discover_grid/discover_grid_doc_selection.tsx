@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -32,16 +33,70 @@ import {
 } from '@elastic/eui';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { JsonCodeBlock } from '../json_code_block/json_code_block';
-import { IndexPattern } from '../../../kibana_services';
+import { DiscoverGridContext, GridContext } from './discover_grid_context';
 
-interface Props {
-  indexPattern: IndexPattern;
-  selected: Record<string, ElasticSearchHit>;
-  onClose: () => void;
+export type DiscoverGridSelection = Map<string, DiscoverGridSelectionDoc>;
+
+export interface DiscoverGridSelectionDoc {
+  id: string;
+  added: string;
+  record: ElasticSearchHit;
 }
 
-export function DiscoverGridFlyoutSelection({ indexPattern, selected, onClose }: Props) {
-  const rows = Object.values(selected);
+export function getSelectedId(record: ElasticSearchHit) {
+  return `${record._index}-${record._id}`;
+}
+
+export const DiscoverGridSelectButton = ({
+  col,
+  rows,
+}: {
+  col: any;
+  rows?: ElasticSearchHit[];
+}) => {
+  const { selected, setSelected } = useContext<GridContext>(DiscoverGridContext);
+  const rowIndex = col.rowIndex;
+  if (!rows || !rows[rowIndex]) {
+    return null;
+  }
+  const record = rows[rowIndex];
+  const id = getSelectedId(record);
+  const isChecked = selected.has(id);
+  if (!rows) {
+    return null;
+  }
+
+  return (
+    <EuiCheckbox
+      id={`${rowIndex}`}
+      aria-label={`Select row ${rowIndex}, ${rows[rowIndex]._id}`}
+      checked={isChecked}
+      onChange={(e) => {
+        if (e.target.checked) {
+          selected.set(id, {
+            id,
+            added: new Date().toJSON(),
+            record: record as ElasticSearchHit,
+          });
+        } else {
+          selected.delete(id);
+        }
+        setSelected(new Map(selected));
+      }}
+    />
+  );
+};
+
+export function DiscoverGridSelection({
+  selected,
+  onClose,
+}: {
+  selected: DiscoverGridSelection;
+  onClose: () => void;
+}) {
+  const rows = [...selected.values()].map((entry) => {
+    return entry.record;
+  });
   return (
     <EuiPortal>
       <EuiFlyout onClose={() => onClose()} size="m">
@@ -81,7 +136,7 @@ export function DiscoverGridFlyoutSelection({ indexPattern, selected, onClose }:
                       paddingBottom: '1em',
                     }}
                   >
-                    <JsonCodeBlock hit={row} indexPattern={indexPattern} />
+                    <JsonCodeBlock hit={row} />
                   </div>
                 </EuiAccordion>
               </div>

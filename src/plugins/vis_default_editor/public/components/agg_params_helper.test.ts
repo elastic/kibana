@@ -33,6 +33,7 @@ import { FieldParamEditor, OrderByParamEditor } from './controls';
 import { EditorConfig } from './utils';
 import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
+import { groupAndSortBy } from '../utils';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
@@ -169,6 +170,9 @@ describe('DefaultEditorAggParams helpers', () => {
         ],
         advanced: [],
       });
+
+      // Should be grouped using displayName as label
+      expect(groupAndSortBy).toHaveBeenCalledWith(expect.anything(), 'type', 'displayName', 'name');
     });
   });
 

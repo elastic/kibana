@@ -37,14 +37,13 @@ import {
   getSchemaDetectors,
   getVisibleColumns,
 } from './discover_grid_helpers';
-import { DiscoverGridFlyoutSelection } from './discover_grid_flyout_selection';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridToolbarSelection } from './discover_grid_toolbar_selection';
 import { DiscoverGridContext } from './discover_grid_context';
-import { DiscoverGridSelectButton } from './discover_grid_select_button';
 import { ViewButton } from './discover_grid_view_button';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
+import { DiscoverGridSelectButton, DiscoverGridSelection } from './discover_grid_doc_selection';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
@@ -107,7 +106,7 @@ export const DiscoverGrid = React.memo(
     useDocSelector,
   }: Props) => {
     const [showSelected, setShowSelected] = useState(false);
-    const [selected, setSelected] = useState<number[]>([]);
+    const [selected, setSelected] = useState<DiscoverGridSelection>(new Map());
     const [viewed, setViewed] = useState<number>(-1);
     const timeString = useMemo(
       () =>
@@ -325,13 +324,8 @@ export const DiscoverGrid = React.memo(
                 }}
               />
             )}
-            {showSelected && selected && selected.length > 0 && (
-              <DiscoverGridFlyoutSelection
-                indexPattern={indexPattern}
-                rows={rows}
-                selected={selected}
-                onClose={() => setShowSelected(false)}
-              />
+            {showSelected && selected && selected.size && (
+              <DiscoverGridSelection selected={selected} onClose={() => setShowSelected(false)} />
             )}
           </>
         </DiscoverGridContext.Provider>

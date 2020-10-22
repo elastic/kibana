@@ -32,13 +32,16 @@ export function DocViewTable({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
+  const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
+  if (!indexPattern) {
+    return null;
+  }
   const mapping = indexPattern.fields.getByName;
   const flattened = indexPattern.flattenHit(hit);
   const formatted = indexPattern.formatHit(hit, 'html');
-  const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
 
   function toggleValueCollapse(field: string) {
-    fieldRowOpen[field] = fieldRowOpen[field] !== true;
+    fieldRowOpen[field] = !fieldRowOpen[field];
     setFieldRowOpen({ ...fieldRowOpen });
   }
 
