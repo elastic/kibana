@@ -28,14 +28,12 @@ image::images/intro-kibana.png[]
 
 {kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
 and processes the data, with {kib} sitting on top. From the home page, {kib} provides
-built-in options for collecting data from popular apps or services and uploading a file:
-
-[role="screenshot"]
-image::setup/images/add-data-home.png[Ways to get data in from the home page]
-
-If you're not ready to use your own data, you can add a <<get-started, sample data set>>
+built-in options for collecting data from popular apps or services and uploading a file.
+If you're not ready to use your own data, you can add a sample data set
 to give {kib} a test drive.
 
+[role="screenshot"]
+image::setup/images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
 
 [float]
 [[explore-and-query]]

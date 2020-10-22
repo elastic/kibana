@@ -4,19 +4,20 @@
 <titleabbrev>Add data</titleabbrev>
 ++++
 
-The fastest way to add data to {kib} is to use one of the built-in options,
-available from the home page.  You can collect data from an app or service
+The fastest way to add data to {kib} is to use one of the built-in options.
+You can collect data from an app or service
 or upload a file that contains your data.  If you're not ready to use your own data,
-add a <<get-started, sample data set>> and give {kib} a test drive.
+add a sample data set and give {kib} a test drive.
+The built-in options are available on the home page.
 
 [role="screenshot"]
-image::images/add-data-home.png[Built-in options for adding data to Kibana]
+image::images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
 
 [float]
 [[add-data-tutorial-kibana]]
 ===  Add data
 
-Ready to ingest logs, metrics, security, and application data?
+Want to ingest logs, metrics, security, or application data?
 Install and configure a Beats data shipper or other module to periodically collect the data
 and send it to {es}. You can then use the pre-built dashboards to explore and analyze the data.
 
@@ -26,18 +27,21 @@ image::images/add-data-tutorials.png[Add Data tutorials]
 [discrete]
 === Add Elastic Agent
 
-beta[] *Elastic Agent* is a centralized way to set up up data integrations.
+beta[] *Elastic Agent* is a centralized way to set up your data integrations.
 With the *Fleet* UI, you can add
-and manage integrations for popular services and platforms, giving you
-an easy way to collect data. The integrations also
-ship with dashboards visualizations,
-so you can see your data right away.
+and manage integrations for popular services and platforms, providing
+an easy way to collect your data. The integrations
+ship with dashboards and visualizations,
+so you quickly get insights on your data.
 
 To get started, refer to
 {ingest-guide}/ingest-management-getting-started.html[Quick start: Get logs and metrics into the Elastic Stack].
 
 [role="screenshot"]
 image::images/add-data-fleet.png[Add data using Fleet]
+
+NOTE: This feature is not intended for use as part of a
+repeated production process, but rather for the initial exploration of your data.
 
 [discrete]
 [[upload-data-kibana]]
@@ -47,15 +51,16 @@ experimental[] If your data is in a CSV, JSON, or log file, you can upload it us
 Data Visualizer. You can upload a file up to 100 MB. This value is configurable up to 1 GB in
 <<kibana-ml-settings, Advanced Settings>>.
 
-NOTE: This feature is not intended for use as part of a
-repeated production process, but rather for the initial exploration of your data.
-
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
 
-For geospatial data, you can use either the File Data Visualizer or the
+For geospatial data, you can use the File Data Visualizer or the
 GeoJSon Uploader, depending on the format of your data.  See
 <<import-geospatial-data, Import geospatial data>> for details.
+
+NOTE: This feature is not intended for use as part of a
+repeated production process, but rather for the initial exploration of your data.
+
 
 [discrete]
 === Custom options for loading your data
@@ -63,8 +68,8 @@ GeoJSon Uploader, depending on the format of your data.  See
 If the built-in options don't work for you, you can index your
 data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
 or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
-After you add your data, you must create an <<index-patterns,index pattern>> to tell
+After you add your data, you're required to create an <<index-patterns,index pattern>> to tell
 {kib} where to find the data.
 
-* To add data for Elastic Observability, see also {obs-docs-ref}/add-observability-data.html[Send data to Elasticsearch].
+* To add data for Elastic Observability, see {observability-guide}/add-observability-data.html[Send data to Elasticsearch].
 * To add data for Elastic Security, see https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].
