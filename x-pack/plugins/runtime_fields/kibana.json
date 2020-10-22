@@ -9,6 +9,5 @@
   ],
   "configPath": ["xpack", "runtime_fields"],
   "requiredBundles": [
-    "esUiShared"
   ]
 }
