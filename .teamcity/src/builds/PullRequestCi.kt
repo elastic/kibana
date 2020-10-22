@@ -22,7 +22,24 @@ object PullRequestCi : BuildType({
     branchFilter = "+:pull/*"
   }
 
+  val prAllowedList = listOf(
+    "brianseeders",
+    "alexwizp",
+    "barlowm",
+    "DziyanaDzeraviankina",
+    "maryia-lapata",
+    "renovate[bot]",
+    "sulemanof",
+    "VladLasitsa"
+  )
+
   params {
+    param("elastic.pull_request.enabled", "true")
+    param("elastic.pull_request.allow_org_users", "true")
+    param("elastic.pull_request.allowed_repo_permissions", "admin,write")
+    param("elastic.pull_request.allowed_list", prAllowedList.joinToString(","))
+    param("elastic.pull_request.cancel_in_progress_builds_on_update", "true")
+
     // These params should get filled in by the app that triggers builds
     param("env.GITHUB_PR_TARGET_BRANCH", "")
     param("env.GITHUB_PR_NUMBER", "")
