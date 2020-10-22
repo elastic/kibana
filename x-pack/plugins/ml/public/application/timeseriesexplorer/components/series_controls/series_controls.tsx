@@ -22,18 +22,26 @@ import {
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
 import { useStorage } from '../../../contexts/ml/use_storage';
+import { EntityFieldType } from '../../../../../common/types/anomalies';
 
 function getEntityControlOptions(fieldValues: any[]) {
   if (!Array.isArray(fieldValues)) {
     return [];
   }
 
-  fieldValues.sort();
-
   return fieldValues.map((value) => {
     return { label: value === '' ? EMPTY_FIELD_VALUE_LABEL : value, value };
   });
 }
+
+type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, null>;
+
+const getDefaultFieldConfig = (fieldTypes: EntityFieldType[]): UiPartitionFieldsConfig => {
+  return fieldTypes.reduce((acc, f) => {
+    acc[f] = { anomalousOnly: false, sort: { by: 'anomaly_score', order: 'desc' } };
+    return acc;
+  }, {} as UiPartitionFieldsConfig);
+};
 
 interface SeriesControlsProps {
   selectedDetectorIndex: any;
@@ -62,10 +70,6 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     },
   } = useMlKibana();
 
-  const [partitionFieldsConfig, setPartitionFieldsConfig] = useStorage<
-    Exclude<PartitionFieldsConfig, null>
-  >(ML_PARTITION_FIELDS_CONFIG, {});
-
   const selectedJob = useMemo(() => mlJobService.getJob(selectedJobId), [selectedJobId]);
 
   const [entitiesLoading, setEntitiesLoading] = useState(false);
@@ -82,15 +86,19 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
+  const [partitionFieldsConfig, setPartitionFieldsConfig] = useStorage<UiPartitionFieldsConfig>(
+    ML_PARTITION_FIELDS_CONFIG,
+    getDefaultFieldConfig(entityControls.map((v) => v.fieldType))
+  );
+
   /**
    * Loads available entity values.
-   * @param {Array} entities - Entity controls configuration
    * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
    */
   const loadEntityValues = async (searchTerm = {}) => {
     setEntitiesLoading(true);
 
-    // Populate the entity input datalists with the values from the top records by score
+    // Populate the entity input data lists with the values from the top records by score
     // for the selected detector across the full time range. No need to pass through finish().
     const detectorIndex = selectedDetectorIndex;
 

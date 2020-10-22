@@ -20,10 +20,11 @@ import {
   EuiText,
   EuiToolTip,
   EuiRadioGroup,
-  EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { PartitionFieldConfig } from '../../../../../common/types/storage';
+import { DeepPartial } from '../../../../../common/types/common';
 
 export interface Entity {
   fieldName: string;
@@ -45,7 +46,7 @@ export interface EntityControlProps {
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   config?: PartitionFieldConfig;
-  onConfigChange: (fieldType: EntityFieldType, config: PartitionFieldConfig) => void;
+  onConfigChange: (fieldType: EntityFieldType, config: DeepPartial<PartitionFieldConfig>) => void;
   forceSelection: boolean;
   options: Array<EuiComboBoxOptionOption<string>>;
 }
@@ -152,6 +153,21 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     },
   ];
 
+  private readonly orderOptions = [
+    {
+      id: 'asc',
+      label: i18n.translate('xpack.ml.timeSeriesExplorer.ascOptionsOrderLabel', {
+        defaultMessage: 'asc',
+      }),
+    },
+    {
+      id: 'desc',
+      label: i18n.translate('xpack.ml.timeSeriesExplorer.descOptionsOrderLabel', {
+        defaultMessage: 'desc',
+      }),
+    },
+  ];
+
   render() {
     const { entity, forceSelection } = this.props;
     const { isLoading, options, selectedOptions } = this.state;
@@ -186,7 +202,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                 iconSize="xxl"
                 iconType="gear"
                 aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.editControlConfiguration', {
-                  defaultMessage: 'Edit ',
+                  defaultMessage: 'Edit field configuration',
                 })}
                 onClick={() => {
                   this.setState({
@@ -220,7 +236,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                 compressed
                 data-test-subj={`mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entity.fieldName}`}
               />
-              <EuiSpacer size="s" />
+              <EuiHorizontalRule margin="s" />
               <EuiFormRow
                 label={
                   <FormattedMessage
@@ -235,12 +251,36 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                   onChange={(id) => {
                     this.props.onConfigChange(this.props.entity.fieldType, {
                       sort: {
+                        ...(this.props.config?.sort ? this.props.config.sort : {}),
                         by: id,
                       },
                     });
                   }}
                   compressed
                   data-test-subj={`mlSingleMetricViewerEntitySelectionConfigSortBy_${entity.fieldName}`}
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.orderLabel"
+                    defaultMessage="Order"
+                  />
+                }
+              >
+                <EuiRadioGroup
+                  options={this.orderOptions}
+                  idSelected={this.props.config?.sort?.order}
+                  onChange={(id) => {
+                    this.props.onConfigChange(this.props.entity.fieldType, {
+                      sort: {
+                        ...(this.props.config?.sort ? this.props.config.sort : {}),
+                        order: id,
+                      },
+                    });
+                  }}
+                  compressed
+                  data-test-subj={`mlSingleMetricViewerEntitySelectionConfigOrder_${entity.fieldName}`}
                 />
               </EuiFormRow>
             </EuiText>
