@@ -106,9 +106,10 @@ export async function loadIndexPatterns({
         fieldFormatMap:
           fieldFormatMap &&
           Object.fromEntries(
-            Object.entries(fieldFormatMap)
-              .filter(([id, format]) => format)
-              .map(([id, format]) => [id, format.toJSON()])
+            Object.entries(fieldFormatMap).map(([id, format]) => [
+              id,
+              'toJSON' in format ? format.toJSON() : format,
+            ])
           ),
         fields: newFields,
         hasRestrictions: !!typeMeta?.aggs,
