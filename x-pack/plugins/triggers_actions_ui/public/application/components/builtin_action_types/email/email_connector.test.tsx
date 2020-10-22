@@ -74,4 +74,51 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeFalsy();
     expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeFalsy();
   });
+
+  test('should display a message to remember username and password when creating a connector with authentication', () => {
+    const actionConnector = {
+      actionTypeId: '.email',
+      config: {
+        hasAuth: true,
+      },
+      secrets: {},
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message when editing an authenticated email connector explaining why username and password must be re-entered', () => {
+    const actionConnector = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+  });
 });

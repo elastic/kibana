@@ -164,13 +164,18 @@ export const xyVisualization: Visualization<State> = {
 
     const sortedAccessors = getSortedAccessors(datasource, layer);
 
+    const isHorizontal = isHorizontalChart(state.layers);
     return {
       groups: [
         {
           groupId: 'x',
-          groupLabel: i18n.translate('xpack.lens.xyChart.xAxisLabel', {
-            defaultMessage: 'X-axis',
-          }),
+          groupLabel: isHorizontal
+            ? i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
+                defaultMessage: 'Vertical axis',
+              })
+            : i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
+                defaultMessage: 'Horizontal axis',
+              }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
           filterOperations: isBucketed,
           suggestedPriority: 1,
@@ -180,9 +185,13 @@ export const xyVisualization: Visualization<State> = {
         },
         {
           groupId: 'y',
-          groupLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
-            defaultMessage: 'Y-axis',
-          }),
+          groupLabel: isHorizontal
+            ? i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
+                defaultMessage: 'Horizontal axis',
+              })
+            : i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
+                defaultMessage: 'Vertical axis',
+              }),
           accessors: sortedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,

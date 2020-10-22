@@ -12,6 +12,7 @@ import {
   share,
   distinctUntilKeyChanged,
   switchMap,
+  exhaustMap,
   concatMap,
   merge,
   filter,
@@ -62,18 +63,28 @@ function getInternalUserSOClient() {
   return appContextService.getInternalUserSOClient(fakeRequest);
 }
 
-function createNewActionsSharedObservable(): Observable<AgentAction[]> {
+export function createNewActionsSharedObservable(): Observable<AgentAction[]> {
   let lastTimestamp = new Date().toISOString();
 
   return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
-    switchMap(() => {
+    exhaustMap(() => {
       const internalSOClient = getInternalUserSOClient();
 
-      const timestamp = lastTimestamp;
-      lastTimestamp = new Date().toISOString();
-      return from(getNewActionsSince(internalSOClient, timestamp));
+      return from(
+        getNewActionsSince(internalSOClient, lastTimestamp).then((data) => {
+          if (data.length > 0) {
+            lastTimestamp = data.reduce((acc, action) => {
+              return acc >= action.created_at ? acc : action.created_at;
+            }, lastTimestamp);
+          }
+
+          return data;
+        })
+      );
     }),
-    filter((data) => data.length > 0),
+    filter((data) => {
+      return data.length > 0;
+    }),
     share()
   );
 }
