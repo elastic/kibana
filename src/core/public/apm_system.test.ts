@@ -19,7 +19,6 @@
 
 jest.mock('@elastic/apm-rum');
 import { apm, init } from '@elastic/apm-rum';
-import { DeeplyMockedKeys } from '../typings';
 import { ApmSystem } from './apm_system';
 
 const initMock = init as jest.Mocked<typeof init>;
