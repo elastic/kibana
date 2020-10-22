@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useCallback, useEffect, useRef } from 'react';
 import {
   TagAttributes,
   TagValidation,
@@ -37,4 +38,22 @@ export const validateTag = (tag: TagAttributes): TagValidation => {
   });
 
   return validation;
+};
+
+export const useIfMounted = () => {
+  const isMounted = useRef(true);
+  useEffect(
+    () => () => {
+      isMounted.current = false;
+    },
+    []
+  );
+
+  const ifMounted = useCallback((func) => {
+    if (isMounted.current && func) {
+      func();
+    }
+  }, []);
+
+  return ifMounted;
 };

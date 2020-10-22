@@ -25,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useIfMounted } from '../../../../../../src/plugins/kibana_react/public';
 import {
   TagAttributes,
   TagValidation,
@@ -34,7 +33,7 @@ import {
   tagDescriptionMaxLength,
 } from '../../../common';
 import { TagBadge } from '../../components';
-import { getRandomColor } from './utils';
+import { getRandomColor, useIfMounted } from './utils';
 
 interface CreateOrEditModalProps {
   onClose: () => void;
