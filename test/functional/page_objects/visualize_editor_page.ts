@@ -97,9 +97,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickSplitDirection(direction: string) {
-      const radioBtn = await find.byCssSelector(
-        `[data-test-subj="visEditorSplitBy"][title="${direction}"]`
-      );
+      const radioBtn = await find.byCssSelector(`[data-test-subj="visEditorSplitBy-${direction}"]`);
       await radioBtn.click();
     }
 
