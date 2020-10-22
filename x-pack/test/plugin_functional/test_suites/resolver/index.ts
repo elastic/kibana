@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({
@@ -47,35 +49,44 @@ export default function ({
 
       for (const [nodeID, fileNamePrefix] of nodeDefinitions) {
         const element = await find.byCssSelector(`[data-test-resolver-node-id="${nodeID}"]`);
-        await screenshot.compareAgainstBaseline(`${fileNamePrefix}`, updateBaselines, element);
+        expect(
+          await screenshot.compareAgainstBaseline(`${fileNamePrefix}`, updateBaselines, element)
+        ).to.be.lessThan(0.01);
+
         // hover the button
         const button = await element.findByCssSelector(
           `button[data-test-resolver-node-id="${nodeID}"]`
         );
         await button.moveMouseTo();
-        await screenshot.compareAgainstBaseline(
-          `${fileNamePrefix}_with_primary_button_hovered`,
-          updateBaselines,
-          element
-        );
+        expect(
+          await screenshot.compareAgainstBaseline(
+            `${fileNamePrefix}_with_primary_button_hovered`,
+            updateBaselines,
+            element
+          )
+        ).to.be.lessThan(0.01);
 
         // select the node
         await button.click();
-        await screenshot.compareAgainstBaseline(
-          `${fileNamePrefix}_selected_with_primary_button_hovered`,
-          updateBaselines,
-          element
-        );
+        expect(
+          await screenshot.compareAgainstBaseline(
+            `${fileNamePrefix}_selected_with_primary_button_hovered`,
+            updateBaselines,
+            element
+          )
+        ).to.be.lessThan(0.01);
 
         // move the mouse away
         const zoomIn = await testSubjects.find('resolver:graph-controls:zoom-in');
         await zoomIn.moveMouseTo();
 
-        await screenshot.compareAgainstBaseline(
-          `${fileNamePrefix}_selected`,
-          updateBaselines,
-          element
-        );
+        expect(
+          await screenshot.compareAgainstBaseline(
+            `${fileNamePrefix}_selected`,
+            updateBaselines,
+            element
+          )
+        ).to.be.lessThan(0.01);
 
         // select a pill
         const pills = await element.findAllByTestSubject('resolver:map:node-submenu-item');
@@ -85,20 +96,24 @@ export default function ({
           // move mouse to first pill
           await firstPill.moveMouseTo();
 
-          await screenshot.compareAgainstBaseline(
-            `${fileNamePrefix}_selected_with_first_pill_hovered`,
-            updateBaselines,
-            element
-          );
+          expect(
+            await screenshot.compareAgainstBaseline(
+              `${fileNamePrefix}_selected_with_first_pill_hovered`,
+              updateBaselines,
+              element
+            )
+          ).to.be.lessThan(0.01);
 
           // click the first pill
           await firstPill.click();
 
-          await screenshot.compareAgainstBaseline(
-            `${fileNamePrefix}_selected_with_first_pill_selected`,
-            updateBaselines,
-            element
-          );
+          expect(
+            await screenshot.compareAgainstBaseline(
+              `${fileNamePrefix}_selected_with_first_pill_selected`,
+              updateBaselines,
+              element
+            )
+          ).to.be.lessThan(0.01);
         }
       }
     });
