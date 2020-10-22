@@ -35,21 +35,20 @@ export function calculateFrequency<T>(values: T[]): JsonObject {
 }
 
 /**
- * Utility to keep track of a limited queue of values which changes over time
+ * Utility to keep track of a bounded array of values which changes over time
  * dropping older values as they slide out of the window we wish to track
  */
 export function createRunningAveragedStat<T>(runningAverageWindowSize: number) {
-  const queue = new Array<T>();
+  const list = new Array<T>();
   return (value?: T) => {
-    if (isUndefined(value)) {
-      return queue;
-    } else {
-      if (queue.length === runningAverageWindowSize) {
-        queue.shift();
+    if (!isUndefined(value)) {
+      if (list.length === runningAverageWindowSize) {
+        list.shift();
       }
-      queue.push(value);
-      return [...queue];
+      list.push(value);
     }
+    // clone list to ensure it isn't mutated externally
+    return [...list];
   };
 }
 
