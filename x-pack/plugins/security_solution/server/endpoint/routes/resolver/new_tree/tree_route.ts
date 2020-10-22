@@ -9,7 +9,6 @@ import { TypeOf } from '@kbn/config-schema';
 import { eventsIndexPattern, alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import { validateTree2 } from '../../../../../common/endpoint/schema/resolver';
 import { Fetcher } from '../utils/fetch';
-import { EndpointAppContext } from '../../../types';
 
 export function handleTree(
   log: Logger
@@ -18,7 +17,7 @@ export function handleTree(
     try {
       const client = context.core.elasticsearch.legacy.client;
 
-      const fetcher = new Fetcher(
+      /* const fetcher = new Fetcher(
         client,
         req.params.id,
         eventsIndexPattern,
@@ -26,10 +25,11 @@ export function handleTree(
         req.query.legacyEndpointID
       );
 
-      const tree = await fetcher.tree(req.query);
+      const tree = await fetcher.tree(req.query);*/
 
       return res.ok({
-        body: tree.render(),
+        // body: tree.render(),
+        body: null,
       });
     } catch (err) {
       log.warn(err);
