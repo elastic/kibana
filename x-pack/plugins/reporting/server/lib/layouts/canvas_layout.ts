@@ -35,16 +35,12 @@ export class CanvasLayout extends Layout implements LayoutInstance {
   public hasFooter: boolean = false;
   public useReportingBranding: boolean = false;
 
-  constructor(size: Size, layoutSelectors?: LayoutSelectorDictionary) {
+  constructor(size: Size) {
     super(LayoutTypes.CANVAS);
     this.height = size.height;
     this.width = size.width;
     this.scaledHeight = size.height * ZOOM;
     this.scaledWidth = size.width * ZOOM;
-
-    if (layoutSelectors) {
-      this.selectors = layoutSelectors;
-    }
   }
 
   public getPdfPageOrientation() {

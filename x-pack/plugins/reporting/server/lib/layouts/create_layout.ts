@@ -22,6 +22,6 @@ export function createLayout(
     return new CanvasLayout(layoutParams.dimensions);
   }
 
-  // this is the default because some jobs won't have anything specified
+  // layoutParams is optional as PrintLayout doesn't use it
   return new PrintLayout(captureConfig);
 }
