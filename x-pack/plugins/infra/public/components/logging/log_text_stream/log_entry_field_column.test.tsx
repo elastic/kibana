@@ -4,85 +4,113 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
-
 import { EuiThemeProvider } from '../../../../../observability/public';
+import { LogFieldColumn } from '../../../../common/http_api';
 import { LogEntryFieldColumn } from './log_entry_field_column';
-import { LogColumn } from '../../../../common/http_api';
 
 describe('LogEntryFieldColumn', () => {
-  it('should output a <ul> when displaying an Array of values', () => {
-    const column: LogColumn = {
+  it('renders a single value without a wrapping list', () => {
+    const column: LogFieldColumn = {
+      columnId: 'TEST_COLUMN',
+      field: 'TEST_FIELD',
+      value: ['a'],
+      highlights: [],
+    };
+
+    const renderResult = render(
+      <LogEntryFieldColumn
+        columnValue={column}
+        highlights={[]}
+        isActiveHighlight={false}
+        wrapMode="pre-wrapped"
+      />,
+      { wrapper: EuiThemeProvider }
+    );
+
+    expect(renderResult.getByTestId('LogEntryColumnContent')).toHaveTextContent(/^a$/);
+    expect(renderResult.queryByTestId('LogEntryFieldValues')).toBe(null);
+  });
+
+  it('renders an array of values as a list', () => {
+    const column: LogFieldColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
       value: ['a', 'b', 'c'],
       highlights: [],
     };
 
-    const component = mount(
+    const renderResult = render(
       <LogEntryFieldColumn
         columnValue={column}
         highlights={[]}
         isActiveHighlight={false}
         wrapMode="pre-wrapped"
       />,
-      { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
+      { wrapper: EuiThemeProvider }
     );
 
-    expect(component.exists('ul')).toBe(true);
-    expect(
-      component.containsAllMatchingElements([
-        <li key="LogEntryFieldColumn-a-0">a</li>,
-        <li key="LogEntryFieldColumn-b-1">b</li>,
-        <li key="LogEntryFieldColumn-c-2">c</li>,
-      ])
-    ).toBe(true);
+    expect(renderResult.getByTestId('LogEntryFieldValues')).not.toBeEmptyDOMElement();
+    expect(renderResult.getByTestId('LogEntryFieldValue-0')).toHaveTextContent('a');
+    expect(renderResult.getByTestId('LogEntryFieldValue-1')).toHaveTextContent('b');
+    expect(renderResult.getByTestId('LogEntryFieldValue-2')).toHaveTextContent('c');
   });
 
-  it('should output a text representation of a passed complex value', () => {
-    const column: LogColumn = {
+  it('renders a text representation of a single complex object', () => {
+    const column: LogFieldColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: {
-        lat: 1,
-        lon: 2,
-      },
+      value: [
+        {
+          lat: 1,
+          lon: 2,
+        },
+      ],
       highlights: [],
     };
 
-    const component = mount(
+    const renderResult = render(
       <LogEntryFieldColumn
         columnValue={column}
         highlights={[]}
         isActiveHighlight={false}
         wrapMode="pre-wrapped"
       />,
-      { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
+      { wrapper: EuiThemeProvider }
     );
 
-    expect(component.text()).toEqual('{"lat":1,"lon":2}');
+    expect(renderResult.getByTestId('LogEntryColumnContent')).toHaveTextContent(
+      '{"lat":1,"lon":2}'
+    );
   });
 
-  it('should output just text when passed a non-Array', () => {
-    const column: LogColumn = {
+  it('renders text representations of a multiple complex objects', () => {
+    const column: LogFieldColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: 'foo',
+      value: [
+        {
+          lat: 1,
+          lon: 2,
+        },
+        [3, 4],
+      ],
       highlights: [],
     };
 
-    const component = mount(
+    const renderResult = render(
       <LogEntryFieldColumn
         columnValue={column}
         highlights={[]}
         isActiveHighlight={false}
         wrapMode="pre-wrapped"
       />,
-      { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
+      { wrapper: EuiThemeProvider }
     );
 
-    expect(component.exists('ul')).toBe(false);
-    expect(component.text()).toEqual('foo');
+    expect(renderResult.getByTestId('LogEntryFieldValues')).not.toBeEmptyDOMElement();
+    expect(renderResult.getByTestId('LogEntryFieldValue-0')).toHaveTextContent('{"lat":1,"lon":2}');
+    expect(renderResult.getByTestId('LogEntryFieldValue-1')).toHaveTextContent('[3,4]');
   });
 });

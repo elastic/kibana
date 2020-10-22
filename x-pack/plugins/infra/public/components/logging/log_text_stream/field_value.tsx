@@ -27,9 +27,12 @@ export const FieldValue: React.FC<{
     );
   } else if (value.length > 1) {
     return (
-      <ul>
+      <ul data-test-subj="LogEntryFieldValues">
         {value.map((entry, i) => (
-          <CommaSeparatedLi key={`LogEntryFieldValue-${i}`}>
+          <CommaSeparatedLi
+            key={`LogEntryFieldValue-${i}`}
+            data-test-subj={`LogEntryFieldValue-${i}`}
+          >
             {highlightFieldValue(
               formatValue(entry),
               highlightTerms,
