@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services: httpConfig.get('services'),
     servers: httpConfig.get('servers'),
     junit: {
-      reportName: 'Http Kibana Platform Integration Tests',
+      reportName: 'Kibana Platform Http Integration Tests',
     },
     esTestCluster: httpConfig.get('esTestCluster'),
     kbnTestServer: httpConfig.get('kbnTestServer'),

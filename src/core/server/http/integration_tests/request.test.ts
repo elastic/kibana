@@ -312,21 +312,20 @@ describe('KibanaRequest', () => {
       const resp3 = await st.get('/').set({ 'X-OPAQUE-ID': 'gamma' }).expect(200);
       expect(resp3.body).toEqual({ requestId: 'gamma' });
     });
-
-    describe('request uuid', () => {
-      it('generates a UUID', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
-        const router = createRouter('/');
-        router.get({ path: '/', validate: false }, async (context, req, res) => {
-          return res.ok({ body: { requestUuid: req.uuid } });
-        });
-        await server.start();
-
-        const st = supertest(innerServer.listener);
-
-        const resp1 = await st.get('/').expect(200);
-        expect(resp1.body.requestUuid).toBe('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+  });
+  describe('request uuid', () => {
+    it('generates a UUID', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({ body: { requestUuid: req.uuid } });
       });
+      await server.start();
+
+      const st = supertest(innerServer.listener);
+
+      const resp1 = await st.get('/').expect(200);
+      expect(resp1.body.requestUuid).toBe('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
 });
