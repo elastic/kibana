@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
   const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
-  const redirectPort = httpConfig.get('servers.kibana.port') + 1;
+  const redirectPort = httpConfig.get('servers.kibana.port') + 1234;
 
   return {
     testFiles: [require.resolve('./')],
