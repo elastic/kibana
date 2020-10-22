@@ -210,7 +210,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         <DataStreamTable
           filters={
             isDeepLink && dataStreamName !== undefined
-              ? `name=${attemptToURIDecode(dataStreamName)}`
+              ? `name="${attemptToURIDecode(dataStreamName)}"`
               : ''
           }
           dataStreams={dataStreams}
