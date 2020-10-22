@@ -142,36 +142,43 @@ export const Description = React.memo<DescriptionProps>(
     isTextArea = false,
     disableAutoSave = false,
     marginRight,
-  }) => (
-    <DescriptionContainer data-test-subj="description-container" marginRight={marginRight}>
-      <EuiToolTip
-        data-test-subj="timeline-description-tool-tip"
-        content={i18n.DESCRIPTION_TOOL_TIP}
-      >
-        {isTextArea ? (
-          <EuiTextArea
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            fullWidth={true}
-            onChange={(e) =>
-              updateDescription({ id: timelineId, description: e.target.value, disableAutoSave })
-            }
-            placeholder={i18n.DESCRIPTION}
-            value={description}
-          />
-        ) : (
-          <EuiFieldText
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            data-test-subj="timeline-description"
-            fullWidth={true}
-            onChange={(e) => updateDescription({ id: timelineId, description: e.target.value })}
-            placeholder={i18n.DESCRIPTION}
-            spellCheck={true}
-            value={description}
-          />
-        )}
-      </EuiToolTip>
-    </DescriptionContainer>
-  )
+  }) => {
+    const onDescriptionChanged = useCallback(
+      (e) => {
+        updateDescription({ id: timelineId, description: e.target.value, disableAutoSave });
+      },
+      [updateDescription, disableAutoSave, timelineId]
+    );
+    return (
+      <DescriptionContainer data-test-subj="description-container" marginRight={marginRight}>
+        <EuiToolTip
+          data-test-subj="timeline-description-tool-tip"
+          content={i18n.DESCRIPTION_TOOL_TIP}
+        >
+          {isTextArea ? (
+            <EuiTextArea
+              data-test-subj="timeline-description-textarea"
+              aria-label={i18n.TIMELINE_DESCRIPTION}
+              fullWidth={true}
+              onChange={onDescriptionChanged}
+              placeholder={i18n.DESCRIPTION}
+              value={description}
+            />
+          ) : (
+            <EuiFieldText
+              aria-label={i18n.TIMELINE_DESCRIPTION}
+              data-test-subj="timeline-description"
+              fullWidth={true}
+              onChange={onDescriptionChanged}
+              placeholder={i18n.DESCRIPTION}
+              spellCheck={true}
+              value={description}
+            />
+          )}
+        </EuiToolTip>
+      </DescriptionContainer>
+    );
+  }
 );
 Description.displayName = 'Description';
 
