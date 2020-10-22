@@ -85,16 +85,6 @@ WARNING: {kib} does not run a migration for every saved object index on every up
 6. Start up {kib} on the older version you wish to rollback to.
 
 [float]
-[[upgrade-migrations-multiple-instances]]
-==== Support for multiple {kib} instances
-
-WARNING: Kibana does not support rolling upgrades. If you're running multiple {kib} instances, all instances should be stopped before upgrading.
-
-Different versions of {kib} running against the same {es} index, such as during a rolling upgrade, can cause data loss. This is because acknowledged writes from the older instances could be written into the _old_ index while the migration is in progress. To prevent this from happening ensure that all old {kiba} instances are shutdown before starting up instances on a newer version.
-
-The first instance that triggers saved object migrations will run the entire process. Any other instances started up while a migration is running will log a message and then wait until saved object migrations has completed before they start serving HTTP traffic.
-
-[float]
 [[upgrade-migrations-old-indices]]
 ==== Handling old `.kibana_N` indices
 
