@@ -599,7 +599,7 @@
     "cpy": "^8.0.0",
     "cronstrue": "^1.51.0",
     "css-loader": "^3.4.2",
-    "cypress": "^5.0.0",
+    "cypress": "^5.4.0",
     "cypress-cucumber-preprocessor": "^2.5.2",
     "cypress-multi-reporters": "^1.2.3",
     "d3": "3.5.17",

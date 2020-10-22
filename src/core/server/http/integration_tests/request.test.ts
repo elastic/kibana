@@ -313,7 +313,6 @@ describe('KibanaRequest', () => {
       expect(resp3.body).toEqual({ requestId: 'gamma' });
     });
   });
-
   describe('request uuid', () => {
     it('generates a UUID', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
