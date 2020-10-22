@@ -65,7 +65,6 @@ describe('ContextAppLegacy test', () => {
 
   it('renders correctly', () => {
     const component = mountWithIntl(<ContextAppLegacy {...defaultProps} />);
-    expect(component).toMatchSnapshot();
     expect(component.find(DocTableLegacy).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
@@ -76,7 +75,6 @@ describe('ContextAppLegacy test', () => {
     const props = { ...defaultProps };
     props.status = 'loading';
     const component = mountWithIntl(<ContextAppLegacy {...props} />);
-    expect(component).toMatchSnapshot();
     expect(component.find('DocTableLegacy').length).toBe(0);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(1);
