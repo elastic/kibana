@@ -48,6 +48,7 @@ import {
   RangeFilter,
   asPinnedQuery,
   matchesClauses,
+  SortOptions,
 } from './queries/query_clauses';
 
 import {
@@ -271,6 +272,17 @@ export class TaskStore {
       )
     );
 
+    // The documents should be sorted by runAt/retryAt, unless there are pinned
+    // tasks being queried, in which case we want to sort by score first, and then
+    // the runAt/retryAt.  That way we'll get the pinned tasks first.  Note that
+    // the score seems to favor newer documents rather than older documents, so
+    // if there are not pinned tasks being queried, we do NOT want to sort by score
+    // at all, just by runAt/retryAt.
+    const sort: SortOptions = [SortByRunAtAndRetryAt];
+    if (claimTasksById && claimTasksById.length) {
+      sort.unshift('_score');
+    }
+
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const { updated } = await this.updateByQuery(
       asUpdateByQuery({
@@ -287,12 +299,7 @@ export class TaskStore {
           status: 'claiming',
           retryAt: claimOwnershipUntil,
         }),
-        sort: [
-          // sort by score first, so the "pinned" Tasks are first
-          '_score',
-          // the nsort by other fields
-          SortByRunAtAndRetryAt,
-        ],
+        sort,
       }),
       {
         max_docs: size,
