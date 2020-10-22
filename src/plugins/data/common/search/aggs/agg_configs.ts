@@ -122,16 +122,19 @@ export class AggConfigs {
     { addToAggConfigs = true } = {}
   ) => {
     const { type } = params;
+    const aggType = typeof type === 'string' ? this.typesRegistry.get(type) : type;
+
+    if (!aggType) {
+      throw new Error(`Unable to find a registered agg type for "${type}"`);
+    }
+
     let aggConfig;
 
     if (params instanceof AggConfig) {
       aggConfig = params;
       params.parent = this;
     } else {
-      aggConfig = new AggConfig(this, {
-        ...params,
-        type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
-      });
+      aggConfig = new AggConfig(this, { ...params, type: aggType });
     }
 
     if (addToAggConfigs) {
