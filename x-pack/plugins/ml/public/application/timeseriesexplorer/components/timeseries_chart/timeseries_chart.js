@@ -49,6 +49,7 @@ import {
   renderAnnotations,
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation,
+  ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
 
 const focusZoomPanelHeight = 25;
@@ -1126,9 +1127,17 @@ class TimeseriesChartIntl extends Component {
 
         return xPos;
       })
-      .attr('y', cxtChartHeight + swlHeight + 1)
+      .attr('y', cxtChartHeight + swlHeight + 2)
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
-      .attr('width', ANNOTATION_SYMBOL_HEIGHT);
+      .attr('width', (d) => {
+        const s = this.contextXScale(moment(d.timestamp)) + 1;
+        const e =
+          typeof d.end_timestamp !== 'undefined'
+            ? this.contextXScale(moment(d.end_timestamp)) - 1
+            : s + ANNOTATION_MIN_WIDTH;
+        const width = Math.max(ANNOTATION_MIN_WIDTH, e - s);
+        return width;
+      });
 
     ctxAnnotations.classed('mlAnnotationHidden', !showAnnotations);
     ctxAnnotationRects.exit().remove();
