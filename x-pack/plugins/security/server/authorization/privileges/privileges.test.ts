@@ -18,8 +18,6 @@ describe('features', () => {
       new KibanaFeature({
         id: 'foo-feature',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
-        navLinkId: 'kibana:foo',
         app: ['app-1', 'app-2'],
         category: { id: 'foo', label: 'foo' },
         catalogue: ['catalogue-1', 'catalogue-2'],
@@ -65,7 +63,6 @@ describe('features', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
         category: { id: 'foo', label: 'foo' },
         privileges: {
@@ -169,7 +166,6 @@ describe('features', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
         category: { id: 'foo', label: 'foo' },
         privileges: null,
@@ -211,8 +207,6 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
           category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
@@ -336,8 +330,6 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
           category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
@@ -421,8 +413,6 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
           category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
@@ -480,8 +470,6 @@ describe('features', () => {
           id: 'foo',
           name: 'Foo KibanaFeature',
           excludeFromBasePrivileges: true,
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
           category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
@@ -546,8 +534,6 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
           category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
@@ -617,8 +603,6 @@ describe('reserved', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
-        navLinkId: 'kibana:foo',
         app: ['app-1', 'app-2'],
         category: { id: 'foo', label: 'foo' },
         catalogue: ['catalogue-1', 'catalogue-2'],
@@ -661,7 +645,6 @@ describe('reserved', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
         category: { id: 'foo', label: 'foo' },
         privileges: null,
@@ -728,7 +711,6 @@ describe('reserved', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
         category: { id: 'foo', label: 'foo' },
         privileges: {
@@ -770,7 +752,6 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
           category: { id: 'foo', label: 'foo' },
           privileges: {
@@ -899,7 +880,6 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
           category: { id: 'foo', label: 'foo' },
           privileges: {
@@ -1106,7 +1086,6 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
           category: { id: 'foo', label: 'foo' },
           excludeFromBasePrivileges: true,
@@ -1251,7 +1230,6 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
           category: { id: 'foo', label: 'foo' },
           privileges: {
@@ -1419,7 +1397,6 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
           category: { id: 'foo', label: 'foo' },
           excludeFromBasePrivileges: true,
@@ -1551,7 +1528,6 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
           category: { id: 'foo', label: 'foo' },
           privileges: {
