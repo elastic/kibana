@@ -414,7 +414,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.subPlugins(),
         startPlugins.data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: defaultIndicesName, onlyCheckIfIndicesExist: false },
+            { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
             {
               strategy: 'securitySolutionIndexFields',
             }
