@@ -18,23 +18,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   /**
    * Select tags in the searchbar's tag filter.
    */
-  const selectFilterTags = async (...tagIds: string[]) => {
+  const selectFilterTags = async (...tagNames: string[]) => {
     // open the filter dropdown
     const filterButton = await find.byCssSelector('.euiFilterGroup .euiFilterButton');
     await filterButton.click();
     // select the tags
-    for (const tagId of tagIds) {
-      await testSubjects.click(`tag-searchbar-option-${tagId}`);
+    for (const tagName of tagNames) {
+      await testSubjects.click(
+        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
+      );
     }
     // click elsewhere to close the filter dropdown
     const searchFilter = await find.byCssSelector('main .euiFieldSearch');
     await searchFilter.click();
   };
 
-  const selectSavedObjectTags = async (...tagIds: string[]) => {
+  const selectSavedObjectTags = async (...tagNames: string[]) => {
     await testSubjects.click('savedObjectTagSelector');
-    for (const tagId of tagIds) {
-      await testSubjects.click(`tagSelectorOption-${tagId}`);
+    for (const tagName of tagNames) {
+      await testSubjects.click(
+        `tagSelectorOption-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
+      );
     }
     await testSubjects.click('savedObjectTitle');
   };
@@ -96,6 +100,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('My new markdown viz');
+      });
+
+      it('allows to assign tags to the new visualization', async () => {
+        const { tagModal } = PageObjects.tagManagement;
+
+        await PageObjects.visualize.navigateToNewVisualization();
+
+        await PageObjects.visualize.clickMarkdownWidget();
+        await PageObjects.visEditor.setMarkdownTxt('Just some markdown');
+        await PageObjects.visEditor.clickGo();
+
+        await PageObjects.visualize.ensureSavePanelOpen();
+        await testSubjects.setValue('savedObjectTitle', 'vis-with-new-tag');
+
+        await testSubjects.click('savedObjectTagSelector');
+        await testSubjects.click(`tagSelectorOption-action__create`);
+
+        expect(await tagModal.isOpened()).to.be(true);
+
+        await tagModal.fillForm(
+          {
+            name: 'my-new-tag',
+            color: '#FFCC33',
+            description: '',
+          },
+          {
+            submit: true,
+          }
+        );
+
+        expect(await tagModal.isOpened()).to.be(false);
+
+        await testSubjects.click('confirmSaveSavedObjectButton');
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+
+        await selectFilterTags('my-new-tag');
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('vis-with-new-tag');
       });
     });
 

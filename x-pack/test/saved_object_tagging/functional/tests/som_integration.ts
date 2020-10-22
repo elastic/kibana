@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
    * Select tags in the searchbar's tag filter.
    * EUI does not allow to specify a testSubj for filters...
    */
-  const selectTagsInFilter = async (...tagIds: string[]) => {
+  const selectTagsInFilter = async (...tagNames: string[]) => {
     // open the filter dropdown
     // the first class selector before the id is of course useless. Only here to help cleaning that once we got
     // testSubjects in EUI filters.
@@ -27,8 +27,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     );
     await filterButton.click();
     // select the tags
-    for (const tagId of tagIds) {
-      await testSubjects.click(`tag-searchbar-option-${tagId}`);
+    for (const tagName of tagNames) {
+      await testSubjects.click(
+        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
+      );
     }
     // click elsewhere to close the filter dropdown
     await testSubjects.click('savedObjectSearchBar');

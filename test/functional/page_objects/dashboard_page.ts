@@ -356,10 +356,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.existOrFail('titleDupicateWarnMsg');
     }
 
-    public async selectDashboardTags(tagIds: string[]) {
+    public async selectDashboardTags(tagNames: string[]) {
       await testSubjects.click('savedObjectTagSelector');
-      for (const tagId of tagIds) {
-        await testSubjects.click(`tagSelectorOption-${tagId}`);
+      for (const tagName of tagNames) {
+        await testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
       }
       await testSubjects.click('savedObjectTitle');
     }

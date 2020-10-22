@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Tag } from '../../../common';
+import { testSubjFriendly } from '../../utils';
 import { CreateModalOpener } from '../edition_modal';
 
 interface CreateOption {
@@ -77,9 +78,9 @@ const renderTagOption = (
   searchValue: string,
   contentClassName: string
 ) => {
-  const { id, name, color } = option.value ?? { name: '' };
+  const { name, color } = option.value ?? { name: '' };
   return (
-    <EuiHealth color={color} data-test-subj={`tagSelectorOption-${id}`}>
+    <EuiHealth color={color} data-test-subj={`tagSelectorOption-${testSubjFriendly(name)}`}>
       <span className={contentClassName}>
         <EuiHighlight search={searchValue}>{name}</EuiHighlight>
       </span>

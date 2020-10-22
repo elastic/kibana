@@ -18,13 +18,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   /**
    * Select tags in the searchbar's tag filter.
    */
-  const selectFilterTags = async (...tagIds: string[]) => {
+  const selectFilterTags = async (...tagNames: string[]) => {
     // open the filter dropdown
     const filterButton = await find.byCssSelector('.euiFilterGroup .euiFilterButton');
     await filterButton.click();
     // select the tags
-    for (const tagId of tagIds) {
-      await testSubjects.click(`tag-searchbar-option-${tagId}`);
+    for (const tagName of tagNames) {
+      await testSubjects.click(
+        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
+      );
     }
     // click elsewhere to close the filter dropdown
     const searchFilter = await find.byCssSelector('main .euiFieldSearch');
@@ -85,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
-      it('allow to select tags for a new dashboard', async () => {
+      it('allows to select tags for a new dashboard', async () => {
         await PageObjects.dashboard.clickNewDashboard();
 
         await PageObjects.dashboard.saveDashboard('my-new-dashboard', {
@@ -98,6 +100,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('my-new-dashboard');
       });
+
+      it('allows to create a tag from the tag selector', async () => {
+        const { tagModal } = PageObjects.tagManagement;
+
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await testSubjects.click('dashboardSaveMenuItem');
+        await testSubjects.setValue('savedObjectTitle', 'dashboard-with-new-tag');
+
+        await testSubjects.click('savedObjectTagSelector');
+        await testSubjects.click(`tagSelectorOption-action__create`);
+
+        expect(await tagModal.isOpened()).to.be(true);
+
+        await tagModal.fillForm(
+          {
+            name: 'my-new-tag',
+            color: '#FFCC33',
+            description: '',
+          },
+          {
+            submit: true,
+          }
+        );
+
+        expect(await tagModal.isOpened()).to.be(false);
+
+        await PageObjects.dashboard.clickSave();
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await selectFilterTags('my-new-tag');
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('dashboard-with-new-tag');
+      });
     });
 
     describe('editing', () => {
@@ -106,7 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
-      it('allow to select tags for an existing dashboard', async () => {
+      it('allows to select tags for an existing dashboard', async () => {
         await listingTable.clickItemLink('dashboard', 'dashboard 4 with real data (tag-1)');
 
         await PageObjects.dashboard.switchToEditMode();

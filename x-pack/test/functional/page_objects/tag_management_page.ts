@@ -279,6 +279,14 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       const rows = await testSubjects.findAll('tagsTableRow');
       return Promise.all([...rows.map(parseTableRow)]);
     }
+
+    /**
+     * Converts the tagName to the format used in test subjects
+     * @param tagName
+     */
+    testSubjFriendly(tagName: string) {
+      return tagName.replace(' ', '_');
+    }
   }
 
   const parseTableRow = async (row: WebElementWrapper) => {
