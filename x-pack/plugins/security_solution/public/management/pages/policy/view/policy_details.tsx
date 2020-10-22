@@ -252,6 +252,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
 
+        <EuiSpacer size="l" />
         <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.advanced.show"
