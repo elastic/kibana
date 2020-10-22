@@ -126,8 +126,7 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
           }
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [dataProviders, activeTimelineDataProviders, browserFields]
+      [activeTimelineDataProviders, browserFields, dataProviders, dispatch, onAddedToTimeline]
     );
     return (
       <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture} sensors={sensors}>

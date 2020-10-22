@@ -32,7 +32,7 @@ export function percentileRank(resp, panel, series, meta) {
     }
 
     getSplits(resp, panel, series, meta).forEach((split) => {
-      (metric.values || []).forEach((percentileRank) => {
+      (metric.values || []).forEach((percentileRank, index) => {
         const data = split.timeseries.buckets.map((bucket) => [
           bucket.key,
           getAggValue(bucket, {
@@ -43,7 +43,7 @@ export function percentileRank(resp, panel, series, meta) {
 
         results.push({
           data,
-          id: `${split.id}:${percentileRank}`,
+          id: `${split.id}:${percentileRank}:${index}`,
           label: `${split.label} (${percentileRank || 0})`,
           color: split.color,
           ...getDefaultDecoration(series),

@@ -19,7 +19,6 @@ const buildProps = (customProps: any = {}) => {
       name: 'Feature 1',
       app: ['app'],
       category: { id: 'foo', label: 'foo' },
-      icon: 'spacesApp',
       privileges: {
         all: {
           app: ['app'],

@@ -4,7 +4,7 @@ Enroll agent
 
 ## Request
 
-`POST /api/ingest_manager/fleet/agents/enroll`
+`POST /api/fleet/agents/enroll`
 
 ## Headers
 
@@ -25,7 +25,7 @@ Enroll agent
 ## Example
 
 ```js
-POST /api/ingest_manager/fleet/agents/enroll
+POST /api/fleet/agents/enroll
 Authorization: ApiKey VALID_API_KEY
 {
   "type": "PERMANENT",

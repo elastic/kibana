@@ -17,6 +17,7 @@ import {
   UseField,
   getFieldValidityAndErrorMessage,
 } from '../../../../shared_imports';
+import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
@@ -51,7 +52,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={true}>
-          <CommonUseField
+          <CommonUseField<string[], DefineStepRule>
             path="threatIndex"
             config={{
               ...schema.threatIndex,

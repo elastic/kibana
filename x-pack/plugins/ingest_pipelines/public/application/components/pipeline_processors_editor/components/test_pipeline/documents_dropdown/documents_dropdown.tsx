@@ -27,7 +27,7 @@ const i18nTexts = {
       defaultMessage: 'Documents:',
     }
   ),
-  addDocumentsButtonLabel: i18n.translate(
+  editDocumentsButtonLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.editDocumentsButtonLabel',
     {
       defaultMessage: 'Edit documents',
@@ -124,7 +124,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
           }}
           data-test-subj="editDocumentsButton"
         >
-          {i18nTexts.addDocumentsButtonLabel}
+          {i18nTexts.editDocumentsButtonLabel}
         </EuiButton>
       </EuiPopoverFooter>
     </EuiPopover>

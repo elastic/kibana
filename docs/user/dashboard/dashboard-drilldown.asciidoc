@@ -39,7 +39,7 @@ Create the *Host Overview* drilldown shown above.
 
 *Set up the dashboards*
 
-. Add the <<gs-get-data-into-kibana, sample web logs>> data set.
+. Add the sample web logs data set.
 
 . Create a new dashboard, called `Host Overview`, and include these visualizations
 from the sample data set:
@@ -57,8 +57,8 @@ TIP: If you don’t see data for a panel, try changing the time range.
 . Set a search and filter.
 +
 [%hardbreaks]
-Search: `extension.keyword:( “gz” or “css” or “deb”)`
-Filter: `geo.src : CN`
+Search: `extension.keyword: ("gz" or "css" or "deb")`
+Filter: `geo.src: CN`
 
 
 *Create the drilldown*
@@ -94,4 +94,3 @@ image::images/drilldown_on_panel.png[Drilldown on pie chart that navigates to an
 +
 You are navigated to your destination dashboard. Verify that the search query, filters,
 and time range are carried over.
-

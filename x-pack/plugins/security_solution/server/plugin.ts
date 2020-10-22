@@ -18,8 +18,10 @@ import {
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
@@ -188,9 +190,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: 'logoSecurity',
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
@@ -226,7 +226,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
-            all: ['alert'],
+            all: [],
             read: [
               'config',
               'cases',
@@ -237,7 +237,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
           alerting: {
-            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            read: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],

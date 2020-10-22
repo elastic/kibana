@@ -22,6 +22,7 @@ import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
 import { NotFound } from '../shared/not_found';
 import { Overview } from './views/overview';
+import { GroupsRouter } from './views/groups';
 
 export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -50,14 +51,13 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
       <Route>
-        <Layout navigation={<WorkplaceSearchNav />} readOnlyMode={readOnlyMode}>
+        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorState />
           ) : (
             <Switch>
-              <Route exact path="/groups">
-                {/* Will replace with groups component subsequent PR */}
-                <div />
+              <Route path="/groups">
+                <GroupsRouter />
               </Route>
               <Route>
                 <NotFound product={WORKPLACE_SEARCH_PLUGIN} />

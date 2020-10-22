@@ -50,7 +50,7 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.missingData.firing', {
   defaultMessage: 'firing',
 });
 
-const DEFAULT_DURATION = '5m';
+const DEFAULT_DURATION = '15m';
 const DEFAULT_LIMIT = '1d';
 
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
@@ -65,17 +65,19 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   public static paramDetails = {
     duration: {
       label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
-        defaultMessage: `Notify if monitoring data is missing for`,
+        defaultMessage: `Notify if monitoring data is missing for the last`,
       }),
       type: AlertParamType.Duration,
     } as CommonAlertParamDetail,
     limit: {
       label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.limit.label', {
-        defaultMessage: `Look this far back in time for monitoring data`,
+        defaultMessage: `looking back`,
       }),
       type: AlertParamType.Duration,
     } as CommonAlertParamDetail,
   };
+
+  public defaultThrottle: string = '6h';
 
   public type = ALERT_MISSING_MONITORING_DATA;
   public label = i18n.translate('xpack.monitoring.alerts.missingData.label', {
@@ -309,13 +311,6 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       return;
     }
 
-    const ccs = instanceState.alertStates.reduce((accum: string, state): string => {
-      if (state.ccs) {
-        return state.ccs;
-      }
-      return accum;
-    }, '');
-
     const firingCount = instanceState.alertStates.filter((alertState) => alertState.ui.isFiring)
       .length;
     const firingStackProducts = instanceState.alertStates
@@ -336,12 +331,10 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       const fullActionText = i18n.translate('xpack.monitoring.alerts.missingData.fullAction', {
         defaultMessage: 'View what monitoring data we do have for these stack products.',
       });
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (ccs) {
-        globalState.push(`ccs:${ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#overview?_g=(${globalState.join(',')})`;
-      const action = `[${fullActionText}](${url})`;
+
+      const ccs = instanceState.alertStates.find((state) => state.ccs)?.ccs;
+      const globalStateLink = this.createGlobalStateLink('overview', cluster.clusterUuid, ccs);
+      const action = `[${fullActionText}](${globalStateLink})`;
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalShortMessage',
         {

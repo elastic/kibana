@@ -138,7 +138,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -202,7 +202,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -354,7 +354,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       <span
                         className="euiFormControlLayoutCustomIcon"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
                           data-euiicon-type="arrowDown"
@@ -435,7 +435,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
           >
             <div
               className="euiPopover euiPopover--anchorUpCenter"
-              container={null}
               id="color-picker-popover"
               onKeyDown={[Function]}
               onMouseDown={[Function]}
@@ -609,7 +608,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                 <span
                   className="euiFormControlLayoutCustomIcon"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -673,7 +672,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                 <span
                   className="euiFormControlLayoutCustomIcon"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -824,7 +823,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
                     <span
                       className="euiFormControlLayoutCustomIcon"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiFormControlLayoutCustomIcon__icon"
                         data-euiicon-type="arrowDown"
@@ -905,7 +904,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
         >
           <div
             className="euiPopover euiPopover--anchorUpCenter"
-            container={null}
             id="color-picker-popover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
@@ -1090,7 +1088,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -1154,7 +1152,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -1306,7 +1304,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       <span
                         className="euiFormControlLayoutCustomIcon"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiFormControlLayoutCustomIcon__icon"
                           data-euiicon-type="arrowDown"
@@ -1387,7 +1385,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
           >
             <div
               className="euiPopover euiPopover--anchorUpCenter"
-              container={null}
               id="color-picker-popover"
               onKeyDown={[Function]}
               onMouseDown={[Function]}

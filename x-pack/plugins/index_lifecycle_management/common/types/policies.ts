@@ -42,9 +42,7 @@ export interface SerializedHotPhase extends SerializedPhase {
       max_age?: string;
       max_docs?: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
@@ -57,9 +55,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     shrink?: {
       number_of_shards: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
@@ -105,10 +101,15 @@ export interface AllocateAction {
   };
 }
 
-export interface Policy {
+export interface ForcemergeAction {
+  max_num_segments: number;
+  // only accepted value for index_codec
+  index_codec?: 'best_compression';
+}
+
+export interface LegacyPolicy {
   name: string;
   phases: {
-    hot: HotPhase;
     warm: WarmPhase;
     cold: ColdPhase;
     delete: DeletePhase;
@@ -150,18 +151,7 @@ export interface PhaseWithIndexPriority {
 export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
-}
-
-export interface HotPhase
-  extends CommonPhaseSettings,
-    PhaseWithIndexPriority,
-    PhaseWithForcemergeAction {
-  rolloverEnabled: boolean;
-  selectedMaxSizeStored: string;
-  selectedMaxSizeStoredUnits: string;
-  selectedMaxDocuments: string;
-  selectedMaxAge: string;
-  selectedMaxAgeUnits: string;
+  bestCompressionEnabled: boolean;
 }
 
 export interface WarmPhase
