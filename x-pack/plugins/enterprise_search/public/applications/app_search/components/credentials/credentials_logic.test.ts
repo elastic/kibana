@@ -1179,7 +1179,7 @@ describe('CredentialsLogic', () => {
     });
 
     describe('onApiTokenChange', () => {
-      it('calls a POST API endpoint that creates a new token', async () => {
+      it('calls a POST API endpoint that creates a new token if the active token does not exist yet', async () => {
         const createdToken = {
           name: 'new-key',
           type: ApiTokenTypes.Admin,
@@ -1200,7 +1200,7 @@ describe('CredentialsLogic', () => {
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 
-      it('calls a PUT endpoint that updates existing API tokens', async () => {
+      it('calls a PUT endpoint that updates the active token if it already exists', async () => {
         const updatedToken = {
           name: 'test-key',
           type: ApiTokenTypes.Private,
@@ -1239,6 +1239,48 @@ describe('CredentialsLogic', () => {
         } catch {
           expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
         }
+      });
+
+      describe('token type data', () => {
+        it('does not send extra read/write/engine access data for admin tokens', () => {
+          const correctAdminToken = {
+            name: 'bogus-admin',
+            type: ApiTokenTypes.Admin,
+          };
+          const extraData = {
+            read: true,
+            write: true,
+            access_all_engines: true,
+          };
+          mount({ activeApiToken: { ...correctAdminToken, ...extraData } });
+
+          CredentialsLogic.actions.onApiTokenChange();
+          expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+            body: JSON.stringify(correctAdminToken),
+          });
+        });
+
+        it('does not send extra read/write access data for search tokens', () => {
+          const correctSearchToken = {
+            name: 'bogus-search',
+            type: ApiTokenTypes.Search,
+            access_all_engines: false,
+            engines: ['some-engine'],
+          };
+          const extraData = {
+            read: true,
+            write: false,
+          };
+          mount({ activeApiToken: { ...correctSearchToken, ...extraData } });
+
+          CredentialsLogic.actions.onApiTokenChange();
+          expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+            body: JSON.stringify(correctSearchToken),
+          });
+        });
+
+        // Private tokens send all data per the PUT test above.
+        // If that ever changes, we should capture that in another test here.
       });
     });
 
