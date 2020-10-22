@@ -92,42 +92,17 @@ function getExpressionForLayer(
         // TODO: improve the type handling here
         const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
         const format = (col as FormattedColumn).params!.format;
+
         const base: ExpressionFunctionAST = {
           type: 'function',
           function: 'lens_format_column',
           arguments: {
-            format: [(format || parentFormat!).id], // either one of the two is available
+            format: format ? [format.id] : [''],
             columnId: [id],
-            rangeParameters: [''],
+            decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+            parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
           },
         };
-
-        // Handle nested formatter carefully one parameter at the time
-        const rangeParameters: Record<string, string | boolean> = {};
-
-        if (parentFormat) {
-          base.arguments.format = [parentFormat.id];
-          // If a format override is present use it
-          if (format) {
-            rangeParameters.nestedFormat = format.id;
-          }
-        }
-        if (parentFormat?.params?.template) {
-          rangeParameters.template = parentFormat.params?.template;
-        }
-
-        if (parentFormat?.params?.replaceInfinity) {
-          rangeParameters.replaceInfinity = parentFormat.params?.replaceInfinity;
-        }
-
-        if (typeof format?.params?.decimals === 'number') {
-          base.arguments.decimals = [format.params.decimals];
-        }
-
-        // To avoid mapping too many ad-hoc arguments, this passes thru a JSON serialization
-        if (Object.keys(rangeParameters).length) {
-          base.arguments.rangeParameters = [JSON.stringify(rangeParameters)];
-        }
 
         return base;
       }
