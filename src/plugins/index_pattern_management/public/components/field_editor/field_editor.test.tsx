@@ -23,6 +23,7 @@ import {
   FieldFormatInstanceType,
   IndexPatternsService,
 } from 'src/plugins/data/public';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -180,6 +181,7 @@ describe('FieldEditor', () => {
       format: new Format(),
       lang: undefined,
       type: 'string',
+      customName: 'Test',
     };
     fieldList.push((testField as unknown) as IndexPatternField);
     indexPattern.fields.getByName = (name) => {
@@ -191,13 +193,19 @@ describe('FieldEditor', () => {
     indexPattern.fields = { ...indexPattern.fields, ...{ update: jest.fn(), add: jest.fn() } };
     indexPattern.fieldFormatMap = { test: field };
     indexPattern.attributes = { fields: { test: { customName: 'Test' } } };
+    indexPattern.deleteFieldFormat = jest.fn();
 
     const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {}, saveIndexPattern: jest.fn(() => Promise.resolve()) },
+        services: {
+          redirectAway: () => {},
+          indexPatternService: ({
+            updateSavedObject: jest.fn(() => Promise.resolve()),
+          } as unknown) as IndexPatternsService,
+        },
       },
       mockContext
     );
