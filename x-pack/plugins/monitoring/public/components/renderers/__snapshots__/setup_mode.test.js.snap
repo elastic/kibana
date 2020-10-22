@@ -100,7 +100,9 @@ exports[`SetupModeRenderer should render with setup mode disabled 1`] = `
     setupMode={
       Object {
         "closeFlyout": [Function],
-        "data": null,
+        "data": Object {
+          "byUuid": Object {},
+        },
         "enabled": false,
         "meta": null,
         "openFlyout": [Function],

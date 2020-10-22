@@ -198,9 +198,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: 'logoSecurity',
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
@@ -236,7 +234,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
-            all: ['alert'],
+            all: [],
             read: [
               'config',
               'cases',
@@ -247,7 +245,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
           alerting: {
-            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            read: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],

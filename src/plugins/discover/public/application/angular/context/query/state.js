@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LOADING_STATUS } from './constants';
+import { LOADING_STATUS } from './index';
 
 export function createInitialLoadingStatusState() {
   return {

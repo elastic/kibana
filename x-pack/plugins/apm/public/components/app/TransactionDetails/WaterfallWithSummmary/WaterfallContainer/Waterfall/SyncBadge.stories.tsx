@@ -4,27 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boolean, withKnobs } from '@storybook/addon-knobs';
-import { storiesOf } from '@storybook/react';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { SyncBadge } from './SyncBadge';
 
-storiesOf('app/TransactionDetails/SyncBadge', module)
-  .addDecorator(withKnobs)
-  .add(
-    'example',
-    () => {
-      return <SyncBadge sync={boolean('sync', true)} />;
+export default {
+  title: 'app/TransactionDetails/SyncBadge',
+  component: SyncBadge,
+  argTypes: {
+    sync: {
+      control: { type: 'inline-radio', options: [true, false, undefined] },
     },
-    {
-      showPanel: true,
-      info: { source: false },
-    }
-  )
-  .add(
-    'sync=undefined',
-    () => {
-      return <SyncBadge />;
-    },
-    { info: { source: false } }
-  );
+  },
+};
+
+export function Example({ sync }: ComponentProps<typeof SyncBadge>) {
+  return <SyncBadge sync={sync} />;
+}
+Example.args = { sync: true } as ComponentProps<typeof SyncBadge>;
