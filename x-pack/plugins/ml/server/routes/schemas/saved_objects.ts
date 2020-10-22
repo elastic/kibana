@@ -11,3 +11,5 @@ export const jobsAndSpaces = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   spaces: schema.arrayOf(schema.string()),
 });
+
+export const repairJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });

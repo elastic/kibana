@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { checksFactory } from '../saved_objects';
-import { jobsAndSpaces } from './schemas/saved_objects';
+import { jobsAndSpaces, repairJobObjects } from './schemas/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -30,20 +29,18 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
-        try {
-          const { checkStatus } = checksFactory(client, jobSavedObjectService);
-          const status = await checkStatus();
+    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobSavedObjectService }) => {
+      try {
+        const { checkStatus } = checksFactory(client, jobSavedObjectService);
+        const status = await checkStatus();
 
-          return response.ok({
-            body: status,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
+        return response.ok({
+          body: status,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
       }
-    )
+    })
   );
 
   /**
@@ -61,27 +58,25 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/saved_objects/repair',
       validate: {
-        query: schema.object({ simulate: schema.maybe(schema.boolean()) }),
+        query: repairJobObjects,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
-        try {
-          const { simulate } = request.query;
-          const { repairJobs } = checksFactory(client, jobSavedObjectService);
-          const savedObjects = await repairJobs(simulate);
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+      try {
+        const { simulate } = request.query;
+        const { repairJobs } = checksFactory(client, jobSavedObjectService);
+        const savedObjects = await repairJobs(simulate);
 
-          return response.ok({
-            body: savedObjects,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
+        return response.ok({
+          body: savedObjects,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
       }
-    )
+    })
   );
 
   /**
