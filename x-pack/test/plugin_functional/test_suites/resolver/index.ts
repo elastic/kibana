@@ -8,6 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const expectedDifference = 0.06;
+
 export default function ({
   getPageObjects,
   getService,
@@ -51,7 +53,7 @@ export default function ({
         const element = await find.byCssSelector(`[data-test-resolver-node-id="${nodeID}"]`);
         expect(
           await screenshot.compareAgainstBaseline(`${fileNamePrefix}`, updateBaselines, element)
-        ).to.be.lessThan(0.01);
+        ).to.be.lessThan(expectedDifference);
 
         // hover the button
         const button = await element.findByCssSelector(
@@ -64,7 +66,7 @@ export default function ({
             updateBaselines,
             element
           )
-        ).to.be.lessThan(0.01);
+        ).to.be.lessThan(expectedDifference);
 
         // select the node
         await button.click();
@@ -74,7 +76,7 @@ export default function ({
             updateBaselines,
             element
           )
-        ).to.be.lessThan(0.01);
+        ).to.be.lessThan(expectedDifference);
 
         // move the mouse away
         const zoomIn = await testSubjects.find('resolver:graph-controls:zoom-in');
@@ -86,7 +88,7 @@ export default function ({
             updateBaselines,
             element
           )
-        ).to.be.lessThan(0.01);
+        ).to.be.lessThan(expectedDifference);
 
         // select a pill
         const pills = await element.findAllByTestSubject('resolver:map:node-submenu-item');
@@ -102,7 +104,7 @@ export default function ({
               updateBaselines,
               element
             )
-          ).to.be.lessThan(0.01);
+          ).to.be.lessThan(expectedDifference);
 
           // click the first pill
           await firstPill.click();
@@ -113,7 +115,7 @@ export default function ({
               updateBaselines,
               element
             )
-          ).to.be.lessThan(0.01);
+          ).to.be.lessThan(expectedDifference);
         }
       }
     });
