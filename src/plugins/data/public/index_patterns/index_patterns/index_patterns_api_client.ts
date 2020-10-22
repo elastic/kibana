@@ -65,7 +65,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
       pattern,
       meta_fields: metaFields,
       type,
-      rollupIndex,
+      rollup_index: rollupIndex,
     }).then((resp: any) => resp.fields);
   }
 }
