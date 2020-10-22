@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line no-restricted-imports
-import omit from 'lodash/omit';
 import React, { FC, useState, useCallback } from 'react';
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { TagValidation } from '../../../common/validation';
@@ -26,9 +24,14 @@ const initialValidation: TagValidation = {
   errors: {},
 };
 
+const getAttributes = (tag: Tag): TagAttributes => {
+  const { id, ...attributes } = tag;
+  return attributes;
+};
+
 export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagClient }) => {
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
-  const [tagAttributes, setTagAttributes] = useState<TagAttributes>(omit(tag, 'id'));
+  const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
 
   const setField = useCallback(
     <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {
