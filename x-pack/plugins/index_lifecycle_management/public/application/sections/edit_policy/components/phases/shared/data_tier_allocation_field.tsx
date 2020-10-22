@@ -55,6 +55,9 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
   return (
     <NodesDataProvider>
       {({ nodesByRoles, nodesByAttributes, isUsingDeprecatedDataRoleConfig }) => {
+        const hasDataNodeRoles = Object.keys(nodesByRoles).some((nodeRole) =>
+          nodeRole.trim().startsWith('data_')
+        );
         const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
 
         const renderNotice = () => {
@@ -62,7 +65,8 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
             case 'default':
               const isCloudEnabled = cloud?.isCloudEnabled ?? false;
               if (isCloudEnabled && phase === 'cold') {
-                const isUsingNodeRolesAllocation = !isUsingDeprecatedDataRoleConfig;
+                const isUsingNodeRolesAllocation =
+                  !isUsingDeprecatedDataRoleConfig && hasDataNodeRoles;
                 const hasNoNodesWithNodeRole = !nodesByRoles.data_cold?.length;
 
                 if (isUsingNodeRolesAllocation && hasNoNodesWithNodeRole) {
@@ -120,9 +124,9 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
                   nodes={nodesByAttributes}
-                  disableDataTierOption={
-                    !!(isUsingDeprecatedDataRoleConfig && cloud?.isCloudEnabled)
-                  }
+                  disableDataTierOption={Boolean(
+                    cloud?.isCloudEnabled && !hasDataNodeRoles && isUsingDeprecatedDataRoleConfig
+                  )}
                 />
 
                 {/* Data tier related warnings and call-to-action notices */}
