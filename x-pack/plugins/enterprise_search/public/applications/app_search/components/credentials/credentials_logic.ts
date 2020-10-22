@@ -211,7 +211,8 @@ export const CredentialsLogic = kea<
   selectors: ({ selectors }) => ({
     fullEngineAccessChecked: [
       () => [AppLogic.selectors.myRole, selectors.activeApiToken],
-      (myRole, activeApiToken) => myRole.canAccessAllEngines && !!activeApiToken.access_all_engines,
+      (myRole, activeApiToken) =>
+        !!(myRole.canAccessAllEngines && activeApiToken.access_all_engines),
     ],
     dataLoading: [
       () => [selectors.isCredentialsDetailsComplete, selectors.isCredentialsDataComplete],
@@ -264,16 +265,7 @@ export const CredentialsLogic = kea<
       }
     },
     onApiTokenChange: async () => {
-      const { myRole } = AppLogic.values;
-      const {
-        id,
-        name,
-        engines,
-        type,
-        read,
-        write,
-        access_all_engines: accessAllEngines,
-      } = values.activeApiToken;
+      const { id, name, engines, type, read, write } = values.activeApiToken;
 
       const data: IApiToken = {
         name,
@@ -284,7 +276,7 @@ export const CredentialsLogic = kea<
         data.write = write;
       }
       if (type !== ApiTokenTypes.Admin) {
-        data.access_all_engines = !!(accessAllEngines && myRole.canAccessAllEngines);
+        data.access_all_engines = values.fullEngineAccessChecked;
         data.engines = engines;
       }
 

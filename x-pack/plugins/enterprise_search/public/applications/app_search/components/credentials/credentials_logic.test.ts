@@ -54,6 +54,7 @@ describe('CredentialsLogic', () => {
     meta: {},
     nameInputBlurred: false,
     shouldShowCredentialsForm: false,
+    fullEngineAccessChecked: false,
   };
 
   const mount = (defaults?: object) => {
