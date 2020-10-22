@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -24,100 +25,150 @@ export default function ({
   describe('Resolver test app', function () {
     this.tags('ciGroup7');
 
-    beforeEach(async function () {
+    // Note: these tests are intended to run on the same page in serial.
+    before(async function () {
       await pageObjects.common.navigateToApp('resolverTest');
-    });
-
-    it('renders at least one node, one node-list, one edge line, and graph controls', async function () {
-      await testSubjects.existOrFail('resolver:node');
-      await testSubjects.existOrFail('resolver:node-list');
-      await testSubjects.existOrFail('resolver:graph:edgeline');
-      await testSubjects.existOrFail('resolver:graph-controls');
-
-      // stuff i'd like to test
-      // nodes: short name origin node with 13 pills, long name non-origin node, short name non-origin node
-      // node states: node is selected, node is unselected
-      // interaction states: node button is hovered, node button is focused, node button is hovered and focused, pill is focused, pill is hovered, pill is hovered and focused
-
       // make the window big enough that all nodes are fully in view (for screenshots)
       await browser.setWindowSize(1920, 1200);
-
-      // Because the lint rules will not allow files that include upper case characters, we specify explicit file name prefixes
-      const nodeDefinitions: Array<[nodeID: string, fileNamePrefix: string]> = [
-        ['origin', 'origin'],
-        ['firstChild', 'first_child'],
-        ['secondChild', 'second_child'],
-      ];
-
-      for (const [nodeID, fileNamePrefix] of nodeDefinitions) {
-        const element = await find.byCssSelector(`[data-test-resolver-node-id="${nodeID}"]`);
-        expect(
-          await screenshot.compareAgainstBaseline(`${fileNamePrefix}`, updateBaselines, element)
-        ).to.be.lessThan(expectedDifference);
-
-        // hover the button
-        const button = await element.findByCssSelector(
-          `button[data-test-resolver-node-id="${nodeID}"]`
-        );
-        await button.moveMouseTo();
-        expect(
-          await screenshot.compareAgainstBaseline(
-            `${fileNamePrefix}_with_primary_button_hovered`,
-            updateBaselines,
-            element
-          )
-        ).to.be.lessThan(expectedDifference);
-
-        // select the node
-        await button.click();
-        expect(
-          await screenshot.compareAgainstBaseline(
-            `${fileNamePrefix}_selected_with_primary_button_hovered`,
-            updateBaselines,
-            element
-          )
-        ).to.be.lessThan(expectedDifference);
-
-        // move the mouse away
-        const zoomIn = await testSubjects.find('resolver:graph-controls:zoom-in');
-        await zoomIn.moveMouseTo();
-
-        expect(
-          await screenshot.compareAgainstBaseline(
-            `${fileNamePrefix}_selected`,
-            updateBaselines,
-            element
-          )
-        ).to.be.lessThan(expectedDifference);
-
-        // select a pill
-        const pills = await element.findAllByTestSubject('resolver:map:node-submenu-item');
-
-        if (pills.length) {
-          const [firstPill] = pills;
-          // move mouse to first pill
-          await firstPill.moveMouseTo();
-
-          expect(
-            await screenshot.compareAgainstBaseline(
-              `${fileNamePrefix}_selected_with_first_pill_hovered`,
-              updateBaselines,
-              element
-            )
-          ).to.be.lessThan(expectedDifference);
-
-          // click the first pill
-          await firstPill.click();
-
-          expect(
-            await screenshot.compareAgainstBaseline(
-              `${fileNamePrefix}_selected_with_first_pill_selected`,
-              updateBaselines,
-              element
-            )
-          ).to.be.lessThan(expectedDifference);
-        }
-      }
     });
+
+    it('renders at least one node', async () => {
+      await testSubjects.existOrFail('resolver:node');
+    });
+    it('renders a node list', async () => {
+      await testSubjects.existOrFail('resolver:node-list');
+    });
+    it('renders at least one edge line', async () => {
+      await testSubjects.existOrFail('resolver:graph:edgeline');
+    });
+    it('renders graph controls', async () => {
+      await testSubjects.existOrFail('resolver:graph-controls');
+    });
+    /**
+     * The mock data used to render the Resolver test plugin has 3 nodes:
+     *   - an origin node with 13 related event pills
+     *   - a non-origin node with a long name
+     *   - a non-origin node with a short name
+     *
+     * Each node is captured when selected and unselected.
+     *
+     * For each node is captured (once when selected and once when unselected) in each of the following interaction states:
+     *   - primary button hovered
+     *   - pill is hovered
+     *   - pill is clicked
+     *   - pill is clicked and hovered
+     */
+
+    // Because the lint rules will not allow files that include upper case characters, we specify explicit file name prefixes
+    const nodeDefinitions: Array<[nodeID: string, fileNamePrefix: string, hasAPill: boolean]> = [
+      ['origin', 'origin', true],
+      ['firstChild', 'first_child', true],
+      ['secondChild', 'second_child', false],
+    ];
+
+    for (const [nodeID, fileNamePrefix, hasAPill] of nodeDefinitions) {
+      describe(`when the user is interacting with the node with ID: ${nodeID}`, () => {
+        let element: WebElementWrapper;
+        before(async () => {
+          element = await find.byCssSelector(`[data-test-resolver-node-id="${nodeID}"]`);
+        });
+        it('should render as expected', async () => {
+          expect(
+            await screenshot.compareAgainstBaseline(`${fileNamePrefix}`, updateBaselines, element)
+          ).to.be.lessThan(expectedDifference);
+        });
+        describe('when the user hovers over the primary button', () => {
+          let button: WebElementWrapper;
+          before(async () => {
+            // hover the button
+            button = await element.findByCssSelector(
+              `button[data-test-resolver-node-id="${nodeID}"]`
+            );
+            await button.moveMouseTo();
+          });
+          it('should render as expected', async () => {
+            expect(
+              await screenshot.compareAgainstBaseline(
+                `${fileNamePrefix}_with_primary_button_hovered`,
+                updateBaselines,
+                element
+              )
+            ).to.be.lessThan(expectedDifference);
+          });
+          describe('when the user has clicked the primary button (which selects the node.)', () => {
+            before(async () => {
+              // select the node
+              await button.click();
+            });
+            it('should load layers', async () => {
+              expect(
+                await screenshot.compareAgainstBaseline(
+                  `${fileNamePrefix}_selected_with_primary_button_hovered`,
+                  updateBaselines,
+                  element
+                )
+              ).to.be.lessThan(expectedDifference);
+            });
+            describe('when the user has moved their mouse off of the primary button (and onto the zoom controls.)', () => {
+              before(async () => {
+                // move the mouse away
+                const zoomIn = await testSubjects.find('resolver:graph-controls:zoom-in');
+                await zoomIn.moveMouseTo();
+              });
+              it('should render as expected', async () => {
+                expect(
+                  await screenshot.compareAgainstBaseline(
+                    `${fileNamePrefix}_selected`,
+                    updateBaselines,
+                    element
+                  )
+                ).to.be.lessThan(expectedDifference);
+              });
+              if (hasAPill) {
+                describe('when the user hovers over the first pill', () => {
+                  let firstPill: WebElementWrapper;
+                  before(async () => {
+                    // select a pill
+                    const pills = await element.findAllByTestSubject(
+                      'resolver:map:node-submenu-item'
+                    );
+
+                    if (pills.length) {
+                      firstPill = pills[0];
+                      // move mouse to first pill
+                      await firstPill.moveMouseTo();
+                    }
+                  });
+                  it('should render as expected', async () => {
+                    expect(
+                      await screenshot.compareAgainstBaseline(
+                        `${fileNamePrefix}_selected_with_first_pill_hovered`,
+                        updateBaselines,
+                        element
+                      )
+                    ).to.be.lessThan(expectedDifference);
+                  });
+                  describe('when the user clicks on the first pill', () => {
+                    before(async () => {
+                      // click the first pill
+                      await firstPill.click();
+                    });
+                    it('should render as expected', async () => {
+                      expect(
+                        await screenshot.compareAgainstBaseline(
+                          `${fileNamePrefix}_selected_with_first_pill_selected`,
+                          updateBaselines,
+                          element
+                        )
+                      ).to.be.lessThan(expectedDifference);
+                    });
+                  });
+                });
+              }
+            });
+          });
+        });
+      });
+    }
   });
 }
