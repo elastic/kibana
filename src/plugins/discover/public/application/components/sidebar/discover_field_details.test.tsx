@@ -65,12 +65,12 @@ describe('discover sidebar field details', function () {
     expect(findTestSubject(comp, 'fieldVisualize-bytes')).toBeTruthy();
   });
 
-  it('should disable the visualize link for a conflict field', function () {
+  it('should disable the visualize link for an _id field', function () {
     const conflictField = new IndexPatternField(
       {
-        name: 'test',
-        type: 'conflict',
-        esTypes: ['double', 'geo_point'],
+        name: '_id',
+        type: 'string',
+        esTypes: ['_id'],
         count: 0,
         scripted: false,
         searchable: true,
@@ -80,7 +80,7 @@ describe('discover sidebar field details', function () {
       'test'
     );
     const comp = mountComponent(conflictField);
-    expect(findTestSubject(comp, 'fieldVisualize-test')).toEqual({});
+    expect(findTestSubject(comp, 'fieldVisualize-_id')).toEqual({});
   });
 
   it('should disable the visualize link for an unknown field', function () {
