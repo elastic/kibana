@@ -189,7 +189,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiFormRow label={i18n.FIELD}>
                   <EuiComboBox
@@ -223,7 +223,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
           </EuiFlexItem>
 
           {type !== DataProviderType.template &&
@@ -245,7 +245,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
           ) : null}
 
           <EuiFlexItem grow={false}>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -265,7 +265,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     }) || isValueFieldInvalid
                   }
                   onClick={handleSave}
-                  size="s"
+                  size="m"
                 >
                   {i18n.SAVE}
                 </EuiButton>
