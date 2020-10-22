@@ -204,9 +204,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           test: /\.(js|tsx?)$/,
           exclude: [
             /node_modules/,
-            // TODO: once we move to TeamCity and get rid of the massive splaying of the
-            // kibana repo we can focus this selector to avoid catching people off guard
-            /[\/\\]packages[\/\\]/,
+            // prevent package code from being touched by babel-loader, except the kbn/optimizer fixtures.
+            //
+            // TODO: once we move to TeamCity and get rid of the splaying of the
+            // kibana repo we can focus this selector to avoid some gotchas
+            {
+              include: [/[\/\\]packages[\/\\]/],
+              exclude: [Path.resolve(__dirname, '../__fixtures__')],
+            },
           ],
           use: {
             loader: 'babel-loader',
