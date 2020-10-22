@@ -176,26 +176,29 @@ export function PanelHeader({
   }
 
   const renderTitle = () => {
-    const titleSpan = showTitle ? (
-      <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
-        {title || placeholderTitle}
-      </span>
-    ) : undefined;
-    const titleComponent = isViewMode ? (
-      titleSpan
-    ) : (
-      <EuiLink
-        color="text"
-        data-test-subj={'embeddablePanelTitleLink'}
-        aria-label={i18n.translate('embeddableApi.panel.editTitleAriaLabel', {
-          defaultMessage: 'Click to edit title: {title}',
-          values: { title: title || placeholderTitle },
-        })}
-        onClick={() => customizeTitle.execute({ embeddable })}
-      >
-        {titleSpan}
-      </EuiLink>
-    );
+    let titleComponent;
+    if (showTitle) {
+      titleComponent = isViewMode ? (
+        <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
+          {title || placeholderTitle}
+        </span>
+      ) : (
+        <EuiLink
+          color="text"
+          data-test-subj={'embeddablePanelTitleLink'}
+          className={
+            title ? 'embPanel__titleText embPanel__titleLink' : 'embPanel__placeholderTitleText'
+          }
+          aria-label={i18n.translate('embeddableApi.panel.editTitleAriaLabel', {
+            defaultMessage: 'Click to edit title: {title}',
+            values: { title: title || placeholderTitle },
+          })}
+          onClick={() => customizeTitle.execute({ embeddable })}
+        >
+          {title || placeholderTitle}
+        </EuiLink>
+      );
+    }
     return description ? (
       <EuiToolTip
         content={description}

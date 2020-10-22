@@ -66,6 +66,10 @@
     @include euiTextTruncate;
   }
 
+  .embPanel__titleLink {
+    font-weight: $euiFontWeightBold;
+  }
+
   .embPanel__placeholderTitleText {
     @include euiTextTruncate;
     font-weight: $euiFontWeightRegular;
