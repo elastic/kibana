@@ -36,7 +36,7 @@ export const SAVE_TIMELINE_TEMPLATE = i18n.translate(
   }
 );
 
-export const SAVE = i18n.translate('xpack.securitySolution.timeline.nameTimeline.modal.header', {
+export const SAVE = i18n.translate('xpack.securitySolution.timeline.nameTimeline.save.title', {
   defaultMessage: 'Save',
 });
 
