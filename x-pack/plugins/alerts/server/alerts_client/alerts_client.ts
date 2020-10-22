@@ -27,6 +27,7 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
+  AlertExecutionStatusValues,
 } from '../types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
 import {
@@ -387,6 +388,23 @@ export class AlertsClient {
     });
 
     logSuccessfulAuthorization();
+
+    const executionStatusValues = await Promise.all(
+      AlertExecutionStatusValues.map((status: string) => {
+        return this.find({
+          options: {
+            ...options,
+            filter: options.filter
+              ? options.filter.concat(` and alert.attributes.executionStatus.status:(${status})`)
+              : `alert.attributes.executionStatus.status:(${status})`,
+            page: 1,
+            per_page: 0,
+          },
+        });
+      })
+    );
+
+    // console.log(executionStatusValues);
 
     return {
       page,
