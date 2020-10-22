@@ -9,5 +9,5 @@ Get field list by providing { pattern }
 <b>Signature:</b>
 
 ```typescript
-getFieldsForWildcard: (options?: GetFieldsOptions) => Promise<any>;
+getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
 ```

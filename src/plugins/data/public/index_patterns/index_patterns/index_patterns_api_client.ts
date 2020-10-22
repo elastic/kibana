@@ -19,7 +19,11 @@
 
 import { HttpSetup } from 'src/core/public';
 import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
-import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
+import {
+  GetFieldsOptions,
+  IIndexPatternsApiClient,
+  GetFieldsOptionsTimePattern,
+} from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -48,7 +52,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
-  getFieldsForTimePattern(options: GetFieldsOptions = {}) {
+  getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
     const { pattern, lookBack, metaFields } = options;
 
     const url = this._getUrl(['_fields_for_time_pattern']);
@@ -60,7 +64,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     }).then((resp: any) => resp.fields);
   }
 
-  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex }: GetFieldsOptions = {}) {
+  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex }: GetFieldsOptions) {
     return this._request(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
