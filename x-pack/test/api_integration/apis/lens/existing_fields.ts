@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/sdfsd${encodeURIComponent('logstash-*')}`)
+          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
