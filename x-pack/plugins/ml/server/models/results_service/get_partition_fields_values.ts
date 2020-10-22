@@ -31,6 +31,8 @@ function getFieldAgg(fieldType: PartitionFieldsType, query?: string, fieldConfig
   const fieldNameKey = `${fieldType}_name`;
   const fieldValueKey = `${fieldType}_value`;
 
+  const sortByField = fieldConfig?.sort?.by === 'name' ? '_key' : 'anomaly_score';
+
   return {
     [fieldNameKey]: {
       terms: {
@@ -71,7 +73,25 @@ function getFieldAgg(fieldType: PartitionFieldsType, query?: string, fieldConfig
           terms: {
             size: AGG_SIZE,
             field: fieldValueKey,
+            ...(fieldConfig?.sort
+              ? {
+                  order: {
+                    [sortByField]: fieldConfig.sort.order ?? 'desc',
+                  },
+                }
+              : {}),
           },
+          ...(fieldConfig?.sort?.by === 'anomaly_score'
+            ? {
+                aggs: {
+                  [sortByField]: {
+                    max: {
+                      field: 'record_score',
+                    },
+                  },
+                },
+              }
+            : {}),
         },
       },
     },
