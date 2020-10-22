@@ -76,7 +76,7 @@ function getAlwaysFiringAlertType() {
             instanceContextValue: true,
           });
       }
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {

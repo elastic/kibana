@@ -20,15 +20,13 @@ import {
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
+  ElasticsearchClient,
 } from '../../../../src/core/server';
 
 import { asOk, asErr, Result } from './lib/result_type';
 
 import {
   ConcreteTaskInstance,
-  ElasticJs,
-  TaskDefinition,
-  TaskDictionary,
   TaskInstance,
   TaskLifecycle,
   TaskLifecycleResult,
@@ -60,13 +58,14 @@ import {
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 export interface StoreOpts {
-  callCluster: ElasticJs;
+  esClient: ElasticsearchClient;
   index: string;
   taskManagerId: string;
   maxAttempts: number;
-  definitions: TaskDictionary<TaskDefinition>;
+  definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
 }
@@ -123,8 +122,8 @@ export class TaskStore {
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
 
-  private callCluster: ElasticJs;
-  private definitions: TaskDictionary<TaskDefinition>;
+  private esClient: ElasticsearchClient;
+  private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: SavedObjectsSerializer;
   private events$: Subject<TaskClaim>;
@@ -132,7 +131,7 @@ export class TaskStore {
   /**
    * Constructs a new TaskStore.
    * @param {StoreOpts} opts
-   * @prop {CallCluster} callCluster - The elastic search connection
+   * @prop {esClient} esClient - An elasticsearch client
    * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
    * @prop {TaskDefinition} definition - The definition of the task being run
@@ -140,7 +139,7 @@ export class TaskStore {
    * @prop {savedObjectsRepository} - An instance to the saved objects repository
    */
   constructor(opts: StoreOpts) {
-    this.callCluster = opts.callCluster;
+    this.esClient = opts.esClient;
     this.index = opts.index;
     this.taskManagerId = opts.taskManagerId;
     this.maxAttempts = opts.maxAttempts;
@@ -164,13 +163,7 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
-    if (!this.definitions[taskInstance.taskType]) {
-      throw new Error(
-        `Unsupported task type "${taskInstance.taskType}". Supported types are ${Object.keys(
-          this.definitions
-        ).join(', ')}`
-      );
-    }
+    this.definitions.ensureHas(taskInstance.taskType);
 
     let savedObject;
     try {
@@ -265,6 +258,9 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
+    const tasksWithRemainingAttempts = [...this.definitions].map(([type, { maxAttempts }]) =>
+      taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
+    );
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
@@ -272,9 +268,7 @@ export class TaskStore {
       // Either task has a schedule or the attempts < the maximum configured
       shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
         TaskWithSchedule,
-        ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
-          taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-        )
+        ...tasksWithRemainingAttempts
       )
     );
 
@@ -473,30 +467,31 @@ export class TaskStore {
   private async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
-    let result;
     try {
-      result = await this.callCluster('search', {
+      const {
+        body: {
+          hits: { hits: tasks },
+        },
+      } = await this.esClient.search<SearchResponse<SavedObjectsRawDoc['_source']>>({
         index: this.index,
-        ignoreUnavailable: true,
+        ignore_unavailable: true,
         body: {
           ...opts,
           query,
         },
       });
+
+      return {
+        docs: tasks
+          .filter((doc) => this.serializer.isRawSavedObject(doc))
+          .map((doc) => this.serializer.rawToSavedObject(doc))
+          .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+          .map(savedObjectToConcreteTaskInstance),
+      };
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
-
-    const rawDocs = (result as SearchResponse<unknown>).hits.hits;
-
-    return {
-      docs: (rawDocs as SavedObjectsRawDoc[])
-        .filter((doc) => this.serializer.isRawSavedObject(doc))
-        .map((doc) => this.serializer.rawToSavedObject(doc))
-        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-        .map(savedObjectToConcreteTaskInstance),
-    };
   }
 
   private async updateByQuery(
@@ -505,11 +500,13 @@ export class TaskStore {
     { max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
-    let result;
     try {
-      result = await this.callCluster('updateByQuery', {
+      const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        body: { total, updated, version_conflicts },
+      } = await this.esClient.updateByQuery<UpdateDocumentByQueryResponse>({
         index: this.index,
-        ignoreUnavailable: true,
+        ignore_unavailable: true,
         refresh: true,
         max_docs,
         conflicts: 'proceed',
@@ -518,18 +515,16 @@ export class TaskStore {
           query,
         },
       });
+
+      return {
+        total,
+        updated,
+        version_conflicts,
+      };
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
-
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { total, updated, version_conflicts } = result as UpdateDocumentByQueryResponse;
-    return {
-      total,
-      updated,
-      version_conflicts,
-    };
   }
 }
 

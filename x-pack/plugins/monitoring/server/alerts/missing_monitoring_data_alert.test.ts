@@ -22,9 +22,9 @@ describe('MissingMonitoringDataAlert', () => {
     const alert = new MissingMonitoringDataAlert();
     expect(alert.type).toBe(ALERT_MISSING_MONITORING_DATA);
     expect(alert.label).toBe('Missing monitoring data');
-    expect(alert.defaultThrottle).toBe('1d');
+    expect(alert.defaultThrottle).toBe('6h');
     // @ts-ignore
-    expect(alert.defaultParams).toStrictEqual({ limit: '1d', duration: '5m' });
+    expect(alert.defaultParams).toStrictEqual({ limit: '1d', duration: '15m' });
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       { name: 'stackProducts', description: 'The stack products missing monitoring data.' },
