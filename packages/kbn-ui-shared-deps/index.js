@@ -69,25 +69,40 @@ exports.externals = {
    */
   tslib: '__kbnSharedDeps__.TsLib',
   '@babel/runtime/helpers/assertThisInitialized':
-    '__kbnSharedDeps__.BabelRuntime.assertThisInitialized',
-  '@babel/runtime/helpers/asyncToGenerator': '__kbnSharedDeps__.BabelRuntime.asyncToGenerator',
-  '@babel/runtime/helpers/classCallCheck': '__kbnSharedDeps__.BabelRuntime.classCallCheck',
-  '@babel/runtime/helpers/createClass': '__kbnSharedDeps__.BabelRuntime.createClass',
-  '@babel/runtime/helpers/createSuper': '__kbnSharedDeps__.BabelRuntime.createSuper',
-  '@babel/runtime/helpers/defineProperty': '__kbnSharedDeps__.BabelRuntime.defineProperty',
-  '@babel/runtime/helpers/extends': '__kbnSharedDeps__.BabelRuntime.extends',
-  '@babel/runtime/helpers/getPrototypeOf': '__kbnSharedDeps__.BabelRuntime.getPrototypeOf',
-  '@babel/runtime/helpers/inherits': '__kbnSharedDeps__.BabelRuntime.inherits',
-  '@babel/runtime/helpers/inheritsLoose': '__kbnSharedDeps__.BabelRuntime.inheritsLoose',
+    '__kbnSharedDeps.BabelRuntime.assertThisInitialized',
+  '@babel/runtime/helpers/asyncToGenerator': '__kbnSharedDeps.BabelRuntime.asyncToGenerator',
+  '@babel/runtime/helpers/classCallCheck': '__kbnSharedDeps.BabelRuntime.classCallCheck',
+  '@babel/runtime/helpers/construct': '__kbnSharedDeps.BabelRuntime.construct',
+  '@babel/runtime/helpers/createClass': '__kbnSharedDeps.BabelRuntime.createClass',
+  '@babel/runtime/helpers/createForOfIteratorHelper':
+    '__kbnSharedDeps.BabelRuntime.createForOfIteratorHelper',
+  '@babel/runtime/helpers/createSuper': '__kbnSharedDeps.BabelRuntime.createSuper',
+  '@babel/runtime/helpers/defineProperty': '__kbnSharedDeps.BabelRuntime.defineProperty',
+  '@babel/runtime/helpers/extends': '__kbnSharedDeps.BabelRuntime.extends',
+  '@babel/runtime/helpers/get': '__kbnSharedDeps.BabelRuntime.get',
+  '@babel/runtime/helpers/getPrototypeOf': '__kbnSharedDeps.BabelRuntime.getPrototypeOf',
+  '@babel/runtime/helpers/inherits': '__kbnSharedDeps.BabelRuntime.inherits',
+  '@babel/runtime/helpers/inheritsLoose': '__kbnSharedDeps.BabelRuntime.inheritsLoose',
   '@babel/runtime/helpers/interopRequireDefault':
-    '__kbnSharedDeps__.BabelRuntime.interopRequireDefault',
+    '__kbnSharedDeps.BabelRuntime.interopRequireDefault',
   '@babel/runtime/helpers/interopRequireWildcard':
-    '__kbnSharedDeps__.BabelRuntime.interopRequireWildcard',
+    '__kbnSharedDeps.BabelRuntime.interopRequireWildcard',
+  '@babel/runtime/helpers/objectDestructuringEmpty':
+    '__kbnSharedDeps.BabelRuntime.objectDestructuringEmpty',
+  '@babel/runtime/helpers/objectSpread2': '__kbnSharedDeps.BabelRuntime.objectSpread2',
+  '@babel/runtime/helpers/objectWithoutProperties':
+    '__kbnSharedDeps.BabelRuntime.objectWithoutProperties',
   '@babel/runtime/helpers/objectWithoutPropertiesLoose':
-    '__kbnSharedDeps__.BabelRuntime.objectWithoutPropertiesLoose',
+    '__kbnSharedDeps.BabelRuntime.objectWithoutPropertiesLoose',
   '@babel/runtime/helpers/possibleConstructorReturn':
-    '__kbnSharedDeps__.BabelRuntime.possibleConstructorReturn',
-  '@babel/runtime/helpers/wrapNativeSuper': '__kbnSharedDeps__.BabelRuntime.wrapNativeSuper',
-  '@babel/runtime/regenerator': '__kbnSharedDeps__.BabelRuntime.regenerator',
+    '__kbnSharedDeps.BabelRuntime.possibleConstructorReturn',
+  '@babel/runtime/regenerator': '__kbnSharedDeps.BabelRuntime.regenerator',
+  '@babel/runtime/helpers/slicedToArray': '__kbnSharedDeps.BabelRuntime.slicedToArray',
+  '@babel/runtime/helpers/taggedTemplateLiteral':
+    '__kbnSharedDeps.BabelRuntime.taggedTemplateLiteral',
+  '@babel/runtime/helpers/toArray': '__kbnSharedDeps.BabelRuntime.toArray',
+  '@babel/runtime/helpers/toConsumableArray': '__kbnSharedDeps.BabelRuntime.toConsumableArray',
+  '@babel/runtime/helpers/toPropertyKey': '__kbnSharedDeps.BabelRuntime.toPropertyKey',
+  '@babel/runtime/helpers/wrapNativeSuper': '__kbnSharedDeps.BabelRuntime.wrapNativeSuper',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');
