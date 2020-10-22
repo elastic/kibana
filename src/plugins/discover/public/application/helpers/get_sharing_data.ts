@@ -57,7 +57,7 @@ export async function getSharingData(
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
 
-  const { searchFields, selectFields } = await getSharingDataFields(
+  const { searchFields } = await getSharingDataFields(
     getFieldCounts,
     state.columns || [],
     index.timeFieldName || '',
@@ -73,16 +73,7 @@ export async function getSharingData(
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  const body = await searchSource.getSearchRequestBody();
-
   return {
-    searchRequest: {
-      index: index.title,
-      body,
-    },
-    fields: selectFields,
-    metaFields: index.metaFields,
-    conflictedTypesFields: index.fields.filter((f) => f.type === 'conflict').map((f) => f.name),
-    indexPatternId: index.id,
+    searchSource: searchSource.getSerializedFields(true),
   };
 }

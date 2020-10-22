@@ -12,6 +12,7 @@ import { RunTaskFnFactory } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
 import { getGenerateCsvParams } from './lib/get_csv_job';
 import { JobPayloadPanelCsv } from './types';
+import { ISearchStart } from '../../../../../../src/plugins/data/server';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -39,16 +40,15 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
 
     const savedObjectsClient = context.core.savedObjects.client;
     const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const job = await getGenerateCsvParams(jobPayload, panel, savedObjectsClient, uiSettingsClient);
-
-    const elasticsearch = reporting.getElasticsearchService();
-    const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);
+    const job = await getGenerateCsvParams(jobPayload, panel);
+    const searchService: ISearchStart = await reporting.getSearchService();
+    const searchSourceService = await searchService.searchSource.asScoped(req);
 
     const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
       job,
       config,
       uiSettingsClient,
-      callAsCurrentUser,
+      searchSourceService,
       new CancellationToken() // can not be cancelled
     );
 

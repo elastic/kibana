@@ -56,6 +56,7 @@ const createMockPluginStart = (
     esqueue: startMock.esqueue,
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
+    data: startMock.data || { search: { asScopedToClient: jest.fn() } },
     store,
   };
 };

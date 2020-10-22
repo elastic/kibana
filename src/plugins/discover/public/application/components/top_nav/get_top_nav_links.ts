@@ -111,13 +111,15 @@ export const getTopNavLinks = ({
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
         shareableUrl: unhashUrl(window.location.href),
-        objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
-          ...sharingData,
-          title: savedSearch.title,
+          taskType: 'csv',
+          taskConfig: {
+            ...sharingData,
+            title: savedSearch.title,
+          },
         },
-        isDirty: !savedSearch.id || state.isAppStateDirty(),
+        isDirty: false,
       });
     },
   };

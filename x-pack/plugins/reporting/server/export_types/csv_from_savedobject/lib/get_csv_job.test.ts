@@ -10,8 +10,6 @@ import { getGenerateCsvParams } from './get_csv_job';
 describe('Get CSV Job', () => {
   let mockJobParams: JobParamsPanelCsv;
   let mockSearchPanel: SearchPanel;
-  let mockSavedObjectsClient: any;
-  let mockUiSettingsClient: any;
   beforeEach(() => {
     mockJobParams = { savedObjectType: 'search', savedObjectId: '234-ididid' };
     mockSearchPanel = {
@@ -26,23 +24,10 @@ describe('Get CSV Job', () => {
       },
       timerange: { timezone: 'PST', min: 0, max: 100 },
     };
-    mockSavedObjectsClient = {
-      get: () => ({
-        attributes: { fields: null, title: null, timeFieldName: null },
-      }),
-    };
-    mockUiSettingsClient = {
-      get: () => ({}),
-    };
   });
 
   it('creates a data structure needed by generateCsv', async () => {
-    const result = await getGenerateCsvParams(
-      mockJobParams,
-      mockSearchPanel,
-      mockSavedObjectsClient,
-      mockUiSettingsClient
-    );
+    const result = await getGenerateCsvParams(mockJobParams, mockSearchPanel);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "browserTimezone": "PST",
@@ -89,12 +74,7 @@ describe('Get CSV Job', () => {
         sort: ['this is the sort'],
       },
     };
-    const result = await getGenerateCsvParams(
-      mockJobParams,
-      mockSearchPanel,
-      mockSavedObjectsClient,
-      mockUiSettingsClient
-    );
+    const result = await getGenerateCsvParams(mockJobParams, mockSearchPanel);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "browserTimezone": "PST",
@@ -144,12 +124,7 @@ describe('Get CSV Job', () => {
     mockJobParams.post = {
       timerange: { timezone: 'Africa/Timbuktu', min: 0, max: 9000 },
     };
-    const result = await getGenerateCsvParams(
-      mockJobParams,
-      mockSearchPanel,
-      mockSavedObjectsClient,
-      mockUiSettingsClient
-    );
+    const result = await getGenerateCsvParams(mockJobParams, mockSearchPanel);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "browserTimezone": "Africa/Timbuktu",
@@ -193,17 +168,7 @@ describe('Get CSV Job', () => {
     mockJobParams.post = {
       timerange: { timezone: 'Africa/Timbuktu', min: 0, max: 900000000 },
     };
-    mockSavedObjectsClient = {
-      get: () => ({
-        attributes: { fields: null, title: 'test search', timeFieldName: '@test_time' },
-      }),
-    };
-    const result = await getGenerateCsvParams(
-      mockJobParams,
-      mockSearchPanel,
-      mockSavedObjectsClient,
-      mockUiSettingsClient
-    );
+    const result = await getGenerateCsvParams(mockJobParams, mockSearchPanel);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "browserTimezone": "Africa/Timbuktu",
@@ -265,17 +230,7 @@ describe('Get CSV Job', () => {
         max: '1990-01-01T00:00:00Z',
       },
     };
-    mockSavedObjectsClient = {
-      get: () => ({
-        attributes: { fields: null, title: 'test search', timeFieldName: '@test_time' },
-      }),
-    };
-    const result = await getGenerateCsvParams(
-      mockJobParams,
-      mockSearchPanel,
-      mockSavedObjectsClient,
-      mockUiSettingsClient
-    );
+    const result = await getGenerateCsvParams(mockJobParams, mockSearchPanel);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "browserTimezone": "Africa/Timbuktu",

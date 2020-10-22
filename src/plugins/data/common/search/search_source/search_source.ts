@@ -182,7 +182,13 @@ export class SearchSource {
   /**
    * returns all search source fields
    */
-  getFields() {
+  getFields(recurse = false): SearchSourceFields {
+    if (recurse) {
+      const parent = this.getParent();
+      if (parent) {
+        return { ...parent.getFields(recurse), ...this.fields };
+      }
+    }
     return { ...this.fields };
   }
 
@@ -603,8 +609,8 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields() {
-    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
+  public getSerializedFields(recurse = false) {
+    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(recurse), [
       'sort',
       'size',
     ]);

@@ -19,22 +19,11 @@ export interface IndexPatternSavedObject {
 }
 
 interface BaseParamsCSV {
-  searchRequest: SearchRequest;
-  fields: string[];
-  metaFields: string[];
-  conflictedTypesFields: string[];
+  searchSource: any;
 }
 
-export type JobParamsCSV = BaseParamsCSV &
-  BaseParams & {
-    indexPatternId: string;
-  };
-
-// CSV create job method converts indexPatternID to indexPatternSavedObject
-export type TaskPayloadCSV = BaseParamsCSV &
-  BasePayload & {
-    indexPatternSavedObject: IndexPatternSavedObject;
-  };
+export type JobParamsCSV = BaseParamsCSV & BaseParams;
+export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
 
 export interface SearchRequest {
   index: string;

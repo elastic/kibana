@@ -11,116 +11,98 @@ import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
-import { getFieldFormats } from '../../../services';
-import { IndexPatternSavedObject, SavedSearchGeneratorResult } from '../types';
+import { SavedSearchGeneratorResult } from '../types';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 import { createEscapeValue } from './escape_value';
-import { fieldFormatMapFactory } from './field_format_map';
-import { createFlattenHit } from './flatten_hit';
-import { createFormatCsvValues } from './format_csv_values';
 import { getUiSettings } from './get_ui_settings';
-import { createHitIterator, EndpointCaller } from './hit_iterator';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
-
-interface SearchRequest {
-  index: string;
-  body:
-    | {
-        _source: { excludes: string[]; includes: string[] };
-        docvalue_fields: string[];
-        query: { bool: { filter: any[]; must_not: any[]; should: any[]; must: any[] } } | any;
-        script_fields: any;
-        sort: Array<{ [key: string]: { order: string } }>;
-        stored_fields: string[];
-      }
-    | any;
-}
+import {
+  EsQuerySearchAfter,
+  ISearchStartSearchSource,
+} from '../../../../../../../src/plugins/data/common/search/search_source';
+import { tabify } from '../../../../../../../src/plugins/data/common/search/tabify';
+import { Datatable } from '../../../../../../../src/plugins/expressions/common/expression_types/specs';
 
 export interface GenerateCsvParams {
   browserTimezone?: string;
-  searchRequest: SearchRequest;
-  indexPatternSavedObject: IndexPatternSavedObject;
-  fields: string[];
-  metaFields: string[];
-  conflictedTypesFields: string[];
+  searchSource: any;
 }
 
 export function createGenerateCsv(logger: LevelLogger) {
-  const hitIterator = createHitIterator(logger);
-
   return async function generateCsv(
     job: GenerateCsvParams,
     config: ReportingConfig,
     uiSettingsClient: IUiSettingsClient,
-    callEndpoint: EndpointCaller,
+    searchSourceService: ISearchStartSearchSource,
     cancellationToken: CancellationToken
   ): Promise<SavedSearchGeneratorResult> {
     const settings = await getUiSettings(job.browserTimezone, uiSettingsClient, config, logger);
     const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
     const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(settings.maxSizeBytes), bom);
-
-    const { fields, metaFields, conflictedTypesFields } = job;
-    const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
-    const warnings: string[] = [];
-
-    if (!builder.tryAppend(header)) {
-      return {
-        size: 0,
-        content: '',
-        maxSizeReached: true,
-        warnings: [],
-      };
-    }
-
-    const iterator = hitIterator(
-      settings.scroll,
-      callEndpoint,
-      job.searchRequest,
-      cancellationToken
-    );
+    const searchSource = await searchSourceService.create(job.searchSource);
+    const fields = searchSource.getField('fields');
+    const recordsAtATime = settings.scroll.size;
+    searchSource.setField('size', recordsAtATime);
+    let currentRecord = -1;
+    let totalRecords = 0;
+    let first = true;
     let maxSizeReached = false;
     let csvContainsFormulas = false;
+    let lastSortId: EsQuerySearchAfter | undefined;
+    const warnings: string[] = [];
 
-    const flattenHit = createFlattenHit(fields, metaFields, conflictedTypesFields);
-    const formatsMap = await getFieldFormats()
-      .fieldFormatServiceFactory(uiSettingsClient)
-      .then((fieldFormats) =>
-        fieldFormatMapFactory(job.indexPatternSavedObject, fieldFormats, settings.timezone)
-      );
+    while (currentRecord < totalRecords) {
+      if (lastSortId) {
+        searchSource.setField('searchAfter', lastSortId);
+      }
+      const results = await searchSource.fetch();
+      const table = (await tabify(searchSource as any, results, {
+        source: true,
+      })) as Datatable;
+      totalRecords = results.hits.total;
+      currentRecord += table.rows.length;
+      if (results.hits.hits.length) {
+        lastSortId = results.hits.hits[results.hits.hits.length - 1].sort as EsQuerySearchAfter;
+      }
 
-    const formatCsvValues = createFormatCsvValues(
-      escapeValue,
-      settings.separator,
-      fields,
-      formatsMap
-    );
-    try {
-      while (true) {
-        const { done, value: hit } = await iterator.next();
+      if (first) {
+        const header = `${table.columns
+          .map((c) => c.name)
+          .map(escapeValue)
+          .join(settings.separator)}\n`;
 
-        if (!hit) {
-          break;
+        if (!builder.tryAppend(header)) {
+          return {
+            size: 0,
+            content: '',
+            maxSizeReached: true,
+            warnings: [],
+          };
         }
+        first = false;
+      }
 
-        if (done) {
-          break;
-        }
-
+      for (const hit of table.rows) {
         if (cancellationToken.isCancelled()) {
           break;
         }
 
-        const flattened = flattenHit(hit);
-        const rows = formatCsvValues(flattened);
         const rowsHaveFormulas =
-          settings.checkForFormulas && checkIfRowsHaveFormulas(flattened, fields);
+          settings.checkForFormulas && checkIfRowsHaveFormulas(hit, fields as string[]);
 
         if (rowsHaveFormulas) {
           csvContainsFormulas = true;
         }
 
-        if (!builder.tryAppend(rows + '\n')) {
+        const columns = table.columns.map((c) => {
+          // we are working on this utilities, its not there yet but should be in a week or so, which will get us the formatted values
+          // const formatter = search.table.getFieldFormatter(c);
+          // return formatter(hit[c.id]);
+          return hit[c.id];
+        });
+
+        if (!builder.tryAppend(columns + '\n')) {
           logger.warn('max Size Reached');
           maxSizeReached = true;
           if (cancellationToken) {
@@ -129,9 +111,8 @@ export function createGenerateCsv(logger: LevelLogger) {
           break;
         }
       }
-    } finally {
-      await iterator.return();
     }
+
     const size = builder.getSizeInBytes();
     logger.debug(`finished generating, total size in bytes: ${size}`);
 
