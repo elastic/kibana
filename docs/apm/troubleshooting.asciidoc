@@ -157,7 +157,7 @@ the values in `http.request.cookies` are not indexed and thus not searchable.
 
 *Ensure an index pattern exists*
 As a first step, you should ensure the correct index pattern exists.
-In Kibana, navigate to *Management > Kibana > Index Patterns*.
+Open the main menu, then click *Stack Management > Index Patterns*.
 In the pattern list, you should see an apm index pattern; The default is `apm-*`.
 If you don't, the index pattern doesn't exist. See <<no-apm-data-found>> for information on how to fix this problem.
 
