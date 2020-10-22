@@ -306,7 +306,9 @@ describe('TaskStore', () => {
       const customMaxAttempts = _.random(44, 100);
       const {
         args: {
-          updateByQuery: { body: { query, sort } = {} },
+          updateByQuery: {
+            body: { query, sort },
+          },
         },
       } = await testClaimAvailableTasks({
         opts: {
