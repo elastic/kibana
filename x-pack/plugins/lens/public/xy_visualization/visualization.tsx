@@ -334,7 +334,7 @@ function validateLayersForDimension(
 
 // i18n ids cannot be dynamically generated, hence the function below
 function getMessageIdsForDimension(dimension: string, layers: number[]) {
-  const layersList = layerMissingAccessors.map((i: number) => i + 1).join(', ');
+  const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
     case 'X':
       return {
