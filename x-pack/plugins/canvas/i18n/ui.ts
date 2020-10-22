@@ -181,6 +181,10 @@ export const ArgumentStrings = {
           url: URL,
         },
       }),
+    getUrlTypeChangeLegend: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.changeLegend', {
+        defaultMessage: 'Change URL type',
+      }),
   },
   Number: {
     getDisplayName: () =>
