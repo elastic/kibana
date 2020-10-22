@@ -19,7 +19,6 @@ import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { getGroupPath, USERS_PATH } from '../../routes';
 
-import { useDidUpdateEffect } from '../../../shared/use_did_update_effect';
 import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
 
 import { GroupsLogic } from './groups_logic';
@@ -40,7 +39,7 @@ export const Groups: React.FC = () => {
     groupListLoading,
     hasFiltersSet,
     groupsMeta: {
-      page: { current: activePage, total_results: numGroups },
+      page: { total_results: numGroups },
     },
     filteredSources,
     filteredUsers,
@@ -56,18 +55,17 @@ export const Groups: React.FC = () => {
     return resetGroups;
   }, [filteredSources, filteredUsers, filterValue]);
 
-  // Because the initial search happens above, we want to skip the initial search and use the custom hook to do so.
-  useDidUpdateEffect(() => {
-    getSearchResults();
-  }, [activePage]);
-
   if (groupsDataLoading) {
     return <Loading />;
   }
 
   if (newGroup && hasMessages) {
     messages[0].description = (
-      <EuiLinkButton to={getGroupPath(newGroup.id)} color="primary">
+      <EuiLinkButton
+        to={getGroupPath(newGroup.id)}
+        color="primary"
+        data-test-subj="NewGroupManageButton"
+      >
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action', {
           defaultMessage: 'Manage Group',
         })}
