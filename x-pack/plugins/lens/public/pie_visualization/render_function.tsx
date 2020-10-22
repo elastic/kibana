@@ -28,7 +28,7 @@ import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
-import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import { getSliceValue, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
@@ -262,7 +262,7 @@ export function PieComponent(
         <Partition
           id={shape}
           data={firstTable.rows}
-          valueAccessor={(d: Datum) => getSliceValueWithFallback(d, reverseGroups, metricColumn)}
+          valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
           percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
           valueGetter={hideLabels || numberDisplay === 'value' ? undefined : 'percent'}
           valueFormatter={(d: number) => (hideLabels ? '' : formatters[metricColumn.id].convert(d))}
