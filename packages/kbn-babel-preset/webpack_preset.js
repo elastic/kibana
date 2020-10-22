@@ -40,7 +40,7 @@ module.exports = () => {
           corejs: false,
           helpers: true,
           regenerator: true,
-          useESModules: true,
+          useESModules: false,
           version: '7.12.1',
         },
       ],
