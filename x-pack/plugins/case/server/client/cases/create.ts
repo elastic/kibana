@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, transformNewCase } from '../routes/api/utils';
+import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
   CasePostRequestRt,
@@ -17,14 +17,14 @@ import {
   excess,
   CaseResponseRt,
   CaseResponse,
-} from '../../common/api';
-import { buildCaseUserActionItem } from '../services/user_actions/helpers';
+} from '../../../common/api';
+import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
   getConnectorFromConfiguration,
   transformCaseConnectorToEsConnector,
-} from '../routes/api/cases/helpers';
+} from '../../routes/api/cases/helpers';
 
-import { CaseClientCreate, CaseClientFactoryArguments } from './types';
+import { CaseClientCreate, CaseClientFactoryArguments } from '../types';
 
 export const create = ({
   savedObjectsClient,

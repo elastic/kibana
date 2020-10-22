@@ -5,17 +5,17 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { ConnectorTypes } from '../../common/api';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { ConnectorTypes } from '../../../common/api';
 import {
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
-} from '../services/__mocks__';
+} from '../../services/mocks';
 
 import { create } from './create';
-import { CaseClient } from './types';
-import { elasticUser, casePostResponse, postCase, caseConfigureResponse } from './__mocks__';
+import { CaseClient } from '../types';
+import { elasticUser, casePostResponse, postCase, caseConfigureResponse } from '../mocks';
 
 const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();

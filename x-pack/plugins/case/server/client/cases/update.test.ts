@@ -5,23 +5,23 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import {
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
-} from '../services/__mocks__';
-import { mockCases } from '../routes/api/__fixtures__';
+} from '../../services/mocks';
+import { mockCases } from '../../routes/api/__fixtures__';
 
 import { update } from './update';
-import { CaseClient } from './types';
+import { CaseClient } from '../types';
 import {
   elasticUser,
   patchConnector,
   patchCases,
   caseConfigureResponse,
   getCasesResponse,
-} from './__mocks__';
+} from '../mocks';
 
 const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();
@@ -255,7 +255,15 @@ describe('update()', () => {
     });
 
     test('it throws when case does not exist', async () => {
-      caseService.getCases.mockResolvedValue({ saved_objects: [{ id: 'not-exists', error: {} }] });
+      caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            id: 'not-exists',
+            error: { error: 'not found', message: 'not found', statusCode: 404 },
+          },
+        ],
+      });
       expect.assertions(1);
       updateHandler({
         request,

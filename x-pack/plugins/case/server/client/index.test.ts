@@ -10,15 +10,15 @@ import {
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
-} from '../services/__mocks__';
+} from '../services/mocks';
 
-import { create } from './create';
-import { update } from './update';
-import { addComment } from './add_comment';
+import { create } from './cases/create';
+import { update } from './cases/update';
+import { addComment } from './comments/add_comment';
 
-jest.mock('./create');
-jest.mock('./update');
-jest.mock('./add_comment');
+jest.mock('./cases/create');
+jest.mock('./cases/update');
+jest.mock('./comments/add_comment');
 
 const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();

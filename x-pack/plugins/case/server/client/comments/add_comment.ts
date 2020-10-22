@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, transformNewComment } from '../routes/api/utils';
+import { flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -17,11 +17,11 @@ import {
   CaseResponseRt,
   CommentRequestRt,
   CaseResponse,
-} from '../../common/api';
-import { buildCommentUserActionItem } from '../services/user_actions/helpers';
+} from '../../../common/api';
+import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
-import { CaseClientAddComment, CaseClientFactoryArguments } from './types';
-import { CASE_SAVED_OBJECT } from '../saved_object_types';
+import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
+import { CASE_SAVED_OBJECT } from '../../saved_object_types';
 
 export const addComment = ({
   savedObjectsClient,
