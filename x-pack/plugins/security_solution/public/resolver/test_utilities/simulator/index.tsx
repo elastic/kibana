@@ -326,6 +326,10 @@ export class Simulator {
     const subjectNode = subject.getDOMNode();
     let current = subjectNode.nextElementSibling;
     const associated: Set<Element> = new Set();
+    // Multiple `dt`s can be associated with a set of `dd`s. Skip immediately following `dt`s.
+    while (current !== null && current.nodeName === 'DT') {
+      current = current.nextElementSibling;
+    }
     while (current !== null && current.nodeName === 'DD') {
       associated.add(current);
       current = current.nextElementSibling;
