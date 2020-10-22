@@ -552,14 +552,14 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         [
           {
             from: 'now/d',
-            to: 'now',
+            to: 'now/d',
             display: i18n.translate('data.advancedSettings.timepicker.today', {
               defaultMessage: 'Today',
             }),
           },
           {
             from: 'now/w',
-            to: 'now',
+            to: 'now/w',
             display: i18n.translate('data.advancedSettings.timepicker.thisWeek', {
               defaultMessage: 'This week',
             }),
