@@ -41,10 +41,14 @@ def test() {
 }
 
 def functionalOss(Map params = [:]) {
-  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, visualRegression: false]
+  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, serverIntegration: true, visualRegression: false]
 
   task {
     kibanaPipeline.buildOss(6)
+
+    if (config.serverIntegration) {
+      task(kibanaPipeline.functionalTestProcess('serverIntegration', './test/scripts/server_integration.sh'))
+    }
 
     if (config.ciGroups) {
       def ciGroups = 1..12
