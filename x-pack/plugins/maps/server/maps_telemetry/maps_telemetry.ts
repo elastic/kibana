@@ -312,9 +312,9 @@ export async function execTransformOverMultipleSavedObjectPages<T>(
 
   let currentPage = 1;
   // Seed values
-  let page = 1;
-  let perPage = 2;
-  let total = 3;
+  let page = 0;
+  let perPage = 0;
+  let total = 0;
   let savedObjects = [];
 
   do {
