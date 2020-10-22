@@ -417,27 +417,35 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <EuiText size="s" data-test-subj="rememberValuesMessage">
-        <FormattedMessage
-          id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.rememberValuesLabel"
-          defaultMessage="Remember these values. You must reenter them each time you edit the connector."
-        />
-      </EuiText>
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiText size="s" data-test-subj="rememberValuesMessage">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.rememberValuesLabel"
+            defaultMessage="Remember these values. You must reenter them each time you edit the connector."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+      </Fragment>
     );
   }
   return (
-    <EuiCallOut
-      size="s"
-      iconType="iInCircle"
-      data-test-subj="reenterValuesMessage"
-      title={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.reenterValuesLabel',
-        {
-          defaultMessage:
-            'Username and password are encrypted. Please reenter values for these fields.',
-        }
-      )}
-    />
+    <Fragment>
+      <EuiSpacer size="m" />
+      <EuiCallOut
+        size="s"
+        iconType="iInCircle"
+        data-test-subj="reenterValuesMessage"
+        title={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.reenterValuesLabel',
+          {
+            defaultMessage:
+              'Username and password are encrypted. Please reenter values for these fields.',
+          }
+        )}
+      />
+      <EuiSpacer size="m" />
+    </Fragment>
   );
 }
 
