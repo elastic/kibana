@@ -306,9 +306,7 @@ describe('TaskStore', () => {
       const customMaxAttempts = _.random(44, 100);
       const {
         args: {
-          updateByQuery: {
-            body: { query },
-          },
+          updateByQuery: { body: { query, sort } = {} },
         },
       } = await testClaimAvailableTasks({
         opts: {
@@ -429,6 +427,25 @@ describe('TaskStore', () => {
           ],
         },
       });
+      expect(sort).toMatchObject([
+        {
+          _script: {
+            type: 'number',
+            order: 'asc',
+            script: {
+              lang: 'painless',
+              source: `
+if (doc['task.retryAt'].size()!=0) {
+  return doc['task.retryAt'].value.toInstant().toEpochMilli();
+}
+if (doc['task.runAt'].size()!=0) {
+  return doc['task.runAt'].value.toInstant().toEpochMilli();
+}
+    `,
+            },
+          },
+        },
+      ]);
     });
 
     test('it supports claiming specific tasks by id', async () => {
