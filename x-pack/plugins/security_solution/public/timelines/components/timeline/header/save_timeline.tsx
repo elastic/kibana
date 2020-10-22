@@ -71,14 +71,15 @@ Wrapper.displayName = 'Wrapper';
 
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
   ({ timelineId, toggleSaveTimeline, onSaveTimeline, updateTitle, updateDescription }) => {
-    const timelineToCreate = useShallowEqualSelector((state) =>
+    const timeline = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
-    const { description, isSaving, savedObjectId, title, timelineType } = timelineToCreate;
+
+    const { description, isSaving, savedObjectId, title, timelineType } = timeline;
 
     const handleClick = useCallback(() => {
-      onSaveTimeline({ ...timelineToCreate, id: timelineId });
-    }, [onSaveTimeline, timelineToCreate, timelineId]);
+      onSaveTimeline({ ...timeline, id: timelineId });
+    }, [onSaveTimeline, timeline, timelineId]);
 
     const { getButton } = useCreateTimelineButton({ timelineId, timelineType });
 
@@ -96,18 +97,28 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       [getButton, timelineType]
     );
 
+    const modalHeader =
+      savedObjectId == null
+        ? timelineType === TimelineType.template
+          ? i18n.SAVE_TIMELINE_TEMPLATE
+          : i18n.SAVE_TIMELINE
+        : timelineType === TimelineType.template
+        ? i18n.NAME_TIMELINE_TEMPLATE
+        : i18n.NAME_TIMELINE;
+
+    const saveButtonTitle =
+      savedObjectId == null
+        ? timelineType === TimelineType.template
+          ? i18n.SAVE_TIMELINE_TEMPLATE
+          : i18n.SAVE_TIMELINE
+        : i18n.SAVE;
+
     return (
       <>
-        {isSaving && <EuiProgress size="s" color="primary" position="absolute" />}
-        <EuiModalHeader>
-          {savedObjectId == null
-            ? timelineType === TimelineType.template
-              ? i18n.SAVE_TIMELINE_TEMPLATE
-              : i18n.SAVE_TIMELINE
-            : timelineType === TimelineType.template
-            ? i18n.NAME_TIMELINE_TEMPLATE
-            : i18n.NAME_TIMELINE}
-        </EuiModalHeader>
+        {isSaving && (
+          <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
+        )}
+        <EuiModalHeader data-test-subj="modal-header">{modalHeader}</EuiModalHeader>
 
         <Wrapper>
           <EuiFlexItem grow={true}>
@@ -120,6 +131,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 width="100%"
                 marginRight={10}
                 disableAutoSave={true}
+                data-test-subj="save-timeline-name"
               />
             </EuiFormRow>
             <EuiSpacer />
@@ -133,6 +145,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 isTextArea={true}
                 disableAutoSave={true}
                 marginRight={0}
+                data-test-subj="save-timeline-description"
               />
             </EuiFormRow>
             <EuiSpacer />
@@ -149,12 +162,13 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false} component="span">
-                <EuiButton isDisabled={title.trim().length === 0} fill={true} onClick={handleClick}>
-                  {savedObjectId == null
-                    ? timelineType === TimelineType.template
-                      ? i18n.SAVE_TIMELINE_TEMPLATE
-                      : i18n.SAVE_TIMELINE
-                    : i18n.SAVE}
+                <EuiButton
+                  isDisabled={title.trim().length === 0}
+                  fill={true}
+                  onClick={handleClick}
+                  data-test-subj="save-button"
+                >
+                  {saveButtonTitle}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -167,7 +181,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
 
 TimelineTitleAndDescription.displayName = 'TimelineTitleAndDescription';
 
-const SaveTimelineComponent = React.memo<SaveTimelineButtonProps>(
+export const SaveTimelineComponent = React.memo<SaveTimelineButtonProps>(
   ({
     timelineId,
     showOverlay,
@@ -177,26 +191,26 @@ const SaveTimelineComponent = React.memo<SaveTimelineButtonProps>(
     updateDescription,
   }) => (
     <>
-      <EuiButtonIcon onClick={toggleSaveTimeline} iconType="pencil">
-        {timelineId == null ? i18n.SAVE_TIMELINE : i18n.NAME_TIMELINE}
-      </EuiButtonIcon>
+      <EuiButtonIcon
+        onClick={toggleSaveTimeline}
+        iconType="pencil"
+        data-test-subj="save-timeline-button-icon"
+      />
 
       {showOverlay ? (
         <EuiOverlayMask>
           <EuiModal
-            data-test-subj="notesModal"
+            data-test-subj="save-timeline-modal"
             maxWidth={NOTES_PANEL_WIDTH}
             onClose={toggleSaveTimeline}
           >
-            {
-              <TimelineTitleAndDescription
-                timelineId={timelineId}
-                toggleSaveTimeline={toggleSaveTimeline}
-                onSaveTimeline={onSaveTimeline}
-                updateTitle={updateTitle}
-                updateDescription={updateDescription}
-              />
-            }
+            <TimelineTitleAndDescription
+              timelineId={timelineId}
+              toggleSaveTimeline={toggleSaveTimeline}
+              onSaveTimeline={onSaveTimeline}
+              updateTitle={updateTitle}
+              updateDescription={updateDescription}
+            />
           </EuiModal>
         </EuiOverlayMask>
       ) : null}
@@ -210,7 +224,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(
     saveTimelineButtonProps.showOverlay ? (
       <SaveTimelineComponent {...saveTimelineButtonProps} />
     ) : (
-      <EuiToolTip content={toolTip || ''}>
+      <EuiToolTip content={toolTip || ''} data-test-subj="save-timeline-btn-tooltip">
         <SaveTimelineComponent {...saveTimelineButtonProps} />
       </EuiToolTip>
     )
