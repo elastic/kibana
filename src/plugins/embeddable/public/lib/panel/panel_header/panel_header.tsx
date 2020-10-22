@@ -179,16 +179,22 @@ export function PanelHeader({
     let titleComponent;
     if (showTitle) {
       titleComponent = isViewMode ? (
-        <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
+        <span
+          className={classNames('embPanel__titleText', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            embPanel__placeholderTitleText: !title,
+          })}
+        >
           {title || placeholderTitle}
         </span>
       ) : (
         <EuiLink
           color="text"
           data-test-subj={'embeddablePanelTitleLink'}
-          className={
-            title ? 'embPanel__titleText embPanel__titleLink' : 'embPanel__placeholderTitleText'
-          }
+          className={classNames('embPanel__titleText', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            embPanel__placeholderTitleText: !title,
+          })}
           aria-label={i18n.translate('embeddableApi.panel.editTitleAriaLabel', {
             defaultMessage: 'Click to edit title: {title}',
             values: { title: title || placeholderTitle },
