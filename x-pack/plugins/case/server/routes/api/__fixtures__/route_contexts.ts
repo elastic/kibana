@@ -6,11 +6,13 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
+import { createCaseClientMock } from '../../../client/mocks';
 import { getActions } from '../__mocks__/request_responses';
 
 export const createRouteContext = (client: any) => {
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
+  const caseMock = createCaseClientMock();
 
   return ({
     core: {
@@ -19,5 +21,6 @@ export const createRouteContext = (client: any) => {
       },
     },
     actions: { getActionsClient: () => actionsMock },
+    case: { getCaseClient: () => caseMock },
   } as unknown) as RequestHandlerContext;
 };

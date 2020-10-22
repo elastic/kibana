@@ -4,95 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorTypes } from '../../../common/api';
-import { mockCases, mockCaseConfigure } from '../../routes/api/__fixtures__';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { CaseService, CaseConfigureService, CaseUserActionServiceSetup } from '../services';
+import { CaseClient } from './types';
+import { authenticationMock } from '../routes/api/__fixtures__';
+import { createCaseClient } from '.';
 
-const createdAt = mockCases[0].attributes.created_at;
-const updatedAt = mockCases[0].attributes.updated_at;
+export type CaseClientMock = jest.Mocked<CaseClient>;
+export const createCaseClientMock = (): CaseClientMock => ({
+  create: jest.fn(),
+  update: jest.fn(),
+  addComment: jest.fn(),
+});
 
-export const elasticUser = mockCases[0].attributes.created_by;
+export const createCaseClientWithMockSavedObjectsClient = async (
+  savedObjectsClient: any,
+  badAuth: boolean = false
+): Promise<{
+  client: CaseClient;
+  services: { userActionService: jest.Mocked<CaseUserActionServiceSetup> };
+}> => {
+  const log = loggingSystemMock.create().get('case');
 
-export const comment = {
-  comment: 'Solve this fast!',
-  id: 'comment-1',
-  createdAt,
-  createdBy: elasticUser,
-  pushedAt: null,
-  pushedBy: null,
-  updatedAt: null,
-  updatedBy: null,
-  version: 'WzQ3LDFc',
-};
+  const caseServicePlugin = new CaseService(log);
+  const caseConfigureServicePlugin = new CaseConfigureService(log);
 
-export const tags: string[] = ['defacement'];
-export const connector = mockCases[0].attributes.connector;
+  const caseService = await caseServicePlugin.setup({
+    authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
+  });
+  const caseConfigureService = await caseConfigureServicePlugin.setup();
+  const userActionService = {
+    postUserActions: jest.fn(),
+    getUserActions: jest.fn(),
+  };
 
-export const postCase = {
-  title: mockCases[0].attributes.title,
-  description: mockCases[0].attributes.description,
-  tags,
-  connector: { ...connector, fields: null },
-};
-
-export const patchCases = {
-  cases: [
-    {
-      id: mockCases[0].id,
-      title: 'Title updated',
-      description: 'Description updated',
-      version: mockCases[0].version ?? 'WzAsMV0=',
-    },
-  ],
-};
-
-export const patchConnector = {
-  cases: [
-    {
-      id: mockCases[0].id,
-      connector: { id: 'jira', name: 'jira', type: ConnectorTypes.jira, fields: null },
-      version: mockCases[0].version ?? 'WzAsMV0=',
-    },
-  ],
-};
-
-export const theCase = {
-  closedAt: null,
-  closedBy: null,
-  id: 'case-1',
-  comments: [comment],
-  createdAt,
-  createdBy: elasticUser,
-  connector,
-  description: 'This is a brand new case of a bad meanie defacing data',
-  externalService: null,
-  status: 'open',
-  tags,
-  title: 'Super Bad Security Issue',
-  totalComment: 1,
-  updatedAt,
-  updatedBy: elasticUser,
-  version: 'WzQ3LDFd',
-};
-
-export const casePostResponse = {
-  ...mockCases[0],
-  attributes: {
-    ...mockCases[0].attributes,
-    updated_at: null,
-    updated_by: null,
-  },
-};
-
-export const caseConfigureResponse = {
-  saved_objects: mockCaseConfigure[0],
-  total: 1,
-  per_page: 20,
-  page: 1,
-};
-
-export const getCasesResponse = {
-  saved_objects: [mockCases[0]],
-  total: 1,
-  per_page: 20,
-  page: 1,
+  return {
+    client: createCaseClient({
+      savedObjectsClient,
+      caseService,
+      caseConfigureService,
+      userActionService,
+    }),
+    services: { userActionService },
+  };
 };

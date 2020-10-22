@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   RequestHandler,
 } from 'kibana/server';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { APP_ID } from '../common/constants';
@@ -96,13 +96,12 @@ export class CasePlugin {
     });
   }
 
-  public async start(core: CoreSetup) {
+  public async start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
-    const [{ savedObjects }] = await core.getStartServices();
 
     const getCaseClientWithRequest = async (request: KibanaRequest) => {
       return createCaseClient({
-        savedObjectsClient: savedObjects.getScopedClient(request),
+        savedObjectsClient: core.savedObjects.getScopedClient(request),
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
         userActionService: this.userActionService!,

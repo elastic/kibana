@@ -5,53 +5,61 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { ConnectorTypes } from '../../../common/api';
+
 import {
-  createCaseServiceMock,
-  createConfigureServiceMock,
-  createUserActionServiceMock,
-} from '../../services/mocks';
+  createMockSavedObjectsRepository,
+  mockCaseConfigure,
+  mockCases,
+} from '../../routes/api/__fixtures__';
+import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
 
-import { create } from './create';
-import { CaseClient } from '../types';
-import { elasticUser, casePostResponse, postCase, caseConfigureResponse } from '../mocks';
-
-const caseService = createCaseServiceMock();
-const caseConfigureService = createConfigureServiceMock();
-const userActionService = createUserActionServiceMock();
-const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
 
-describe('create()', () => {
-  let createHandler: CaseClient['create'];
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-    caseService.getUser.mockResolvedValue(elasticUser);
-    caseConfigureService.find.mockResolvedValue(caseConfigureResponse);
-    caseService.postNewCase.mockResolvedValue(casePostResponse);
-
-    createHandler = create({
-      savedObjectsClient,
-      caseService,
-      caseConfigureService,
-      userActionService,
-    });
+describe('create', () => {
+  beforeEach(async () => {
+    jest.restoreAllMocks();
+    const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
+    spyOnDate.mockImplementation(() => ({
+      toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
+    }));
   });
 
   describe('happy path', () => {
     test('it creates the case correctly', async () => {
-      const res = await createHandler({ request, theCase: postCase });
+      const postCase = {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        title: 'Super Bad Security Issue',
+        tags: ['defacement'],
+        connector: {
+          id: '123',
+          name: 'Jira',
+          type: ConnectorTypes.jira,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseConfigureSavedObject: mockCaseConfigure,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const res = await caseClient.client.create({ request, theCase: postCase });
+
       expect(res).toEqual({
-        id: 'mock-id-1',
+        id: 'mock-it',
         comments: [],
         totalComment: 0,
         closed_at: null,
         closed_by: null,
-        connector: { id: 'none', name: 'none', type: '.none', fields: null },
+        connector: {
+          id: '123',
+          name: 'Jira',
+          type: ConnectorTypes.jira,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
         created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
@@ -59,23 +67,65 @@ describe('create()', () => {
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
-        version: 'WzAsMV0=',
+        version: 'WzksMV0=',
       });
+
+      expect(
+        caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
+      ).toEqual([
+        {
+          attributes: {
+            action: 'create',
+            action_at: '2019-11-25T21:54:48.952Z',
+            action_by: {
+              email: 'd00d@awesome.com',
+              full_name: 'Awesome D00d',
+              username: 'awesome',
+            },
+            action_field: ['description', 'status', 'tags', 'title', 'connector'],
+            new_value:
+              '{"description":"This is a brand new case of a bad meanie defacing data","title":"Super Bad Security Issue","tags":["defacement"],"connector":{"id":"123","name":"Jira","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}}}',
+            old_value: null,
+          },
+          references: [
+            {
+              id: 'mock-it',
+              name: 'associated-cases',
+              type: 'cases',
+            },
+          ],
+        },
+      ]);
     });
 
     test('it creates the case without connector in the configuration', async () => {
-      caseConfigureService.find.mockResolvedValue({ ...caseConfigureResponse, saved_objects: [] });
+      const postCase = {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        title: 'Super Bad Security Issue',
+        tags: ['defacement'],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      };
 
-      const res = await createHandler({ request, theCase: postCase });
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const res = await caseClient.client.create({ request, theCase: postCase });
+
       expect(res).toEqual({
-        id: 'mock-id-1',
+        id: 'mock-it',
         comments: [],
         totalComment: 0,
         closed_at: null,
         closed_by: null,
-        connector: { id: 'none', name: 'none', type: '.none', fields: null },
+        connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
         created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
@@ -83,7 +133,50 @@ describe('create()', () => {
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
-        version: 'WzAsMV0=',
+        version: 'WzksMV0=',
+      });
+    });
+
+    test('Allow user to create case without authentication', async () => {
+      const postCase = {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        title: 'Super Bad Security Issue',
+        tags: ['defacement'],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient, true);
+      const res = await caseClient.client.create({ request, theCase: postCase });
+
+      expect(res).toEqual({
+        id: 'mock-it',
+        comments: [],
+        totalComment: 0,
+        closed_at: null,
+        closed_by: null,
+        connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: {
+          email: null,
+          full_name: null,
+          username: null,
+        },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        external_service: null,
+        title: 'Super Bad Security Issue',
+        status: 'open',
+        tags: ['defacement'],
+        updated_at: null,
+        updated_by: null,
+        version: 'WzksMV0=',
       });
     });
   });
@@ -91,74 +184,159 @@ describe('create()', () => {
   describe('unhappy path', () => {
     test('it throws when missing title', async () => {
       expect.assertions(1);
-      caseConfigureService.find.mockResolvedValue({ ...caseConfigureResponse, saved_objects: [] });
-      createHandler({
-        request,
-        // @ts-expect-error
-        theCase: {
-          description: 'desc',
-          tags: [],
-          connector: postCase.connector,
+      const postCase = {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        tags: ['defacement'],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
         },
-      }).catch((e) => expect(e).not.toBeNull());
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      caseClient.client
+        // @ts-expect-error
+        .create({ request, theCase: postCase })
+        .catch((e) => expect(e).not.toBeNull());
     });
 
     test('it throws when missing description', async () => {
       expect.assertions(1);
-      caseConfigureService.find.mockResolvedValue({ ...caseConfigureResponse, saved_objects: [] });
-      createHandler({
-        request,
-        // @ts-expect-error
-        theCase: {
-          title: 'title',
-          tags: [],
-          connector: postCase.connector,
+      const postCase = {
+        title: 'a title',
+        tags: ['defacement'],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
         },
-      }).catch((e) => expect(e).not.toBeNull());
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      caseClient.client
+        // @ts-expect-error
+        .create({ request, theCase: postCase })
+        .catch((e) => expect(e).not.toBeNull());
     });
 
     test('it throws when missing tags', async () => {
       expect.assertions(1);
-      caseConfigureService.find.mockResolvedValue({ ...caseConfigureResponse, saved_objects: [] });
-      createHandler({
-        request,
-        // @ts-expect-error
-        theCase: {
-          title: 'title',
-          description: 'desc',
-          connector: postCase.connector,
+      const postCase = {
+        title: 'a title',
+        description: 'This is a brand new case of a bad meanie defacing data',
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
         },
-      }).catch((e) => expect(e).not.toBeNull());
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      caseClient.client
+        // @ts-expect-error
+        .create({ request, theCase: postCase })
+        .catch((e) => expect(e).not.toBeNull());
     });
 
     test('it throws when missing connector ', async () => {
       expect.assertions(1);
-      caseConfigureService.find.mockResolvedValue({ ...caseConfigureResponse, saved_objects: [] });
-      createHandler({
-        request,
+      const postCase = {
+        title: 'a title',
+        description: 'This is a brand new case of a bad meanie defacing data',
+        tags: ['defacement'],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      caseClient.client
         // @ts-expect-error
-        theCase: { title: 'a title', description: 'desc', tags: [] },
-      }).catch((e) => expect(e).not.toBeNull());
+        .create({ request, theCase: postCase })
+        .catch((e) => expect(e).not.toBeNull());
     });
 
     test('it throws when connector missing the right fields', async () => {
       expect.assertions(1);
-      caseConfigureService.find.mockResolvedValue({ ...caseConfigureResponse, saved_objects: [] });
-      createHandler({
-        request,
-        theCase: {
-          title: 'a title',
-          description: 'desc',
-          tags: [],
-          connector: {
-            id: 'jira',
-            name: 'jira',
-            type: ConnectorTypes.jira,
-            // @ts-expect-error
-            fields: {},
-          },
+      const postCase = {
+        title: 'a title',
+        description: 'This is a brand new case of a bad meanie defacing data',
+        tags: ['defacement'],
+        connector: {
+          id: '123',
+          name: 'Jira',
+          type: ConnectorTypes.jira,
+          fields: {},
         },
-      }).catch((e) => expect(e).not.toBeNull());
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      caseClient.client
+        // @ts-expect-error
+        .create({ request, theCase: postCase })
+        .catch((e) => expect(e).not.toBeNull());
+    });
+
+    test('it throws if you passing status for a new case', async () => {
+      expect.assertions(1);
+      const postCase = {
+        title: 'a title',
+        description: 'This is a brand new case of a bad meanie defacing data',
+        tags: ['defacement'],
+        status: 'closed',
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      caseClient.client
+        .create({ request, theCase: postCase })
+        .catch((e) => expect(e).not.toBeNull());
+    });
+
+    it(`Returns an error if postNewCase throws`, async () => {
+      const postCase = {
+        description: 'Throw an error',
+        title: 'Super Bad Security Issue',
+        tags: ['error'],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      };
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+
+      caseClient.client
+        .create({ request, theCase: postCase })
+        .catch((e) => expect(e).not.toBeNull());
     });
   });
 });
