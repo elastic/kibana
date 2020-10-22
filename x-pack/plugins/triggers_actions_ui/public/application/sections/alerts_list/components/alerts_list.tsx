@@ -486,7 +486,6 @@ export const AlertsList: React.FunctionComponent = () => {
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
               defaultMessage="Active: {totalStausesActive}"
-              data-test-subj="totalStausesActive"
               values={{
                 totalStausesActive: alertsStatusesTotal.active,
               }}
@@ -497,7 +496,6 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="danger" data-test-subj="totalErrorAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
-              data-test-subj="totalStausesError"
               defaultMessage="Error: {totalStausesError}"
               values={{ totalStausesError: alertsStatusesTotal.error }}
             />
@@ -507,7 +505,6 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="subdued" data-test-subj="totalOkAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
-              data-test-subj="totalStausesOk"
               defaultMessage="Ok: {totalStausesOk}"
               values={{ totalStausesOk: alertsStatusesTotal.ok }}
             />
@@ -517,7 +514,6 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="success" data-test-subj="totalPendingAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesPendingDescription"
-              data-test-subj="totalStausesPending"
               defaultMessage="Pending: {totalStausesPending}"
               values={{
                 totalStausesPending: alertsStatusesTotal.pending,
@@ -529,7 +525,6 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="warning" data-test-subj="totalUnknownAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesUnknownDescription"
-              data-test-subj="totalStausesUnknown"
               defaultMessage="Unknown: {totalStausesUnknown}"
               values={{
                 totalStausesUnknown: alertsStatusesTotal.unknown,

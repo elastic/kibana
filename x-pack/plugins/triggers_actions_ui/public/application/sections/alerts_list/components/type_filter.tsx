@@ -64,7 +64,7 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
                 }
               }}
               checked={selectedValues.includes(item.value) ? 'on' : undefined}
-              data-test-subj={`alertType${item.name.replaceAll(' ', '')}FilterOption`}
+              data-test-subj={`alertType${item.value}FilterOption`}
             >
               {item.name}
             </EuiFilterSelectItem>

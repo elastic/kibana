@@ -62,7 +62,7 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
                 }
               }}
               checked={selectedValues.includes(item.id) ? 'on' : undefined}
-              data-test-subj={`actionType${item.name.replaceAll(' ', '')}FilterOption`}
+              data-test-subj={`actionType${item.id}FilterOption`}
             >
               {item.name}
             </EuiFilterSelectItem>

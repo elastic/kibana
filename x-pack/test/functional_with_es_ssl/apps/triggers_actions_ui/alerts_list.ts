@@ -381,54 +381,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should filter alerts by the status', async () => {
       const createdAlert = await createAlert();
-      // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution status Ok
+      const failinfAlert = await createFailingAlert();
+      // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution statuses
       await retry.try(async () => {
         await refreshAlertsList();
-        const refreshResults = await pageObjects.triggersActionsUI.getAlertsList(true);
-        expect(refreshResults).to.eql([
-          {
-            name: createdAlert.name,
-            tagsText: 'foo, bar',
-            alertType: 'Test: Noop',
-            interval: '1m',
-            status: 'Ok',
-          },
-        ]);
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.map((item) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
       await testSubjects.click('alertStatusFilterButton');
       await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter
       await retry.try(async () => {
-        const filterErrorOnlyResults = await pageObjects.triggersActionsUI.getAlertsList(true);
-        expect(filterErrorOnlyResults).to.eql([]); // no alerts with errors
-      });
-
-      const alertStatusokFilerOption = await testSubjects.find('alertStatusokFilerOption');
-      // reopen popup with status filters if it was closed
-      if (!alertStatusokFilerOption) {
-        await testSubjects.click('alertStatusFilterButton');
-      }
-      await testSubjects.click('alertStatusokFilerOption'); // select Ok status filter
-
-      await retry.try(async () => {
-        const filterOkOnlyResults = await pageObjects.triggersActionsUI.getAlertsList(true);
-        expect(filterOkOnlyResults).to.eql([
+        const filterErrorOnlyResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(filterErrorOnlyResults).to.eql([
           {
-            name: createdAlert.name,
+            name: failinfAlert.name,
             tagsText: 'foo, bar',
-            alertType: 'Test: Noop',
-            interval: '1m',
-            status: 'Ok',
+            alertType: 'Test: Failing',
+            interval: '30s',
+            status: 'Error',
           },
         ]);
       });
-      await deleteAlerts([createdAlert.id]);
+
+      await deleteAlerts([createdAlert.id, failinfAlert.id]);
     });
 
     it('should display total alerts by status and error banner only when exists alerts with status error', async () => {
       const createdAlert = await createAlert();
       await retry.try(async () => {
         await refreshAlertsList();
-        const refreshResults = await pageObjects.triggersActionsUI.getAlertsList(true);
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(refreshResults).to.eql([
           {
             name: createdAlert.name,
@@ -476,16 +458,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const failinfAlert = await createFailingAlert();
       await refreshAlertsList();
       await testSubjects.click('alertTypeFilterButton');
-      await testSubjects.click('alertTypeTest:NoopFilterOption');
+      await testSubjects.click('alertTypetest.failingFilterOption');
 
       await retry.try(async () => {
         const filterOkOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
         expect(filterOkOnlyResults).to.eql([
           {
-            name: noopAlert.name,
+            name: failinfAlert.name,
             tagsText: 'foo, bar',
-            alertType: 'Test: Noop',
-            interval: '1m',
+            alertType: 'Test: Failing',
+            interval: '30s',
           },
         ]);
       });
@@ -515,7 +497,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       await refreshAlertsList();
       await testSubjects.click('actionTypeFilterButton');
-      await testSubjects.click('actionTypeSlackFilterOption');
+      await testSubjects.click('actionType.slackFilterOption');
 
       await retry.try(async () => {
         const filterOkOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
