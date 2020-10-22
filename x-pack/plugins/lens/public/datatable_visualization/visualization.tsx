@@ -246,10 +246,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length === 0
     ) {
       return {
-        shortMessage: i18n.translate(`xpack.lens.datatable.dataFailureShort`, {
+        shortMessage: i18n.translate('xpack.lens.datatable.dataFailureShort', {
           defaultMessage: `No metric dimension configured`,
         }),
-        longMessage: i18n.translate(`xpack.lens.datatable.dataFailureLong`, {
+        longMessage: i18n.translate('xpack.lens.datatable.dataFailureLong', {
           defaultMessage: `Add a field to the metric dimension panel`,
         }),
       };

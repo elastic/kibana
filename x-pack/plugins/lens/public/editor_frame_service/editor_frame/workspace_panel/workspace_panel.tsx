@@ -369,7 +369,7 @@ export const InnerVisualizationWrapper = ({
                 {shortMessage ?? (
                   <FormattedMessage
                     id="xpack.lens.editorFrame.dataFailure"
-                    defaultMessage={'An error occurred when loading data.'}
+                    defaultMessage="An error occurred when loading data."
                   />
                 )}
               </EuiFlexItem>

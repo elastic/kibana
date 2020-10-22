@@ -328,20 +328,36 @@ function validateLayersForDimension(
   }, []);
   return {
     valid: false,
-    payload: {
-      shortMessage: i18n.translate(`xpack.lens.xyVisualization.dataFailure${dimension}Short`, {
-        defaultMessage: `Some layers are missing the ${dimension} dimension`,
-      }),
-      longMessage: i18n.translate(`xpack.lens.xyVisualization.dataFailure${dimension}Long`, {
-        defaultMessage: `{layers, plural, one {Layer} other {Layers}} ${layerMissingAccessors
-          .map((i: number) => i + 1)
-          .join(
-            ', '
-          )} {layers, plural, one {has} other {have}} no dimension field set for the ${dimension} axis`,
-        values: { layers: layerMissingAccessors.length },
-      }),
-    },
+    payload: getMessageIdsForDimension(dimension, layerMissingAccessors),
   };
+}
+
+// i18n ids cannot be dynamically generated, hence the function below
+function getMessageIdsForDimension(dimension: string, layers: number[]) {
+  const layersList = layerMissingAccessors.map((i: number) => i + 1).join(', ');
+  switch (dimension) {
+    case 'X':
+      return {
+        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXShort', {
+          defaultMessage: `Some layers are missing the X dimension`,
+        }),
+        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXLong', {
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {has} other {have}} no dimension field set for the X axis`,
+          values: { layers: layers.length, layersList },
+        }),
+      };
+    case 'Y':
+      return {
+        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
+          defaultMessage: `Some layers are missing the Y dimension`,
+        }),
+        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {has} other {have}} no dimension field set for the Y axis`,
+          values: { layers: layers.length, layersList },
+        }),
+      };
+  }
+  return { shortMessage: '', longMessage: '' };
 }
 
 function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
