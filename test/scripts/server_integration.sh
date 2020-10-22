@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-source src/dev/ci_setup/setup_env.sh
+source test/scripts/jenkins_test_setup_oss.sh
 
 yarn run grunt run:serverIntegrationTests
