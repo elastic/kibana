@@ -202,7 +202,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(js|tsx?)$/,
-          exclude: [/node_modules/, Path.resolve(worker.repoRoot, 'packages')],
+          exclude: [
+            /node_modules/,
+            // TODO: once we move to TeamCity and get rid of the massive splaying of the
+            // kibana repo we can focus this selector to avoid catching people off guard
+            /[\/\\]packages[\/\\]/,
+          ],
           use: {
             loader: 'babel-loader',
             options: {
