@@ -54,6 +54,7 @@ describe('ExplorerChart', () => {
       <ExplorerChartSingleMetric
         mlSelectSeverityService={mlSelectSeverityServiceMock}
         tooltipService={mockTooltipService}
+        severity={0}
       />
     );
 
@@ -79,6 +80,7 @@ describe('ExplorerChart', () => {
         seriesConfig={config}
         mlSelectSeverityService={mlSelectSeverityServiceMock}
         tooltipService={mockTooltipService}
+        severity={0}
       />
     );
 
@@ -111,6 +113,7 @@ describe('ExplorerChart', () => {
           seriesConfig={config}
           mlSelectSeverityService={mlSelectSeverityServiceMock}
           tooltipService={mockTooltipService}
+          severity={0}
         />
       </div>
     );
