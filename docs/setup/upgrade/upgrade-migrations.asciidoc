@@ -58,6 +58,10 @@ Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensu
 Kibana does not support rolling upgrades. Stop all {kib} instances before starting a newer version to prevent upgrade failures and data loss.
 
 [float]
+===== Incompatible `xpack.tasks.index` configuration setting
+For {kib} < 7.5.1, if the task manager index is set to `.tasks` with the configuration setting `xpack.tasks.index: ".tasks"`, upgrade migrations will fail. {kib} 7.5.1 and later prevents this by refusing to start with an incompatible configuration setting.
+
+[float]
 [[resolve-migrations-failures]]
 ==== Resolving migration failures
 
