@@ -80,7 +80,7 @@ import {
 export { PackageInfo, EnvironmentMode } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
-export {
+export type {
   AppCategory,
   UiSettingsParams,
   UserProvidedValues,
@@ -89,6 +89,8 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  DeeplyMockedKeys,
+  MockedKeys,
 } from '../types';
 
 export {

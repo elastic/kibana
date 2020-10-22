@@ -27,3 +27,4 @@ export * from './app_category';
 export * from './ui_settings';
 export * from './saved_objects';
 export * from './serializable';
+export * from './mocks';

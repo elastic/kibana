@@ -19,7 +19,13 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  StartServicesAccessor,
+  MockedKeys,
+} from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';

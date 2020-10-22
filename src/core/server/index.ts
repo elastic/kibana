@@ -334,7 +334,7 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory } from '../types';
+export type { AppCategory, DeeplyMockedKeys, MockedKeys } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {

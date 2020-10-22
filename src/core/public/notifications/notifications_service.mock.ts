@@ -17,6 +17,7 @@
  * under the License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { MockedKeys } from '../../types';
 import {
   NotificationsService,
   NotificationsSetup,
