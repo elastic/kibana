@@ -35,6 +35,7 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
         // clicking on the testSubject
         const input = await find.activeElement();
 
+        // make sure that clearing the element's value works
         await retry.tryForTime(5000, async () => {
           let currentValue = await input.getAttribute('value');
           if (currentValue !== '') {
@@ -53,6 +54,7 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
           }
         });
 
+        // make sure that typing a character really adds that character to the input value
         for (const chr of text) {
           await retry.tryForTime(5000, async () => {
             const oldValue = await input.getAttribute('value');
@@ -69,6 +71,16 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
               }
             });
           });
+        }
+
+        // make sure that finally the complete text is entered
+        // this is needed because sometimes the field value is reset while typing
+        // and the above character checking might not catch it due to bad timing
+        const currentValue = await input.getAttribute('value');
+        if (currentValue !== text) {
+          throw new Error(
+            `Expected input '${selector}' to have the value '${text}' (got ${currentValue})`
+          );
         }
       });
     },

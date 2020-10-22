@@ -17,37 +17,45 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { withKnobs, boolean } from '@storybook/addon-knobs';
+import * as React from 'react';
 import { PanelOptionsMenu } from '..';
 
-const euiContextDescriptors = {
-  id: 'mainMenu',
-  title: 'Options',
-  items: [
-    {
-      name: 'Inspect',
-      icon: 'inspect',
-      onClick: action('onClick(inspect)'),
+export default {
+  title: 'components/PanelOptionsMenu',
+  component: PanelOptionsMenu,
+  argTypes: {
+    isViewMode: {
+      control: { type: 'boolean' },
     },
-    {
-      name: 'Full screen',
-      icon: 'expand',
-      onClick: action('onClick(expand)'),
-    },
+  },
+  decorators: [
+    (Story: React.ComponentType) => (
+      <div style={{ height: 150 }}>
+        <Story />
+      </div>
+    ),
   ],
 };
 
-storiesOf('components/PanelOptionsMenu', module)
-  .addDecorator(withKnobs)
-  .add('default', () => {
-    const isViewMode = boolean('isViewMode', false);
+export function Default({ isViewMode }: React.ComponentProps<typeof PanelOptionsMenu>) {
+  const euiContextDescriptors = {
+    id: 'mainMenu',
+    title: 'Options',
+    items: [
+      {
+        name: 'Inspect',
+        icon: 'inspect',
+        onClick: action('onClick(inspect)'),
+      },
+      {
+        name: 'Full screen',
+        icon: 'expand',
+        onClick: action('onClick(expand)'),
+      },
+    ],
+  };
 
-    return (
-      <div style={{ height: 150 }}>
-        <PanelOptionsMenu panelDescriptor={euiContextDescriptors} isViewMode={isViewMode} />
-      </div>
-    );
-  });
+  return <PanelOptionsMenu panelDescriptor={euiContextDescriptors} isViewMode={isViewMode} />;
+}
+Default.args = { isViewMode: false } as React.ComponentProps<typeof PanelOptionsMenu>;
