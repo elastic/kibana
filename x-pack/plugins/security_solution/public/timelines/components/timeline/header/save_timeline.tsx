@@ -78,7 +78,10 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     const { description, isSaving, savedObjectId, title, timelineType } = timeline;
 
     const handleClick = useCallback(() => {
-      onSaveTimeline({ ...timeline, id: timelineId });
+      onSaveTimeline({
+        ...timeline,
+        id: timelineId,
+      });
     }, [onSaveTimeline, timeline, timelineId]);
 
     const { getButton } = useCreateTimelineButton({ timelineId, timelineType });

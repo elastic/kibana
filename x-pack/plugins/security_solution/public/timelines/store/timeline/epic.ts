@@ -182,11 +182,10 @@ export const createTimelineEpic = <State>(): Epic<
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
           isItAtimelineAction(timelineId) &&
-          !action.payload?.disableAutoSave
+          !get('payload.disableAutoSave', action)
         ) {
           return true;
         }
-        return false;
       }),
       debounceTime(500),
       mergeMap(([action]) => {

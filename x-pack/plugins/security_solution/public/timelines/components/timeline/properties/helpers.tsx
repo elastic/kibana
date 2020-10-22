@@ -51,7 +51,7 @@ import {
   StyledStar,
 } from './styles';
 import * as i18n from './translations';
-import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
+import { setInsertTimeline, showTimeline, TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
@@ -92,7 +92,7 @@ export type UpdateDescription = ({
   description: string;
   disableAutoSave?: boolean;
 }) => void;
-export type SaveTimeline = ({ id }: { id: string }) => void;
+export type SaveTimeline = (args: TimelineInput) => void;
 
 export const StarIcon = React.memo<{
   isFavorite: boolean;

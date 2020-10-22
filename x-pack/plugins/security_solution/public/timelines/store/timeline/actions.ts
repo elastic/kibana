@@ -56,7 +56,7 @@ export const applyDeltaToColumnWidth = actionCreator<{
   delta: number;
 }>('APPLY_DELTA_TO_COLUMN_WIDTH');
 
-export const saveTimeline = actionCreator<{
+export interface TimelineInput {
   id: string;
   dataProviders?: DataProvider[];
   dateRange?: {
@@ -76,33 +76,13 @@ export const saveTimeline = actionCreator<{
   sort?: Sort;
   showCheckboxes?: boolean;
   timelineType?: TimelineTypeLiteral;
-  templateTimelineId?: string;
-  templateTimelineVersion?: number;
-}>('SAVE_TIMELINE');
+  templateTimelineId?: string | null;
+  templateTimelineVersion?: number | null;
+}
 
-export const createTimeline = actionCreator<{
-  id: string;
-  dataProviders?: DataProvider[];
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  filters?: Filter[];
-  columns: ColumnHeaderOptions[];
-  itemsPerPage?: number;
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
-  };
-  show?: boolean;
-  sort?: Sort;
-  showCheckboxes?: boolean;
-  timelineType?: TimelineTypeLiteral;
-  templateTimelineId?: string;
-  templateTimelineVersion?: number;
-}>('CREATE_TIMELINE');
+export const saveTimeline = actionCreator<TimelineInput>('SAVE_TIMELINE');
+
+export const createTimeline = actionCreator<TimelineInput>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 

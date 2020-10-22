@@ -20,6 +20,7 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { TimelineInput } from '../../../store/timeline/actions';
 
 interface OwnProps {
   timelineId: string;
@@ -150,7 +151,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   }) => dispatch(timelineActions.updateTitle({ id, title, disableAutoSave })),
   toggleLock: ({ linkToId }: { linkToId: InputsModelId }) =>
     dispatch(inputsActions.toggleTimelineLinkTo({ linkToId })),
-  saveTimeline: (args) => dispatch(timelineActions.saveTimeline(args)),
+  saveTimeline: (args: TimelineInput) => dispatch(timelineActions.saveTimeline(args)),
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
