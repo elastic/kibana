@@ -13,11 +13,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
+  const security = getService('security');
   const PageObjects = getPageObjects(['reporting', 'common', 'canvas']);
 
   describe('PDF Report Generation', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
+      await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
       await esArchiver.load('canvas/reports');
       await browser.setWindowSize(1600, 850);
     });
