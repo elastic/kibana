@@ -34,7 +34,7 @@ export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
-export const INVESTIGATION_NOTES_TOGGLE = 1;
+export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
 export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJobId"]';
 
