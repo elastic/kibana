@@ -14,9 +14,11 @@ export {
 } from './constants';
 export { TagWithRelations, TagAttributes, Tag, ITagsClient, TagSavedObject } from './types';
 export {
+  TagValidation,
   validateTagColor,
   validateTagName,
+  validateTagDescription,
   tagNameMinLength,
-  TagValidation,
   tagNameMaxLength,
+  tagDescriptionMaxLength,
 } from './validation';

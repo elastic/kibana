@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateTagColor, validateTagName } from './validation';
+import { validateTagColor, validateTagName, validateTagDescription } from './validation';
 
 describe('Tag attributes validation', () => {
   describe('validateTagName', () => {
@@ -20,7 +20,11 @@ describe('Tag attributes validation', () => {
       );
     });
 
-    it('returns an error message if the name contains invalid characters', () => {});
+    it('returns an error message if the name contains invalid characters', () => {
+      expect(validateTagName('t^ag+name&')).toMatchInlineSnapshot(
+        `"Tag name can only include a-z, 0-9, _, -,:."`
+      );
+    });
   });
 
   describe('validateTagColor', () => {
@@ -47,6 +51,18 @@ describe('Tag attributes validation', () => {
       expect(validateTagColor('hello dolly')).toMatchInlineSnapshot(
         `"Tag color must be a valid hex color"`
       );
+    });
+  });
+
+  describe('validateTagDescription', () => {
+    it('returns an error message if the description is too long', () => {
+      expect(validateTagDescription('a'.repeat(205))).toMatchInlineSnapshot(
+        `"Tag description must be shorter than 200 characters"`
+      );
+    });
+
+    it('returns no error if the description is valid', () => {
+      expect(validateTagDescription('some valid description')).toBeUndefined();
     });
   });
 });

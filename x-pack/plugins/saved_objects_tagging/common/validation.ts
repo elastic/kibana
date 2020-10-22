@@ -9,6 +9,7 @@ import { Tag } from './types';
 
 export const tagNameMinLength = 2;
 export const tagNameMaxLength = 50;
+export const tagDescriptionMaxLength = 200;
 
 const hexColorRegexp = /^#[0-9A-F]{6}$/i;
 const nameValidCharsRegexp = /^[0-9A-Z:\-_\s]+$/i;
@@ -51,6 +52,17 @@ export const validateTagName = (name: string): string | undefined => {
   if (!nameValidCharsRegexp.test(name)) {
     return i18n.translate('xpack.savedObjectsTagging.validation.name.errorInvalidCharacters', {
       defaultMessage: 'Tag name can only include a-z, 0-9, _, -,:.',
+    });
+  }
+};
+
+export const validateTagDescription = (description: string): string | undefined => {
+  if (description.length > tagDescriptionMaxLength) {
+    return i18n.translate('xpack.savedObjectsTagging.validation.name.errorTooLong', {
+      defaultMessage: 'Tag description must be shorter than {length} characters',
+      values: {
+        length: tagDescriptionMaxLength,
+      },
     });
   }
 };

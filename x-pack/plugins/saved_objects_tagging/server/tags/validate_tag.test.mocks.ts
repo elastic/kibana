@@ -6,8 +6,10 @@
 
 export const validateTagNameMock = jest.fn();
 export const validateTagColorMock = jest.fn();
+export const validateTagDescriptionMock = jest.fn();
 
 jest.doMock('../../common/validation', () => ({
   validateTagName: validateTagNameMock,
   validateTagColor: validateTagColorMock,
+  validateTagDescription: validateTagDescriptionMock,
 }));

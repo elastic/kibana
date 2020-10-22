@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateTagColorMock, validateTagNameMock } from './validate_tag.test.mocks';
+import {
+  validateTagColorMock,
+  validateTagNameMock,
+  validateTagDescriptionMock,
+} from './validate_tag.test.mocks';
 
 import { TagAttributes } from '../../common/types';
 import { validateTag } from './validate_tag';
@@ -20,6 +24,7 @@ describe('validateTag', () => {
   beforeEach(() => {
     validateTagNameMock.mockReset();
     validateTagColorMock.mockReset();
+    validateTagDescriptionMock.mockReset();
   });
 
   it('calls `validateTagName` with attributes.name', () => {
@@ -69,16 +74,45 @@ describe('validateTag', () => {
     expect(validation.valid).toBe(true);
   });
 
+  it('calls `validateTagDescription` with attributes.description', () => {
+    const attributes = createAttributes();
+
+    validateTag(attributes);
+
+    expect(validateTagDescriptionMock).toHaveBeenCalledTimes(1);
+    expect(validateTagDescriptionMock).toHaveBeenCalledWith(attributes.description);
+  });
+
+  it('returns the error from `validateTagDescription` in `errors.description`', () => {
+    const descError = 'invalid description';
+    const attributes = createAttributes();
+    validateTagDescriptionMock.mockReturnValue(descError);
+
+    const validation = validateTag(attributes);
+
+    expect(validation.errors.description).toBe(descError);
+  });
+
   it('returns `valid: false` if any field has error', () => {
     const attributes = createAttributes();
     validateTagNameMock.mockReturnValue('invalid name');
     validateTagColorMock.mockReturnValue(undefined);
+    validateTagDescriptionMock.mockReturnValue(undefined);
 
     let validation = validateTag(attributes);
     expect(validation.valid).toBe(false);
 
     validateTagNameMock.mockReturnValue(undefined);
     validateTagColorMock.mockReturnValue('invalid color');
+    validateTagDescriptionMock.mockReturnValue(undefined);
+
+    validation = validateTag(attributes);
+    expect(validation.valid).toBe(false);
+
+    validateTagNameMock.mockReturnValue(undefined);
+    validateTagColorMock.mockReturnValue(undefined);
+    validateTagDescriptionMock.mockReturnValue('invalid desc');
+
     validation = validateTag(attributes);
     expect(validation.valid).toBe(false);
   });

@@ -5,7 +5,12 @@
  */
 
 import { TagAttributes } from '../../common/types';
-import { TagValidation, validateTagColor, validateTagName } from '../../common/validation';
+import {
+  TagValidation,
+  validateTagColor,
+  validateTagName,
+  validateTagDescription,
+} from '../../common/validation';
 
 export const validateTag = (attributes: TagAttributes): TagValidation => {
   const validation: TagValidation = {
@@ -16,6 +21,7 @@ export const validateTag = (attributes: TagAttributes): TagValidation => {
 
   validation.errors.name = validateTagName(attributes.name);
   validation.errors.color = validateTagColor(attributes.color);
+  validation.errors.description = validateTagDescription(attributes.description);
 
   Object.values(validation.errors).forEach((error) => {
     if (error) {

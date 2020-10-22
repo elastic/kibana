@@ -25,7 +25,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TagAttributes, TagValidation, validateTagColor, tagNameMaxLength } from '../../../common';
+import {
+  TagAttributes,
+  TagValidation,
+  validateTagColor,
+  tagNameMaxLength,
+  tagDescriptionMaxLength,
+} from '../../../common';
 import { TagBadge } from '../../components';
 import { getRandomColor } from './utils';
 
@@ -172,6 +178,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             <EuiTextArea
               name="description"
               value={tag.description}
+              maxLength={tagDescriptionMaxLength}
               onChange={(e) => setDescription(e.target.value)}
               data-test-subj="createModalField-description"
               resize="none"
