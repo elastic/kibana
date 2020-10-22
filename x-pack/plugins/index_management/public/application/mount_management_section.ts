@@ -41,6 +41,7 @@ export async function mountManagementSection(
     fatalErrors,
     application,
     chrome: { docTitle },
+    uiSettings,
   } = core;
 
   docTitle.change(PLUGIN.getI18nName(i18n));
@@ -60,6 +61,7 @@ export async function mountManagementSection(
     services,
     history,
     setBreadcrumbs,
+    uiSettings,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

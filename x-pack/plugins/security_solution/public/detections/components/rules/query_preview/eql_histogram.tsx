@@ -5,74 +5,68 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import * as i18n from './translations';
-import { BarChart } from '../../../../common/components/charts/barchart';
 import { getHistogramConfig } from './helpers';
-import { ChartData, ChartSeriesConfigs } from '../../../../common/components/charts/common';
+import {
+  ChartSeriesData,
+  ChartSeriesConfigs,
+  ChartData,
+} from '../../../../common/components/charts/common';
 import { InspectQuery } from '../../../../common/store/inputs/model';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { Panel } from '../../../../common/components/panel';
-import { HeaderSection } from '../../../../common/components/header_section';
+import { inputsModel } from '../../../../common/store';
+import { PreviewHistogram } from './histogram';
 
 export const ID = 'queryEqlPreviewHistogramQuery';
 
 interface PreviewEqlQueryHistogramProps {
   to: string;
   from: string;
-  totalHits: number;
+  totalCount: number;
+  isLoading: boolean;
   data: ChartData[];
   inspect: InspectQuery;
+  refetch: inputsModel.Refetch;
 }
 
 export const PreviewEqlQueryHistogram = ({
   from,
   to,
-  totalHits,
+  totalCount,
   data,
   inspect,
+  refetch,
+  isLoading,
 }: PreviewEqlQueryHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
   useEffect((): void => {
     if (!isInitializing) {
-      setQuery({ id: ID, inspect, loading: false, refetch: () => {} });
+      setQuery({ id: ID, inspect, loading: false, refetch });
     }
-  }, [setQuery, inspect, isInitializing]);
+  }, [setQuery, inspect, isInitializing, refetch]);
 
   const barConfig = useMemo((): ChartSeriesConfigs => getHistogramConfig(to, from), [from, to]);
 
+  const subtitle = useMemo(
+    (): string =>
+      isLoading ? i18n.QUERY_PREVIEW_SUBTITLE_LOADING : i18n.QUERY_PREVIEW_TITLE(totalCount),
+    [isLoading, totalCount]
+  );
+
+  const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
+
   return (
-    <>
-      <Panel height={300}>
-        <EuiFlexGroup gutterSize="none" direction="column">
-          <EuiFlexItem grow={1}>
-            <HeaderSection
-              id={ID}
-              title={i18n.QUERY_GRAPH_HITS_TITLE}
-              titleSize="xs"
-              subtitle={i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalHits)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <BarChart
-              configs={barConfig}
-              barChart={[{ key: 'hits', value: data }]}
-              stackByField={undefined}
-              timelineId={undefined}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <>
-              <EuiSpacer />
-              <EuiText size="s" color="subdued">
-                <p>{i18n.PREVIEW_QUERY_DISCLAIMER_EQL}</p>
-              </EuiText>
-            </>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Panel>
-    </>
+    <PreviewHistogram
+      id={ID}
+      data={chartData}
+      barConfig={barConfig}
+      title={i18n.QUERY_GRAPH_HITS_TITLE}
+      subtitle={subtitle}
+      disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER_EQL}
+      isLoading={isLoading}
+      data-test-subj="queryPreviewEqlHistogram"
+    />
   );
 };

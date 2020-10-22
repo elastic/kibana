@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
@@ -217,7 +218,27 @@ export class Execution<
       const fn = getByAlias(this.state.get().functions, fnName);
 
       if (!fn) {
-        return createError({ message: `Function ${fnName} could not be found.` });
+        return createError({
+          name: 'fn not found',
+          message: i18n.translate('expressions.execution.functionNotFound', {
+            defaultMessage: `Function {fnName} could not be found.`,
+            values: {
+              fnName,
+            },
+          }),
+        });
+      }
+
+      if (fn.disabled) {
+        return createError({
+          name: 'fn is disabled',
+          message: i18n.translate('expressions.execution.functionDisabled', {
+            defaultMessage: `Function {fnName} is disabled.`,
+            values: {
+              fnName,
+            },
+          }),
+        });
       }
 
       let args: Record<string, ExpressionValue> = {};

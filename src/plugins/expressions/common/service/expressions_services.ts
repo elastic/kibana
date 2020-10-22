@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
+import { Executor, ExpressionExecOptions } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
 import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
+import { SavedObjectReference } from '../../../../core/types';
+import { PersistableState } from '../../../kibana_utils/common';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -99,7 +101,8 @@ export interface ExpressionsServiceStart {
   run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
   ) => Promise<Output>;
 
   /**
@@ -115,7 +118,8 @@ export interface ExpressionsServiceStart {
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.
     input: Input,
-    context?: ExtraContext
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
   ) => ExecutionContract<ExtraContext, Input, Output>;
 
   /**
@@ -154,7 +158,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService {
+export class ExpressionsService implements PersistableState<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -210,8 +214,8 @@ export class ExpressionsService {
     definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
   ): void => this.renderers.register(definition);
 
-  public readonly run: ExpressionsServiceStart['run'] = (ast, input, context) =>
-    this.executor.run(ast, input, context);
+  public readonly run: ExpressionsServiceStart['run'] = (ast, input, context, options) =>
+    this.executor.run(ast, input, context, options);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -242,8 +246,8 @@ export class ExpressionsService {
    */
   public readonly getTypes = (): ReturnType<Executor['getTypes']> => this.executor.getTypes();
 
-  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, context) => {
-    const execution = this.executor.createExecution(ast, context);
+  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, context, options) => {
+    const execution = this.executor.createExecution(ast, context, options);
     execution.start(input);
     return execution.contract;
   }) as ExpressionsServiceStart['execute'];
@@ -254,6 +258,36 @@ export class ExpressionsService {
     const fork = new ExpressionsService({ executor, renderers });
 
     return fork;
+  };
+
+  /**
+   * Extracts telemetry from expression AST
+   * @param state expression AST to extract references from
+   */
+  public readonly telemetry = (
+    state: ExpressionAstExpression,
+    telemetryData: Record<string, any> = {}
+  ) => {
+    return this.executor.telemetry(state, telemetryData);
+  };
+
+  /**
+   * Extracts saved object references from expression AST
+   * @param state expression AST to extract references from
+   * @returns new expression AST with references removed and array of references
+   */
+  public readonly extract = (state: ExpressionAstExpression) => {
+    return this.executor.extract(state);
+  };
+
+  /**
+   * Injects saved object references into expression AST
+   * @param state expression AST to update
+   * @param references array of saved object references
+   * @returns new expression AST with references injected
+   */
+  public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
+    return this.executor.inject(state, references);
   };
 
   /**

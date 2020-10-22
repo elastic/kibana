@@ -6,7 +6,17 @@
 import { isAgentUpgradeable } from './is_agent_upgradeable';
 import { Agent } from '../types/models/agent';
 
-const getAgent = (version: string, upgradeable: boolean): Agent => {
+const getAgent = ({
+  version,
+  upgradeable = false,
+  unenrolling = false,
+  unenrolled = false,
+}: {
+  version: string;
+  upgradeable?: boolean;
+  unenrolling?: boolean;
+  unenrolled?: boolean;
+}): Agent => {
   const agent: Agent = {
     id: 'de9006e1-54a7-4320-b24e-927e6fe518a8',
     active: true,
@@ -76,25 +86,84 @@ const getAgent = (version: string, upgradeable: boolean): Agent => {
   if (upgradeable) {
     agent.local_metadata.elastic.agent.upgradeable = true;
   }
+  if (unenrolling) {
+    agent.unenrollment_started_at = '2020-10-01T14:43:27.255Z';
+  }
+  if (unenrolled) {
+    agent.unenrolled_at = '2020-10-01T14:43:27.255Z';
+  }
   return agent;
 };
 describe('Ingest Manager - isAgentUpgradeable', () => {
   it('returns false if agent reports not upgradeable with agent version < kibana version', () => {
-    expect(isAgentUpgradeable(getAgent('7.9.0', false), '8.0.0')).toBe(false);
+    expect(isAgentUpgradeable(getAgent({ version: '7.9.0' }), '8.0.0')).toBe(false);
   });
   it('returns false if agent reports not upgradeable with agent version > kibana version', () => {
-    expect(isAgentUpgradeable(getAgent('8.0.0', false), '7.9.0')).toBe(false);
+    expect(isAgentUpgradeable(getAgent({ version: '8.0.0' }), '7.9.0')).toBe(false);
   });
   it('returns false if agent reports not upgradeable with agent version === kibana version', () => {
-    expect(isAgentUpgradeable(getAgent('8.0.0', false), '8.0.0')).toBe(false);
+    expect(isAgentUpgradeable(getAgent({ version: '8.0.0' }), '8.0.0')).toBe(false);
   });
   it('returns false if agent reports upgradeable, with agent version === kibana version', () => {
-    expect(isAgentUpgradeable(getAgent('8.0.0', true), '8.0.0')).toBe(false);
+    expect(isAgentUpgradeable(getAgent({ version: '8.0.0', upgradeable: true }), '8.0.0')).toBe(
+      false
+    );
   });
   it('returns false if agent reports upgradeable, with agent version > kibana version', () => {
-    expect(isAgentUpgradeable(getAgent('8.0.0', true), '7.9.0')).toBe(false);
+    expect(isAgentUpgradeable(getAgent({ version: '8.0.0', upgradeable: true }), '7.9.0')).toBe(
+      false
+    );
+  });
+  it('returns false if agent reports upgradeable, but agent is unenrolling', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true, unenrolling: true }),
+        '8.0.0'
+      )
+    ).toBe(false);
+  });
+  it('returns false if agent reports upgradeable, but agent is unenrolled', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true, unenrolled: true }),
+        '8.0.0'
+      )
+    ).toBe(false);
   });
   it('returns true if agent reports upgradeable, with agent version < kibana version', () => {
-    expect(isAgentUpgradeable(getAgent('7.9.0', true), '8.0.0')).toBe(true);
+    expect(isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0')).toBe(
+      true
+    );
+  });
+  it('returns false if agent reports upgradeable, with agent snapshot version === kibana version', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }), '7.9.0')
+    ).toBe(false);
+  });
+  it('returns false if agent reports upgradeable, with agent version === kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '7.9.0-SNAPSHOT')
+    ).toBe(false);
+  });
+  it('returns true if agent reports upgradeable, with agent snapshot version < kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }),
+        '8.0.0-SNAPSHOT'
+      )
+    ).toBe(true);
+  });
+  it('returns false if agent reports upgradeable, with agent snapshot version === kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '8.0.0-SNAPSHOT', upgradeable: true }),
+        '8.0.0-SNAPSHOT'
+      )
+    ).toBe(false);
+  });
+  it('returns true if agent reports upgradeable, with agent version < kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0-SNAPSHOT')
+    ).toBe(true);
   });
 });

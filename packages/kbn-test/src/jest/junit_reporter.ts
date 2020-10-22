@@ -22,11 +22,12 @@ import { writeFileSync, mkdirSync } from 'fs';
 
 import xmlBuilder from 'xmlbuilder';
 
+import { REPO_ROOT } from '@kbn/utils';
 import type { Config } from '@jest/types';
 import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
 import { escapeCdata } from '../mocha/xml';
-import { makeJunitReportPath } from './report_path';
+import { getUniqueJunitReportPath } from './report_path';
 
 interface ReporterOptions {
   reportName?: string;
@@ -46,7 +47,7 @@ export default class JestJUnitReporter extends BaseReporter {
   constructor(globalConfig: Config.GlobalConfig, { rootDirectory, reportName }: ReporterOptions) {
     super();
     this._reportName = reportName || 'Jest Tests';
-    this._rootDirectory = rootDirectory ? resolve(rootDirectory) : resolve(__dirname, '../..');
+    this._rootDirectory = rootDirectory ? resolve(rootDirectory) : REPO_ROOT;
   }
 
   /**
@@ -114,7 +115,7 @@ export default class JestJUnitReporter extends BaseReporter {
       });
     });
 
-    const reportPath = makeJunitReportPath(rootDirectory, reportName);
+    const reportPath = getUniqueJunitReportPath(rootDirectory, reportName);
     const reportXML = root.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
