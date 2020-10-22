@@ -59,14 +59,32 @@ const compileRule = (rule: LogMessageFormattingRule): CompiledLogMessageFormatti
 const compileCondition = (
   condition: LogMessageFormattingCondition
 ): CompiledLogMessageFormattingCondition =>
-  [compileExistsCondition, compileFieldValueCondition].reduce(
-    (compiledCondition, compile) => compile(condition) || compiledCondition,
-    catchAllCondition
-  );
+  [
+    compileAllCondition,
+    compileExistsCondition,
+    compileExistsPrefixCondition,
+    compileFieldValueCondition,
+  ].reduce((compiledCondition, compile) => compile(condition) || compiledCondition, falseCondition);
 
-const catchAllCondition: CompiledLogMessageFormattingCondition = {
+const falseCondition: CompiledLogMessageFormattingCondition = {
   conditionFields: [] as string[],
   fulfillsCondition: () => false,
+};
+
+const compileAllCondition = (
+  condition: LogMessageFormattingCondition
+): CompiledLogMessageFormattingCondition | null => {
+  if (!('all' in condition)) {
+    return null;
+  }
+
+  const compiledConditions = condition.all.map(compileCondition);
+
+  return {
+    conditionFields: compiledConditions.flatMap(({ conditionFields }) => conditionFields),
+    fulfillsCondition: (fields: Fields) =>
+      compiledConditions.every(({ fulfillsCondition }) => fulfillsCondition(fields)),
+  };
 };
 
 const compileExistsCondition = (condition: LogMessageFormattingCondition) =>
@@ -75,6 +93,17 @@ const compileExistsCondition = (condition: LogMessageFormattingCondition) =>
         conditionFields: condition.exists,
         fulfillsCondition: (fields: Fields) =>
           condition.exists.every((fieldName) => fieldName in fields),
+      }
+    : null;
+
+const compileExistsPrefixCondition = (condition: LogMessageFormattingCondition) =>
+  'existsPrefix' in condition
+    ? {
+        conditionFields: condition.existsPrefix.map((prefix) => `${prefix}.*`),
+        fulfillsCondition: (fields: Fields) =>
+          condition.existsPrefix.every((fieldNamePrefix) =>
+            Object.keys(fields).some((field) => field.startsWith(`${fieldNamePrefix}.`))
+          ),
       }
     : null;
 
@@ -116,7 +145,11 @@ const compileFormattingInstructions = (
 const compileFormattingInstruction = (
   formattingInstruction: LogMessageFormattingInstruction
 ): CompiledLogMessageFormattingInstruction =>
-  [compileFieldReferenceFormattingInstruction, compileConstantFormattingInstruction].reduce(
+  [
+    compileFieldReferenceFormattingInstruction,
+    compileFieldsPrefixReferenceFormattingInstruction,
+    compileConstantFormattingInstruction,
+  ].reduce(
     (compiledFormattingInstruction, compile) =>
       compile(formattingInstruction) || compiledFormattingInstruction,
     catchAllFormattingInstruction
@@ -147,6 +180,31 @@ const compileFieldReferenceFormattingInstruction = (
               highlights: highlightedValues,
             },
           ];
+        },
+      }
+    : null;
+
+const compileFieldsPrefixReferenceFormattingInstruction = (
+  formattingInstruction: LogMessageFormattingInstruction
+): CompiledLogMessageFormattingInstruction | null =>
+  'fieldsPrefix' in formattingInstruction
+    ? {
+        formattingFields: [`${formattingInstruction.fieldsPrefix}.*`],
+        format: (fields, highlights) => {
+          const matchingFields = Object.keys(fields).filter((field) =>
+            field.startsWith(`${formattingInstruction.fieldsPrefix}.`)
+          );
+          return matchingFields.flatMap((field) => {
+            const value = fields[field] ?? [];
+            const highlightedValues = highlights[field] ?? [];
+            return [
+              {
+                field,
+                value,
+                highlights: highlightedValues,
+              },
+            ];
+          });
         },
       }
     : null;
