@@ -27,7 +27,6 @@ export interface VisualizationListItem {
   savedObjectType: string;
   title: string;
   description?: string;
-  note?: string;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   typeTitle: string;
   image?: string;
@@ -52,6 +51,7 @@ export interface VisTypeAlias {
   promotion?: boolean;
   description: string;
   note?: string;
+  groupTitle?: string;
   disabled?: boolean;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   stage: 'experimental' | 'beta' | 'production';

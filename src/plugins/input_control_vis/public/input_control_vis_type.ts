@@ -38,7 +38,7 @@ export function createInputControlVisTypeDefinition(
     icon: 'controlsHorizontal',
     group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
-      defaultMessage: 'Create custom filters to control dashboard content.',
+      defaultMessage: 'Add drop-down and range slider to your dashboard.',
     }),
     stage: 'experimental',
     visualization: InputControlVisController,

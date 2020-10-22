@@ -51,6 +51,9 @@ export const createVegaTypeDefinition = (
     }),
     icon: 'visVega',
     group: VisGroups.PROMOTED,
+    groupTitle: i18n.translate('visTypeVega.type.vegaGroupTitle', {
+      defaultMessage: 'Custom visualizations',
+    }),
     visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
       optionsTemplate: VegaVisEditor,

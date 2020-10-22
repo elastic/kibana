@@ -56,6 +56,7 @@ export interface VisType<TVisParams = unknown> {
   readonly image?: string;
   readonly stage: 'experimental' | 'beta' | 'production';
   readonly group: VisGroups;
+  readonly groupTitle: string;
   readonly requiresSearch: boolean;
   readonly useCustomNoDataScreen: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);

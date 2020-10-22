@@ -197,7 +197,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
     <EuiFlexItem>
       <EuiCard
         titleSize="xs"
-        title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
+        title={<span data-test-subj="visTypeTitle">{visType.groupTitle || visType.title}</span>}
         onClick={onClick}
         isDisabled={shouldDisplayBadge}
         betaBadgeLabel={
@@ -248,7 +248,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
-              {visType.title}
+              {visType.groupTitle || visType.title}
             </EuiLink>
           </EuiFlexItem>
           {visType.stage === 'experimental' && (

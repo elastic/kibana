@@ -250,7 +250,7 @@ describe('DeprecationFactory', () => {
     });
   });
 
-  describe('rcopyFromRoot', () => {
+  describe('copyFromRoot', () => {
     it('copies a property to a different namespace', () => {
       const rawConfig = {
         originplugin: {

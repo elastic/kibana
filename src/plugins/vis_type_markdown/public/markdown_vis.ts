@@ -31,8 +31,11 @@ export const markdownVisDefinition = {
   isAccessible: true,
   icon: 'visText',
   group: VisGroups.TOOLS,
+  groupTitle: i18n.translate('visTypeMarkdown.markdownGroupTitle', {
+    defaultMessage: 'Text',
+  }),
   description: i18n.translate('visTypeMarkdown.markdownDescription', {
-    defaultMessage: 'Create a document using Markdown syntax.',
+    defaultMessage: 'Add text and images to your dashboard.',
   }),
   toExpressionAst,
   visConfig: {
