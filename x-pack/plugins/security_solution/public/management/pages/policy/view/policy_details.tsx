@@ -255,8 +255,8 @@ export const PolicyDetails = React.memo(() => {
         <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.advanced.show"
-            defaultMessage="{status} advanced settings"
-            values={{ status: showAdvancedPolicy ? 'Hide' : 'Show' }}
+            defaultMessage="{action} advanced settings"
+            values={{ action: showAdvancedPolicy ? 'Hide' : 'Show' }}
           />
         </EuiButtonEmpty>
 
