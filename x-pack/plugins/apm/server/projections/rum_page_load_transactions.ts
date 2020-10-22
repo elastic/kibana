@@ -17,9 +17,11 @@ import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 export function getRumPageLoadTransactionsProjection({
   setup,
   urlQuery,
+  checkFetchStartFieldExists = true,
 }: {
   setup: Setup & SetupTimeRange;
   urlQuery?: string;
+  checkFetchStartFieldExists?: boolean;
 }) {
   const { start, end, esFilter } = setup;
 
@@ -27,13 +29,17 @@ export function getRumPageLoadTransactionsProjection({
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-      {
-        // Adding this filter to cater for some inconsistent rum data
-        // not available on aggregated transactions
-        exists: {
-          field: 'transaction.marks.navigationTiming.fetchStart',
-        },
-      },
+      ...(checkFetchStartFieldExists
+        ? [
+            {
+              // Adding this filter to cater for some inconsistent rum data
+              // not available on aggregated transactions
+              exists: {
+                field: 'transaction.marks.navigationTiming.fetchStart',
+              },
+            },
+          ]
+        : []),
       ...(urlQuery
         ? [
             {

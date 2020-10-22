@@ -31,11 +31,6 @@ Object {
           ],
         },
       },
-      "pageViews": Object {
-        "value_count": Object {
-          "field": "transaction.duration.us",
-        },
-      },
     },
     "query": Object {
       "bool": Object {
@@ -55,11 +50,6 @@ Object {
             },
           },
           Object {
-            "exists": Object {
-              "field": "transaction.marks.navigationTiming.fetchStart",
-            },
-          },
-          Object {
             "term": Object {
               "service.environment": "test",
             },
@@ -68,6 +58,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": true,
   },
 }
 `;

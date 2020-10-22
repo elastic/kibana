@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -25,17 +24,14 @@ export async function getClientMetrics({
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    checkFetchStartFieldExists: false,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
+      track_total_hits: true,
       aggs: {
-        pageViews: {
-          value_count: {
-            field: TRANSACTION_DURATION,
-          },
-        },
         backEnd: {
           percentiles: {
             field: TRANSACTION_TIME_TO_FIRST_BYTE,
@@ -59,15 +55,14 @@ export async function getClientMetrics({
   });
 
   const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(params);
-  const { backEnd, domInteractive, pageViews } = response.aggregations!;
+  const { backEnd, domInteractive } = response.aggregations!;
 
   const pkey = percentile.toFixed(1);
 
   // Divide by 1000 to convert ms into seconds
   return {
-    pageViews,
+    pageViews: { value: response.hits.total.value ?? 0 },
     backEnd: { value: backEnd.values[pkey] || 0 },
     frontEnd: {
       value: (domInteractive.values[pkey] || 0) - (backEnd.values[pkey] || 0),
