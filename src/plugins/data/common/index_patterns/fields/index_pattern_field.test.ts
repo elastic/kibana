@@ -91,6 +91,17 @@ describe('Field', function () {
     expect(fieldC.searchable).toEqual(false);
   });
 
+  it('calculates visualizable', () => {
+    const field = getField({ type: 'unknown' });
+    expect(field.visualizable).toEqual(false);
+
+    const fieldB = getField({ type: 'conflict' });
+    expect(fieldB.visualizable).toEqual(false);
+
+    const fieldC = getField({ aggregatable: false, scripted: false });
+    expect(fieldC.visualizable).toEqual(false);
+  });
+
   it('calculates aggregatable', () => {
     const field = getField({ aggregatable: true, scripted: false });
     expect(field.aggregatable).toEqual(true);
