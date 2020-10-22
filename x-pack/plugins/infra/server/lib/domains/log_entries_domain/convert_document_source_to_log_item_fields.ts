@@ -5,25 +5,24 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { isArray, isPlainObject } from 'lodash';
-
-import { JsonObject } from '../../../../common/typed_json';
 import { LogEntriesItemField } from '../../../../common/http_api';
+import { JsonArray, JsonObject, jsonObjectRT, JsonValue } from '../../../../common/typed_json';
 
-const isJsonObject = (subject: any): subject is JsonObject => {
-  return isPlainObject(subject);
-};
-
-const serializeValue = (value: any): string => {
-  if (isArray(value) || isPlainObject(value)) {
+const serializeValue = (value: JsonValue): string => {
+  if (Array.isArray(value)) {
+    return value.map(serializeValue).join(', ');
+  } else if (typeof value === 'object' && value != null) {
     return stringify(value);
+  } else {
+    return `${value}`;
   }
-  return `${value}`;
 };
+
+// TODO: move rendering to browser
 export const convertESFieldsToLogItemFields = (fields: {
-  [field: string]: [value: unknown];
+  [field: string]: JsonArray;
 }): LogEntriesItemField[] => {
-  return Object.keys(fields).map((field) => ({ field, value: serializeValue(fields[field][0]) }));
+  return Object.keys(fields).map((field) => ({ field, value: serializeValue(fields[field]) }));
 };
 
 export const convertDocumentSourceToLogItemFields = (
@@ -34,7 +33,7 @@ export const convertDocumentSourceToLogItemFields = (
   return Object.keys(source).reduce((acc, key) => {
     const value = source[key];
     const nextPath = [...path, key];
-    if (isJsonObject(value)) {
+    if (jsonObjectRT.is(value)) {
       return convertDocumentSourceToLogItemFields(value, nextPath, acc);
     }
     const field = { field: nextPath.join('.'), value: serializeValue(value) };
