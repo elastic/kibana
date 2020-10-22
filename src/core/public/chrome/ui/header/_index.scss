@@ -1,7 +1,9 @@
 @include euiHeaderAffordForFixed;
 
-.euiDataGrid__restrictBody .chrHeaderWrapper {
-  display: none;
+.euiDataGrid__restrictBody {
+  .headerGlobalNav {
+    display: none;
+  }
 }
 
 .chrHeaderHelpMenu__version {
