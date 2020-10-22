@@ -62,6 +62,7 @@ import { bulkInsertSignals } from './single_bulk_create';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
+import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
 
 export const signalRulesAlertType = ({
   logger,
@@ -446,7 +447,6 @@ export const signalRulesAlertType = ({
           if (query === undefined) {
             throw new Error('EQL query rule must have a query defined');
           }
-          const MIN_EQL_RULE_INDEX_VERSION = 2;
           try {
             const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
             if (
