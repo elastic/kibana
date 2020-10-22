@@ -58,7 +58,14 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
           nameToFeature('metrics')
         );
 
-        const info = await getNodeInfo(framework, requestContext, configuration, nodeId, nodeType);
+        const info = await getNodeInfo(
+          framework,
+          requestContext,
+          configuration,
+          nodeId,
+          nodeType,
+          timeRange
+        );
         const cloudInstanceId = get(info, 'cloud.instance.id');
 
         const cloudMetricsMetadata = cloudInstanceId

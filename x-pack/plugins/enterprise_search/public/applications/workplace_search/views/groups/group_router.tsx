@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 import { Route, Switch, useParams } from 'react-router-dom';
 
-import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
+import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
@@ -26,15 +26,12 @@ import { GroupSourcePrioritization } from './components/group_source_prioritizat
 export const GroupRouter: React.FC = () => {
   const { groupId } = useParams() as { groupId: string };
 
-  const { messages } = useValues(FlashMessagesLogic);
   const { initializeGroup, resetGroup } = useActions(GroupLogic);
   const {
-    sharedSourcesModalModalVisible,
+    sharedSourcesModalVisible,
     manageUsersModalVisible,
     group: { name },
   } = useValues(GroupLogic);
-
-  const hasMessages = messages.length > 0;
 
   useEffect(() => {
     initializeGroup(groupId);
@@ -43,7 +40,7 @@ export const GroupRouter: React.FC = () => {
 
   return (
     <>
-      {hasMessages && <FlashMessages />}
+      <FlashMessages />
       <Switch>
         <Route path={GROUP_SOURCE_PRIORITIZATION_PATH}>
           <SetPageChrome trail={[NAV.GROUPS, name || '...', NAV.SOURCE_PRIORITIZATION]} />
@@ -55,7 +52,7 @@ export const GroupRouter: React.FC = () => {
           <GroupOverview />
         </Route>
       </Switch>
-      {sharedSourcesModalModalVisible && <SharedSourcesModal />}
+      {sharedSourcesModalVisible && <SharedSourcesModal />}
       {manageUsersModalVisible && <ManageUsersModal />}
     </>
   );

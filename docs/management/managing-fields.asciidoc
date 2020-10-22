@@ -134,7 +134,7 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 [[create-scripted-field]]
 === Create a scripted field
 
-. Open the menu, then go to *Stack Management > {kib} > Index Patterns*
+. Open the main menu, then click *Stack Management > Index Patterns*.
 . Select the index pattern you want to add a scripted field to.
 . Go to the *Scripted fields* tab for the index pattern, then click *Add scripted field*.
 . Enter a name for the scripted field.
