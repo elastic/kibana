@@ -272,16 +272,16 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         await expect(
           simulator().map(() => {
             // The link text is split across two columns. The first column is the count and the second column has the type.
-            const whatever: Array<{ type: string; link: string }> = [];
+            const typesAndCounts: Array<{ type: string; link: string }> = [];
             const type = simulator().testSubject('resolver:panel:node-events:event-type-count');
             const link = simulator().testSubject('resolver:panel:node-events:event-type-link');
             for (let index = 0; index < type.length; index++) {
-              whatever.push({
+              typesAndCounts.push({
                 type: type.at(index).text(),
                 link: link.at(index).text(),
               });
             }
-            return whatever;
+            return typesAndCounts;
           })
         ).toYieldEqualTo([
           // Because there is no printed whitespace after "Count", the count immediately follows it.
