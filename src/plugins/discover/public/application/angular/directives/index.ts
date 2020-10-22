@@ -17,15 +17,5 @@
  * under the License.
  */
 
-import { DiscoverNoResults } from './no_results';
-import { DiscoverUninitialized } from './uninitialized';
-import { DiscoverHistogram } from './histogram';
-import { getAngularModule } from '../../../kibana_services';
-
-const app = getAngularModule();
-
-app.directive('discoverNoResults', (reactDirective) => reactDirective(DiscoverNoResults));
-
-app.directive('discoverUninitialized', (reactDirective) => reactDirective(DiscoverUninitialized));
-
-app.directive('discoverHistogram', (reactDirective) => reactDirective(DiscoverHistogram));
+export { DiscoverUninitialized } from './uninitialized';
+export { DiscoverHistogram } from './histogram';
