@@ -35,6 +35,7 @@ object PullRequestCi : BuildType({
 
   params {
     param("elastic.pull_request.enabled", "true")
+    param("elastic.pull_request.target_branch", "master_teamcity")
     param("elastic.pull_request.allow_org_users", "true")
     param("elastic.pull_request.allowed_repo_permissions", "admin,write")
     param("elastic.pull_request.allowed_list", prAllowedList.joinToString(","))
