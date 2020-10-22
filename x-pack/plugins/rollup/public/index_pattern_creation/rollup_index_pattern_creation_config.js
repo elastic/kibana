@@ -162,12 +162,6 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     return {
       type: this.type,
       rollupIndex: this.rollupIndex,
-
-      /*
-      params: {
-
-      },
-      */
     };
   };
 }

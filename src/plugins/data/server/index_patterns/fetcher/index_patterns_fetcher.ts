@@ -89,7 +89,6 @@ export class IndexPatternsFetcher {
         ).body
       )[rollupIndex].aggs;
       const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
-      console.log('FIELDS', fieldCapsResponse);
 
       // Keep meta fields
       metaFields!.forEach(
@@ -103,7 +102,7 @@ export class IndexPatternsFetcher {
         rollupFields
       );
     }
-    return Object.values(fieldCapsResponse);
+    return fieldCapsResponse;
   }
 
   /**

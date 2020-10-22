@@ -60,10 +60,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     }).then((resp: any) => resp.fields);
   }
 
-  getFieldsForWildcard(options: GetFieldsOptions = {}) {
-    const { pattern, metaFields, type, rollupIndex } = options;
-    console.log('getFieldsForWildcard', pattern, metaFields, type, rollupIndex);
-
+  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex }: GetFieldsOptions = {}) {
     return this._request(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,

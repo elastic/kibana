@@ -221,7 +221,6 @@ export class IndexPatternsService {
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
-      // params: options.params || {},
     });
   };
 
@@ -235,9 +234,9 @@ export class IndexPatternsService {
   ) =>
     this.getFieldsForWildcard({
       pattern: indexPattern.title as string,
-      ...options,
       type: indexPattern.type,
-      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+      rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
+      ...options,
     });
 
   /**
@@ -377,7 +376,7 @@ export class IndexPatternsService {
             pattern: title,
             metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
             type,
-            params: typeMeta && typeMeta.params,
+            rollupIndex: typeMeta?.params?.rollupIndex,
           })
         : spec.fields;
     } catch (err) {
