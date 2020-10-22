@@ -20,6 +20,20 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'GET',
   });
 
+  dataManagement.getDataStream = ca({
+    urls: [
+      {
+        fmt: '/_data_stream/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'GET',
+  });
+
   // We don't allow the user to create a data stream in the UI or API. We're just adding this here
   // to enable the API integration tests.
   dataManagement.createDataStream = ca({
