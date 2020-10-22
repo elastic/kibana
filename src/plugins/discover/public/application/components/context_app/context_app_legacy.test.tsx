@@ -53,6 +53,7 @@ describe('ContextAppLegacy test', () => {
     minimumVisibleRows: 5,
     indexPattern,
     status: 'loaded',
+    defaultStepSize: 5,
     predecessorCount: 10,
     successorCount: 10,
     predecessorAvailable: 10,

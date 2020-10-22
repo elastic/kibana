@@ -27,7 +27,7 @@ import { IIndexPattern, IndexPatternField } from '../../../../../data/common/ind
 import { LOADING_STATUS } from './constants';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
 
-export type ContextAppProps = Partial<ActionBarProps> & {
+export interface ContextAppProps {
   columns: string[];
   hits: Array<Record<string, unknown>>;
   indexPattern: IIndexPattern;
@@ -35,6 +35,7 @@ export type ContextAppProps = Partial<ActionBarProps> & {
   minimumVisibleRows: number;
   sorting: string[];
   status: string;
+  defaultStepSize: number;
   predecessorCount: number;
   successorCount: number;
   predecessorAvailable: number;
@@ -43,14 +44,10 @@ export type ContextAppProps = Partial<ActionBarProps> & {
   onChangeSuccessorCount: (count: number) => void;
   predecessorStatus: string;
   successorStatus: string;
-};
+}
 
 const PREDECESSOR_TYPE = 'predecessors';
 const SUCCESSOR_TYPE = 'successors';
-
-function isPredecessorType(type: string) {
-  return type === PREDECESSOR_TYPE;
-}
 
 function isLoading(status: string) {
   return status !== LOADING_STATUS.LOADED && status !== LOADING_STATUS.FAILED;
@@ -72,14 +69,13 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       onChangePredecessorCount,
       onChangeSuccessorCount,
     } = renderProps;
+    const isPredecessorType = type === PREDECESSOR_TYPE;
     return {
       defaultStepSize,
-      docCount: isPredecessorType(type) ? predecessorCount : successorCount,
-      docCountAvailable: isPredecessorType(type) ? predecessorAvailable : successorAvailable,
-      onChangeCount: isPredecessorType(type) ? onChangePredecessorCount : onChangeSuccessorCount,
-      isLoading: isPredecessorType(type)
-        ? isLoading(predecessorStatus)
-        : isLoading(successorStatus),
+      docCount: isPredecessorType ? predecessorCount : successorCount,
+      docCountAvailable: isPredecessorType ? predecessorAvailable : successorAvailable,
+      onChangeCount: isPredecessorType ? onChangePredecessorCount : onChangeSuccessorCount,
+      isLoading: isPredecessorType ? isLoading(predecessorStatus) : isLoading(successorStatus),
       type,
       isDisabled: !isLoaded,
     } as ActionBarProps;
