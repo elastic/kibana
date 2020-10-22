@@ -1382,6 +1382,22 @@ class TimeseriesChartIntl extends Component {
         });
       }
 
+      if (marker.metricFunction) {
+        tooltipData.push({
+          label: i18n.translate(
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
+            {
+              defaultMessage: 'function',
+            }
+          ),
+          value: marker.metricFunction,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'metric_function',
+        });
+      }
+
       if (modelPlotEnabled === false) {
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
