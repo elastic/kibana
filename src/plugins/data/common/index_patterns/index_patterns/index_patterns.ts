@@ -35,7 +35,6 @@ import {
   IndexPatternSpec,
   IndexPatternAttributes,
   FieldSpec,
-  FieldFormatMap,
   IndexPatternFieldMap,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -297,20 +296,6 @@ export class IndexPatternsService {
   };
 
   /**
-   * Applies a set of formats to a set of fields
-   * @param fieldSpecs
-   * @param fieldFormatMap
-   */
-  private addFormatsToFields = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
-    Object.entries(fieldFormatMap).forEach(([fieldName, value]) => {
-      const field = fieldSpecs.find((fld: FieldSpec) => fld.name === fieldName);
-      if (field) {
-        field.format = value;
-      }
-    });
-  };
-
-  /**
    * Converts field array to map
    * @param fields
    */
@@ -346,7 +331,6 @@ export class IndexPatternsService {
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
 
-    this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
     return {
       id,
       version,
@@ -357,6 +341,7 @@ export class IndexPatternsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      fieldFormats: parsedFieldFormatMap,
     };
   };
 
@@ -382,9 +367,6 @@ export class IndexPatternsService {
 
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta } = spec;
-    const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
-      ? JSON.parse(savedObject.attributes.fieldFormatMap)
-      : {};
 
     const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
     let isSaveRequired = isFieldRefreshRequired;
@@ -415,12 +397,9 @@ export class IndexPatternsService {
       }
     }
 
-    Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
-      const field = spec.fields?.[fieldName];
-      if (field) {
-        field.format = value;
-      }
-    });
+    spec.fieldFormats = savedObject.attributes.fieldFormatMap
+      ? JSON.parse(savedObject.attributes.fieldFormatMap)
+      : {};
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);
@@ -456,7 +435,6 @@ export class IndexPatternsService {
 
     const indexPattern = new IndexPattern({
       spec,
-      savedObjectsClient: this.savedObjectsClient,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
       metaFields,

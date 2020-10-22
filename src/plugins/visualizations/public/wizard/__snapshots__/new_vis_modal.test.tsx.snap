@@ -154,7 +154,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                 class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   data-euiicon-type="cross"
@@ -207,7 +207,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 <span
                                   class="euiFormControlLayoutCustomIcon"
                                 >
-                                  <div
+                                  <span
                                     aria-hidden="true"
                                     class="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="search"
@@ -222,7 +222,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   class="euiFormControlLayoutClearButton"
                                   type="button"
                                 >
-                                  <div
+                                  <span
                                     class="euiFormControlLayoutClearButton__icon"
                                     data-euiicon-type="cross"
                                   />
@@ -258,7 +258,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -289,7 +289,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -320,7 +320,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -352,7 +352,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -402,7 +402,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           <span
                             class="euiButtonContent euiButtonContent--iconRight euiButton__content"
                           >
-                            <div
+                            <span
                               class="euiButtonContent__icon"
                               data-euiicon-type="popout"
                             />
@@ -461,7 +461,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                       size="m"
                       type="cross"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="cross"
@@ -597,7 +597,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       className="euiFormControlLayoutCustomIcon__icon"
                                                       type="search"
                                                     >
-                                                      <div
+                                                      <span
                                                         aria-hidden="true"
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         data-euiicon-type="search"
@@ -626,7 +626,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         className="euiFormControlLayoutClearButton__icon"
                                                         type="cross"
                                                       >
-                                                        <div
+                                                        <span
                                                           className="euiFormControlLayoutClearButton__icon"
                                                           data-euiicon-type="cross"
                                                         />
@@ -723,7 +723,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -792,7 +792,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -861,7 +861,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -930,7 +930,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -1063,7 +1063,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               size="m"
                                               type="popout"
                                             >
-                                              <div
+                                              <span
                                                 className="euiButtonContent__icon"
                                                 data-euiicon-type="popout"
                                                 size="m"
@@ -1252,7 +1252,7 @@ exports[`NewVisModal should render as expected 1`] = `
                 class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   data-euiicon-type="cross"
@@ -1293,7 +1293,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             >
                               <input
                                 aria-label="Filter for a visualization type"
-                                class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                                class="euiFieldSearch euiFieldSearch--fullWidth"
                                 data-test-subj="filterVisType"
                                 placeholder="Filter"
                                 type="search"
@@ -1305,7 +1305,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 <span
                                   class="euiFormControlLayoutCustomIcon"
                                 >
-                                  <div
+                                  <span
                                     aria-hidden="true"
                                     class="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="search"
@@ -1340,7 +1340,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -1371,7 +1371,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -1402,7 +1402,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -1433,7 +1433,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
+                                    <span
                                       color="secondary"
                                       data-euiicon-type="empty"
                                     />
@@ -1483,7 +1483,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           <span
                             class="euiButtonContent euiButtonContent--iconRight euiButton__content"
                           >
-                            <div
+                            <span
                               class="euiButtonContent__icon"
                               data-euiicon-type="popout"
                             />
@@ -1542,7 +1542,7 @@ exports[`NewVisModal should render as expected 1`] = `
                       size="m"
                       type="cross"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="cross"
@@ -1641,7 +1641,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             <EuiValidatableControl>
                                               <input
                                                 aria-label="Filter for a visualization type"
-                                                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                                                className="euiFieldSearch euiFieldSearch--fullWidth"
                                                 data-test-subj="filterVisType"
                                                 onChange={[Function]}
                                                 onKeyUp={[Function]}
@@ -1668,7 +1668,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       className="euiFormControlLayoutCustomIcon__icon"
                                                       type="search"
                                                     >
-                                                      <div
+                                                      <span
                                                         aria-hidden="true"
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         data-euiicon-type="search"
@@ -1753,7 +1753,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -1822,7 +1822,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -1891,7 +1891,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -1960,7 +1960,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <div
+                                                      <span
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -2093,7 +2093,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               size="m"
                                               type="popout"
                                             >
-                                              <div
+                                              <span
                                                 className="euiButtonContent__icon"
                                                 data-euiicon-type="popout"
                                                 size="m"
