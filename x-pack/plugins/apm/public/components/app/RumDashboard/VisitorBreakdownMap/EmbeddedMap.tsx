@@ -20,7 +20,7 @@ import {
   ViewMode,
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { getLayerList } from './LayerList';
+import { useLayerList } from './useLayerList';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
@@ -54,6 +54,8 @@ export function EmbeddedMapComponent() {
   const { start, end, serviceName } = urlParams;
 
   const mapFilters = useMapFilters();
+
+  const layerList = useLayerList();
 
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
@@ -148,7 +150,7 @@ export function EmbeddedMapComponent() {
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        await embeddableObject.setLayerList(getLayerList());
+        await embeddableObject.setLayerList(layerList);
       }
 
       setEmbeddable(embeddableObject);
