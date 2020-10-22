@@ -362,7 +362,6 @@ class TimeseriesChartIntl extends Component {
 
     const context = svg
       .append('g')
-      .attr('id', 'timeSeriesBrush')
       .attr('class', 'context-chart')
       .attr(
         'transform',
@@ -1092,6 +1091,7 @@ class TimeseriesChartIntl extends Component {
     cxtGroup.append('path').datum(data).attr('class', 'values-line').attr('d', contextValuesLine);
     drawLineChartDots(data, cxtGroup, contextValuesLine, 1);
 
+    // Add annotation markers to the context area
     cxtGroup.append('g').classed('mlContextAnnotations', true);
 
     const [contextXRangeStart, contextXRangeEnd] = this.contextXScale.range();
@@ -1456,22 +1456,6 @@ class TimeseriesChartIntl extends Component {
             key: seriesKey,
           },
           valueAccessor: 'multi_bucket_impact',
-        });
-      }
-
-      if (marker.metricFunction) {
-        tooltipData.push({
-          label: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
-            {
-              defaultMessage: 'function',
-            }
-          ),
-          value: marker.metricFunction,
-          seriesIdentifier: {
-            key: seriesKey,
-          },
-          valueAccessor: 'metric_function',
         });
       }
 
