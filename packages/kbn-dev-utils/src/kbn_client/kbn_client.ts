@@ -25,7 +25,7 @@ import { KbnClientVersion } from './kbn_client_version';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
 
-interface Options {
+export interface KbnClientOptions {
   url: string;
   certificateAuthorities?: Buffer[];
   log: ToolingLog;
@@ -47,7 +47,7 @@ export class KbnClient {
    * Basic Kibana server client that implements common behaviors for talking
    * to the Kibana server from dev tooling.
    */
-  constructor(options: Options) {
+  constructor(options: KbnClientOptions) {
     if (!options.url) {
       throw new Error('missing Kibana url');
     }

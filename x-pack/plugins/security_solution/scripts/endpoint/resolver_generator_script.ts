@@ -203,7 +203,14 @@ async function main() {
       default: false,
     },
   }).argv;
-  const kbnClient = new KbnClientWithApiKeySupport(new ToolingLog(), { url: argv.kibana });
+
+  const kbnClient = new KbnClientWithApiKeySupport({
+    log: new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    }),
+    url: argv.kibana,
+  });
 
   try {
     await doIngestSetup(kbnClient);
