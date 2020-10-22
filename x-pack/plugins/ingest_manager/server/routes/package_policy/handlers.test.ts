@@ -168,45 +168,53 @@ describe('When calling package policy', () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(callbackOne).toHaveBeenCalledWith({
-          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
-          description: '',
-          enabled: true,
-          inputs: [],
-          name: 'endpoint-1',
-          namespace: 'default',
-          output_id: '',
-          package: {
-            name: 'endpoint',
-            title: 'Elastic Endpoint',
-            version: '0.5.0',
+        expect(callbackOne).toHaveBeenCalledWith(
+          {
+            policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+            description: '',
+            enabled: true,
+            inputs: [],
+            name: 'endpoint-1',
+            namespace: 'default',
+            output_id: '',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.5.0',
+            },
           },
-        });
-        expect(callbackTwo).toHaveBeenCalledWith({
-          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
-          description: '',
-          enabled: true,
-          inputs: [
-            {
-              type: 'endpoint',
-              enabled: true,
-              streams: [],
-              config: {
-                one: {
-                  value: 'inserted by callbackOne',
+          context,
+          request
+        );
+        expect(callbackTwo).toHaveBeenCalledWith(
+          {
+            policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+            description: '',
+            enabled: true,
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                streams: [],
+                config: {
+                  one: {
+                    value: 'inserted by callbackOne',
+                  },
                 },
               },
+            ],
+            name: 'endpoint-1',
+            namespace: 'default',
+            output_id: '',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.5.0',
             },
-          ],
-          name: 'endpoint-1',
-          namespace: 'default',
-          output_id: '',
-          package: {
-            name: 'endpoint',
-            title: 'Elastic Endpoint',
-            version: '0.5.0',
           },
-        });
+          context,
+          request
+        );
       });
 
       it('should create with data from callback', async () => {
