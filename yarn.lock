@@ -1218,10 +1218,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.7.0"
 
-"@elastic/charts@23.2.1":
-  version "23.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-23.2.1.tgz#1f48629fe4597655a7f119fd019c4d5a2cbaf252"
-  integrity sha512-L2jUPAWwE0xLry6DcqcngVLCa9R32pfz5jW1fyOJRWSq1Fay2swOw4joBe8PmHpvl2s8EwWi9qWBORR1z3hUeQ==
+"@elastic/charts@24.0.0":
+  version "24.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.0.0.tgz#7b97b00a3dc873f46f764de0f28573e236b76aa7"
+  integrity sha512-ZFIdHcU48Wes7eb1R+48L7xLH4p7D9oSdkoX/iuwt+znD353UhiYK9u+dbrpMXeOMtFYt7dktzVAbouHcJCZPA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -9820,10 +9820,10 @@ cypress-promise@^1.1.0:
   resolved "https://registry.yarnpkg.com/cypress-promise/-/cypress-promise-1.1.0.tgz#f2d66965945fe198431aaf692d5157cea9d47b25"
   integrity sha512-DhIf5PJ/a0iY+Yii6n7Rbwq+9TJxU4pupXYzf9mZd8nPG0AzQrj9i+pqINv4xbI2EV1p+PKW3maCkR7oPG4GrA==
 
-cypress@^5.0.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-5.2.0.tgz#6902efd90703242a2539f0623c6e1118aff01f95"
-  integrity sha512-9S2spcrpIXrQ+CQIKHsjRoLQyRc2ehB06clJXPXXp1zyOL/uZMM3Qc20ipNki4CcNwY0nBTQZffPbRpODeGYQg==
+cypress@5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-5.4.0.tgz#8833a76e91129add601f823d43c53eb512d162c5"
+  integrity sha512-BJR+u3DRSYMqaBS1a3l1rbh5AkMRHugbxcYYzkl+xYlO6dzcJVE8uAhghzVI/hxijCyBg1iuSe4TRp/g1PUg8Q==
   dependencies:
     "@cypress/listr-verbose-renderer" "^0.4.1"
     "@cypress/request" "^2.88.5"
