@@ -72,13 +72,13 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
           };
         });
     },
-    async getAlertsList() {
+    async getAlertsList(includingStatus?: boolean) {
       const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
         .map((row) => {
-          return {
+          const rowItem = {
             name: $(row)
               .findTestSubject('alertsTableCell-name')
               .find('.euiTableCellContent')
@@ -96,6 +96,16 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
               .find('.euiTableCellContent')
               .text(),
           };
+          if (includingStatus) {
+            return {
+              ...rowItem,
+              status: $(row)
+                .findTestSubject('alertsTableCell-status')
+                .find('.euiTableCellContent')
+                .text(),
+            };
+          }
+          return rowItem;
         });
     },
     async isAlertsListDisplayed() {
