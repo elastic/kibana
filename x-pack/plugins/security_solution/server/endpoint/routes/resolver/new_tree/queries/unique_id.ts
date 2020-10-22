@@ -223,7 +223,29 @@ export class UniqueID {
     return results;
   }
 
-  private nodesFromAggsHelper2(buckets: any, spec: Array<{ id: string; parentID: string }>) {}
+  /**
+   * Need to test, I think this will work.
+   * @param buckets
+   * @param spec
+   */
+  private nodesFromAggsHelper2(buckets: any, spec: Array<{ id: string; parentID: string }>) {
+    if (buckets && spec && spec.length) {
+      const edge = spec.shift();
+      if (!edge) {
+        throw new Error('this should neveer happen');
+      }
+
+      return buckets.reduce((results, bucket) => {
+        results.push(...this.nodesFromAggsHelper2(bucket[edge.id].buckets, spec));
+        return results;
+      }, []);
+    }
+
+    return buckets.reduce((results, bucket) => {
+      results.push(...bucket.singleEvent.hits.hits.map((hit) => hit._source));
+      return results;
+    });
+  }
 
   public getNodesFromAggs(response: ApiResponse<SearchResponse<unknown>>) {
     const spec = [...this.idParts.connections];
