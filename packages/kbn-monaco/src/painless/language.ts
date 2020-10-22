@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import { monaco } from '../monaco';
+import { monaco } from '../monaco_imports';
 
-import { painlessLanguage } from './painless_lexer_rules';
 import { PainlessCompletionAdapter } from './painless_completion';
 import { WorkerProxyService } from './worker_proxy_service';
 import { ID } from './constants';
 import { PainlessContext } from './types';
 
 const wps = new WorkerProxyService();
-
-monaco.languages.register({ id: ID });
 
 const worker = (...uris: any[]) => {
   return wps.getWorker(uris);
@@ -36,7 +33,6 @@ const worker = (...uris: any[]) => {
 monaco.languages.onLanguage(ID, async () => {
   wps.setup();
 });
-monaco.languages.setMonarchTokensProvider(ID, painlessLanguage);
 
 export const getSuggestionProvider = (context: PainlessContext) =>
   new PainlessCompletionAdapter(worker, context);

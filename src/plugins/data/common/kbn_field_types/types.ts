@@ -52,6 +52,7 @@ export enum ES_FIELD_TYPES {
   INTEGER = 'integer',
   LONG = 'long',
   SHORT = 'short',
+  UNSIGNED_LONG = 'unsigned_long',
 
   NESTED = 'nested',
   BYTE = 'byte',

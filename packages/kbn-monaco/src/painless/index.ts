@@ -17,9 +17,8 @@
  * under the License.
  */
 
-/**
- * This import registers the painless monaco language contribution
- */
+import { ID } from './constants';
+import { lexerRules } from './lexer_rules';
 import { getSuggestionProvider } from './language';
 
-export const PainlessLang = { ID: 'painless', getSuggestionProvider };
+export const PainlessLang = { ID, getSuggestionProvider, lexerRules };

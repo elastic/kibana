@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { monaco } from '../monaco';
+import { monaco } from '../monaco_imports';
 import { PainlessCompletionResult, PainlessCompletionKind } from './types';
 
 const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.CompletionItemKind => {

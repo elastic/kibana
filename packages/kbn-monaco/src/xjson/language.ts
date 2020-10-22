@@ -19,15 +19,11 @@
 
 // This file contains a lot of single setup logic for registering a language globally
 
-import { monaco } from '../monaco';
+import { monaco } from '../monaco_imports';
 import { WorkerProxyService } from './worker_proxy_service';
-import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
 
 const wps = new WorkerProxyService();
-
-// Register rules against shared monaco instance.
-registerLexerRules(monaco);
 
 monaco.languages.onLanguage(ID, async () => {
   return wps.setup();
