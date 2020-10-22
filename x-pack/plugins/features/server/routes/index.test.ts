@@ -55,7 +55,7 @@ describe('GET /api/features', () => {
       name: 'Licensed Feature',
       app: ['bar-app'],
       category: { id: 'foo', label: 'foo' },
-      validLicenses: ['gold'],
+      minimumLicense: 'gold',
       privileges: null,
     });
 

@@ -63,6 +63,7 @@ export interface DeleteAgentPolicyRequest {
 
 export interface DeleteAgentPolicyResponse {
   id: string;
+  name: string;
 }
 
 export interface GetFullAgentPolicyRequest {

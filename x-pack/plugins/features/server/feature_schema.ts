@@ -91,12 +91,14 @@ const kibanaFeatureSchema = Joi.object({
   category: appCategorySchema,
   order: Joi.number(),
   excludeFromBasePrivileges: Joi.boolean(),
-  validLicenses: Joi.array().items(
-    Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial')
+  minimumLicense: Joi.string().valid(
+    'basic',
+    'standard',
+    'gold',
+    'platinum',
+    'enterprise',
+    'trial'
   ),
-  icon: Joi.string(),
-  description: Joi.string(),
-  navLinkId: Joi.string().regex(uiCapabilitiesRegex),
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,
