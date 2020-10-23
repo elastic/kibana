@@ -25,6 +25,7 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
+import { CopyTraceLink } from './CopyTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
@@ -106,6 +107,7 @@ export function WaterfallWithSummmary({
               compressed
             />
           )}
+          <CopyTraceLink transaction={entryTransaction} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
