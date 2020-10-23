@@ -149,14 +149,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const callCluster = async (endpoint: string, params?: Record<string, any>) =>
-      this.callWithRequest(request, endpoint, {
-        ...params,
-        allowNoIndices: true,
-      });
-
-    return new IndexPatternsFetcher(callCluster);
+    return new IndexPatternsFetcher(request.context.core.elasticsearch.client.asCurrentUser, true);
   }
 }
 
