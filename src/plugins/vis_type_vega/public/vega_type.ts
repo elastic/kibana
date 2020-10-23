@@ -29,12 +29,13 @@ import { createVegaVisualization } from './vega_visualization';
 import { getDefaultSpec } from './default_spec';
 import { createInspectorAdapters } from './vega_inspector';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
-
+import { toExpressionAst } from './to_ast';
+import { VisParams } from './vega_fn';
 import { getInfoMessage } from './components/experimental_map_vis_info';
 
 export const createVegaTypeDefinition = (
   dependencies: VegaVisualizationDependencies
-): BaseVisTypeOptions => {
+): BaseVisTypeOptions<VisParams> => {
   const requestHandler = createVegaRequestHandler(dependencies);
   const visualization = createVegaVisualization(dependencies);
 
@@ -55,7 +56,7 @@ export const createVegaTypeDefinition = (
     },
     visualization,
     requestHandler,
-    responseHandler: 'none',
+    toExpressionAst,
     options: {
       showIndexSelection: false,
       showQueryBar: true,

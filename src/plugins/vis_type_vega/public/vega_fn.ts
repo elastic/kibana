@@ -46,15 +46,17 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-export const createVegaFn = (
-  dependencies: VegaVisualizationDependencies
-): ExpressionFunctionDefinition<
+export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'vega',
   Input,
   Arguments,
   Output,
   ExecutionContext<unknown, VegaInspectorAdapters>
-> => ({
+>;
+
+export const createVegaFn = (
+  dependencies: VegaVisualizationDependencies
+): VegaExpressionFunctionDefinition => ({
   name: 'vega',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
