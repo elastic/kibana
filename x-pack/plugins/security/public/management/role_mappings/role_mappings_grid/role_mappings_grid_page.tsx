@@ -330,14 +330,16 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               this.state.roles?.find((r) => r.name === rolename) ?? rolename;
 
             return (
-              <RoleTableDisplay
-                role={role}
-                key={rolename}
-                navigateToApp={this.props.navigateToApp}
-              />
+              <EuiFlexItem grow={false} key={rolename}>
+                <RoleTableDisplay role={role} navigateToApp={this.props.navigateToApp} />
+              </EuiFlexItem>
             );
           });
-          return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
+          return (
+            <EuiFlexGroup gutterSize="s" data-test-subj="roleMappingRoles" wrap>
+              {roleLinks}
+            </EuiFlexGroup>
+          );
         },
       },
       {
