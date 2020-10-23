@@ -435,7 +435,6 @@ export class IndexPatternsService {
 
     const indexPattern = new IndexPattern({
       spec,
-      savedObjectsClient: this.savedObjectsClient,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
       metaFields,

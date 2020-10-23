@@ -344,22 +344,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -595,22 +596,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -846,22 +848,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1097,22 +1100,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1348,22 +1352,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1599,22 +1604,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1850,22 +1856,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2101,22 +2108,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2352,22 +2360,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2603,22 +2612,23 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3144,22 +3154,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3395,22 +3406,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3646,22 +3658,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3897,22 +3910,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4148,22 +4162,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4399,22 +4414,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4650,22 +4666,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4901,22 +4918,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -5152,22 +5170,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -5403,22 +5422,23 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -5902,22 +5922,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -6153,22 +6174,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -6404,22 +6426,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -6655,22 +6678,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -6906,22 +6930,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -7157,22 +7182,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -7408,22 +7434,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -7659,22 +7686,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -7910,22 +7938,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -8161,22 +8190,23 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
-                        <button
-                          class="euiButton euiButton--danger euiButton--small"
-                          data-test-subj="trustedAppDeleteButton"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                            style="height: auto;"
+                        <div>
+                          <button
+                            class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                            data-test-subj="trustedAppDeleteButton"
+                            type="button"
                           >
                             <span
-                              class="euiButton__text"
+                              class="euiButtonContent euiButton__content"
                             >
-                              Remove
+                              <span
+                                class="euiButton__text"
+                              >
+                                Remove
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
