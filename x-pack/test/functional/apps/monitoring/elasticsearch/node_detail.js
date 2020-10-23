@@ -13,8 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const nodeDetail = getService('monitoringElasticsearchNodeDetail');
 
-  // Failing: See https://github.com/elastic/kibana/issues/81166
-  describe.skip('Elasticsearch node detail', () => {
+  describe('Elasticsearch node detail', () => {
     describe('Active Nodes', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
