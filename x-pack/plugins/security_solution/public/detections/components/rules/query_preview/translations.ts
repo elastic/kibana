@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PREVIEW_LABEL = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.previewQueryLabel',
+export const QUERY_PREVIEW_BUTTON = i18n.translate(
+  'xpack.securitySolution.stepDefineRule.previewQueryButton',
   {
     defaultMessage: 'Preview results',
   }
 );
 
-export const PREVIEW_SELECT_ARIA = i18n.translate(
+export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
   'xpack.securitySolution.stepDefineRule.previewQueryAriaLabel',
   {
     defaultMessage: 'Query preview timeframe select',
@@ -85,14 +85,14 @@ export const QUERY_PREVIEW_NO_HITS = i18n.translate(
   }
 );
 
-export const PREVIEW_QUERY_ERROR = i18n.translate(
+export const QUERY_PREVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError',
   {
     defaultMessage: 'Error fetching preview',
   }
 );
 
-export const PREVIEW_QUERY_DISCLAIMER = i18n.translate(
+export const QUERY_PREVIEW_DISCLAIMER = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimer',
   {
     defaultMessage:
@@ -100,7 +100,7 @@ export const PREVIEW_QUERY_DISCLAIMER = i18n.translate(
   }
 );
 
-export const PREVIEW_QUERY_DISCLAIMER_EQL = i18n.translate(
+export const QUERY_PREVIEW_DISCLAIMER_EQL = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql',
   {
     defaultMessage:
@@ -108,19 +108,24 @@ export const PREVIEW_QUERY_DISCLAIMER_EQL = i18n.translate(
   }
 );
 
-export const PREVIEW_WARNING_CAP_HIT = (cap: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphCapHitWarning',
-    {
-      values: { cap },
-      defaultMessage:
-        'Hit query cap size of {cap}. This query could produce more hits than the {cap} shown.',
-    }
-  );
-
-export const PREVIEW_WARNING_TIMESTAMP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTimestampWarning',
+export const QUERY_PREVIEW_SUBTITLE_LOADING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading',
   {
-    defaultMessage: 'Unable to find "@timestamp" field on events.',
+    defaultMessage: '...loading',
+  }
+);
+
+export const QUERY_PREVIEW_EQL_SEQUENCE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewEqlSequenceTitle',
+  {
+    defaultMessage: 'No histogram available',
+  }
+);
+
+export const QUERY_PREVIEW_EQL_SEQUENCE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewEqlSequenceDescription',
+  {
+    defaultMessage:
+      'No histogram is available at this time for EQL sequence queries. You can use the inspect in the top right corner to view query details.',
   }
 );

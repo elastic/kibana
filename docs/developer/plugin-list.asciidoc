@@ -286,10 +286,6 @@ which will load the visualization's editor.
 |To access an elasticsearch instance that has live data you have two options:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/audit_trail[auditTrail]
-|WARNING: Missing README.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
 |Notes:
 Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
@@ -435,8 +431,9 @@ using the CURL scripts in the scripts folder.
 |This plugin provides access to the detailed tile map services from Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ml[ml]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
+|This plugin provides access to the machine learning features provided by
+Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]
@@ -468,7 +465,8 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security/README.md[security]
-|See Configuring security in Kibana.
+|See Configuring security in
+Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
@@ -498,8 +496,8 @@ routes, etc.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/transform[transform]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
+|This plugin provides access to the transforms features provided by Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]

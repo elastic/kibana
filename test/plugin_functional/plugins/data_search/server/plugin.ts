@@ -58,12 +58,15 @@ export class DataSearchTestPlugin
         },
       },
       async (context, req, res) => {
-        const [, { data }] = await core.getStartServices();
+        const [{ savedObjects }, { data }] = await core.getStartServices();
         const service = await data.search.searchSource.asScoped(req);
+        const savedObjectsClient = savedObjects.getScopedClient(req);
 
         // Since the index pattern ID can change on each test run, we need
         // to look it up on the fly and insert it into the request.
-        const indexPatterns = await data.indexPatterns.indexPatternsServiceFactory(req);
+        const indexPatterns = await data.indexPatterns.indexPatternsServiceFactory(
+          savedObjectsClient
+        );
         const ids = await indexPatterns.getIds();
         // @ts-expect-error Force overwriting the request
         req.body.index = ids[0];

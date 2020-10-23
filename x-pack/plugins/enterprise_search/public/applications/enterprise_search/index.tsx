@@ -25,7 +25,7 @@ export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => 
   const { errorConnecting } = useValues(HttpLogic);
   const { config } = useValues(KibanaLogic);
 
-  const showErrorConnecting = config.host && errorConnecting;
+  const showErrorConnecting = !!(config.host && errorConnecting);
 
   return (
     <Switch>

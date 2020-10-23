@@ -18,6 +18,9 @@ export const HostOverviewQuery = gql`
       id
       HostOverview(hostName: $hostName, timerange: $timerange, defaultIndex: $defaultIndex) {
         _id
+        agent {
+          id
+        }
         host {
           architecture
           id

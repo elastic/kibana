@@ -8,7 +8,7 @@
 
 ```typescript
 data: {
-        table: KibanaDatatable;
+        table: Datatable;
         column: number;
         range: number[];
         timeFieldName?: string;

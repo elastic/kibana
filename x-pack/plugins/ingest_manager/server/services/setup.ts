@@ -29,6 +29,7 @@ import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
+import { ensureAgentActionPolicyChangeExists } from './agents';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -48,7 +49,11 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
-  const [installedPackages, defaultOutput, defaultAgentPolicy] = await Promise.all([
+  const [
+    installedPackages,
+    defaultOutput,
+    { created: defaultAgentPolicyCreated, defaultAgentPolicy },
+  ] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
@@ -65,45 +70,50 @@ async function createSetupSideEffects(
     }),
   ]);
 
-  // ensure default packages are added to the default conifg
-  const agentPolicyWithPackagePolicies = await agentPolicyService.get(
-    soClient,
-    defaultAgentPolicy.id,
-    true
-  );
-  if (!agentPolicyWithPackagePolicies) {
-    throw new Error('Policy not found');
-  }
-  if (
-    agentPolicyWithPackagePolicies.package_policies.length &&
-    typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
-  ) {
-    throw new Error('Policy not found');
-  }
-  for (const installedPackage of installedPackages) {
-    const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
-      (packageName) => installedPackage.name === packageName
+  // If we just created the default policy, ensure default packages are added to it
+  if (defaultAgentPolicyCreated) {
+    const agentPolicyWithPackagePolicies = await agentPolicyService.get(
+      soClient,
+      defaultAgentPolicy.id,
+      true
     );
-    if (!packageShouldBeInstalled) {
-      continue;
+    if (!agentPolicyWithPackagePolicies) {
+      throw new Error('Policy not found');
+    }
+    if (
+      agentPolicyWithPackagePolicies.package_policies.length &&
+      typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
+    ) {
+      throw new Error('Policy not found');
     }
 
-    const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
-      (d: PackagePolicy | string) => {
-        return typeof d !== 'string' && d.package?.name === installedPackage.name;
-      }
-    );
-
-    if (!isInstalled) {
-      await addPackageToAgentPolicy(
-        soClient,
-        callCluster,
-        installedPackage,
-        agentPolicyWithPackagePolicies,
-        defaultOutput
+    for (const installedPackage of installedPackages) {
+      const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
+        (packageName) => installedPackage.name === packageName
       );
+      if (!packageShouldBeInstalled) {
+        continue;
+      }
+
+      const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
+        (d: PackagePolicy | string) => {
+          return typeof d !== 'string' && d.package?.name === installedPackage.name;
+        }
+      );
+
+      if (!isInstalled) {
+        await addPackageToAgentPolicy(
+          soClient,
+          callCluster,
+          installedPackage,
+          agentPolicyWithPackagePolicies,
+          defaultOutput
+        );
+      }
     }
   }
+
+  await ensureAgentActionPolicyChangeExists(soClient);
 
   return { isIntialized: true };
 }

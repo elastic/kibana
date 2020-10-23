@@ -10,7 +10,7 @@ exports[`VisualizationRequestError should render according to snapshot 1`] = `
     <div
       class="euiTextColor euiTextColor--subdued"
     >
-      <div
+      <span
         color="danger"
         data-euiicon-type="alert"
       />
