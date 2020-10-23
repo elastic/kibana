@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DocLinksStart } from 'kibana/public';
+
 import {
   SecurityOssPluginSetup,
   SecurityOssPluginStart,
 } from '../../../../../src/plugins/security_oss/public';
 import { insecureClusterAlertTitle, insecureClusterAlertText } from './components';
+import { DocumentationLinksService } from './documentation_links';
 
 interface SetupDeps {
   securityOssSetup: SecurityOssPluginSetup;
@@ -16,20 +19,27 @@ interface SetupDeps {
 
 interface StartDeps {
   securityOssStart: SecurityOssPluginStart;
+  docLinks: DocLinksStart;
 }
 
 export class SecurityCheckupService {
   private securityOssStart?: SecurityOssPluginStart;
 
+  private docLinksService?: DocumentationLinksService;
+
   public setup({ securityOssSetup }: SetupDeps) {
     securityOssSetup.insecureCluster.setAlertTitle(insecureClusterAlertTitle);
     securityOssSetup.insecureCluster.setAlertText(
-      insecureClusterAlertText((persist: boolean) => this.onDismiss(persist))
+      insecureClusterAlertText(
+        () => this.docLinksService!,
+        (persist: boolean) => this.onDismiss(persist)
+      )
     );
   }
 
-  public start({ securityOssStart }: StartDeps) {
+  public start({ securityOssStart, docLinks }: StartDeps) {
     this.securityOssStart = securityOssStart;
+    this.docLinksService = new DocumentationLinksService(docLinks);
   }
 
   private onDismiss(persist: boolean) {

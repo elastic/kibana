@@ -51,6 +51,10 @@ const EuiBadgeWrap = (styled(EuiBadge)`
   }
 ` as unknown) as typeof EuiBadge;
 
+const Query = styled.div`
+  white-space: pre-wrap;
+`;
+
 export const buildQueryBarDescription = ({
   field,
   filters,
@@ -92,8 +96,8 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{queryLabel ?? i18n.QUERY_LABEL} </>,
-        description: <>{query} </>,
+        title: <>{queryLabel ?? i18n.QUERY_LABEL}</>,
+        description: <Query>{query}</Query>,
       },
     ];
   }

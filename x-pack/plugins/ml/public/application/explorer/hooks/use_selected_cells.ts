@@ -60,7 +60,7 @@ export const useSelectedCells = (
         setAppState('mlExplorerSwimlane', mlExplorerSwimlane);
       }
     },
-    [appState?.mlExplorerSwimlane, selectedCells]
+    [appState?.mlExplorerSwimlane, selectedCells, setAppState]
   );
 
   return [selectedCells, setSelectedCells];

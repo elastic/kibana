@@ -45,6 +45,7 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
 export interface KibanaRequestState extends ApplicationState {
   requestId: string;
   requestUuid: string;
+  rewrittenUrl?: Url;
 }
 
 /**
@@ -161,7 +162,7 @@ export class KibanaRequest<
    * is always a UUID uniquely identifying the request.
    */
   public readonly uuid: string;
-  /** a WHATWG URL standard object. */
+  /** a Node.js parsed Url object */
   public readonly url: Url;
   /** matched route details */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
@@ -186,6 +187,11 @@ export class KibanaRequest<
     isAuthenticated: boolean;
   };
 
+  /**
+   * URL rewritten in onPreRouting request interceptor.
+   */
+  public readonly rewrittenUrl?: Url;
+
   /** @internal */
   protected readonly [requestSymbol]: Request;
 
@@ -199,10 +205,12 @@ export class KibanaRequest<
     private readonly withoutSecretHeaders: boolean
   ) {
     // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
-    // KibanaRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
+    // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
-    this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? uuid.v4();
-    this.uuid = (request.app as KibanaRequestState | undefined)?.requestUuid ?? uuid.v4();
+    const appState = request.app as KibanaRequestState | undefined;
+    this.id = appState?.requestId ?? uuid.v4();
+    this.uuid = appState?.requestUuid ?? uuid.v4();
+    this.rewrittenUrl = appState?.rewrittenUrl;
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });

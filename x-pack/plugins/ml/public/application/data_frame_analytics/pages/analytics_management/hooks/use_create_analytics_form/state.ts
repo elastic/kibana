@@ -93,6 +93,7 @@ export interface State {
     sourceIndexFieldsCheckFailed: boolean;
     standardizationEnabled: undefined | string;
     trainingPercent: number;
+    useEstimatedMml: boolean;
   };
   disabled: boolean;
   indexPatternsMap: SourceIndexMap;
@@ -147,7 +148,7 @@ export const getInitialState = (): State => ({
     nNeighbors: undefined,
     numTopFeatureImportanceValues: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
     numTopFeatureImportanceValuesValid: true,
-    numTopClasses: 2,
+    numTopClasses: -1,
     outlierFraction: undefined,
     predictionFieldName: undefined,
     previousJobType: null,
@@ -161,6 +162,7 @@ export const getInitialState = (): State => ({
     sourceIndexFieldsCheckFailed: false,
     standardizationEnabled: 'true',
     trainingPercent: 80,
+    useEstimatedMml: true,
   },
   jobConfig: {},
   disabled:

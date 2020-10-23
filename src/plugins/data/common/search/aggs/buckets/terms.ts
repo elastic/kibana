@@ -41,7 +41,6 @@ import {
 export const termsAggFilter = [
   '!top_hits',
   '!percentiles',
-  '!median',
   '!std_dev',
   '!derivative',
   '!moving_avg',
@@ -198,14 +197,14 @@ export const getTermsBucketAgg = () =>
             return;
           }
 
-          const orderAggId = orderAgg.id;
+          const orderAggPath = orderAgg.getValueBucketPath();
 
           if (orderAgg.parentId && aggs) {
             orderAgg = aggs.byId(orderAgg.parentId);
           }
 
           output.subAggs = (output.subAggs || []).concat(orderAgg);
-          order[orderAggId] = dir;
+          order[orderAggPath] = dir;
         },
       },
       {
