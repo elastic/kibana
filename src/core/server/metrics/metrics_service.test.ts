@@ -18,13 +18,15 @@
  */
 
 import moment from 'moment';
+import { firstValueFrom } from '@kbn/std';
+import { Subject } from 'rxjs';
 
 import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
+import { OpsMetrics } from './types';
 import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
-import { take } from 'rxjs/operators';
 
 const testInterval = 100;
 
@@ -79,24 +81,28 @@ describe('MetricsService', () => {
       await metricsService.setup({ http: httpMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
-      // `advanceTimersByTime` only ensure the interval handler is executed
-      // however the `reset` call is executed after the async call to `collect`
-      // meaning that we are going to miss the call if we don't wait for the
-      // actual observable emission that is performed after
-      const waitForNextEmission = () => getOpsMetrics$().pipe(take(1)).toPromise();
+      // subscribe to getOptsMetrics$() so we will know when the refreshes
+      // are compelete without needing to worry about the replay behavior
+      // of creating new subscriptions
+      const opsMetrics$ = new Subject();
+      getOpsMetrics$().subscribe(opsMetrics$);
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(1);
 
-      let nextEmission = waitForNextEmission();
+      // trigger the start of a refresh with the timer and wait for it
+      // to complete by observing the publish to opsMetrics$
       jest.advanceTimersByTime(testInterval);
-      await nextEmission;
+      await firstValueFrom(opsMetrics$);
+
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(2);
 
-      nextEmission = waitForNextEmission();
+      // trigger the start of a refresh with the timer and wait for it
+      // to complete by observing the publish to opsMetrics$
       jest.advanceTimersByTime(testInterval);
-      await nextEmission;
+      await firstValueFrom(opsMetrics$);
+
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(3);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(3);
     });
@@ -117,13 +123,20 @@ describe('MetricsService', () => {
       await metricsService.setup({ http: httpMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
-      const firstEmission = getOpsMetrics$().pipe(take(1)).toPromise();
-      jest.advanceTimersByTime(testInterval);
-      expect(await firstEmission).toEqual({ metric: 'first' });
+      // subscribe to getOpsMetrics$ once so we can await on emits to the subject
+      const originalSub$ = new Subject();
+      getOpsMetrics$().subscribe(originalSub$);
 
-      const secondEmission = getOpsMetrics$().pipe(take(1)).toPromise();
+      // create a new subscription via getOpsMetrics$ and ensure it gets the first value first
+      expect(await firstValueFrom(getOpsMetrics$())).toEqual({ metric: 'first' });
+
+      // trigger the start of a refresh with the timer and wait for it
+      // to complete by observing the publish to originalSub$
       jest.advanceTimersByTime(testInterval);
-      expect(await secondEmission).toEqual({ metric: 'second' });
+      await firstValueFrom(originalSub$);
+
+      // create a new subscription via getOpsMetrics$ and ensure it gets the second value first
+      expect(await firstValueFrom(getOpsMetrics$())).toEqual({ metric: 'second' });
     });
   });
 
