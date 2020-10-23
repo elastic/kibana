@@ -13,7 +13,8 @@
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
     "plugins/licensing/**/*",
-    "plugins/global_search/**/*"
+    "plugins/global_search/**/*",
+    "plugins/task_manager/**/*",
   ],
   "compilerOptions": {
     "paths": {
