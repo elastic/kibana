@@ -1,0 +1,209 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { cloneDeep } from 'lodash';
+import {
+  AreaSeries,
+  BarSeries,
+  Chart,
+  ScaleType,
+  Settings,
+  Position,
+  Axis,
+  TooltipType,
+} from '@elastic/charts';
+
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { useKibana } from '../../../kibana_react/public';
+
+import { buildOptions, colors } from '../helpers/panel_utils';
+
+import { Series, Sheet } from '../helpers/timelion_request_handler';
+import { getBarStyles, getAreaStyles } from '../helpers/series_styles';
+import { TimelionVisDependencies } from '../plugin';
+
+import './index.scss';
+
+interface TimelionVisComponentProps {
+  fireEvent: IInterpreterRenderHandlers['event'];
+  interval: string;
+  seriesList: Sheet;
+  renderComplete: IInterpreterRenderHandlers['done'];
+}
+
+function TimelionVisComponent1({
+  interval,
+  seriesList,
+  renderComplete,
+  fireEvent,
+}: TimelionVisComponentProps) {
+  const kibana = useKibana<TimelionVisDependencies>();
+  const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
+  const options = buildOptions(
+    interval,
+    kibana.services.timefilter,
+    kibana.services.uiSettings,
+    400
+  );
+
+  useEffect(() => {
+    const newChart = seriesList.list.map((series: Series, seriesIndex: number) => {
+      const newSeries = { ...series };
+      if (!newSeries.color) {
+        const colorIndex = seriesIndex % colors.length;
+        newSeries.color = colors[colorIndex];
+      }
+      return newSeries;
+    });
+    setChart(newChart);
+  }, [seriesList.list]);
+
+  const getLegendPosition = function (chartGlobal: any) {
+    if (chartGlobal && chartGlobal.legend) {
+      switch (chartGlobal.legend.position) {
+        case 'ne':
+          return Position.Right;
+        case 'nw':
+          return Position.Left;
+        case 'se':
+          return Position.Right;
+        case 'sw':
+          return Position.Left;
+      }
+    }
+    return Position.Left;
+  };
+
+  const brushEndListener = useCallback(
+    ({ x }) => {
+      fireEvent({
+        name: 'applyFilter',
+        data: {
+          timeFieldName: '*',
+          filters: [
+            {
+              range: {
+                '*': {
+                  gte: x[0],
+                  lte: x[1],
+                },
+              },
+            },
+          ],
+        },
+      });
+    },
+    [fireEvent]
+  );
+
+  const onRenderChange = function (data) {
+    if (!data[0]) {
+      renderComplete();
+    }
+  };
+
+  return (
+    <Chart renderer="canvas" className="timelionChart" size={{ width: '100%' }}>
+      <Settings
+        onBrushEnd={brushEndListener}
+        showLegend
+        legendPosition={getLegendPosition(chart[0]._global)}
+        onRenderChange={onRenderChange}
+        theme={[
+          {
+            crosshair: {
+              band: {
+                fill: '#F00',
+              },
+            },
+          },
+        ]}
+        tooltip={{
+          snap: true,
+          type: TooltipType.VerticalCursor,
+        }}
+      />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        showOverlappingTicks
+        tickFormat={options.xaxis.tickFormatter}
+      />
+      {chart[0]._global && chart[0]._global.yaxes ? (
+        chart[0]._global.yaxes.map((data, index) => {
+          return (
+            <Axis
+              key={data.position + index}
+              id={data.position + data.axisLabel}
+              title={data.axisLabel}
+              position={data.position}
+              gridLine={{
+                stroke: 'rgba(125,125,125,0.3)',
+                visible: true,
+              }}
+            />
+          );
+        })
+      ) : (
+        <Axis
+          id="left"
+          position={Position.Left}
+          gridLine={{
+            stroke: 'rgba(125,125,125,0.3)',
+            visible: true,
+          }}
+        />
+      )}
+      {chart.map((data, index) => {
+        if (data.bars) {
+          return (
+            <BarSeries
+              key={data.label + index}
+              id={data.label}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={data.data}
+              {...getBarStyles(data.bars, data.color)}
+            />
+          );
+        } else {
+          return (
+            <AreaSeries
+              key={data.label + index}
+              id={data.label}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={data.data}
+              {...getAreaStyles(data)}
+            />
+          );
+        }
+      })}
+    </Chart>
+  );
+}
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TimelionVisComponent1 as default };

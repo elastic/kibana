@@ -59,6 +59,11 @@
   font-weight: $euiFontWeightBold;
 }
 
+.timelionChart {
+  flex-direction: column;
+  flex: 1 1 100%;
+}
+
 .visEditor--timelion {
   .visEditorSidebar__timelionOptions {
     flex: 1 1 auto;
