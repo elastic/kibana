@@ -35,7 +35,8 @@ export async function getPaginatedNodes(
   pagination,
   sort,
   queryText,
-  { clusterStats, nodesShardCount }
+  { clusterStats, nodesShardCount },
+  alertStatus
 ) {
   const config = req.server.config();
   const size = config.get('monitoring.ui.max_bucket_size');
@@ -91,6 +92,35 @@ export async function getPaginatedNodes(
         const lastItem = dataSeries[dataSeries.length - 1];
         if (lastItem.length && lastItem.length === 2) {
           node[metricName] = lastItem[1];
+        }
+      }
+    }
+  }
+
+  // For some alerts (maybe only missing monitoring data), we want to show the nodes
+  // which we are missing data if they do not normally show up, so we can show the alert
+  for (const status of Object.values(alertStatus)) {
+    for (const { firing, state } of status.states) {
+      if (!firing) {
+        continue;
+      }
+      const node = nodes.find((node) => node.uuid === state.stackProductUuid);
+      if (!node) {
+        nodes.push({
+          name: state.stackProductName,
+          uuid: state.stackProductUuid,
+        });
+      }
+    }
+  }
+
+  // Fetch and add alerts since we need to support server side sorting
+  for (const node of nodes) {
+    for (const status of Object.values(alertStatus)) {
+      for (const { firing, state } of status.states) {
+        if (firing && state.stackProductUuid === node.uuid) {
+          node.alerts = node.alerts || 0;
+          node.alerts++;
         }
       }
     }

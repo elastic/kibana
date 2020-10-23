@@ -237,7 +237,7 @@ export function ElasticsearchPanel(props) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsBadge alerts={alertsList} />
+        <AlertsBadge alerts={alertsList} viewMoreUrl={goToNodes()} />
       </EuiFlexItem>
     );
   }

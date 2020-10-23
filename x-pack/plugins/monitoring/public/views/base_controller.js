@@ -105,6 +105,7 @@ export class MonitoringViewBaseController {
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
     this.telemetryPageViewTitle = telemetryPageViewTitle || title;
+    this.alertConfig = alerts;
 
     let deferTimer;
     let zoomInLevel = 0;

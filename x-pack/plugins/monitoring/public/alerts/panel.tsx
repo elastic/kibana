@@ -31,7 +31,7 @@ import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 interface Props {
   alert: CommonAlertStatus;
   alertState?: CommonAlertState;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
+  nextStepsFilter?: (nextStep: AlertMessage) => boolean;
 }
 export const AlertPanel: React.FC<Props> = (props: Props) => {
   const {
