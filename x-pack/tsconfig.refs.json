@@ -3,5 +3,6 @@
   "references": [
     { "path": "./plugins/licensing/tsconfig.json" },
     { "path": "./plugins/global_search/tsconfig.json" },
+    { "path": "./plugins/event_log/tsconfig.json"}
   ]
 }

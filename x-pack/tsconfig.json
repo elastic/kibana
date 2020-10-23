@@ -36,5 +36,6 @@
     { "path": "../src/plugins/telemetry/tsconfig.json" },
     { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../src/plugins/newsfeed/tsconfig.json" },
+    { "path": "./plugins/event_log/tsconfig.json"}
   ]
 }
