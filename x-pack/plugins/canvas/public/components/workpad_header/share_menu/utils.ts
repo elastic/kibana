@@ -11,6 +11,7 @@ import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
+// FIXME: make this configurable and use `preserve_layout` by default, until the next major release
 const CANVAS_LAYOUT_TYPE = 'canvas';
 
 interface PageCount {
