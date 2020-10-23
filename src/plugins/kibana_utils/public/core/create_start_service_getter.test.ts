@@ -47,8 +47,11 @@ describe('createStartServicesGetter', () => {
     expect(() => start()).toThrow();
 
     await new Promise((r) => setTimeout(r, 1));
+
     future.resolve([core, plugins, self]);
     await future.promise;
+
+    await new Promise((r) => setTimeout(r, 1));
 
     expect(start()).toEqual({
       core,
@@ -66,8 +69,11 @@ describe('createStartServicesGetter', () => {
     const start = createStartServicesGetter(accessor);
 
     await new Promise((r) => setTimeout(r, 1));
+
     future.resolve([core, plugins, self]);
     await future.promise;
+
+    await new Promise((r) => setTimeout(r, 1));
 
     expect(start()).toEqual({
       core,
