@@ -13,7 +13,7 @@ export const FIELD = i18n.translate('xpack.securitySolution.threatMatch.fieldDes
 export const THREAT_FIELD = i18n.translate(
   'xpack.securitySolution.threatMatch.threatFieldDescription',
   {
-    defaultMessage: 'Threat index field',
+    defaultMessage: 'Indicator index field',
   }
 );
 
