@@ -46,7 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const res = await PageObjects.reporting.getResponse(url);
 
         expect(res.status).to.equal(200);
-        expect(res.get('content-length')).to.equal('1598');
         expect(res.get('content-type')).to.equal('application/pdf');
         expect(res.get('content-disposition')).to.equal(
           'inline; filename="The Very Cool Workpad for PDF Tests.pdf"'
@@ -56,10 +55,123 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * PDF files include dynamic meta info such as creation date.
          * This checks only the first few thousand bytes of the Buffer
          */
-        const encodedPdf = (res.body as Buffer).toString('base64');
-        expect(encodedPdf).to.match(
-          /^JVBERi0xLjMKJf\/\/\/\/8KOSAwIG9iago8PAovVHlwZSAvRXh0R1N0YXRlCi9jYSAxCi9DQSAxCj4\+CmVuZG9iago4IDAgb2JqCjw8Ci9UeXBlIC9/
+        const pdfStrings = (res.body as Buffer).toString('utf8', 14); // start on byte 14 to skip non-ut8 data
+        const [header, , contents, , info] = pdfStrings.split('stream'); // ignore all data parts from `stream` to `endstream`
+
+        expect(header).to.be(
+          `
+9 0 obj
+<<
+/Type /ExtGState
+/ca 1
+/CA 1
+>>
+endobj
+8 0 obj
+<<
+/Type /Page
+/Parent 1 0 R
+/MediaBox [0 0 8 8]
+/Contents 6 0 R
+/Resources 7 0 R
+>>
+endobj
+7 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/ExtGState <<
+/Gs1 9 0 R
+>>
+/XObject <<
+/I1 5 0 R
+>>
+>>
+endobj
+6 0 obj
+<<
+/Length 45
+/Filter /FlateDecode
+>>
+`
         );
+        expect(contents.replace(/D:\d+Z/, 'DATESTAMP')).to.be(
+          `
+endobj
+11 0 obj
+(pdfmake)
+endobj
+12 0 obj
+(pdfmake)
+endobj
+13 0 obj
+(DATESTAMP)
+endobj
+10 0 obj
+<<
+/Producer 11 0 R
+/Creator 12 0 R
+/CreationDate 13 0 R
+>>
+endobj
+4 0 obj
+<<
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/Names 2 0 R
+>>
+endobj
+1 0 obj
+<<
+/Type /Pages
+/Count 1
+/Kids [8 0 R]
+>>
+endobj
+2 0 obj
+<<
+/Dests <<
+  /Names [
+]
+>>
+>>
+endobj
+14 0 obj
+<<
+/Type /XObject
+/Subtype /Image
+/Height 16
+/Width 16
+/BitsPerComponent 8
+/Filter /FlateDecode
+/ColorSpace /DeviceGray
+/Decode [0 1]
+/Length 12
+>>
+`
+        );
+        expect(info).to.be(
+          `
+endobj
+5 0 obj
+<<
+/Type /XObject
+/Subtype /Image
+/BitsPerComponent 8
+/Width 16
+/Height 16
+/Filter /FlateDecode
+/ColorSpace /DeviceRGB
+/SMask 14 0 R
+/Length 17
+>>
+`
+        );
+
+        expect(res.get('content-length')).to.equal('1598');
       });
     });
   });
