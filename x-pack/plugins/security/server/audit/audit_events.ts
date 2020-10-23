@@ -123,7 +123,7 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
       domain: request.url.hostname ?? undefined,
       path: pathname ?? undefined,
       port: request.url.port ? parseInt(request.url.port, 10) : undefined,
-      query: search?.slice(1) ?? undefined,
+      query: search?.slice(1) || undefined,
       scheme: request.url.protocol ?? undefined,
     },
   };
