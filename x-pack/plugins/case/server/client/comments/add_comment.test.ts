@@ -39,8 +39,8 @@ describe('addComment', () => {
       });
 
       expect(res.id).toEqual('mock-id-1');
-      expect(res.totalComment).toEqual(res.comments.length);
-      expect(res.comments[res.comments.length - 1]).toEqual({
+      expect(res.totalComment).toEqual(res.comments!.length);
+      expect(res.comments![res.comments!.length - 1]).toEqual({
         comment: 'Wow, good luck catching that bad meanie!',
         created_at: '2020-10-23T21:54:48.952Z',
         created_by: {
@@ -85,7 +85,7 @@ describe('addComment', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.addComment({
+      await caseClient.client.addComment({
         request,
         caseId: 'mock-id-1',
         comment: { comment: 'Wow, good luck catching that bad meanie!' },
@@ -137,7 +137,7 @@ describe('addComment', () => {
       });
 
       expect(res.id).toEqual('mock-id-1');
-      expect(res.comments[res.comments.length - 1]).toEqual({
+      expect(res.comments![res.comments!.length - 1]).toEqual({
         comment: 'Wow, good luck catching that bad meanie!',
         created_at: '2020-10-23T21:54:48.952Z',
         created_by: {

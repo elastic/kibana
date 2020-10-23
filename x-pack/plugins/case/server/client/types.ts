@@ -47,9 +47,3 @@ export interface CaseClient {
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
 }
-
-export interface CaseClientFactoryArguments {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
-}

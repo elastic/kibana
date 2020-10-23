@@ -7,6 +7,8 @@
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { ConnectorTypes } from '../../../../common/api';
+import { CaseClient } from '../../../client';
 import {
   createMockSavedObjectsRepository,
   createRoute,
@@ -14,8 +16,6 @@ import {
   mockCases,
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
-import { ConnectorTypes } from '../../../../common/api/connectors';
-import { CaseClient } from '../../../client';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -28,29 +28,31 @@ describe('PATCH cases', () => {
   });
 
   it(`it updates a new case`, async () => {
-    const patchResult = {
-      closed_at: '2019-11-25T21:54:48.952Z',
-      closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-      comments: [],
-      connector: {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
+    const patchResult = [
+      {
+        closed_at: '2019-11-25T21:54:48.952Z',
+        closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        comments: [],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        id: 'mock-id-1',
+        external_service: null,
+        status: 'closed' as const,
+        tags: ['defacement'],
+        title: 'Super Bad Security Issue',
+        totalComment: 0,
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        version: 'WzE3LDFd',
       },
-      created_at: '2019-11-25T21:54:48.952Z',
-      created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-      description: 'This is a brand new case of a bad meanie defacing data',
-      id: 'mock-id-1',
-      external_service: null,
-      status: 'closed',
-      tags: ['defacement'],
-      title: 'Super Bad Security Issue',
-      totalComment: 0,
-      updated_at: '2019-11-25T21:54:48.952Z',
-      updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-      version: 'WzE3LDFd',
-    };
+    ];
 
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',

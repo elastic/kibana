@@ -5,7 +5,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes, CasesPatchRequest } from '../../../common/api';
 import {
   createMockSavedObjectsRepository,
   mockCaseNoConnectorId,
@@ -190,7 +190,7 @@ describe('update', () => {
     });
 
     test('it updates the connector correctly', async () => {
-      const patchCases = {
+      const patchCases = ({
         cases: [
           {
             id: 'mock-id-3',
@@ -203,7 +203,7 @@ describe('update', () => {
             version: 'WzUsMV0=',
           },
         ],
-      };
+      } as unknown) as CasesPatchRequest;
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,

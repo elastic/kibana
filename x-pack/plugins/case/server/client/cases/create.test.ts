@@ -5,7 +5,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes, CasePostRequest } from '../../../common/api';
 
 import {
   createMockSavedObjectsRepository,
@@ -37,7 +37,7 @@ describe('create', () => {
           type: ConnectorTypes.jira,
           fields: { issueType: 'Task', priority: 'High', parent: null },
         },
-      };
+      } as CasePostRequest;
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
