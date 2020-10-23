@@ -55,8 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * PDF files include dynamic meta info such as creation date.
          * This checks only the first few thousand bytes of the Buffer
          */
-        const pdfStrings = (res.body as Buffer).toString('utf8', 14); // start on byte 14 to skip non-ut8 data
-        const [header, , contents, , info] = pdfStrings.split('stream'); // ignore all data parts from `stream` to `endstream`
+        const pdfStrings = (res.body as Buffer).toString('utf8', 14); // start on byte 14 to skip non-utf8 data
+        const [header, , contents, , info] = pdfStrings.split('stream'); // ignore everthing from `stream` to `endstream` - the non-utf8 blocks
 
         expect(header).to.be(
           `
