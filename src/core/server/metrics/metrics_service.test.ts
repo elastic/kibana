@@ -24,7 +24,6 @@ import { Subject } from 'rxjs';
 import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
-import { OpsMetrics } from './types';
 import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 
