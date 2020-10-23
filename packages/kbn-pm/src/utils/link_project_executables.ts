@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { dirname, relative, resolve, sep } from 'path';
+import { dirname, join, relative, resolve, sep } from 'path';
 
 import { chmod, createSymlink, isFile, isDirectory, mkdirp, rmdirp } from './fs';
 import { log } from './log';
@@ -89,10 +89,14 @@ export async function linkProjectExecutables(
   }
 
   // Create symlinks to rootProject/node_modules/.bin for every other project
+  const kibanaProjectPath = projectsByName.get('kibana').path;
   for (const [projectName] of projectGraph) {
     const project = projectsByName.get(projectName)!;
 
-    if (project.isSinglePackageJsonProject) {
+    if (
+      project.isSinglePackageJsonProject ||
+      project.path.includes(join(kibanaProjectPath, 'plugins'))
+    ) {
       continue;
     }
 

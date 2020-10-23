@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { join } from 'path';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -34,7 +35,7 @@ export const BootstrapCommand: ICommand = {
 
   async run(projects, projectGraph, { options, kbn }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
-
+    const kibanaProjectPath = projects.get('kibana').path;
     const extraArgs = [
       ...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []),
       ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
@@ -46,14 +47,20 @@ export const BootstrapCommand: ICommand = {
           continue;
         }
 
-        if (project.isSinglePackageJsonProject) {
+        if (
+          project.isSinglePackageJsonProject ||
+          project.path.includes(join(kibanaProjectPath, 'plugins'))
+        ) {
           await project.installDependencies({ extraArgs });
           continue;
         }
 
-        if (!project.isEveryDependencyLocal()) {
+        if (
+          !project.isEveryDependencyLocal() &&
+          !project.path.includes(join(kibanaProjectPath, 'plugins'))
+        ) {
           throw new Error(
-            `[${project.name}] is not an eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
+            `[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
           );
         }
       }

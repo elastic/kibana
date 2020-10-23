@@ -8936,14 +8936,16 @@ const commands = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BootstrapCommand", function() { return BootstrapCommand; });
-/* harmony import */ var _utils_link_project_executables__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(130);
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(246);
-/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(247);
-/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(248);
-/* harmony import */ var _utils_project_checksums__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(357);
-/* harmony import */ var _utils_bootstrap_cache_file__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(362);
-/* harmony import */ var _utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(359);
-/* harmony import */ var _utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(363);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(130);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(246);
+/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(247);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(248);
+/* harmony import */ var _utils_project_checksums__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(357);
+/* harmony import */ var _utils_bootstrap_cache_file__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(362);
+/* harmony import */ var _utils_yarn_lock__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(359);
+/* harmony import */ var _utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(363);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -8970,6 +8972,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 const BootstrapCommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
@@ -8978,7 +8981,8 @@ const BootstrapCommand = {
     options,
     kbn
   }) {
-    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projects, projectGraph);
+    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph);
+    const kibanaProjectPath = projects.get('kibana').path;
     const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])];
 
     for (const batch of batchedProjects) {
@@ -8987,27 +8991,27 @@ const BootstrapCommand = {
           continue;
         }
 
-        if (project.isSinglePackageJsonProject) {
+        if (project.isSinglePackageJsonProject || project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(kibanaProjectPath, 'plugins'))) {
           await project.installDependencies({
             extraArgs
           });
           continue;
         }
 
-        if (!project.isEveryDependencyLocal()) {
-          throw new Error(`[${project.name}] is not an eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`);
+        if (!project.isEveryDependencyLocal() && !project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(kibanaProjectPath, 'plugins'))) {
+          throw new Error(`[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`);
         }
       }
     }
 
-    const yarnLock = await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__["readYarnLock"])(kbn);
+    const yarnLock = await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_7__["readYarnLock"])(kbn);
 
     if (options.validate) {
-      await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_7__["validateDependencies"])(kbn, yarnLock);
+      await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_8__["validateDependencies"])(kbn, yarnLock);
     } // Create node_modules/bin for every project
 
 
-    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_0__["linkProjectExecutables"])(projects, projectGraph);
+    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph);
     /**
      * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
      * in the list of projects. We do this because some projects need to be
@@ -9015,17 +9019,17 @@ const BootstrapCommand = {
      * have to, as it will slow down the bootstrapping process.
      */
 
-    const checksums = await Object(_utils_project_checksums__WEBPACK_IMPORTED_MODULE_4__["getAllChecksums"])(kbn, _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"], yarnLock);
+    const checksums = await Object(_utils_project_checksums__WEBPACK_IMPORTED_MODULE_5__["getAllChecksums"])(kbn, _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"], yarnLock);
     const caches = new Map();
     let cachedProjectCount = 0;
 
     for (const project of projects.values()) {
       if (project.hasScript('kbn:bootstrap')) {
-        const file = new _utils_bootstrap_cache_file__WEBPACK_IMPORTED_MODULE_5__["BootstrapCacheFile"](kbn, project, checksums);
+        const file = new _utils_bootstrap_cache_file__WEBPACK_IMPORTED_MODULE_6__["BootstrapCacheFile"](kbn, project, checksums);
         const valid = options.cache && file.isValid();
 
         if (valid) {
-          _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].debug(`[${project.name}] cache up to date`);
+          _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].debug(`[${project.name}] cache up to date`);
           cachedProjectCount += 1;
         }
 
@@ -9037,18 +9041,18 @@ const BootstrapCommand = {
     }
 
     if (cachedProjectCount > 0) {
-      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`${cachedProjectCount} bootstrap builds are cached`);
+      _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].success(`${cachedProjectCount} bootstrap builds are cached`);
     }
 
-    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async project => {
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_3__["parallelizeBatches"])(batchedProjects, async project => {
       const cache = caches.get(project);
 
       if (cache && !cache.valid) {
-        _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`[${project.name}] running [kbn:bootstrap] script`);
+        _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].info(`[${project.name}] running [kbn:bootstrap] script`);
         cache.file.delete();
         await project.runScriptStreaming('kbn:bootstrap');
         cache.file.write();
-        _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`[${project.name}] bootstrap complete`);
+        _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].success(`[${project.name}] bootstrap complete`);
       }
     });
   }
@@ -9150,10 +9154,12 @@ async function linkProjectExecutables(projectsByName, projectGraph) {
   } // Create symlinks to rootProject/node_modules/.bin for every other project
 
 
+  const kibanaProjectPath = projectsByName.get('kibana').path;
+
   for (const [projectName] of projectGraph) {
     const project = projectsByName.get(projectName);
 
-    if (project.isSinglePackageJsonProject) {
+    if (project.isSinglePackageJsonProject || project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(kibanaProjectPath, 'plugins'))) {
       continue;
     }
 
@@ -46199,10 +46205,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(dedent__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(113);
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(131);
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(246);
-/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(251);
-/* harmony import */ var _projects_tree__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(364);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(131);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(246);
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(251);
+/* harmony import */ var _projects_tree__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(364);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -46222,6 +46230,7 @@ __webpack_require__.r(__webpack_exports__);
  * under the License.
  */
 // @ts-expect-error published types are useless
+
 
 
 
@@ -46250,8 +46259,8 @@ async function validateDependencies(kbn, yarnLock) {
       delete yarnLock[req];
     }
 
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_3__["writeFile"])(kbn.getAbsolute('yarn.lock'), Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["stringify"])(yarnLock), 'utf8');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_4__["writeFile"])(kbn.getAbsolute('yarn.lock'), Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["stringify"])(yarnLock), 'utf8');
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
 
       Multiple version of lodash v4 were detected, so they have been removed
       from the yarn.lock file. Please rerun yarn kbn bootstrap to coalese the
@@ -46270,7 +46279,7 @@ async function validateDependencies(kbn, yarnLock) {
   // of lodash v3 in the distributable
 
 
-  const prodDependencies = kbn.resolveAllProductionDependencies(yarnLock, _log__WEBPACK_IMPORTED_MODULE_4__["log"]);
+  const prodDependencies = kbn.resolveAllProductionDependencies(yarnLock, _log__WEBPACK_IMPORTED_MODULE_5__["log"]);
   const lodash3Versions = new Set();
 
   for (const dep of prodDependencies.values()) {
@@ -46281,7 +46290,7 @@ async function validateDependencies(kbn, yarnLock) {
 
 
   if (lodash3Versions.size) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
 
       Due to changes in the yarn.lock file and/or package.json files a version of
       lodash 3 is now included in the production dependencies. To reduce the size of
@@ -46302,6 +46311,11 @@ async function validateDependencies(kbn, yarnLock) {
   const depRanges = new Map();
 
   for (const project of kbn.getAllProjects().values()) {
+    // Skip if this is an external plugin
+    if (project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_3__["join"])(kbn.kibanaProject.path, 'plugins'))) {
+      continue;
+    }
+
     for (const [dep, range] of Object.entries(project.allDependencies)) {
       const existingDep = depRanges.get(dep);
 
@@ -46327,13 +46341,13 @@ async function validateDependencies(kbn, yarnLock) {
     }
   }
 
-  const duplicateRanges = Array.from(depRanges.entries()).filter(([, ranges]) => ranges.length > 1 && !ranges.every(rng => Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(rng.range))).reduce((acc, [dep, ranges]) => [...acc, dep, ...ranges.map(({
+  const duplicateRanges = Array.from(depRanges.entries()).filter(([, ranges]) => ranges.length > 1 && !ranges.every(rng => Object(_package_json__WEBPACK_IMPORTED_MODULE_6__["isLinkDependency"])(rng.range))).reduce((acc, [dep, ranges]) => [...acc, dep, ...ranges.map(({
     range,
     projects
   }) => `  ${range} => ${projects.map(p => p.name).join(', ')}`)], []).join('\n        ');
 
   if (duplicateRanges) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
 
       [single_version_dependencies] Multiple version ranges for the same dependency
       were found declared across different package.json files. Please consolidate
@@ -46354,19 +46368,19 @@ async function validateDependencies(kbn, yarnLock) {
   const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(kbn, 'kibana');
 
   if (devOnlyProjectsInProduction) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
       Some of the packages in the production dependency chain for Kibana and X-Pack are
       flagged with "kibana.devOnly" in their package.json. Please check changes made to
       packages and their dependencies to ensure they don't end up in production.
 
       The devOnly dependencies that are being dependend on in production are:
 
-        ${Object(_projects_tree__WEBPACK_IMPORTED_MODULE_6__["treeToString"])(devOnlyProjectsInProduction).split('\n').join('\n        ')}
+        ${Object(_projects_tree__WEBPACK_IMPORTED_MODULE_7__["treeToString"])(devOnlyProjectsInProduction).split('\n').join('\n        ')}
     `);
     process.exit(1);
   }
 
-  _log__WEBPACK_IMPORTED_MODULE_4__["log"].success('yarn.lock analysis completed without any issues');
+  _log__WEBPACK_IMPORTED_MODULE_5__["log"].success('yarn.lock analysis completed without any issues');
 }
 
 function getDevOnlyProductionDepsTree(kbn, projectName) {
