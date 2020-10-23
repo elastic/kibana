@@ -93,7 +93,7 @@ export function parseClientOptions(
     };
   }
 
-  clientOptions.nodes = config.hosts.map((host) => convertHost(host, !scoped, config));
+  clientOptions.nodes = config.hosts.map((host) => convertHost(host));
 
   if (config.ssl) {
     clientOptions.ssl = generateSslConfig(
@@ -140,18 +140,10 @@ const generateSslConfig = (
   return ssl;
 };
 
-const convertHost = (
-  host: string,
-  needAuth: boolean,
-  { username, password }: ElasticsearchClientConfig
-): NodeOptions => {
+const convertHost = (host: string): NodeOptions => {
   const url = new URL(host);
   const isHTTPS = url.protocol === 'https:';
   url.port = url.port || (isHTTPS ? '443' : '80');
-  if (needAuth && username && password) {
-    url.username = username;
-    url.password = password;
-  }
 
   return {
     url,
