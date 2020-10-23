@@ -8981,24 +8981,28 @@ const BootstrapCommand = {
     options,
     kbn
   }) {
+    var _projects$get;
+
     const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph);
-    const kibanaProjectPath = projects.get('kibana').path;
+    const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path;
     const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])];
 
     for (const batch of batchedProjects) {
       for (const project of batch) {
+        const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${path__WEBPACK_IMPORTED_MODULE_0__["sep"]}plugins`);
+
         if (!project.hasDependencies()) {
           continue;
         }
 
-        if (project.isSinglePackageJsonProject || project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(kibanaProjectPath, 'plugins'))) {
+        if (project.isSinglePackageJsonProject || isExternalPlugin) {
           await project.installDependencies({
             extraArgs
           });
           continue;
         }
 
-        if (!project.isEveryDependencyLocal() && !project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(kibanaProjectPath, 'plugins'))) {
+        if (!project.isEveryDependencyLocal() && !isExternalPlugin) {
           throw new Error(`[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`);
         }
       }
@@ -9105,6 +9109,8 @@ __webpack_require__.r(__webpack_exports__);
  *
  */
 async function linkProjectExecutables(projectsByName, projectGraph) {
+  var _projectsByName$get;
+
   _log__WEBPACK_IMPORTED_MODULE_2__["log"].debug(`Linking package executables`); // Find root and generate executables from dependencies for it
 
   let rootProject = null;
@@ -9154,12 +9160,13 @@ async function linkProjectExecutables(projectsByName, projectGraph) {
   } // Create symlinks to rootProject/node_modules/.bin for every other project
 
 
-  const kibanaProjectPath = projectsByName.get('kibana').path;
+  const kibanaProjectPath = (_projectsByName$get = projectsByName.get('kibana')) === null || _projectsByName$get === void 0 ? void 0 : _projectsByName$get.path;
 
   for (const [projectName] of projectGraph) {
     const project = projectsByName.get(projectName);
+    const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${path__WEBPACK_IMPORTED_MODULE_0__["sep"]}plugins`);
 
-    if (project.isSinglePackageJsonProject || project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(kibanaProjectPath, 'plugins'))) {
+    if (project.isSinglePackageJsonProject || isExternalPlugin) {
       continue;
     }
 
@@ -46311,8 +46318,10 @@ async function validateDependencies(kbn, yarnLock) {
   const depRanges = new Map();
 
   for (const project of kbn.getAllProjects().values()) {
+    var _kbn$kibanaProject;
+
     // Skip if this is an external plugin
-    if (project.path.includes(Object(path__WEBPACK_IMPORTED_MODULE_3__["join"])(kbn.kibanaProject.path, 'plugins'))) {
+    if (project.path.includes(`${(_kbn$kibanaProject = kbn.kibanaProject) === null || _kbn$kibanaProject === void 0 ? void 0 : _kbn$kibanaProject.path}${path__WEBPACK_IMPORTED_MODULE_3__["sep"]}plugins`)) {
       continue;
     }
 
