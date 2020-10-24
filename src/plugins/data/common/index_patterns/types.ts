@@ -185,6 +185,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
+  attributes?: IndexPatternAttrs;
 }
 
 export interface SourceFilter {

@@ -69,7 +69,7 @@ export const fieldList = (
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec) => {
-      const newField = new IndexPatternField({ ...field, ...{ shortDotsEnable } });
+      const newField = new IndexPatternField({ ...field, shortDotsEnable });
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);

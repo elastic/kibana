@@ -400,6 +400,7 @@ export class IndexPatternsService {
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
+    spec.attributes = savedObject.attributes.attributes;
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);

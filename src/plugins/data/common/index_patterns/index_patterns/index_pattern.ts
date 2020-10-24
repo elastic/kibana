@@ -104,8 +104,8 @@ export class IndexPattern implements IIndexPattern {
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
-
-    this.fields.replaceAll(Object.values(spec.fields || {}));
+    this.attributes = spec.attributes;
+    this.fields.replaceAll(Object.values(this.getFieldSpecs(spec.fields)));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
   }
@@ -274,15 +274,9 @@ export class IndexPattern implements IIndexPattern {
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
-    const attribFields = {} as { [key: string]: { customName: string } };
-    for (const field of this.fields) {
-      if (field.customName) {
-        attribFields[field.name] = { customName: field.customName };
-      }
-    }
 
     return {
-      attributes: Object.keys(attribFields).length ? { fields: attribFields } : undefined,
+      attributes: this.attributes,
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
@@ -321,5 +315,23 @@ export class IndexPattern implements IIndexPattern {
     if (formatSpec) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
+  }
+  /**
+   * Helper function to extend field specs with e.g. customName
+   */
+  private getFieldSpecs(specs: IndexPatternSpec | undefined) {
+    if (!specs) {
+      return {};
+    }
+    if (!this.attributes?.fields) {
+      return specs;
+    }
+
+    for (const key of Object.keys(this.attributes?.fields)) {
+      if (specs[key] && this.attributes.fields[key].customName) {
+        specs[key].customName = this.attributes.fields[key].customName;
+      }
+    }
+    return specs;
   }
 }

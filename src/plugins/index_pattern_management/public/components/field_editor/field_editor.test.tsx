@@ -223,7 +223,7 @@ describe('FieldEditor', () => {
       Object {
         "fields": Object {
           "test": Object {
-            "customName": "Test",
+            "customName": "new Test",
           },
         },
       }
