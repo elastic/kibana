@@ -14,6 +14,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
+  const VALIDATED_SEPARATELY = 'this value is not validated directly';
+
   describe('Validate job', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
@@ -33,7 +35,13 @@ export default ({ getService }: FtrProviderContext) => {
           groups: [],
           analysis_config: {
             bucket_span: '15m',
-            detectors: [{ function: 'mean', field_name: 'products.discount_amount' }],
+            detectors: [
+              {
+                function: 'mean',
+                field_name: 'products.discount_amount',
+                exclude_frequent: 'none',
+              },
+            ],
             influencers: [],
             summary_count_field_name: 'doc_count',
           },
@@ -234,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
       });
 
-      expect(body).to.eql([
+      const expectedResponse = [
         {
           id: 'job_id_valid',
           heading: 'Job ID format is valid',
@@ -252,10 +260,9 @@ export default ({ getService }: FtrProviderContext) => {
         },
         {
           id: 'cardinality_model_plot_high',
-          modelPlotCardinality: 4711,
-          text:
-            'The estimated cardinality of 4711 of fields relevant to creating model plots might result in resource intensive jobs.',
-          status: 'warning',
+          modelPlotCardinality: VALIDATED_SEPARATELY,
+          text: VALIDATED_SEPARATELY,
+          status: VALIDATED_SEPARATELY,
         },
         {
           id: 'cardinality_partition_field',
@@ -296,7 +303,32 @@ export default ({ getService }: FtrProviderContext) => {
           url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#model-memory-limits`,
           status: 'warning',
         },
-      ]);
+      ];
+
+      expect(body.length).to.eql(
+        expectedResponse.length,
+        `Response body should have ${expectedResponse.length} entries (got ${body})`
+      );
+      for (const entry of expectedResponse) {
+        const responseEntry = body.find((obj: any) => obj.id === entry.id);
+        expect(responseEntry).to.not.eql(
+          undefined,
+          `Response entry with id '${entry.id}' should exist`
+        );
+
+        if (entry.id === 'cardinality_model_plot_high') {
+          // don't check the exact value of modelPlotCardinality as this is an approximation
+          expect(responseEntry).to.have.property('modelPlotCardinality');
+          expect(responseEntry)
+            .to.have.property('text')
+            .match(
+              /^The estimated cardinality of [0-9]+ of fields relevant to creating model plots might result in resource intensive jobs./
+            );
+          expect(responseEntry).to.have.property('status', 'warning');
+        } else {
+          expect(responseEntry).to.eql(entry);
+        }
+      }
     });
 
     it('should not validate configuration in case request payload is invalid', async () => {

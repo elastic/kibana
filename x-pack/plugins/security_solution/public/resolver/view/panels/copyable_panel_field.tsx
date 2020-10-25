@@ -6,11 +6,11 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiToolTip, EuiPopover } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React, { memo, useState } from 'react';
-import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
+import React, { memo, useState, useCallback } from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useColors } from '../use_colors';
 import { StyledPanel } from '../styles';
 
@@ -43,8 +43,10 @@ export const CopyablePanelField = memo(
   ({ textToCopy, content }: { textToCopy: string; content: JSX.Element | string }) => {
     const { linkColor, copyableFieldBackground } = useColors();
     const [isOpen, setIsOpen] = useState(false);
+    const toasts = useKibana().services.notifications?.toasts;
 
     const onMouseEnter = () => setIsOpen(true);
+    const onMouseLeave = () => setIsOpen(false);
 
     const ButtonContent = memo(() => (
       <StyledCopyableField
@@ -57,7 +59,22 @@ export const CopyablePanelField = memo(
       </StyledCopyableField>
     ));
 
-    const onMouseLeave = () => setIsOpen(false);
+    const onClick = useCallback(
+      async (event: React.MouseEvent<HTMLButtonElement>) => {
+        try {
+          await navigator.clipboard.writeText(textToCopy);
+        } catch (error) {
+          if (toasts) {
+            toasts.addError(error, {
+              title: i18n.translate('xpack.securitySolution.resolver.panel.copyFailureTitle', {
+                defaultMessage: 'Copy Failure',
+              }),
+            });
+          }
+        }
+      },
+      [textToCopy, toasts]
+    );
 
     return (
       <div onMouseLeave={onMouseLeave}>
@@ -74,10 +91,14 @@ export const CopyablePanelField = memo(
               defaultMessage: 'Copy to Clipboard',
             })}
           >
-            <WithCopyToClipboard
-              data-test-subj="resolver:panel:copy-to-clipboard"
-              text={textToCopy}
-              titleSummary={textToCopy}
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.securitySolution.resolver.panel.copyToClipboard', {
+                defaultMessage: 'Copy to Clipboard',
+              })}
+              color="text"
+              data-test-subj="resolver:panel:clipboard"
+              iconType="copyClipboard"
+              onClick={onClick}
             />
           </EuiToolTip>
         </EuiPopover>

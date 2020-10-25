@@ -2,7 +2,7 @@
 [[canvas-tutorial]]
 == Tutorial: Create a workpad for monitoring sales
 
-To get up and running with Canvas, use the following tutorial where you'll create a workpad for monitoring sales at an eCommerce store.
+To get up and running with Canvas, add the Sample eCommerce orders data, then use the data to create a workpad for monitoring sales at an eCommerce store.
 
 [float]
 === Before you begin
@@ -14,7 +14,7 @@ For this tutorial, you'll need to add the <<add-sample-data, Sample eCommerce or
 
 Your first step to working with Canvas is to create a workpad.
 
-. Open the menu, then go to *Canvas*.
+. Open the main menu, then click *Canvas*.
 
 . On the *Canvas workpads* page, click *Create workpad*.
 
@@ -114,18 +114,16 @@ image::images/canvas-timefilter-element.png[Image showing Canvas workpad with fi
 
 To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the elements automatically update.
 
-Your workpad is now complete!
+Your workpad is complete!
 
 [float]
-=== Next steps
+=== What's next?
 Now that you know the Canvas basics, you're ready to explore on your own.
 
 Here are some things to try:
 
 * Play with the {kibana-ref}/add-sample-data.html[sample Canvas workpads].
 
-* Build presentations of your own live data with <<create-workpads,workpads>>.
-
-* Learn more about <<add-canvas-elements,elements>> &mdash; the building blocks of your workpad.
+* Build presentations of your own data with <<create-workpads,workpads>>.
 
 * Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.

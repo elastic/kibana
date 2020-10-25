@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const DATA_UNDEFINED_LABEL = i18n.translate(
+  'xpack.apm.rum.coreVitals.dataUndefined',
+  {
+    defaultMessage: 'N/A',
+  }
+);
+
 export const FCP_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
   defaultMessage: 'First contentful paint',
 });

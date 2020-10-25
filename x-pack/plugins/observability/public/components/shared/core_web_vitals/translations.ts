@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const NO_DATA = i18n.translate('xpack.observability.ux.coreVitals.noData', {
+  defaultMessage: 'No data is available.',
+});
+
 export const LCP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.lcp', {
   defaultMessage: 'Largest contentful paint',
 });
@@ -51,4 +55,27 @@ export const MORE_LABEL = i18n.translate('xpack.observability.ux.coreVitals.more
 
 export const LESS_LABEL = i18n.translate('xpack.observability.ux.coreVitals.less', {
   defaultMessage: 'less',
+});
+
+export const IS_LABEL = i18n.translate('xpack.observability.ux.coreVitals.is', {
+  defaultMessage: 'is',
+});
+
+export const TAKES_LABEL = i18n.translate('xpack.observability.ux.coreVitals.takes', {
+  defaultMessage: 'takes',
+});
+
+export const LCP_HELP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.lcp.help', {
+  defaultMessage:
+    'Largest contentful paint measures loading performance. To provide a good user experience, LCP should occur within 2.5 seconds of when the page first starts loading.',
+});
+
+export const FID_HELP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.fid.help', {
+  defaultMessage:
+    'First input delay measures interactivity. To provide a good user experience, pages should have a FID of less than 100 milliseconds.',
+});
+
+export const CLS_HELP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.cls.help', {
+  defaultMessage:
+    'Cumulative Layout Shift (CLS): measures visual stability. To provide a good user experience, pages should maintain a CLS of less than 0.1.',
 });

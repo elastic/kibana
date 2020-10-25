@@ -33,7 +33,6 @@ import {
 
 import {
   FEATURE_IMPORTANCE,
-  FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
@@ -112,10 +111,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
         schema = NON_AGGREGATABLE;
     }
 
-    if (
-      field === `${resultsField}.${OUTLIER_SCORE}` ||
-      field.includes(`${resultsField}.${FEATURE_INFLUENCE}`)
-    ) {
+    if (field === `${resultsField}.${OUTLIER_SCORE}`) {
       schema = 'numeric';
     }
 
@@ -203,19 +199,24 @@ export const useRenderCellValue = (
       }
 
       function getCellValue(cId: string) {
-        if (cId.includes(`.${FEATURE_INFLUENCE}.`) && resultsField !== undefined) {
-          const results = getNestedProperty(tableItems[adjustedRowIndex], resultsField, null);
-          return results[cId.replace(`${resultsField}.`, '')];
+        if (tableItems.hasOwnProperty(adjustedRowIndex)) {
+          const item = tableItems[adjustedRowIndex];
+
+          // Try if the field name is available as is.
+          if (item.hasOwnProperty(cId)) {
+            return item[cId];
+          }
+
+          // Try if the field name is available as a nested field.
+          return getNestedProperty(tableItems[adjustedRowIndex], cId, null);
         }
 
-        return tableItems.hasOwnProperty(adjustedRowIndex)
-          ? getNestedProperty(tableItems[adjustedRowIndex], cId, null)
-          : null;
+        return null;
       }
 
       const cellValue = getCellValue(columnId);
 
-      // React by default doesn't all us to use a hook in a callback.
+      // React by default doesn't allow us to use a hook in a callback.
       // However, this one will be passed on to EuiDataGrid and its docs
       // recommend wrapping `setCellProps` in a `useEffect()` hook
       // so we're ignoring the linting rule here.

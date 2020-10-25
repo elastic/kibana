@@ -20,16 +20,16 @@ and more &mdash; all from the convenience of a {kib} UI.
 document discovery to SIEM, {kib} is the portal for accessing these and other capabilities.
 
 [role="screenshot"]
-image::images/intro-kibana.png[]
+image::images/intro-kibana.png[Kibana home page]
 
 [float]
 [[get-data-into-kibana]]
-=== Add data
+=== Ingest data
 
-{kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
+{kib} is designed to use {es} as a data source. Think of {es} as the engine that stores
 and processes the data, with {kib} sitting on top.
 
-From the home page, {kib} provides these options for adding data:
+From the home page, {kib} provides these options for ingesting data:
 
 * Import data using the
 https://www.elastic.co/blog/importing-csv-and-log-data-into-elasticsearch-with-file-data-visualizer[File Data visualizer].
@@ -60,7 +60,7 @@ search for hidden insights and relationships. Ask your questions, and then
 narrow the results to just the data you want.
 
 [role="screenshot"]
-image::images/intro-discover.png[]
+image::images/intro-discover.png[Discover UI]
 
 [float]
 [[visualize-and-analyze]]
@@ -79,7 +79,7 @@ use <<dashboard, Dashboard>> to collect them in one place. A dashboard provides
 insights into your data from multiple perspectives.
 
 [role="screenshot"]
-image::images/intro-dashboard.png[]
+image::images/intro-dashboard.png[Sample eCommerce data set dashboard]
 
 {kib} also offers these visualization features:
 
@@ -155,6 +155,5 @@ and start exploring data in minutes.
 You can also <<install, install {kib} on your own>> &mdash; no code, no additional
 infrastructure required.
 
-Our <<create-your-own-dashboard, Getting Started>> and in-product guidance can
-help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[]
-in the top navigation bar for help with questions or to provide feedback.
+Our <<get-started, Quick start>> and in-product guidance can
+help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[Help icon in navigation bar] for help with questions or to provide feedback.

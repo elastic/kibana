@@ -7,25 +7,29 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
-import { ADMIN, PRIVATE } from './constants';
+import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
+import {
+  FlashMessagesLogic,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
+import { AppLogic } from '../../app_logic';
+
 import { IMeta } from '../../../../../common/types';
-import { flashAPIErrors } from '../../../shared/flash_messages';
 import { IEngine } from '../../types';
 import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
 const defaultApiToken: IApiToken = {
   name: '',
-  type: PRIVATE,
+  type: ApiTokenTypes.Private,
   read: true,
   write: true,
   access_all_engines: true,
 };
 
-// TODO CREATE_MESSAGE, UPDATE_MESSAGE, and DELETE_MESSAGE from ent-search
-
-export interface ICredentialsLogicActions {
+interface ICredentialsLogicActions {
   addEngineName(engineName: string): string;
   onApiKeyDelete(tokenName: string): string;
   onApiTokenCreateSuccess(apiToken: IApiToken): IApiToken;
@@ -46,9 +50,11 @@ export interface ICredentialsLogicActions {
   fetchCredentials(page?: number): number;
   fetchDetails(): { value: boolean };
   deleteApiKey(tokenName: string): string;
+  onApiTokenChange(): void;
+  onEngineSelect(engineName: string): string;
 }
 
-export interface ICredentialsLogicValues {
+interface ICredentialsLogicValues {
   activeApiToken: IApiToken;
   activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
@@ -79,10 +85,7 @@ export const CredentialsLogic = kea<
     setCredentialsData: (meta, apiTokens) => ({ meta, apiTokens }),
     setCredentialsDetails: (details) => details,
     setNameInputBlurred: (nameInputBlurred) => nameInputBlurred,
-    setTokenReadWrite: ({ name, checked }) => ({
-      name,
-      checked,
-    }),
+    setTokenReadWrite: ({ name, checked }) => ({ name, checked }),
     setTokenName: (name) => name,
     setTokenType: (tokenType) => tokenType,
     showCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
@@ -92,6 +95,8 @@ export const CredentialsLogic = kea<
     fetchCredentials: (page) => page,
     fetchDetails: true,
     deleteApiKey: (tokenName) => tokenName,
+    onApiTokenChange: () => null,
+    onEngineSelect: (engineName) => engineName,
   }),
   reducers: () => ({
     apiTokens: [
@@ -164,11 +169,12 @@ export const CredentialsLogic = kea<
         }),
         setTokenType: (activeApiToken, tokenType) => ({
           ...activeApiToken,
-          access_all_engines: tokenType === ADMIN ? false : activeApiToken.access_all_engines,
-          engines: tokenType === ADMIN ? [] : activeApiToken.engines,
-          write: tokenType === PRIVATE,
-          read: tokenType === PRIVATE,
-          type: tokenType,
+          access_all_engines:
+            tokenType === ApiTokenTypes.Admin ? false : activeApiToken.access_all_engines,
+          engines: tokenType === ApiTokenTypes.Admin ? [] : activeApiToken.engines,
+          write: tokenType === ApiTokenTypes.Private,
+          read: tokenType === ApiTokenTypes.Private,
+          type: tokenType as ApiTokenTypes,
         }),
         showCredentialsForm: (_, activeApiToken) => activeApiToken,
       },
@@ -203,7 +209,11 @@ export const CredentialsLogic = kea<
     ],
   }),
   selectors: ({ selectors }) => ({
-    // TODO fullEngineAccessChecked from ent-search
+    fullEngineAccessChecked: [
+      () => [AppLogic.selectors.myRole, selectors.activeApiToken],
+      (myRole, activeApiToken) =>
+        !!(myRole.canAccessAllEngines && activeApiToken.access_all_engines),
+    ],
     dataLoading: [
       () => [selectors.isCredentialsDetailsComplete, selectors.isCredentialsDataComplete],
       (isCredentialsDetailsComplete, isCredentialsDataComplete) => {
@@ -216,6 +226,9 @@ export const CredentialsLogic = kea<
     ],
   }),
   listeners: ({ actions, values }) => ({
+    showCredentialsForm: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
     initializeCredentialsData: () => {
       actions.fetchCredentials();
       actions.fetchDetails();
@@ -246,11 +259,50 @@ export const CredentialsLogic = kea<
         await http.delete(`/api/app_search/credentials/${tokenName}`);
 
         actions.onApiKeyDelete(tokenName);
+        setSuccessMessage(DELETE_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
     },
-    // TODO onApiTokenChange from ent-search
-    // TODO onEngineSelect from ent-search
+    onApiTokenChange: async () => {
+      const { id, name, engines, type, read, write } = values.activeApiToken;
+
+      const data: IApiToken = {
+        name,
+        type,
+      };
+      if (type === ApiTokenTypes.Private) {
+        data.read = read;
+        data.write = write;
+      }
+      if (type !== ApiTokenTypes.Admin) {
+        data.access_all_engines = values.fullEngineAccessChecked;
+        data.engines = engines;
+      }
+
+      try {
+        const { http } = HttpLogic.values;
+        const body = JSON.stringify(data);
+
+        if (id) {
+          const response = await http.put(`/api/app_search/credentials/${name}`, { body });
+          actions.onApiTokenUpdateSuccess(response);
+          setSuccessMessage(UPDATE_MESSAGE);
+        } else {
+          const response = await http.post('/api/app_search/credentials', { body });
+          actions.onApiTokenCreateSuccess(response);
+          setSuccessMessage(CREATE_MESSAGE);
+        }
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    onEngineSelect: (engineName: string) => {
+      if (values.activeApiToken?.engines?.includes(engineName)) {
+        actions.removeEngineName(engineName);
+      } else {
+        actions.addEngineName(engineName);
+      }
+    },
   }),
 });

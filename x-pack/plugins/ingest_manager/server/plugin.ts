@@ -14,6 +14,8 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
   SavedObjectsClientContract,
+  RequestHandlerContext,
+  KibanaRequest,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
@@ -112,7 +114,11 @@ const allSavedObjectTypes = [
  */
 export type ExternalCallback = [
   'packagePolicyCreate',
-  (newPackagePolicy: NewPackagePolicy) => Promise<NewPackagePolicy>
+  (
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ) => Promise<NewPackagePolicy>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
@@ -181,9 +187,7 @@ export class IngestManagerPlugin
       deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
         name: 'Ingest Manager',
-        icon: 'savedObjectsApp',
         category: DEFAULT_APP_CATEGORIES.management,
-        navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
         catalogue: ['ingestManager'],
         privileges: {
