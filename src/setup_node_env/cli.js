@@ -17,5 +17,9 @@
  * under the License.
  */
 
-require('../setup_node_env/cli');
-require('./cli_keystore');
+// The following require statements MUST be executed before any others - BEGIN
+require('./exit_on_warning');
+require('./harden');
+// The following require statements MUST be executed before any others - END
+
+require('./node_version_validator');

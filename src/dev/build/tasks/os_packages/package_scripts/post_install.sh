@@ -36,8 +36,10 @@ case $1 in
     fi
 
     set_access
+    PACKAGE=deb
   ;;
   abort-deconfigure|abort-upgrade|abort-remove)
+    PACKAGE=deb
   ;;
 
   # Red Hat
@@ -56,6 +58,7 @@ case $1 in
     fi
 
     set_access
+    PACKAGE=rpm
   ;;
 
   *)
@@ -67,5 +70,15 @@ esac
 if [ "$IS_UPGRADE" = "true" ]; then
   if command -v systemctl >/dev/null; then
       systemctl daemon-reload
+  fi
+fi
+
+# the equivalent code for rpm is in posttrans
+if [ "$PACKAGE" = "deb" ]; then
+  if [ ! -f "${KBN_PATH_CONF}"/kibana.keystore ]; then
+      /usr/share/kibana/bin/kibana-keystore create
+      chown root:<%= group %> "${KBN_PATH_CONF}"/kibana.keystore
+      chmod 660 "${KBN_PATH_CONF}"/kibana.keystore
+      md5sum "${KBN_PATH_CONF}"/kibana.keystore > "${KBN_PATH_CONF}"/.kibana.keystore.initial_md5sum
   fi
 fi
