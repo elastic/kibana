@@ -57,6 +57,7 @@ export interface TelemetryOptInStats {
 export interface BaseStatsGetterConfig {
   unencrypted: boolean;
   timestamp: number;
+  request?: KibanaRequest;
 }
 
 export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {

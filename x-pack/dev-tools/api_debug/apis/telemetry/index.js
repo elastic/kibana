@@ -7,8 +7,8 @@
 import moment from 'moment';
 
 export const name = 'telemetry';
-export const description = 'Get the clusters stats for the last 1 hour from the Kibana server';
+export const description = 'Get the clusters stats from the Kibana server';
 export const method = 'POST';
 export const path = '/api/telemetry/v2/clusters/_stats';
 
-export const body = { timeRange: moment.now(), unencrypted: true };
+export const body = { timeRange: moment().valueOf(), unencrypted: true };
