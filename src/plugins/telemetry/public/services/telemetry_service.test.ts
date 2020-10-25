@@ -18,42 +18,30 @@
  */
 
 /* eslint-disable dot-notation */
-import { mockTelemetryService } from '../mocks';
-
-const mockSubtract = jest.fn().mockImplementation(() => {
-  return {
-    toISOString: jest.fn(),
-  };
-});
-
-const mockClone = jest.fn().mockImplementation(() => {
-  return {
-    clone: mockClone,
-    subtract: mockSubtract,
-    toISOString: jest.fn(),
-  };
-});
+const mockMomentValueOf = jest.fn();
 
 jest.mock('moment', () => {
   return jest.fn().mockImplementation(() => {
     return {
-      clone: mockClone,
-      subtract: mockSubtract,
-      toISOString: jest.fn(),
+      valueOf: mockMomentValueOf,
     };
   });
 });
 
+import { mockTelemetryService } from '../mocks';
+
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {
+      const timestamp = Date.now();
+      mockMomentValueOf.mockReturnValueOnce(timestamp);
       const telemetryService = mockTelemetryService();
+
       await telemetryService.fetchTelemetry();
       expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({ unencrypted: false, timeRange: {} }),
+        body: JSON.stringify({ unencrypted: false, timestamp }),
       });
-      expect(mockClone).toBeCalled();
-      expect(mockSubtract).toBeCalledWith(20, 'minutes');
+      expect(mockMomentValueOf).toBeCalled();
     });
   });
 

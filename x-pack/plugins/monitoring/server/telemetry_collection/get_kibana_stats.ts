@@ -177,8 +177,8 @@ export function ensureTimeSpan(
 export async function getKibanaStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   maxBucketSize: number
 ) {
   const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);

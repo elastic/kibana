@@ -11,14 +11,4 @@ export const description = 'Get the clusters stats for the last 1 hour from the 
 export const method = 'POST';
 export const path = '/api/telemetry/v2/clusters/_stats';
 
-// Get an object with start and end times for the last 1 hour, ISO format, in UTC
-function getTimeRange() {
-  const end = moment();
-  const start = moment(end).subtract(1, 'hour');
-  return {
-    min: moment.utc(start).format(),
-    max: moment.utc(end).format(),
-  };
-}
-
-export const body = { timeRange: getTimeRange(), unencrypted: true };
+export const body = { timeRange: moment.now(), unencrypted: true };
