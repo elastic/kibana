@@ -21,7 +21,7 @@ export type DroppableEvent = React.DragEvent<HTMLElement>;
 export type DropHandler = (item: unknown) => void;
 
 /**
- * A function that handles a drop event.
+ * A function that handles a dropTo event.
  */
 export type DropToHandler = (dropTargetId: string) => void;
 

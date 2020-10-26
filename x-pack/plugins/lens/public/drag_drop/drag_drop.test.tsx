@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, mount } from 'enzyme';
-import { DragDrop, ReorderableDragDrop } from './drag_drop';
+import { DragDrop, ReorderableDragDrop, DropToHandler, DropHandler } from './drag_drop';
 import { ChildDragDropProvider, ReorderProvider } from './providers';
 
 jest.useFakeTimers();
@@ -197,9 +197,10 @@ describe('DragDrop', () => {
   describe('reordering', () => {
     const mountComponent = (
       dragging: { id: '1' } | undefined,
-      onDrop: (e: React.DragEvent<HTMLElement>) => void
-    ) => {
-      return mount(
+      onDrop: DropHandler = jest.fn(),
+      dropTo: DropToHandler = jest.fn()
+    ) =>
+      mount(
         <ChildDragDropProvider
           dragging={{ id: '1' }}
           setDragging={() => {
@@ -216,8 +217,9 @@ describe('DragDrop', () => {
               itemsInGroup={['1', '2', '3']}
               value={{ id: '1' }}
               onDrop={onDrop}
+              dropTo={dropTo}
             >
-              <div />
+              <span>1</span>
             </DragDrop>
             <DragDrop
               label="2"
@@ -230,8 +232,9 @@ describe('DragDrop', () => {
                 id: '2',
               }}
               onDrop={onDrop}
+              dropTo={dropTo}
             >
-              <div />
+              <span>2</span>
             </DragDrop>
             <DragDrop
               label="3"
@@ -244,18 +247,18 @@ describe('DragDrop', () => {
                 id: '3',
               }}
               onDrop={onDrop}
+              dropTo={dropTo}
             >
-              <div />
+              <span>3</span>
             </DragDrop>
           </ReorderProvider>
         </ChildDragDropProvider>
       );
-    };
     test(`ReorderableDragDrop component doesn't appear for groups of 1 or less`, () => {
       let dragging;
       const component = mount(
         <ChildDragDropProvider
-          dragging={undefined}
+          dragging={dragging}
           setDragging={() => {
             dragging = { id: '1' };
           }}
@@ -270,6 +273,7 @@ describe('DragDrop', () => {
               itemsInGroup={['1']}
               value={{ id: '1' }}
               onDrop={jest.fn()}
+              dropTo={jest.fn()}
             >
               <div />
             </DragDrop>
@@ -330,39 +334,36 @@ describe('DragDrop', () => {
       expect(onDrop).toBeCalledWith({ id: '1' });
     });
     test(`Keyboard navigation: user can reorder an element`, () => {
-      const component = mountComponent(undefined, jest.fn());
-      const dataTransfer = {
-        setData: jest.fn(),
-        getData: jest.fn(),
-      };
-      component
+      const onDrop = jest.fn();
+      const dropTo = jest.fn();
+      const component = mountComponent({ id: '1' }, onDrop, dropTo);
+      const keyboardHandler = component
         .find(ReorderableDragDrop)
-        .first()
-        .find('[data-test-subj="lnsDragDrop"]')
-        .simulate('dragstart', { dataTransfer });
-      jest.runAllTimers();
+        .at(1)
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
 
-      component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragover');
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(0).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
-      );
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable--up lnsDragDrop-isReorderable'
-      );
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable--up lnsDragDrop-isReorderable'
-      );
+      keyboardHandler.simulate('keydown', { key: 'Enter' });
+      keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
+      expect(dropTo).toBeCalledWith('3');
 
-      component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragleave');
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
-      );
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
-      );
+      keyboardHandler.simulate('keydown', { key: 'ArrowUp' });
+      expect(dropTo).toBeCalledWith('1');
     });
     test(`Keyboard Navigation: User cannot move an element outside of the group`, () => {
-      const component = mountComponent({ id: '1' }, jest.fn());
+      const onDrop = jest.fn();
+      const dropTo = jest.fn();
+      const component = mountComponent({ id: '1' }, onDrop, dropTo);
+      const keyboardHandler = component
+        .find(ReorderableDragDrop)
+        .first()
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+
+      keyboardHandler.simulate('keydown', { key: 'Enter' });
+      keyboardHandler.simulate('keydown', { key: 'ArrowUp' });
+      expect(dropTo).not.toHaveBeenCalled();
+
+      keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
+      expect(dropTo).toBeCalledWith('2');
     });
   });
 });
