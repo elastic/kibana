@@ -45,7 +45,7 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed(EditPolicy, testBedConfig);
 
-export interface EditPolicyTestBed extends TestBed<TestSubjects> {
+export interface EditPolicyTestBed extends TestBed<TestSubjects | string> {
   actions: {
     setWaitForSnapshotPolicy: (snapshotPolicyName: string) => void;
     savePolicy: () => void;
