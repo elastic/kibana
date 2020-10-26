@@ -5,7 +5,7 @@
  */
 
 import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
-import { Logger } from '../types';
+import { Logger } from '../../../../../src/core/server';
 
 export function ensureDeprecatedFieldsAreCorrected(
   { id, taskType, interval, schedule, ...taskInstance }: TaskInstanceWithDeprecatedFields,

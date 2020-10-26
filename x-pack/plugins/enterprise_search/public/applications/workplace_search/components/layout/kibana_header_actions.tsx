@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
@@ -14,10 +14,17 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
 
   return (
-    <EuiButtonEmpty href={getWorkplaceSearchUrl('/search')} target="_blank" iconType="search">
-      {i18n.translate('xpack.enterpriseSearch.workplaceSearch.headerActions.searchApplication', {
-        defaultMessage: 'Go to search application',
-      })}
+    <EuiButtonEmpty
+      href={getWorkplaceSearchUrl('/search')}
+      target="_blank"
+      iconType="search"
+      style={{ marginRight: 5 }}
+    >
+      <EuiText size="s">
+        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.headerActions.searchApplication', {
+          defaultMessage: 'Go to search application',
+        })}
+      </EuiText>
     </EuiButtonEmpty>
   );
 };

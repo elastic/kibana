@@ -10,6 +10,23 @@ export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
 
+export const DEFAULT_POLICY: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: '',
+    phases: {
+      hot: {
+        min_age: '123ms',
+        actions: {
+          rollover: {},
+        },
+      },
+    },
+  },
+  name: '',
+};
+
 export const DELETE_PHASE_POLICY: PolicyFromES = {
   version: 1,
   modified_date: Date.now().toString(),
@@ -19,7 +36,11 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
         min_age: '0ms',
         actions: {
           rollover: {
+            max_age: '30d',
             max_size: '50gb',
+          },
+          set_priority: {
+            priority: 100,
           },
         },
       },

@@ -92,13 +92,11 @@ export class SampleTaskManagerFixturePlugin
     taskManager.registerTaskDefinitions({
       sampleTask: {
         ...defaultSampleTaskConfig,
-        type: 'sampleTask',
         title: 'Sample Task',
         description: 'A sample task for testing the task_manager.',
       },
       singleAttemptSampleTask: {
         ...defaultSampleTaskConfig,
-        type: 'singleAttemptSampleTask',
         title: 'Failing Sample Task',
         description:
           'A sample task for testing the task_manager that fails on the first attempt to run.',

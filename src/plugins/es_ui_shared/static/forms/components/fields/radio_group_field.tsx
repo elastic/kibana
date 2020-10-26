@@ -39,8 +39,8 @@ export const RadioGroupField = ({ field, euiFieldProps = {}, ...rest }: Props) =
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      {...rest}
     >
       <EuiRadioGroup
         idSelected={field.value as string}

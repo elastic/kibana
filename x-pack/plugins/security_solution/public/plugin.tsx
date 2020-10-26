@@ -85,7 +85,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _store?: SecurityAppStore;
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
-    initTelemetry(plugins.usageCollection, APP_ID);
+    initTelemetry(
+      {
+        usageCollection: plugins.usageCollection,
+        telemetryManagementSection: plugins.telemetryManagementSection,
+      },
+      APP_ID
+    );
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({

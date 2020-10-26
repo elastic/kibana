@@ -15,7 +15,6 @@ import {
 } from '../../../../common/components/charts/common';
 import { InspectQuery } from '../../../../common/store/inputs/model';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { hasEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
 import { inputsModel } from '../../../../common/store';
 import { PreviewHistogram } from './histogram';
 
@@ -26,7 +25,6 @@ interface PreviewEqlQueryHistogramProps {
   from: string;
   totalCount: number;
   isLoading: boolean;
-  query: string;
   data: ChartData[];
   inspect: InspectQuery;
   refetch: inputsModel.Refetch;
@@ -36,7 +34,6 @@ export const PreviewEqlQueryHistogram = ({
   from,
   to,
   totalCount,
-  query,
   data,
   inspect,
   refetch,
@@ -50,14 +47,11 @@ export const PreviewEqlQueryHistogram = ({
     }
   }, [setQuery, inspect, isInitializing, refetch]);
 
-  const barConfig = useMemo(
-    (): ChartSeriesConfigs => getHistogramConfig(to, from, hasEqlSequenceQuery(query)),
-    [from, to, query]
-  );
+  const barConfig = useMemo((): ChartSeriesConfigs => getHistogramConfig(to, from), [from, to]);
 
   const subtitle = useMemo(
     (): string =>
-      isLoading ? i18n.PREVIEW_SUBTITLE_LOADING : i18n.QUERY_PREVIEW_TITLE(totalCount),
+      isLoading ? i18n.QUERY_PREVIEW_SUBTITLE_LOADING : i18n.QUERY_PREVIEW_TITLE(totalCount),
     [isLoading, totalCount]
   );
 
@@ -70,7 +64,7 @@ export const PreviewEqlQueryHistogram = ({
       barConfig={barConfig}
       title={i18n.QUERY_GRAPH_HITS_TITLE}
       subtitle={subtitle}
-      disclaimer={i18n.PREVIEW_QUERY_DISCLAIMER_EQL}
+      disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER_EQL}
       isLoading={isLoading}
       data-test-subj="queryPreviewEqlHistogram"
     />
