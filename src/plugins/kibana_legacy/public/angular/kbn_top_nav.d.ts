@@ -17,6 +17,15 @@
  * under the License.
  */
 
-export function createTopNavDirective(): unknown;
-export const createTopNavHelper: (options: unknown) => (reactDirective: unknown) => unknown;
+import { Injectable, IDirectiveFactory, IScope, IAttributes, IController } from 'angular';
+
+export const createTopNavDirective: Injectable<IDirectiveFactory<
+  IScope,
+  JQLite,
+  IAttributes,
+  IController
+>>;
+export const createTopNavHelper: (
+  options: unknown
+) => Injectable<IDirectiveFactory<IScope, JQLite, IAttributes, IController>>;
 export function loadKbnTopNavDirectives(navUi: unknown): void;
