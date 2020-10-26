@@ -44,8 +44,8 @@ export const SelectField = ({ field, euiFieldProps, ...rest }: Props) => {
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      {...rest}
     >
       <EuiSelect
         fullWidth

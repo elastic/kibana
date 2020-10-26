@@ -25,25 +25,24 @@ export function updateColumnParam<C extends IndexPatternColumn, K extends keyof 
     ([_columnId, column]) => column === currentColumn
   )![0];
 
-  return {
-    ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: {
-        ...state.layers[layerId],
-        columns: {
-          ...state.layers[layerId].columns,
-          [columnId]: {
-            ...currentColumn,
-            params: {
-              ...currentColumn.params,
-              [paramName]: value,
-            },
+  const layer = state.layers[layerId];
+
+  return mergeLayer({
+    state,
+    layerId,
+    newLayer: {
+      columns: {
+        ...layer.columns,
+        [columnId]: {
+          ...currentColumn,
+          params: {
+            ...currentColumn.params,
+            [paramName]: value,
           },
         },
       },
     },
-  };
+  });
 }
 
 function adjustColumnReferencesForChangedColumn(
@@ -91,25 +90,29 @@ export function changeColumn<C extends IndexPatternColumn>({
     updatedColumn.label = oldColumn.label;
   }
 
+  const layer = {
+    ...state.layers[layerId],
+  };
+
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
-      ...state.layers[layerId].columns,
+      ...layer.columns,
       [columnId]: updatedColumn,
     },
     columnId
   );
 
-  return {
-    ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: {
-        ...state.layers[layerId],
-        columnOrder: getColumnOrder(newColumns),
+  return mergeLayer({
+    state,
+    layerId,
+    newLayer: {
+      columnOrder: getColumnOrder({
+        ...layer,
         columns: newColumns,
-      },
+      }),
+      columns: newColumns,
     },
-  };
+  });
 }
 
 export function deleteColumn({
@@ -125,24 +128,26 @@ export function deleteColumn({
   delete hypotheticalColumns[columnId];
 
   const newColumns = adjustColumnReferencesForChangedColumn(hypotheticalColumns, columnId);
-
-  return {
-    ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: {
-        ...state.layers[layerId],
-        columnOrder: getColumnOrder(newColumns),
-        columns: newColumns,
-      },
-    },
+  const layer = {
+    ...state.layers[layerId],
+    columns: newColumns,
   };
+
+  return mergeLayer({
+    state,
+    layerId,
+    newLayer: {
+      ...layer,
+      columnOrder: getColumnOrder(layer),
+    },
+  });
 }
 
-export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
-  const entries = Object.entries(columns);
-
-  const [aggregations, metrics] = _.partition(entries, ([id, col]) => col.isBucketed);
+export function getColumnOrder(layer: IndexPatternLayer): string[] {
+  const [aggregations, metrics] = _.partition(
+    Object.entries(layer.columns),
+    ([id, col]) => col.isBucketed
+  );
 
   return aggregations
     .sort(([id, col], [id2, col2]) => {
@@ -154,6 +159,24 @@ export function getColumnOrder(columns: Record<string, IndexPatternColumn>): str
     })
     .map(([id]) => id)
     .concat(metrics.map(([id]) => id));
+}
+
+export function mergeLayer({
+  state,
+  layerId,
+  newLayer,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  newLayer: Partial<IndexPatternLayer>;
+}) {
+  return {
+    ...state,
+    layers: {
+      ...state.layers,
+      [layerId]: { ...state.layers[layerId], ...newLayer },
+    },
+  };
 }
 
 export function updateLayerIndexPattern(

@@ -119,18 +119,18 @@
 #CC# /x-pack/plugins/beats_management/ @elastic/beats
 
 # Canvas
-/src/plugins/dashboard/ @elastic/kibana-app
-/src/plugins/input_control_vis/ @elastic/kibana-app
-/src/plugins/vis_type_markdown/ @elastic/kibana-app
+/src/plugins/dashboard/ @elastic/kibana-canvas
+/src/plugins/input_control_vis/ @elastic/kibana-canvas
+/src/plugins/vis_type_markdown/ @elastic/kibana-canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
-/x-pack/plugins/dashboard_enhanced/ @elastic/kibana-app
+/x-pack/plugins/dashboard_enhanced/ @elastic/kibana-canvas
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
-#CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-app
+#CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-canvas
+#CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-canvas
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-canvas
 #CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-canvas
-#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-app
-#CC# /x-pack/legacy/plugins/dashboard_mode/ @elastic/kibana-app
+#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-canvas
+#CC# /x-pack/legacy/plugins/dashboard_mode/ @elastic/kibana-canvas
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
@@ -381,8 +381,9 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 **/*.scss  @elastic/kibana-design
 #CC# /packages/kbn-ui-framework/ @elastic/kibana-design
 
-# Core design
+# Core UI design
 /src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
+/src/plugins/embeddable/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers

@@ -110,7 +110,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Saved '${alertName}'`);
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([
@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmAlertSaveModal');
 
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Saved '${alertName}'`);
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([
@@ -422,11 +422,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const namePrefix = generateUniqueKey();
       let count = 0;
       const createdAlertsFirstPage = await Promise.all(
-        times(10, () => createAlert({ name: `${namePrefix}-0${count++}` }))
-      );
-
-      const createdAlertsSecondPage = await Promise.all(
-        times(2, () => createAlert({ name: `${namePrefix}-1${count++}` }))
+        times(2, () => createAlert({ name: `${namePrefix}-0${count++}` }))
       );
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
@@ -442,18 +438,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      await retry.try(async () => {
+      await retry.tryForTime(30000, async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 10 alerts');
+        expect(toastTitle).to.eql('Deleted 2 alerts');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterDelete).to.have.length(2);
-      expect(searchResultsAfterDelete[0].name).to.eql(createdAlertsSecondPage[0].name);
-      expect(searchResultsAfterDelete[1].name).to.eql(createdAlertsSecondPage[1].name);
-
-      await deleteAlerts([createdAlertsSecondPage[0].id, createdAlertsSecondPage[1].id]);
+      expect(searchResultsAfterDelete).to.have.length(0);
     });
   });
 };

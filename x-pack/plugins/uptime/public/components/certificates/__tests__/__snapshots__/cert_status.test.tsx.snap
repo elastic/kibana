@@ -15,7 +15,7 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <div
+      <span
         color="success"
         data-euiicon-type="dot"
       />

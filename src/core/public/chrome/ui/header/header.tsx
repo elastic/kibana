@@ -112,8 +112,8 @@ export function Header({
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
+                    loadingCount$={observables.loadingCount$}
                   />,
-                  <LoadingIndicator loadingCount$={observables.loadingCount$} />,
                 ],
                 borders: 'none',
               },

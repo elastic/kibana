@@ -81,6 +81,7 @@ interface AlertFormProps {
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   operation: string;
 }
 
@@ -90,6 +91,7 @@ export const AlertForm = ({
   dispatch,
   errors,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   operation,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
@@ -260,6 +262,7 @@ export const AlertForm = ({
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           messageVariables={
             alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
               ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>

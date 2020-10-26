@@ -19,7 +19,7 @@
     <form role="form" class="container-fluid" ng-submit="opts.saveSheet()">
       <label
         for="savedSheet"
-        class="kuiLabel kuiVerticalRhythmSmall"
+        class="timApp__label"
         i18n-id="timelion.topNavMenu.save.saveEntireSheetLabel"
         i18n-default-message="Save sheet as"
       ></label>
@@ -28,20 +28,21 @@
         id="savedSheet"
         ng-model="opts.savedSheet.title"
         input-focus="select"
-        class="form-control kuiVerticalRhythmSmall"
+        class="form-control"
+        style="margin-bottom: 4px;"
         placeholder="{{ ::'timelion.topNavMenu.save.saveEntireSheet.inputPlaceholder' | i18n: { defaultMessage: 'Name this sheet...' } }}"
         aria-label="{{ ::'timelion.topNavMenu.save.saveEntireSheet.inputAriaLabel' | i18n: { defaultMessage: 'Name' } }}"
       >
 
       <saved-object-save-as-check-box
-        class="kuiVerticalRhythmSmall"
         saved-object="opts.savedSheet"
+        style="margin-bottom: 4px;"
       ></saved-object-save-as-check-box>
 
       <button
         ng-disabled="!opts.savedSheet.title"
         type="submit"
-        class="kuiButton kuiButton--primary kuiVerticalRhythmSmall"
+        class="timApp__button"
         i18n-id="timelion.topNavMenu.save.saveEntireSheet.submitButtonLabel"
         i18n-default-message="Save"
         data-test-subj="timelionFinishSaveButton"
@@ -96,7 +97,7 @@
         <button
           ng-disabled="!panelTitle"
           type="submit"
-          class="kuiButton kuiButton--primary"
+          class="timApp__button"
           i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.submitButtonLabel"
           i18n-default-message="Save"
         ></button>

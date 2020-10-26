@@ -5,13 +5,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import { CredentialsLogic } from '../credentials_logic';
+import { Key } from './key';
+import { HiddenText } from '../../../../shared/hidden_text';
 import { IApiToken } from '../types';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { apiTokenSort } from '../utils/api_token_sort';
@@ -39,28 +41,21 @@ export const CredentialsList: React.FC = () => {
       name: 'Key',
       width: '36%',
       render: (token: IApiToken) => {
-        if (!token.key) return null;
+        const { key } = token;
+        if (!key) return null;
         return (
           <EuiCopy
-            textToCopy={token.key}
+            textToCopy={key}
             afterMessage={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.copied', {
               defaultMessage: 'Copied',
             })}
           >
             {(copy) => (
-              <>
-                <EuiButtonIcon
-                  onClick={copy}
-                  iconType="copyClipboard"
-                  aria-label={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.credentials.copyApiKey',
-                    {
-                      defaultMessage: 'Copy API Key to clipboard',
-                    }
-                  )}
-                />
-                {token.key}
-              </>
+              <HiddenText text={key}>
+                {({ hiddenText, isHidden, toggle }) => (
+                  <Key copy={copy} toggleIsHidden={toggle} isHidden={isHidden} text={hiddenText} />
+                )}
+              </HiddenText>
             )}
           </EuiCopy>
         );
@@ -118,7 +113,21 @@ export const CredentialsList: React.FC = () => {
     fetchCredentials(current + 1);
   };
 
-  return (
+  return items.length < 1 ? (
+    <EuiEmptyPrompt
+      iconType="editorStrike"
+      title={
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.title', {
+            defaultMessage: 'No API Keys have been created yet.',
+          })}
+        </h2>
+      }
+      body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
+        defaultMessage: 'Click the "Create a key" button to make your first one.',
+      })}
+    />
+  ) : (
     <EuiBasicTable
       columns={columns}
       items={items}

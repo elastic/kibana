@@ -14,7 +14,7 @@ pageLoadAssetSize:
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 1170713
+  data: 1287839
   dataEnhanced: 50420
   devTools: 38637
   discover: 105145
@@ -68,7 +68,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 189428
   securityOss: 30806
-  securitySolution: 622387
+  securitySolution: 283440
   share: 99061
   snapshotRestore: 79032
   spaces: 387915

@@ -7,7 +7,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 
 import { POLICY_NAME } from './constants';
 import { TestSubjects } from '../helpers';
@@ -43,30 +43,91 @@ const testBedConfig: TestBedConfig = {
   },
 };
 
-const initTestBed = registerTestBed(EditPolicy, testBedConfig);
+const initTestBed = registerTestBed<TestSubjects>(EditPolicy, testBedConfig);
 
-export interface EditPolicyTestBed extends TestBed<TestSubjects> {
-  actions: {
-    setWaitForSnapshotPolicy: (snapshotPolicyName: string) => void;
-    savePolicy: () => void;
-  };
-}
+type SetupReturn = ReturnType<typeof setup>;
 
-export const setup = async (): Promise<EditPolicyTestBed> => {
+export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
+
+export const setup = async () => {
   const testBed = await initTestBed();
 
+  const { find, component } = testBed;
+
   const setWaitForSnapshotPolicy = async (snapshotPolicyName: string) => {
-    const { component } = testBed;
     act(() => {
-      testBed.find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
+      find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
     });
     component.update();
   };
 
   const savePolicy = async () => {
-    const { component, find } = testBed;
     await act(async () => {
       find('savePolicyButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const toggleRollover = async (checked: boolean) => {
+    await act(async () => {
+      find('rolloverSwitch').simulate('click', { target: { checked } });
+    });
+    component.update();
+  };
+
+  const setMaxSize = async (value: string, units?: string) => {
+    await act(async () => {
+      find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
+      if (units) {
+        find('hot-selectedMaxSizeStoredUnits.select').simulate('change', {
+          target: { value: units },
+        });
+      }
+    });
+    component.update();
+  };
+
+  const setMaxDocs = async (value: string) => {
+    await act(async () => {
+      find('hot-selectedMaxDocuments').simulate('change', { target: { value } });
+    });
+    component.update();
+  };
+
+  const setMaxAge = async (value: string, units?: string) => {
+    await act(async () => {
+      find('hot-selectedMaxAge').simulate('change', { target: { value } });
+      if (units) {
+        find('hot-selectedMaxAgeUnits.select').simulate('change', { target: { value: units } });
+      }
+    });
+    component.update();
+  };
+
+  const toggleForceMerge = (phase: string) => async (checked: boolean) => {
+    await act(async () => {
+      find(`${phase}-forceMergeSwitch`).simulate('click', { target: { checked } });
+    });
+    component.update();
+  };
+
+  const setForcemergeSegmentsCount = (phase: string) => async (value: string) => {
+    await act(async () => {
+      find(`${phase}-selectedForceMergeSegments`).simulate('change', { target: { value } });
+    });
+    component.update();
+  };
+
+  const setBestCompression = (phase: string) => async (checked: boolean) => {
+    await act(async () => {
+      find(`${phase}-bestCompression`).simulate('click', { target: { checked } });
+    });
+    component.update();
+  };
+
+  const setIndexPriority = (phase: string) => async (value: string) => {
+    await act(async () => {
+      find(`${phase}-phaseIndexPriority`).simulate('change', { target: { value } });
     });
     component.update();
   };
@@ -76,6 +137,16 @@ export const setup = async (): Promise<EditPolicyTestBed> => {
     actions: {
       setWaitForSnapshotPolicy,
       savePolicy,
+      hot: {
+        setMaxSize,
+        setMaxDocs,
+        setMaxAge,
+        toggleRollover,
+        toggleForceMerge: toggleForceMerge('hot'),
+        setForcemergeSegments: setForcemergeSegmentsCount('hot'),
+        setBestCompression: setBestCompression('hot'),
+        setIndexPriority: setIndexPriority('hot'),
+      },
     },
   };
 };

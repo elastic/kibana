@@ -25,12 +25,6 @@ import Joi from 'joi';
 type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 
 /**
- * A loosely typed definition of the elasticjs wrapper. It's beyond the scope
- * of this work to try to make a comprehensive type definition of this.
- */
-export type ElasticJs = (action: string, args: unknown) => Promise<unknown>;
-
-/**
  * The run context is passed into a task's run function as its sole argument.
  */
 export interface RunContext {
@@ -153,13 +147,6 @@ export const validateTaskDefinition = Joi.object({
   createTaskRunner: Joi.func().required(),
   getRetry: Joi.func().optional(),
 }).default();
-
-/**
- * A dictionary mapping task types to their definitions.
- */
-export interface TaskDictionary<T extends TaskDefinition> {
-  [taskType: string]: T;
-}
 
 export enum TaskStatus {
   Idle = 'idle',
