@@ -40,7 +40,7 @@ interface Arguments {
 
 export type VisParams = Required<Arguments>;
 
-interface RenderValue {
+export interface RenderValue {
   visData: VegaParser;
   visType: 'vega';
   visConfig: VisParams;
@@ -82,7 +82,7 @@ export const createVegaFn = (
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'vega_vis',
       value: {
         visData: response,
         visType: 'vega',
