@@ -176,7 +176,6 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypesFilter,
           alertStatusesFilter,
         });
-        await loadAlertsTotalStatuses();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -185,6 +184,9 @@ export const AlertsList: React.FunctionComponent = () => {
 
         if (!alertsResponse.data?.length && page.index > 0) {
           setPage({ ...page, index: 0 });
+        }
+        if (alertsResponse?.aggregations?.alertExecutionStatus) {
+          setAlertsStatusesTotal(alertsResponse.aggregations.alertExecutionStatus);
         }
       } catch (e) {
         toastNotifications.addDanger({
@@ -197,33 +199,6 @@ export const AlertsList: React.FunctionComponent = () => {
         });
         setAlertsState({ ...alertsState, isLoading: false });
       }
-    }
-  }
-
-  async function loadAlertsTotalStatuses() {
-    let alertsStatuses = {};
-    try {
-      AlertExecutionStatusValues.forEach(async (status: string) => {
-        const alertsTotalResponse = await loadAlerts({
-          http,
-          page: { index: 0, size: 0 },
-          searchText,
-          typesFilter,
-          actionTypesFilter,
-          alertStatusesFilter: [status],
-        });
-        setAlertsStatusesTotal({ ...alertsStatuses, [status]: alertsTotalResponse.total });
-        alertsStatuses = { ...alertsStatuses, [status]: alertsTotalResponse.total };
-      });
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
-          {
-            defaultMessage: 'Unable to load alert statuses info',
-          }
-        ),
-      });
     }
   }
 

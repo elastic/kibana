@@ -83,7 +83,7 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
           : [query.search_fields];
       }
 
-      const findResult = await alertsClient.find({ options });
+      const findResult = await alertsClient.find({ options }, true);
       return res.ok({
         body: findResult,
       });

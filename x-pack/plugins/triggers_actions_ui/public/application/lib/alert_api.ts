@@ -11,7 +11,14 @@ import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertUpdates, AlertTaskState, AlertInstanceSummary } from '../../types';
+import {
+  Alert,
+  AlertAggregations,
+  AlertType,
+  AlertUpdates,
+  AlertTaskState,
+  AlertInstanceSummary,
+} from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
@@ -77,6 +84,7 @@ export async function loadAlerts({
   perPage: number;
   total: number;
   data: Alert[];
+  aggregations?: AlertAggregations;
 }> {
   const filters = [];
   if (typesFilter && typesFilter.length) {

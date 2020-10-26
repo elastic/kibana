@@ -21,7 +21,6 @@ import { KueryNode } from '../../../../../src/plugins/data/server';
 export enum ReadOperations {
   Get = 'get',
   GetAlertState = 'getAlertState',
-  GetAlertStatus = 'getAlertStatus',
   GetAlertInstanceSummary = 'getAlertInstanceSummary',
   Find = 'find',
 }

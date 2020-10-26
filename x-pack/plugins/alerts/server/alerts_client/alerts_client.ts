@@ -103,11 +103,16 @@ interface IndexType {
   [key: string]: unknown;
 }
 
+interface FindAggregations {
+  alertExecutionStatus: { [key: string]: number };
+}
+
 export interface FindResult {
   page: number;
   perPage: number;
   total: number;
   data: SanitizedAlert[];
+  aggregations?: FindAggregations;
 }
 
 export interface CreateOptions {
@@ -352,9 +357,10 @@ export class AlertsClient {
     });
   }
 
-  public async find({
-    options: { fields, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<FindResult> {
+  public async find(
+    { options: { fields, ...options } = {} }: { options?: FindOptions } = {},
+    aggregate: boolean = false
+  ): Promise<FindResult> {
     const {
       filter: authorizationFilter,
       ensureAlertTypeIsAuthorized,
@@ -389,29 +395,47 @@ export class AlertsClient {
 
     logSuccessfulAuthorization();
 
-    const executionStatusValues = await Promise.all(
-      AlertExecutionStatusValues.map((status: string) => {
-        return this.find({
-          options: {
-            ...options,
-            filter: options.filter
-              ? options.filter.concat(` and alert.attributes.executionStatus.status:(${status})`)
-              : `alert.attributes.executionStatus.status:(${status})`,
-            page: 1,
-            per_page: 0,
-          },
-        });
-      })
-    );
-
-    // console.log(executionStatusValues);
-
-    return {
+    const findResults: FindResult = {
       page,
       perPage,
       total,
       data: authorizedData,
     };
+
+    // Replace this in the future when saved objects support aggregations
+    if (aggregate) {
+      findResults.aggregations = {
+        alertExecutionStatus: await this.getAlertExecutionStatusTotals({ options }),
+      };
+    }
+
+    return findResults;
+  }
+
+  private async getAlertExecutionStatusTotals({
+    options: { fields, ...options } = {},
+  }: { options?: FindOptions } = {}): Promise<{ [key: string]: number }> {
+    const alertExecutionStatus = await Promise.all(
+      AlertExecutionStatusValues.map(async (status: string) => {
+        const statusResults = await this.find({
+          options: {
+            ...options,
+            filter: options.filter
+              ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
+              : `alert.attributes.executionStatus.status:(${status})`,
+            page: 1,
+            perPage: 0,
+          },
+        });
+
+        return { [status]: statusResults.total };
+      })
+    );
+
+    return alertExecutionStatus.reduce(
+      (acc, curr: { [key: string]: number }) => Object.assign(acc, curr),
+      {}
+    );
   }
 
   public async delete({ id }: { id: string }) {

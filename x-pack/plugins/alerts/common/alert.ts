@@ -46,6 +46,10 @@ export interface AlertAction {
   params: AlertActionParams;
 }
 
+export interface AlertAggregations {
+  alertExecutionStatus: { [key: string]: number };
+}
+
 export interface Alert {
   id: string;
   enabled: boolean;
