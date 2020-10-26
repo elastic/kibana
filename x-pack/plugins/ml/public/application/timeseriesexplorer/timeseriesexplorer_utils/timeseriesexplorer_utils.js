@@ -100,7 +100,8 @@ export function processDataForFocusAnomalies(
   chartData,
   anomalyRecords,
   aggregationInterval,
-  modelPlotEnabled
+  modelPlotEnabled,
+  actualPlotFunction
 ) {
   const timesToAddPointsFor = [];
 
@@ -142,6 +143,8 @@ export function processDataForFocusAnomalies(
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[TIME_FIELD_NAME];
+    if (record.function === 'metric' && record.function_description !== actualPlotFunction) return;
+
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint !== undefined) {
       // If chart aggregation interval > bucket span, there may be more than
@@ -182,6 +185,9 @@ export function processDataForFocusAnomalies(
 
         if (record.multi_bucket_impact !== undefined) {
           chartPoint.multiBucketImpact = record.multi_bucket_impact;
+        }
+        if (record.function === 'metric') {
+          chartPoint.metricActualPlotFunction = record.function_description ?? actualPlotFunction;
         }
       }
     }

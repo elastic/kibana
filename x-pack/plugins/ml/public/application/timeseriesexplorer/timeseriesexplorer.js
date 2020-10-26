@@ -430,7 +430,9 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
-  loadPlotByOptions = () => {
+  loadPlotByOptions = async () => {
+    // only load the options to view chart by 'avg', 'min', or 'max'
+    // if the original function is 'metric'
     const { selectedJobId, selectedDetectorIndex } = this.props;
     const selectedJob = mlJobService.getJob(selectedJobId);
 
@@ -858,6 +860,36 @@ export class TimeSeriesExplorer extends React.Component {
     if (detectorId !== selectedDetectorIndex) {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
+    // if the detector's function is metric, fetch the highest scoring anomaly record
+    // and set to plot the function_description (avg/min/max) of that record by default
+    if (selectedJob?.analysis_config?.detectors[detectorIndex]?.function === 'metric') {
+      const entityControls = this.getControlsForDetector();
+
+      mlResultsService
+        .getRecordsForCriteria(
+          [selectedJob.job_id],
+          this.getCriteriaFields(selectedDetectorIndex, entityControls),
+          0,
+          null,
+          null,
+          1
+        )
+        .toPromise()
+        .then((resp) => {
+          if (Array.isArray(resp?.records) && resp.records.length === 1) {
+            const highestScoringAnomaly = resp.records[0];
+            this.setState({ actualPlotFunction: highestScoringAnomaly.function_description });
+          }
+        })
+        .catch((resp) => {
+          console.log(
+            'Time series explorer - error getting record with highest anomaly score:',
+            resp
+          );
+        });
+    } else {
+      this.setState({ actualPlotFunction: undefined });
+    }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
     mlFieldFormatService.populateFormats([jobId]).catch((err) => {
@@ -1221,6 +1253,42 @@ export class TimeSeriesExplorer extends React.Component {
                 />
               );
             })}
+            {actualPlotFunction && (
+              <EuiFlexItem style={{ textAlign: 'right' }}>
+                <EuiFormRow
+                  label={i18n.translate('xpack.ml.timeSeriesExplorer.metricPlotByOption', {
+                    defaultMessage: 'Function',
+                  })}
+                >
+                  <EuiSelect
+                    options={[
+                      {
+                        value: 'avg',
+                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel', {
+                          defaultMessage: 'average',
+                        }),
+                      },
+                      {
+                        value: 'min',
+                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByMinOptionLabel', {
+                          defaultMessage: 'min',
+                        }),
+                      },
+                      {
+                        value: 'max',
+                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByMaxOptionLabel', {
+                          defaultMessage: 'max',
+                        }),
+                      },
+                    ]}
+                    value={actualPlotFunction ?? 'avg'}
+                    onChange={(e) => this.setPlotByFunction(e.target.value)}
+                    aria-label="Pick function to plot by (min, max, or average) if metric function"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+
             {arePartitioningFieldsProvided && (
               <EuiFlexItem style={{ textAlign: 'right' }}>
                 <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
@@ -1314,34 +1382,6 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </h2>
                 </EuiTitle>
-
-                {actualPlotFunction && (
-                  <EuiSelect
-                    options={[
-                      {
-                        value: 'avg',
-                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel', {
-                          defaultMessage: 'average',
-                        }),
-                      },
-                      {
-                        value: 'min',
-                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByMinOptionLabel', {
-                          defaultMessage: 'min',
-                        }),
-                      },
-                      {
-                        value: 'max',
-                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByMaxOptionLabel', {
-                          defaultMessage: 'max',
-                        }),
-                      },
-                    ]}
-                    value={actualPlotFunction ?? 'avg'}
-                    onChange={(e) => this.setPlotByFunction(e.target.value)}
-                    aria-label="Pick function to plot by (min, max, or average) if metric function"
-                  />
-                )}
 
                 <EuiFlexGroup style={{ float: 'right' }}>
                   {showModelBoundsCheckbox && (

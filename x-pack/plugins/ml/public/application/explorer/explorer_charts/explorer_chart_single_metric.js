@@ -493,6 +493,22 @@ export class ExplorerChartSingleMetric extends React.Component {
         });
       }
 
+      if (marker.metricActualPlotFunction !== undefined) {
+        tooltipData.push({
+          label: i18n.translate(
+            'xpack.ml.explorer.singleMetricChart.metricActualPlotFunctionLabel',
+            {
+              defaultMessage: 'function',
+            }
+          ),
+          value: marker.metricActualPlotFunction,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'metricActualPlotFunction',
+        });
+      }
+
       tooltipService.show(tooltipData, circle, {
         x: LINE_CHART_ANOMALY_RADIUS * 3,
         y: LINE_CHART_ANOMALY_RADIUS * 2,

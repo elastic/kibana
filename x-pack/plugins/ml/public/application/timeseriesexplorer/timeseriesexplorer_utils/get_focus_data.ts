@@ -145,7 +145,8 @@ export function getFocusData(
         focusChartData,
         anomalyRecords,
         focusAggregationInterval,
-        modelPlotEnabled
+        modelPlotEnabled,
+        actualPlotFunction
       );
       focusChartData = processScheduledEventsForChart(focusChartData, scheduledEvents);
 
