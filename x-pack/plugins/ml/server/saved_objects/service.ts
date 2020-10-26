@@ -196,23 +196,6 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     return filterJobObjectIdsForSpace('anomaly-detector', ids, 'datafeed_id', allowWildcards);
   }
 
-  // async function jobsExists(jobType: JobType, ids: string[]) {
-  //   const existIds = await filterJobObjectIdsForSpace(jobType, ids, 'job_id', false);
-  //   return ids.map((id) =>
-  //     existIds.includes(id)
-  //       ? { exists: true }
-  //       : { exists: false, error: { body: createError(id, 'job_id') } }
-  //   );
-  // }
-
-  // async function jobExists(jobType: JobType, id: string) {
-  //   const exists = await jobsExists(jobType, [id]);
-  //   if (exists[0].exists === false) {
-  //     // throw exists[0].error;
-  //     throw new Error(exists[0].error?.body.error.reason);
-  //   }
-  // }
-
   async function assignJobsToSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
     const results: Record<string, { success: boolean; error?: any }> = {};
     const jobs = await _getJobObjects(jobType);
@@ -273,8 +256,6 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     filterJobIdsForSpace,
     filterDatafeedsForSpace,
     filterDatafeedIdsForSpace,
-    // jobsExists,
-    // jobExists,
     assignJobsToSpaces,
     removeJobsFromSpaces,
   };

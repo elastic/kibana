@@ -6,15 +6,15 @@
 
 // Service for managing job saved objects
 
-import { HttpService } from '../http_service';
+import { http } from '../http_service';
 
 import { basePath } from './index';
 
-export const savedObjectsApiProvider = ({ http }: HttpService) => ({
+export const savedObjects = {
   jobsSpaces() {
     return http<any>({
       path: `${basePath()}/saved_objects/jobs_spaces`,
       method: 'GET',
     });
   },
-});
+};
