@@ -62,26 +62,30 @@ export default function ({
     // Because the lint rules will not allow files that include upper case characters, we specify explicit file name prefixes
     const nodeDefinitions: Array<[nodeID: string, fileNamePrefix: string, hasAPill: boolean]> = [
       ['origin', 'origin', true],
-      ['firstChild', 'first_child', true],
+      ['firstChild', 'first_child', false],
       ['secondChild', 'second_child', false],
     ];
 
     for (const [nodeID, fileNamePrefix, hasAPill] of nodeDefinitions) {
       describe(`when the user is interacting with the node with ID: ${nodeID}`, () => {
-        let element: WebElementWrapper;
-        before(async () => {
-          element = await find.byCssSelector(`[data-test-resolver-node-id="${nodeID}"]`);
+        let element: () => Promise<WebElementWrapper>;
+        beforeEach(async () => {
+          element = () => find.byCssSelector(`[data-test-resolver-node-id="${nodeID}"]`);
         });
         it('should render as expected', async () => {
           expect(
-            await screenshot.compareAgainstBaseline(`${fileNamePrefix}`, updateBaselines, element)
+            await screenshot.compareAgainstBaseline(
+              `${fileNamePrefix}`,
+              updateBaselines,
+              await element()
+            )
           ).to.be.lessThan(expectedDifference);
         });
         describe('when the user hovers over the primary button', () => {
           let button: WebElementWrapper;
-          before(async () => {
+          beforeEach(async () => {
             // hover the button
-            button = await element.findByCssSelector(
+            button = await (await element()).findByCssSelector(
               `button[data-test-resolver-node-id="${nodeID}"]`
             );
             await button.moveMouseTo();
@@ -91,26 +95,26 @@ export default function ({
               await screenshot.compareAgainstBaseline(
                 `${fileNamePrefix}_with_primary_button_hovered`,
                 updateBaselines,
-                element
+                await element()
               )
             ).to.be.lessThan(expectedDifference);
           });
           describe('when the user has clicked the primary button (which selects the node.)', () => {
-            before(async () => {
+            beforeEach(async () => {
               // select the node
               await button.click();
             });
-            it('should load layers', async () => {
+            it('should render as expected', async () => {
               expect(
                 await screenshot.compareAgainstBaseline(
                   `${fileNamePrefix}_selected_with_primary_button_hovered`,
                   updateBaselines,
-                  element
+                  await element()
                 )
               ).to.be.lessThan(expectedDifference);
             });
             describe('when the user has moved their mouse off of the primary button (and onto the zoom controls.)', () => {
-              before(async () => {
+              beforeEach(async () => {
                 // move the mouse away
                 const zoomIn = await testSubjects.find('resolver:graph-controls:zoom-in');
                 await zoomIn.moveMouseTo();
@@ -120,45 +124,44 @@ export default function ({
                   await screenshot.compareAgainstBaseline(
                     `${fileNamePrefix}_selected`,
                     updateBaselines,
-                    element
+                    await element()
                   )
                 ).to.be.lessThan(expectedDifference);
               });
               if (hasAPill) {
                 describe('when the user hovers over the first pill', () => {
-                  let firstPill: WebElementWrapper;
-                  before(async () => {
-                    // select a pill
-                    const pills = await element.findAllByTestSubject(
-                      'resolver:map:node-submenu-item'
-                    );
+                  let firstPill: () => Promise<WebElementWrapper>;
+                  beforeEach(async () => {
+                    firstPill = async () => {
+                      // select a pill
+                      const pills = await (await element()).findAllByTestSubject(
+                        'resolver:map:node-submenu-item'
+                      );
+                      return pills[0];
+                    };
 
-                    if (pills.length) {
-                      firstPill = pills[0];
-                      // move mouse to first pill
-                      await firstPill.moveMouseTo();
-                    }
+                    // move mouse to first pill
+                    await (await firstPill()).moveMouseTo();
                   });
                   it('should render as expected', async () => {
-                    expect(
-                      await screenshot.compareAgainstBaseline(
-                        `${fileNamePrefix}_selected_with_first_pill_hovered`,
-                        updateBaselines,
-                        element
-                      )
-                    ).to.be.lessThan(expectedDifference);
+                    const diff = await screenshot.compareAgainstBaseline(
+                      `${fileNamePrefix}_selected_with_first_pill_hovered`,
+                      updateBaselines,
+                      await element()
+                    );
+                    expect(diff).to.be.lessThan(expectedDifference);
                   });
                   describe('when the user clicks on the first pill', () => {
-                    before(async () => {
+                    beforeEach(async () => {
                       // click the first pill
-                      await firstPill.click();
+                      await (await firstPill()).click();
                     });
                     it('should render as expected', async () => {
                       expect(
                         await screenshot.compareAgainstBaseline(
                           `${fileNamePrefix}_selected_with_first_pill_selected`,
                           updateBaselines,
-                          element
+                          await element()
                         )
                       ).to.be.lessThan(expectedDifference);
                     });
