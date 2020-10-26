@@ -46,6 +46,8 @@ curl -XGET "http://localhost:9200/_search" -d'
 When you paste the command into Console, {kib} automatically converts it
 to Console syntax.  Alternatively, if you want to see Console syntax in cURL, 
 click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*.
+Please note that once copied, the url will need to be replaced and the username and password will 
+need to be provided for the calls to work from external environments.
 
 [float]
 [[console-autocomplete]]
