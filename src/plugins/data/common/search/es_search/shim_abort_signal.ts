@@ -30,10 +30,10 @@ import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
  *
  * @returns a TransportRequestPromise that will be aborted if the signal is aborted
  */
-export const shimAbortSignal = <T extends TransportRequestPromise<unknown>>(
-  promise: T,
+export const shimAbortSignal = <TResponse = any>(
+  promise: TransportRequestPromise<TResponse>,
   signal: AbortSignal | undefined
-): T => {
+): TransportRequestPromise<TResponse> => {
   if (signal) {
     signal.addEventListener('abort', () => promise.abort());
   }

@@ -17,4 +17,5 @@ export interface ISearchOptions
 |  [abortSignal](./kibana-plugin-plugins-data-public.isearchoptions.abortsignal.md) | <code>AbortSignal</code> | An <code>AbortSignal</code> that allows the caller of <code>search</code> to abort a search request. |
 |  [sessionId](./kibana-plugin-plugins-data-public.isearchoptions.sessionid.md) | <code>string</code> | A session ID, grouping multiple search requests into a single session. |
 |  [strategy](./kibana-plugin-plugins-data-public.isearchoptions.strategy.md) | <code>string</code> | Use this option to force using a specific server side search strategy. Leave empty to use the default strategy. |
+|  [waitForCompletion](./kibana-plugin-plugins-data-public.isearchoptions.waitforcompletion.md) | <code>boolean</code> | If this option is true, the stream will be completed only upon receiving is\_partial = false and is\_running = false |
 

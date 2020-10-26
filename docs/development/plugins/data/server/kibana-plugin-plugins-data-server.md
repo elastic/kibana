@@ -34,7 +34,6 @@
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
-|  [toSnakeCase(obj)](./kibana-plugin-plugins-data-server.tosnakecase.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
 ## Interfaces
@@ -42,6 +41,7 @@
 |  Interface | Description |
 |  --- | --- |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
+|  [DoSearchFnArgs](./kibana-plugin-plugins-data-server.dosearchfnargs.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |

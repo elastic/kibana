@@ -16,74 +16,61 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable, from } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { Logger } from 'kibana/server';
+import { Observable } from 'rxjs';
+import { switchMap, first, mergeMap } from 'rxjs/operators';
+
+import type { SharedGlobalConfig } from 'kibana/server';
+
 import { SearchUsage } from '../collectors/usage';
-import { toSnakeCase } from './to_snake_case';
 import {
-  ISearchStrategy,
-  getDefaultSearchParams,
-  getTotalLoaded,
-  getShardTimeout,
-  shimAbortSignal,
-  IEsSearchResponse,
-} from '..';
+  doSearch,
+  includeTotalLoaded,
+  toKibanaSearchResponse,
+  DoSearchFnArgs,
+} from '../../../common/search/es_search/es_search_rxjs_utils';
+import { trackSearchStatus } from './es_search_rxjs_utils';
+
+import { getDefaultSearchParams, getShardTimeout } from '..';
+import type { ISearchStrategy } from '..';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
-): ISearchStrategy => {
-  return {
-    search: (request, options, context) =>
-      from(
-        new Promise<IEsSearchResponse>(async (resolve, reject) => {
-          logger.debug(`search ${request.params?.index}`);
-          const config = await config$.pipe(first()).toPromise();
-          const uiSettingsClient = await context.core.uiSettings.client;
+): ISearchStrategy => ({
+  search: (request, { abortSignal }, context) => {
+    // Only default index pattern type is supported here.
+    // See data_enhanced for other t ype support.
+    if (Boolean(request.indexType)) {
+      throw new Error(`Unsupported index pattern type ${request.indexType}`);
+    }
 
-          // Only default index pattern type is supported here.
-          // See data_enhanced for other type support.
-          if (!!request.indexType) {
-            throw new Error(`Unsupported index pattern type ${request.indexType}`);
-          }
-
-          // ignoreThrottled is not supported in OSS
-          const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(
-            uiSettingsClient
-          );
-
-          const params = toSnakeCase({
-            ...defaultParams,
-            ...getShardTimeout(config),
-            ...request.params,
-          });
-
-          try {
-            const promise = shimAbortSignal(
-              context.core.elasticsearch.client.asCurrentUser.search(params),
-              options?.abortSignal
-            );
-            const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
-
-            if (usage) usage.trackSuccess(rawResponse.took);
-
-            // The above query will either complete or timeout and throw an error.
-            // There is no progress indication on this api.
+    return config$.pipe(
+      mergeMap(
+        (config) =>
+          new Promise<DoSearchFnArgs>(async (resolve) => {
             resolve({
-              isPartial: false,
-              isRunning: false,
-              rawResponse,
-              ...getTotalLoaded(rawResponse._shards),
+              params: {
+                ...(await getDefaultSearchParams(context.core.uiSettings.client)),
+                ...getShardTimeout(config),
+                ...request.params,
+              },
             });
-          } catch (e) {
-            if (usage) usage.trackError();
-            reject(e);
-          }
-        })
+          })
       ),
-  };
-};
+      switchMap(
+        doSearch(
+          (...args) => context.core.elasticsearch.client.asCurrentUser.search(...args),
+          abortSignal
+        )
+      ),
+      toKibanaSearchResponse(),
+      trackSearchStatus(logger, usage),
+      includeTotalLoaded(),
+
+      // OSS search strategy doesn't support of async search. We should complete stream on getting first response.
+      first()
+    );
+  },
+});

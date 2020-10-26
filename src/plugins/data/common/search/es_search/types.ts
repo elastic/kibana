@@ -36,6 +36,11 @@ export interface ISearchOptions {
    * A session ID, grouping multiple search requests into a single session.
    */
   sessionId?: string;
+
+  /**
+   *  If this option is true, the stream will be completed only upon receiving is_partial = false and is_running = false
+   */
+  waitForCompletion?: boolean;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {
@@ -44,6 +49,13 @@ export type ISearchRequestParams<T = Record<string, any>> = {
 
 export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
   indexType?: string;
+}
+
+export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Source> {
+  id?: string;
+  is_partial?: boolean;
+  is_running?: boolean;
+  response?: SearchResponse<Source>;
 }
 
 export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;

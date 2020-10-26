@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { ES_SEARCH_STRATEGY } from '../../../../data/server';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
@@ -136,12 +135,11 @@ export default new Datasource('es', {
       .search(
         body,
         {
-          strategy: ES_SEARCH_STRATEGY,
+          waitForCompletion: true,
         },
         tlConfig.context
       )
       .toPromise();
-
     if (!resp.rawResponse._shards.total) {
       throw new Error(
         i18n.translate('timelion.serverSideErrors.esFunction.indexNotFoundErrorMessage', {

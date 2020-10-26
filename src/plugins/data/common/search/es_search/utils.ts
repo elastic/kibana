@@ -30,12 +30,12 @@ export const isErrorResponse = (response?: IKibanaSearchResponse) => {
  * @returns true if response is completed successfully
  */
 export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
-  return response && !response.isRunning && !response.isPartial;
+  return Boolean(response && !response.isRunning && !response.isPartial);
 };
 
 /**
  * @returns true if request is still running an/d response contains partial results
  */
 export const isPartialResponse = (response?: IKibanaSearchResponse) => {
-  return response && response.isRunning && response.isPartial;
+  return Boolean(response && response.isRunning && response.isPartial);
 };

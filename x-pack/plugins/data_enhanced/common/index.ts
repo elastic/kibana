@@ -12,4 +12,5 @@ export {
   EqlSearchStrategyResponse,
   IAsyncSearchRequest,
   IEnhancedEsSearchRequest,
+  IAsyncSearchOptions,
 } from './search';
