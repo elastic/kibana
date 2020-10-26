@@ -6,15 +6,15 @@
 
 import moment from 'moment';
 import { mergeTables } from './merge_tables';
-import { KibanaDatatable } from 'src/plugins/expressions';
+import { Datatable } from 'src/plugins/expressions';
 
 describe('lens_merge_tables', () => {
   it('should produce a row with the nested table as defined', () => {
-    const sampleTable1: KibanaDatatable = {
-      type: 'kibana_datatable',
+    const sampleTable1: Datatable = {
+      type: 'datatable',
       columns: [
-        { id: 'bucket', name: 'A' },
-        { id: 'count', name: 'Count' },
+        { id: 'bucket', name: 'A', meta: { type: 'string' } },
+        { id: 'count', name: 'Count', meta: { type: 'number' } },
       ],
       rows: [
         { bucket: 'a', count: 5 },
@@ -22,11 +22,11 @@ describe('lens_merge_tables', () => {
       ],
     };
 
-    const sampleTable2: KibanaDatatable = {
-      type: 'kibana_datatable',
+    const sampleTable2: Datatable = {
+      type: 'datatable',
       columns: [
-        { id: 'bucket', name: 'C' },
-        { id: 'avg', name: 'Average' },
+        { id: 'bucket', name: 'C', meta: { type: 'string' } },
+        { id: 'avg', name: 'Average', meta: { type: 'number' } },
       ],
       rows: [
         { bucket: 'a', avg: 2.5 },

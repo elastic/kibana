@@ -41,6 +41,28 @@ export const API_URL_INVALID = i18n.translate(
   }
 );
 
+export const AUTHENTICATION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.authenticationLabel',
+  {
+    defaultMessage: 'Authentication',
+  }
+);
+
+export const REMEMBER_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.rememberValuesLabel',
+  {
+    defaultMessage:
+      'Remember these values. You must reenter them each time you edit the connector.',
+  }
+);
+
+export const REENTER_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel',
+  {
+    defaultMessage: 'Username and password are encrypted. Please reenter values for these fields.',
+  }
+);
+
 export const USERNAME_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.usernameTextFieldLabel',
   {

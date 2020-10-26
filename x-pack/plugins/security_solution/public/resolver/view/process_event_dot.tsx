@@ -62,7 +62,7 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   text-align: left;
   text-transform: uppercase;
   width: fit-content;
-  z-index: 40;
+  z-index: 45;
 `;
 
 const StyledOuterGroup = styled.g`
@@ -393,7 +393,7 @@ const UnstyledProcessEventDot = React.memo(
               backgroundColor: colorMap.resolverBackground,
               alignSelf: 'flex-start',
               padding: 0,
-              zIndex: 40,
+              zIndex: 45,
             }}
           >
             <EuiButton

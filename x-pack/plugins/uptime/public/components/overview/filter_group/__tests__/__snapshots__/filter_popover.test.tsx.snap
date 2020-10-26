@@ -100,7 +100,7 @@ exports[`FilterPopover component returns selected items on popover close 1`] = `
         <span
           class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
         >
-          <div
+          <span
             class="euiButtonContent__icon"
             data-euiicon-type="arrowDown"
           />

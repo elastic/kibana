@@ -11,9 +11,10 @@ import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import {
   CODE_PATH_BEATS,
   BEATS_SYSTEM_ID,
@@ -81,7 +82,7 @@ uiRoutes.when('/beats/beats', {
           injector={this.injector}
           productName={BEATS_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-            <Fragment>
+            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
               <Listing
                 stats={this.data.stats}
@@ -93,7 +94,7 @@ uiRoutes.when('/beats/beats', {
                 onTableChange={this.onTableChange || onTableChange}
               />
               {bottomBarComponent}
-            </Fragment>
+            </SetupModeContext.Provider>
           )}
         />
       );
