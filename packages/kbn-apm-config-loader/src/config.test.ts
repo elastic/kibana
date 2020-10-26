@@ -163,7 +163,7 @@ describe('ApmConfiguration', () => {
     );
   });
 
-  it('sets correctly sets environment', () => {
+  it('correctly sets environment', () => {
     delete process.env.ELASTIC_APM_ENVIRONMENT;
     delete process.env.NODE_ENV;
 
