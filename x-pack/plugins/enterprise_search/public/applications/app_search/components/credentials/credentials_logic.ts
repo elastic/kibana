@@ -20,7 +20,7 @@ import { IMeta } from '../../../../../common/types';
 import { IEngine } from '../../types';
 import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
-const defaultApiToken: IApiToken = {
+export const defaultApiToken: IApiToken = {
   name: '',
   type: ApiTokenTypes.Private,
   read: true,
