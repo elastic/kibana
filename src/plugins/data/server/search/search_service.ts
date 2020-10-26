@@ -227,21 +227,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    deps: SearchStrategyDependencies,
     searchRequest: SearchStrategyRequest,
-    options?: ISearchOptions
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
   ) => {
     const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options?.strategy
+      options.strategy
     );
 
-    return strategy.search(deps, searchRequest, options);
+    return strategy.search(searchRequest, options, deps);
   };
 
-  private cancel = (deps: SearchStrategyDependencies, id: string, options?: ISearchOptions) => {
-    const strategy = this.getSearchStrategy(options?.strategy);
+  private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
+    const strategy = this.getSearchStrategy(options.strategy);
 
-    return strategy.cancel ? strategy.cancel(deps, id) : Promise.resolve();
+    return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
   };
 
   private getSearchStrategy = <
@@ -267,8 +267,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
       };
       return {
-        search: (searchRequest, options) => this.search(deps, searchRequest, options),
-        cancel: (id, options) => this.cancel(deps, id, options),
+        search: (searchRequest, options = {}) => this.search(searchRequest, options, deps),
+        cancel: (id, options = {}) => this.cancel(id, options, deps),
       };
     };
   };

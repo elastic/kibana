@@ -26,7 +26,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: ({ esClient }, request, options) =>
+    search: (request, options, { esClient }) =>
       from(
         new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
           const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);

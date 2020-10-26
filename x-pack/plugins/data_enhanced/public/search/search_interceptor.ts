@@ -65,7 +65,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       timeout: this.searchTimeout,
     });
     const aborted$ = from(toPromise(combinedSignal));
-    const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
+    const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 

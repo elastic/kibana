@@ -21,13 +21,13 @@ export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   return {
-    cancel: async ({ esClient }, id) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
       await esClient.asCurrentUser.eql.delete({
         id,
       });
     },
-    search: ({ esClient, uiSettingsClient }, request, options) =>
+    search: (request, options, { esClient, uiSettingsClient }) =>
       from(
         new Promise<EqlSearchStrategyResponse>(async (resolve, reject) => {
           logger.debug(`_eql/search ${JSON.stringify(request.params) || request.id}`);
@@ -62,7 +62,7 @@ export const eqlSearchStrategyProvider = (
               );
             }
 
-            const rawResponse = await shimAbortSignal(promise, options?.abortSignal);
+            const rawResponse = await shimAbortSignal(promise, options.abortSignal);
             const { id, is_partial: isPartial, is_running: isRunning } = rawResponse.body;
 
             resolve({

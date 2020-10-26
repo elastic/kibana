@@ -39,7 +39,7 @@ export const enhancedEsSearchStrategyProvider = (
   usage?: SearchUsage
 ): ISearchStrategy<IEnhancedEsSearchRequest> => {
   return {
-    search: (deps, request, options) =>
+    search: (request, options, deps) =>
       from(
         new Promise<IEsSearchResponse>(async (resolve, reject) => {
           logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
@@ -48,8 +48,8 @@ export const enhancedEsSearchStrategyProvider = (
 
           try {
             const response = isAsync
-              ? await asyncSearch(deps, request, options)
-              : await rollupSearch(deps, request, options);
+              ? await asyncSearch(request, options, deps)
+              : await rollupSearch(request, options, deps);
 
             if (
               usage &&
@@ -67,16 +67,16 @@ export const enhancedEsSearchStrategyProvider = (
           }
         })
       ),
-    cancel: async ({ esClient }, id) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`cancel ${id}`);
       await esClient.asCurrentUser.asyncSearch.delete({ id });
     },
   };
 
   async function asyncSearch(
-    { esClient, uiSettingsClient }: SearchStrategyDependencies,
     request: IEnhancedEsSearchRequest,
-    options?: ISearchOptions
+    options: ISearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
     let promise: TransportRequestPromise<any>;
     const asyncOptions = getAsyncOptions();
@@ -98,7 +98,7 @@ export const enhancedEsSearchStrategyProvider = (
       });
     }
 
-    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
+    const esResponse = await shimAbortSignal(promise, options.abortSignal);
     const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
     return {
       id,
@@ -110,9 +110,9 @@ export const enhancedEsSearchStrategyProvider = (
   }
 
   async function rollupSearch(
-    { esClient, uiSettingsClient }: SearchStrategyDependencies,
     request: IEnhancedEsSearchRequest,
-    options?: ISearchOptions
+    options: ISearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
     const config = await config$.pipe(first()).toPromise();
     const { body, index, ...params } = request.params!;
@@ -131,7 +131,7 @@ export const enhancedEsSearchStrategyProvider = (
       querystring,
     });
 
-    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
+    const esResponse = await shimAbortSignal(promise, options.abortSignal);
 
     const response = esResponse.body as SearchResponse<any>;
     return {

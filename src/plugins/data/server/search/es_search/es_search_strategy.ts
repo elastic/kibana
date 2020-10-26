@@ -38,7 +38,7 @@ export const esSearchStrategyProvider = (
   usage?: SearchUsage
 ): ISearchStrategy => {
   return {
-    search: ({ esClient, uiSettingsClient }, request, options) =>
+    search: (request, options, { esClient, uiSettingsClient }) =>
       from(
         new Promise<IEsSearchResponse>(async (resolve, reject) => {
           logger.debug(`search ${request.params?.index}`);
@@ -64,7 +64,7 @@ export const esSearchStrategyProvider = (
           try {
             const promise = shimAbortSignal(
               esClient.asCurrentUser.search(params),
-              options?.abortSignal
+              options.abortSignal
             );
             const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
 

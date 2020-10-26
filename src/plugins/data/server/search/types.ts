@@ -79,11 +79,11 @@ export interface ISearchStrategy<
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   search: (
-    deps: SearchStrategyDependencies,
     request: SearchStrategyRequest,
-    options?: ISearchOptions
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
   ) => Observable<SearchStrategyResponse>;
-  cancel?: (deps: SearchStrategyDependencies, id: string) => Promise<void>;
+  cancel?: (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
 }
 
 export interface ISearchStart<
