@@ -104,9 +104,7 @@ To save the current search:
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-To import, export and delete saved searches:
-. Open the menu, then click *Stack Management.
-. From the {kib} menu, click *Saved Ojbects*.
+To import, export, and delete saved searches, open the main menu, then click *Stack Management > Saved Ojbects*.
 
 ==== Open a saved search
 To load a saved search into Discover:
