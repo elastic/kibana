@@ -51,7 +51,8 @@ export function getFocusData(
   modelPlotEnabled: boolean,
   nonBlankEntities: any[],
   searchBounds: any,
-  selectedJob: Job
+  selectedJob: Job,
+  actualPlotFunction: string | undefined
 ): Observable<FocusData> {
   return forkJoin([
     // Query 1 - load metric data across selected time range.
@@ -61,7 +62,8 @@ export function getFocusData(
       nonBlankEntities,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      focusAggregationInterval.asMilliseconds()
+      focusAggregationInterval.asMilliseconds(),
+      actualPlotFunction
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
     mlResultsService.getRecordsForCriteria(

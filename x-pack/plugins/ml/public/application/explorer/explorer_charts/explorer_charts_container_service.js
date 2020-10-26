@@ -46,8 +46,6 @@ const ML_TIME_FIELD_NAME = 'timestamp';
 const USE_OVERALL_CHART_LIMITS = false;
 const MAX_CHARTS_PER_ROW = 4;
 
-// callback(getDefaultChartsData());
-
 export const anomalyDataChange = function (
   chartsContainerWidth,
   anomalyRecords,
@@ -57,6 +55,7 @@ export const anomalyDataChange = function (
 ) {
   const data = getDefaultChartsData();
 
+  console.log('anomalyRecords', anomalyRecords);
   const filteredRecords = anomalyRecords.filter((record) => {
     return Number(record.record_score) >= severity;
   });

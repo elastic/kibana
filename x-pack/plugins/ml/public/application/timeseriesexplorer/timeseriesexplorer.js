@@ -154,6 +154,8 @@ function getTimeseriesexplorerDefaultState() {
     zoomTo: undefined,
     zoomFromFocusLoaded: undefined,
     zoomToFocusLoaded: undefined,
+    // Sets function to plot by if original function is metric
+    actualPlotFunction: undefined,
   };
 }
 
@@ -238,6 +240,12 @@ export class TimeSeriesExplorer extends React.Component {
     });
   };
 
+  setPlotByFunction = (selectedFuction) => {
+    this.setState({
+      actualPlotFunction: selectedFuction,
+    });
+  };
+
   previousChartProps = {};
   previousShowAnnotations = undefined;
   previousShowForecast = undefined;
@@ -291,7 +299,7 @@ export class TimeSeriesExplorer extends React.Component {
    */
   getFocusData(selection) {
     const { selectedJobId, selectedForecastId, selectedDetectorIndex } = this.props;
-    const { modelPlotEnabled } = this.state;
+    const { modelPlotEnabled, actualPlotFunction } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
@@ -313,6 +321,7 @@ export class TimeSeriesExplorer extends React.Component {
       entityControls.filter((entity) => entity.fieldValue !== null),
       searchBounds,
       selectedJob,
+      actualPlotFunction,
       TIME_FIELD_NAME
     );
   }
@@ -421,6 +430,25 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
+  loadPlotByOptions = () => {
+    const { selectedJobId, selectedDetectorIndex } = this.props;
+    const selectedJob = mlJobService.getJob(selectedJobId);
+
+    if (selectedJob === undefined) return;
+
+    const detectors = selectedJob.analysis_config.detectors;
+
+    if (detectors && detectors[selectedDetectorIndex]?.function) {
+      if (detectors[selectedDetectorIndex]?.function === 'metric') {
+        if (this.state.actualPlotFunction === undefined) {
+          this.setState({ actualPlotFunction: 'avg' });
+        }
+      } else {
+        this.setState({ actualPlotFunction: undefined });
+      }
+    }
+  };
+
   /**
    * Loads available entity values.
    * @param {Array} entities - Entity controls configuration
@@ -488,7 +516,10 @@ export class TimeSeriesExplorer extends React.Component {
       zoom,
     } = this.props;
 
-    const { loadCounter: currentLoadCounter } = this.state;
+    const {
+      loadCounter: currentLoadCounter,
+      actualPlotFunction: functionToPlotByIfMetric,
+    } = this.state;
 
     const currentSelectedJob = mlJobService.getJob(selectedJobId);
 
@@ -629,7 +660,8 @@ export class TimeSeriesExplorer extends React.Component {
             nonBlankEntities,
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.asMilliseconds()
+            stateUpdate.contextAggregationInterval.asMilliseconds(),
+            functionToPlotByIfMetric
           )
           .toPromise()
           .then((resp) => {
@@ -949,7 +981,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.componentDidUpdate();
   }
 
-  componentDidUpdate(previousProps) {
+  componentDidUpdate(previousProps, previousState) {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
       this.contextChartSelectedInitCallDone = false;
       this.setState({ fullRefresh: false, loading: true }, () => {
@@ -965,6 +997,7 @@ export class TimeSeriesExplorer extends React.Component {
     ) {
       const entityControls = this.getControlsForDetector();
       this.loadEntityValues(entityControls);
+      this.loadPlotByOptions();
     }
 
     if (
@@ -989,7 +1022,8 @@ export class TimeSeriesExplorer extends React.Component {
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       previousProps.selectedForecastId !== this.props.selectedForecastId ||
-      previousProps.selectedJobId !== this.props.selectedJobId
+      previousProps.selectedJobId !== this.props.selectedJobId ||
+      previousState.actualPlotFunction !== this.state.actualPlotFunction
     ) {
       const fullRefresh =
         previousProps === undefined ||
@@ -997,7 +1031,8 @@ export class TimeSeriesExplorer extends React.Component {
         !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
         previousProps.selectedForecastId !== this.props.selectedForecastId ||
-        previousProps.selectedJobId !== this.props.selectedJobId;
+        previousProps.selectedJobId !== this.props.selectedJobId ||
+        previousState.actualPlotFunction !== this.state.actualPlotFunction;
       this.loadSingleMetricData(fullRefresh);
     }
 
@@ -1068,8 +1103,8 @@ export class TimeSeriesExplorer extends React.Component {
       zoomTo,
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
+      actualPlotFunction,
     } = this.state;
-
     const chartProps = {
       modelPlotEnabled,
       contextChartData,
@@ -1279,6 +1314,34 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </h2>
                 </EuiTitle>
+
+                {actualPlotFunction && (
+                  <EuiSelect
+                    options={[
+                      {
+                        value: 'avg',
+                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel', {
+                          defaultMessage: 'average',
+                        }),
+                      },
+                      {
+                        value: 'min',
+                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByMinOptionLabel', {
+                          defaultMessage: 'min',
+                        }),
+                      },
+                      {
+                        value: 'max',
+                        text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByMaxOptionLabel', {
+                          defaultMessage: 'max',
+                        }),
+                      },
+                    ]}
+                    value={actualPlotFunction ?? 'avg'}
+                    onChange={(e) => this.setPlotByFunction(e.target.value)}
+                    aria-label="Pick function to plot by (min, max, or average) if metric function"
+                  />
+                )}
 
                 <EuiFlexGroup style={{ float: 'right' }}>
                   {showModelBoundsCheckbox && (
