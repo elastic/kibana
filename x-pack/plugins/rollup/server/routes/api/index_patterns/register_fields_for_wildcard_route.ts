@@ -8,6 +8,7 @@ import { keyBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Field } from '../../../lib/merge_capabilities_with_fields';
 import { RouteDependencies } from '../../../types';
+import type { IndexPatternsFetcher as IndexPatternsFetcherType } from '../../../../../../../src/plugins/data/server';
 
 const parseMetaFields = (metaFields: string | string[]) => {
   let parsedFields: string[] = [];
@@ -23,10 +24,10 @@ const getFieldsForWildcardRequest = async (
   context: any,
   request: any,
   response: any,
-  IndexPatternsFetcher: any
+  IndexPatternsFetcher: typeof IndexPatternsFetcherType
 ) => {
-  const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
-  const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
+  const { asCurrentUser } = context.core.elasticsearch.client;
+  const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
   const { pattern, meta_fields: metaFields } = request.query;
 
   let parsedFields: string[] = [];

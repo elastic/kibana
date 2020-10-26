@@ -26,7 +26,6 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
   RouteMethod,
-  LegacyAPICaller,
 } from '../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
@@ -218,11 +217,7 @@ export class KibanaFramework {
   }
 
   public getIndexPatternsService(requestContext: RequestHandlerContext): IndexPatternsFetcher {
-    return new IndexPatternsFetcher((...rest: Parameters<LegacyAPICaller>) => {
-      rest[1] = rest[1] || {};
-      rest[1].allowNoIndices = true;
-      return requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(...rest);
-    });
+    return new IndexPatternsFetcher(requestContext.core.elasticsearch.client.asCurrentUser, true);
   }
 
   public getSpaceId(request: KibanaRequest): string {
