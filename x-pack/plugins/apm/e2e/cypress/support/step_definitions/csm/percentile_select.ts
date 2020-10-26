@@ -12,9 +12,7 @@ When('the user changes the selected percentile', () => {
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
 
-  getDataTestSubj('uxPercentileSelect').click();
-
-  getDataTestSubj('p95Percentile').click();
+  getDataTestSubj('uxPercentileSelect').select('95');
 });
 
 Then(`it displays client metric related to that percentile`, () => {
@@ -22,8 +20,5 @@ Then(`it displays client metric related to that percentile`, () => {
 
   verifyClientMetrics(metrics, false);
 
-  // reset to median
-  getDataTestSubj('uxPercentileSelect').click();
-
-  getDataTestSubj('p50Percentile').click();
+  getDataTestSubj('uxPercentileSelect').select('50');
 });

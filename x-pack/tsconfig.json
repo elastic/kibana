@@ -13,10 +13,7 @@
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
     "plugins/licensing/**/*",
-    "plugins/global_search/**/*",
-    "../src/plugins/usage_collection/**/*",
-    "../src/plugins/telemetry_collection_manager/**/*",
-    "../src/plugins/telemetry/**/*"
+    "plugins/global_search/**/*"
   ],
   "compilerOptions": {
     "paths": {
@@ -36,6 +33,8 @@
     { "path": "./plugins/global_search/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../src/plugins/telemetry_collection_manager/tsconfig.json" },
-    { "path": "../src/plugins/telemetry/tsconfig.json" }
+    { "path": "../src/plugins/telemetry/tsconfig.json" },
+    { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
+    { "path": "../src/plugins/newsfeed/tsconfig.json" },
   ]
 }

@@ -247,11 +247,16 @@ export async function getNewActionsSince(
         nodeTypes.literal.buildNode(false),
       ])
     ),
+    nodeTypes.function.buildNodeWithArgumentNodes('is', [
+      nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`),
+      nodeTypes.wildcard.buildNode(nodeTypes.wildcard.wildcardSymbol),
+      nodeTypes.literal.buildNode(false),
+    ]),
     nodeTypes.function.buildNode(
       'range',
       `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.created_at`,
       {
-        gte: timestamp,
+        gt: timestamp,
       }
     ),
   ]);

@@ -14,9 +14,15 @@ jest.mock('../../../shared/http', () => ({
 }));
 import { HttpLogic } from '../../../shared/http';
 jest.mock('../../../shared/flash_messages', () => ({
+  FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn() } },
+  setSuccessMessage: jest.fn(),
   flashAPIErrors: jest.fn(),
 }));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  FlashMessagesLogic,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
 
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
@@ -952,6 +958,13 @@ describe('CredentialsLogic', () => {
           });
         });
       });
+
+      describe('listener side-effects', () => {
+        it('should clear flashMessages whenever the credentials form flyout is opened', () => {
+          CredentialsLogic.actions.showCredentialsForm();
+          expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
+        });
+      });
     });
 
     describe('hideCredentialsForm', () => {
@@ -1142,6 +1155,7 @@ describe('CredentialsLogic', () => {
         );
         await promise;
         expect(CredentialsLogic.actions.onApiKeyDelete).toHaveBeenCalledWith(tokenName);
+        expect(setSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
