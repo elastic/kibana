@@ -51,7 +51,7 @@ export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   Input,
   Arguments,
   Output,
-  ExecutionContext<unknown, VegaInspectorAdapters>
+  ExecutionContext<VegaInspectorAdapters>
 >;
 
 export const createVegaFn = (
