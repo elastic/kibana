@@ -6,28 +6,17 @@
 
 import { IIndexPattern } from '../../../../../src/plugins/data/common/index_patterns';
 import { MapSettings } from '../reducers/map';
-import { EmbeddableInput, EmbeddableOutput } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableInput, EmbeddableOutput, SavedObjectEmbeddableInput } from '../../../../../src/plugins/embeddable/public';
 import { Filter, Query, RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
 import { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 
-export interface MapEmbeddableConfig {
-  description?: string;
-  editUrl?: string;
-  editApp?: string;
-  editPath?: string;
-  indexPatterns: IIndexPattern[];
+export type MapEmbeddableConfig = {
   editable: boolean;
-  title?: string;
-  layerList: LayerDescriptor[];
-  settings?: MapSettings;
-}
+};
 
-export interface MapEmbeddableInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  filters: Filter[];
-  query?: Query;
-  refreshConfig: RefreshInterval;
-  isLayerTOCOpen: boolean;
+type MapEmbeddableState = {
+  refreshConfig?: RefreshInterval;
+  isLayerTOCOpen?: boolean;
   openTOCDetails?: string[];
   disableTooltipControl?: boolean;
   disableInteractive?: boolean;
@@ -37,8 +26,13 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   mapCenter?: MapCenterAndZoom;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
-}
+};
+export type MapByValueInput = {
+  attributes: MapSavedObjectAttributes;
+} & EmbeddableInput & MapEmbeddableState;
+export type MapByReferenceInput = SavedObjectEmbeddableInput & MapEmbeddableState;
+export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 
-export interface MapEmbeddableOutput extends EmbeddableOutput {
+export type MapEmbeddableOutput = EmbeddableOutput & {
   indexPatterns: IIndexPattern[];
 }
