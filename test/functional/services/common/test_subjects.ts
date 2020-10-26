@@ -177,12 +177,20 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
             tryTimeout?: number;
           }
     ): Promise<string> {
-      const findTimeout = typeof options === 'number' ? options : options?.findTimeout;
-      const tryTimeout = typeof options !== 'number' ? options?.tryTimeout : undefined;
+      const findTimeout =
+        (typeof options === 'number' ? options : options?.findTimeout) ??
+        config.get('timeouts.find');
 
-      return await retry.tryForTime(tryTimeout ?? config.get('timeouts.try'), async () => {
-        log.debug(`TestSubjects.getAttribute(${selector}, ${attribute})`);
-        const element = await this.find(selector, findTimeout ?? config.get('timeouts.find'));
+      const tryTimeout =
+        (typeof options !== 'number' ? options?.tryTimeout : undefined) ??
+        config.get('timeouts.try');
+
+      log.debug(
+        `TestSubjects.getAttribute(${selector}, ${attribute}, tryTimeout=${tryTimeout}, findTimeout=${findTimeout})`
+      );
+
+      return await retry.tryForTime(tryTimeout, async () => {
+        const element = await this.find(selector, findTimeout);
         return await element.getAttribute(attribute);
       });
     }
