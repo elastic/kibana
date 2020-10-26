@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getAPMHref } from '../../../shared/Links/apm/APMLink';
 
 export function CopyTraceLink({ transaction }: { transaction: ITransaction }) {
@@ -37,7 +37,7 @@ export function CopyTraceLink({ transaction }: { transaction: ITransaction }) {
             title: i18n.translate(
               'xpack.apm.transactionDetails.copyTraceSampleFailureTitle',
               {
-                defaultMessage: 'Copy Failure',
+                defaultMessage: 'Unable to copy trace url to clipboard',
               }
             ),
           });
