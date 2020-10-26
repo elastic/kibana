@@ -80,7 +80,7 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
           'Performance is a distribution. Measure the experiences of all visitors to your web application and understand how to improve the experience for everyone.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.ux.link', {
-        defaultMessage: 'Install Rum Agent',
+        defaultMessage: 'Install RUM Agent',
       }),
       href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
     },

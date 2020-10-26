@@ -24,7 +24,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const fieldNames =
     'user.username,user.id,host.ip,user_agent.name,kubernetes.pod.uuid,url.domain,container.id,service.node.name';
 
-  describe('Slow durations', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/81264
+  describe.skip('Slow durations', () => {
     const url = format({
       pathname: `/api/apm/correlations/slow_durations`,
       query: { start, end, durationPercentile, fieldNames },

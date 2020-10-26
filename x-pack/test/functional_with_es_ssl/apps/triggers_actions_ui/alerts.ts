@@ -110,7 +110,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Saved '${alertName}'`);
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([
@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmAlertSaveModal');
 
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Saved '${alertName}'`);
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([

@@ -37,7 +37,6 @@ featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
     id: 'feature-1',
     name: 'feature 1',
-    icon: 'spacesApp',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,

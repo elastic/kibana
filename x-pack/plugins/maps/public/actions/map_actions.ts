@@ -18,6 +18,7 @@ import {
   getWaitingForMapReadyLayerListRaw,
   getQuery,
   getTimeFilters,
+  getLayerList,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -56,6 +57,7 @@ import {
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
+import { cleanTooltipStateForLayer } from './tooltip_actions';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -128,8 +130,7 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const state = getState();
-    const dataFilters = getDataFilters(state);
+    const dataFilters = getDataFilters(getState());
     const { extent, zoom: newZoom } = newMapConstants;
     const { buffer, zoom: currentZoom } = dataFilters;
 
@@ -164,6 +165,15 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
         ...newMapConstants,
       },
     });
+
+    if (currentZoom !== newZoom) {
+      getLayerList(getState()).map((layer) => {
+        if (!layer.showAtZoomLevel(newZoom)) {
+          dispatch(cleanTooltipStateForLayer(layer.getId()));
+        }
+      });
+    }
+
     await dispatch(syncDataForAllLayers());
   };
 }
