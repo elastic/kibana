@@ -17,6 +17,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       comment: {
         type: 'text',
       },
+      type: {
+        type: 'keyword',
+      },
       created_at: {
         type: 'date',
       },

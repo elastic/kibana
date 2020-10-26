@@ -10,6 +10,7 @@ import { UserRT } from '../user';
 
 const CommentBasicRt = rt.type({
   comment: rt.string,
+  type: rt.union([rt.string, rt.null, rt.undefined]),
 });
 
 export const CommentAttributesRt = rt.intersection([
