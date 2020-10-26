@@ -503,7 +503,7 @@ describe('Lens App', () => {
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
         await getButton(inst).run(inst.getDOMNode());
         inst.update();
-        const handler = inst.find('[data-test-subj="lnsApp_saveModalOrigin"]').prop('onSave') as (
+        const handler = inst.find('SavedObjectSaveModalOrigin').prop('onSave') as (
           p: unknown
         ) => void;
         handler(saveProps);
