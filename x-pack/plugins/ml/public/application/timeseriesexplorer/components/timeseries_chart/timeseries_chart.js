@@ -1385,7 +1385,7 @@ class TimeseriesChartIntl extends Component {
       if (marker.metricFunction) {
         tooltipData.push({
           label: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.metricActualPlotFunctionLabel',
             {
               defaultMessage: 'function',
             }

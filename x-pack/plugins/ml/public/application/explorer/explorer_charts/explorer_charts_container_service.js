@@ -55,7 +55,6 @@ export const anomalyDataChange = function (
 ) {
   const data = getDefaultChartsData();
 
-  console.log('anomalyRecords', anomalyRecords);
   const filteredRecords = anomalyRecords.filter((record) => {
     return Number(record.record_score) >= severity;
   });
