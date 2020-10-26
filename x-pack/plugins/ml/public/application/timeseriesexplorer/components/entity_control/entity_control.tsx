@@ -9,13 +9,7 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 export interface Entity {
   fieldName: string;
@@ -156,9 +150,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     return (
       <EuiFlexItem grow={false}>
         <EuiFormRow label={entity.fieldName} helpText={forceSelection ? selectMessage : null}>
-          <EuiToolTip position="right" content={forceSelection ? selectMessage : null}>
-            {control}
-          </EuiToolTip>
+          {control}
         </EuiFormRow>
       </EuiFlexItem>
     );

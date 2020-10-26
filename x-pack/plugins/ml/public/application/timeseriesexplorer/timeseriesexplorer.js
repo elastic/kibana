@@ -1134,7 +1134,6 @@ export class TimeSeriesExplorer extends React.Component {
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
         {fieldNamesWithEmptyValues.length > 0 && (
           <EuiCallOut
-            className="single-metric-request-callout"
             title={
               <FormattedMessage
                 id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
