@@ -5,7 +5,6 @@
  */
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import { LicensingPluginSetup } from '../../licensing/server';
 import {
   CoreSetup,
   CoreStart,
@@ -66,10 +65,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup,
-    {
-      visTypeTimelion,
-      licensing,
-    }: { visTypeTimelion?: TimelionSetupContract; licensing: LicensingPluginSetup }
+    { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
     this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
 
