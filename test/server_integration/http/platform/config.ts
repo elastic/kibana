@@ -16,28 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }) {
-  const supertest = getService('supertest');
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const httpConfig = await readConfigFile(require.resolve('../../config'));
 
-  describe('kibana server cache-control', () => {
-    it('properly marks responses as private, with directives to disable caching', async () => {
-      await supertest
-        .get('/api/status')
-        .expect('Cache-Control', 'private, no-cache, no-store, must-revalidate')
-        .expect(200);
-    });
-
-    it('allows translation bundles to be cached', async () => {
-      await supertest
-        .get('/translations/en.json')
-        .expect('Cache-Control', 'must-revalidate')
-        .expect(200);
-    });
-
-    it('allows the bootstrap bundles to be cached', async () => {
-      await supertest.get('/bootstrap.js').expect('Cache-Control', 'must-revalidate').expect(200);
-    });
-  });
+  return {
+    testFiles: [require.resolve('./cache'), require.resolve('./headers')],
+    services: httpConfig.get('services'),
+    servers: httpConfig.get('servers'),
+    junit: {
+      reportName: 'Kibana Platform Http Integration Tests',
+    },
+    esTestCluster: httpConfig.get('esTestCluster'),
+    kbnTestServer: httpConfig.get('kbnTestServer'),
+  };
 }
