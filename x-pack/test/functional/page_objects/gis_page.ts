@@ -235,7 +235,15 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     }
 
     async isSetViewPopoverOpen() {
-      return await testSubjects.exists('mapSetViewForm', { timeout: 5000 });
+      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
+    }
+
+    /**
+     * When we try to open the set view form use a longer timeout and throw
+     * an error if it fails to trigger a retry
+     */
+    async waitForSetViewPopoverOpen() {
+      await testSubjects.existOrFail('mapSetViewForm', { timeout: 5000 });
     }
 
     async openSetViewPopover() {
@@ -243,10 +251,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       if (!isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await this.isSetViewPopoverOpen();
-          if (!isOpenAfterClick) {
-            throw new Error('set view popover not opened');
-          }
+          await this.waitForSetViewPopoverOpen();
         });
       }
     }
@@ -256,10 +261,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       if (isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await this.isSetViewPopoverOpen();
-          if (isOpenAfterClick) {
-            throw new Error('set view popover not closed');
-          }
+          await this.waitForSetViewPopoverOpen();
         });
       }
     }
