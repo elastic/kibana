@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         this.timeout(180000);
 
         await PageObjects.common.navigateToApp('canvas');
-        await PageObjects.canvas.loadSavedWorkpad('The Very Cool Workpad for PDF Tests');
+        await PageObjects.canvas.loadFirstWorkpad('The Very Cool Workpad for PDF Tests');
         await PageObjects.reporting.openPdfReportingPanel();
         await PageObjects.reporting.clickGenerateReportButton();
 
