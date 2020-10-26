@@ -23,7 +23,8 @@ export const createMockExecutionContext = <ExtraContext extends object = object>
   extraContext: ExtraContext = {} as ExtraContext
 ): ExecutionContext & ExtraContext => {
   const executionContext: ExecutionContext = {
-    getInitialInput: jest.fn(),
+    getSearchContext: jest.fn(),
+    getSearchSessionId: jest.fn(),
     variables: {},
     types: {},
     abortSignal: {
@@ -37,7 +38,6 @@ export const createMockExecutionContext = <ExtraContext extends object = object>
       requests: {} as any,
       data: {} as any,
     },
-    search: {},
   };
 
   return {
