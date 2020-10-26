@@ -81,11 +81,18 @@ export const defaultIndexNamesSelector = () => {
   return mapStateToProps;
 };
 
+const EXLCUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 export const getSourcererScopeSelector = () => {
   const getScopesSelector = scopesSelector();
 
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope =>
-    getScopesSelector(state)[scopeId];
+  const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => ({
+    ...getScopesSelector(state)[scopeId],
+    selectedPatterns: getScopesSelector(state)[scopeId].selectedPatterns.some(
+      (index) => index === 'logs-*'
+    )
+      ? [...getScopesSelector(state)[scopeId].selectedPatterns, EXLCUDE_ELASTIC_CLOUD_INDEX]
+      : getScopesSelector(state)[scopeId].selectedPatterns,
+  });
 
   return mapStateToProps;
 };
