@@ -109,8 +109,6 @@ export class CpuUsageAlert extends BaseAlert {
       if (this.config.ui.container.elasticsearch.enabled) {
         stat.cpuUsage =
           (stat.containerUsage / (stat.containerPeriods * stat.containerQuota * 1000)) * 100;
-      } else {
-        stat.cpuUsage = stat.cpuUsage;
       }
 
       return {
