@@ -7,7 +7,7 @@
 import React from 'react';
 import { OverlayStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import { Tag } from '../../../common/types';
+import { Tag, TagAttributes } from '../../../common/types';
 import { ITagInternalClient } from '../../tags';
 
 interface GetModalOpenerOptions {
@@ -16,6 +16,7 @@ interface GetModalOpenerOptions {
 }
 
 interface OpenCreateModalOptions {
+  defaultValues?: Partial<TagAttributes>;
   onCreate: (tag: Tag) => void;
 }
 
@@ -24,11 +25,15 @@ export type CreateModalOpener = (options: OpenCreateModalOptions) => Promise<Ove
 export const getCreateModalOpener = ({
   overlays,
   tagClient,
-}: GetModalOpenerOptions): CreateModalOpener => async ({ onCreate }: OpenCreateModalOptions) => {
+}: GetModalOpenerOptions): CreateModalOpener => async ({
+  onCreate,
+  defaultValues,
+}: OpenCreateModalOptions) => {
   const { CreateTagModal } = await import('./create_modal');
   const modal = overlays.openModal(
     toMountPoint(
       <CreateTagModal
+        defaultValues={defaultValues}
         onClose={() => {
           modal.close();
         }}

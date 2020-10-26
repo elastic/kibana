@@ -12,15 +12,17 @@ import { getRandomColor, validateTag } from './utils';
 import { CreateOrEditModal } from './create_or_edit_modal';
 
 interface CreateTagModalProps {
+  defaultValues?: Partial<TagAttributes>;
   onClose: () => void;
   onSave: (tag: Tag) => void;
   tagClient: ITagsClient;
 }
 
-const createEmptyTag = (): TagAttributes => ({
+const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAttributes => ({
   name: '',
   description: '',
   color: getRandomColor(),
+  ...providedDefaults,
 });
 
 const initialValidation: TagValidation = {
@@ -29,9 +31,16 @@ const initialValidation: TagValidation = {
   errors: {},
 };
 
-export const CreateTagModal: FC<CreateTagModalProps> = ({ tagClient, onClose, onSave }) => {
+export const CreateTagModal: FC<CreateTagModalProps> = ({
+  defaultValues,
+  tagClient,
+  onClose,
+  onSave,
+}) => {
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
-  const [tagAttributes, setTagAttributes] = useState<TagAttributes>(createEmptyTag());
+  const [tagAttributes, setTagAttributes] = useState<TagAttributes>(
+    getDefaultAttributes(defaultValues)
+  );
 
   const setField = useCallback(
     <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {

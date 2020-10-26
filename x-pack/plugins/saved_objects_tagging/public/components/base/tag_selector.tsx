@@ -150,13 +150,16 @@ export const TagSelector: FC<TagSelectorProps> = ({
 
       if (newSelectedOptions.find(isCreateOption)) {
         openCreateModal({
+          defaultValues: {
+            name: currentSearch,
+          },
           onCreate: (tag) => {
             setSelected([...selected, tag.id]);
           },
         });
       }
     },
-    [selected, setSelected, openCreateModal]
+    [selected, setSelected, openCreateModal, currentSearch]
   );
 
   return (
