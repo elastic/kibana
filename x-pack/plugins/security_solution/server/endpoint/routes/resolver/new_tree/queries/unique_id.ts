@@ -5,6 +5,8 @@
  */
 import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 
+export type Nodes = Array<Map<string, string>>;
+
 export interface EdgeDefinition {
   id: string;
   parentID: string;
@@ -48,6 +50,13 @@ export class UniqueID {
     return { schemaParts, idToParent, sourceFilter };
   }
 
+  private validateKeys(keys: IterableIterator<string>) {
+    for (const key of keys) {
+      if (!this.parts.has(key)) {
+        throw new Error(`node key: ${key} was not found in id definition`);
+      }
+    }
+  }
   /**
    * Given a spec like:
    * [
@@ -98,22 +107,14 @@ export class UniqueID {
    *    }
    *  ]
    */
-  public buildDescendantsQueryFilters(nodes: Array<Map<string, string>>) {
-    const validateKeys = (keys: IterableIterator<string>) => {
-      for (const key of keys) {
-        if (!this.parts.has(key)) {
-          throw new Error(`node key: ${key} was not found in id definition`);
-        }
-      }
-    };
-
+  public buildDescendantsQueryFilters(nodes: Nodes) {
     // iterate over all the nodes and build a bunch of OR clauses (find node1 or node2 etc)
     // to build each OR clause, we need to construct a bunch of AND clauses to restrict the
     // search to the fields included in the edge's schema
     // so the resulting clause would be:
     // (node1.fieldA == valueA AND node1.fieldB == valueB) OR (node2.fieldE == valueE AND node2.fieldF == valueF) etc
     const filters = nodes.map((node) => {
-      validateKeys(node.keys());
+      this.validateKeys(node.keys());
       const filterArray = [];
       for (const [key, value] of node.entries()) {
         const parentKey = this.idToParent.get(key);
@@ -131,6 +132,29 @@ export class UniqueID {
     });
 
     return filters;
+  }
+
+  public buildDescendantsAncestryQueryFilters(nodes: Nodes): JsonValue[] {
+    if (!this.idSchema.ancestry) {
+      return [];
+    }
+
+    const ancestryTerms = nodes.map((node) => {
+      this.validateKeys(node.keys());
+      let ancestryValue = '';
+      // extract out the building of the ancestry value
+      for (const [_, value] of node.entries()) {
+        // TODO make more performant?
+        ancestryValue = `${ancestryValue}-${value}`;
+      }
+      return ancestryValue;
+    });
+
+    return [
+      {
+        terms: { [this.idSchema.ancestry]: ancestryTerms },
+      },
+    ];
   }
 
   public buildConstraints(): JsonObject[] {
@@ -154,6 +178,7 @@ export class UniqueID {
   }
 
   private buildFinalAgg(nestedAggs: any) {
+    // TODO also add bucket_sort on @timestamp with a max metrics aggs
     nestedAggs.aggs = {
       singleEvent: {
         top_hits: {
@@ -180,6 +205,57 @@ export class UniqueID {
   }
 
   public buildAggregations(size: number): JsonValue {
+    const accumulatedAggs: any = { aggs: {} };
+    let current: JsonObject = accumulatedAggs;
+    for (const connection of this.idSchema.edges) {
+      current = this.buildSingleAgg(current, connection.id, size);
+    }
+
+    this.buildFinalAgg(current);
+    return accumulatedAggs.aggs;
+  }
+
+  private buildFinalAncestryAgg(nestedAggs: any, nodes: Nodes) {
+    // TODO also add bucket_sort on @timestamp with a max metrics aggs
+    nestedAggs.aggs = {
+      singleEvent: {
+        top_hits: {
+          // TODO figure out if we can use doc_values
+          _source: this.sourceFilter,
+          size: 1,
+          // TODO there might a use case to make the order configurable
+          sort: [{ '@timestamp': { order: 'asc' } }],
+        },
+      },
+      ancestry: {
+        max: {
+          script: {
+            source: `
+              Map ancestry = [:];
+              int length = params._source.process.Ext.ancestry.length;
+              List sourceAncestryArray = params._source.process.Ext.ancestry;
+              for (int i = 0; i < length; i++) {
+                ancestry[sourceAncestryArray[i]] = i;
+              }
+              for (String id : params.ids) {
+                def index = ancestry[id];
+                if (index != null) {
+                  return index;
+                }
+              }
+              return -1;
+            `,
+            params: {
+              // TODO this should be constructed using the nodes param
+              ids: ['yo', '9tw2j9fryf'],
+            },
+          },
+        },
+      },
+    };
+  }
+
+  public buildAncestryAggregations(size: number, nodes: Nodes): JsonValue {
     const accumulatedAggs: any = { aggs: {} };
     let current: JsonObject = accumulatedAggs;
     for (const connection of this.idSchema.edges) {

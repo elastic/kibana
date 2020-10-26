@@ -93,7 +93,7 @@ export class DescendantsQuery {
                 },
               },
             },
-            this.uniqueID.buildDescendantsAncestryQueryFilters(nodes),
+            ...this.uniqueID.buildDescendantsAncestryQueryFilters(nodes),
             ...this.uniqueID.buildConstraints(),
             {
               term: { 'event.category': 'process' },
@@ -104,7 +104,7 @@ export class DescendantsQuery {
           ],
         },
       },
-      aggs: this.uniqueID.buildAggregations(this.size),
+      aggs: this.uniqueID.buildAncestryAggregations(this.size),
     };
   }
 
