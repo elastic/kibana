@@ -44,10 +44,8 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
 
   phase.phaseEnabled = true;
 
-  if (phaseSerialized.actions.allocate) {
-    phase.dataTierAllocationType = determineDataTierAllocationType(
-      phaseSerialized.actions.allocate
-    );
+  if (phaseSerialized.actions) {
+    phase.dataTierAllocationType = determineDataTierAllocationType(phaseSerialized.actions);
   }
 
   if (phaseSerialized.min_age) {
