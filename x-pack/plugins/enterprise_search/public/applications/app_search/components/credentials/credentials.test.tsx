@@ -14,6 +14,7 @@ import { Credentials } from './credentials';
 import { EuiCopy, EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
+import { CredentialsFlyout } from './credentials_flyout';
 
 describe('Credentials', () => {
   // Kea mocks
@@ -70,5 +71,17 @@ describe('Credentials', () => {
     const button: any = wrapper.find('[data-test-subj="CreateAPIKeyButton"]');
     button.props().onClick();
     expect(actions.showCredentialsForm).toHaveBeenCalledTimes(1);
+  });
+
+  it('will render CredentialsFlyout if shouldShowCredentialsForm is true', () => {
+    setMockValues({ shouldShowCredentialsForm: true });
+    const wrapper = shallow(<Credentials />);
+    expect(wrapper.find(CredentialsFlyout)).toHaveLength(1);
+  });
+
+  it('will NOT render CredentialsFlyout if shouldShowCredentialsForm is false', () => {
+    setMockValues({ shouldShowCredentialsForm: false });
+    const wrapper = shallow(<Credentials />);
+    expect(wrapper.find(CredentialsFlyout)).toHaveLength(0);
   });
 });
