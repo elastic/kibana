@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment';
 import {
   ClusterDetailsGetter,
   StatsCollectionConfig,
@@ -13,7 +14,6 @@ import {
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { CustomContext } from './get_all_stats';
-
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
  */
@@ -29,9 +29,12 @@ export const getClusterUuids: ClusterDetailsGetter<CustomContext> = async (
  * Fetch the aggregated Cluster UUIDs from the monitoring cluster.
  */
 export function fetchClusterUuids(
-  { callCluster, start, end }: StatsCollectionConfig,
+  { callCluster, timestamp }: StatsCollectionConfig,
   maxBucketSize: number
 ) {
+  const start = moment(timestamp).subtract(20, 'minutes').toISOString();
+  const end = moment(timestamp).toISOString();
+
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: 0,

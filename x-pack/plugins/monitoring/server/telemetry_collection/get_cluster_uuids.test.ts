@@ -26,15 +26,14 @@ describe('get_cluster_uuids', () => {
   const expectedUuids = response.aggregations.cluster_uuids.buckets
     .map((bucket) => bucket.key)
     .map((expectedUuid) => ({ clusterUuid: expectedUuid }));
-  const start = new Date().toISOString();
-  const end = new Date().toISOString();
+  const timestamp = Date.now();
 
   describe('getClusterUuids', () => {
     it('returns cluster UUIDs', async () => {
       callCluster.withArgs('search').returns(Promise.resolve(response));
       expect(
         await getClusterUuids(
-          { callCluster, esClient, soClient, start, end, usageCollection: {} as any },
+          { callCluster, esClient, soClient, timestamp, usageCollection: {} as any },
           {
             maxBucketSize: 1,
           } as any
@@ -48,7 +47,7 @@ describe('get_cluster_uuids', () => {
       callCluster.returns(Promise.resolve(response));
       expect(
         await fetchClusterUuids(
-          { callCluster, esClient, soClient, start, end, usageCollection: {} as any },
+          { callCluster, esClient, soClient, timestamp, usageCollection: {} as any },
           {
             maxBucketSize: 1,
           } as any

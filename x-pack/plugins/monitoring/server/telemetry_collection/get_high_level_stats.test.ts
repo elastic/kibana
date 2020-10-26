@@ -15,8 +15,8 @@ describe('get_high_level_stats', () => {
   const callWith = sinon.stub();
   const product = 'xyz';
   const cloudName = 'bare-metal';
-  const start = 0;
-  const end = 1;
+  const start = new Date().toISOString();
+  const end = new Date().toISOString();
   const response = {
     hits: {
       hits: [

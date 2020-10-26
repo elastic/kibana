@@ -414,7 +414,7 @@ export async function getBeatsStats(
   clusterUuids: string[],
   start: string,
   end: string
-): BeatsStatsByClusterUuid {
+): Promise<BeatsStatsByClusterUuid> {
   const options: BeatsProcessOptions = {
     clusters: {}, // the result object to be built up
     clusterHostSets: {}, // passed to processResults for tracking state in the results generation
