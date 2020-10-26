@@ -20,7 +20,7 @@ export interface StyleField {
   supportsAutoDomain: boolean;
 }
 
-export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFieldsCustodian> {
+export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFieldsHelper> {
   const promises: Array<Promise<StyleField>> = fields.map(async (field: IField) => {
     return {
       label: await field.getLabel(),
@@ -31,10 +31,10 @@ export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFi
     };
   });
   const styleFields = await Promise.all(promises);
-  return new StyleFieldsCustodian(styleFields);
+  return new StyleFieldsHelper(styleFields);
 }
 
-class StyleFieldsCustodian {
+class StyleFieldsHelper {
   private readonly _styleFields: StyleField[];
   private readonly _ordinalAndCategoricalFields: StyleField[];
   private readonly _numberFields: StyleField[];
