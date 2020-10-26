@@ -7,6 +7,7 @@
 import { PolicyFromES } from '../../../common/types';
 
 export const POLICY_NAME = 'my_policy';
+export const SPECIAL_CHARS_NAME = 'test%25';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
 
@@ -59,4 +60,23 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
     name: POLICY_NAME,
   },
   name: POLICY_NAME,
+};
+
+export const SPECIAL_CHARS_POLICY: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_size: '50gb',
+          },
+        },
+      },
+    },
+    name: SPECIAL_CHARS_NAME,
+  },
+  name: SPECIAL_CHARS_NAME,
 };

@@ -76,12 +76,18 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
+  let decodedPolicyName = policyName;
+  // if navigation via router, need to decode policyName
+  if (policyName && history.action === 'PUSH') {
+    decodedPolicyName = decodeURIComponent(policyName);
+  }
+
   return (
     <PresentationComponent
       policies={policies}
       history={history}
       getUrlForApp={getUrlForApp}
-      policyName={policyName}
+      policyName={decodedPolicyName}
     />
   );
 };

@@ -12,7 +12,7 @@ import { CloudSetup } from '../../../cloud/public';
 
 import { KibanaContextProvider } from '../shared_imports';
 
-import { App } from './app';
+import { AppWithRouter } from './app';
 
 export const renderApp = (
   element: Element,
@@ -25,7 +25,11 @@ export const renderApp = (
   render(
     <I18nContext>
       <KibanaContextProvider services={{ cloud }}>
-        <App history={history} navigateToApp={navigateToApp} getUrlForApp={getUrlForApp} />
+        <AppWithRouter
+          history={history}
+          navigateToApp={navigateToApp}
+          getUrlForApp={getUrlForApp}
+        />
       </KibanaContextProvider>
     </I18nContext>,
     element
