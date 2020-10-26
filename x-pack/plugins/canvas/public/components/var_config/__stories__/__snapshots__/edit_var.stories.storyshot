@@ -233,7 +233,7 @@ Array [
             <legend
               className="euiScreenReaderOnly"
             >
-              True/false toggle
+              Boolean value
             </legend>
             <div
               className="euiButtonGroup__buttons"
