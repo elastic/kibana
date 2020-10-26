@@ -282,7 +282,7 @@ const DragDropInner = React.memo(function DragDropInner(
           draggable,
           onDragEnd: dragEnd,
           onDragStart: dragStart,
-          ['data-test-subj']: props['data-test-subj'] || 'lnsDragDrop',
+          dataTestSubj: props['data-test-subj'] || 'lnsDragDrop',
         }}
         dropProps={{
           onDrop: drop,
@@ -315,7 +315,7 @@ const DragDropInner = React.memo(function DragDropInner(
             !state.keyboardMode
               ? i18n.translate('xpack.lens.dragDrop.reorderInactive', {
                   defaultMessage:
-                    '{label} is in position {position} of {groupLength}. Press enter/space to initiate re-order. Then use the up/down arrow keys to re-order.',
+                    '{label} is ranked {position} out of {groupLength}. Press enter/space to initiate reorder',
                   values: {
                     label,
                     position: currentIndex + 1,
@@ -324,7 +324,7 @@ const DragDropInner = React.memo(function DragDropInner(
                 })
               : i18n.translate('xpack.lens.dragDrop.reorderActive', {
                   defaultMessage:
-                    '{label} is in position {position} of {groupLength}. Use the up/down arrow keys to re-order. Press escape to leave re-ordering.',
+                    'Element {label} grabbed. ${label} is ranked {position} out of {groupLength}. Use arrows to change position. Press enter/space to confirm.',
                   values: {
                     label,
                     position: currentIndex + 1,
@@ -354,8 +354,8 @@ const DragDropInner = React.memo(function DragDropInner(
             }
           }}
         >
-          {i18n.translate('xpack.lens.dragDrop.screenReaderButtonLabel', {
-            defaultMessage: 'Press enter to reorder (copy pending)',
+          {i18n.translate('xpack.lens.dragDrop.keyboardReorderHandle', {
+            defaultMessage: 'Keyboard reorder handle',
           })}
         </button>
       </EuiScreenReaderOnly>
@@ -375,7 +375,7 @@ export const ReorderableDragDrop = ({
     draggable: Props['draggable'];
     onDragEnd: (e: DroppableEvent) => void;
     onDragStart: (e: DroppableEvent) => void;
-    ['data-test-subj']: string;
+    dataTestSubj: string;
   };
   dropProps: {
     onDrop: (e: DroppableEvent) => void;
@@ -394,7 +394,10 @@ export const ReorderableDragDrop = ({
   return (
     <div className="lnsDragDrop__reorderableContainer">
       {React.cloneElement(children, {
-        ...draggingProps,
+        draggable: draggingProps.draggable,
+        onDragEnd: draggingProps.onDragEnd,
+        onDragStart: draggingProps.onDragStart,
+        ['data-test-subj']: draggingProps.dataTestSubj,
         className: classNames(
           draggingProps.className,
           reorderState && {
