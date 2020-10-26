@@ -80,7 +80,7 @@ const loginViaEnvironmentCredentials = () => {
   cy.request({
     body: {
       providerType: 'basic',
-      providerName: 'cloud-basic',
+      providerName: 'basic',
       currentURL: '/',
       params: {
         username: Cypress.env(ELASTICSEARCH_USERNAME),
@@ -111,7 +111,7 @@ const loginViaConfig = () => {
     cy.request({
       body: {
         providerType: 'basic',
-        providerName: 'cloud-basic',
+        providerName: 'basic',
         currentURL: '/',
         params: {
           username: config.elasticsearch.username,
