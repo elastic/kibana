@@ -1109,19 +1109,43 @@ describe('#removeReferencesTo', () => {
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
-    await expectForbiddenError(client.removeReferencesTo, { type, id, options });
+    await expectForbiddenError(
+      client.removeReferencesTo,
+      { type, id, options },
+      'removeReferences'
+    );
   });
 
   test(`returns result of baseClient.removeReferencesTo when authorized`, async () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.removeReferencesTo.mockReturnValue(apiCallReturnValue as any);
 
-    const result = await expectSuccess(client.removeReferencesTo, { type, id, options });
+    const result = await expectSuccess(
+      client.removeReferencesTo,
+      { type, id, options },
+      'removeReferences'
+    );
     expect(result).toBe(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
     await expectPrivilegeCheck(client.removeReferencesTo, { type, id, options }, namespace);
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.removeReferencesTo.mockReturnValue(apiCallReturnValue as any);
+    await client.removeReferencesTo(type, id);
+
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_remove_references', EventOutcome.UNKNOWN, { type, id });
+  });
+
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.removeReferencesTo(type, id)).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_remove_references', EventOutcome.FAILURE, { type, id });
   });
 });
 
