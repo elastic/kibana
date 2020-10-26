@@ -17,7 +17,9 @@ export BUILD_URL=""
 export JOB_NAME=""
 export NODE_NAME=""
 
+# Reads the ES_BUILD_JAVA env var out of .ci/java-versions.properties and exports it
 export "$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | xargs)"
+
 export PATH="$HOME/.java/$ES_BUILD_JAVA/bin:$PATH"
 export JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
 
