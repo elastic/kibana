@@ -379,11 +379,13 @@ export function removeSelectedLayer() {
   ) => {
     const state = getState();
     const layerId = getSelectedLayerId(state);
-    dispatch(removeLayer(layerId));
+    if (layerId) {
+      dispatch(removeLayer(layerId));
+    }
   };
 }
 
-export function removeLayer(layerId: string | null) {
+export function removeLayer(layerId: string) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -398,7 +400,7 @@ export function removeLayer(layerId: string | null) {
   };
 }
 
-function removeLayerFromLayerList(layerId: string | null) {
+function removeLayerFromLayerList(layerId: string) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -411,7 +413,7 @@ function removeLayerFromLayerList(layerId: string | null) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(cleanTooltipStateForLayer(layerId!));
+    dispatch(cleanTooltipStateForLayer(layerId));
     layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,
