@@ -62,7 +62,7 @@ export function VectorStyleSymbolizeAsEditor({
         onChange={onSymbolizeAsChange}
         isFullWidth
         legend={i18n.translate('xpack.maps.vector.symbolControlLegend', {
-          defaultMessage: 'Symbol type control',
+          defaultMessage: 'Symbol type',
         })}
       />
     </EuiFormRow>

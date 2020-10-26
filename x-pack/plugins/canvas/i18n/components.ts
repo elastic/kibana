@@ -1071,7 +1071,7 @@ export const ComponentStrings = {
   VarConfigVarValueField: {
     getBooleanOptionsLegend: () =>
       i18n.translate('xpack.canvas.varConfigVarValueField.booleanOptionsLegend', {
-        defaultMessage: 'True/false toggle',
+        defaultMessage: 'Boolean value',
       }),
     getFalseOption: () =>
       i18n.translate('xpack.canvas.varConfigVarValueField.falseOption', {

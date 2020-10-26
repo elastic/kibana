@@ -183,7 +183,7 @@ export const ArgumentStrings = {
       }),
     getUrlTypeChangeLegend: () =>
       i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.changeLegend', {
-        defaultMessage: 'Change URL type',
+        defaultMessage: 'Image upload type',
       }),
   },
   Number: {

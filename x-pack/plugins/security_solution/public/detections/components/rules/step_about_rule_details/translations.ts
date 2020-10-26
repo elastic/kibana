@@ -29,6 +29,6 @@ export const ABOUT_PANEL_NOTES_TAB = i18n.translate(
 export const ABOUT_CONTROL_LEGEND = i18n.translate(
   'xpack.securitySolution.detectionEngine.details.stepAboutRule.controlLegend',
   {
-    defaultMessage: 'Details toggle control',
+    defaultMessage: 'Viewing',
   }
 );
