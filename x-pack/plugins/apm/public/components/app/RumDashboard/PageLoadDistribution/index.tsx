@@ -13,7 +13,6 @@ import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { ResetPercentileZoom } from './ResetPercentileZoom';
-import { getPercentileLabel } from '../UXMetrics/translations';
 
 export interface PercentileRange {
   min?: number | null;
