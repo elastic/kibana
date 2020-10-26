@@ -71,6 +71,38 @@ describe('UsersGridPage', () => {
     expect(findTestSubject(wrapper, 'userDisabled')).toHaveLength(0);
   });
 
+  it('generates valid links when usernames contain special characters', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([
+        {
+          username: 'username with some fun characters!@#$%^&*()',
+          email: 'foo@bar.net',
+          full_name: 'foo bar',
+          roles: ['kibana_user'],
+          enabled: true,
+        },
+      ]);
+    });
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    await waitForRender(wrapper);
+
+    const link = findTestSubject(wrapper, 'userRowUserName');
+    expect(link.props().href).toMatchInlineSnapshot(
+      `"/edit/username%20with%20some%20fun%20characters!%40%23%24%25%5E%26*()"`
+    );
+  });
+
   it('renders a forbidden message if user is not authorized', async () => {
     const apiClient = userAPIClientMock.create();
     apiClient.getUsers.mockRejectedValue({ body: { statusCode: 403 } });
