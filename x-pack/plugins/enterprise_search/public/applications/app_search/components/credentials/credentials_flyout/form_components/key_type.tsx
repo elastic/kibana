@@ -32,7 +32,7 @@ export const FormKeyType: React.FC = () => {
       helpText={
         <EuiText size="xs">
           <p>
-            {tokenDescription && <strong>{tokenDescription}</strong>}{' '}
+            <strong>{tokenDescription}</strong>{' '}
             <EuiLink href={DOCS_HREF}>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.documentationLink1', {
                 defaultMessage: 'Visit the documentation',
