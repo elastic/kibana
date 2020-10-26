@@ -35,7 +35,7 @@ export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhas
 
   phase.phaseEnabled = true;
 
-  if (phaseSerialized.actions.allocate) {
+  if (phaseSerialized.actions) {
     phase.dataTierAllocationType = determineDataTierAllocationTypeLegacy(phaseSerialized.actions);
   }
 

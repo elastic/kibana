@@ -95,3 +95,58 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
   },
   name: POLICY_NAME,
 };
+
+export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          allocate: {
+            require: {},
+            include: { test: '123' },
+            exclude: {},
+          },
+        },
+      },
+      cold: {
+        actions: {
+          migrate: { enabled: false },
+        },
+      },
+    },
+    name: POLICY_NAME,
+  },
+  name: POLICY_NAME,
+};
+
+export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {},
+      },
+    },
+    name: POLICY_NAME,
+  },
+  name: POLICY_NAME,
+};

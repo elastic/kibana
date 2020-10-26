@@ -26,7 +26,7 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       warmPhaseOnRollover: Boolean(policy.phases.warm?.min_age === '0ms'),
       forceMergeEnabled: Boolean(policy.phases.warm?.actions?.forcemerge),
       bestCompression: policy.phases.warm?.actions?.forcemerge?.index_codec === 'best_compression',
-      dataTierAllocationType: determineDataTierAllocationType(policy.phases.warm?.actions.allocate),
+      dataTierAllocationType: determineDataTierAllocationType(policy.phases.warm?.actions),
     },
   };
 

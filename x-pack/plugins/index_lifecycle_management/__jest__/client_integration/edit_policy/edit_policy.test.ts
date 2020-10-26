@@ -16,6 +16,8 @@ import {
   SNAPSHOT_POLICY_NAME,
   DEFAULT_POLICY,
   POLICY_WITH_INCLUDE_EXCLUDE,
+  POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
+  POLICY_WITH_NODE_ROLE_ALLOCATION,
 } from './constants';
 
 window.scrollTo = jest.fn();
@@ -379,6 +381,59 @@ describe('<EditPolicy />', () => {
       expect(testBed.find('customPolicyCallout').exists()).toBeFalsy();
       expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
       expect(testBed.find('policiesErrorCallout').exists()).toBeTruthy();
+    });
+  });
+
+  describe('data allocation', () => {
+    describe('node roles', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_NODE_ROLE_ALLOCATION]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+      test('showing "default" type', () => {
+        const { find } = testBed;
+        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toContain(
+          'recommended'
+        );
+        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).not.toContain(
+          'Custom'
+        );
+        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).not.toContain('Off');
+      });
+    });
+    describe('node attr and none', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('showing "custom" and "off" types', () => {
+        const { find } = testBed;
+        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toContain('Custom');
+        expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
+      });
     });
   });
 });
