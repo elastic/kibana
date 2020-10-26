@@ -50,7 +50,7 @@ import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
 import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
-import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import {
   setUISettings,
   setApplication,

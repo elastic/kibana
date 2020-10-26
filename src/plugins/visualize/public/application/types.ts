@@ -47,7 +47,7 @@ import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { EventEmitter } from 'events';
 import { DashboardStart } from '../../../dashboard/public';
-import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
 export type PureVisState = SavedVisState;
 

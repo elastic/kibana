@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ApplicationStart } from 'kibana/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
-import { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
+import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
