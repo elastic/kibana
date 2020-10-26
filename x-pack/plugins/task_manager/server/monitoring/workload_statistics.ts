@@ -9,9 +9,7 @@ import { mergeMap, map, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
-import { ConcreteTaskInstance } from '../task';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
 import { HealthStatus } from './monitoring_stats_stream';
@@ -109,7 +107,7 @@ export function createWorkloadAggregator(
 
   return timer(0, refreshInterval).pipe(
     mergeMap(() =>
-      taskStore.aggregate<WorkloadAggregation>({
+      taskStore.aggregate({
         aggs: {
           taskType: {
             terms: { field: 'task.taskType' },
@@ -166,7 +164,7 @@ export function createWorkloadAggregator(
         },
       })
     ),
-    map((result: ESSearchResponse<ConcreteTaskInstance, { body: WorkloadAggregation }>) => {
+    map((result) => {
       const {
         aggregations,
         hits: {
@@ -185,22 +183,13 @@ export function createWorkloadAggregator(
         throw new Error(`Invalid workload: ${JSON.stringify(result)}`);
       }
 
-      const taskTypes = (aggregations.taskType as AggregationResultOf<
-        WorkloadAggregation['aggs']['taskType'],
-        {}
-      >).buckets;
-      const schedules = (aggregations.schedule as AggregationResultOf<
-        WorkloadAggregation['aggs']['schedule'],
-        {}
-      >).buckets;
+      const taskTypes = aggregations.taskType.buckets;
+      const schedules = aggregations.schedule.buckets;
 
       const {
         overdue: { doc_count: overdue },
         scheduleDensity: { buckets: [scheduleDensity] = [] } = {},
-      } = aggregations.idleTasks as AggregationResultOf<
-        WorkloadAggregation['aggs']['idleTasks'],
-        {}
-      >;
+      } = aggregations.idleTasks;
 
       const summary: WorkloadStat = {
         count,

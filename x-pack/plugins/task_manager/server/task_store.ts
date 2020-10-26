@@ -510,7 +510,7 @@ export class TaskStore {
     aggs,
     query,
     size = 0,
-  }: AggregationOpts) {
+  }: TSearchRequest): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
     const { body } = await this.esClient.search<
       ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>
     >({
