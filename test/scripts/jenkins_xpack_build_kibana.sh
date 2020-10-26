@@ -28,7 +28,7 @@ node scripts/functional_tests --assert-none-excluded \
 if [[ -z "$CODE_COVERAGE" ]] ; then
   echo " -> building and extracting default Kibana distributable for use in functional tests"
   cd "$KIBANA_DIR"
-  node scripts/build --debug --no-oss
+  node scripts/build --debug --no-oss --all-platforms
   linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
   installDir="$KIBANA_DIR/install/kibana"
   mkdir -p "$installDir"
