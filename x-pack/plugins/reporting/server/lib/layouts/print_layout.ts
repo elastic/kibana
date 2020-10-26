@@ -5,6 +5,7 @@
  */
 
 import path from 'path';
+import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { LevelLogger } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
@@ -90,11 +91,11 @@ export class PrintLayout extends Layout implements LayoutInstance {
     };
   }
 
-  public getPdfPageOrientation() {
+  public getPdfPageOrientation(): PageOrientation {
     return 'portrait';
   }
 
-  public getPdfPageSize() {
+  public getPdfPageSize(): PredefinedPageSize {
     return 'A4';
   }
 }

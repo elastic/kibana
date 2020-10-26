@@ -26,4 +26,4 @@ export {
   CollectorOptions,
   CollectorFetchContext,
 } from './collector';
-export { UsageCollector } from './usage_collector';
+export { UsageCollector, UsageCollectorOptions } from './usage_collector';
