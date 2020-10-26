@@ -100,16 +100,6 @@ if (doc['task.runAt'].size()!=0) {
   },
 };
 
-export const updateFields = (fieldUpdates: {
-  [field: string]: string | number | Date;
-}): ScriptClause => ({
-  source: Object.keys(fieldUpdates)
-    .map((field) => `ctx._source.task.${field}=params.${field};`)
-    .join(' '),
-  lang: 'painless',
-  params: fieldUpdates,
-});
-
 export const updateFieldsAndMarkAsFailed = (
   fieldUpdates: {
     [field: string]: string | number | Date;
