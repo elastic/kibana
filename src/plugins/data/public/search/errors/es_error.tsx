@@ -17,9 +17,30 @@
  * under the License.
  */
 
-export * from './es_error';
-export * from './painless_error';
-export * from './timeout_error';
-export * from './utils';
-export * from './types';
-export * from './http_error';
+import React from 'react';
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { ApplicationStart } from 'kibana/public';
+import { KbnError } from '../../../../kibana_utils/common';
+import { IEsError } from './types';
+import { getRootCause } from './utils';
+
+export class EsError extends KbnError {
+  constructor(protected readonly err: IEsError) {
+    super('EsError');
+  }
+
+  public getErrorMessage(application: ApplicationStart) {
+    const rootCause = getRootCause(this.err)?.reason;
+
+    return (
+      <>
+        <EuiSpacer size="s" />
+        {rootCause ? (
+          <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
+            {rootCause}
+          </EuiCodeBlock>
+        ) : null}
+      </>
+    );
+  }
+}
