@@ -54,7 +54,8 @@ describe('<EditPolicy />', () => {
 
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(entirePolicy).toMatchInlineSnapshot(`
           Object {
             "name": "my_policy",
             "phases": Object {
@@ -85,18 +86,14 @@ describe('<EditPolicy />', () => {
         await actions.hot.toggleRollover();
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+        const policy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        const hotActions = policy.phases.hot.actions;
+        const rolloverAction = hotActions.rollover;
+        expect(rolloverAction).toBe(undefined);
+        expect(hotActions).toMatchInlineSnapshot(`
           Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "set_priority": Object {
-                    "priority": 100,
-                  },
-                },
-                "min_age": "0ms",
-              },
+            "set_priority": Object {
+              "priority": 100,
             },
           }
         `);
@@ -128,31 +125,15 @@ describe('<EditPolicy />', () => {
         await actions.warm.enable();
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+        const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
+        expect(warmPhase).toMatchInlineSnapshot(`
           Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
-                  },
-                },
-                "min_age": "0ms",
-              },
-              "warm": Object {
-                "actions": Object {
-                  "set_priority": Object {
-                    "priority": 50,
-                  },
-                },
-                "min_age": "0ms",
+            "actions": Object {
+              "set_priority": Object {
+                "priority": 50,
               },
             },
+            "min_age": "0ms",
           }
         `);
       });
@@ -172,7 +153,9 @@ describe('<EditPolicy />', () => {
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        // Check shape of entire policy
+        expect(entirePolicy).toMatchInlineSnapshot(`
           Object {
             "name": "my_policy",
             "phases": Object {
@@ -220,33 +203,15 @@ describe('<EditPolicy />', () => {
         await actions.warm.setReplicas('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+        const warmPhaseActions = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
+          .actions;
+        expect(warmPhaseActions).toMatchInlineSnapshot(`
           Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
-                  },
-                },
-                "min_age": "0ms",
-              },
-              "warm": Object {
-                "actions": Object {
-                  "allocate": Object {
-                    "number_of_replicas": 123,
-                  },
-                  "set_priority": Object {
-                    "priority": 50,
-                  },
-                },
-                "min_age": "0ms",
-              },
+            "allocate": Object {
+              "number_of_replicas": 123,
+            },
+            "set_priority": Object {
+              "priority": 50,
             },
           }
         `);
@@ -258,32 +223,9 @@ describe('<EditPolicy />', () => {
         await actions.warm.warmPhaseOnRollover();
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
-          Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
-                  },
-                },
-                "min_age": "0ms",
-              },
-              "warm": Object {
-                "actions": Object {
-                  "set_priority": Object {
-                    "priority": 50,
-                  },
-                },
-              },
-            },
-          }
-        `);
+        const warmPhaseMinAge = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
+          .min_age;
+        expect(warmPhaseMinAge).toBe(undefined);
       });
     });
 
@@ -310,38 +252,15 @@ describe('<EditPolicy />', () => {
         await actions.warm.setDataAllocation('node_attrs');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toMatchInlineSnapshot(`
+        const warmPhaseAllocate = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
+          .actions.allocate;
+        expect(warmPhaseAllocate).toMatchInlineSnapshot(`
           Object {
-            "name": "my_policy",
-            "phases": Object {
-              "hot": Object {
-                "actions": Object {
-                  "rollover": Object {
-                    "max_age": "30d",
-                    "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
-                  },
-                },
-                "min_age": "123ms",
-              },
-              "warm": Object {
-                "actions": Object {
-                  "allocate": Object {
-                    "exclude": Object {
-                      "def": "456",
-                    },
-                    "include": Object {
-                      "abc": "123",
-                    },
-                  },
-                  "set_priority": Object {
-                    "priority": 50,
-                  },
-                },
-                "min_age": "0ms",
-              },
+            "exclude": Object {
+              "def": "456",
+            },
+            "include": Object {
+              "abc": "123",
             },
           }
         `);
