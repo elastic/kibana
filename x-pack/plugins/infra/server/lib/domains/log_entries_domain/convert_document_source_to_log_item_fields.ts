@@ -9,9 +9,7 @@ import { LogEntriesItemField } from '../../../../common/http_api';
 import { JsonArray, JsonObject, jsonObjectRT, JsonValue } from '../../../../common/typed_json';
 
 const serializeValue = (value: JsonValue): string => {
-  if (Array.isArray(value)) {
-    return value.map(serializeValue).join(', ');
-  } else if (typeof value === 'object' && value != null) {
+  if (typeof value === 'object' && value != null) {
     return stringify(value);
   } else {
     return `${value}`;
