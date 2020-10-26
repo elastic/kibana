@@ -98,6 +98,18 @@ describe('EQL search strategy', () => {
         expect(mockEqlSearch).not.toHaveBeenCalled();
         expect(requestParams).toEqual(expect.objectContaining({ id: 'my-search-id' }));
       });
+
+      it('emits an error if the client throws', async () => {
+        expect.assertions(1);
+        mockEqlSearch.mockReset().mockRejectedValueOnce(new Error('client error'));
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        eqlSearch.search({ options, params }, {}, mockContext).subscribe(
+          () => {},
+          (err) => {
+            expect(err).toEqual(new Error('client error'));
+          }
+        );
+      });
     });
 
     describe('arguments', () => {

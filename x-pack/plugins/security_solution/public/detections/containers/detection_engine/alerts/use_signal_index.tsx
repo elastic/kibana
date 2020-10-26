@@ -17,7 +17,7 @@ export interface ReturnSignalIndex {
   loading: boolean;
   signalIndexExists: boolean | null;
   signalIndexName: string | null;
-  signalIndexTemplateOutdated: boolean | null;
+  signalIndexMappingOutdated: boolean | null;
   createDeSignalIndex: Func | null;
 }
 
@@ -31,7 +31,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   const [signalIndex, setSignalIndex] = useState<Omit<ReturnSignalIndex, 'loading'>>({
     signalIndexExists: null,
     signalIndexName: null,
-    signalIndexTemplateOutdated: null,
+    signalIndexMappingOutdated: null,
     createDeSignalIndex: null,
   });
   const [, dispatchToaster] = useStateToaster();
@@ -49,7 +49,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
           setSignalIndex({
             signalIndexExists: true,
             signalIndexName: signal.name,
-            signalIndexTemplateOutdated: signal.template_outdated,
+            signalIndexMappingOutdated: signal.index_mapping_outdated,
             createDeSignalIndex: createIndex,
           });
         }
@@ -58,7 +58,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
           setSignalIndex({
             signalIndexExists: false,
             signalIndexName: null,
-            signalIndexTemplateOutdated: null,
+            signalIndexMappingOutdated: null,
             createDeSignalIndex: createIndex,
           });
           if (isSecurityAppError(error) && error.body.status_code !== 404) {
@@ -89,7 +89,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
             setSignalIndex({
               signalIndexExists: false,
               signalIndexName: null,
-              signalIndexTemplateOutdated: null,
+              signalIndexMappingOutdated: null,
               createDeSignalIndex: createIndex,
             });
             errorToToaster({ title: i18n.SIGNAL_POST_FAILURE, error, dispatchToaster });

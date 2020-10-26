@@ -105,10 +105,12 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
       windows: {
         events: windows.events,
         malware: windows.malware,
+        popup: windows.popup,
       },
       mac: {
         events: mac.events,
         malware: mac.malware,
+        popup: mac.popup,
       },
       linux: {
         events: linux.events,

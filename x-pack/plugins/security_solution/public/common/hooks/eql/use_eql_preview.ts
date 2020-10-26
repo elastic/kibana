@@ -14,12 +14,13 @@ import {
   AbortError,
   isCompleteResponse,
   isErrorResponse,
+  isPartialResponse,
 } from '../../../../../../../src/plugins/data/common';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
 } from '../../../../../data_enhanced/common';
-import { getEqlAggsData, getSequenceAggs } from './helpers';
+import { formatInspect, getEqlAggsData } from './helpers';
 import { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
@@ -106,13 +107,37 @@ export const useEqlPreview = (): [
               if (isCompleteResponse(res)) {
                 if (!didCancel.current) {
                   setLoading(false);
-                  if (hasEqlSequenceQuery(query)) {
-                    setResponse(getSequenceAggs(res, refetch.current));
-                  } else {
-                    setResponse(getEqlAggsData(res, interval, to, refetch.current));
-                  }
+
+                  setResponse((prev) => {
+                    const { inspect, ...rest } = getEqlAggsData(
+                      res,
+                      interval,
+                      to,
+                      refetch.current,
+                      index,
+                      hasEqlSequenceQuery(query)
+                    );
+                    const inspectDsl = prev.inspect.dsl[0] ? prev.inspect.dsl : inspect.dsl;
+                    const inspectResp = prev.inspect.response[0]
+                      ? prev.inspect.response
+                      : inspect.response;
+
+                    return {
+                      ...prev,
+                      ...rest,
+                      inspect: {
+                        dsl: inspectDsl,
+                        response: inspectResp,
+                      },
+                    };
+                  });
                 }
+
                 unsubscribeStream.current.next();
+              } else if (isPartialResponse(res)) {
+                // TODO: Eql search strategy partial responses return a value under meta.params.body
+                // but the final/complete response does not, that's why the inspect values are set here
+                setResponse((prev) => ({ ...prev, inspect: formatInspect(res, index) }));
               } else if (isErrorResponse(res)) {
                 setLoading(false);
                 notifications.toasts.addWarning(i18n.EQL_PREVIEW_FETCH_FAILURE);

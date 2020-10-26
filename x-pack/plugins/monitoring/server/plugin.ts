@@ -279,8 +279,6 @@ export class Plugin {
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'monitoringApp',
-      navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
