@@ -12,10 +12,11 @@ import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { setPolicy } from '../../index/set_policy';
 import { setTemplate } from '../../index/set_template';
-import { getSignalsTemplate } from './get_signals_template';
+import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
+import { getIndexVersion } from './get_index_version';
 
 export const createIndexRoute = (router: IRouter) => {
   router.post(
@@ -67,18 +68,20 @@ export const createDetectionIndex = async (
   }
 
   const index = siemClient.getSignalsIndex();
-  const indexExists = await getIndexExists(callCluster, index);
+  const policyExists = await getPolicyExists(callCluster, index);
+  if (!policyExists) {
+    await setPolicy(callCluster, index, signalsPolicy);
+  }
   if (await templateNeedsUpdate(callCluster, index)) {
-    const policyExists = await getPolicyExists(callCluster, index);
-    if (!policyExists) {
-      await setPolicy(callCluster, index, signalsPolicy);
-    }
     await setTemplate(callCluster, index, getSignalsTemplate(index));
-    if (indexExists) {
+  }
+  const indexExists = await getIndexExists(callCluster, index);
+  if (indexExists) {
+    const indexVersion = await getIndexVersion(callCluster, index);
+    if (indexVersion !== SIGNALS_TEMPLATE_VERSION) {
       await callCluster('indices.rollover', { alias: index });
     }
-  }
-  if (!indexExists) {
+  } else {
     await createBootstrapIndex(callCluster, index);
   }
 };
