@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataTierAllocationType, AllocateAction } from '../../../../common/types';
+import { DataTierAllocationType, AllocateAction, MigrateAction } from '../../../../common/types';
 
 /**
  * Determine what deserialized state the policy config represents.
@@ -12,20 +12,25 @@ import { DataTierAllocationType, AllocateAction } from '../../../../common/types
  * See {@DataTierAllocationType} for more information.
  */
 export const determineDataTierAllocationType = (
-  allocateAction?: AllocateAction
+  actions: {
+    allocate?: AllocateAction;
+    migrate?: MigrateAction;
+  } = {}
 ): DataTierAllocationType => {
-  if (!allocateAction) {
-    return 'default';
-  }
+  const { allocate, migrate } = actions;
 
-  if (allocateAction.migrate?.enabled === false) {
+  if (migrate?.enabled === false) {
     return 'none';
   }
 
+  if (!allocate) {
+    return 'default';
+  }
+
   if (
-    (allocateAction.require && Object.keys(allocateAction.require).length) ||
-    (allocateAction.include && Object.keys(allocateAction.include).length) ||
-    (allocateAction.exclude && Object.keys(allocateAction.exclude).length)
+    (allocate.require && Object.keys(allocate.require).length) ||
+    (allocate.include && Object.keys(allocate.include).length) ||
+    (allocate.exclude && Object.keys(allocate.exclude).length)
   ) {
     return 'custom';
   }
