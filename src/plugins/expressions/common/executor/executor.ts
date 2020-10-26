@@ -20,7 +20,6 @@
 /* eslint-disable max-classes-per-file */
 
 import { cloneDeep, mapValues } from 'lodash';
-import semver from 'semver';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -87,6 +86,17 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
     return Object.values(this.toJS());
   }
 }
+
+const semverGte = (semver1: string, semver2: string) => {
+  const regex = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/;
+  const [major1, minor1, patch1] = semver1.match(regex) as RegExpMatchArray;
+  const [major2, minor2, patch2] = semver2.match(regex) as RegExpMatchArray;
+
+  return (
+    major1 > major2 ||
+    (major1 === major2 && (minor1 > minor2 || (minor1 === minor2 && patch1 >= patch2)))
+  );
+};
 
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
   implements PersistableState<ExpressionAstExpression> {
@@ -267,7 +277,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   migrateToLatest(ast: unknown, version: string) {
     return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
       for (const key in Object.keys(fn.migrations)) {
-        if (semver.gte(key, version)) {
+        if (semverGte(key, version)) {
           link = fn.migrations[key](link) as ExpressionAstFunction;
         }
       }
