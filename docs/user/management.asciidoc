@@ -7,7 +7,7 @@
 indices, clusters, licenses, UI settings, index patterns, spaces, and more.
 
 
-Access to individual features is governed by Elasticsearch and {kib} privileges.
+Access to individual features is governed by {es} and {kib} privileges.
 Consult your administrator if you do not have the appropriate access.
 
 [float]

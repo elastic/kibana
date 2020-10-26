@@ -34,7 +34,7 @@ Central Management UI.
 
 You must have the `beats_admin` role assigned to use **{beats} Central Management**
 
-You can assign this role in *Stack Management > Security > Users*.
+To assign the role, open the menu, then click *Stack Management > Users*.
 
 
 [float]
