@@ -61,7 +61,8 @@ export const validateTree = {
 export const validateTree2 = {
   body: schema.object({
     // optional
-    levels: schema.nullable(
+    // if the ancestry field below is specified ignore these fields
+    levels: schema.maybe(
       schema.object({
         ancestors: schema.number({ min: 0, max: 1000 }),
         descendants: schema.number({ min: 0, max: 1000 }),
@@ -77,6 +78,7 @@ export const validateTree2 = {
     schema: schema.object({
       // the ancestry field is optional
       ancestry: schema.maybe(schema.string()),
+      // TODO set a limit on the array size
       edges: schema.arrayOf(
         schema.object({
           id: schema.string(),

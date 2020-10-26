@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { DescendantsQuery } from '../queries/children';
+import { DescendantsQuery } from '../queries/descendants';
 import { UniqueID, Schema } from '../queries/unique_id';
 
 /**
@@ -40,12 +40,12 @@ export class Fetcher {
    * @param options the options for retrieving the structure of the tree.
    */
   public async tree(options: TreeOptions) {
-    const query = new DescendantsQuery(
-      new UniqueID(options.schema),
-      options.indexPatterns,
-      options.timerange,
-      options.descendants
-    );
+    const query = new DescendantsQuery({
+      uniqueID: new UniqueID(options.schema),
+      indexPatterns: options.indexPatterns,
+      timerange: options.timerange,
+      size: options.descendants,
+    });
 
     return query.search(this.client, options.nodes);
   }

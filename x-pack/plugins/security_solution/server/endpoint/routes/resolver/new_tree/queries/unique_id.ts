@@ -23,43 +23,29 @@ export class UniqueID {
     if (idSchema.edges.length <= 0) {
       throw new Error('received empty edges schema');
     }
-
-    this.sourceFilter = this.createSourceFilter();
-    this.parts = this.createMapParts();
-    this.idToParent = this.createIDToParent();
+    const { schemaParts, idToParent, sourceFilter } = UniqueID.setupFields(idSchema);
+    this.sourceFilter = sourceFilter;
+    this.parts = schemaParts;
+    this.idToParent = idToParent;
   }
 
-  private createMapParts(): Set<string> {
-    const parts = new Set<string>();
-    if (this.idSchema.ancestry) {
-      parts.add(this.idSchema.ancestry);
-    }
-
-    for (const connection of this.idSchema.edges) {
-      parts.add(connection.id);
-      parts.add(connection.parentID);
-    }
-    return parts;
-  }
-
-  private createIDToParent(): Map<string, string> {
+  private static setupFields(schema: Schema) {
+    const schemaParts = new Set<string>();
     const idToParent = new Map<string, string>();
-    for (const connection of this.idSchema.edges) {
-      idToParent.set(connection.id, connection.parentID);
-    }
-    return idToParent;
-  }
+    const sourceFilter: string[] = ['@timestamp'];
 
-  private createSourceFilter(): string[] {
-    const filter = this.idSchema.edges.reduce((sourceFilterAcc: string[], connection) => {
-      sourceFilterAcc.push(connection.id, connection.parentID);
-      return sourceFilterAcc;
-    }, []);
-
-    if (this.idSchema.ancestry) {
-      filter.push(this.idSchema.ancestry);
+    if (schema.ancestry) {
+      schemaParts.add(schema.ancestry);
+      sourceFilter.push(schema.ancestry);
     }
-    return filter;
+
+    for (const edge of schema.edges) {
+      schemaParts.add(edge.id);
+      schemaParts.add(edge.parentID);
+      idToParent.set(edge.id, edge.parentID);
+    }
+
+    return { schemaParts, idToParent, sourceFilter };
   }
 
   /**
@@ -89,8 +75,7 @@ export class UniqueID {
    * ]
    *
    * to this:
-   * bool: {
-   *  should: [
+   *  [
    *    {
    *      filter: [
    *        {
@@ -112,7 +97,6 @@ export class UniqueID {
    *      ]
    *    }
    *  ]
-   * }
    */
   public buildDescendantsQueryFilters(nodes: Array<Map<string, string>>) {
     const validateKeys = (keys: IterableIterator<string>) => {
@@ -123,8 +107,12 @@ export class UniqueID {
       }
     };
 
-    // TODO make this cleaner
-    const filter = nodes.map((node) => {
+    // iterate over all the nodes and build a bunch of OR clauses (find node1 or node2 etc)
+    // to build each OR clause, we need to construct a bunch of AND clauses to restrict the
+    // search to the fields included in the edge's schema
+    // so the resulting clause would be:
+    // (node1.fieldA == valueA AND node1.fieldB == valueB) OR (node2.fieldE == valueE AND node2.fieldF == valueF) etc
+    const filters = nodes.map((node) => {
       validateKeys(node.keys());
       const filterArray = [];
       for (const [key, value] of node.entries()) {
@@ -142,14 +130,10 @@ export class UniqueID {
       };
     });
 
-    return {
-      bool: {
-        should: [...filter],
-      },
-    };
+    return filters;
   }
 
-  public buildEmptyRestraints(): JsonObject[] {
+  public buildConstraints(): JsonObject[] {
     const filter = [];
 
     for (const connection of this.idSchema.edges) {
