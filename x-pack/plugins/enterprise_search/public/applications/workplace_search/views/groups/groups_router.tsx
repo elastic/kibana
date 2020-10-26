@@ -37,7 +37,9 @@ export const GroupsRouter: React.FC = () => {
         <SendTelemetry action="viewed" metric="groups" />
         <Groups />
       </Route>
-      <Route path={GROUP_PATH} component={GroupRouter} />
+      <Route path={GROUP_PATH}>
+        <GroupRouter />
+      </Route>
     </Switch>
   );
 };
