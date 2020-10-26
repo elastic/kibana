@@ -106,7 +106,7 @@ export const ResolverWithoutProviders = React.memo(
               ({ points: [startPosition, endPosition], metadata }) => (
                 <EdgeLine
                   edgeLineMetadata={metadata}
-                  key={metadata.uniqueId}
+                  key={metadata.reactKey}
                   startPosition={startPosition}
                   endPosition={endPosition}
                   projectionMatrix={projectionMatrix}

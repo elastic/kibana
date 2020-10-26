@@ -45,7 +45,7 @@ export const buildThreatMappingFilter = ({
 };
 
 /**
- * Filters out any entries which do not include the threat list item.
+ * Filters out any combined "AND" entries which do not include all the threat list items.
  */
 export const filterThreatMapping = ({
   threatMapping,
@@ -53,8 +53,14 @@ export const filterThreatMapping = ({
 }: FilterThreatMappingOptions): ThreatMapping =>
   threatMapping
     .map((threatMap) => {
-      const entries = threatMap.entries.filter((entry) => get(entry.value, threatListItem) != null);
-      return { ...threatMap, entries };
+      const atLeastOneItemMissingInThreatList = threatMap.entries.some(
+        (entry) => get(entry.value, threatListItem) == null
+      );
+      if (atLeastOneItemMissingInThreatList) {
+        return { ...threatMap, entries: [] };
+      } else {
+        return { ...threatMap, entries: threatMap.entries };
+      }
     })
     .filter((threatMap) => threatMap.entries.length !== 0);
 

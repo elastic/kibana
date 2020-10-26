@@ -8,22 +8,24 @@ import {
   SerializedPhase,
   ColdPhase,
   DeletePhase,
-  HotPhase,
   WarmPhase,
+  SerializedPolicy,
 } from '../../../common/types';
 
-export const defaultNewHotPhase: HotPhase = {
-  phaseEnabled: true,
-  rolloverEnabled: true,
-  selectedMaxAge: '30',
-  selectedMaxAgeUnits: 'd',
-  selectedMaxSizeStored: '50',
-  selectedMaxSizeStoredUnits: 'gb',
-  forceMergeEnabled: false,
-  selectedForceMergeSegments: '',
-  bestCompressionEnabled: false,
-  phaseIndexPriority: '100',
-  selectedMaxDocuments: '',
+export const defaultSetPriority: string = '100';
+
+export const defaultPolicy: SerializedPolicy = {
+  name: '',
+  phases: {
+    hot: {
+      actions: {
+        rollover: {
+          max_age: '30d',
+          max_size: '50gb',
+        },
+      },
+    },
+  },
 };
 
 export const defaultNewWarmPhase: WarmPhase = {

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const ALL_ACTIONS = '[data-test-subj="rules-details-popover-button-icon"]';
+
 export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';
 
 export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggleDescriptionText]';
@@ -23,6 +25,8 @@ export const DEFINITION_DETAILS =
 export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
+
+export const DELETE_RULE = '[data-test-subj=rules-details-delete-rule]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 

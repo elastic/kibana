@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
+import $ from 'jquery';
 import React from 'react';
-import $ from '../../lib/jquery_flot';
 import { eventBus } from './event_bus';
 import { getChartOptions } from './get_chart_options';
 

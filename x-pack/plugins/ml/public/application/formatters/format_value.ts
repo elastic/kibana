@@ -53,9 +53,9 @@ export function formatValue(
 // For time_of_day or time_of_week functions the anomaly record
 // containing the timestamp of the anomaly should be supplied in
 // order to correctly format the day or week offset to the time of the anomaly.
-function formatSingleValue(
+export function formatSingleValue(
   value: number,
-  mlFunction: string,
+  mlFunction?: string,
   fieldFormat?: any,
   record?: AnomalyRecordDoc
 ) {

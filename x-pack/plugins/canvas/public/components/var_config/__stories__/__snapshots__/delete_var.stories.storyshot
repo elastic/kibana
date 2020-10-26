@@ -13,7 +13,7 @@ Array [
       <span
         className="canvasVarHeader__iconWrapper"
       >
-        <div
+        <span
           data-euiicon-type="sortLeft"
           style={
             Object {
@@ -69,7 +69,7 @@ Array [
             <span
               className="euiButtonContent euiButton__content"
             >
-              <div
+              <span
                 className="euiButtonContent__icon"
                 data-euiicon-type="trash"
                 size="m"

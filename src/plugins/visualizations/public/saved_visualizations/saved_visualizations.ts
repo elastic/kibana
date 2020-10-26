@@ -16,19 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../plugins/saved_objects/public';
+import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
-import { createSavedVisClass } from './_saved_vis';
+import { createSavedVisClass, SavedVisServices } from './_saved_vis';
 import { TypesStart } from '../vis_types';
 
-export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
+export interface SavedVisServicesWithVisualizations extends SavedVisServices {
   visualizationTypes: TypesStart;
 }
 export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
-export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
+export function createSavedVisLoader(services: SavedVisServicesWithVisualizations) {
   const { savedObjectsClient, visualizationTypes } = services;
 
   class SavedObjectLoaderVisualize extends SavedObjectLoader {

@@ -19,7 +19,9 @@ export type DataFrameAnalyticsId = string;
 export interface OutlierAnalysis {
   [key: string]: {};
 
-  outlier_detection: {};
+  outlier_detection: {
+    compute_feature_influence?: boolean;
+  };
 }
 
 interface Regression {

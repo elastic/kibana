@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Policy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
+import { LegacyPolicy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 import {
   defaultNewColdPhase,
   defaultNewDeletePhase,
-  defaultNewHotPhase,
   defaultNewWarmPhase,
   serializedPhaseInitialization,
 } from '../../constants';
 
-import { hotPhaseFromES, hotPhaseToES } from './hot_phase';
 import { warmPhaseFromES, warmPhaseToES } from './warm_phase';
 import { coldPhaseFromES, coldPhaseToES } from './cold_phase';
 import { deletePhaseFromES, deletePhaseToES } from './delete_phase';
@@ -46,11 +44,10 @@ export const getPolicyByName = (
   }
 };
 
-export const initializeNewPolicy = (newPolicyName: string = ''): Policy => {
+export const initializeNewPolicy = (newPolicyName: string = ''): LegacyPolicy => {
   return {
     name: newPolicyName,
     phases: {
-      hot: { ...defaultNewHotPhase },
       warm: { ...defaultNewWarmPhase },
       cold: { ...defaultNewColdPhase },
       delete: { ...defaultNewDeletePhase },
@@ -58,7 +55,7 @@ export const initializeNewPolicy = (newPolicyName: string = ''): Policy => {
   };
 };
 
-export const deserializePolicy = (policy: PolicyFromES): Policy => {
+export const deserializePolicy = (policy: PolicyFromES): LegacyPolicy => {
   const {
     name,
     policy: { phases },
@@ -67,7 +64,6 @@ export const deserializePolicy = (policy: PolicyFromES): Policy => {
   return {
     name,
     phases: {
-      hot: hotPhaseFromES(phases.hot),
       warm: warmPhaseFromES(phases.warm),
       cold: coldPhaseFromES(phases.cold),
       delete: deletePhaseFromES(phases.delete),
@@ -75,8 +71,8 @@ export const deserializePolicy = (policy: PolicyFromES): Policy => {
   };
 };
 
-export const serializePolicy = (
-  policy: Policy,
+export const legacySerializePolicy = (
+  policy: LegacyPolicy,
   originalEsPolicy: SerializedPolicy = {
     name: policy.name,
     phases: { hot: { ...serializedPhaseInitialization } },
@@ -84,7 +80,7 @@ export const serializePolicy = (
 ): SerializedPolicy => {
   const serializedPolicy = {
     name: policy.name,
-    phases: { hot: hotPhaseToES(policy.phases.hot, originalEsPolicy.phases.hot) },
+    phases: {},
   } as SerializedPolicy;
   if (policy.phases.warm.phaseEnabled) {
     serializedPolicy.phases.warm = warmPhaseToES(policy.phases.warm, originalEsPolicy.phases.warm);

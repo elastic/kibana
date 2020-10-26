@@ -212,7 +212,7 @@ export const MinAgeInput = <Phase extends PhaseWithMinAge>({
           <EuiFieldNumber
             id={`${phase}-${selectedMinimumAgeProperty}`}
             value={phaseData.selectedMinimumAge}
-            onChange={async (e) => {
+            onChange={(e) => {
               setPhaseData(selectedMinimumAgeProperty, e.target.value);
             }}
             min={0}

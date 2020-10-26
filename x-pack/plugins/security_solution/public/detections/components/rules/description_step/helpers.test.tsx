@@ -168,8 +168,11 @@ describe('helpers', () => {
         query: mockQueryBarWithQuery.query,
         savedId: mockQueryBarWithQuery.saved_id,
       });
-      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-      expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query} </>);
+
+      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
+      expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
+        mockQueryBarWithQuery.query
+      );
     });
 
     test('returns expected array of ListItems when "savedId" exists', () => {

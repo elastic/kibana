@@ -16,6 +16,7 @@ import {
   AABB,
   VisibleEntites,
   TreeFetcherParameters,
+  IsometricTaxiLayout,
 } from '../../types';
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
@@ -346,7 +347,7 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
-export const layout = createSelector(
+export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
   function processNodePositionsAndEdgeLineSegments(
@@ -372,7 +373,7 @@ export const layout = createSelector(
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically
-    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originNode);
+    const originPosition = isometricTaxiLayoutModel.processPosition(taxiLayout, originNode);
     // adjust the position of everything so that the origin node is at `(0, 0)`
 
     if (originPosition === undefined) {

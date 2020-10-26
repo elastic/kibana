@@ -23,7 +23,6 @@ import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-expect-error
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
@@ -64,6 +63,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     optimization: {
       noEmitOnErrors: true,
+      splitChunks: {
+        maxAsyncRequests: 10,
+        cacheGroups: {
+          default: {
+            reuseExistingChunk: false,
+          },
+        },
+      },
     },
 
     externals: [UiSharedDeps.externals],

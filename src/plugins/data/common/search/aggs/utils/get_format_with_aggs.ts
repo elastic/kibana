@@ -48,6 +48,9 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
     const customFormats: Record<string, () => IFieldFormat> = {
       range: () => {
         const RangeFormat = FieldFormat.from((range: any) => {
+          if (range.label) {
+            return range.label;
+          }
           const nestedFormatter = params as SerializedFieldFormat;
           const format = getFieldFormat({
             id: nestedFormatter.id,

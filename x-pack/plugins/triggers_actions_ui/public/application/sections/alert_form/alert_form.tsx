@@ -81,6 +81,7 @@ interface AlertFormProps {
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   operation: string;
 }
 
@@ -90,6 +91,7 @@ export const AlertForm = ({
   dispatch,
   errors,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   operation,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
@@ -103,9 +105,7 @@ export const AlertForm = ({
   } = alertsContext;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
-    alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
-  );
+  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
@@ -146,6 +146,10 @@ export const AlertForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
+  }, [alert, alertTypeRegistry]);
 
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -260,6 +264,7 @@ export const AlertForm = ({
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           messageVariables={
             alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
               ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>

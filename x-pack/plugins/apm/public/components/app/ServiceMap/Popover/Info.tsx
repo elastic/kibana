@@ -10,7 +10,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import React from 'react';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import {
   SPAN_SUBTYPE,
@@ -71,7 +71,7 @@ export function Info(data: InfoProps) {
               resource.label || resource['span.destination.service.resource'];
             const desc = `${resource['span.type']} (${resource['span.subtype']})`;
             return (
-              <>
+              <Fragment key={resource.id}>
                 <EuiDescriptionListTitle
                   className="eui-textTruncate"
                   title={title}
@@ -84,7 +84,7 @@ export function Info(data: InfoProps) {
                 >
                   {desc}
                 </EuiDescriptionListDescription>
-              </>
+              </Fragment>
             );
           })}
         </EuiDescriptionList>
@@ -97,8 +97,8 @@ export function Info(data: InfoProps) {
       {listItems.map(
         ({ title, description }) =>
           description && (
-            <div>
-              <ItemRow key={title}>
+            <div key={title}>
+              <ItemRow>
                 <SubduedDescriptionListTitle>
                   {title}
                 </SubduedDescriptionListTitle>

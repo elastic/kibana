@@ -41,7 +41,7 @@ export function registerVisualizationsCollector(
         saved_90_days_total: { type: 'long' },
       },
     },
-    fetch: async (callCluster) => {
+    fetch: async ({ callCluster }) => {
       const index = (await config.pipe(first()).toPromise()).kibana.index;
       return await getStats(callCluster, index);
     },

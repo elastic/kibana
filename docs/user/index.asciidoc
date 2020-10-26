@@ -27,13 +27,7 @@ include::graph/index.asciidoc[]
 
 include::{kib-repo-dir}/observability/index.asciidoc[]
 
-include::{kib-repo-dir}/logs/index.asciidoc[]
-
-include::{kib-repo-dir}/infrastructure/index.asciidoc[]
-
 include::{kib-repo-dir}/apm/index.asciidoc[]
-
-include::{kib-repo-dir}/uptime/index.asciidoc[]
 
 include::{kib-repo-dir}/siem/index.asciidoc[]
 

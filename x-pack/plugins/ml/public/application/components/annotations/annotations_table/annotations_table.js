@@ -273,7 +273,7 @@ class AnnotationsTableUI extends Component {
         timeRange,
         refreshInterval: {
           display: 'Off',
-          pause: false,
+          pause: true,
           value: 0,
         },
         jobIds: [job.job_id],

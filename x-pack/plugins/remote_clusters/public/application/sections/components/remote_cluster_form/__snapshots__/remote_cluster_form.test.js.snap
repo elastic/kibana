@@ -511,7 +511,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                             size="m"
                                             type="cross"
                                           >
-                                            <div
+                                            <span
                                               className="euiSwitch__icon"
                                               data-euiicon-type="cross"
                                               size="m"
@@ -522,7 +522,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                             size="m"
                                             type="check"
                                           >
-                                            <div
+                                            <span
                                               className="euiSwitch__icon euiSwitch__icon--checked"
                                               data-euiicon-type="check"
                                               size="m"
@@ -1186,7 +1186,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                     size="m"
                                     type="cross"
                                   >
-                                    <div
+                                    <span
                                       className="euiSwitch__icon"
                                       data-euiicon-type="cross"
                                       size="m"
@@ -1197,7 +1197,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                     size="m"
                                     type="check"
                                   >
-                                    <div
+                                    <span
                                       className="euiSwitch__icon euiSwitch__icon--checked"
                                       data-euiicon-type="check"
                                       size="m"
@@ -1306,7 +1306,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               size="m"
                               type="check"
                             >
-                              <div
+                              <span
                                 className="euiButtonContent__icon"
                                 data-euiicon-type="check"
                                 size="m"
@@ -1512,11 +1512,11 @@ Array [
                         <span
                           class="euiSwitch__track"
                         >
-                          <div
+                          <span
                             class="euiSwitch__icon"
                             data-euiicon-type="cross"
                           />
-                          <div
+                          <span
                             class="euiSwitch__icon euiSwitch__icon--checked"
                             data-euiicon-type="check"
                           />
@@ -1729,11 +1729,11 @@ Array [
                     <span
                       class="euiSwitch__track"
                     >
-                      <div
+                      <span
                         class="euiSwitch__icon"
                         data-euiicon-type="cross"
                       />
-                      <div
+                      <span
                         class="euiSwitch__icon euiSwitch__icon--checked"
                         data-euiicon-type="check"
                       />
@@ -1777,7 +1777,7 @@ Array [
             <span
               class="euiButtonContent euiButton__content"
             >
-              <div
+              <span
                 class="euiButtonContent__icon"
                 data-euiicon-type="check"
               />
@@ -1979,11 +1979,11 @@ Array [
             <span
               class="euiSwitch__track"
             >
-              <div
+              <span
                 class="euiSwitch__icon"
                 data-euiicon-type="cross"
               />
-              <div
+              <span
                 class="euiSwitch__icon euiSwitch__icon--checked"
                 data-euiicon-type="check"
               />

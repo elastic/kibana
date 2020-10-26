@@ -34,7 +34,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     defaultStackByOption: MatrixHistogramOption;
     errorMessage: string;
     headerChildren?: React.ReactNode;
-    footerChildren?: React.ReactNode;
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
@@ -48,7 +47,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     subtitle?: string | GetSubTitle;
     timelineId?: string;
     title: string | GetTitle;
-    yTitle?: string | undefined;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -70,7 +68,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   errorMessage,
   filterQuery,
   headerChildren,
-  footerChildren,
   histogramType,
   hideHistogramIfEmpty = false,
   id,
@@ -89,7 +86,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   title,
   titleSize,
   yTickFormatter,
-  yTitle,
 }) => {
   const dispatch = useDispatch();
   const handleBrushEnd = useCallback(
@@ -118,18 +114,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
         onBrushEnd: handleBrushEnd,
         yTickFormatter,
         showLegend,
-        yTitle,
       }),
-    [
-      chartHeight,
-      startDate,
-      legendPosition,
-      endDate,
-      handleBrushEnd,
-      yTickFormatter,
-      showLegend,
-      yTitle,
-    ]
+    [chartHeight, startDate, legendPosition, endDate, handleBrushEnd, yTickFormatter, showLegend]
   );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
@@ -242,11 +228,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
               stackByField={selectedStackByOption.value}
               timelineId={timelineId}
             />
-          )}
-          {footerChildren != null && (
-            <EuiFlexGroup gutterSize="none" direction="row">
-              {footerChildren}
-            </EuiFlexGroup>
           )}
         </HistogramPanel>
       </InspectButtonContainer>

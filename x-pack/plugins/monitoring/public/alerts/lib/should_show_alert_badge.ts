@@ -5,14 +5,16 @@
  */
 import { isInSetupMode } from '../../lib/setup_mode';
 import { CommonAlertStatus } from '../../../common/types';
+import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
 
 export function shouldShowAlertBadge(
   alerts: { [alertTypeId: string]: CommonAlertStatus },
-  alertTypeIds: string[]
+  alertTypeIds: string[],
+  context?: ISetupModeContext
 ) {
   if (!alerts) {
     return false;
   }
-  const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode(context);
   return inSetupMode || alertTypeIds.find((name) => alerts[name] && alerts[name].states.length);
 }

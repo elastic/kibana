@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PhaseWithAllocation } from '../../../../../../common/types';
@@ -38,16 +38,13 @@ export const NoNodeAttributesWarning: FunctionComponent<{ phase: PhaseWithAlloca
   phase,
 }) => {
   return (
-    <>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        data-test-subj="noNodeAttributesWarning"
-        style={{ maxWidth: 400 }}
-        title={i18nTexts.title}
-        color="warning"
-      >
-        {i18nTexts[phase].body}
-      </EuiCallOut>
-    </>
+    <EuiCallOut
+      data-test-subj="noNodeAttributesWarning"
+      style={{ maxWidth: 400 }}
+      title={i18nTexts.title}
+      color="warning"
+    >
+      {i18nTexts[phase].body}
+    </EuiCallOut>
   );
 };
