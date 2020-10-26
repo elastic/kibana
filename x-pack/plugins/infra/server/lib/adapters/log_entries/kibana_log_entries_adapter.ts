@@ -14,6 +14,7 @@ import { RequestHandlerContext } from 'src/core/server';
 import { JsonArray } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
+  LogItemHit,
   LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
@@ -25,13 +26,6 @@ import { SortedSearchHit } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
-
-interface LogItemHit {
-  _index: string;
-  _id: string;
-  fields: { [key: string]: [value: unknown] };
-  sort: [number, number];
-}
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: KibanaFramework) {}

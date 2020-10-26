@@ -7,7 +7,7 @@
 import { sortBy } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject } from '../../../../common/typed_json';
+import { JsonArray, JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
@@ -310,10 +310,10 @@ export class InfraLogEntriesDomain {
   }
 }
 
-interface LogItemHit {
+export interface LogItemHit {
   _index: string;
   _id: string;
-  fields: { [field: string]: [value: unknown] };
+  fields: { [field: string]: [value: JsonArray] };
   sort: [number, number];
 }
 
