@@ -62,7 +62,8 @@ export function runFailedTestsReporterCli() {
           );
         }
 
-        const isPr = !!process.env.GITHUB_PR_NUMBER;
+        // ghprbPullId check can be removed once there are no PR jobs running on Jenkins
+        const isPr = !!process.env.GITHUB_PR_NUMBER || !!process.env.ghprbPullId;
         const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
           log.info('Failure issues only created on master/version branch jobs');
