@@ -30,7 +30,7 @@ export const AlertAddFooter = ({ isSaving, hasErrors, onSave, onCancel }: AlertA
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={onCancel}>
-            {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
+            {i18n.translate('xpack.triggersActionsUI.sections.alertAddFooter.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
@@ -47,7 +47,7 @@ export const AlertAddFooter = ({ isSaving, hasErrors, onSave, onCancel }: AlertA
             onClick={onSave}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+              id="xpack.triggersActionsUI.sections.alertAddFooter.saveButtonLabel"
               defaultMessage="Save"
             />
           </EuiButton>
