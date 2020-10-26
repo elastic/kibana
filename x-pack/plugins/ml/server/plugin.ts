@@ -17,7 +17,7 @@ import {
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
 import { initMlTelemetry } from './lib/telemetry';
@@ -75,10 +75,8 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
-      icon: PLUGIN_ICON,
       order: 500,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       management: {
