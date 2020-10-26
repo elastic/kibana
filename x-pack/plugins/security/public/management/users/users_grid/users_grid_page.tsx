@@ -151,16 +151,14 @@ export class UsersGridPage extends Component<Props, State> {
           const roleLinks = rolenames.map((rolename, index) => {
             const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
             return (
-              <EuiFlexItem grow={false} key={rolename}>
-                <RoleTableDisplay role={roleDefinition} navigateToApp={this.props.navigateToApp} />
-              </EuiFlexItem>
+              <RoleTableDisplay
+                role={roleDefinition}
+                key={rolename}
+                navigateToApp={this.props.navigateToApp}
+              />
             );
           });
-          return (
-            <EuiFlexGroup data-test-subj="userRowRoles" gutterSize="s" wrap>
-              {roleLinks}
-            </EuiFlexGroup>
-          );
+          return <div data-test-subj="userRowRoles">{roleLinks}</div>;
         },
       },
       {
