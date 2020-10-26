@@ -1,14 +1,14 @@
 [[connect-to-elasticsearch]]
-== Add data to {kib}
+== Add data
 ++++
 <titleabbrev>Add data</titleabbrev>
 ++++
 
-The fastest way to add data to {kib} is to use one of the built-in options.
+To start working with your data in {kib}, use one of the many ingest options,
+available from the home page.
 You can collect data from an app or service
 or upload a file that contains your data.  If you're not ready to use your own data,
 add a sample data set and give {kib} a test drive.
-The built-in options are available on the home page.
 
 [role="screenshot"]
 image::images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
@@ -27,8 +27,10 @@ image::images/add-data-tutorials.png[Add Data tutorials]
 [discrete]
 === Add Elastic Agent
 
-beta[] *Elastic Agent* is a centralized way to set up your data integrations.
-With the *Fleet* UI, you can add
+beta[] *Elastic Agent* is sneak peek at the next generation of
+data integration modules, offering
+a centralized way to set up your integrations.
+With *Fleet*, you can add
 and manage integrations for popular services and platforms, providing
 an easy way to collect your data. The integrations
 ship with dashboards and visualizations,
@@ -39,9 +41,6 @@ To get started, refer to
 
 [role="screenshot"]
 image::images/add-data-fleet.png[Add data using Fleet]
-
-NOTE: This feature is not intended for use as part of a
-repeated production process, but rather for the initial exploration of your data.
 
 [discrete]
 [[upload-data-kibana]]
@@ -54,18 +53,17 @@ Data Visualizer. You can upload a file up to 100 MB. This value is configurable 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
 
-For geospatial data, you can use the File Data Visualizer or the
-GeoJSon Uploader, depending on the format of your data.  See
-<<import-geospatial-data, Import geospatial data>> for details.
+See <<import-geospatial-data, Import geospatial data>>
+to upload a file with geospatial data.
 
 NOTE: This feature is not intended for use as part of a
 repeated production process, but rather for the initial exploration of your data.
 
 
 [discrete]
-=== Custom options for loading your data
+=== Additional options for loading your data
 
-If the built-in options don't work for you, you can index your
+If the {kib} ingest options don't work for you, you can index your
 data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
 or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
 After you add your data, you're required to create an <<index-patterns,index pattern>> to tell
