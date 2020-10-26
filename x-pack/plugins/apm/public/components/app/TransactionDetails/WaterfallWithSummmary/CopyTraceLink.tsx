@@ -22,10 +22,11 @@ export function CopyTraceLink({ transaction }: { transaction: Transaction }) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
   const toasts = useKibana().services.notifications?.toasts;
-  const textToCopy = getAPMHref({
+  const href = getAPMHref({
     basePath,
     path: `/link-to/trace/${transaction.trace.id}`,
   });
+  const textToCopy = `${window.location.protocol}//${window.location.host}${href}`;
 
   const onClick = useCallback(
     async (event: React.MouseEvent<HTMLButtonElement>) => {
