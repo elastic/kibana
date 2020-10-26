@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { convertEsError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 
@@ -46,15 +46,15 @@ export interface IndexAliasResponse {
  *  @return {Promise<IndexAliasResponse>}
  */
 export async function callIndexAliasApi(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   indices: string[] | string
-): Promise<IndicesAliasResponse> {
+) {
   try {
-    return (await callCluster('indices.getAlias', {
+    return await callCluster.indices.getAlias({
       index: indices,
-      ignoreUnavailable: true,
-      allowNoIndices: false,
-    })) as Promise<IndicesAliasResponse>;
+      ignore_unavailable: true,
+      allow_no_indices: false,
+    });
   } catch (error) {
     throw convertEsError(indices, error);
   }
@@ -73,17 +73,17 @@ export async function callIndexAliasApi(
  *  @return {Promise<FieldCapsResponse>}
  */
 export async function callFieldCapsApi(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   indices: string[] | string,
-  fieldCapsOptions: { allowNoIndices: boolean } = { allowNoIndices: false }
+  fieldCapsOptions: { allow_no_indices: boolean } = { allow_no_indices: false }
 ) {
   try {
-    return (await callCluster('fieldCaps', {
+    return await callCluster.fieldCaps<FieldCapsResponse>({
       index: indices,
       fields: '*',
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       ...fieldCapsOptions,
-    })) as FieldCapsResponse;
+    });
   } catch (error) {
     throw convertEsError(indices, error);
   }
