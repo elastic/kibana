@@ -9,11 +9,15 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 
-import { POLICY_NAME } from './constants';
-import { TestSubjects } from '../helpers';
-
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
+
+import { Phases as PolicyPhases } from '../../../common/types';
+
+type Phases = keyof PolicyPhases;
+
+import { POLICY_NAME } from './constants';
+import { TestSubjects } from '../helpers';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -111,26 +115,26 @@ export const setup = async () => {
     component.update();
   };
 
-  const toggleForceMerge = (phase: string) => createFormClickAction(`${phase}-forceMergeSwitch`);
+  const toggleForceMerge = (phase: Phases) => createFormClickAction(`${phase}-forceMergeSwitch`);
 
-  const setForcemergeSegmentsCount = (phase: string) =>
+  const setForcemergeSegmentsCount = (phase: Phases) =>
     createFormSetValueAction(`${phase}-selectedForceMergeSegments`);
 
-  const setBestCompression = (phase: string) => createFormClickAction(`${phase}-bestCompression`);
+  const setBestCompression = (phase: Phases) => createFormClickAction(`${phase}-bestCompression`);
 
-  const setIndexPriority = (phase: string) =>
+  const setIndexPriority = (phase: Phases) =>
     createFormSetValueAction(`${phase}-phaseIndexPriority`);
 
-  const enable = (phase: string) => createFormClickAction(`enablePhaseSwitch-${phase}`);
+  const enable = (phase: Phases) => createFormClickAction(`enablePhaseSwitch-${phase}`);
 
   const warmPhaseOnRollover = createFormClickAction(`warm-warmPhaseOnRollover`);
 
-  const setMinAgeValue = (phase: string) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
+  const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
 
-  const setMinAgeUnits = (phase: string) =>
+  const setMinAgeUnits = (phase: Phases) =>
     createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`);
 
-  const setDataAllocation = (phase: string) => async (value: DataTierAllocationType) => {
+  const setDataAllocation = (phase: Phases) => async (value: DataTierAllocationType) => {
     act(() => {
       find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
     });
