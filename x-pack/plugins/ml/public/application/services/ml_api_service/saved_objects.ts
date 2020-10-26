@@ -11,12 +11,10 @@ import { HttpService } from '../http_service';
 import { basePath } from './index';
 
 export const savedObjectsApiProvider = ({ http }: HttpService) => ({
-  savedObjects: {
-    jobsSpaces() {
-      return http<any>({
-        path: `${basePath()}/saved_objects/jobs_spaces`,
-        method: 'GET',
-      });
-    },
+  jobsSpaces() {
+    return http<any>({
+      path: `${basePath()}/saved_objects/jobs_spaces`,
+      method: 'GET',
+    });
   },
 });
