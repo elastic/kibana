@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, LegacyCallAPIOptions } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { IndexPatternsFetcher, FieldDescriptor } from '../../../../../../src/plugins/data/server';
 
@@ -14,15 +14,10 @@ export interface IndexPatternTitleAndFields {
 }
 
 export const getUptimeIndexPattern: UMElasticsearchQueryFn<
-  {},
+  { esClient: ElasticsearchClient },
   IndexPatternTitleAndFields | undefined
-> = async ({ callES, dynamicSettings }) => {
-  const callAsCurrentUser: LegacyAPICaller = async (
-    endpoint: string,
-    clientParams: Record<string, any> = {},
-    options?: LegacyCallAPIOptions
-  ) => callES(endpoint, clientParams, options);
-  const indexPatternsFetcher = new IndexPatternsFetcher(callAsCurrentUser);
+> = async ({ esClient, dynamicSettings }) => {
+  const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
   // and since `getFieldsForWildcard` will throw if the specified indices don't exist,
