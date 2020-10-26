@@ -7,11 +7,16 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
-import { ApiTokenTypes } from './constants';
+import { ApiTokenTypes, DELETE_MESSAGE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
+import {
+  FlashMessagesLogic,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
+
 import { IMeta } from '../../../../../common/types';
-import { flashAPIErrors } from '../../../shared/flash_messages';
 import { IEngine } from '../../types';
 import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
@@ -23,9 +28,7 @@ const defaultApiToken: IApiToken = {
   access_all_engines: true,
 };
 
-// TODO CREATE_MESSAGE, UPDATE_MESSAGE, and DELETE_MESSAGE from ent-search
-
-export interface ICredentialsLogicActions {
+interface ICredentialsLogicActions {
   addEngineName(engineName: string): string;
   onApiKeyDelete(tokenName: string): string;
   onApiTokenCreateSuccess(apiToken: IApiToken): IApiToken;
@@ -48,7 +51,7 @@ export interface ICredentialsLogicActions {
   deleteApiKey(tokenName: string): string;
 }
 
-export interface ICredentialsLogicValues {
+interface ICredentialsLogicValues {
   activeApiToken: IApiToken;
   activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
@@ -79,10 +82,7 @@ export const CredentialsLogic = kea<
     setCredentialsData: (meta, apiTokens) => ({ meta, apiTokens }),
     setCredentialsDetails: (details) => details,
     setNameInputBlurred: (nameInputBlurred) => nameInputBlurred,
-    setTokenReadWrite: ({ name, checked }) => ({
-      name,
-      checked,
-    }),
+    setTokenReadWrite: ({ name, checked }) => ({ name, checked }),
     setTokenName: (name) => name,
     setTokenType: (tokenType) => tokenType,
     showCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
@@ -217,6 +217,9 @@ export const CredentialsLogic = kea<
     ],
   }),
   listeners: ({ actions, values }) => ({
+    showCredentialsForm: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
     initializeCredentialsData: () => {
       actions.fetchCredentials();
       actions.fetchDetails();
@@ -247,6 +250,7 @@ export const CredentialsLogic = kea<
         await http.delete(`/api/app_search/credentials/${tokenName}`);
 
         actions.onApiKeyDelete(tokenName);
+        setSuccessMessage(DELETE_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
