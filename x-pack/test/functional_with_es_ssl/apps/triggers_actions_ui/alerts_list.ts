@@ -461,8 +461,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('alertTypetest.failingFilterOption');
 
       await retry.try(async () => {
-        const filterOkOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filterOkOnlyResults).to.eql([
+        const filterFailingAlertOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filterFailingAlertOnlyResults).to.eql([
           {
             name: failinfAlert.name,
             tagsText: 'foo, bar',
@@ -489,7 +489,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         actions: [
           {
             id: action.id,
-            actionTypeId: '.server-log',
+            actionTypeId: '.slack',
             group: 'default',
             params: { level: 'info', message: 'gfghfhg' },
           },
@@ -500,8 +500,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('actionType.slackFilterOption');
 
       await retry.try(async () => {
-        const filterOkOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filterOkOnlyResults).to.eql([
+        const filterWithSlackOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filterWithSlackOnlyResults).to.eql([
           {
             name: noopAlertWithAction.name,
             tagsText: 'foo, bar',
