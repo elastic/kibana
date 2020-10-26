@@ -1314,10 +1314,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.7.0"
 
-"@elastic/charts@23.2.1":
-  version "23.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-23.2.1.tgz#1f48629fe4597655a7f119fd019c4d5a2cbaf252"
-  integrity sha512-L2jUPAWwE0xLry6DcqcngVLCa9R32pfz5jW1fyOJRWSq1Fay2swOw4joBe8PmHpvl2s8EwWi9qWBORR1z3hUeQ==
+"@elastic/charts@24.0.0":
+  version "24.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.0.0.tgz#7b97b00a3dc873f46f764de0f28573e236b76aa7"
+  integrity sha512-ZFIdHcU48Wes7eb1R+48L7xLH4p7D9oSdkoX/iuwt+znD353UhiYK9u+dbrpMXeOMtFYt7dktzVAbouHcJCZPA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -4587,6 +4587,21 @@
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/@types/parse5/-/parse5-5.0.3.tgz#e7b5aebbac150f8b5fdd4a46e7f0bd8e65e19109"
   integrity sha512-kUNnecmtkunAoQ3CnjmMkzNU/gtxG8guhi+Fk2U/kOpIKjIMKnXGp4IJCgQJrXSgMsWYimYG4TGjz/UzbGEBTw==
+
+"@types/pdfkit@*":
+  version "0.10.6"
+  resolved "https://registry.yarnpkg.com/@types/pdfkit/-/pdfkit-0.10.6.tgz#9ddde7e642e6c3f1245134456a03fbc4b67dc4b5"
+  integrity sha512-o6R2fO/fhg392YNYahiaNGZ8CNdSKMmf5W0LvyjJ/63mLQEPTgl6M9vb4zKoHaGpsP43VimuBz+xgVevsPy8jA==
+  dependencies:
+    "@types/node" "*"
+
+"@types/pdfmake@^0.1.15":
+  version "0.1.15"
+  resolved "https://registry.yarnpkg.com/@types/pdfmake/-/pdfmake-0.1.15.tgz#383a8fca407612a580b82d1ca496d39001aee102"
+  integrity sha512-uyKefZzC1OUTKoUdY0fU9n7BjciSSYPHq2KLQmGNejeZn6Xo6hI04xhAGk368Rv9wHjKo36IGLIVIysvhrGVJQ==
+  dependencies:
+    "@types/node" "*"
+    "@types/pdfkit" "*"
 
 "@types/pegjs@^0.10.1":
   version "0.10.1"
