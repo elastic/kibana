@@ -175,7 +175,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                 target="_blank"
               >
                 docs 
-                <div
+                <span
                   data-euiicon-type="popout"
                 />
               </a>

@@ -61,6 +61,7 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     name: ENTRY_PROPERTY_TITLES.value,
     sortable: false,
     width: '60%',
+    'data-test-subj': 'conditionValue',
     render(field: Entry['value'], entry: Entry) {
       return (
         <TextFieldValue

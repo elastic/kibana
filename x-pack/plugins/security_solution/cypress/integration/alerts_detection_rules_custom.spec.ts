@@ -73,6 +73,7 @@ import {
 import {
   changeToThreeHundredRowsPerPage,
   deleteFirstRule,
+  deleteRule,
   deleteSelectedRules,
   editFirstRule,
   filterByCustomRules,
@@ -91,12 +92,12 @@ import {
   goToAboutStepTab,
   goToActionsStepTab,
   goToScheduleStepTab,
+  waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -119,6 +120,7 @@ describe('Custom detection rules creation', () => {
   });
 
   after(() => {
+    deleteRule();
     esArchiverUnload('timeline');
   });
 
@@ -168,7 +170,7 @@ describe('Custom detection rules creation', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${newRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newRule.severity);
@@ -197,14 +199,10 @@ describe('Custom detection rules creation', () => {
       );
     });
 
-    refreshPage();
     waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);
-      });
+    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.above', 0);
     cy.get(ALERT_RULE_NAME).first().should('have.text', newRule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');
@@ -328,7 +326,7 @@ describe('Custom detection rules deletion and edition', () => {
       fillAboutRule(editedRule);
       saveEditedRule();
 
-      cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name} Beta`);
+      cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', editedRule.description);
       cy.get(ABOUT_DETAILS).within(() => {
         getDetails(SEVERITY_DETAILS).should('have.text', editedRule.severity);

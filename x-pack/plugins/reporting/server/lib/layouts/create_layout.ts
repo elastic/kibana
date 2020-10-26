@@ -5,11 +5,14 @@
  */
 
 import { CaptureConfig } from '../../types';
-import { LayoutParams, LayoutTypes } from './';
+import { LayoutInstance, LayoutParams, LayoutTypes } from './';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 
-export function createLayout(captureConfig: CaptureConfig, layoutParams?: LayoutParams) {
+export function createLayout(
+  captureConfig: CaptureConfig,
+  layoutParams?: LayoutParams
+): LayoutInstance {
   if (layoutParams && layoutParams.dimensions && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new PreserveLayout(layoutParams.dimensions);
   }

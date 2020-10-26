@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
-import { Logger } from './types';
+import { Logger } from '../../../../src/core/server';
 import { TaskRunner } from './task_runner';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 

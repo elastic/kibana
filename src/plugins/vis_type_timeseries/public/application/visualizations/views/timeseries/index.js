@@ -20,6 +20,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 
 import {
   Axis,
@@ -165,6 +166,7 @@ export const TimeSeries = ({
           {
             id,
             label,
+            labelFormatted,
             bars,
             lines,
             data,
@@ -188,14 +190,17 @@ export const TimeSeries = ({
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
-
+          let seriesName = label.toString();
+          if (labelFormatted) {
+            seriesName = labelDateFormatter(labelFormatted);
+          }
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -221,7 +226,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}

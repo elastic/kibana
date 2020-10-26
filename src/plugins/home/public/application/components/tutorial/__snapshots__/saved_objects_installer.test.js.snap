@@ -526,7 +526,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                       size="m"
                       type="check"
                     >
-                      <div
+                      <span
                         aria-label="complete"
                         className="euiStepNumber__icon"
                         data-euiicon-type="check"

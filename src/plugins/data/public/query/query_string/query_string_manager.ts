@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
+import { skip } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { Query, UI_SETTINGS } from '../../../common';
@@ -61,7 +61,7 @@ export class QueryStringManager {
   }
 
   public getUpdates$ = () => {
-    return this.query$.asObservable();
+    return this.query$.asObservable().pipe(skip(1));
   };
 
   public getQuery = (): Query => {

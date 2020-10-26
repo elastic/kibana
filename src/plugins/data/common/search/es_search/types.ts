@@ -31,6 +31,11 @@ export interface ISearchOptions {
    * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
    */
   strategy?: string;
+
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
+  sessionId?: string;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {

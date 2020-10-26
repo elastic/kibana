@@ -21,6 +21,7 @@ import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
 import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('apollo-client');
 
@@ -29,7 +30,7 @@ describe('alert actions', () => {
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
   let updateTimelineIsLoading: UpdateTimelineLoading;
-  let searchStrategyClient: ISearchStart;
+  let searchStrategyClient: jest.Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -42,11 +43,13 @@ describe('alert actions', () => {
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
+
     searchStrategyClient = {
       aggs: {} as ISearchStart['aggs'],
       showError: jest.fn(),
       search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
       searchSource: {} as ISearchStart['searchSource'],
+      session: dataPluginMock.createStartContract().search.session,
     };
 
     jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {

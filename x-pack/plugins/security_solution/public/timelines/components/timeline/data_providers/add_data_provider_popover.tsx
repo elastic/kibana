@@ -199,6 +199,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       withTitle
       panelPaddingSize="none"
       ownFocus={true}
+      repositionOnScroll
     >
       {content}
     </EuiPopover>

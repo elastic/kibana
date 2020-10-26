@@ -153,6 +153,10 @@ export class Project {
     return (this.json.kibana && this.json.kibana.clean) || {};
   }
 
+  public isFlaggedAsDevOnly() {
+    return !!(this.json.kibana && this.json.kibana.devOnly);
+  }
+
   public hasScript(name: string) {
     return name in this.scripts;
   }

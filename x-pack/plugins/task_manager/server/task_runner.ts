@@ -15,11 +15,11 @@ import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
+import { Logger } from '../../../../src/core/server';
 import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
 import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { Logger } from './types';
-import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
+import { Middleware } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
@@ -29,10 +29,10 @@ import {
   FailedRunResult,
   FailedTaskResult,
   TaskDefinition,
-  TaskDictionary,
   validateRunResult,
   TaskStatus,
 } from './task';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
@@ -55,15 +55,13 @@ export interface Updatable {
   remove(id: string): Promise<void>;
 }
 
-interface Opts {
+type Opts = {
   logger: Logger;
-  definitions: TaskDictionary<TaskDefinition>;
+  definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  beforeRun: BeforeRunFunction;
-  beforeMarkRunning: BeforeMarkRunningFunction;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
-}
+} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 /**
  * Runs a background task, ensures that errors are properly handled,
@@ -76,11 +74,11 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<TaskDefinition>;
+  private definitions: TaskTypeDictionary;
   private logger: Logger;
   private bufferedTaskStore: Updatable;
-  private beforeRun: BeforeRunFunction;
-  private beforeMarkRunning: BeforeMarkRunningFunction;
+  private beforeRun: Middleware['beforeRun'];
+  private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
 
   /**
@@ -129,7 +127,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets the task defintion from the dictionary.
    */
   public get definition() {
-    return this.definitions[this.taskType];
+    return this.definitions.get(this.taskType);
   }
 
   /**

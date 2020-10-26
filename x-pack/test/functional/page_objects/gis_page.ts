@@ -19,6 +19,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
   const renderable = getService('renderable');
+  const browser = getService('browser');
 
   function escapeLayerName(layerName: string) {
     return layerName.split(' ').join('_');
@@ -691,6 +692,13 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
         });
       }
       await testSubjects.click('mapSettingSubmitButton');
+    }
+
+    async refreshAndClearUnsavedChangesWarning() {
+      await browser.refresh();
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
     }
   }
   return new GisPage();
