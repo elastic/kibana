@@ -18,8 +18,6 @@
  */
 
 import { I18N_RC } from './constants';
-import * as path from 'path';
-import { KibanaConfig } from '../kbn_server';
 import { fromRoot } from '../../../core/server/utils';
 
 jest.mock('./get_translation_paths', () => ({ getTranslationPaths: jest.fn() }));
@@ -27,7 +25,7 @@ import { getKibanaTranslatoinPaths } from './get_kibana_translation_paths';
 import { getTranslationPaths as mockGetTranslationPaths } from './get_translation_paths';
 
 describe('getKibanaTranslatoinPaths', () => {
-  const mockConfig = { get: jest.fn() } as KibanaConfig;
+  const mockConfig = { get: jest.fn() };
 
   beforeEach(() => {
     jest.resetAllMocks();
