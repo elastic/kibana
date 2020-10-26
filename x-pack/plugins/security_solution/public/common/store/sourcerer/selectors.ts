@@ -87,10 +87,11 @@ export const getSourcererScopeSelector = () => {
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => ({
     ...getScopesSelector(state)[scopeId],
-    selectedPatterns: [
-      ...getScopesSelector(state)[scopeId].selectedPatterns,
-      EXLCUDE_ELASTIC_CLOUD_INDEX,
-    ],
+    selectedPatterns: getScopesSelector(state)[scopeId].selectedPatterns.some(
+      (index) => index === 'logs-*'
+    )
+      ? [...getScopesSelector(state)[scopeId].selectedPatterns, EXLCUDE_ELASTIC_CLOUD_INDEX]
+      : getScopesSelector(state)[scopeId].selectedPatterns,
   });
 
   return mapStateToProps;
