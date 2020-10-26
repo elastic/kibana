@@ -25,6 +25,7 @@ export {
   MakeSchemaFrom,
   SchemaField,
   CollectorOptions,
+  UsageCollectorOptions,
   Collector,
 } from './collector';
 export { UsageCollectionSetup } from './plugin';

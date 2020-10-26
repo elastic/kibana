@@ -20,7 +20,7 @@
 import { snakeCase } from 'lodash';
 import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
-import { UsageCollector } from './usage_collector';
+import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
 interface CollectorSetConfig {
   logger: Logger;
@@ -39,10 +39,22 @@ export class CollectorSet {
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
   }
 
-  public makeStatsCollector = <T, U>(options: CollectorOptions<T, U>) => {
+  public makeStatsCollector = <
+    T,
+    U,
+    O extends CollectorOptions<T, U> = CollectorOptions<T, U> // Used to allow extra properties (the Collector constructor extends the class with the additional options provided)
+  >(
+    options: O
+  ) => {
     return new Collector(this.logger, options);
   };
-  public makeUsageCollector = <T, U = T>(options: CollectorOptions<T, U>) => {
+  public makeUsageCollector = <
+    T,
+    U = T,
+    O extends UsageCollectorOptions<T, U> = UsageCollectorOptions<T, U>
+  >(
+    options: O
+  ) => {
     return new UsageCollector(this.logger, options);
   };
 
