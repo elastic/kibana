@@ -19,7 +19,10 @@ import {
   ValueClickContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import type { ActionContext, ActionFactoryContext, UrlTrigger } from './url_drilldown';
-import { SELECT_RANGE_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 type ContextScopeInput = ActionContext | ActionFactoryContext;
 
@@ -177,7 +180,9 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       from: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
       to: new Date().toISOString(),
     };
-  } else {
+  }
+
+  if (trigger === VALUE_CLICK_TRIGGER) {
     // number of mock points to generate
     // should be larger or equal of any possible data points length emitted by VALUE_CLICK_TRIGGER
     const nPoints = 4;
@@ -192,6 +197,8 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       points,
     };
   }
+
+  return {};
 }
 
 type Primitive = string | number | boolean | null;
