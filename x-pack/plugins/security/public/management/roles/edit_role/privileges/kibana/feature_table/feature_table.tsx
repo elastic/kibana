@@ -321,8 +321,14 @@ export class FeatureTable extends Component<Props, {}> {
         idSelected={`${feature.id}_${selectedPrivilegeId ?? NO_PRIVILEGE_VALUE}`}
         onChange={this.onChange(feature.id)}
         legend={i18n.translate('xpack.security.management.editRole.featureTable.actionLegendText', {
-          defaultMessage: 'Primary feature privilege control',
+          defaultMessage: '{featureName} privilege',
+          values: {
+            featureName: feature.name,
+          },
         })}
+        style={{
+          minWidth: 200,
+        }}
       />
     );
 
