@@ -252,8 +252,8 @@ export class InfraLogEntriesDomain {
   ): Promise<LogEntriesItem> {
     const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
     const defaultFields = [
-      { field: '_index', value: document._index },
-      { field: '_id', value: document._id },
+      { field: '_index', value: [document._index] },
+      { field: '_id', value: [document._id] },
     ];
 
     return {

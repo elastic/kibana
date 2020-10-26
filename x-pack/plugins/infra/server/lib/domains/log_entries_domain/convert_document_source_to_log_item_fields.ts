@@ -6,35 +6,20 @@
 
 import stringify from 'json-stable-stringify';
 import { LogEntriesItemField } from '../../../../common/http_api';
-import { JsonArray, JsonObject, jsonObjectRT, JsonValue } from '../../../../common/typed_json';
+import { JsonArray } from '../../../../common/typed_json';
 
-const serializeValue = (value: JsonValue): string => {
-  if (typeof value === 'object' && value != null) {
-    return stringify(value);
-  } else {
-    return `${value}`;
-  }
+const serializeValue = (value: JsonArray): string[] => {
+  return value.map((v) => {
+    if (typeof v === 'object' && v != null) {
+      return stringify(v);
+    } else {
+      return `${v}`;
+    }
+  });
 };
 
-// TODO: move rendering to browser
 export const convertESFieldsToLogItemFields = (fields: {
   [field: string]: JsonArray;
 }): LogEntriesItemField[] => {
   return Object.keys(fields).map((field) => ({ field, value: serializeValue(fields[field]) }));
-};
-
-export const convertDocumentSourceToLogItemFields = (
-  source: JsonObject,
-  path: string[] = [],
-  fields: LogEntriesItemField[] = []
-): LogEntriesItemField[] => {
-  return Object.keys(source).reduce((acc, key) => {
-    const value = source[key];
-    const nextPath = [...path, key];
-    if (jsonObjectRT.is(value)) {
-      return convertDocumentSourceToLogItemFields(value, nextPath, acc);
-    }
-    const field = { field: nextPath.join('.'), value: serializeValue(value) };
-    return [...acc, field];
-  }, fields);
 };
