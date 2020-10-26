@@ -5,7 +5,6 @@
  */
 
 import LRU from 'lru-cache';
-import { LegacyAPICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
   FieldDescriptor,
@@ -45,8 +44,7 @@ export const getDynamicIndexPattern = async ({
   }
 
   const indexPatternsFetcher = new IndexPatternsFetcher(
-    (...rest: Parameters<LegacyAPICaller>) =>
-      context.core.elasticsearch.legacy.client.callAsCurrentUser(...rest)
+    context.core.elasticsearch.client.asCurrentUser
   );
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
