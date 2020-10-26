@@ -56,6 +56,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
     <NodesDataProvider>
       {({ nodesByRoles, nodesByAttributes, isUsingDeprecatedDataRoleConfig }) => {
         const hasDataNodeRoles = Object.keys(nodesByRoles).some((nodeRole) =>
+          // match any of the "data_" roles, including data_content.
           nodeRole.trim().startsWith('data_')
         );
         const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
