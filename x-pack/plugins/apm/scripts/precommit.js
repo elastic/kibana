@@ -61,8 +61,6 @@ tasks.run().catch((error) => {
   // from src/dev/typescript/exec_in_projects.ts
   process.exitCode = 1;
 
-  console.log(error);
-
   const errors = error.errors || [error];
 
   for (const e of errors) {
