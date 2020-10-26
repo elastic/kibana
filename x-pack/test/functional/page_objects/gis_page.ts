@@ -235,7 +235,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     }
 
     async isSetViewPopoverOpen() {
-      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
+      return await testSubjects.exists('mapSetViewForm', { timeout: 5000 });
     }
 
     async openSetViewPopover() {
