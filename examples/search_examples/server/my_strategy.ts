@@ -33,7 +33,7 @@ export const mySearchStrategyProvider = (
           cool: request.get_cool ? 'YES' : 'NOPE',
         }))
       ),
-    cancel: async (id, options, deps) => {
+    cancel: (id, options, deps) => {
       if (es.cancel) {
         return es.cancel(id, options, deps);
       }
