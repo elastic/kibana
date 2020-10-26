@@ -124,7 +124,8 @@ export function getMlClient(
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
       const resp = await mlClient.deleteDataFrameAnalytics(...p);
-      // don't delete the job object
+      // don't delete the job saved object as the real job will not be
+      // deleted initially and could still fail.
       return resp;
     },
     async deleteDatafeed(...p: any) {
@@ -150,7 +151,8 @@ export function getMlClient(
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       const resp = await mlClient.deleteJob(...p);
-      // don't delete the job object
+      // don't delete the job saved object as the real job will not be
+      // deleted initially and could still fail.
       return resp;
     },
     async deleteModelSnapshot(...p: Parameters<MlClient['deleteModelSnapshot']>) {
