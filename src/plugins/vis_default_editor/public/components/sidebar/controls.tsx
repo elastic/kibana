@@ -52,7 +52,10 @@ function DefaultEditorControls({
 }: DefaultEditorControlsProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
-  const toggleAutoApply = useCallback((e) => setAutoApplyEnabled((enabled) => !enabled), []);
+  const toggleAutoApply = useCallback(
+    (nextAutoApplyEnabled) => setAutoApplyEnabled(nextAutoApplyEnabled),
+    []
+  );
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
 
   useDebounce(
@@ -137,7 +140,7 @@ function DefaultEditorControls({
             iconType="refresh"
             color={autoApplyEnabled ? 'primary' : 'text'}
             fill
-            onClick={toggleAutoApply}
+            onClick={() => toggleAutoApply(!autoApplyEnabled)}
             size="s"
             minWidth={80}
           >

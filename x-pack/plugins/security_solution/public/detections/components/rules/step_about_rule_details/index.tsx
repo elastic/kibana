@@ -50,10 +50,12 @@ const toggleOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'details',
     label: i18n.ABOUT_PANEL_DETAILS_TAB,
+    'data-test-subj': 'stepAboutDetailsToggle-details',
   },
   {
     id: 'notes',
     label: i18n.ABOUT_PANEL_NOTES_TAB,
+    'data-test-subj': 'stepAboutDetailsToggle-notes',
   },
 ];
 

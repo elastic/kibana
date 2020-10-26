@@ -95,8 +95,8 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               append={
                 <EuiButton
                   style={{ minWidth: '40px' }}
-                  onChange={(e: any) => {
-                    updateConfig({ includeTo: e.target.checked });
+                  onClick={() => {
+                    updateConfig({ includeTo: !includeTo });
                   }}
                   isSelected={includeTo}
                   fill={includeTo}

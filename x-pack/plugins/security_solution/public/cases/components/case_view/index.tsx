@@ -242,10 +242,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const toggleStatusCase = useCallback(
-      (e) =>
+      (nextStatus) =>
         onUpdateField({
           key: 'status',
-          value: e.target.checked ? 'closed' : 'open',
+          value: nextStatus ? 'closed' : 'open',
         }),
       [onUpdateField]
     );
@@ -330,7 +330,7 @@ export const CaseComponent = React.memo<CaseProps>(
               disabled={!userCanCrud}
               isLoading={isLoading && updateKey === 'status'}
               onRefresh={handleRefresh}
-              toggleStatusCase={toggleStatusCase}
+              toggleStatusCase={() => toggleStatusCase(!caseStatusData.isSelected)}
               {...caseStatusData}
             />
           </HeaderPage>
@@ -365,7 +365,7 @@ export const CaseComponent = React.memo<CaseProps>(
                           isSelected={caseStatusData.isSelected}
                           isLoading={isLoading && updateKey === 'status'}
                           fill={caseStatusData.isSelected}
-                          onChange={toggleStatusCase}
+                          onClick={() => toggleStatusCase(!caseStatusData.isSelected)}
                         >
                           {caseStatusData.buttonLabel}
                         </EuiButton>

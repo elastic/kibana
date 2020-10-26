@@ -39,12 +39,14 @@ function RowsOrColumnsControl({ editorStateParams, setStateParamValue }: AggCont
       label: i18n.translate('visDefaultEditor.controls.rowsLabel', {
         defaultMessage: 'Rows',
       }),
+      'data-test-subj': 'visEditorSplitBy-Rows',
     },
     {
       id: PARAMS.COLUMNS,
       label: i18n.translate('visDefaultEditor.controls.columnsLabel', {
         defaultMessage: 'Columns',
       }),
+      'data-test-subj': 'visEditorSplitBy-Columns',
     },
   ];
   const onChange = useCallback(

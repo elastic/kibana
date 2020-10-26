@@ -44,7 +44,7 @@ interface CaseStatusProps {
   onRefresh: () => void;
   status: string;
   title: string;
-  toggleStatusCase: (evt: unknown) => void;
+  toggleStatusCase: (status: boolean) => void;
   value: string | null;
 }
 const CaseStatusComp: React.FC<CaseStatusProps> = ({
@@ -99,7 +99,7 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
             isLoading={isLoading}
             isSelected={isSelected}
             fill={isSelected}
-            onChange={toggleStatusCase}
+            onClick={() => toggleStatusCase(!isSelected)}
           >
             {buttonLabel}
           </EuiButton>
