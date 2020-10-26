@@ -399,21 +399,40 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should import saved objects with index patterns when index patterns does not exists', async () => {
-        // First, we need to delete the index pattern
-        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
-        await PageObjects.savedObjects.clickDelete();
-
-        // Then, import the objects
+      it('should preserve index patterns selection when switching between pages', async () => {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
+          path.join(__dirname, 'exports', '_import_objects_missing_all_index_patterns.json')
         );
-        await PageObjects.savedObjects.checkImportSucceeded();
-        await PageObjects.savedObjects.clickImportDone();
 
-        const objects = await PageObjects.savedObjects.getRowTitles();
-        const isSavedObjectImported = objects.includes('saved object imported with index pattern');
-        expect(isSavedObjectImported).to.be(true);
+        await PageObjects.savedObjects.setOverriddenIndexPatternValue(
+          'missing-index-pattern-1',
+          'index-pattern-test-1'
+        );
+
+        await testSubjects.click('pagination-button-next');
+
+        await PageObjects.savedObjects.setOverriddenIndexPatternValue(
+          'missing-index-pattern-7',
+          'index-pattern-test-2'
+        );
+
+        await testSubjects.click('pagination-button-previous');
+
+        const selectedIdForMissingIndexPattern1 = await testSubjects.getAttribute(
+          'managementChangeIndexSelection-missing-index-pattern-1',
+          'value'
+        );
+
+        expect(selectedIdForMissingIndexPattern1).to.eql('f1e4c910-a2e6-11e7-bb30-233be9be6a20');
+
+        await testSubjects.click('pagination-button-next');
+
+        const selectedIdForMissingIndexPattern7 = await testSubjects.getAttribute(
+          'managementChangeIndexSelection-missing-index-pattern-7',
+          'value'
+        );
+
+        expect(selectedIdForMissingIndexPattern7).to.eql('f1e4c910-a2e6-11e7-bb30-233be9be6a87');
       });
     });
   });
