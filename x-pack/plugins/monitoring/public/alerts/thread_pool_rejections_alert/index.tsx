@@ -8,9 +8,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { Expression, Props } from '../components/duration/expression';
-
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { CommonAlertParamDetails } from '../../../common/types';
 
 interface ThreadPoolTypes {
