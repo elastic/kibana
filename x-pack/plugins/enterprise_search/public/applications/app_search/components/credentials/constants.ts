@@ -11,6 +11,16 @@ export enum ApiTokenTypes {
   Search = 'search',
 }
 
+export const CREATE_MESSAGE = i18n.translate('xpack.enterpriseSearch.appSearch.tokens.created', {
+  defaultMessage: 'Successfully created key.',
+});
+export const UPDATE_MESSAGE = i18n.translate('xpack.enterpriseSearch.appSearch.tokens.update', {
+  defaultMessage: 'Successfully updated API Key.',
+});
+export const DELETE_MESSAGE = i18n.translate('xpack.enterpriseSearch.appSearch.tokens.deleted', {
+  defaultMessage: 'Successfully deleted key.',
+});
+
 export const SEARCH_DISPLAY = i18n.translate(
   'xpack.enterpriseSearch.appSearch.tokens.permissions.display.search',
   {
@@ -81,3 +91,5 @@ export const TOKEN_TYPE_INFO = [
   { value: ApiTokenTypes.Private, text: TOKEN_TYPE_DISPLAY_NAMES[ApiTokenTypes.Private] },
   { value: ApiTokenTypes.Admin, text: TOKEN_TYPE_DISPLAY_NAMES[ApiTokenTypes.Admin] },
 ];
+
+export const FLYOUT_ARIA_LABEL_ID = 'credentialsFlyoutTitle';
