@@ -98,6 +98,9 @@ export function SelectableUrlList({
     if (evt.key.toLowerCase() === 'enter') {
       onTermChange();
       setPopoverIsOpen(false);
+      if (searchRef) {
+        searchRef.blur();
+      }
     }
   };
 
@@ -211,7 +214,7 @@ export function SelectableUrlList({
                 <EuiText size="s">
                   <FormattedMessage
                     id="xpack.apm.ux.url.hitEnter.include"
-                    defaultMessage="Hit {icon} to include all urls matching {searchValue}"
+                    defaultMessage="Hit {icon} or Click Apply to include all urls matching {searchValue}"
                     values={{
                       searchValue: <strong>{searchValue}</strong>,
                       icon: (
