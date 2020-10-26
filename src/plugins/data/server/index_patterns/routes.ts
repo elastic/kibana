@@ -46,8 +46,8 @@ export function registerRoutes(http: HttpServiceSetup) {
       },
     },
     async (context, request, response) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
-      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
+      const { asCurrentUser } = context.core.elasticsearch.client;
+      const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
       const { pattern, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];
@@ -105,8 +105,8 @@ export function registerRoutes(http: HttpServiceSetup) {
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
-      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
+      const { asCurrentUser } = context.core.elasticsearch.client;
+      const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];
