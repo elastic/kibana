@@ -435,7 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           await createRule(supertest, ruleWithException);
-          await waitForSignalsToBePresent(supertest);
+          await waitForSignalsToBePresent(supertest, 10);
           const signalsOpen = await getAllSignals(supertest);
           expect(signalsOpen.hits.hits.length).equal(10);
         });

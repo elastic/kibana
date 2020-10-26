@@ -44,6 +44,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -78,6 +79,7 @@ describe('Detection rules, machine learning', () => {
   });
 
   after(() => {
+    deleteRule();
     esArchiverUnload('prebuilt_rules_loaded');
   });
 

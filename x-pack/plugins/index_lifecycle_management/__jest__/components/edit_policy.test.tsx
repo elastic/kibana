@@ -792,11 +792,12 @@ describe('edit policy', () => {
       httpRequestsMockHelpers.setPoliciesResponse(policies);
     });
 
-    describe('with legacy data role config', () => {
+    describe('with deprecated data role config', () => {
       test('should hide data tier option on cloud using legacy node role configuration', async () => {
         http.setupNodeListResponse({
           nodesByAttributes: { test: ['123'] },
-          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          // On cloud, if using legacy config there will not be any "data_*" roles set.
+          nodesByRoles: { data: ['test'] },
           isUsingDeprecatedDataRoleConfig: true,
         });
         const rendered = mountWithIntl(component);
@@ -830,6 +831,8 @@ describe('edit policy', () => {
         expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
         expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
         expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+        // We should not be showing the call-to-action for users to activate data tiers in cloud
+        expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeFalsy();
       });
 
       test('should show cloud notice when cold tier nodes do not exist', async () => {
