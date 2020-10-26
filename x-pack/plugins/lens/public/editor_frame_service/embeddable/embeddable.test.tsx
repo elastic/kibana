@@ -28,6 +28,7 @@ import { IBasePath } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -346,10 +347,12 @@ describe('embeddable', () => {
     } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    embeddable.updateInput({
-      timeRange,
-      query,
-      filters: [{ meta: { alias: 'test', negate: true, disabled: true } }],
+    act(() => {
+      embeddable.updateInput({
+        timeRange,
+        query,
+        filters: [{ meta: { alias: 'test', negate: true, disabled: true } }],
+      });
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
@@ -393,7 +396,9 @@ describe('embeddable', () => {
     } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    autoRefreshFetchSubject.next();
+    act(() => {
+      autoRefreshFetchSubject.next();
+    });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });

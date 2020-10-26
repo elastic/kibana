@@ -20,7 +20,7 @@
 import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
-import { UsageCollector } from './usage_collector';
+import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -73,8 +73,9 @@ describe('CollectorSet', () => {
           // Even for Collector vs. UsageCollector
           new UsageCollector(logger, {
             type: 'test_duplicated',
-            fetch: () => 2,
+            fetch: () => ({ prop: 2 }),
             isReady: () => false,
+            schema: { prop: { type: 'long' } },
           })
         )
       ).toThrowError(`Usage collector's type "test_duplicated" is duplicated.`);
@@ -252,7 +253,12 @@ describe('CollectorSet', () => {
   });
 
   describe('isUsageCollector', () => {
-    const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {}, isReady: () => true };
+    const collectorOptions: UsageCollectorOptions = {
+      type: 'MY_TEST_COLLECTOR',
+      fetch: () => ({ test: 1 }),
+      isReady: () => true,
+      schema: { test: { type: 'long' } },
+    };
 
     it('returns true only for UsageCollector instances', () => {
       const collectors = new CollectorSet({ logger });

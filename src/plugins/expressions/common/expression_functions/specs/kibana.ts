@@ -50,9 +50,9 @@ export const kibana: ExpressionFunctionKibana = {
       // TODO: But it shouldn't be need.
       ...input,
       type: 'kibana_context',
-      query: [...toArray((getSearchContext() as any).query), ...toArray((input || {}).query)],
-      filters: [...((getSearchContext() as any).filters || []), ...((input || {}).filters || [])],
-      timeRange: (getSearchContext() as any).timeRange || (input ? input.timeRange : undefined),
+      query: [...toArray(getSearchContext().query), ...toArray((input || {}).query)],
+      filters: [...(getSearchContext().filters || []), ...((input || {}).filters || [])],
+      timeRange: getSearchContext().timeRange || (input ? input.timeRange : undefined),
     };
 
     return output;

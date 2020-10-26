@@ -60,6 +60,7 @@ export const NumericType = ({ field }: Props) => {
                   path="scaling_factor"
                   config={getFieldConfig('scaling_factor')}
                   component={Field}
+                  data-test-subj="scalingFactor"
                 />
               </EditFieldFormRow>
             ) : null;

@@ -54,7 +54,7 @@ export class DiskUsageAlert extends BaseAlert {
   public label = DiskUsageAlert.LABEL;
 
   protected defaultParams = {
-    threshold: 90,
+    threshold: 80,
     duration: '5m',
   };
 

@@ -156,9 +156,7 @@ export class Execution<
       variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
-      inspectorAdapters:
-        execution.params.inspectorAdapters ||
-        ((createDefaultInspectorAdapters() as any) as InspectorAdapters),
+      inspectorAdapters: execution.params.inspectorAdapters || createDefaultInspectorAdapters(),
       ...(execution.params as any).extraContext,
     };
   }
