@@ -15,9 +15,10 @@ assignees: ''
 
 **Describe the change. How will it manifest to users?**
 
-**What percentage of users will be affected?**
+**How many users will be affected?**
 
-<!-- e.g., Roughly 75% will need to make changes to x. -->
+<!-- e.g., Based on telemetry data, roughly 75% of our users will need to make changes to x -->
+<!-- e.g., A majority of users will need to make changes to x. -->
 
 **What can users do to address the change manually?**
 
