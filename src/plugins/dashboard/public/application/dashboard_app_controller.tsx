@@ -66,7 +66,6 @@ import {
   ViewMode,
   ContainerOutput,
   EmbeddableInput,
-  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -82,7 +81,7 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IKbnUrlStateStorage, unhashUrl } from '../../../kibana_utils/public';
+import { IKbnUrlStateStorage, setStateToKbnUrl, unhashUrl } from '../../../kibana_utils/public';
 import {
   addFatalError,
   AngularHttpError,
@@ -145,7 +144,6 @@ export class DashboardAppController {
       notifications,
       overlays,
       chrome,
-      injectedMetadata,
       fatalErrors,
       uiSettings,
       savedObjects,
@@ -178,7 +176,7 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    const incomingEmbeddable = embeddable
+    let incomingEmbeddable = embeddable
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage();
 
@@ -344,10 +342,22 @@ export class DashboardAppController {
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
         embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
-      let expandedPanelId;
-      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        expandedPanelId = dashboardContainer.getInput().expandedPanelId;
+
+      // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+      if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+        const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
+        embeddablesMap[incomingEmbeddable.embeddableId] = {
+          gridData: originalPanelState.gridData,
+          type: incomingEmbeddable.type,
+          explicitInput: {
+            ...originalPanelState.explicitInput,
+            ...incomingEmbeddable.input,
+            id: incomingEmbeddable.embeddableId,
+          },
+        };
+        incomingEmbeddable = undefined;
       }
+
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
       const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
@@ -369,7 +379,7 @@ export class DashboardAppController {
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
         description: dashboardStateManager.getDescription(),
-        expandedPanelId,
+        expandedPanelId: dashboardStateManager.getExpandedPanelId(),
       };
     };
 
@@ -482,32 +492,16 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            if (incomingEmbeddable) {
-              if ('id' in incomingEmbeddable) {
-                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(
-                  incomingEmbeddable.type,
-                  {
-                    savedObjectId: incomingEmbeddable.id,
-                  }
-                );
-              } else if ('input' in incomingEmbeddable) {
-                const input = incomingEmbeddable.input;
-                // @ts-expect-error
-                delete input.id;
-                const explicitInput = {
-                  savedVis: input,
-                };
-                const embeddableId =
-                  'embeddableId' in incomingEmbeddable
-                    ? incomingEmbeddable.embeddableId
-                    : undefined;
-                container.addOrUpdateEmbeddable<EmbeddableInput>(
-                  incomingEmbeddable.type,
-                  // This ugly solution is temporary - https://github.com/elastic/kibana/pull/70272 fixes this whole section
-                  (explicitInput as unknown) as EmbeddableInput,
-                  embeddableId
-                );
-              }
+            // If the incomingEmbeddable does not yet exist in the panels listing, create a new panel using the container's addEmbeddable method.
+            if (
+              incomingEmbeddable &&
+              (!incomingEmbeddable.embeddableId ||
+                !container.getInput().panels[incomingEmbeddable.embeddableId])
+            ) {
+              container.addNewEmbeddable<EmbeddableInput>(
+                incomingEmbeddable.type,
+                incomingEmbeddable.input
+              );
             }
           }
 
@@ -531,9 +525,6 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
       filterManager.getFilters()
     );
-
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
 
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
@@ -1084,7 +1075,12 @@ export class DashboardAppController {
           allowEmbed: true,
           allowShortUrl:
             !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href),
+          shareableUrl: setStateToKbnUrl(
+            '_a',
+            dashboardStateManager.getAppState(),
+            { useHash: false, storeInHashQuery: true },
+            unhashUrl(window.location.href)
+          ),
           objectId: dash.id,
           objectType: 'dashboard',
           sharingData: {

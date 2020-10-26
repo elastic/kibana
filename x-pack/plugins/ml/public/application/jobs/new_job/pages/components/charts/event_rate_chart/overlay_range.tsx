@@ -5,12 +5,10 @@
  */
 
 import React, { FC } from 'react';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, LineAnnotation, AnnotationDomainTypes } from '@elastic/charts';
 import { LineChartPoint } from '../../../../common/chart_loader';
-import { TIME_FORMAT } from '../../../../../../../../common/constants/time_format';
+import { timeFormatter } from '../../../../../../../../common/util/date_utils';
 
 interface Props {
   overlayKey: number;
@@ -70,9 +68,7 @@ export const OverlayRange: FC<Props> = ({
                 <div style={{ textAlign: 'center' }}>
                   <EuiIcon type="arrowUp" />
                 </div>
-                <div style={{ fontWeight: 'normal', color: '#343741' }}>
-                  {formatDate(start, TIME_FORMAT)}
-                </div>
+                <div style={{ fontWeight: 'normal', color: '#343741' }}>{timeFormatter(start)}</div>
               </div>
             </>
           ) : undefined

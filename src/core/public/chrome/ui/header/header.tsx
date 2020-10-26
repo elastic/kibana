@@ -22,13 +22,15 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
+  EuiHideFor,
   EuiIcon,
+  EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
 import {
@@ -88,7 +90,7 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   if (!isVisible) {
-    return <LoadingIndicator loadingCount$={observables.loadingCount$} />;
+    return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
   }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
@@ -97,7 +99,6 @@ export function Header({
 
   return (
     <>
-      <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           <EuiHeader
@@ -111,18 +112,26 @@ export function Header({
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
+                    loadingCount$={observables.loadingCount$}
                   />,
                 ],
                 borders: 'none',
               },
               {
                 ...(observables.navControlsCenter$ && {
-                  items: [<HeaderNavControls navControls$={observables.navControlsCenter$} />],
+                  items: [
+                    <EuiShowFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    </EuiShowFor>,
+                  ],
                 }),
                 borders: 'none',
               },
               {
                 items: [
+                  <EuiHideFor sizes={['m', 'l', 'xl']}>
+                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                  </EuiHideFor>,
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
@@ -153,8 +162,6 @@ export function Header({
                   <EuiIcon type="menu" size="m" />
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem border="right" />
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>

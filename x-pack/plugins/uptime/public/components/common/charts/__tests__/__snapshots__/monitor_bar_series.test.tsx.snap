@@ -131,6 +131,7 @@ exports[`MonitorBarSeries component shallow renders a series when there are down
           },
         ]
       }
+      minInterval={10}
     />
   </ContextProvider>
 </ContextProvider>

@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
-<KpiNetworkComponent
+exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
+<NetworkKpiComponent
   filterQuery=""
   from="2019-06-15T06:00:00.000Z"
+  indexNames={Array []}
   narrowDateRange={[MockFunction]}
   setQuery={[MockFunction]}
   skip={true}

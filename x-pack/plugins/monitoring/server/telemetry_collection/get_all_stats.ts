@@ -21,7 +21,6 @@ type PromiseReturnType<T extends (...args: any[]) => any> = ReturnType<T> extend
 export interface CustomContext {
   maxBucketSize: number;
 }
-
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
  * Returns the array of clusters joined with the Kibana and Logstash instances.
@@ -29,7 +28,7 @@ export interface CustomContext {
  */
 export const getAllStats: StatsGetter<CustomContext> = async (
   clustersDetails,
-  { callCluster, start, end },
+  { callCluster, start, end, esClient, soClient },
   { maxBucketSize }
 ) => {
   const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);

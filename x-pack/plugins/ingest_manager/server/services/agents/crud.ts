@@ -3,25 +3,39 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import Boom from 'boom';
 import { SavedObjectsClientContract } from 'src/core/server';
-import {
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-  AGENT_TYPE_EPHEMERAL,
-  AGENT_POLLING_THRESHOLD_MS,
-} from '../../constants';
+import { isAgentUpgradeable } from '../../../common';
+import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
+import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
-import { escapeSearchQueryPhrase } from '../saved_object';
+import { appContextService } from '../../services';
+
+const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
+const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
+
+function _joinFilters(filters: string[], operator = 'AND') {
+  return filters.reduce((acc: string | undefined, filter) => {
+    if (acc) {
+      return `${acc} ${operator} (${filter})`;
+    }
+
+    return `(${filter})`;
+  }, undefined);
+}
 
 export async function listAgents(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
   }
-) {
+): Promise<{
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
+}> {
   const {
     page = 1,
     perPage = 20,
@@ -29,46 +43,94 @@ export async function listAgents(
     sortOrder = 'desc',
     kuery,
     showInactive = false,
+    showUpgradeable,
   } = options;
-
   const filters = [];
 
   if (kuery && kuery !== '') {
-    // To ensure users dont need to know about SO data structure...
-    filters.push(
-      kuery.replace(
-        new RegExp(`${AGENT_SAVED_OBJECT_TYPE}\.`, 'g'),
-        `${AGENT_SAVED_OBJECT_TYPE}.attributes.`
-      )
-    );
+    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
   }
 
   if (showInactive === false) {
-    const agentActiveCondition = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND not ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
-    const recentlySeenEphemeralAgent = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL} AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.last_checkin > ${
-      Date.now() - 3 * AGENT_POLLING_THRESHOLD_MS
-    }`;
-    filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
+    filters.push(ACTIVE_AGENT_CONDITION);
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { saved_objects, total } = await soClient.find<AgentSOAttributes>({
+  let { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
+    filter: _joinFilters(filters),
     sortField,
     sortOrder,
     page,
     perPage,
-    filter: _joinFilters(filters),
   });
-
-  const agents: Agent[] = saved_objects.map(savedObjectToAgent);
+  // filtering for a range on the version string will not work,
+  // nor does filtering on a flattened field (local_metadata), so filter here
+  if (showUpgradeable) {
+    agentSOs = agentSOs.filter((agent) =>
+      isAgentUpgradeable(savedObjectToAgent(agent), appContextService.getKibanaVersion())
+    );
+    total = agentSOs.length;
+  }
 
   return {
-    agents,
+    agents: agentSOs.map(savedObjectToAgent),
     total,
     page,
     perPage,
   };
+}
+
+export async function listAllAgents(
+  soClient: SavedObjectsClientContract,
+  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+    showInactive: boolean;
+  }
+): Promise<{
+  agents: Agent[];
+  total: number;
+}> {
+  const { sortField = 'enrolled_at', sortOrder = 'desc', kuery, showInactive = false } = options;
+  const filters = [];
+
+  if (kuery && kuery !== '') {
+    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+  }
+
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+
+  const { saved_objects: agentSOs, total } = await findAllSOs<AgentSOAttributes>(soClient, {
+    type: AGENT_SAVED_OBJECT_TYPE,
+    kuery: _joinFilters(filters),
+    sortField,
+    sortOrder,
+  });
+
+  return {
+    agents: agentSOs.map(savedObjectToAgent),
+    total,
+  };
+}
+
+export async function countInactiveAgents(
+  soClient: SavedObjectsClientContract,
+  options: Pick<ListWithKuery, 'kuery'>
+): Promise<number> {
+  const { kuery } = options;
+  const filters = [INACTIVE_AGENT_CONDITION];
+
+  if (kuery && kuery !== '') {
+    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+  }
+
+  const { total } = await soClient.find<AgentSOAttributes>({
+    type: AGENT_SAVED_OBJECT_TYPE,
+    filter: _joinFilters(filters),
+    perPage: 0,
+  });
+
+  return total;
 }
 
 export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
@@ -76,6 +138,17 @@ export async function getAgent(soClient: SavedObjectsClientContract, agentId: st
     await soClient.get<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId)
   );
   return agent;
+}
+
+export async function getAgents(soClient: SavedObjectsClientContract, agentIds: string[]) {
+  const agentSOs = await soClient.bulkGet<AgentSOAttributes>(
+    agentIds.map((agentId) => ({
+      id: agentId,
+      type: AGENT_SAVED_OBJECT_TYPE,
+    }))
+  );
+  const agents = agentSOs.saved_objects.map(savedObjectToAgent);
+  return agents;
 }
 
 export async function getAgentByAccessAPIKeyId(
@@ -141,14 +214,4 @@ export async function deleteAgent(soClient: SavedObjectsClientContract, agentId:
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     active: false,
   });
-}
-
-function _joinFilters(filters: string[], operator = 'AND') {
-  return filters.reduce((acc: string | undefined, filter) => {
-    if (acc) {
-      return `${acc} ${operator} (${filter})`;
-    }
-
-    return `(${filter})`;
-  }, undefined);
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
@@ -53,7 +53,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService = new ManagementService();
       this.managementService.setup({
         management: plugins.management,
-        getStartServices: core.getStartServices as CoreSetup<PluginsStart>['getStartServices'],
+        getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
         spacesManager: this.spacesManager,
         securityLicense: plugins.security?.license,
       });
@@ -73,6 +73,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         spacesManager: this.spacesManager,
         notificationsSetup: core.notifications,
         savedObjectsManagementSetup: plugins.savedObjectsManagement,
+        getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
       });
       const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
       copySavedObjectsToSpaceService.setup({

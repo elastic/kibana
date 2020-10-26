@@ -17,6 +17,7 @@ import {
   NewPackagePolicy,
 } from '../../types';
 import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
@@ -36,11 +37,8 @@ export const getPackagePoliciesHandler: RequestHandler<
         perPage,
       },
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -63,14 +61,11 @@ export const getOnePackagePolicyHandler: RequestHandler<TypeOf<
     } else {
       return notFoundResponse();
     }
-  } catch (e) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return notFoundResponse();
     } else {
-      return response.customError({
-        statusCode: 500,
-        body: { message: e.message },
-      });
+      return defaultIngestErrorHandler({ error, response });
     }
   }
 };
@@ -95,7 +90,7 @@ export const createPackagePolicyHandler: RequestHandler<
         try {
           // ensure that the returned value by the callback passes schema validation
           updatedNewData = CreatePackagePolicyRequestSchema.body.validate(
-            await callback(updatedNewData)
+            await callback(updatedNewData, context, request)
           );
         } catch (error) {
           // Log the error, but keep going and process the other callbacks
@@ -117,12 +112,8 @@ export const createPackagePolicyHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    logger.error(e);
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -163,11 +154,8 @@ export const updatePackagePolicyHandler: RequestHandler<
     return response.ok({
       body: { item: updatedPackagePolicy },
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: e.statusCode || 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -187,10 +175,7 @@ export const deletePackagePolicyHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

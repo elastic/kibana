@@ -18,7 +18,9 @@ interface Props {
 }
 
 const Container = styled.div`
-  min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
+  min-height: calc(
+    100vh - ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px
+  );
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
   display: flex;
   flex-direction: column;
@@ -41,7 +43,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const { getHref } = useLink();
-  const { fleet } = useConfig();
+  const { agents } = useConfig();
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
   return (
@@ -80,11 +82,11 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiTab
                     isSelected={section === 'fleet'}
                     href={getHref('fleet')}
-                    disabled={!fleet?.enabled}
+                    disabled={!agents?.enabled}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.fleetLinkText"
-                      defaultMessage="Fleet"
+                      id="xpack.ingestManager.appNavigation.agentsLinkText"
+                      defaultMessage="Agents"
                     />
                   </EuiTab>
                   <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>

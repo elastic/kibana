@@ -9,6 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
 import { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
 import { outputService } from '../../services/output';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -23,11 +24,8 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
     };
 
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -43,17 +41,14 @@ export const getOneOuputHandler: RequestHandler<TypeOf<
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Output ${request.params.outputId} not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -72,16 +67,13 @@ export const putOuputHandler: RequestHandler<
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Output ${request.params.outputId} not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };

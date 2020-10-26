@@ -60,7 +60,7 @@ export const getAddPrepackagedThreatMatchRulesSchemaMock = (): AddPrepackagedRul
   rule_id: 'rule-1',
   version: 1,
   threat_query: '*:*',
-  threat_index: 'list-index',
+  threat_index: ['list-index'],
   threat_mapping: [
     {
       entries: [
@@ -118,7 +118,7 @@ export const getAddPrepackagedThreatMatchRulesSchemaDecodedMock = (): AddPrepack
   exceptions_list: [],
   rule_id: 'rule-1',
   threat_query: '*:*',
-  threat_index: 'list-index',
+  threat_index: ['list-index'],
   threat_mapping: [
     {
       entries: [

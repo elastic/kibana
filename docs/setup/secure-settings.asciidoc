@@ -19,7 +19,7 @@ bin/kibana-keystore create
 ----------------------------------------------------------------
 
 The file `kibana.keystore` will be created in the directory defined by the
-`path.data` configuration setting.
+<<path-data, `path.data`>> configuration setting.
 
 [float]
 [[list-settings]]

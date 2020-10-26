@@ -6,9 +6,9 @@
 
 import { getThreatList } from './get_threat_list';
 
-import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignals = async ({
   threatMapping,
@@ -24,6 +24,7 @@ export const createThreatSignals = async ({
   previousStartedAt,
   listClient,
   logger,
+  eventsTelemetry,
   alertId,
   outputIndex,
   params,
@@ -40,6 +41,7 @@ export const createThreatSignals = async ({
   throttle,
   threatFilters,
   threatQuery,
+  threatLanguage,
   buildRuleMessage,
   threatIndex,
   name,
@@ -58,7 +60,9 @@ export const createThreatSignals = async ({
     exceptionItems,
     threatFilters,
     query: threatQuery,
-    index: [threatIndex],
+    language: threatLanguage,
+    index: threatIndex,
+    listClient,
     searchAfter: undefined,
     sortField: undefined,
     sortOrder: undefined,
@@ -79,6 +83,7 @@ export const createThreatSignals = async ({
       previousStartedAt,
       listClient,
       logger,
+      eventsTelemetry,
       alertId,
       outputIndex,
       params,
@@ -97,6 +102,7 @@ export const createThreatSignals = async ({
       threatQuery,
       buildRuleMessage,
       threatIndex,
+      threatLanguage,
       name,
       currentThreatList: threatList,
       currentResult: results,

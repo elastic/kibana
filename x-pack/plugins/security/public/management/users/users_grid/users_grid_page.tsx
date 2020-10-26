@@ -151,14 +151,16 @@ export class UsersGridPage extends Component<Props, State> {
           const roleLinks = rolenames.map((rolename, index) => {
             const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
             return (
-              <RoleTableDisplay
-                role={roleDefinition}
-                key={rolename}
-                navigateToApp={this.props.navigateToApp}
-              />
+              <EuiFlexItem grow={false} key={rolename}>
+                <RoleTableDisplay role={roleDefinition} navigateToApp={this.props.navigateToApp} />
+              </EuiFlexItem>
             );
           });
-          return <div data-test-subj="userRowRoles">{roleLinks}</div>;
+          return (
+            <EuiFlexGroup data-test-subj="userRowRoles" gutterSize="s" wrap>
+              {roleLinks}
+            </EuiFlexGroup>
+          );
         },
       },
       {
@@ -192,6 +194,7 @@ export class UsersGridPage extends Component<Props, State> {
       toolsRight: this.renderToolsRight(),
       box: {
         incremental: true,
+        'data-test-subj': 'searchUsers',
       },
       onChange: (query: any) => {
         this.setState({
@@ -275,12 +278,18 @@ export class UsersGridPage extends Component<Props, State> {
 
   private handleDelete = (usernames: string[], errors: string[]) => {
     const { users } = this.state;
+    const filteredUsers = users.filter(({ username }) => {
+      return !usernames.includes(username) || errors.includes(username);
+    });
     this.setState({
       selection: [],
       showDeleteConfirmation: false,
-      users: users.filter(({ username }) => {
-        return !usernames.includes(username) || errors.includes(username);
-      }),
+      users: filteredUsers,
+      visibleUsers: this.getVisibleUsers(
+        filteredUsers,
+        this.state.filter,
+        this.state.includeReservedUsers
+      ),
     });
   };
 

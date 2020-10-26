@@ -59,7 +59,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     application: { navigateToApp },
   } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
     params: { policyId, pkgkey },
@@ -242,7 +242,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.createPackagePolicy.addedNotificationTitle', {
-          defaultMessage: `Successfully added '{packagePolicyName}'`,
+          defaultMessage: `'{packagePolicyName}' integration added.`,
           values: {
             packagePolicyName: packagePolicy.name,
           },
@@ -250,7 +250,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.ingestManager.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
                 values: {
                   agentPolicyName: agentPolicy.name,
                 },

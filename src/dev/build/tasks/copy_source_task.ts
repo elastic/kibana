@@ -35,9 +35,12 @@ export const CopySource: Task = {
         '!src/fixtures/**',
         '!src/cli/cluster/**',
         '!src/cli/repl/**',
+        '!src/cli/dev.js',
         '!src/functional_test_runner/**',
         '!src/dev/**',
-        '!**/public/**',
+        // this is the dev-only entry
+        '!src/setup_node_env/index.js',
+        '!**/public/**/*.{js,ts,tsx,json}',
         'typings/**',
         'config/kibana.yml',
         'config/node.options',

@@ -45,26 +45,18 @@ const k7Breadcrumbs = ($route) => {
 };
 
 getAngularModule().config(($routeProvider) => {
-  $routeProvider
-    // deprecated route, kept for compatibility
-    // should be removed in the future
-    .when('/context/:indexPatternId/:type/:id*', {
-      redirectTo: '/context/:indexPatternId/:id',
-    })
-    .when('/context/:indexPatternId/:id*', {
-      controller: ContextAppRouteController,
-      k7Breadcrumbs,
-      controllerAs: 'contextAppRoute',
-      resolve: {
-        indexPattern: ($route, Promise) => {
-          const indexPattern = getServices().indexPatterns.get(
-            $route.current.params.indexPatternId
-          );
-          return Promise.props({ ip: indexPattern });
-        },
+  $routeProvider.when('/context/:indexPatternId/:id*', {
+    controller: ContextAppRouteController,
+    k7Breadcrumbs,
+    controllerAs: 'contextAppRoute',
+    resolve: {
+      indexPattern: ($route, Promise) => {
+        const indexPattern = getServices().indexPatterns.get($route.current.params.indexPatternId);
+        return Promise.props({ ip: indexPattern });
       },
-      template: contextAppRouteTemplate,
-    });
+    },
+    template: contextAppRouteTemplate,
+  });
 });
 
 function ContextAppRouteController($routeParams, $scope, $route) {

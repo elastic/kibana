@@ -8,6 +8,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import '../../../../common/mock/formatted_relative';
 
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { NotePreview } from './note_preview';

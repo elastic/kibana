@@ -36,6 +36,7 @@ const ConfigSchemaProps = {
   port: schema.nullable(portSchema()),
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
+  hasAuth: schema.boolean({ defaultValue: true }),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
@@ -185,6 +186,7 @@ async function executor(
       message: params.message,
     },
     proxySettings: execOptions.proxySettings,
+    hasAuth: config.hasAuth,
   };
 
   let result;

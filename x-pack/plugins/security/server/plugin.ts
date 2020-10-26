@@ -9,6 +9,7 @@ import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import { deepFreeze } from '@kbn/std';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
   CoreSetup,
   CoreStart,
@@ -66,7 +67,7 @@ export interface SecurityPluginSetup {
     'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
   >;
   license: SecurityLicense;
-  audit: Pick<AuditServiceSetup, 'getLogger'>;
+  audit: AuditServiceSetup;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -84,6 +85,7 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  securityOss?: SecurityOssPluginSetup;
 }
 
 export interface PluginStartDependencies {
@@ -99,6 +101,7 @@ export class Plugin {
   private readonly logger: Logger;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
+  private authc?: Authentication;
 
   private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
@@ -133,7 +136,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing, taskManager, usageCollection }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, securityOss }: PluginSetupDependencies
   ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -153,6 +156,13 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    if (securityOss) {
+      license.features$.subscribe(({ allowRbac }) => {
+        const showInsecureClusterWarning = !allowRbac;
+        securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
+      });
+    }
+
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
     );
@@ -167,8 +177,15 @@ export class Plugin {
 
     registerSecurityUsageCollector({ usageCollection, config, license });
 
-    const audit = this.auditService.setup({ license, config: config.audit });
-    const auditLogger = new SecurityAuditLogger(audit.getLogger());
+    const audit = this.auditService.setup({
+      license,
+      config: config.audit,
+      logging: core.logging,
+      http: core.http,
+      getSpaceId: (request) => this.getSpacesService()?.getSpaceId(request),
+      getCurrentUser: (request) => this.authc?.getCurrentUser(request),
+    });
+    const legacyAuditLogger = new SecurityAuditLogger(audit.getLogger());
 
     const { session } = this.sessionManagementService.setup({
       config,
@@ -178,8 +195,9 @@ export class Plugin {
       taskManager,
     });
 
-    const authc = await setupAuthentication({
-      auditLogger,
+    this.authc = await setupAuthentication({
+      legacyAuditLogger,
+      audit,
       getFeatureUsageService: this.getFeatureUsageService,
       http: core.http,
       clusterClient,
@@ -197,13 +215,15 @@ export class Plugin {
       loggers: this.initializerContext.logger,
       kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
+      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       getSpacesService: this.getSpacesService,
       features,
-      getCurrentUser: authc.getCurrentUser,
+      getCurrentUser: this.authc.getCurrentUser,
     });
 
     setupSavedObjects({
-      auditLogger,
+      legacyAuditLogger,
+      audit,
       authz,
       savedObjects: core.savedObjects,
       getSpacesService: this.getSpacesService,
@@ -216,7 +236,7 @@ export class Plugin {
       logger: this.initializerContext.logger.get('routes'),
       clusterClient,
       config,
-      authc,
+      authc: this.authc,
       authz,
       license,
       session,
@@ -229,17 +249,18 @@ export class Plugin {
 
     return deepFreeze<SecurityPluginSetup>({
       audit: {
+        asScoped: audit.asScoped,
         getLogger: audit.getLogger,
       },
 
       authc: {
-        isAuthenticated: authc.isAuthenticated,
-        getCurrentUser: authc.getCurrentUser,
-        areAPIKeysEnabled: authc.areAPIKeysEnabled,
-        createAPIKey: authc.createAPIKey,
-        invalidateAPIKey: authc.invalidateAPIKey,
-        grantAPIKeyAsInternalUser: authc.grantAPIKeyAsInternalUser,
-        invalidateAPIKeyAsInternalUser: authc.invalidateAPIKeyAsInternalUser,
+        isAuthenticated: this.authc.isAuthenticated,
+        getCurrentUser: this.authc.getCurrentUser,
+        areAPIKeysEnabled: this.authc.areAPIKeysEnabled,
+        createAPIKey: this.authc.createAPIKey,
+        invalidateAPIKey: this.authc.invalidateAPIKey,
+        grantAPIKeyAsInternalUser: this.authc.grantAPIKeyAsInternalUser,
+        invalidateAPIKeyAsInternalUser: this.authc.invalidateAPIKeyAsInternalUser,
       },
 
       authz: {

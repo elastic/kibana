@@ -21,17 +21,16 @@ import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+import { FieldFormatsStart } from '../../field_formats';
+import { getForceNow } from '../../query/timefilter/lib/get_force_now';
+import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,
   AggsCommonStartDependencies,
   AggsCommonService,
   AggConfigs,
   AggTypesDependencies,
-  calculateBounds,
-  TimeRange,
-} from '../../../common';
-import { FieldFormatsStart } from '../../field_formats';
-import { getForceNow } from '../../query/timefilter/lib/get_force_now';
+} from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
 
 /**

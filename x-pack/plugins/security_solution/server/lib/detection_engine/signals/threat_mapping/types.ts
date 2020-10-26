@@ -15,14 +15,17 @@ import {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
+  ThreatIndex,
+  ThreatLanguageOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import { AlertServices } from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export interface CreateThreatSignalsOptions {
   threatMapping: ThreatMapping;
@@ -38,6 +41,7 @@ export interface CreateThreatSignalsOptions {
   previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
   params: RuleTypeParams;
@@ -55,7 +59,8 @@ export interface CreateThreatSignalsOptions {
   threatFilters: PartialFilter[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
-  threatIndex: string;
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
   name: string;
 }
 
@@ -73,6 +78,7 @@ export interface CreateThreatSignalOptions {
   previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
   params: RuleTypeParams;
@@ -90,10 +96,16 @@ export interface CreateThreatSignalOptions {
   threatFilters: PartialFilter[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
-  threatIndex: string;
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
   name: string;
   currentThreatList: SearchResponse<ThreatListItem>;
   currentResult: SearchAfterAndBulkCreateReturnType;
+}
+
+export interface ThreatSignalResults {
+  threatList: SearchResponse<ThreatListItem>;
+  results: SearchAfterAndBulkCreateReturnType;
 }
 
 export interface BuildThreatMappingFilterOptions {
@@ -135,6 +147,7 @@ export interface BooleanFilter {
 export interface GetThreatListOptions {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   query: string;
+  language: ThreatLanguageOrUndefined;
   index: string[];
   perPage?: number;
   searchAfter: string[] | undefined;
@@ -142,11 +155,14 @@ export interface GetThreatListOptions {
   sortOrder: 'asc' | 'desc' | undefined;
   threatFilters: PartialFilter[];
   exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
 }
 
 export interface GetSortWithTieBreakerOptions {
   sortField: string | undefined;
   sortOrder: 'asc' | 'desc' | undefined;
+  index: string[];
+  listItemIndex: string;
 }
 
 /**
@@ -158,6 +174,5 @@ export interface ThreatListItem {
 }
 
 export interface SortWithTieBreaker {
-  '@timestamp': 'asc';
   [key: string]: string;
 }

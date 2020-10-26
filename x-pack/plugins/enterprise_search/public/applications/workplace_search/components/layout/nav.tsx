@@ -3,14 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNav, SideNavLink } from '../../../shared/layout';
+
+import { GroupSubNav } from '../../views/groups/components/group_sub_nav';
+import { NAV } from '../../views/groups/constants';
 
 import {
   ORG_SOURCES_PATH,
@@ -22,10 +25,6 @@ import {
 } from '../../routes';
 
 export const WorkplaceSearchNav: React.FC = () => {
-  const {
-    externalUrl: { getWorkplaceSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
-
   // TODO: icons
   return (
     <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
@@ -39,10 +38,8 @@ export const WorkplaceSearchNav: React.FC = () => {
           defaultMessage: 'Sources',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${GROUPS_PATH}`)}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups', {
-          defaultMessage: 'Groups',
-        })}
+      <SideNavLink to={GROUPS_PATH} subNav={<GroupSubNav />}>
+        {NAV.GROUPS}
       </SideNavLink>
       <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
@@ -63,11 +60,6 @@ export const WorkplaceSearchNav: React.FC = () => {
       <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SOURCES_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.personalDashboard', {
           defaultMessage: 'View my personal dashboard',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl('/search')}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.search', {
-          defaultMessage: 'Go to search application',
         })}
       </SideNavLink>
     </SideNav>

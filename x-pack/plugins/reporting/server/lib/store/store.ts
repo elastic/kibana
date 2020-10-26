@@ -5,20 +5,11 @@
  */
 
 import { ElasticsearchServiceSetup } from 'src/core/server';
-import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { BaseParams, BaseParamsEncryptedFields, ReportingUser } from '../../types';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { Report } from './report';
-
-interface JobSettings {
-  timeout: number;
-  browser_type: string;
-  max_attempts: number;
-  priority: number;
-}
 
 const checkReportIsEditable = (report: Report) => {
   if (!report._id || !report._index) {
@@ -35,7 +26,6 @@ const checkReportIsEditable = (report: Report) => {
 export class ReportingStore {
   private readonly indexPrefix: string;
   private readonly indexInterval: string;
-  private readonly jobSettings: JobSettings;
   private client: ElasticsearchServiceSetup['legacy']['client'];
   private logger: LevelLogger;
 
@@ -46,13 +36,6 @@ export class ReportingStore {
     this.client = elasticsearch.legacy.client;
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
-    this.jobSettings = {
-      timeout: durationToNumber(config.get('queue', 'timeout')),
-      browser_type: config.get('capture', 'browser', 'type'),
-      max_attempts: config.get('capture', 'maxAttempts'),
-      priority: 10, // unused
-    };
-
     this.logger = logger;
   }
 
@@ -101,36 +84,17 @@ export class ReportingStore {
    * Called from addReport, which handles any errors
    */
   private async indexReport(report: Report) {
-    const params = report.payload;
-
-    // Queing is handled by TM. These queueing-based fields for reference in Report Info panel
-    const infoFields = {
-      timeout: report.timeout,
-      process_expiration: new Date(0), // use epoch so the job query works
-      created_at: new Date(),
-      attempts: 0,
-      max_attempts: report.max_attempts,
-      status: statuses.JOB_STATUS_PENDING,
-      browser_type: report.browser_type,
-    };
-
-    const indexParams = {
+    const doc = {
       index: report._index,
       id: report._id,
       body: {
-        ...infoFields,
-        jobtype: report.jobtype,
-        meta: {
-          // We are copying these values out of payload because these fields are indexed and can be aggregated on
-          // for tracking stats, while payload contents are not.
-          objectType: params.objectType,
-          layout: params.layout ? params.layout.id : 'none',
-        },
-        payload: report.payload,
-        created_by: report.created_by,
+        ...report.toEsDocsJSON()._source,
+        process_expiration: new Date(0), // use epoch so the job query works
+        attempts: 0,
+        status: statuses.JOB_STATUS_PENDING,
       },
     };
-    return await this.client.callAsInternalUser('index', indexParams);
+    return await this.client.callAsInternalUser('index', doc);
   }
 
   /*
@@ -140,22 +104,14 @@ export class ReportingStore {
     return await this.client.callAsInternalUser('indices.refresh', { index });
   }
 
-  public async addReport(
-    type: string,
-    user: ReportingUser,
-    payload: BaseParams & BaseParamsEncryptedFields
-  ): Promise<Report> {
-    const timestamp = indexTimestamp(this.indexInterval);
-    const index = `${this.indexPrefix}-${timestamp}`;
+  public async addReport(report: Report): Promise<Report> {
+    let index = report._index;
+    if (!index) {
+      const timestamp = indexTimestamp(this.indexInterval);
+      index = `${this.indexPrefix}-${timestamp}`;
+      report._index = index;
+    }
     await this.createIndex(index);
-
-    const report = new Report({
-      _index: index,
-      payload,
-      jobtype: type,
-      created_by: user ? user.username : false,
-      ...this.jobSettings,
-    });
 
     try {
       const doc = await this.indexReport(report);
@@ -166,7 +122,7 @@ export class ReportingStore {
 
       return report;
     } catch (err) {
-      this.logger.error(`Error in addReport!`);
+      this.logger.error(`Error in adding a report!`);
       this.logger.error(err);
       throw err;
     }
@@ -220,7 +176,7 @@ export class ReportingStore {
 
   public async setReportCompleted(report: Report, stats: Partial<Report>): Promise<Report> {
     try {
-      const { output } = stats as { output: any };
+      const { output } = stats;
       const status =
         output && output.warnings && output.warnings.length > 0
           ? statuses.JOB_STATUS_WARNINGS

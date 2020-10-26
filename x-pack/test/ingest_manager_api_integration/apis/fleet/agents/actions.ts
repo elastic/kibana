@@ -22,23 +22,23 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 200 if this a valid actions request', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
+        .post(`/api/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
-            type: 'CONFIG_CHANGE',
+            type: 'POLICY_CHANGE',
             data: { data: 'action_data' },
           },
         })
         .expect(200);
 
-      expect(apiResponse.item.type).to.eql('CONFIG_CHANGE');
+      expect(apiResponse.item.type).to.eql('POLICY_CHANGE');
       expect(apiResponse.item.data).to.eql({ data: 'action_data' });
     });
 
     it('should return a 400 when request does not have type information', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
+        .post(`/api/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
@@ -54,11 +54,11 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 404 when agent does not exist', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent100/actions`)
+        .post(`/api/fleet/agents/agent100/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
-            type: 'CONFIG_CHANGE',
+            type: 'POLICY_CHANGE',
             data: { data: 'action_data' },
             sent_at: '2020-03-18T19:45:02.620Z',
           },

@@ -17,6 +17,8 @@ With Canvas, you can:
 
 * Focus the data you want to display with filters.
 
+To begin, open the main menu, then click *Canvas*.
+
 [role="screenshot"]
 image::images/canvas-gs-example.png[Getting started example]
 
@@ -26,7 +28,8 @@ For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_
 [[create-workpads]]
 == Create workpads
 
-A _workpad_ provides you with a space where you can build presentations of your live data.
+A _workpad_ provides you with a space where you can build presentations of your live data. With Canvas, 
+you can create a workpad from scratch, start with a preconfigured workpad, import an existing workpad, or use a sample data workpad.
 
 [float]
 [[start-with-a-blank-workpad]]
@@ -34,19 +37,15 @@ A _workpad_ provides you with a space where you can build presentations of your 
 
 To use the background colors, images, and data of your choice, start with a blank workpad.
 
-. Open the menu, then go to *Canvas*.
+. On the *Canvas workpads* page, click *Create workpad*.
 
-. On the *Canvas workpads* view, click *Create workpad*.
+. Specify the *Workpad settings*.
 
-. Add a *Name* to your workpad.
+.. Add a *Name* to your workpad.
 
-. In the *Width* and *Height* fields, specify the size.
+.. In the *Width* and *Height* fields, specify the size, or select one of default layouts. 
 
-. Select the layout.
-+
-For example, click *720p* for a traditional presentation layout.
-
-. Click the *Background color* picker, then select the background color for your workpad.
+.. Click the *Background* color picker, then select the color for your workpad.
 +
 [role="screenshot"]
 image::images/canvas-background-color-picker.png[Canvas color picker]
@@ -57,9 +56,7 @@ image::images/canvas-background-color-picker.png[Canvas color picker]
 
 If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
 
-. Open the menu, then go to *Canvas*.
-
-. On the *Canvas workpads* view, select *Templates*.
+. On the *Canvas workpads* page, select *Templates*.
 
 . Click the preconfigured template that you want to use.
 
@@ -69,17 +66,15 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 [[import-existing-workpads]]
 === Import existing workpads
 
-When you want to use a workpad that someone else has already started, import the JSON file into Canvas.
+When you want to use a workpad that someone else has already started, import the JSON file.
 
-. Open the menu, then go to *Canvas*.
-
-. On the *Canvas workpads* view, click and drag the file to the *Import workpad JSON file* field.
+To begin, drag the file to the *Import workpad JSON file* field on the *Canvas workpads* page. 
 
 [float]
 [[use-sample-data-workpads]]
 === Use sample data workpads
 
-Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
+Each of the {kib} sample data sets comes with a workpad that you can use for your own workpad inspiration.
 
 . Add a {kibana-ref}/add-sample-data.html[sample data set].
 
@@ -123,12 +118,12 @@ To save a group of elements, press and hold Shift, select the elements you want 
 Elements are saved in *Add element > My elements*.
 
 [float]
-[[add-existing-visuualizations]]
-=== Add existing visualizations
+[[add-saved-objects]]
+=== Add saved objects
 
 Add <<managing-saved-objects,saved objects>> to your workpad, such as maps and visualizations.
 
-. Click *Add element > Add from Visualize Library*.
+. Click *Add element > Add from {kib}*.
 
 . Select the saved object you want to add.
 +

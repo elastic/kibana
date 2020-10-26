@@ -9,6 +9,8 @@ import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import styled from 'styled-components';
+import { EuiFlexItem } from '@elastic/eui';
 import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -79,6 +81,13 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? '',
   index: rule.index ?? [],
+  threatIndex: rule.threat_index ?? [],
+  threatQueryBar: {
+    query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
+    filters: (rule.threat_filters ?? []) as Filter[],
+    saved_id: undefined,
+  },
+  threatMapping: rule.threat_mapping ?? [],
   queryBar: {
     query: { query: rule.query ?? '', language: rule.language ?? '' },
     filters: (rule.filters ?? []) as Filter[],
@@ -109,15 +118,21 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
 
   const fromDuration = moment.duration(intervalValue.diff(fromValue));
-  const fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
 
-  if (fromDuration.asSeconds() < 60) {
-    return `${Math.floor(fromDuration.asSeconds())}s`;
-  } else if (fromDuration.asMinutes() < 60) {
-    return `${Math.floor(fromDuration.asMinutes())}m`;
+  // Basing calculations off floored seconds count as moment durations weren't precise
+  const intervalDuration = Math.floor(fromDuration.asSeconds());
+  // For consistency of display value
+  if (intervalDuration === 0) {
+    return `0s`;
   }
 
-  return fromHumanize;
+  if (intervalDuration % 3600 === 0) {
+    return `${intervalDuration / 3600}h`;
+  } else if (intervalDuration % 60 === 0) {
+    return `${intervalDuration / 60}m`;
+  } else {
+    return `${intervalDuration}s`;
+  }
 };
 
 export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
@@ -341,7 +356,6 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
     'threat',
     'type',
     'version',
-    // 'lists',
   ];
 
   const ruleParamsKeys = [
@@ -371,3 +385,8 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
   canUserCRUD != null ? !canUserCRUD : false;
+
+export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
+  max-width: 1000px;
+  overflow: hidden;
+`;

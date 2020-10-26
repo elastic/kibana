@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 export function getIntervalAndTimefield(panel, series = {}, indexPatternObject) {
-  const getDefaultTimeField = () => get(indexPatternObject, 'timeFieldName', DEFAULT_TIME_FIELD);
+  const getDefaultTimeField = () => indexPatternObject?.timeFieldName ?? DEFAULT_TIME_FIELD;
 
   const timeField =
     (series.override_index_pattern && series.series_time_field) ||

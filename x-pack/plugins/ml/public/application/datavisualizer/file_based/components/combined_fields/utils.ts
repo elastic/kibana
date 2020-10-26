@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import { CombinedField } from './types';
 import {
@@ -54,7 +54,7 @@ export function addCombinedFieldsToPipeline(
   pipeline: IngestPipeline,
   combinedFields: CombinedField[]
 ) {
-  const updatedPipeline = _.cloneDeep(pipeline);
+  const updatedPipeline = cloneDeep(pipeline);
   combinedFields.forEach((combinedField) => {
     updatedPipeline.processors.push({
       set: {

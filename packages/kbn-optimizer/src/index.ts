@@ -21,3 +21,5 @@ export { OptimizerConfig } from './optimizer';
 export * from './run_optimizer';
 export * from './log_optimizer_state';
 export * from './report_optimizer_stats';
+export * from './node';
+export * from './limits';

@@ -21,8 +21,10 @@ import {
   fatalErrorsServiceMock,
 } from '../../../../../src/core/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
+import { CloudSetup } from '../../../cloud/public';
 
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
+import { KibanaContextProvider } from '../../public/shared_imports';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 import { init as initNotification } from '../../public/application/services/notification';
@@ -31,15 +33,12 @@ import {
   positiveNumbersAboveZeroErrorMessage,
   positiveNumberRequiredMessage,
   numberRequiredMessage,
-  maximumAgeRequiredMessage,
-  maximumSizeRequiredMessage,
   policyNameRequiredMessage,
   policyNameStartsWithUnderscoreErrorMessage,
   policyNameContainsCommaErrorMessage,
   policyNameContainsSpaceErrorMessage,
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
-  maximumDocumentsRequiredMessage,
 } from '../../public/application/services/policies/policy_validation';
 import { editPolicyHelpers } from './helpers';
 
@@ -114,8 +113,10 @@ const expectedErrorMessages = (rendered: ReactWrapper, expectedMessages: string[
     expect(foundErrorMessage).toBe(true);
   });
 };
-const noRollover = (rendered: ReactWrapper) => {
-  findTestSubject(rendered, 'rolloverSwitch').simulate('click');
+const noRollover = async (rendered: ReactWrapper) => {
+  await act(async () => {
+    findTestSubject(rendered, 'rolloverSwitch').simulate('click');
+  });
   rendered.update();
 };
 const getNodeAttributeSelect = (rendered: ReactWrapper, phase: string) => {
@@ -131,7 +132,7 @@ const setPhaseAfter = (rendered: ReactWrapper, phase: string, after: string | nu
   afterInput.simulate('change', { target: { value: after } });
   rendered.update();
 };
-const setPhaseIndexPriority = (
+const setPhaseIndexPriorityLegacy = (
   rendered: ReactWrapper,
   phase: string,
   priority: string | number
@@ -140,15 +141,53 @@ const setPhaseIndexPriority = (
   priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
-const save = (rendered: ReactWrapper) => {
+const setPhaseIndexPriority = async (
+  rendered: ReactWrapper,
+  phase: string,
+  priority: string | number
+) => {
+  const priorityInput = findTestSubject(rendered, `${phase}-phaseIndexPriority`);
+  await act(async () => {
+    priorityInput.simulate('change', { target: { value: priority } });
+  });
+  rendered.update();
+};
+const save = async (rendered: ReactWrapper) => {
   const saveButton = findTestSubject(rendered, 'savePolicyButton');
-  saveButton.simulate('click');
+  await act(async () => {
+    saveButton.simulate('click');
+  });
   rendered.update();
 };
 describe('edit policy', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  /**
+   * The form lib has a short delay (setTimeout) before running and rendering
+   * any validation errors. This helper advances timers and can trigger component
+   * state changes.
+   */
+  const waitForFormLibValidation = () => {
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+  };
+
   beforeEach(() => {
     component = (
-      <EditPolicy history={history} getUrlForApp={jest.fn()} policies={policies} policyName={''} />
+      <KibanaContextProvider services={{ cloud: { isCloudEnabled: false } as CloudSetup }}>
+        <EditPolicy
+          history={history}
+          getUrlForApp={jest.fn()}
+          policies={policies}
+          policyName={''}
+        />
+      </KibanaContextProvider>
     );
 
     ({ http } = editPolicyHelpers.setup());
@@ -157,27 +196,27 @@ describe('edit policy', () => {
     httpRequestsMockHelpers.setPoliciesResponse(policies);
   });
   describe('top level form', () => {
-    test('should show error when trying to save empty form', () => {
+    test('should show error when trying to save empty form', async () => {
       const rendered = mountWithIntl(component);
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameRequiredMessage]);
     });
-    test('should show error when trying to save policy name with space', () => {
+    test('should show error when trying to save policy name with space', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'my policy');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameContainsSpaceErrorMessage]);
     });
-    test('should show error when trying to save policy name that is already used', () => {
+    test('should show error when trying to save policy name that is already used', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'testy0');
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameAlreadyUsedErrorMessage]);
     });
-    test('should show error when trying to save as new policy but using the same name', () => {
+    test('should show error when trying to save as new policy but using the same name', async () => {
       component = (
         <EditPolicy
           policyName={'testy0'}
@@ -190,42 +229,46 @@ describe('edit policy', () => {
       findTestSubject(rendered, 'saveAsNewSwitch').simulate('click');
       rendered.update();
       setPolicyName(rendered, 'testy0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameMustBeDifferentErrorMessage]);
     });
-    test('should show error when trying to save policy name with comma', () => {
+    test('should show error when trying to save policy name with comma', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'my,policy');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameContainsCommaErrorMessage]);
     });
-    test('should show error when trying to save policy name starting with underscore', () => {
+    test('should show error when trying to save policy name starting with underscore', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, '_mypolicy');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
     });
-    test('should show correct json in policy flyout', () => {
+    test('should show correct json in policy flyout', async () => {
       const rendered = mountWithIntl(component);
-      findTestSubject(rendered, 'requestButton').simulate('click');
+
+      await act(async () => {
+        findTestSubject(rendered, 'requestButton').simulate('click');
+      });
+      rendered.update();
       const json = rendered.find(`code`).text();
       const expected = `PUT _ilm/policy/<policyName>\n${JSON.stringify(
         {
           policy: {
             phases: {
               hot: {
-                min_age: '0ms',
                 actions: {
-                  rollover: {
-                    max_age: '30d',
-                    max_size: '50gb',
-                  },
                   set_priority: {
                     priority: 100,
                   },
+                  rollover: {
+                    max_size: '50gb',
+                    max_age: '30d',
+                  },
                 },
+                min_age: '0ms',
               },
             },
           },
@@ -237,55 +280,66 @@ describe('edit policy', () => {
     });
   });
   describe('hot phase', () => {
-    test('should show errors when trying to save with no max size and no max age', () => {
+    test('should show errors when trying to save with no max size and no max age', async () => {
       const rendered = mountWithIntl(component);
+      expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeFalsy();
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
-      maxSizeInput.simulate('change', { target: { value: '' } });
-      const maxAgeInput = rendered.find(`input#hot-selectedMaxAge`);
-      maxAgeInput.simulate('change', { target: { value: '' } });
+      const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
+      await act(async () => {
+        maxSizeInput.simulate('change', { target: { value: '' } });
+      });
+      waitForFormLibValidation();
+      const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
+      await act(async () => {
+        maxAgeInput.simulate('change', { target: { value: '' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
-      expectedErrorMessages(rendered, [
-        maximumSizeRequiredMessage,
-        maximumAgeRequiredMessage,
-        maximumDocumentsRequiredMessage,
-      ]);
+      await save(rendered);
+      expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeTruthy();
     });
-    test('should show number above 0 required error when trying to save with -1 for max size', () => {
+    test('should show number above 0 required error when trying to save with -1 for max size', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
-      maxSizeInput.simulate('change', { target: { value: -1 } });
+      const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
+      await act(async () => {
+        maxSizeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show number above 0 required error when trying to save with 0 for max size', () => {
+    test('should show number above 0 required error when trying to save with 0 for max size', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
-      maxSizeInput.simulate('change', { target: { value: 0 } });
+      const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
+      await act(async () => {
+        maxSizeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show number above 0 required error when trying to save with -1 for max age', () => {
+    test('should show number above 0 required error when trying to save with -1 for max age', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
-      maxSizeInput.simulate('change', { target: { value: -1 } });
+      const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
+      await act(async () => {
+        maxAgeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show number above 0 required error when trying to save with 0 for max age', () => {
+    test('should show number above 0 required error when trying to save with 0 for max age', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
-      maxSizeInput.simulate('change', { target: { value: 0 } });
+      const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
+      await act(async () => {
+        maxAgeInput.simulate('change', { target: { value: '0' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show forcemerge input when rollover enabled', () => {
@@ -293,22 +347,27 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       expect(findTestSubject(rendered, 'hot-forceMergeSwitch').exists()).toBeTruthy();
     });
-    test('should hide forcemerge input when rollover is disabled', () => {
+    test('should hide forcemerge input when rollover is disabled', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      noRollover(rendered);
+      await noRollover(rendered);
+      waitForFormLibValidation();
       rendered.update();
       expect(findTestSubject(rendered, 'hot-forceMergeSwitch').exists()).toBeFalsy();
     });
     test('should show positive number required above zero error when trying to save hot phase with 0 for force merge', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
+      act(() => {
+        findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
+      });
       rendered.update();
       const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
-      forcemergeInput.simulate('change', { target: { value: '0' } });
+      await act(async () => {
+        forcemergeInput.simulate('change', { target: { value: '0' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save hot phase with -1 for force merge', async () => {
@@ -317,18 +376,22 @@ describe('edit policy', () => {
       findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
       rendered.update();
       const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
-      forcemergeInput.simulate('change', { target: { value: '-1' } });
+      await act(async () => {
+        forcemergeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show positive number required error when trying to save with -1 for index priority', () => {
+    test('should show positive number required error when trying to save with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      setPhaseIndexPriority(rendered, 'hot', '-1');
-      save(rendered);
-      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+      await setPhaseIndexPriority(rendered, 'hot', '-1');
+      waitForFormLibValidation();
+      rendered.update();
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
   });
   describe('warm phase', () => {
@@ -342,44 +405,44 @@ describe('edit policy', () => {
 
     test('should show number required error when trying to save empty warm phase', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [numberRequiredMessage]);
     });
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save warm phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show positive number required error when trying to save warm phase with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
-      setPhaseIndexPriority(rendered, 'warm', '-1');
-      save(rendered);
+      setPhaseIndexPriorityLegacy(rendered, 'warm', '-1');
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show positive number required above zero error when trying to save warm phase with 0 for shrink', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       findTestSubject(rendered, 'shrinkSwitch').simulate('click');
@@ -388,12 +451,12 @@ describe('edit policy', () => {
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
       shrinkInput.simulate('change', { target: { value: '0' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save warm phase with -1 for shrink', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
@@ -402,12 +465,12 @@ describe('edit policy', () => {
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
       shrinkInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number required above zero error when trying to save warm phase with 0 for force merge', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
@@ -416,12 +479,12 @@ describe('edit policy', () => {
       const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '0' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save warm phase with -1 for force merge', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
@@ -430,13 +493,13 @@ describe('edit policy', () => {
       const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show spinner for node attributes input when loading', async () => {
       server.respondImmediately = false;
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
@@ -447,9 +510,10 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['node1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -459,7 +523,7 @@ describe('edit policy', () => {
     });
     test('should show node attributes input when attributes exist', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -471,7 +535,7 @@ describe('edit policy', () => {
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -495,13 +559,40 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: {},
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
+    });
+    test('should show default allocation notice when hot tier exists, but not warm tier', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data_hot: ['test'], data_cold: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      const rendered = mountWithIntl(component);
+      await noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
+    });
+    test('should not show default allocation notice when node with "data" role exists', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      const rendered = mountWithIntl(component);
+      await noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
     });
   });
   describe('cold phase', () => {
@@ -514,26 +605,26 @@ describe('edit policy', () => {
     });
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', '0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save cold phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show spinner for node attributes input when loading', async () => {
       server.respondImmediately = false;
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
@@ -544,9 +635,10 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['node1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -556,7 +648,7 @@ describe('edit policy', () => {
     });
     test('should show node attributes input when attributes exist', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -568,7 +660,7 @@ describe('edit policy', () => {
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -590,45 +682,175 @@ describe('edit policy', () => {
     });
     test('should show positive number required error when trying to save with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', '1');
-      setPhaseIndexPriority(rendered, 'cold', '-1');
-      save(rendered);
+      setPhaseIndexPriorityLegacy(rendered, 'cold', '-1');
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show default allocation warning when no node roles are found', async () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: {},
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
     });
+    test('should show default allocation notice when warm or hot tiers exists, but not cold tier', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      const rendered = mountWithIntl(component);
+      await noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'cold');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
+    });
+    test('should not show default allocation notice when node with "data" role exists', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      const rendered = mountWithIntl(component);
+      await noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'cold');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
+    });
   });
   describe('delete phase', () => {
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', '0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save delete phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
-      noRollover(rendered);
+      await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+  });
+  describe('not on cloud', () => {
+    beforeEach(() => {
+      server.respondImmediately = true;
+    });
+    test('should show all allocation options, even if using legacy config', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+        isUsingDeprecatedDataRoleConfig: true,
+      });
+      const rendered = mountWithIntl(component);
+      await noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+      // Assert that only the custom and off options exist
+      findTestSubject(rendered, 'dataTierSelect').simulate('click');
+      expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+    });
+  });
+  describe('on cloud', () => {
+    beforeEach(() => {
+      component = (
+        <KibanaContextProvider services={{ cloud: { isCloudEnabled: true } as CloudSetup }}>
+          <EditPolicy
+            history={history}
+            getUrlForApp={jest.fn()}
+            policies={policies}
+            policyName="test"
+          />
+        </KibanaContextProvider>
+      );
+      ({ http } = editPolicyHelpers.setup());
+      ({ server, httpRequestsMockHelpers } = http);
+      server.respondImmediately = true;
+
+      httpRequestsMockHelpers.setPoliciesResponse(policies);
+    });
+
+    describe('with deprecated data role config', () => {
+      test('should hide data tier option on cloud using legacy node role configuration', async () => {
+        http.setupNodeListResponse({
+          nodesByAttributes: { test: ['123'] },
+          // On cloud, if using legacy config there will not be any "data_*" roles set.
+          nodesByRoles: { data: ['test'] },
+          isUsingDeprecatedDataRoleConfig: true,
+        });
+        const rendered = mountWithIntl(component);
+        await noRollover(rendered);
+        setPolicyName(rendered, 'mypolicy');
+        await activatePhase(rendered, 'warm');
+        expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+        // Assert that only the custom and off options exist
+        findTestSubject(rendered, 'dataTierSelect').simulate('click');
+        expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeFalsy();
+        expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+      });
+    });
+
+    describe('with node role config', () => {
+      test('should show off, custom and data role options on cloud with data roles', async () => {
+        http.setupNodeListResponse({
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        const rendered = mountWithIntl(component);
+        await noRollover(rendered);
+        setPolicyName(rendered, 'mypolicy');
+        await activatePhase(rendered, 'warm');
+        expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+        findTestSubject(rendered, 'dataTierSelect').simulate('click');
+        expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+        // We should not be showing the call-to-action for users to activate data tiers in cloud
+        expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeFalsy();
+      });
+
+      test('should show cloud notice when cold tier nodes do not exist', async () => {
+        http.setupNodeListResponse({
+          nodesByAttributes: {},
+          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        const rendered = mountWithIntl(component);
+        await noRollover(rendered);
+        setPolicyName(rendered, 'mypolicy');
+        await activatePhase(rendered, 'cold');
+        expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeTruthy();
+        // Assert that other notices are not showing
+        expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
+        expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
+      });
     });
   });
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 
 import { IScopedClusterClient } from 'kibana/server';
 
@@ -144,6 +144,7 @@ describe('ML - validateTimeRange', () => {
 
   it('invalid time field', () => {
     const mockSearchResponseInvalid = cloneDeep(mockSearchResponse);
+    // @ts-expect-error creating intentionally invalid data
     mockSearchResponseInvalid.fieldCaps = undefined;
     const duration = { start: 0, end: 1 };
     return validateTimeRange(

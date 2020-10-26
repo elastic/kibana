@@ -21,15 +21,15 @@ export type GetTestSuite = TestSuite<GetTestDefinition>;
 export type GetTestCase = TestCase;
 
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
-export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
+export const TEST_CASES: Record<string, GetTestCase> = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('get');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('get');
   const expectResponseBody = (testCase: GetTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     if (testCase.failure === 403) {
-      await expectForbidden(testCase.type)(response);
+      await expectSavedObjectForbidden(testCase.type)(response);
     } else {
       // permitted
       const object = response.body;

@@ -26,7 +26,7 @@ const indexPattern = ({
 
 describe('new_job_capabilities_service', () => {
   describe('cloudwatch newJobCaps()', () => {
-    it('can construct job caps objects from endpoint json', async (done) => {
+    it('can construct job caps objects from endpoint json', async () => {
       await newJobCapsService.initializeFromIndexPattern(indexPattern);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
@@ -43,27 +43,22 @@ describe('new_job_capabilities_service', () => {
 
       expect(meanAgg.fields).toHaveLength(7);
       expect(distinctCountAgg.fields).toHaveLength(10);
-      done();
     });
 
-    it('job caps including text fields', async (done) => {
+    it('job caps including text fields', async () => {
       await newJobCapsService.initializeFromIndexPattern(indexPattern, true, false);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
       expect(fields).toHaveLength(13); // one more field
       expect(aggs).toHaveLength(35);
-
-      done();
     });
 
-    it('job caps excluding event rate', async (done) => {
+    it('job caps excluding event rate', async () => {
       await newJobCapsService.initializeFromIndexPattern(indexPattern, false, true);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
       expect(fields).toHaveLength(11); // one less field
       expect(aggs).toHaveLength(35);
-
-      done();
     });
   });
 });

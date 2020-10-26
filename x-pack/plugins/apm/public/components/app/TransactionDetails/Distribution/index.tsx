@@ -10,12 +10,12 @@ import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { ValuesType } from 'utility-types';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { getDurationFormatter } from '../../../../utils/formatters';
 // @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -30,7 +30,10 @@ interface IChartPoint {
   };
 }
 
-export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
+export function getFormattedBuckets(
+  buckets: DistributionBucket[],
+  bucketSize: number
+) {
   if (!buckets) {
     return [];
   }

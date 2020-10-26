@@ -5,22 +5,20 @@
  */
 import { mount } from 'enzyme';
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import { Actions } from '.';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
-  return {
-    ...origin,
-    useSelector: jest.fn(),
-  };
-});
+jest.mock('../../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+}));
 
 describe('Actions', () => {
-  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  beforeEach(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
 
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(

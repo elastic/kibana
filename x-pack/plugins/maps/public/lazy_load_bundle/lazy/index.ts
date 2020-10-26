@@ -20,3 +20,5 @@ export * from '../../classes/layers/solution_layers/security';
 export { registerLayerWizard } from '../../classes/layers/layer_wizard_registry';
 export { registerSource } from '../../classes/sources/source_registry';
 export { getIndexPatternsFromIds } from '../../index_pattern_util';
+export { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
+export { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';

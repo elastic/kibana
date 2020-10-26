@@ -29,6 +29,8 @@ export const COMBO_BOX = '.euiComboBoxOption__content';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
+export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
+
 export const DRAGGABLE_HEADER =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
 
@@ -55,6 +57,9 @@ export const NOTES_BUTTON = '[data-test-subj="timeline-notes-button-large"]';
 export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
+
+export const OPEN_TIMELINE_TEMPLATE_ICON =
+  '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
@@ -95,6 +100,8 @@ export const TIMELINE_FILTER = (filter: TimelineFilter) => {
 };
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
+
+export const TIMELINE_TITLE_BY_ID = (id: string) => `[data-test-subj="title-${id}"]`;
 
 export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 

@@ -10,16 +10,18 @@ import { MemoryRouter } from 'react-router-dom';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import { useWithSource } from '../../common/containers/source';
 import {
   useMessagesStorage,
   UseMessagesStorage,
 } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from './index';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
+import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useFetchIndex } from '../../common/containers/source';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
+jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -49,19 +51,172 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
     clearAllMessages: () => undefined,
   };
 };
-
+const mockUseSourcererScope = useSourcererScope as jest.Mock;
+const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
+const mockUseFetchIndex = useFetchIndex as jest.Mock;
+const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 describe('Overview', () => {
+  beforeEach(() => {
+    mockUseFetchIndex.mockReturnValue([
+      false,
+      {
+        indexExists: true,
+      },
+    ]);
+  });
   describe('rendering', () => {
+    test('it DOES NOT render the Getting started text when an index is available', () => {
+      mockUseSourcererScope.mockReturnValue({
+        selectedPatterns: [],
+        indicesExist: true,
+        indexPattern: {},
+      });
+
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+      wrapper.unmount();
+    });
+
+    test('it DOES render the Endpoint banner when the endpoint index is NOT available AND storage is NOT set', () => {
+      mockUseFetchIndex.mockReturnValue([
+        false,
+        {
+          indexExists: false,
+        },
+      ]);
+      mockUseSourcererScope.mockReturnValue({
+        selectedPatterns: [],
+        indicesExist: true,
+        indexPattern: {},
+      });
+
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(true);
+      wrapper.unmount();
+    });
+
+    test('it does NOT render the Endpoint banner when the endpoint index is NOT available but storage is set', () => {
+      mockUseFetchIndex.mockReturnValue([
+        false,
+        {
+          indexExists: false,
+        },
+      ]);
+      mockUseSourcererScope.mockReturnValueOnce({
+        selectedPatterns: [],
+        indicesExist: true,
+        indexPattern: {},
+      });
+
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
+      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
+      wrapper.unmount();
+    });
+
+    test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
+      mockUseSourcererScope.mockReturnValue({
+        selectedPatterns: [],
+        indexExists: true,
+        indexPattern: {},
+      });
+
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
+      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
+      wrapper.unmount();
+    });
+
+    test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
+      mockUseSourcererScope.mockReturnValue({
+        selectedPatterns: [],
+        indicesExist: true,
+        indexPattern: {},
+      });
+
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
+      wrapper.unmount();
+    });
+
+    test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
+      mockUseSourcererScope.mockReturnValue({
+        selectedPatterns: [],
+        indicesExist: true,
+        indexPattern: {},
+      });
+
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
+      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: false });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
+      wrapper.unmount();
+    });
+
     describe('when no index is available', () => {
       beforeEach(() => {
-        (useWithSource as jest.Mock).mockReturnValue({
+        mockUseSourcererScope.mockReturnValue({
+          selectedPatterns: [],
           indicesExist: false,
         });
-        (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
-        const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<
-          UseMessagesStorage
-        >;
-        mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+        mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: false });
+        mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
       it('renders the Setup Instructions text', () => {
@@ -87,7 +242,7 @@ describe('Overview', () => {
       });
 
       it('shows Endpoint get ready button when ingest is enabled', () => {
-        (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
+        mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
@@ -97,147 +252,6 @@ describe('Overview', () => {
         );
         expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(true);
       });
-    });
-
-    it('it DOES NOT render the Getting started text when an index is available', () => {
-      (useWithSource as jest.Mock).mockReturnValue({
-        indicesExist: true,
-        indexPattern: {},
-      });
-
-      const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
-      mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
-
-      const wrapper = mount(
-        <TestProviders>
-          <MemoryRouter>
-            <Overview />
-          </MemoryRouter>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
-      wrapper.unmount();
-    });
-
-    test('it DOES render the Endpoint banner when the endpoint index is NOT available AND storage is NOT set', () => {
-      (useWithSource as jest.Mock).mockReturnValueOnce({
-        indicesExist: true,
-        indexPattern: {},
-      });
-
-      (useWithSource as jest.Mock).mockReturnValueOnce({
-        indicesExist: false,
-        indexPattern: {},
-      });
-
-      const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
-      mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
-
-      const wrapper = mount(
-        <TestProviders>
-          <MemoryRouter>
-            <Overview />
-          </MemoryRouter>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(true);
-      wrapper.unmount();
-    });
-
-    test('it does NOT render the Endpoint banner when the endpoint index is NOT available but storage is set', () => {
-      (useWithSource as jest.Mock).mockReturnValueOnce({
-        indicesExist: true,
-        indexPattern: {},
-      });
-
-      (useWithSource as jest.Mock).mockReturnValueOnce({
-        indicesExist: false,
-        indexPattern: {},
-      });
-
-      const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
-      mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
-
-      const wrapper = mount(
-        <TestProviders>
-          <MemoryRouter>
-            <Overview />
-          </MemoryRouter>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
-    });
-
-    test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
-      (useWithSource as jest.Mock).mockReturnValue({
-        indicesExist: true,
-        indexPattern: {},
-      });
-
-      const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
-      mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
-
-      const wrapper = mount(
-        <TestProviders>
-          <MemoryRouter>
-            <Overview />
-          </MemoryRouter>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
-    });
-
-    test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
-      (useWithSource as jest.Mock).mockReturnValue({
-        indicesExist: true,
-        indexPattern: {},
-      });
-
-      const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
-      mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
-
-      const wrapper = mount(
-        <TestProviders>
-          <MemoryRouter>
-            <Overview />
-          </MemoryRouter>
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
-    });
-
-    test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
-      (useWithSource as jest.Mock).mockReturnValue({
-        indicesExist: true,
-        indexPattern: {},
-      });
-
-      const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
-      mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
-
-      const wrapper = mount(
-        <TestProviders>
-          <MemoryRouter>
-            <Overview />
-          </MemoryRouter>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
-      wrapper.unmount();
     });
   });
 });

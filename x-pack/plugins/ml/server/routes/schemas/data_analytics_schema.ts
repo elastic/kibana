@@ -47,7 +47,7 @@ export const dataAnalyticsExplainSchema = schema.object({
   dest: schema.maybe(schema.any()),
   /** Source */
   source: schema.object({
-    index: schema.string(),
+    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
     query: schema.maybe(schema.any()),
   }),
   analysis: schema.any(),

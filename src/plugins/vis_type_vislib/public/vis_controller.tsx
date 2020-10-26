@@ -20,8 +20,6 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-// @ts-ignore
-import { Vis as Vislib } from './vislib/vis';
 import { Positions } from './utils/collections';
 import { VisTypeVislibDependencies } from './plugin';
 import { mountReactNode } from '../../../core/public/utils';
@@ -68,7 +66,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
       this.container.appendChild(this.legendEl);
     }
 
-    render(esResponse: any, visParams: VisParams) {
+    render(esResponse: any, visParams: VisParams): Promise<void> {
       if (this.vislibVis) {
         this.destroy();
       }
@@ -79,6 +77,9 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
           return resolve();
         }
+
+        // @ts-expect-error
+        const { Vis: Vislib } = await import('./vislib/vis');
 
         this.vislibVis = new Vislib(this.chartEl, visParams, deps);
         this.vislibVis.on('brush', this.vis.API.events.brush);

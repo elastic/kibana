@@ -5,6 +5,7 @@
  */
 
 import sinon from 'sinon';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
   getClusterUuids,
   fetchClusterUuids,
@@ -13,6 +14,8 @@ import {
 
 describe('get_cluster_uuids', () => {
   const callCluster = sinon.stub();
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const soClient = savedObjectsRepositoryMock.create();
   const response = {
     aggregations: {
       cluster_uuids: {
@@ -30,9 +33,12 @@ describe('get_cluster_uuids', () => {
     it('returns cluster UUIDs', async () => {
       callCluster.withArgs('search').returns(Promise.resolve(response));
       expect(
-        await getClusterUuids({ callCluster, start, end, usageCollection: {} as any }, {
-          maxBucketSize: 1,
-        } as any)
+        await getClusterUuids(
+          { callCluster, esClient, soClient, start, end, usageCollection: {} as any },
+          {
+            maxBucketSize: 1,
+          } as any
+        )
       ).toStrictEqual(expectedUuids);
     });
   });
@@ -41,9 +47,12 @@ describe('get_cluster_uuids', () => {
     it('searches for clusters', async () => {
       callCluster.returns(Promise.resolve(response));
       expect(
-        await fetchClusterUuids({ callCluster, start, end, usageCollection: {} as any }, {
-          maxBucketSize: 1,
-        } as any)
+        await fetchClusterUuids(
+          { callCluster, esClient, soClient, start, end, usageCollection: {} as any },
+          {
+            maxBucketSize: 1,
+          } as any
+        )
       ).toStrictEqual(response);
     });
   });

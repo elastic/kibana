@@ -8,9 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { asPercent } from '../../../../../common/utils/formatters';
+import {
+  asDuration,
+  asPercent,
+  tpmUnit,
+} from '../../../../../common/utils/formatters';
 import { ServiceNodeStats } from '../../../../../common/service_map';
-import { asDuration, tpmUnit } from '../../../../utils/formatters';
 
 export const ItemRow = styled('tr')`
   line-height: 2;

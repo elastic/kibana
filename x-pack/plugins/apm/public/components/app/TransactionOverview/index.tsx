@@ -35,6 +35,9 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
+import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
+import { UserExperienceCallout } from './user_experience_callout';
+import { Correlations } from '../Correlations';
 
 function getRedirectLocation({
   urlParams,
@@ -115,6 +118,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
+      <Correlations />
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -125,6 +129,12 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
+          {transactionType === TRANSACTION_PAGE_LOAD && (
+            <>
+              <UserExperienceCallout />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <ChartsSyncContextProvider>
             <TransactionCharts
               charts={transactionCharts}

@@ -79,6 +79,7 @@ export class ActionExecutor {
     }
 
     const {
+      logger,
       spaces,
       getServices,
       encryptedSavedObjectsClient,
@@ -101,7 +102,7 @@ export class ActionExecutor {
       namespace.namespace
     );
 
-    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
     const actionType = actionTypeRegistry.get(actionTypeId);
@@ -171,11 +172,15 @@ export class ActionExecutor {
       event.message = `action execution failure: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = actionErrorToMessage(result);
+      logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
     } else {
       event.event.outcome = 'failure';
-      event.message = `action execution returned unexpected result: ${actionLabel}`;
+      event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';
+      logger.warn(
+        `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+      );
     }
 
     eventLogger.logEvent(event);

@@ -25,15 +25,6 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 export FORCE_COLOR=1
 
 ###
-### The @babel/register cache collects the build output from each file in
-### a map, in memory, and then when the process exits it writes that to the
-### babel cache file as a JSON encoded object. Stringifying that object
-### causes OOMs on CI regularly enough that we need to find another solution,
-### and until we do we need to disable the cache
-###
-export BABEL_DISABLE_CACHE=true
-
-###
 ### check that we seem to be in a kibana project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then

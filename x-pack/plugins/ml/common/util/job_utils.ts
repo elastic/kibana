@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEmpty from 'lodash/isEmpty';
-import isEqual from 'lodash/isEqual';
-import each from 'lodash/each';
-import pick from 'lodash/pick';
+import { isEmpty, isEqual, each, pick } from 'lodash';
 
 import semver from 'semver';
 import moment, { Duration } from 'moment';

@@ -28,7 +28,7 @@ import { isValidNamespace } from '../../../services';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
 interface ValidationResults {
-  [key: string]: JSX.Element[];
+  [key: string]: Array<JSX.Element | string>;
 }
 
 const StyledEuiAccordion = styled(EuiAccordion)`
@@ -41,6 +41,7 @@ export const agentPolicyFormValidation = (
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>
 ): ValidationResults => {
   const errors: ValidationResults = {};
+  const namespaceValidation = isValidNamespace(agentPolicy.namespace || '');
 
   if (!agentPolicy.name?.trim()) {
     errors.name = [
@@ -51,20 +52,8 @@ export const agentPolicyFormValidation = (
     ];
   }
 
-  if (!agentPolicy.namespace?.trim()) {
-    errors.namespace = [
-      <FormattedMessage
-        id="xpack.ingestManager.agentPolicyForm.namespaceRequiredErrorMessage"
-        defaultMessage="A namespace is required"
-      />,
-    ];
-  } else if (!isValidNamespace(agentPolicy.namespace)) {
-    errors.namespace = [
-      <FormattedMessage
-        id="xpack.ingestManager.agentPolicyForm.namespaceInvalidErrorMessage"
-        defaultMessage="Namespace contains invalid characters"
-      />,
-    ];
+  if (!namespaceValidation.valid && namespaceValidation.error) {
+    errors.namespace = [namespaceValidation.error];
   }
 
   return errors;

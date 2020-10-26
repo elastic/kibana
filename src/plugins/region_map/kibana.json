@@ -10,7 +10,8 @@
     "expressions",
     "mapsLegacy",
     "kibanaLegacy",
-    "data"
+    "data",
+    "share"
   ],
   "requiredBundles": [
     "kibanaUtils",

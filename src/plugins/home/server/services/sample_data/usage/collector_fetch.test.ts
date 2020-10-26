@@ -17,39 +17,39 @@
  * under the License.
  */
 
-import sinon from 'sinon';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { fetchProvider } from './collector_fetch';
 
-describe('Sample Data Fetch', () => {
-  let callClusterMock: sinon.SinonStub;
+const getMockFetchClients = (hits?: unknown[]) => {
+  const fetchParamsMock = createCollectorFetchContextMock();
+  fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+  return fetchParamsMock;
+};
 
-  beforeEach(() => {
-    callClusterMock = sinon.stub();
-  });
+describe('Sample Data Fetch', () => {
+  let collectorFetchContext: CollectorFetchContext;
 
   test('uninitialized .kibana', async () => {
     const fetch = fetchProvider('index');
-    const telemetry = await fetch(callClusterMock);
+    collectorFetchContext = getMockFetchClients();
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`undefined`);
   });
 
   test('installed data set', async () => {
     const fetch = fetchProvider('index');
-    callClusterMock.returns({
-      hits: {
-        hits: [
-          {
-            _id: 'sample-data-telemetry:test1',
-            _source: {
-              updated_at: '2019-03-13T22:02:09Z',
-              'sample-data-telemetry': { installCount: 1 },
-            },
-          },
-        ],
+    collectorFetchContext = getMockFetchClients([
+      {
+        _id: 'sample-data-telemetry:test1',
+        _source: {
+          updated_at: '2019-03-13T22:02:09Z',
+          'sample-data-telemetry': { installCount: 1 },
+        },
       },
-    });
-    const telemetry = await fetch(callClusterMock);
+    ]);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -67,27 +67,23 @@ Object {
 
   test('multiple installed data sets', async () => {
     const fetch = fetchProvider('index');
-    callClusterMock.returns({
-      hits: {
-        hits: [
-          {
-            _id: 'sample-data-telemetry:test1',
-            _source: {
-              updated_at: '2019-03-13T22:02:09Z',
-              'sample-data-telemetry': { installCount: 1 },
-            },
-          },
-          {
-            _id: 'sample-data-telemetry:test2',
-            _source: {
-              updated_at: '2019-03-13T22:13:17Z',
-              'sample-data-telemetry': { installCount: 1 },
-            },
-          },
-        ],
+    collectorFetchContext = getMockFetchClients([
+      {
+        _id: 'sample-data-telemetry:test1',
+        _source: {
+          updated_at: '2019-03-13T22:02:09Z',
+          'sample-data-telemetry': { installCount: 1 },
+        },
       },
-    });
-    const telemetry = await fetch(callClusterMock);
+      {
+        _id: 'sample-data-telemetry:test2',
+        _source: {
+          updated_at: '2019-03-13T22:13:17Z',
+          'sample-data-telemetry': { installCount: 1 },
+        },
+      },
+    ]);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -106,17 +102,13 @@ Object {
 
   test('installed data set, missing counts', async () => {
     const fetch = fetchProvider('index');
-    callClusterMock.returns({
-      hits: {
-        hits: [
-          {
-            _id: 'sample-data-telemetry:test1',
-            _source: { updated_at: '2019-03-13T22:02:09Z', 'sample-data-telemetry': {} },
-          },
-        ],
+    collectorFetchContext = getMockFetchClients([
+      {
+        _id: 'sample-data-telemetry:test1',
+        _source: { updated_at: '2019-03-13T22:02:09Z', 'sample-data-telemetry': {} },
       },
-    });
-    const telemetry = await fetch(callClusterMock);
+    ]);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -132,34 +124,30 @@ Object {
 
   test('installed and uninstalled data sets', async () => {
     const fetch = fetchProvider('index');
-    callClusterMock.returns({
-      hits: {
-        hits: [
-          {
-            _id: 'sample-data-telemetry:test0',
-            _source: {
-              updated_at: '2019-03-13T22:29:32Z',
-              'sample-data-telemetry': { installCount: 4, unInstallCount: 4 },
-            },
-          },
-          {
-            _id: 'sample-data-telemetry:test1',
-            _source: {
-              updated_at: '2019-03-13T22:02:09Z',
-              'sample-data-telemetry': { installCount: 1 },
-            },
-          },
-          {
-            _id: 'sample-data-telemetry:test2',
-            _source: {
-              updated_at: '2019-03-13T22:13:17Z',
-              'sample-data-telemetry': { installCount: 1 },
-            },
-          },
-        ],
+    collectorFetchContext = getMockFetchClients([
+      {
+        _id: 'sample-data-telemetry:test0',
+        _source: {
+          updated_at: '2019-03-13T22:29:32Z',
+          'sample-data-telemetry': { installCount: 4, unInstallCount: 4 },
+        },
       },
-    });
-    const telemetry = await fetch(callClusterMock);
+      {
+        _id: 'sample-data-telemetry:test1',
+        _source: {
+          updated_at: '2019-03-13T22:02:09Z',
+          'sample-data-telemetry': { installCount: 1 },
+        },
+      },
+      {
+        _id: 'sample-data-telemetry:test2',
+        _source: {
+          updated_at: '2019-03-13T22:13:17Z',
+          'sample-data-telemetry': { installCount: 1 },
+        },
+      },
+    ]);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {

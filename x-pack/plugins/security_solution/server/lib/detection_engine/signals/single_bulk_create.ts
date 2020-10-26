@@ -7,11 +7,12 @@
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerts/server';
-import { SignalSearchResponse, BulkResponse } from './types';
+import { SignalSearchResponse, BulkResponse, SignalHit, BaseSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
+import { BuildRuleMessage } from './rule_messages';
 import { Logger } from '../../../../../../../src/core/server';
 
 interface SingleBulkCreateParams {
@@ -32,6 +33,7 @@ interface SingleBulkCreateParams {
   tags: string[];
   throttle: string;
   refresh: RefreshTypes;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 /**
@@ -59,6 +61,18 @@ export const filterDuplicateRules = (
   });
 };
 
+/**
+ * Similar to filterDuplicateRules, but operates on candidate signal documents rather than events that matched
+ * the detection query. This means we only have to compare the ruleId against the ancestors array.
+ * @param ruleId The rule id
+ * @param signals The candidate new signals
+ */
+export const filterDuplicateSignals = (ruleId: string, signals: SignalHit[]) => {
+  return signals.filter(
+    (doc) => !doc.signal.ancestors.some((ancestor) => ancestor.rule === ruleId)
+  );
+};
+
 export interface SingleBulkCreateResponse {
   success: boolean;
   bulkCreateDuration?: string;
@@ -66,8 +80,14 @@ export interface SingleBulkCreateResponse {
   errors: string[];
 }
 
+export interface BulkInsertSignalsResponse {
+  bulkCreateDuration: string;
+  createdItemsCount: number;
+}
+
 // Bulk Index documents.
 export const singleBulkCreate = async ({
+  buildRuleMessage,
   filteredEvents,
   ruleParams,
   services,
@@ -87,9 +107,9 @@ export const singleBulkCreate = async ({
   throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
   filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
-  logger.debug(`about to bulk create ${filteredEvents.hits.hits.length} events`);
+  logger.debug(buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`));
   if (filteredEvents.hits.hits.length === 0) {
-    logger.debug(`all events were duplicates`);
+    logger.debug(buildRuleMessage(`all events were duplicates`));
     return { success: true, createdItemsCount: 0, errors: [] };
   }
   // index documents after creating an ID based on the
@@ -136,21 +156,27 @@ export const singleBulkCreate = async ({
     body: bulkBody,
   });
   const end = performance.now();
-  logger.debug(`individual bulk process time took: ${makeFloatString(end - start)} milliseconds`);
-  logger.debug(`took property says bulk took: ${response.took} milliseconds`);
+  logger.debug(
+    buildRuleMessage(
+      `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
+    )
+  );
+  logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
 
   const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
   const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
   const errorCountByMessage = errorAggregator(response, [409]);
 
-  logger.debug(`bulk created ${createdItemsCount} signals`);
+  logger.debug(buildRuleMessage(`bulk created ${createdItemsCount} signals`));
   if (duplicateSignalsCount > 0) {
-    logger.debug(`ignored ${duplicateSignalsCount} duplicate signals`);
+    logger.debug(buildRuleMessage(`ignored ${duplicateSignalsCount} duplicate signals`));
   }
 
   if (!isEmpty(errorCountByMessage)) {
     logger.error(
-      `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
+      buildRuleMessage(
+        `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
+      )
     );
     return {
       errors: Object.keys(errorCountByMessage),
@@ -166,4 +192,47 @@ export const singleBulkCreate = async ({
       createdItemsCount,
     };
   }
+};
+
+// Bulk Index new signals.
+export const bulkInsertSignals = async (
+  signals: BaseSignalHit[],
+  logger: Logger,
+  services: AlertServices,
+  refresh: RefreshTypes
+): Promise<BulkInsertSignalsResponse> => {
+  // index documents after creating an ID based on the
+  // id and index of each parent and the rule ID
+  const bulkBody = signals.flatMap((doc) => [
+    {
+      create: {
+        _index: doc._index,
+        _id: doc._id,
+      },
+    },
+    doc._source,
+  ]);
+  const start = performance.now();
+  const response: BulkResponse = await services.callCluster('bulk', {
+    refresh,
+    body: bulkBody,
+  });
+  const end = performance.now();
+  logger.debug(`individual bulk process time took: ${makeFloatString(end - start)} milliseconds`);
+  logger.debug(`took property says bulk took: ${response.took} milliseconds`);
+
+  if (response.errors) {
+    const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
+    logger.debug(`ignored ${duplicateSignalsCount} duplicate signals`);
+    const errorCountByMessage = errorAggregator(response, [409]);
+    if (!isEmpty(errorCountByMessage)) {
+      logger.error(
+        `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
+      );
+    }
+  }
+
+  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+  logger.debug(`bulk created ${createdItemsCount} signals`);
+  return { bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
 };

@@ -5,10 +5,10 @@
  */
 
 import {
-  CoreStart,
   CoreSetup,
-  PluginInitializerContext,
+  CoreStart,
   Plugin as CorePlugin,
+  PluginInitializerContext,
 } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
@@ -17,13 +17,16 @@ import { registerBuiltInAlertTypes } from './application/components/builtin_aler
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
-  ManagementSetup,
   ManagementAppMountParams,
+  ManagementSetup,
 } from '../../../../src/plugins/management/public';
-import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
+export interface TriggersActionsUiConfigType {
+  enableGeoTrackingThresholdAlert: boolean;
+}
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -56,13 +59,14 @@ export class Plugin
     > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  private initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    this.actionTypeRegistry = actionTypeRegistry;
+    this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
 
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    this.alertTypeRegistry = alertTypeRegistry;
+    this.alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+
+    this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
@@ -81,7 +85,10 @@ export class Plugin
           PluginsStart,
           unknown
         ];
-        boot({
+
+        const { boot } = await import('./application/boot');
+
+        return boot({
           dataPlugin: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
@@ -100,7 +107,6 @@ export class Plugin
           actionTypeRegistry,
           alertTypeRegistry,
         });
-        return () => {};
       },
     });
 
@@ -110,6 +116,7 @@ export class Plugin
 
     registerBuiltInAlertTypes({
       alertTypeRegistry: this.alertTypeRegistry,
+      triggerActionsUiConfig: this.initializerContext.config.get<TriggersActionsUiConfigType>(),
     });
 
     return {

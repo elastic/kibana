@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry } from 'lodash';
+import { curry, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
@@ -85,21 +85,39 @@ async function executor(
     refresh: config.refresh,
   };
 
-  let result;
   try {
-    result = await services.callCluster('bulk', bulkParams);
-  } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
-      defaultMessage: 'error indexing documents',
-    });
-    logger.error(`error indexing documents: ${err.message}`);
-    return {
-      status: 'error',
-      actionId,
-      message,
-      serviceMessage: err.message,
-    };
-  }
+    const result = await services.callCluster('bulk', bulkParams);
 
-  return { status: 'ok', data: result, actionId };
+    const err = find(result.items, 'index.error.reason');
+    if (err) {
+      return wrapErr(
+        `${err.index.error!.reason}${
+          err.index.error?.caused_by ? ` (${err.index.error?.caused_by?.reason})` : ''
+        }`,
+        actionId,
+        logger
+      );
+    }
+
+    return { status: 'ok', data: result, actionId };
+  } catch (err) {
+    return wrapErr(err.message, actionId, logger);
+  }
+}
+
+function wrapErr(
+  errMessage: string,
+  actionId: string,
+  logger: Logger
+): ActionTypeExecutorResult<unknown> {
+  const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
+    defaultMessage: 'error indexing documents',
+  });
+  logger.error(`error indexing documents: ${errMessage}`);
+  return {
+    status: 'error',
+    actionId,
+    message,
+    serviceMessage: errMessage,
+  };
 }

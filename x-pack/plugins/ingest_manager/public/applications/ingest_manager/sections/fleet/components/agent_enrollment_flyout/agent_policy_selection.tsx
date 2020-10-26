@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
 import { sendGetEnrollmentAPIKeys, useCore } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
@@ -98,7 +99,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         try {
           const res = await sendGetEnrollmentAPIKeys({
             page: 1,
-            perPage: 10000,
+            perPage: SO_SEARCH_LIMIT,
           });
           if (res.error) {
             throw res.error;

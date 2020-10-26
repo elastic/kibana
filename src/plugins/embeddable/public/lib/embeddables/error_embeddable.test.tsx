@@ -17,43 +17,33 @@
  * under the License.
  */
 import React from 'react';
+import { wait, render } from '@testing-library/react';
 import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
-import { mount } from 'enzyme';
 
 test('ErrorEmbeddable renders an embeddable', async () => {
   const embeddable = new ErrorEmbeddable('some error occurred', { id: '123', title: 'Error' });
-  const component = mount(<EmbeddableRoot embeddable={embeddable} />);
-  expect(
-    component.getDOMNode().querySelectorAll('[data-test-subj="embeddableStackError"]').length
-  ).toBe(1);
-  expect(
-    component.getDOMNode().querySelectorAll('[data-test-subj="errorMessageMarkdown"]').length
-  ).toBe(1);
-  expect(
-    component
-      .getDOMNode()
-      .querySelectorAll('[data-test-subj="errorMessageMarkdown"]')[0]
-      .innerHTML.includes('some error occurred')
-  ).toBe(true);
+  const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
+
+  expect(getByTestId('embeddableStackError')).toBeVisible();
+  await wait(() => getByTestId('errorMessageMarkdown')); // wait for lazy markdown component
+  expect(getByText(/some error occurred/i)).toBeVisible();
 });
 
 test('ErrorEmbeddable renders an embeddable with markdown message', async () => {
   const error = '[some link](http://localhost:5601/takeMeThere)';
   const embeddable = new ErrorEmbeddable(error, { id: '123', title: 'Error' });
-  const component = mount(<EmbeddableRoot embeddable={embeddable} />);
-  expect(
-    component.getDOMNode().querySelectorAll('[data-test-subj="embeddableStackError"]').length
-  ).toBe(1);
-  expect(
-    component.getDOMNode().querySelectorAll('[data-test-subj="errorMessageMarkdown"]').length
-  ).toBe(1);
-  expect(
-    component
-      .getDOMNode()
-      .querySelectorAll('[data-test-subj="errorMessageMarkdown"]')[0]
-      .innerHTML.includes(
-        '<a href="http://localhost:5601/takeMeThere" target="_blank" rel="noopener noreferrer">some link</a>'
-      )
-  ).toBe(true);
+  const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
+
+  expect(getByTestId('embeddableStackError')).toBeVisible();
+  await wait(() => getByTestId('errorMessageMarkdown')); // wait for lazy markdown component
+  expect(getByText(/some link/i)).toMatchInlineSnapshot(`
+    <a
+      href="http://localhost:5601/takeMeThere"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      some link
+    </a>
+  `);
 });

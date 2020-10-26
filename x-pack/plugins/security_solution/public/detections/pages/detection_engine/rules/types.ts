@@ -22,7 +22,11 @@ import {
   Type,
   Severity,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { List } from '../../../../../common/detection_engine/schemas/types';
+import {
+  List,
+  ThreatIndex,
+  ThreatMapping,
+} from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -124,6 +128,9 @@ export interface DefineStepRule {
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
+  threatIndex: ThreatIndex;
+  threatQueryBar: FieldValueQueryBar;
+  threatMapping: ThreatMapping;
 }
 
 export interface ScheduleStepRule {

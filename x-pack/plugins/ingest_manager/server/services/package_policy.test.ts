@@ -45,14 +45,14 @@ describe('Package policy service', () => {
     it('should work with config variables from the stream', async () => {
       const inputs = await packagePolicyService.assignPackageStream(
         ({
-          datasets: [
+          data_streams: [
             {
               type: 'logs',
-              name: 'package.dataset1',
+              dataset: 'package.dataset1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-          config_templates: [
+          policy_templates: [
             {
               inputs: [{ type: 'log' }],
             },
@@ -64,7 +64,7 @@ describe('Package policy service', () => {
             enabled: true,
             streams: [
               {
-                id: 'dataset01',
+                id: 'datastream01',
                 data_stream: { dataset: 'package.dataset1', type: 'logs' },
                 enabled: true,
                 vars: {
@@ -84,7 +84,7 @@ describe('Package policy service', () => {
           enabled: true,
           streams: [
             {
-              id: 'dataset01',
+              id: 'datastream01',
               data_stream: { dataset: 'package.dataset1', type: 'logs' },
               enabled: true,
               vars: {
@@ -106,14 +106,14 @@ describe('Package policy service', () => {
     it('should work with config variables at the input level', async () => {
       const inputs = await packagePolicyService.assignPackageStream(
         ({
-          datasets: [
+          data_streams: [
             {
-              name: 'package.dataset1',
+              dataset: 'package.dataset1',
               type: 'logs',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-          config_templates: [
+          policy_templates: [
             {
               inputs: [{ type: 'log' }],
             },
@@ -130,7 +130,7 @@ describe('Package policy service', () => {
             },
             streams: [
               {
-                id: 'dataset01',
+                id: 'datastream01',
                 data_stream: { dataset: 'package.dataset1', type: 'logs' },
                 enabled: true,
               },
@@ -150,7 +150,7 @@ describe('Package policy service', () => {
           },
           streams: [
             {
-              id: 'dataset01',
+              id: 'datastream01',
               data_stream: { dataset: 'package.dataset1', type: 'logs' },
               enabled: true,
               compiled_stream: {

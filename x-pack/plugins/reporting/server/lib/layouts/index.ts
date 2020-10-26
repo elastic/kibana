@@ -53,7 +53,7 @@ export interface Size {
 
 export interface LayoutParams {
   id: string;
-  dimensions: Size;
+  dimensions?: Size;
   selectors?: LayoutSelectorDictionary;
 }
 
@@ -64,4 +64,4 @@ interface LayoutSelectors {
   positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
 }
 
-export type LayoutInstance = Layout & LayoutSelectors & Size;
+export type LayoutInstance = Layout & LayoutSelectors & Partial<Size>;

@@ -65,6 +65,7 @@ export const useGetIssueTypes = ({
         }
       } catch (error) {
         if (!didCancel) {
+          setIsLoading(false);
           toastNotifications.addDanger({
             title: i18n.ISSUE_TYPES_API_ERROR,
             text: error.message,

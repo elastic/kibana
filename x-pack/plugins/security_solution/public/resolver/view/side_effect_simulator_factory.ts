@@ -67,6 +67,18 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
     });
 
   /**
+   * Mock the global writeText method as it is not available in jsDOM and alows us to track what was copied
+   */
+  const MockClipboard: Clipboard = {
+    writeText: jest.fn(),
+    readText: jest.fn(),
+    addEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+    removeEventListener: jest.fn(),
+  };
+  // @ts-ignore navigator doesn't natively exist on global
+  global.navigator.clipboard = MockClipboard;
+  /**
    * A mock implementation of `ResizeObserver` that works with our fake `getBoundingClientRect` and `simulateElementResize`
    */
   class MockResizeObserver implements ResizeObserver {

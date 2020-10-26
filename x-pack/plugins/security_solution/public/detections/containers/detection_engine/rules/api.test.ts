@@ -202,7 +202,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.tags: "hello" OR alert.attributes.tags: "world"',
+          filter: 'alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -297,7 +297,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND (alert.attributes.tags: "hello" OR alert.attributes.tags: "world")',
+            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND (alert.attributes.tags: "hello" AND alert.attributes.tags: "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',

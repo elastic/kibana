@@ -11,14 +11,17 @@ import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-
+import { Alert } from '../../common';
 const alertType = {
   id: 'test',
   name: 'My test alert',
@@ -71,9 +74,10 @@ describe('Task Runner', () => {
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
     eventLogger: eventLoggerMock.create(),
+    internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
   };
 
-  const mockedAlertTypeSavedObject = {
+  const mockedAlertTypeSavedObject: Alert = {
     id: '1',
     consumer: 'bar',
     createdAt: new Date('2019-02-12T21:01:22.479Z'),
@@ -82,6 +86,7 @@ describe('Task Runner', () => {
     muteAll: false,
     enabled: true,
     alertTypeId: '123',
+    apiKey: '',
     apiKeyOwner: 'elastic',
     schedule: { interval: '10s' },
     name: 'alert-name',
@@ -102,6 +107,10 @@ describe('Task Runner', () => {
         },
       },
     ],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
   };
 
   beforeEach(() => {

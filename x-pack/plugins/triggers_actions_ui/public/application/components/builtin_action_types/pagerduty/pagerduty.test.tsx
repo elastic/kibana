@@ -91,6 +91,7 @@ describe('pagerduty action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
+        dedupKey: [],
         summary: [],
         timestamp: [],
       },

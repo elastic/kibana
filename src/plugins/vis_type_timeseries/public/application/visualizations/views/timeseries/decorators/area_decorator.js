@@ -42,6 +42,7 @@ export function AreaSeriesDecorator({
   sortIndex,
   y1AccessorFormat,
   y0AccessorFormat,
+  tickFormat,
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
@@ -67,6 +68,7 @@ export function AreaSeriesDecorator({
     enableHistogramMode,
     useDefaultGroupDomain,
     sortIndex,
+    tickFormat,
     ...areaSeriesStyle,
   };
 

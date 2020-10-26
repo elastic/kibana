@@ -21,7 +21,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           <span
             className="euiButtonContent euiButtonEmpty__content"
           >
-            <div
+            <span
               className="euiButtonContent__icon"
               data-euiicon-type="grid"
               size="m"
@@ -47,7 +47,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowLeft"
@@ -84,7 +84,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowRight"
@@ -107,7 +107,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           <span
             className="euiButtonContent euiButtonEmpty__content"
           >
-            <div
+            <span
               className="euiButtonContent__icon"
               data-euiicon-type="editorCodeBlock"
               size="m"
@@ -146,7 +146,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           <span
             className="euiButtonContent euiButtonEmpty__content"
           >
-            <div
+            <span
               className="euiButtonContent__icon"
               data-euiicon-type="grid"
               size="m"
@@ -172,7 +172,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowLeft"
@@ -209,7 +209,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowRight"

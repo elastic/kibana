@@ -129,6 +129,17 @@ describe('Kibana keystore', () => {
       expect(keystore.data.foo).toEqual('bar');
     });
 
+    it('parses JSON values', async () => {
+      prompt.question.returns(Promise.resolve('["bar"]\n'));
+
+      const keystore = new Keystore('/data/test.keystore');
+      sandbox.stub(keystore, 'save');
+
+      await add(keystore, 'foo');
+
+      expect(keystore.data.foo).toEqual(['bar']);
+    });
+
     it('persists updated keystore', async () => {
       prompt.question.returns(Promise.resolve('bar\n'));
 

@@ -7,11 +7,7 @@
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
@@ -41,23 +37,26 @@ export const getBreakdownField = (breakdown: string) => {
 
 export const getPageLoadDistBreakdown = async ({
   setup,
-  minDuration,
-  maxDuration,
+  minPercentile,
+  maxPercentile,
   breakdown,
+  urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
-  minDuration: number;
-  maxDuration: number;
+  setup: Setup & SetupTimeRange;
+  minPercentile: number;
+  maxPercentile: number;
   breakdown: string;
+  urlQuery?: string;
 }) => {
   // convert secs to micros
   const stepValues = getPLDChartSteps({
-    minDuration: minDuration * MICRO_TO_SEC,
-    maxDuration: maxDuration * MICRO_TO_SEC,
+    maxDuration: (maxPercentile ? +maxPercentile : 50) * MICRO_TO_SEC,
+    minDuration: minPercentile ? +minPercentile * MICRO_TO_SEC : 0,
   });
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {

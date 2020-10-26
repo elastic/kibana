@@ -73,7 +73,7 @@ describe('test acks handlers', () => {
     const ackService: AcksService = {
       acknowledgeAgentActions: jest.fn().mockReturnValueOnce([
         {
-          type: 'CONFIG_CHANGE',
+          type: 'POLICY_CHANGE',
           id: 'action1',
         },
       ]),

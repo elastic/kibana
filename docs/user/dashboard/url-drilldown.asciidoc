@@ -15,12 +15,28 @@ image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigate
 NOTE: URL drilldown is available with the https://www.elastic.co/subscriptions[Gold subscription] and higher.
 
 [float]
+[[url-drilldown-supported-panels]]
+==== Supported panels
+
+The following panels support URL drilldowns:
+
+* Lens
+* Area
+* Data table
+* Heat map
+* Horizontal bar
+* Line
+* Pie
+* Tag cloud
+* Vertical bar
+
+[float]
 [[try-it]]
 ==== Try it: Create a URL drilldown
 
 This example shows how to create the "Show on Github" drilldown shown above.
 
-. Add the <<gs-get-data-into-kibana, sample web logs>> data set.
+. Add the sample web logs data set.
 . Open the *[Logs] Web traffic* dashboard. This isn’t data from Github, but it should work for demonstration purposes.
 . In the dashboard menu bar, click *Edit*.
 . In *[Logs] Visitors by OS*, open the panel menu, and then select *Create drilldown*.
@@ -119,6 +135,92 @@ Example:
 
 `{{ date event.from “YYYY MM DD”}}` +
 `{{date “now-15”}}`
+
+|formatNumber
+a|Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
+Refer to the http://numeraljs.com/#format[numeral.js] for different formatting options. 
+
+Example:
+
+`{{formatNumber event.value "0.0"}}`
+
+|lowercase
+a|Converts a string to lower case.
+
+Example:
+
+`{{lowercase event.value}}`
+
+|uppercase
+a|Converts a string to upper case.
+
+Example:
+
+`{{uppercase event.value}}`
+
+|trim
+a|Removes leading and trailing spaces from a string.
+
+Example:
+
+`{{trim event.value}}`
+
+|trimLeft
+a|Removes leading spaces from a string.
+
+Example:
+
+`{{trimLeft event.value}}`
+
+|trimRight
+a|Removes trailing spaces from a string.
+
+Example:
+
+`{{trimRight event.value}}`
+
+|mid
+a|Extracts a substring from a string by start position and number of characters to extract.
+
+Example:
+
+`{{mid event.value 3 5}}` - extracts five characters starting from a third character. 
+
+|left
+a|Extracts a number of characters from a string (starting from left).
+
+Example:
+
+`{{left event.value 3}}`
+
+|right
+a|Extracts a number of characters from a string (starting from right).
+
+Example:
+
+`{{right event.value 3}}`
+
+|concat
+a|Concatenates two or more strings.
+
+Example:
+
+`{{concat event.value "," event.key}}`
+
+|replace
+a|Replaces all substrings within a string.
+
+Example:
+
+`{{replace event.value "stringToReplace" "stringToReplaceWith"}}`
+
+|split
+a|Splits a string using a provided splitter.
+
+Example:
+
+`{{split event.value ","}}`
+
 |===
 
 
@@ -238,3 +340,14 @@ Tip: Consider using <<helpers, date>> helper for date formatting.
 | Aggregation field behind the selected range, if available.
 
 |===
+
+[float]
+[[disable]]
+==== Disable URL drilldown
+
+You can disable URL drilldown feature on your {kib} instance by disabling the plugin:
+
+["source","yml"]
+-----------
+url_drilldown.enabled: false
+-----------

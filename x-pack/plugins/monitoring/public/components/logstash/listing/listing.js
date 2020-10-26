@@ -84,7 +84,18 @@ export class Listing extends PureComponent {
         width: '175px',
         sortable: true,
         render: () => {
-          return <AlertsStatus showBadge={true} alerts={alerts} />;
+          return (
+            <AlertsStatus
+              showBadge={true}
+              alerts={alerts}
+              nextStepsFilter={(nextStep) => {
+                if (nextStep.text.includes('Logstash nodes')) {
+                  return false;
+                }
+                return true;
+              }}
+            />
+          );
         },
       },
       {

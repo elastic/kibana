@@ -5,7 +5,12 @@
  */
 
 import * as rt from 'io-ts';
-import { criteriaRT, TimeUnitRT, timeSizeRT, groupByRT } from '../../alerting/logs/types';
+import {
+  criteriaRT,
+  TimeUnitRT,
+  timeSizeRT,
+  groupByRT,
+} from '../../alerting/logs/log_threshold/types';
 
 export const LOG_ALERTS_CHART_PREVIEW_DATA_PATH = '/api/infra/log_alerts/chart_preview_data';
 

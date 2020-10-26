@@ -17,7 +17,6 @@ import { ExportTypeDefinition } from '../../types';
 import { createJobFnFactory, ImmediateCreateJobFn } from './create_job';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPanelCsv } from './types';
 
 /*
  * These functions are exported to share with the API route handler that
@@ -27,9 +26,7 @@ export { createJobFnFactory } from './create_job';
 export { runTaskFnFactory } from './execute_job';
 
 export const getExportType = (): ExportTypeDefinition<
-  JobParamsPanelCsv,
   ImmediateCreateJobFn,
-  JobParamsPanelCsv,
   ImmediateExecuteFn
 > => ({
   ...metadata,

@@ -34,7 +34,7 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'namespace' | 'sortOrder' | 'rootSearchFields'
+  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
 >;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -94,6 +94,12 @@ export interface SavedObjectsUpdateOptions {
 /** @public */
 export interface SavedObjectsBatchResponse<T = unknown> {
   savedObjects: Array<SimpleSavedObject<T>>;
+}
+
+/** @public */
+export interface SavedObjectsDeleteOptions {
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
 }
 
 /**
@@ -261,12 +267,20 @@ export class SavedObjectsClient {
    * @param id
    * @returns
    */
-  public delete = (type: string, id: string): ReturnType<SavedObjectsApi['delete']> => {
+  public delete = (
+    type: string,
+    id: string,
+    options?: SavedObjectsDeleteOptions
+  ): ReturnType<SavedObjectsApi['delete']> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE' });
+    const query = {
+      force: !!options?.force,
+    };
+
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
   /**

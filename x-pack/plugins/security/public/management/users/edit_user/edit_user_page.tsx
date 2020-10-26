@@ -536,7 +536,7 @@ export class EditUserPage extends Component<Props, State> {
 
               {isNewUser || showChangePasswordForm ? null : (
                 <EuiFormRow label="Password">
-                  <EuiLink onClick={this.toggleChangePasswordForm}>
+                  <EuiLink data-test-subj="changePassword" onClick={this.toggleChangePasswordForm}>
                     <FormattedMessage
                       id="xpack.security.management.users.editUser.changePasswordButtonLabel"
                       defaultMessage="Change password"

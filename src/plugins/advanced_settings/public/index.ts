@@ -17,11 +17,19 @@
  * under the License.
  */
 
+import React from 'react';
 import { PluginInitializerContext } from 'kibana/public';
 import { AdvancedSettingsPlugin } from './plugin';
 export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
 export { ComponentRegistry } from './component_registry';
-export { Field } from './management_app/components/field';
+
+/**
+ * Exports the field component as a React.lazy component. We're explicitly naming it lazy here
+ * so any plugin that would import that can clearly see it's lazy loaded and can only be used
+ * inside a suspense context.
+ */
+const LazyField = React.lazy(() => import('./management_app/components/field'));
+export { LazyField };
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AdvancedSettingsPlugin();

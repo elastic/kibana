@@ -25,13 +25,10 @@ import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
-import { getServices, IIndexPattern } from '../../kibana_services';
-// @ts-ignore
-import { DiscoverNoResults } from '../angular/directives/no_results';
-import { DiscoverUninitialized } from '../angular/directives/uninitialized';
-import { DiscoverHistogram } from '../angular/directives/histogram';
+import { getServices, IndexPattern } from '../../kibana_services';
+import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
+import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DiscoverFetchError, FetchError } from './fetch_error/fetch_error';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import {
@@ -41,6 +38,7 @@ import {
   TimeRange,
   Query,
   IndexPatternAttributes,
+  DataPublicPluginStart,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
@@ -54,11 +52,11 @@ export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
-  fetchError: FetchError;
+  fetchError: Error;
   fieldCounts: Record<string, number>;
   histogramData: Chart;
   hits: number;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   minimumVisibleRows: number;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   onChangeInterval: (interval: string) => void;
@@ -75,6 +73,7 @@ export interface DiscoverLegacyProps {
     sampleSize: number;
     fixedScroll: (el: HTMLElement) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    data: DataPublicPluginStart;
   };
   resetQuery: () => void;
   resultState: string;
@@ -95,8 +94,8 @@ export function DiscoverLegacy({
   addColumn,
   fetch,
   fetchCounter,
-  fetchError,
   fieldCounts,
+  fetchError,
   histogramData,
   hits,
   indexPattern,
@@ -211,16 +210,12 @@ export function DiscoverLegacy({
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}
                   queryLanguage={state.query ? state.query.language : ''}
+                  data={opts.data}
+                  error={fetchError}
                 />
               )}
               {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-              {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
-              <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
-                {fetchError && <DiscoverFetchError fetchError={fetchError} />}
-                <div className="dscOverlay" style={{ display: fetchError ? 'none' : '' }}>
-                  <LoadingSpinner />
-                </div>
-              </span>
+              {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
                   <SkipBottomButton onClick={onSkipBottomButtonClick} />

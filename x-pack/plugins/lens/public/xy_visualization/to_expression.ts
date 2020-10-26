@@ -15,7 +15,8 @@ interface ValidLayer extends LayerConfig {
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -31,7 +32,7 @@ export const toExpression = (
     });
   });
 
-  return buildExpression(state, metadata, datasourceLayers);
+  return buildExpression(state, metadata, datasourceLayers, attributes);
 };
 
 export function toPreviewExpression(
@@ -81,7 +82,8 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers?: Record<string, DatasourcePublicAPI>
+  datasourceLayers?: Record<string, DatasourcePublicAPI>,
+  attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
     Boolean(layer.accessors.length)
@@ -97,6 +99,8 @@ export const buildExpression = (
         type: 'function',
         function: 'lens_xy_chart',
         arguments: {
+          title: [attributes?.title || ''],
+          description: [attributes?.description || ''],
           xTitle: [state.xTitle || ''],
           yTitle: [state.yTitle || ''],
           yRightTitle: [state.yRightTitle || ''],

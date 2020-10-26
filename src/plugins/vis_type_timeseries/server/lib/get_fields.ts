@@ -16,15 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniqBy } from 'lodash';
+import { uniqBy, get } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
-// @ts-ignore
-import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
-import { indexPatterns } from '../../../data/server';
 import { Framework } from '../plugin';
-import { IndexPatternFieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
+import {
+  indexPatterns,
+  IndexPatternFieldDescriptor,
+  IndexPatternsFetcher,
+} from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 export async function getFields(
@@ -44,7 +45,7 @@ export async function getFields(
     payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.elasticsearch.legacy.client.callAsCurrentUser
+        requestContext.core.elasticsearch.client.asCurrentUser
       ),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
@@ -58,7 +59,18 @@ export async function getFields(
         .toPromise();
     },
   };
-  const { indexPatternString } = await getIndexPatternObject(reqFacade, indexPattern);
+  let indexPatternString = indexPattern;
+
+  if (!indexPatternString) {
+    const [{ savedObjects }, { data }] = await framework.core.getStartServices();
+    const savedObjectsClient = savedObjects.getScopedClient(request);
+    const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+      savedObjectsClient
+    );
+    const defaultIndexPattern = await indexPatternsService.getDefault();
+    indexPatternString = get(defaultIndexPattern, 'title', '');
+  }
+
   const {
     searchStrategy,
     capabilities,

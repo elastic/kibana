@@ -11,12 +11,15 @@ import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { asPercent } from '../../../../../common/utils/formatters';
+import {
+  asPercent,
+  asDecimal,
+  asMillisecondDuration,
+} from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
-import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
@@ -50,6 +53,17 @@ const AppLink = styled(TransactionOverviewLink)`
   ${truncate('100%')};
 `;
 
+const ToolTipWrapper = styled.span`
+  width: 100%;
+  .apmServiceList__serviceNameTooltip {
+    width: 100%;
+    .apmServiceList__serviceNameContainer {
+      // removes 24px referent to the icon placed on the left side of the text.
+      width: calc(100% - 24px);
+    }
+  }
+`;
+
 export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
   {
     field: 'healthStatus',
@@ -74,24 +88,27 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     width: '40%',
     sortable: true,
     render: (_, { serviceName, agentName }) => (
-      <EuiToolTip
-        delay="long"
-        content={formatString(serviceName)}
-        id="service-name-tooltip"
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {agentName && (
-            <EuiFlexItem grow={false}>
-              <AgentIcon agentName={agentName} />
+      <ToolTipWrapper>
+        <EuiToolTip
+          delay="long"
+          content={formatString(serviceName)}
+          id="service-name-tooltip"
+          anchorClassName="apmServiceList__serviceNameTooltip"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {agentName && (
+              <EuiFlexItem grow={false}>
+                <AgentIcon agentName={agentName} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem className="apmServiceList__serviceNameContainer">
+              <AppLink serviceName={serviceName} className="eui-textTruncate">
+                {formatString(serviceName)}
+              </AppLink>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <AppLink serviceName={serviceName}>
-              {formatString(serviceName)}
-            </AppLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiToolTip>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      </ToolTipWrapper>
     ),
   },
   {
@@ -150,7 +167,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     width: px(unit * 10),
   },
   {
-    field: 'errorsPerMinute',
+    field: 'transactionErrorRate',
     name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
       defaultMessage: 'Error rate %',
     }),
@@ -188,18 +205,20 @@ export function ServiceList({ items, noItemsMessage }: Props) {
   const columns = displayHealthStatus
     ? SERVICE_COLUMNS
     : SERVICE_COLUMNS.filter((column) => column.field !== 'healthStatus');
+  const initialSortField = displayHealthStatus
+    ? 'healthStatus'
+    : 'transactionsPerMinute';
 
   return (
     <ManagedTable
       columns={columns}
       items={items}
       noItemsMessage={noItemsMessage}
-      initialSortField="healthStatus"
+      initialSortField={initialSortField}
       initialSortDirection="desc"
       initialPageSize={50}
       sortFn={(itemsToSort, sortField, sortDirection) => {
         // For healthStatus, sort items by healthStatus first, then by TPM
-
         return sortField === 'healthStatus'
           ? orderBy(
               itemsToSort,
@@ -217,13 +236,15 @@ export function ServiceList({ items, noItemsMessage }: Props) {
               itemsToSort,
               (item) => {
                 switch (sortField) {
+                  // Use `?? -1` here so `undefined` will appear after/before `0`.
+                  // In the table this will make the "N/A" items always at the
+                  // bottom/top.
                   case 'avgResponseTime':
-                    return item.avgResponseTime?.value ?? 0;
+                    return item.avgResponseTime?.value ?? -1;
                   case 'transactionsPerMinute':
-                    return item.transactionsPerMinute?.value ?? 0;
+                    return item.transactionsPerMinute?.value ?? -1;
                   case 'transactionErrorRate':
-                    return item.transactionErrorRate?.value ?? 0;
-
+                    return item.transactionErrorRate?.value ?? -1;
                   default:
                     return item[sortField as keyof typeof item];
                 }

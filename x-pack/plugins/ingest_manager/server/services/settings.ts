@@ -73,7 +73,7 @@ export function createDefaultSettings(): BaseSettings {
   const cloud = appContextService.getCloud();
   const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
   const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-  const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+  const flagsUrl = appContextService.getConfig()?.agents?.kibana?.host;
   const defaultUrl = url.format({
     protocol: serverInfo.protocol,
     hostname: serverInfo.hostname,

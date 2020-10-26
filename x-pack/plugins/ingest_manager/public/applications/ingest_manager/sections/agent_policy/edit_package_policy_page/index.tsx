@@ -45,7 +45,7 @@ import { StepDefinePackagePolicy } from '../create_package_policy_page/step_defi
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
   const { notifications } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
     params: { policyId, packagePolicyId },

@@ -17,12 +17,14 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
+  isTransformEnabled,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
   sendGetAgentPolicyList,
+  sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
@@ -70,24 +72,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
-      // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0) {
-        try {
-          const indexPatterns = await fetchIndexPatterns();
-          if (indexPatterns !== undefined) {
-            dispatch({
-              type: 'serverReturnedMetadataPatterns',
-              payload: indexPatterns,
-            });
-          }
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnMetadataPatterns',
-            payload: error,
-          });
-        }
-      }
-
       try {
         const decodedQuery: Query = searchBarQuery(getState());
 
@@ -103,6 +87,32 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointList',
           payload: endpointResponse,
         });
+
+        try {
+          const endpointsTotalCount = await endpointsTotal(coreStart.http);
+          dispatch({
+            type: 'serverReturnedEndpointsTotal',
+            payload: endpointsTotalCount,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnEndpointsTotal',
+            payload: error,
+          });
+        }
+
+        try {
+          const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
+          dispatch({
+            type: 'serverReturnedAgenstWithEndpointsTotal',
+            payload: agentsWithEndpoint.total,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnAgenstWithEndpointsTotal',
+            payload: error,
+          });
+        }
 
         try {
           const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
@@ -132,6 +142,24 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverFailedToReturnEndpointList',
           payload: error,
         });
+      }
+
+      // get index pattern and fields for search bar
+      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+        try {
+          const indexPatterns = await fetchIndexPatterns();
+          if (indexPatterns !== undefined) {
+            dispatch({
+              type: 'serverReturnedMetadataPatterns',
+              payload: indexPatterns,
+            });
+          }
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnMetadataPatterns',
+            payload: error,
+          });
+        }
       }
 
       // No endpoints, so we should check to see if there are policies for onboarding
@@ -286,7 +314,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       // call the policy response api
       try {
         const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { hostId: selectedEndpoint },
+          query: { agentId: selectedEndpoint },
         });
         dispatch({
           type: 'serverReturnedEndpointPolicyResponse',
@@ -370,17 +398,27 @@ const getAgentAndPoliciesForEndpointsList = async (
   return nonExistingPackagePoliciesAndExistingAgentPolicies;
 };
 
-const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
+const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      (
-        await http.post<HostResultList>('/api/endpoint/metadata', {
-          body: JSON.stringify({
-            paging_properties: [{ page_index: 0 }, { page_size: 1 }],
-          }),
-        })
-      ).hosts.length !== 0
-    );
+      await http.post<HostResultList>('/api/endpoint/metadata', {
+        body: JSON.stringify({
+          paging_properties: [{ page_index: 0 }, { page_size: 1 }],
+        }),
+      })
+    ).total;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`error while trying to check for total endpoints`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
+  return 0;
+};
+
+const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
+  try {
+    return (await endpointsTotal(http)) > 0;
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`error while trying to check if endpoints exist`);

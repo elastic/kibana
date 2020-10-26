@@ -90,6 +90,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         operation: string;
         field?: string;
         isPreviousIncompatible?: boolean;
+        keepOpen?: boolean;
       },
       layerIndex = 0
     ) {
@@ -107,6 +108,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await comboBox.openOptionsList(target);
         await comboBox.setElement(target, opts.field);
       }
+
+      if (!opts.keepOpen) {
+        this.closeDimensionEditor();
+      }
+    },
+
+    /**
+     * Open the specified dimension.
+     *
+     * @param dimension - the selector of the dimension panel to open
+     * @param layerIndex - the index of the layer
+     */
+    async openDimensionEditor(dimension: string, layerIndex = 0) {
+      await retry.try(async () => {
+        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${dimension}`);
+      });
     },
 
     // closes the dimension editor flyout
@@ -127,7 +144,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lns-newBucket-add');
       const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
       await queryInput.type(queryString);
-      await PageObjects.common.pressEnterKey();
+      // Problem here is that after typing in the queryInput a dropdown will fetch the server
+      // with suggestions and show up. Depending on the cursor position and some other factors
+      // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
+      // dropdown which was not intended originally.
+      // To close the Filter popover we need to move to the label input and then press Enter:
+      // solution is to press Tab 2 twice (first Tab will close the dropdown) instead of Enter to avoid
+      // race condition with the dropdown
+      await PageObjects.common.pressTabKey();
+      await PageObjects.common.pressTabKey();
+      // Now it is safe to press Enter as we're in the label input
       await PageObjects.common.pressEnterKey();
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },

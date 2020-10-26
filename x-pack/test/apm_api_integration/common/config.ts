@@ -63,6 +63,10 @@ export function createTestConfig(settings: Settings) {
           servers.kibana,
           ApmUser.apmAnnotationsWriteUser
         ),
+        supertestAsApmReadUserWithoutMlAccess: supertestAsApmUser(
+          servers.kibana,
+          ApmUser.apmReadUserWithoutMlAccess
+        ),
       },
       junit: {
         reportName: name,

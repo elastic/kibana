@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * PLEASE NOTE: This component is currently duplicated. A version of this component wired up with
+ * the form lib lives in ./phases/shared
+ */
+
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
+  EuiFormRow,
   EuiSpacer,
   EuiSwitch,
   EuiTextColor,
@@ -19,9 +25,16 @@ import { ErrableFormRow } from './form_errors';
 import { Phases, PhaseWithForcemergeAction } from '../../../../../common/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
-const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel', {
+const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
   defaultMessage: 'Force merge data',
 });
+
+const bestCompressionLabel = i18n.translate(
+  'xpack.indexLifecycleMgmt.forcemerge.bestCompressionLabel',
+  {
+    defaultMessage: 'Compress stored fields',
+  }
+);
 
 interface Props {
   errors?: PhaseValidationErrors<PhaseWithForcemergeAction>;
@@ -30,6 +43,7 @@ interface Props {
   setPhaseData: (dataKey: keyof PhaseWithForcemergeAction, value: boolean | string) => void;
   isShowingErrors: boolean;
 }
+
 export const Forcemerge: React.FunctionComponent<Props> = ({
   errors,
   phaseData,
@@ -42,7 +56,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({
       title={
         <h3>
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
+            id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText"
             defaultMessage="Force merge"
           />
         </h3>
@@ -50,7 +64,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({
       description={
         <EuiTextColor color="subdued">
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataExplanationText"
+            id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
             defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
           />{' '}
           <LearnMoreLink docPath="indices-forcemerge.html" />
@@ -73,23 +87,43 @@ export const Forcemerge: React.FunctionComponent<Props> = ({
       <EuiSpacer />
       <div id="forcemergeContent" aria-live="polite" role="region">
         {phaseData.forceMergeEnabled ? (
-          <ErrableFormRow
-            id={`${phase}-selectedForceMergeSegments`}
-            label={i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel', {
-              defaultMessage: 'Number of segments',
-            })}
-            isShowingErrors={isShowingErrors}
-            errors={errors?.selectedForceMergeSegments}
-          >
-            <EuiFieldNumber
-              data-test-subj={`${phase}-selectedForceMergeSegments`}
-              value={phaseData.selectedForceMergeSegments}
-              onChange={(e) => {
-                setPhaseData('selectedForceMergeSegments', e.target.value);
-              }}
-              min={1}
-            />
-          </ErrableFormRow>
+          <>
+            <ErrableFormRow
+              id={`${phase}-selectedForceMergeSegments`}
+              label={i18n.translate('xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel', {
+                defaultMessage: 'Number of segments',
+              })}
+              isShowingErrors={isShowingErrors}
+              errors={errors?.selectedForceMergeSegments}
+            >
+              <EuiFieldNumber
+                data-test-subj={`${phase}-selectedForceMergeSegments`}
+                value={phaseData.selectedForceMergeSegments}
+                onChange={(e) => {
+                  setPhaseData('selectedForceMergeSegments', e.target.value);
+                }}
+                min={1}
+              />
+            </ErrableFormRow>
+            <EuiFormRow
+              hasEmptyLabelSpace
+              helpText={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.bestCompressionText"
+                  defaultMessage="Use higher compression for stored fields at the cost of slower performance."
+                />
+              }
+            >
+              <EuiSwitch
+                data-test-subj={`${phase}-bestCompression`}
+                label={bestCompressionLabel}
+                checked={phaseData.bestCompressionEnabled}
+                onChange={(e) => {
+                  setPhaseData('bestCompressionEnabled', e.target.checked);
+                }}
+              />
+            </EuiFormRow>
+          </>
         ) : null}
       </div>
     </EuiDescribedFormGroup>

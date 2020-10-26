@@ -24,7 +24,6 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export {
   ACTION_ADD_PANEL,
-  ACTION_APPLY_FILTER,
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
@@ -77,6 +76,8 @@ export {
   EmbeddableRenderer,
   EmbeddableRendererProps,
 } from './lib';
+
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 
 export { EnhancementRegistryDefinition } from './types';
 

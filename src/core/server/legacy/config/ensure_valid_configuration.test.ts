@@ -39,17 +39,12 @@ describe('ensureValidConfiguration', () => {
       configService as any,
       {
         settings: 'settings',
-        pluginSpecs: 'pluginSpecs',
-        disabledPluginSpecs: 'disabledPluginSpecs',
-        pluginExtendedConfig: 'pluginExtendedConfig',
-        uiExports: 'uiExports',
+        legacyConfig: 'pluginExtendedConfig',
       } as any
     );
     expect(getUnusedConfigKeys).toHaveBeenCalledTimes(1);
     expect(getUnusedConfigKeys).toHaveBeenCalledWith({
       coreHandledConfigPaths: ['core', 'elastic'],
-      pluginSpecs: 'pluginSpecs',
-      disabledPluginSpecs: 'disabledPluginSpecs',
       settings: 'settings',
       legacyConfig: 'pluginExtendedConfig',
     });

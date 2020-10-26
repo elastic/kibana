@@ -21,6 +21,8 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
@@ -49,6 +51,10 @@ const EuiBadgeWrap = (styled(EuiBadge)`
   }
 ` as unknown) as typeof EuiBadge;
 
+const Query = styled.div`
+  white-space: pre-wrap;
+`;
+
 export const buildQueryBarDescription = ({
   field,
   filters,
@@ -56,6 +62,7 @@ export const buildQueryBarDescription = ({
   query,
   savedId,
   indexPatterns,
+  queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(filters)) {
@@ -89,8 +96,8 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{i18n.QUERY_LABEL} </>,
-        description: <>{query} </>,
+        title: <>{queryLabel ?? i18n.QUERY_LABEL}</>,
+        description: <Query>{query}</Query>,
       },
     ];
   }
@@ -416,3 +423,40 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
     ),
   },
 ];
+
+export const buildThreatMappingDescription = (
+  title: string,
+  threatMapping: ThreatMapping
+): ListItems[] => {
+  const description = threatMapping.reduce<string>(
+    (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
+      const matches = threatMap.entries.reduce<string>(
+        (accumItems, item, itemsIndex, { length: threatMapLength }) => {
+          if (threatMapLength === 1) {
+            return `${item.field} ${MATCHES} ${item.value}`;
+          } else if (itemsIndex === 0) {
+            return `(${item.field} ${MATCHES} ${item.value})`;
+          } else {
+            return `${accumItems} ${AND} (${item.field} ${MATCHES} ${item.value})`;
+          }
+        },
+        ''
+      );
+
+      if (threatMappingLength === 1) {
+        return `${matches}`;
+      } else if (threatMapIndex === 0) {
+        return `(${matches})`;
+      } else {
+        return `${accumThreatMaps} ${OR} (${matches})`;
+      }
+    },
+    ''
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};

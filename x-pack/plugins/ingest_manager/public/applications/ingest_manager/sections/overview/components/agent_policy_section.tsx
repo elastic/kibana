@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
+import { SO_SEARCH_LIMIT } from '../../../constants';
 import { useLink, useGetPackagePolicies } from '../../../hooks';
 import { AgentPolicy } from '../../../types';
 import { Loading } from '../../fleet/components';
@@ -25,7 +26,7 @@ export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> =
   const { getHref } = useLink();
   const packagePoliciesRequest = useGetPackagePolicies({
     page: 1,
-    perPage: 10000,
+    perPage: SO_SEARCH_LIMIT,
   });
 
   return (

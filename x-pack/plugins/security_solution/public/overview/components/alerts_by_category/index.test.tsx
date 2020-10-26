@@ -10,9 +10,9 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../../common/mock/match_media';
+import '../../../common/mock/react_beautiful_dnd';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
@@ -29,7 +29,15 @@ const to = '2019-03-31T06:00:00.000Z';
 
 describe('Alerts by category', () => {
   let wrapper: ReactWrapper;
-
+  const testProps = {
+    deleteQuery: jest.fn(),
+    filters: [],
+    from,
+    indexNames: [],
+    indexPattern: mockIndexPattern,
+    setQuery: jest.fn(),
+    to,
+  };
   describe('before loading data', () => {
     beforeAll(async () => {
       (useMatrixHistogram as jest.Mock).mockReturnValue([
@@ -44,14 +52,7 @@ describe('Alerts by category', () => {
       wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviders>
-            <AlertsByCategory
-              deleteQuery={jest.fn()}
-              filters={[]}
-              from={from}
-              indexPattern={mockIndexPattern}
-              setQuery={jest.fn()}
-              to={to}
-            />
+            <AlertsByCategory {...testProps} />
           </TestProviders>
         </ThemeProvider>
       );
@@ -119,14 +120,7 @@ describe('Alerts by category', () => {
       wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviders>
-            <AlertsByCategory
-              deleteQuery={jest.fn()}
-              filters={[]}
-              from={from}
-              indexPattern={mockIndexPattern}
-              setQuery={jest.fn()}
-              to={to}
-            />
+            <AlertsByCategory {...testProps} />
           </TestProviders>
         </ThemeProvider>
       );

@@ -27,15 +27,22 @@ interface AdministrationListPageProps {
   title: React.ReactNode;
   subtitle: React.ReactNode;
   actions?: React.ReactNode;
+  headerBackComponent?: React.ReactNode;
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ beta, title, subtitle, actions, children, ...otherProps }) => {
+  ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
     return (
       <WrapperPage noTimeline {...otherProps}>
-        <HeaderPage title={title} subtitle={subtitle} badgeOptions={badgeOptions}>
+        <HeaderPage
+          hideSourcerer={true}
+          title={title}
+          subtitle={subtitle}
+          backComponent={headerBackComponent}
+          badgeOptions={badgeOptions}
+        >
           {actions}
         </HeaderPage>
 

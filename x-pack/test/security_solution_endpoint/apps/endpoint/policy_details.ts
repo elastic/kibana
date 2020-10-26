@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'policy',
     'endpointPageUtils',
     'ingestManagerCreatePackagePolicy',
+    'trustedApps',
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
@@ -24,7 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { protocol, hostname, port } = kbnTestServer;
 
   const kibanaUrl = Url.format({
-    protocol,
     hostname,
     port,
   });
@@ -206,6 +206,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   events: { file: false, network: true, process: true },
                   logging: { file: 'info' },
                   malware: { mode: 'prevent' },
+                  popup: {
+                    malware: {
+                      enabled: true,
+                      message: '',
+                    },
+                  },
                 },
                 windows: {
                   events: {
@@ -219,6 +225,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   logging: { file: 'info' },
                   malware: { mode: 'prevent' },
+                  popup: {
+                    malware: {
+                      enabled: true,
+                      message: '',
+                    },
+                  },
                 },
               },
               streams: [],
@@ -236,6 +248,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           fleet: {
             kibana: {
               hosts: [kibanaUrl],
+              protocol,
             },
           },
           revision: 3,
@@ -249,6 +262,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('when on Ingest Policy Edit Package Policy page', async () => {
       let policyInfo: PolicyTestResourceInfo;
       beforeEach(async () => {
@@ -264,16 +278,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await policyInfo.cleanup();
         }
       });
-      it('should show a link to Policy Details', async () => {
-        await testSubjects.existOrFail('editLinkToPolicyDetails');
+
+      it('should show callout', async () => {
+        await testSubjects.existOrFail('endpointPackagePolicy_edit');
       });
-      it('should navigate to Policy Details when the link is clicked', async () => {
-        const linkToPolicy = await testSubjects.find('editLinkToPolicyDetails');
-        await linkToPolicy.click();
+
+      it('should show actions button with expected action items', async () => {
+        const actionsButton = await pageObjects.ingestManagerCreatePackagePolicy.findEndpointActionsButton();
+        await actionsButton.click();
+        const menuPanel = await testSubjects.find('endpointActionsMenuPanel');
+        const actionItems = await menuPanel.findAllByTagName<'button'>('button');
+        const expectedItems = ['Edit Policy', 'Edit Trusted Applications'];
+
+        for (const action of actionItems) {
+          const buttonText = await action.getVisibleText();
+          expect(buttonText).to.be(expectedItems.find((item) => item === buttonText));
+        }
+      });
+
+      it('should navigate to Policy Details when the edit security policy action is clicked', async () => {
+        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('policy');
         await pageObjects.policy.ensureIsOnDetailsPage();
       });
+
       it('should allow the user to navigate, edit, save Policy Details and be redirected back to ingest', async () => {
-        await (await testSubjects.find('editLinkToPolicyDetails')).click();
+        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('policy');
         await pageObjects.policy.ensureIsOnDetailsPage();
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
         await pageObjects.policy.confirmAndSave();
@@ -281,9 +310,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
       });
+
       it('should navigate back to Ingest Policy Edit package page on click of cancel button', async () => {
-        await (await testSubjects.find('editLinkToPolicyDetails')).click();
+        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('policy');
         await (await pageObjects.policy.findCancelButton()).click();
+        await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
+      });
+
+      it('should navigate to Trusted Apps', async () => {
+        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('trustedApps');
+        await pageObjects.trustedApps.ensureIsOnTrustedAppsListPage();
+      });
+
+      it('should show the back button on Trusted Apps Page and navigate back to fleet', async () => {
+        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('trustedApps');
+        const backButton = await pageObjects.trustedApps.findTrustedAppsListPageBackButton();
+        await backButton.click();
         await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
       });
     });

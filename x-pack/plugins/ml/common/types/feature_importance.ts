@@ -21,3 +21,42 @@ export interface TopClass {
 }
 
 export type TopClasses = TopClass[];
+
+export interface ClassFeatureImportanceSummary {
+  class_name: string;
+  importance: {
+    max: number;
+    min: number;
+    mean_magnitude: number;
+  };
+}
+export interface ClassificationTotalFeatureImportance {
+  feature_name: string;
+  classes: ClassFeatureImportanceSummary[];
+}
+
+export interface RegressionFeatureImportanceSummary {
+  max: number;
+  min: number;
+  mean_magnitude: number;
+}
+
+export interface RegressionTotalFeatureImportance {
+  feature_name: string;
+  importance: RegressionFeatureImportanceSummary;
+}
+export type TotalFeatureImportance =
+  | ClassificationTotalFeatureImportance
+  | RegressionTotalFeatureImportance;
+
+export function isClassificationTotalFeatureImportance(
+  summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
+): summary is ClassificationTotalFeatureImportance {
+  return (summary as ClassificationTotalFeatureImportance).classes !== undefined;
+}
+
+export function isRegressionTotalFeatureImportance(
+  summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
+): summary is RegressionTotalFeatureImportance {
+  return (summary as RegressionTotalFeatureImportance).importance !== undefined;
+}

@@ -85,6 +85,146 @@ describe('7.10.0', () => {
       },
     });
   });
+
+  test('migrates PagerDuty actions to set a default dedupkey of the AlertId', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.pagerduty',
+          group: 'default',
+          params: {
+            summary: 'fired {{alertInstanceId}}',
+            eventAction: 'resolve',
+            component: '',
+          },
+          id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+        },
+      ],
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        actions: [
+          {
+            actionTypeId: '.pagerduty',
+            group: 'default',
+            params: {
+              summary: 'fired {{alertInstanceId}}',
+              eventAction: 'resolve',
+              dedupKey: '{{alertId}}',
+              component: '',
+            },
+            id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+          },
+        ],
+      },
+    });
+  });
+
+  test('skips PagerDuty actions with a specified dedupkey', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.pagerduty',
+          group: 'default',
+          params: {
+            summary: 'fired {{alertInstanceId}}',
+            eventAction: 'trigger',
+            dedupKey: '{{alertInstanceId}}',
+            component: '',
+          },
+          id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+        },
+      ],
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        actions: [
+          {
+            actionTypeId: '.pagerduty',
+            group: 'default',
+            params: {
+              summary: 'fired {{alertInstanceId}}',
+              eventAction: 'trigger',
+              dedupKey: '{{alertInstanceId}}',
+              component: '',
+            },
+            id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+          },
+        ],
+      },
+    });
+  });
+
+  test('skips PagerDuty actions with an eventAction of "trigger"', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.pagerduty',
+          group: 'default',
+          params: {
+            summary: 'fired {{alertInstanceId}}',
+            eventAction: 'trigger',
+            component: '',
+          },
+          id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+        },
+      ],
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        meta: {
+          versionApiKeyLastmodified: 'pre-7.10.0',
+        },
+        actions: [
+          {
+            actionTypeId: '.pagerduty',
+            group: 'default',
+            params: {
+              summary: 'fired {{alertInstanceId}}',
+              eventAction: 'trigger',
+              component: '',
+            },
+            id: 'b62ea790-5366-4abc-a7df-33db1db78410',
+          },
+        ],
+      },
+    });
+  });
+
+  test('creates execution status', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData();
+    const dateStart = Date.now();
+    const migratedAlert = migration710(alert, { log });
+    const dateStop = Date.now();
+    const dateExecutionStatus = Date.parse(
+      migratedAlert.attributes.executionStatus.lastExecutionDate
+    );
+
+    expect(dateStart).toBeLessThanOrEqual(dateExecutionStatus);
+    expect(dateStop).toBeGreaterThanOrEqual(dateExecutionStatus);
+
+    expect(migratedAlert).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        executionStatus: {
+          lastExecutionDate: migratedAlert.attributes.executionStatus.lastExecutionDate,
+          status: 'pending',
+          error: null,
+        },
+      },
+    });
+  });
 });
 
 describe('7.10.0 migrates with failure', () => {
@@ -123,7 +263,7 @@ describe('7.10.0 migrates with failure', () => {
 
 function getMockData(
   overwrites: Record<string, unknown> = {}
-): SavedObjectUnsanitizedDoc<RawAlert> {
+): SavedObjectUnsanitizedDoc<Partial<RawAlert>> {
   return {
     attributes: {
       enabled: true,

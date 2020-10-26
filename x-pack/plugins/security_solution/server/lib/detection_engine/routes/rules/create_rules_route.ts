@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -53,6 +54,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         building_block_type: buildingBlockType,
         description,
         enabled,
+        event_category_override: eventCategoryOverride,
         false_positives: falsePositives,
         from,
         query: queryOrUndefined,
@@ -82,6 +84,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         threat_index: threatIndex,
         threat_query: threatQuery,
         threat_mapping: threatMapping,
+        threat_language: threatLanguage,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -94,7 +97,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
+          !isMlRule(type) && !isEqlRule(type) && languageOrUndefined == null
+            ? 'kuery'
+            : languageOrUndefined;
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
@@ -138,6 +143,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           buildingBlockType,
           description,
           enabled,
+          eventCategoryOverride,
           falsePositives,
           from,
           immutable: false,
@@ -170,6 +176,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           threatIndex,
           threatQuery,
           threatMapping,
+          threatLanguage,
           timestampOverride,
           references,
           note,

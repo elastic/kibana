@@ -33,11 +33,9 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         excludeFromBasePrivileges: true,
-        icon: 'addDataApp',
-        navLinkId: 'someNavLink',
         app: ['app1'],
         category: { id: 'foo', label: 'foo' },
-        validLicenses: ['standard', 'basic', 'gold', 'platinum'],
+        minimumLicense: 'platinum',
         catalogue: ['foo'],
         management: {
           foo: ['bar'],
@@ -421,20 +419,6 @@ describe('FeatureRegistry', () => {
     });
 
     ['contains space', 'contains_invalid()_chars', ''].forEach((prohibitedChars) => {
-      it(`prevents features from being registered with a navLinkId of "${prohibitedChars}"`, () => {
-        const featureRegistry = new FeatureRegistry();
-        expect(() =>
-          featureRegistry.registerKibanaFeature({
-            id: 'foo',
-            name: 'some feature',
-            navLinkId: prohibitedChars,
-            app: [],
-            category: { id: 'foo', label: 'foo' },
-            privileges: null,
-          })
-        ).toThrowErrorMatchingSnapshot();
-      });
-
       it(`prevents features from being registered with a management id of "${prohibitedChars}"`, () => {
         const featureRegistry = new FeatureRegistry();
         expect(() =>

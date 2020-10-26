@@ -153,6 +153,16 @@ export interface AggregationOptionsByType {
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
+  bucket_sort: {
+    sort?: SortOptions;
+    from?: number;
+    size?: number;
+  };
+  significant_terms: {
+    size?: number;
+    field?: string;
+    background_filter?: Record<string, any>;
+  } & AggregationSourceOptions;
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -329,6 +339,18 @@ interface AggregationResponsePart<
       ? Array<{ key: number; value: number }>
       : Record<string, number>;
   };
+  significant_terms: {
+    doc_count: number;
+    bg_count: number;
+    buckets: Array<
+      {
+        bg_count: number;
+        doc_count: number;
+        key: string | number;
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+    >;
+  };
+  bucket_sort: undefined;
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap

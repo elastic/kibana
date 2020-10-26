@@ -31,6 +31,7 @@ import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
+import { Correlations } from '../Correlations';
 
 interface Sample {
   traceId: string;
@@ -110,6 +111,8 @@ export function TransactionDetails({
           <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
+
+      <Correlations />
 
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>

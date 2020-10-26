@@ -14,6 +14,7 @@ import {
   FieldConfig,
   UseField,
   fieldValidators,
+  useKibana,
 } from '../../../../../../../shared_imports';
 
 import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
@@ -46,7 +47,7 @@ interface Props {
 
 const { emptyField } = fieldValidators;
 
-const typeConfig: FieldConfig<any, string> = {
+const typeConfig: FieldConfig<string> = {
   type: FIELD_TYPES.COMBO_BOX,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel', {
     defaultMessage: 'Processor',
@@ -64,6 +65,10 @@ const typeConfig: FieldConfig<any, string> = {
 };
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
+  const {
+    services: { documentation },
+  } = useKibana();
+  const esDocUrl = documentation.getEsDocsBasePath();
   return (
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
@@ -107,7 +112,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
           <EuiFormRow
             label={typeField.label}
             labelAppend={typeField.labelAppend}
-            helpText={typeof description === 'function' ? description() : description}
+            helpText={typeof description === 'function' ? description(esDocUrl) : description}
             error={error}
             isInvalid={isInvalid}
             fullWidth

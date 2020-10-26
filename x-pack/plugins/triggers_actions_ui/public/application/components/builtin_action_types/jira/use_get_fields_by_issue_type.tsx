@@ -72,6 +72,7 @@ export const useGetFieldsByIssueType = ({
         }
       } catch (error) {
         if (!didCancel) {
+          setIsLoading(false);
           toastNotifications.addDanger({
             title: i18n.FIELDS_API_ERROR,
             text: error.message,

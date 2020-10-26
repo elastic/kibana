@@ -20,7 +20,7 @@
 import { findIndex } from 'lodash';
 import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
-import { OnNotification, FieldSpec } from '../types';
+import { FieldSpec, IndexPatternFieldMap } from '../types';
 import { IndexPattern } from '../index_patterns';
 import { shortenDottedString } from '../../utils';
 
@@ -35,15 +35,10 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
-  toSpec(options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }): FieldSpec[];
+  toSpec(options?: {
+    getFormatterForField?: IndexPattern['getFormatterForField'];
+  }): IndexPatternFieldMap;
 }
-
-export type CreateIndexPatternFieldList = (
-  indexPattern: IndexPattern,
-  specs?: FieldSpec[],
-  shortDotsEnable?: boolean,
-  onNotification?: OnNotification
-) => IIndexPatternFieldList;
 
 // extending the array class and using a constructor doesn't work well
 // when calling filter and similar so wrapping in a callback.
@@ -105,7 +100,7 @@ export const fieldList = (
       this.groups.clear();
     };
 
-    public readonly replaceAll = (spcs: FieldSpec[]) => {
+    public readonly replaceAll = (spcs: FieldSpec[] = []) => {
       this.removeAll();
       spcs.forEach(this.add);
     };
@@ -115,7 +110,12 @@ export const fieldList = (
     }: {
       getFormatterForField?: IndexPattern['getFormatterForField'];
     } = {}) {
-      return [...this.map((field) => field.toSpec({ getFormatterForField }))];
+      return {
+        ...this.reduce<IndexPatternFieldMap>((collector, field) => {
+          collector[field.name] = field.toSpec({ getFormatterForField });
+          return collector;
+        }, {}),
+      };
     }
   }
 

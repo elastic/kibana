@@ -5,11 +5,12 @@
  */
 
 import { CasesConfigurationMapping } from '../case_mappings';
+import { UserConfiguredActionConnector } from '../../../../types';
 
-export interface ResilientActionConnector {
-  config: ResilientConfig;
-  secrets: ResilientSecrets;
-}
+export type ResilientActionConnector = UserConfiguredActionConnector<
+  ResilientConfig,
+  ResilientSecrets
+>;
 
 export interface ResilientActionParams {
   subAction: string;
@@ -28,14 +29,14 @@ interface IncidentConfiguration {
   mapping: CasesConfigurationMapping[];
 }
 
-interface ResilientConfig {
+export interface ResilientConfig {
   apiUrl: string;
   orgId: string;
   incidentConfiguration?: IncidentConfiguration;
   isCaseOwned?: boolean;
 }
 
-interface ResilientSecrets {
+export interface ResilientSecrets {
   apiKeyId: string;
   apiKeySecret: string;
 }

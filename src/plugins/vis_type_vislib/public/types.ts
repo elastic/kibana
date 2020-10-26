@@ -93,4 +93,5 @@ export interface BasicVislibParams extends CommonVislibParams {
   };
   seriesParams: SeriesParam[];
   times: TimeMarker[];
+  type: string;
 }
