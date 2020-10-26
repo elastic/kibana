@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { ESAPICaller, UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
@@ -13,10 +14,12 @@ export interface GetMonitorDetailsParams {
   dateStart: string;
   dateEnd: string;
   alertsClient: any;
+  esClient: ElasticsearchClient;
 }
 
 const getMonitorAlerts = async (
   callES: ESAPICaller,
+  esClient: ElasticsearchClient,
   dynamicSettings: any,
   alertsClient: any,
   monitorId: string
@@ -67,6 +70,7 @@ const getMonitorAlerts = async (
     const parsedFilters = await formatFilterString(
       dynamicSettings,
       callES,
+      esClient,
       currAlert.params.filters,
       currAlert.params.search
     );
@@ -84,7 +88,7 @@ const getMonitorAlerts = async (
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
+> = async ({ callES, esClient, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -134,7 +138,13 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
 
   const monitorError: MonitorError | undefined = data?.error;
   const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts(callES, dynamicSettings, alertsClient, monitorId);
+  const monAlerts = await getMonitorAlerts(
+    callES,
+    esClient,
+    dynamicSettings,
+    alertsClient,
+    monitorId
+  );
   return {
     monitorId,
     error: monitorError,
