@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
   KeyboardEvent,
+  useEffect,
 } from 'react';
 import {
   EuiFlexGroup,
@@ -38,6 +39,7 @@ import {
 } from './RenderOption';
 import { I18LABELS } from '../../translations';
 import { useUiSetting$ } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useUrlParams } from '../../../../../hooks/useUrlParams';
 
 const StyledRow = styled.div<{
   darkMode: boolean;
@@ -83,6 +85,10 @@ export function SelectableUrlList({
 }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
+  const { urlParams } = useUrlParams();
+
+  const { searchTerm } = urlParams;
+
   const [popoverRef, setPopoverRef] = useState<HTMLElement | null>(null);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
@@ -126,6 +132,14 @@ export function SelectableUrlList({
     }
   };
 
+  useEffect(() => {
+    if (searchRef && searchTerm) {
+      searchRef.value = searchTerm;
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchRef]);
+
   const loadingMessage = (
     <EuiSelectableMessage style={{ minHeight: 300 }}>
       <EuiLoadingSpinner size="l" />
@@ -165,12 +179,12 @@ export function SelectableUrlList({
       renderOption={selectableRenderOptions}
       singleSelection={false}
       searchProps={{
-        placeholder: I18LABELS.searchByUrl,
         isClearable: true,
         onFocus: searchOnFocus,
         onBlur: searchOnBlur,
         onInput: onSearchInput,
         inputRef: setSearchRef,
+        placeholder: I18LABELS.searchByUrl,
       }}
       listProps={{
         rowHeight: 68,
