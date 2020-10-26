@@ -214,7 +214,7 @@ export function SelectableUrlList({
                 <EuiText size="s">
                   <FormattedMessage
                     id="xpack.apm.ux.url.hitEnter.include"
-                    defaultMessage="Hit {icon} or Click Apply to include all urls matching {searchValue}"
+                    defaultMessage="Hit {icon} or click apply to include all urls matching {searchValue}"
                     values={{
                       searchValue: <strong>{searchValue}</strong>,
                       icon: (
