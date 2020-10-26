@@ -292,7 +292,7 @@ exports[`extend index management ilm summary extension should return extension w
           size="m"
           type="cross"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="cross"

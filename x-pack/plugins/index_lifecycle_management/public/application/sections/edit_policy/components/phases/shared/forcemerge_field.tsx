@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import React from 'react';
@@ -23,9 +23,11 @@ interface Props {
 const forceMergeEnabledPath = '_meta.hot.forceMergeEnabled';
 
 export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
-  const [{ [forceMergeEnabledPath]: forceMergeEnabled }] = useFormData({
-    watch: [forceMergeEnabledPath],
+  const [formData] = useFormData({
+    watch: forceMergeEnabledPath,
   });
+  const forceMergeEnabled = get(formData, forceMergeEnabledPath);
+
   return (
     <EuiDescribedFormGroup
       title={

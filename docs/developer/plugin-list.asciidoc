@@ -286,10 +286,6 @@ which will load the visualization's editor.
 |To access an elasticsearch instance that has live data you have two options:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/audit_trail[auditTrail]
-|WARNING: Missing README.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
 |Notes:
 Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
@@ -469,7 +465,8 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security/README.md[security]
-|See Configuring security in Kibana.
+|See Configuring security in
+Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]

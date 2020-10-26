@@ -455,9 +455,6 @@ The opacity of the chart items that are dimmed when highlighting another element
 of the chart. The lower this number, the more the highlighted element stands out.
 This must be a number between 0 and 1.
 
-[[visualization-loadingdelay]]`visualization:loadingDelay`::
-The time to wait before dimming visualizations during a query.
-
 [[visualization-regionmap-showwarnings]]`visualization:regionmap:showWarnings`::
 Shows a warning in a region map when terms cannot be joined to a shape.
 

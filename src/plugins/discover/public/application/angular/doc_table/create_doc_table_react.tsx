@@ -68,6 +68,7 @@ export function convertDirectiveToRenderFn(
     let rejected = false;
 
     const cleanupFnPromise = injectAngularElement(domNode, directive.template, props, getInjector);
+
     cleanupFnPromise.catch(() => {
       rejected = true;
       render(<div>error</div>, domNode);
@@ -91,10 +92,10 @@ export interface DocTableLegacyProps {
   rows: Array<Record<string, unknown>>;
   indexPattern: IIndexPattern;
   minimumVisibleRows: number;
-  onAddColumn: (column: string) => void;
-  onSort: (sort: string[][]) => void;
-  onMoveColumn: (columns: string, newIdx: number) => void;
-  onRemoveColumn: (column: string) => void;
+  onAddColumn?: (column: string) => void;
+  onSort?: (sort: string[][]) => void;
+  onMoveColumn?: (columns: string, newIdx: number) => void;
+  onRemoveColumn?: (column: string) => void;
   sort?: string[][];
 }
 

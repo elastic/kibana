@@ -19,7 +19,7 @@ import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
-import { getCytoscapeDivStyle } from './cytoscapeOptions';
+import { getCytoscapeDivStyle } from './cytoscape_options';
 import { EmptyBanner } from './EmptyBanner';
 import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './Popover';
@@ -121,7 +121,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         elements={data.elements}
         height={height}
         serviceName={serviceName}
-        style={getCytoscapeDivStyle(theme)}
+        style={getCytoscapeDivStyle(theme, status)}
       >
         <Controls />
         {serviceName && <EmptyBanner />}
