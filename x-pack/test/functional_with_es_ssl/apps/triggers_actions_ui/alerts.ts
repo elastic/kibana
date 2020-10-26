@@ -60,7 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('[data-test-subj="alertTypesComboBox"]');
 
     await retry.try(async () => {
-      const fieldOptions = await find.allByCssSelector('#.index-threshold option');
+      const fieldOptions = await find.allByCssSelector('#index-threshold option');
       expect(fieldOptions[1]).not.to.be(undefined);
       await fieldOptions[1].click();
     });

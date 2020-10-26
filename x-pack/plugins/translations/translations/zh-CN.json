@@ -20368,7 +20368,6 @@
     "xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel": "创建连接器",
     "xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton": "新添",
     "xpack.triggersActionsUI.sections.alertForm.alertNameLabel": "名称",
-    "xpack.triggersActionsUI.sections.alertForm.changeAlertTypeAriaLabel": "删除",
     "xpack.triggersActionsUI.sections.alertForm.checkFieldLabel": "检查频率",
     "xpack.triggersActionsUI.sections.alertForm.checkWithTooltip": "定义评估条件的频率。",
     "xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel": "无 {actionTypeName} 连接器",

@@ -6,6 +6,7 @@
 import React, { Fragment, useState, useEffect, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { capitalize, sortBy } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -284,19 +285,35 @@ export const AlertForm = ({
     </>
   );
 
-  const alertTypeOptions = alertTypeRegistryList.map((item) => ({
-    label: typeof item.name === 'string' ? item.name : item.id,
-    id: item.id,
+  const groupAlertTypesByProducer = () => {
+    return alertTypeRegistryList.reduce(
+      (result: Record<string, EuiComboBoxOptionOption[]>, currentValue) => {
+        const producer = alertTypesIndex?.get(currentValue.id)?.producer;
+        if (producer) {
+          (result[producer] = result[producer] || []).push({
+            label: typeof currentValue.name === 'string' ? currentValue.name : currentValue.id,
+            id: currentValue.id,
+          });
+        }
+        return result;
+      },
+      {}
+    );
+  };
+
+  const alertTypeOptions = sortBy(Object.entries(groupAlertTypesByProducer())).map((item) => ({
+    label: capitalize(item[0]),
+    options: item[1],
   }));
 
   const resetAlertTypeToEmpty = () => {
     setAlertProperty('alertTypeId', null);
     setAlertTypeModel(null);
-    setAlertProperty('params', {});
   };
 
-  const alertTypeOnChange = (alertTypeSelectedOption: EuiComboBoxOptionOption[]) => {
+  const alertTypeOnChange = (alertTypeSelectedOption: Array<{ label: string; id?: string }>) => {
     setSelectedAlertTypeOptions(alertTypeSelectedOption);
+    setAlertProperty('params', {});
 
     if (alertTypeSelectedOption.length === 0) {
       resetAlertTypeToEmpty();
@@ -311,7 +328,6 @@ export const AlertForm = ({
             alertTypeRegistryItem.id === alertTypeSelectedOption[0].id
         )[0]
     );
-    setAlertProperty('params', {});
     if (
       alertTypesIndex &&
       alertTypeSelectedOption[0].id &&
@@ -323,7 +339,7 @@ export const AlertForm = ({
     }
   };
 
-  const alertTypeRenderOption = (option: EuiComboBoxOptionOption<unknown>) => {
+  const alertTypeRenderOption = (option: { label: string; id?: string }) => {
     return (
       <div>
         <EuiText size="s" color="default">
