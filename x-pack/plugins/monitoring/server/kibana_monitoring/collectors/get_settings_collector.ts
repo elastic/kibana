@@ -10,7 +10,10 @@ import {
   CLUSTER_ALERTS_ADDRESS_CONFIG_KEY,
 } from '../../../common/constants';
 import { Logger } from '../../../../../../src/core/server';
-import { Collector, UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
+import {
+  Collector,
+  UsageCollectionSetup,
+} from '../../../../../../src/plugins/usage_collection/server';
 import { MonitoringConfig } from '../../config';
 import { CoreServices } from '../../core_services';
 
