@@ -11,13 +11,16 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Mshta Making Network Connections",
-  "query": "sequence by process.entity_id with maxspan=2h\n  [process where event.type in (\"start\", \"process_started\") and process.name == \"mshta.exe\" and\n     process.parent.name != \"Microsoft.ConfigurationManagement.exe\" and\n     process.parent.executable not in (\"C:\\\\Amazon\\\\Amazon Assistant\\\\amazonAssistantService.exe\",\n                                       \"C:\\\\TeamViewer\\\\TeamViewer.exe\") and\n     process.args != \"ADSelfService_Enroll.hta\"]\n  [network where process.name == \"mshta.exe\"]\n",
+  "query": "sequence by process.entity_id with maxspan=2h\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"mshta.exe\" and\n     not process.parent.name : \"Microsoft.ConfigurationManagement.exe\" and\n     not (process.parent.executable : \"C:\\\\Amazon\\\\Amazon Assistant\\\\amazonAssistantService.exe\" or\n          process.parent.executable : \"C:\\\\TeamViewer\\\\TeamViewer.exe\") and\n     not process.args : \"ADSelfService_Enroll.hta\"]\n  [network where process.name : \"mshta.exe\"]\n",
   "risk_score": 21,
   "rule_id": "c2d90150-0133-451c-a783-533e736c12d7",
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {

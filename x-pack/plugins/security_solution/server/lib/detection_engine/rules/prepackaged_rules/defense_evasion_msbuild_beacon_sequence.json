@@ -11,13 +11,16 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "MsBuild Network Connection Sequence",
-  "query": "sequence by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.name == \"MSBuild.exe\"]\n  [network where process.name == \"MSBuild.exe\" and\n     not (destination.address == \"127.0.0.1\" and source.address == \"127.0.0.1\")]\n",
+  "query": "sequence by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"MSBuild.exe\"]\n  [network where process.name : \"MSBuild.exe\" and\n     not (destination.ip == \"127.0.0.1\" and source.ip == \"127.0.0.1\")]\n",
   "risk_score": 21,
   "rule_id": "9dc6ed5d-62a9-4feb-a903-fafa1d33b8e9",
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
