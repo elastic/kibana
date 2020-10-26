@@ -3,23 +3,19 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./build/tsbuildinfo/kibana"
   },
-  "include": [
-    "kibana.d.ts",
-    "src/**/*",
-    "typings/**/*",
-    "test_utils/**/*"
-  ],
+  "include": ["kibana.d.ts", "src/**/*", "typings/**/*", "test_utils/**/*"],
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/test_utils/**/*",
     "src/core/**/*",
-    "src/plugins/kibana_utils/**/*",
+    "src/plugins/kibana_legacy/**/*",
     "src/plugins/kibana_react/**/*",
-    "src/plugins/usage_collection/**/*",
-    "src/plugins/telemetry_collection_manager/**/*",
-    "src/plugins/telemetry/**/*",
     "src/plugins/kibana_usage_collection/**/*",
-    "src/plugins/newsfeed/**/*"
+    "src/plugins/kibana_utils/**/*",
+    "src/plugins/newsfeed/**/*",
+    "src/plugins/telemetry/**/*",
+    "src/plugins/telemetry_collection_manager/**/*",
+    "src/plugins/usage_collection/**/*"
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find

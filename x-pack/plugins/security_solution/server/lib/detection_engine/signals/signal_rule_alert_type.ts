@@ -8,7 +8,6 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
-import { get } from 'lodash';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -62,6 +61,8 @@ import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_q
 import { bulkInsertSignals } from './single_bulk_create';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
+import { getIndexVersion } from '../routes/index/get_index_version';
+import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
 
 export const signalRulesAlertType = ({
   logger,
@@ -119,17 +120,6 @@ export const signalRulesAlertType = ({
         type,
         exceptionsList,
       } = params;
-      const outputIndexTemplateMapping: unknown = await services.callCluster(
-        'indices.getTemplate',
-        { name: outputIndex }
-      );
-      const signalMappingVersion: number | undefined = get(outputIndexTemplateMapping, [
-        outputIndex,
-        'version',
-      ]);
-      if (signalMappingVersion !== undefined && typeof signalMappingVersion !== 'number') {
-        throw new Error('Found non-numeric value for "version" in output index template');
-      }
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -457,14 +447,24 @@ export const signalRulesAlertType = ({
           if (query === undefined) {
             throw new Error('EQL query rule must have a query defined');
           }
-          const MIN_EQL_RULE_TEMPLATE_VERSION = 2;
-          if (
-            signalMappingVersion === undefined ||
-            signalMappingVersion < MIN_EQL_RULE_TEMPLATE_VERSION
-          ) {
-            throw new Error(
-              `EQL based rules require an update to version ${MIN_EQL_RULE_TEMPLATE_VERSION} of the detection alerts index mapping`
-            );
+          try {
+            const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
+            if (
+              signalIndexVersion === undefined ||
+              signalIndexVersion < MIN_EQL_RULE_INDEX_VERSION
+            ) {
+              throw new Error(
+                `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
+              );
+            }
+          } catch (err) {
+            if (err.statusCode === 403) {
+              throw new Error(
+                `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${outputIndex}`
+              );
+            } else {
+              throw err;
+            }
           }
           const inputIndex = await getInputIndex(services, version, index);
           const request = buildEqlSearchRequest(

@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.9.3>>
 * <<release-notes-7.9.2>>
 * <<release-notes-7.9.1>>
 * <<release-notes-7.9.0>>
@@ -42,6 +43,39 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.9.3]]
+== {kib} 7.9.3
+
+For breaking changes, refer to <<breaking-changes-7.9,breaking changes in 7.9>>.
+
+[float]
+[[enhancement-v7.9.3]]
+=== Enhancement
+Reporting::
+* Increases openUrl timeout config default to 1min {kibana-pull}78322[#78322]
+
+[float]
+[[bug-v7.9.3]]
+=== Bug fixes
+Discover::
+* Fixes scripted field error handling for non OSS env {kibana-pull}76476[#76476]
+Lens and visualizations::
+* Shows tooltip on external pointer events {kibana-pull}77306[#77306]
+Management::
+* Fixes a bug in the index template wizard, which resulted in an error when the user tries to save an existing 
+template or attempts to view the Elasticsearch request when the template does not have any mappings {kibana-pull}78653[#78653]
+* Fixes index pattern creation when using cross cluster search with clusters running <7.9 {kibana-pull}80006[#80006]
+Monitoring::
+* Fixes UX around an unavailable remote cluster {kibana-pull}79202[#79202]
+* Synchronous `setup` and `start` methods {kibana-pull}79457[#79457]
+* Removes license refresh from setup {kibana-pull}79518[#79518]
+Platform::
+* Invalid `searchSourceJSON` causes saved object migration to fail {kibana-pull}78535[#78535]
+* Changes legacy import 'version' field to optional {kibana-pull}79706[#79706]
+Security::
+* Adds `xpack.security.sameSiteCookies` to docker allow list {kibana-pull}78192[#78192]
+* Updates user table after user is deleted {kibana-pull}79491[#79491]
 
 [[release-notes-7.9.2]]
 == {kib} 7.9.2
