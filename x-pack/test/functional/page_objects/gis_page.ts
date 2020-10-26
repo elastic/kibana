@@ -234,36 +234,35 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       return buttons.length;
     }
 
-    async isSetViewPopoverOpen() {
-      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
-    }
-
-    /**
-     * When we try to open the set view form use a longer timeout and throw
-     * an error if it fails to trigger a retry
-     */
-    async waitForSetViewPopoverOpen() {
-      await testSubjects.existOrFail('mapSetViewForm', { timeout: 5000 });
-    }
-
     async openSetViewPopover() {
-      const isOpen = await this.isSetViewPopoverOpen();
-      if (!isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('toggleSetViewVisibilityButton');
-          await this.waitForSetViewPopoverOpen();
-        });
-      }
+      await this.changeSetViewPopoverOpenState(true);
     }
 
     async closeSetViewPopover() {
-      const isOpen = await this.isSetViewPopoverOpen();
-      if (isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('toggleSetViewVisibilityButton');
-          await this.waitForSetViewPopoverOpen();
-        });
-      }
+      await this.changeSetViewPopoverOpenState(false);
+    }
+
+    private async changeSetViewPopoverOpenState(expectedOpenState: boolean) {
+      log.debug('Ensuring that the setViewPopover is', expectedOpenState ? 'open' : 'closed');
+
+      await retry.try(async () => {
+        // if the popover is clearly in the expected state already bail out quickly
+        const isOpen = await testSubjects.exists('mapSetViewForm', { timeout: 500 });
+        if (isOpen === expectedOpenState) {
+          return;
+        }
+
+        // toggle the view state by clicking the button
+        await testSubjects.click('toggleSetViewVisibilityButton');
+
+        if (expectedOpenState === true) {
+          // wait for up to 10 seconds for the form to show up, otherwise fail and retry
+          await testSubjects.existOrFail('mapSetViewForm', { timeout: 10000 });
+        } else {
+          // wait for the form to hide, otherwise fail and retry
+          await testSubjects.waitForDeleted('mapSetViewForm');
+        }
+      });
     }
 
     async setView(lat: number, lon: number, zoom: number) {
