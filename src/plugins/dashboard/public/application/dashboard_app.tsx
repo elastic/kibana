@@ -48,6 +48,7 @@ import {
   esFilters,
   FilterManager,
   IndexPattern,
+  IndexPatternsContract,
   QueryStart,
   QueryState,
   syncQueryStateWithUrl,
@@ -67,21 +68,22 @@ import {
   DashboardContainerInput,
   SavedDashboardPanel,
 } from '..';
+import { getDashboardTitle } from './dashboard_strings';
 
-enum UrlParams {
-  SHOW_TOP_MENU = 'show-top-menu',
-  SHOW_QUERY_INPUT = 'show-query-input',
-  SHOW_TIME_FILTER = 'show-time-filter',
-  SHOW_FILTER_BAR = 'show-filter-bar',
-  HIDE_FILTER_BAR = 'hide-filter-bar',
-}
+// enum UrlParams {
+//   SHOW_TOP_MENU = 'show-top-menu',
+//   SHOW_QUERY_INPUT = 'show-query-input',
+//   SHOW_TIME_FILTER = 'show-time-filter',
+//   SHOW_FILTER_BAR = 'show-filter-bar',
+//   HIDE_FILTER_BAR = 'hide-filter-bar',
+// }
 
-interface UrlParamsSelectedMap {
-  [UrlParams.SHOW_TOP_MENU]: boolean;
-  [UrlParams.SHOW_QUERY_INPUT]: boolean;
-  [UrlParams.SHOW_TIME_FILTER]: boolean;
-  [UrlParams.SHOW_FILTER_BAR]: boolean;
-}
+// interface UrlParamsSelectedMap {
+//   [UrlParams.SHOW_TOP_MENU]: boolean;
+//   [UrlParams.SHOW_QUERY_INPUT]: boolean;
+//   [UrlParams.SHOW_TIME_FILTER]: boolean;
+//   [UrlParams.SHOW_FILTER_BAR]: boolean;
+// }
 
 // interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTER_BAR> {
 //   [UrlParams.HIDE_FILTER_BAR]: boolean;
@@ -216,6 +218,72 @@ const getInputSubscription = (props: {
   });
 };
 
+const getOutputSubscription = (props: {
+  dashboardContainer: DashboardContainer;
+  indexPatterns: IndexPatternsContract;
+  onUpdateIndexPatterns: (newIndexPatterns: IndexPattern[]) => void;
+}) => {
+  const { dashboardContainer, indexPatterns, onUpdateIndexPatterns } = props;
+
+  const updateIndexPatternsOperator = pipe(
+    filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+    map((container: DashboardContainer): IndexPattern[] => {
+      let panelIndexPatterns: IndexPattern[] = [];
+      Object.values(container.getChildIds()).forEach((id) => {
+        const embeddableInstance = container.getChild(id);
+        if (isErrorEmbeddable(embeddableInstance)) return;
+        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
+        if (!embeddableIndexPatterns) return;
+        panelIndexPatterns.push(...embeddableIndexPatterns);
+      });
+      panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+      return panelIndexPatterns;
+    }),
+    distinctUntilChanged((a, b) =>
+      deepEqual(
+        a.map((ip) => ip.id),
+        b.map((ip) => ip.id)
+      )
+    ),
+    // using switchMap for previous task cancellation
+    switchMap((panelIndexPatterns: IndexPattern[]) => {
+      return new Observable((observer) => {
+        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+          if (observer.closed) return;
+          onUpdateIndexPatterns(panelIndexPatterns);
+          observer.complete();
+        } else {
+          indexPatterns.getDefault().then((defaultIndexPattern) => {
+            if (observer.closed) return;
+            onUpdateIndexPatterns([defaultIndexPattern as IndexPattern]);
+            observer.complete();
+          });
+        }
+      });
+    })
+  );
+
+  return merge(
+    // output of dashboard container itself
+    dashboardContainer.getOutput$(),
+    // plus output of dashboard container children,
+    // children may change, so make sure we subscribe/unsubscribe with switchMap
+    dashboardContainer.getOutput$().pipe(
+      map(() => dashboardContainer!.getChildIds()),
+      distinctUntilChanged(deepEqual),
+      switchMap((newChildIds: string[]) =>
+        merge(...newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$()))
+      )
+    )
+  )
+    .pipe(
+      mapTo(dashboardContainer),
+      startWith(dashboardContainer), // to trigger initial index pattern update
+      updateIndexPatternsOperator
+    )
+    .subscribe();
+};
+
 const getFiltersSubscription = (props: {
   query: QueryStart;
   dashboardContainer: DashboardContainer;
@@ -249,12 +317,12 @@ export function DashboardApp({
     // localStorage,
     embeddable,
     data,
-    uiSettings,
+    // uiSettings,
     // savedObjects,
     savedDashboards,
     initializerContext,
     indexPatterns,
-    navigation,
+    // navigation,
     // dashboardCapabilities,
     // savedObjectsClient,
     dashboardConfig,
@@ -276,12 +344,30 @@ export function DashboardApp({
     testState: DashboardAppComponentState
   ): testState is DashboardAppComponentActiveState => {
     return Boolean(
-      testState.dashboardContainer &&
+      testState.initialized &&
+        testState.dashboardContainer &&
         testState.dashboardStateManager &&
         testState.indexPatterns &&
         testState.savedDashboard
     );
   };
+
+  const refreshDashboardContainer = useCallback(() => {
+    if (!isActiveState(state)) {
+      return;
+    }
+    const { dashboardStateManager, dashboardContainer } = state;
+    const changes = getChangesFromAppStateForContainerState({
+      appStateDashboardInput: getDashboardContainerInput({
+        dashboardStateManager,
+        query: data.query,
+      }),
+      dashboardContainer,
+    });
+    if (changes && dashboardContainer) {
+      dashboardContainer.updateInput(changes);
+    }
+  }, [state, data.query]);
 
   const initializeStateSyncing = useCallback(
     ({ savedDashboard }: { savedDashboard: DashboardSavedObject }) => {
@@ -367,96 +453,11 @@ export function DashboardApp({
     ]
   );
 
-  const refreshDashboardContainer = useCallback(() => {
-    if (!isActiveState(state)) {
-      return;
-    }
-    const { dashboardStateManager, dashboardContainer } = state;
-    const changes = getChangesFromAppStateForContainerState({
-      appStateDashboardInput: getDashboardContainerInput({
-        dashboardStateManager,
-        query: data.query,
-      }),
-      dashboardContainer,
-    });
-    if (changes && dashboardContainer) {
-      dashboardContainer.updateInput(changes);
-    }
-  }, [state, data.query]);
-
-  const getOutputSubscription = useCallback(
-    (props: { dashboardContainer: DashboardContainer }) => {
-      const { dashboardContainer } = props;
-
-      const updateIndexPatternsOperator = pipe(
-        filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-        map((container: DashboardContainer): IndexPattern[] => {
-          let panelIndexPatterns: IndexPattern[] = [];
-          Object.values(container.getChildIds()).forEach((id) => {
-            const embeddableInstance = container.getChild(id);
-            if (isErrorEmbeddable(embeddableInstance)) return;
-            const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
-            if (!embeddableIndexPatterns) return;
-            panelIndexPatterns.push(...embeddableIndexPatterns);
-          });
-          panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
-          return panelIndexPatterns;
-        }),
-        distinctUntilChanged((a, b) =>
-          deepEqual(
-            a.map((ip) => ip.id),
-            b.map((ip) => ip.id)
-          )
-        ),
-        // using switchMap for previous task cancellation
-        switchMap((panelIndexPatterns: IndexPattern[]) => {
-          return new Observable((observer) => {
-            if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-              if (observer.closed) return;
-              setState((s) => ({ ...s, indexPatterns: panelIndexPatterns }));
-              observer.complete();
-            } else {
-              indexPatterns.getDefault().then((defaultIndexPattern) => {
-                if (observer.closed) return;
-                setState((s) => ({ ...s, indexPatterns: [defaultIndexPattern as IndexPattern] }));
-                observer.complete();
-              });
-            }
-          });
-        })
-      );
-
-      return merge(
-        // output of dashboard container itself
-        dashboardContainer.getOutput$(),
-        // plus output of dashboard container children,
-        // children may change, so make sure we subscribe/unsubscribe with switchMap
-        dashboardContainer.getOutput$().pipe(
-          map(() => dashboardContainer!.getChildIds()),
-          distinctUntilChanged(deepEqual),
-          switchMap((newChildIds: string[]) =>
-            merge(
-              ...newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$())
-            )
-          )
-        )
-      )
-        .pipe(
-          mapTo(dashboardContainer),
-          startWith(dashboardContainer), // to trigger initial index pattern update
-          updateIndexPatternsOperator
-        )
-        .subscribe();
-    },
-    [indexPatterns]
-  );
-
   // Dashboard loading useEffect
   useEffect(() => {
-    if (state?.savedDashboard?.id && state?.savedDashboard?.id === savedDashboardId) {
+    if (state?.savedDashboard?.id === savedDashboardId && state.initialized) {
       return;
     }
-
     data.indexPatterns
       .ensureDefaultIndexPattern()
       ?.then(() => savedDashboards.get(savedDashboardId) as Promise<DashboardSavedObject>)
@@ -475,6 +476,23 @@ export function DashboardApp({
           stopSyncingQueryServiceStateWithUrl,
           stopSyncingAppFilters,
         } = initializeStateSyncing({ savedDashboard });
+
+        chrome.setBreadcrumbs([
+          {
+            text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
+              defaultMessage: 'Dashboard',
+            }),
+            href: DashboardConstants.LANDING_PAGE_PATH,
+          },
+          {
+            text: getDashboardTitle(
+              dashboardStateManager.getTitle(),
+              dashboardStateManager.getViewMode(),
+              dashboardStateManager.getIsDirty(data.query.timefilter.timefilter),
+              dashboardStateManager.isNew()
+            ),
+          },
+        ]);
 
         const dashboardFactory = embeddable.getEmbeddableFactory<
           DashboardContainerInput,
@@ -503,13 +521,24 @@ export function DashboardApp({
               })
             );
             subscriptions.add(
+              getOutputSubscription({
+                dashboardContainer,
+                indexPatterns,
+                onUpdateIndexPatterns: (newIndexPatterns) => {
+                  setState((s) => ({
+                    ...s,
+                    indexPatterns: newIndexPatterns,
+                  }));
+                },
+              })
+            );
+            subscriptions.add(
               getFiltersSubscription({
                 query: data.query,
                 dashboardContainer,
                 dashboardStateManager,
               })
             );
-            subscriptions.add(getOutputSubscription({ dashboardContainer }));
 
             dashboardStateManager.registerChangeListener(() => {
               // we aren't checking dirty state because there are changes the container needs to know about
@@ -521,6 +550,7 @@ export function DashboardApp({
               dashboardContainer,
               dashboardStateManager,
               savedDashboard,
+              initialized: true,
             });
 
             dashboardContainer.render(document.getElementById('dashboardViewport')!);
@@ -561,19 +591,19 @@ export function DashboardApp({
       });
   }, [
     savedDashboardId,
-    state?.savedDashboard?.id,
+    state.savedDashboard?.id,
+    refreshDashboardContainer,
     embeddable,
     data.query,
     history,
     savedDashboards,
     data.indexPatterns,
     chrome.recentlyAccessed,
+    indexPatterns,
     core.notifications.toasts,
-    refreshDashboardContainer,
     data.query.filterManager,
     state.dashboardContainer?.destroy,
     initializeStateSyncing,
-    getOutputSubscription,
   ]);
 
   return (

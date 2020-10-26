@@ -42,7 +42,6 @@ import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
 import { IKbnUrlStateStorage, Storage } from '../../../kibana_utils/public';
-import { DashboardCapabilities } from '../types';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { DashboardContainer, SavedObjectDashboard } from '..';
 
@@ -78,6 +77,7 @@ export interface DashboardSaveOptions {
 }
 
 export interface DashboardAppComponentState {
+  initialized?: boolean;
   savedDashboard?: SavedObjectDashboard;
   dashboardStateManager?: DashboardStateManager;
   dashboardContainer?: DashboardContainer;
@@ -86,7 +86,7 @@ export interface DashboardAppComponentState {
 
 export type DashboardAppComponentActiveState = Required<DashboardAppComponentState>;
 
-export type DashboardTopNavProps = Required<DashboardAppComponentState> & {
+export type DashboardTopNavProps = Omit<DashboardAppComponentActiveState, 'initialized'> & {
   timefilter: TimefilterContract;
   redirectToDashboard: RedirectToDashboard;
   refreshDashboardContainer: () => void;

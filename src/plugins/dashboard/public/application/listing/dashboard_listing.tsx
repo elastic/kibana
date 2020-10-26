@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { DashboardAppServices, DashboardListingProps } from '../types';
 import { TableListView, useKibana } from '../../../../kibana_react/public';
-import { DashboardConstants, createDashboardEditUrl } from '../..';
 import { ApplicationStart } from '../../../../../core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { syncQueryStateWithUrl } from '../../../../data/public';
@@ -42,8 +41,26 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: { core, data, savedObjects, savedDashboards, dashboardConfig, savedObjectsClient },
+    services: {
+      core,
+      data,
+      savedObjects,
+      savedDashboards,
+      dashboardConfig,
+      savedObjectsClient,
+      chrome,
+    },
   } = useKibana<DashboardAppServices>();
+
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('dashboard.dashboardBreadcrumbsTitle', {
+          defaultMessage: 'Dashboards',
+        }),
+      },
+    ]);
+  }, [chrome]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
