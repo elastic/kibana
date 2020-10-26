@@ -14,6 +14,7 @@ import {
   setSelectedIndexPatterns,
   setSignalIndexName,
   setSource,
+  initTimelineIndexPatterns,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
 import { createDefaultIndexPatterns } from './helpers';
@@ -52,6 +53,19 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     };
   })
+  .case(initTimelineIndexPatterns, (state, { id, selectedPatterns }) => {
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        [id]: {
+          ...state.sourcererScopes[id],
+          selectedPatterns,
+        },
+      },
+    };
+  })
+
   .case(setSource, (state, { id, payload }) => {
     const { ...sourcererScopes } = payload;
     return {
