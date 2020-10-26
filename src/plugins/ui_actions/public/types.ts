@@ -22,10 +22,12 @@ import { TriggerInternal } from './triggers/trigger_internal';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
+  ROW_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
   DEFAULT_TRIGGER,
+  RowClickContext,
 } from './triggers';
 import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 import type { ApplyGlobalFilterActionContext } from '../../data/public';
@@ -49,6 +51,7 @@ export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
   [SELECT_RANGE_TRIGGER]: RangeSelectContext;
   [VALUE_CLICK_TRIGGER]: ValueClickContext;
+  [ROW_CLICK_TRIGGER]: RowClickContext;
   [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
   [VISUALIZE_FIELD_TRIGGER]: VisualizeFieldContext;
   [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeFieldContext;

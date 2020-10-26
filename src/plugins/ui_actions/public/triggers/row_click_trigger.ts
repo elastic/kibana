@@ -17,13 +17,22 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './row_click_trigger';
-export * from './apply_filter_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './default_trigger';
+import { i18n } from '@kbn/i18n';
+import { IEmbeddable } from '../../../embeddable/public';
+import { Trigger } from '.';
+
+export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';
+
+export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'> = {
+  id: ROW_CLICK_TRIGGER,
+  title: i18n.translate('uiActions.triggers.rowClickTitle', {
+    defaultMessage: 'Table row click',
+  }),
+  description: i18n.translate('uiActions.triggers.rowClickkDescription', {
+    defaultMessage: 'A click on a table row',
+  }),
+};
+
+export interface RowClickContext {
+  embeddable?: IEmbeddable;
+}
