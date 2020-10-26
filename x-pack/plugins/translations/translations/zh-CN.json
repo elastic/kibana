@@ -3669,7 +3669,6 @@
     "visDefaultEditor.editorConfig.dateHistogram.customInterval.helpText": "必须是配置时间间隔的倍数：{interval}",
     "visDefaultEditor.editorConfig.histogram.interval.helpText": "必须是配置时间间隔的倍数：{interval}",
     "visDefaultEditor.metrics.wrongLastBucketTypeErrorMessage": "使用“{type}”指标聚合时，上一存储桶聚合必须是“Date Histogram”或“Histogram”。",
-    "visDefaultEditor.sidebar.autoApplyChangesAriaLabel": "自动应用编辑器更改",
     "visDefaultEditor.sidebar.autoApplyChangesOffLabel": "自动应用关闭",
     "visDefaultEditor.sidebar.autoApplyChangesOnLabel": "自动应用开启",
     "visDefaultEditor.sidebar.autoApplyChangesTooltip": "每次更改时自动更新可视化。",

@@ -3668,7 +3668,6 @@
     "visDefaultEditor.editorConfig.dateHistogram.customInterval.helpText": "構成間隔の倍数でなければなりません: {interval}",
     "visDefaultEditor.editorConfig.histogram.interval.helpText": "構成間隔の倍数でなければなりません: {interval}",
     "visDefaultEditor.metrics.wrongLastBucketTypeErrorMessage": "「{type}」メトリック集約を使用する場合、最後のバケット集約は「Date Histogram」または「Histogram」でなければなりません。",
-    "visDefaultEditor.sidebar.autoApplyChangesAriaLabel": "エディターの変更を自動適用します",
     "visDefaultEditor.sidebar.autoApplyChangesOffLabel": "自動適用がオフです",
     "visDefaultEditor.sidebar.autoApplyChangesOnLabel": "自動適用がオンです",
     "visDefaultEditor.sidebar.autoApplyChangesTooltip": "変更されるごとにビジュアライゼーションを自動的に更新します。",
