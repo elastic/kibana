@@ -10,8 +10,9 @@ When you've finished, you'll know how to:
 * <<view-and-analyze-the-data,Gain insight into the data with *Dashboard*.>>
 
 [float]
-=== Before you begin 
-When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. For more information, refer to {ref}/security-privileges.html[Security privileges].
+=== Required privileges
+When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
+For more information, refer to {ref}/security-privileges.html[Security privileges].
 
 [float]
 [[set-up-on-cloud]]
@@ -30,7 +31,7 @@ Sample data sets come with sample visualizations, dashboards, and more to help y
 . On the *Sample eCommerce orders* card, click *Add data*.
 +
 [role="screenshot"]
-image::getting-started/images/add-sample-data.png[]
+image::getting-started/images/add-sample-data.png[Add data UI]
 
 [float]
 [[explore-the-data]]
@@ -38,7 +39,7 @@ image::getting-started/images/add-sample-data.png[]
 
 *Discover* displays an interactive histogram that shows the distribution of of data, or documents, over time, and a table that lists the fields for each document that matches the index. By default, all fields are shown for each matching document.
 
-. Open the menu, then click *Discover*.
+. Open the main menu, then click *Discover*.
 
 . Change the <<set-time-filter, time filter>> to *Last 7 days*.
 +
@@ -70,7 +71,7 @@ For more information, refer to <<discover, *Discover*>>.
 
 A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, Markdown, and more.
 
-. Open the menu, then click *Dashboard*. 
+. Open the main menu, then click *Dashboard*. 
 
 . Click *[eCommerce] Revenue Dashboard*.
 +
@@ -83,7 +84,7 @@ image::getting-started/images/tutorial-sample-dashboard.png[]
 
 To focus in on the data you want to view on the dashboard, use filters. 
 
-. From the *Controls* visualization, make a selection from the *Manufacturer* and *Category* dropdowns, then click *Apply changes*.
+. From the *[eCommerce] Controls* panel, make a selection from the *Manufacturer* and *Category* dropdowns, then click *Apply changes*.
 +
 For example, the following dashboard shows the data for women's clothing from Gnomehouse. 
 +
@@ -103,11 +104,11 @@ For more information, refer to <<dashboard,*Dashboard*>>.
 
 [float]
 [[create-a-visualization]]
-=== Create a visualization
+=== Create a visualization panel
 
-To create a treemap that shows the top regions and manufacturers, use *Lens*, then add the treemap to the dashboard.
+To create a treemap panel that shows the top regions and manufacturers, use *Lens*, then add the treemap panel to the dashboard.
 
-. From the {kib} toolbar, click *Edit*, then click *Create new*.
+. From the toolbar, click *Edit*, then click *Create new*.
 
 . On the *New Visualization* window, click *Lens*.
 
@@ -126,7 +127,7 @@ image::getting-started/images/tutorial-visualization-dropdown.png[Visualization 
 
 . On the *Save Lens visualization*, enter a title and make sure *Add to Dashboard after saving* is selected, then click *Save and return*.
 +
-The treemap appears as the last visualization on the dashboard.
+The treemap appears as the last visualization panel on the dashboard.
 +
 [role="screenshot"]
 image::getting-started/images/tutorial-final-dashboard.gif[Final dashboard with new treemap visualization]

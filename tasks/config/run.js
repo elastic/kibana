@@ -176,7 +176,7 @@ module.exports = function () {
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
         '--config',
-        'test/server_integration/http/cache/config.js',
+        'test/server_integration/http/platform/config.ts',
         '--config',
         'test/server_integration/http/ssl_with_p12/config.js',
         '--config',
