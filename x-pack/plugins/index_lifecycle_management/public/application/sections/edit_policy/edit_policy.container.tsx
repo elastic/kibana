@@ -77,9 +77,13 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   }
 
   let decodedPolicyName = policyName;
-  // if navigation via router, need to decode policyName
-  if (policyName && history.action === 'PUSH') {
-    decodedPolicyName = decodeURIComponent(policyName);
+  if (policyName) {
+    try {
+      decodedPolicyName = decodeURIComponent(policyName);
+    } catch (e) {
+      // %25 is automatically decoded to %, so decoding it again will throw an error
+      // that have to be ignored (link to kibana issue for explanation)
+    }
   }
 
   return (

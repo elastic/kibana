@@ -7,26 +7,11 @@
 import { PolicyFromES } from '../../../common/types';
 
 export const POLICY_NAME = 'my_policy';
-export const SPECIAL_CHARS_NAME = 'test%25';
+// navigation doesn't work for % with other special chars or sequence %25
+// link to kibana issue for explanation
+export const SPECIAL_CHARS_NAME = 'test?#';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
-
-export const DEFAULT_POLICY: PolicyFromES = {
-  version: 1,
-  modified_date: Date.now().toString(),
-  policy: {
-    name: '',
-    phases: {
-      hot: {
-        min_age: '123ms',
-        actions: {
-          rollover: {},
-        },
-      },
-    },
-  },
-  name: '',
-};
 
 export const DELETE_PHASE_POLICY: PolicyFromES = {
   version: 1,
@@ -62,21 +47,19 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
   name: POLICY_NAME,
 };
 
-export const SPECIAL_CHARS_POLICY: PolicyFromES = {
+export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
   version: 1,
   modified_date: Date.now().toString(),
   policy: {
+    name: policyName,
     phases: {
       hot: {
-        min_age: '0ms',
+        min_age: '123ms',
         actions: {
-          rollover: {
-            max_size: '50gb',
-          },
+          rollover: {},
         },
       },
     },
-    name: SPECIAL_CHARS_NAME,
   },
-  name: SPECIAL_CHARS_NAME,
-};
+  name: policyName,
+});

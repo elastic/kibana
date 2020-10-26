@@ -14,7 +14,7 @@ import {
   DELETE_PHASE_POLICY,
   NEW_SNAPSHOT_POLICY_NAME,
   SNAPSHOT_POLICY_NAME,
-  DEFAULT_POLICY,
+  getDefaultHotPhasePolicy,
 } from './constants';
 
 window.scrollTo = jest.fn();
@@ -29,7 +29,7 @@ describe('<EditPolicy />', () => {
   describe('hot phase', () => {
     describe('serialization', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('test')]);
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {

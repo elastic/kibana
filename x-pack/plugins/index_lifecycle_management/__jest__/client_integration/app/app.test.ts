@@ -6,7 +6,7 @@
 
 import { AppTestBed, setup } from './app.helpers';
 import { setupEnvironment } from '../helpers/setup_environment';
-import { SPECIAL_CHARS_NAME, SPECIAL_CHARS_POLICY } from '../edit_policy/constants';
+import { SPECIAL_CHARS_NAME, getDefaultHotPhasePolicy } from '../edit_policy/constants';
 import { act } from 'react-dom/test-utils';
 
 window.scrollTo = jest.fn();
@@ -19,8 +19,8 @@ describe('<App />', () => {
   });
 
   describe('navigation with special characters', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([SPECIAL_CHARS_POLICY]);
+    beforeAll(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(SPECIAL_CHARS_NAME)]);
     });
 
     test('when clicked on policy name in table', async () => {
@@ -56,6 +56,21 @@ describe('<App />', () => {
     test('when loading edit policy page url', async () => {
       await act(async () => {
         testBed = await setup([`/policies/edit/${encodeURIComponent(SPECIAL_CHARS_NAME)}`]);
+      });
+
+      const { component } = testBed;
+      component.update();
+
+      expect(testBed.find('policyTitle').text()).toBe(
+        `Edit index lifecycle policy ${SPECIAL_CHARS_NAME}`
+      );
+    });
+
+    test('when loading edit policy page url with double encoding', async () => {
+      await act(async () => {
+        testBed = await setup([
+          encodeURI(`/policies/edit/${encodeURIComponent(SPECIAL_CHARS_NAME)}`),
+        ]);
       });
 
       const { component } = testBed;
