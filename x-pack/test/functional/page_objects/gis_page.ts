@@ -282,9 +282,15 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       // this method is regularly called within a retry, so we need to reduce the timeouts
       // of the retries done within the getAttribute method in order to ensure that they fail
       // early enough to retry getView()
-      const lat = await testSubjects.getAttribute('latitudeInput', 'value', 5000);
-      const lon = await testSubjects.getAttribute('longitudeInput', 'value', 5000);
-      const zoom = await testSubjects.getAttribute('zoomInput', 'value', 5000);
+      const getAttributeOptions = {
+        tryTimeout: 5000,
+        findTimeout: 1000,
+      };
+
+      const lat = await testSubjects.getAttribute('latitudeInput', 'value', getAttributeOptions);
+      const lon = await testSubjects.getAttribute('longitudeInput', 'value', getAttributeOptions);
+      const zoom = await testSubjects.getAttribute('zoomInput', 'value', getAttributeOptions);
+
       await this.closeSetViewPopover();
       return {
         lat: parseFloat(lat),
