@@ -21,6 +21,7 @@ import { ResolverAction } from '../store/actions';
 import { createStore } from 'redux';
 import { resolverReducer } from '../store/reducer';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -198,11 +199,15 @@ describe('useCamera on an unpainted element', () => {
           throw new Error('missing the process to bring into view');
         }
         simulator.controls.time = 0;
+        const nodeID = entityIDSafeVersion(process);
+        if (!nodeID) {
+          throw new Error('could not find nodeID for process');
+        }
         const cameraAction: ResolverAction = {
-          type: 'userBroughtProcessIntoView',
+          type: 'userBroughtNodeIntoView',
           payload: {
             time: simulator.controls.time,
-            process,
+            nodeID,
           },
         };
         await waitFor(() => {

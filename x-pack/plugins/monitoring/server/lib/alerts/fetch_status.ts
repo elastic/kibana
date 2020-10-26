@@ -18,8 +18,9 @@ export async function fetchStatus(
   clusterUuid: string,
   start: number,
   end: number,
-  filters: CommonAlertFilter[]
+  filters: CommonAlertFilter[] = []
 ): Promise<{ [type: string]: CommonAlertStatus }> {
+  const types: Array<{ type: string; result: CommonAlertStatus }> = [];
   const byType: { [type: string]: CommonAlertStatus } = {};
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
@@ -39,7 +40,7 @@ export async function fetchStatus(
         alert: serialized,
       };
 
-      byType[type] = result;
+      types.push({ type, result });
 
       const id = alert.getId();
       if (!id) {
@@ -74,6 +75,11 @@ export async function fetchStatus(
       }, []);
     })
   );
+
+  types.sort((a, b) => (a.type === b.type ? 0 : a.type.length > b.type.length ? 1 : -1));
+  for (const { type, result } of types) {
+    byType[type] = result;
+  }
 
   return byType;
 }

@@ -23,7 +23,11 @@ const paramsSchema = schema.object({
   policyNames: schema.string(),
 });
 
-export function registerDeleteRoute({ router, license }: RouteDependencies) {
+export function registerDeleteRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.delete(
     { path: addBasePath('/policies/{policyNames}'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -33,15 +37,8 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
       try {
         await deletePolicies(context.core.elasticsearch.client.asCurrentUser, policyNames);
         return response.ok();
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

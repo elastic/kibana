@@ -33,6 +33,8 @@ import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
+import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
+import { isAgentsSetup } from './agents/setup';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -81,7 +83,12 @@ class AgentPolicyService {
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
-  public async ensureDefaultAgentPolicy(soClient: SavedObjectsClientContract) {
+  public async ensureDefaultAgentPolicy(
+    soClient: SavedObjectsClientContract
+  ): Promise<{
+    created: boolean;
+    defaultAgentPolicy: AgentPolicy;
+  }> {
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -93,12 +100,18 @@ class AgentPolicyService {
         ...DEFAULT_AGENT_POLICY,
       };
 
-      return this.create(soClient, newDefaultAgentPolicy);
+      return {
+        created: true,
+        defaultAgentPolicy: await this.create(soClient, newDefaultAgentPolicy),
+      };
     }
 
     return {
-      id: agentPolicies.saved_objects[0].id,
-      ...agentPolicies.saved_objects[0].attributes,
+      created: false,
+      defaultAgentPolicy: {
+        id: agentPolicies.saved_objects[0].id,
+        ...agentPolicies.saved_objects[0].attributes,
+      },
     };
   }
 
@@ -128,12 +141,12 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string; namespace: string }
+    givenPolicy: { id?: string; name: string }
   ) {
     const results = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      searchFields: ['namespace', 'name'],
-      search: `${givenPolicy.namespace} + ${escapeSearchQueryPhrase(givenPolicy.name)}`,
+      searchFields: ['name'],
+      search: escapeSearchQueryPhrase(givenPolicy.name),
     });
     const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
     if (Array.isArray(idsWithName)) {
@@ -144,9 +157,7 @@ class AgentPolicyService {
           ? `Agent Policy '${idsWithName[0]}' already exists`
           : `Agent Policies '${idsWithName.join(',')}' already exist`;
 
-        throw new AgentPolicyNameExistsError(
-          `${existClause} in '${givenPolicy.namespace}' namespace with name '${givenPolicy.name}'`
-        );
+        throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
       }
     }
   }
@@ -236,11 +247,10 @@ class AgentPolicyService {
     agentPolicy: Partial<AgentPolicy>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    if (agentPolicy.name && agentPolicy.namespace) {
+    if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
         id,
         name: agentPolicy.name,
-        namespace: agentPolicy.namespace,
       });
     }
     return this._update(soClient, id, agentPolicy, options?.user);
@@ -288,6 +298,8 @@ class AgentPolicyService {
     if (!updatedAgentPolicy) {
       throw new Error('Copied agent policy not found');
     }
+
+    await this.createFleetPolicyChangeAction(soClient, newAgentPolicy.id);
 
     return updatedAgentPolicy;
   }
@@ -403,7 +415,9 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    const { id: defaultAgentPolicyId } = await this.ensureDefaultAgentPolicy(soClient);
+    const {
+      defaultAgentPolicy: { id: defaultAgentPolicyId },
+    } = await this.ensureDefaultAgentPolicy(soClient);
     if (id === defaultAgentPolicyId) {
       throw new Error('The default agent policy cannot be deleted');
     }
@@ -428,6 +442,7 @@ class AgentPolicyService {
     await this.triggerAgentPolicyUpdatedEvent(soClient, 'deleted', id);
     return {
       id,
+      name: agentPolicy.name,
     };
   }
 
@@ -435,6 +450,11 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ) {
+    // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
+    // the action will be created during the fleet setup
+    if (!(await isAgentsSetup(soClient))) {
+      return;
+    }
     const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
     if (!policy || !policy.revision) {
       return;
@@ -540,18 +560,11 @@ class AgentPolicyService {
       }
       if (!settings.kibana_urls || !settings.kibana_urls.length)
         throw new Error('kibana_urls is missing');
-      const hostsWithoutProtocol = settings.kibana_urls.map((url) => {
-        const parsedURL = new URL(url);
-        return `${parsedURL.host}${parsedURL.pathname !== '/' ? parsedURL.pathname : ''}`;
-      });
+
       fullAgentPolicy.fleet = {
-        kibana: {
-          protocol: new URL(settings.kibana_urls[0]).protocol.replace(':', ''),
-          hosts: hostsWithoutProtocol,
-        },
+        kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
       };
     }
-
     return fullAgentPolicy;
   }
 }

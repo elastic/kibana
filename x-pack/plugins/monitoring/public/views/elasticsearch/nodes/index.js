@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { uiRoutes } from '../../../angular/helpers/routes';
@@ -25,6 +25,7 @@ import {
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
 } from '../../../../common/constants';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -64,7 +65,7 @@ uiRoutes.when('/elasticsearch/nodes', {
 
         const promise = globalState.cluster_uuid
           ? getNodes()
-          : new Promise((resolve) => resolve({}));
+          : new Promise((resolve) => resolve({ data: {} }));
         return promise
           .then((response) => response.data)
           .catch((err) => {
@@ -129,7 +130,7 @@ uiRoutes.when('/elasticsearch/nodes', {
               injector={$injector}
               productName={ELASTICSEARCH_SYSTEM_ID}
               render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <Fragment>
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
                   {flyoutComponent}
                   <ElasticsearchNodes
                     clusterStatus={clusterStatus}
@@ -141,7 +142,7 @@ uiRoutes.when('/elasticsearch/nodes', {
                     {...this.getPaginationTableProps(pagination)}
                   />
                   {bottomBarComponent}
-                </Fragment>
+                </SetupModeContext.Provider>
               )}
             />
           );

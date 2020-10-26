@@ -49,7 +49,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   size="xxl"
                   type="securityApp"
                 >
-                  <div
+                  <span
                     color="subdued"
                     data-euiicon-type="securityApp"
                     size="xxl"

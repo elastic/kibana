@@ -33,8 +33,6 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     name: PLUGIN.NAME,
     order: 1000,
     category: DEFAULT_APP_CATEGORIES.observability,
-    navLinkId: PLUGIN.ID,
-    icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     management: {
@@ -67,7 +65,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
           read: [umDynamicSettings.name],
         },
         alerting: {
-          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
         },
         management: {
           insightsAndAlerting: ['triggersActions'],

@@ -60,6 +60,7 @@ export const createThreatSignal = async ({
     searchAfter: currentThreatList.hits.hits[currentThreatList.hits.hits.length - 1].sort,
     sortField: undefined,
     sortOrder: undefined,
+    listClient,
   });
 
   const threatFilter = buildThreatMappingFilter({

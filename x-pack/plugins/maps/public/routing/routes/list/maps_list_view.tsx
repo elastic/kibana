@@ -42,6 +42,7 @@ import {
   getNavigateToApp,
 } from '../../../kibana_services';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
+import { getAppTitle } from '../../../../common/i18n_getters';
 
 export const EMPTY_FILTER = '';
 
@@ -101,7 +102,8 @@ export class MapsListView extends React.Component {
   async initMapList() {
     this.fetchItems();
     addHelpMenuToAppChrome();
-    getCoreChrome().docTitle.change('Maps');
+    getCoreChrome().docTitle.change(getAppTitle());
+    getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
   }
 
   _find = (search: string) => getMapsSavedObjectLoader().find(search, this.state.listingLimit);

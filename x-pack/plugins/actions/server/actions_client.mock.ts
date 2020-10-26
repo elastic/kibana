@@ -20,6 +20,7 @@ const createActionsClientMock = () => {
     execute: jest.fn(),
     enqueueExecution: jest.fn(),
     listTypes: jest.fn(),
+    isActionTypeEnabled: jest.fn(),
   };
   return mocked;
 };

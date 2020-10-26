@@ -46,6 +46,7 @@ interface OwnProps {
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
 }
 
 type StatefulBodyComponentProps = OwnProps & PropsFromRedux;
@@ -73,6 +74,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     selectedEventIds,
     setSelected,
     clearSelected,
+    onRuleChange,
     show,
     showCheckboxes,
     graphEventId,
@@ -211,6 +213,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
         refetch={refetch}
+        onRuleChange={onRuleChange}
         rowRenderers={enabledRowRenderers}
         selectedEventIds={selectedEventIds}
         show={id === TimelineId.active ? show : true}

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import React, { memo, useCallback } from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useHistory } from 'react-router-dom';
@@ -14,6 +14,8 @@ import * as i18n from './translations';
 import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
+import { useUserData } from '../../user_info';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -46,24 +48,36 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     [history]
   );
 
+  const [
+    { isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite },
+  ] = useUserData();
+
+  const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules({
+    canUserCRUD,
+    hasIndexWrite,
+    isSignalIndexExists,
+    isAuthenticated,
+    hasEncryptionKey,
+  });
+
+  const loadPrebuiltRulesAndTemplatesButton = useMemo(
+    () =>
+      getLoadPrebuiltRulesAndTemplatesButton({
+        isDisabled: userHasNoPermissions,
+        onClick: handlePreBuiltCreation,
+        fill: true,
+        'data-test-subj': 'load-prebuilt-rules',
+      }),
+    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasNoPermissions]
+  );
+
   return (
     <EmptyPrompt
       title={<h2>{i18n.PRE_BUILT_TITLE}</h2>}
       body={<p>{i18n.PRE_BUILT_MSG}</p>}
       actions={
         <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="indexOpen"
-              isDisabled={userHasNoPermissions}
-              isLoading={loading}
-              onClick={handlePreBuiltCreation}
-              data-test-subj="load-prebuilt-rules"
-            >
-              {i18n.PRE_BUILT_ACTION}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LinkButton
               isDisabled={userHasNoPermissions}

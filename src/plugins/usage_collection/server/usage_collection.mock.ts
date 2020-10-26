@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsRepositoryMock,
+} from '../../../../src/core/server/mocks';
 
 import { CollectorOptions } from './collector/collector';
 import { UsageCollectionSetup, CollectorFetchContext } from './index';
@@ -52,6 +55,7 @@ export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchCon
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext> = {
     callCluster: elasticsearchServiceMock.createLegacyClusterClient().callAsInternalUser,
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+    soClient: savedObjectsRepositoryMock.create(),
   };
   return collectorFetchClientsMock;
 }

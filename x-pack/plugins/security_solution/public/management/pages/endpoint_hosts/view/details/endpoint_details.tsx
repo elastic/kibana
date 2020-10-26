@@ -89,16 +89,16 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         getEndpointDetailsPath({
           name: 'endpointPolicyResponse',
           ...currentUrlParams,
-          selected_endpoint: details.host.id,
+          selected_endpoint: details.agent.id,
         })
       ),
       getEndpointDetailsPath({
         name: 'endpointPolicyResponse',
         ...currentUrlParams,
-        selected_endpoint: details.host.id,
+        selected_endpoint: details.agent.id,
       }),
     ];
-  }, [details.host.id, formatUrl, queryParams]);
+  }, [details.agent.id, formatUrl, queryParams]);
 
   const agentDetailsWithFlyoutPath = `${agentDetailsAppPath}${openReassignFlyoutSearch}`;
   const agentDetailsWithFlyoutUrl = `${agentDetailsUrl}${openReassignFlyoutSearch}`;
@@ -112,7 +112,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         {
           path: getEndpointDetailsPath({
             name: 'endpointDetails',
-            selected_endpoint: details.host.id,
+            selected_endpoint: details.agent.id,
           }),
         },
       ],

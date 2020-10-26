@@ -13,7 +13,11 @@ import {
   ServiceStatus,
   ServiceStatusLevels,
 } from '../../../../../src/core/server';
-import { contextServiceMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import {
+  contextServiceMock,
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+} from '../../../../../src/core/server/mocks';
 import { createHttpServer } from '../../../../../src/core/server/test_utils';
 import { registerSettingsRoute } from './settings';
 
@@ -41,6 +45,9 @@ describe('/api/settings', () => {
             client: {
               asCurrentUser: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
             },
+          },
+          savedObjects: {
+            client: savedObjectsServiceMock.create(),
           },
         },
       }),
