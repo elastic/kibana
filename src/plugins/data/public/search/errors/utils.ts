@@ -17,9 +17,15 @@
  * under the License.
  */
 
-export * from './es_error';
-export * from './painless_error';
-export * from './timeout_error';
-export * from './utils';
-export * from './types';
-export * from './http_error';
+import { IEsError } from './types';
+
+export function getFailedShards(err: IEsError) {
+  const failedShards =
+    err.body?.attributes?.error?.failed_shards ||
+    err.body?.attributes?.error?.caused_by?.failed_shards;
+  return failedShards ? failedShards[0] : undefined;
+}
+
+export function getRootCause(err: IEsError) {
+  return getFailedShards(err)?.reason;
+}
