@@ -112,7 +112,7 @@ export class UsersGridPage extends Component<Props, State> {
         render: (username: string) => (
           <EuiLink
             data-test-subj="userRowUserName"
-            {...reactRouterNavigate(this.props.history, `/edit/${username}`)}
+            {...reactRouterNavigate(this.props.history, `/edit/${encodeURIComponent(username)}`)}
           >
             {username}
           </EuiLink>
