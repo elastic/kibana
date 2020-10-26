@@ -10,7 +10,10 @@ import {
   CLUSTER_ALERTS_ADDRESS_CONFIG_KEY,
 } from '../../../common/constants';
 import { Logger } from '../../../../../../src/core/server';
-import { Collector } from '../../../../../../src/plugins/usage_collection/server';
+import {
+  Collector,
+  UsageCollectionSetup,
+} from '../../../../../../src/plugins/usage_collection/server';
 import { MonitoringConfig } from '../../config';
 import { CoreServices } from '../../core_services';
 
@@ -74,10 +77,18 @@ export interface KibanaSettingsCollector extends Collector<EmailSettingData | un
   getEmailValueStructure(email: string | null): EmailSettingData;
 }
 
-export function getSettingsCollector(usageCollection: any, config: MonitoringConfig) {
+export function getSettingsCollector(
+  usageCollection: UsageCollectionSetup,
+  config: MonitoringConfig
+) {
   return usageCollection.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
+    schema: {
+      xpack: {
+        default_admin_email: { type: 'text' },
+      },
+    },
     async fetch(this: KibanaSettingsCollector) {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config);

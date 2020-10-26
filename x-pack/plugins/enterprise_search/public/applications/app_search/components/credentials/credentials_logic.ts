@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
-import { ApiTokenTypes, DELETE_MESSAGE } from './constants';
+import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
 import {
@@ -15,6 +15,7 @@ import {
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
+import { AppLogic } from '../../app_logic';
 
 import { IMeta } from '../../../../../common/types';
 import { IEngine } from '../../types';
@@ -49,6 +50,8 @@ interface ICredentialsLogicActions {
   fetchCredentials(page?: number): number;
   fetchDetails(): { value: boolean };
   deleteApiKey(tokenName: string): string;
+  onApiTokenChange(): void;
+  onEngineSelect(engineName: string): string;
 }
 
 interface ICredentialsLogicValues {
@@ -92,6 +95,8 @@ export const CredentialsLogic = kea<
     fetchCredentials: (page) => page,
     fetchDetails: true,
     deleteApiKey: (tokenName) => tokenName,
+    onApiTokenChange: () => null,
+    onEngineSelect: (engineName) => engineName,
   }),
   reducers: () => ({
     apiTokens: [
@@ -204,7 +209,11 @@ export const CredentialsLogic = kea<
     ],
   }),
   selectors: ({ selectors }) => ({
-    // TODO fullEngineAccessChecked from ent-search
+    fullEngineAccessChecked: [
+      () => [AppLogic.selectors.myRole, selectors.activeApiToken],
+      (myRole, activeApiToken) =>
+        !!(myRole.canAccessAllEngines && activeApiToken.access_all_engines),
+    ],
     dataLoading: [
       () => [selectors.isCredentialsDetailsComplete, selectors.isCredentialsDataComplete],
       (isCredentialsDetailsComplete, isCredentialsDataComplete) => {
@@ -255,7 +264,45 @@ export const CredentialsLogic = kea<
         flashAPIErrors(e);
       }
     },
-    // TODO onApiTokenChange from ent-search
-    // TODO onEngineSelect from ent-search
+    onApiTokenChange: async () => {
+      const { id, name, engines, type, read, write } = values.activeApiToken;
+
+      const data: IApiToken = {
+        name,
+        type,
+      };
+      if (type === ApiTokenTypes.Private) {
+        data.read = read;
+        data.write = write;
+      }
+      if (type !== ApiTokenTypes.Admin) {
+        data.access_all_engines = values.fullEngineAccessChecked;
+        data.engines = engines;
+      }
+
+      try {
+        const { http } = HttpLogic.values;
+        const body = JSON.stringify(data);
+
+        if (id) {
+          const response = await http.put(`/api/app_search/credentials/${name}`, { body });
+          actions.onApiTokenUpdateSuccess(response);
+          setSuccessMessage(UPDATE_MESSAGE);
+        } else {
+          const response = await http.post('/api/app_search/credentials', { body });
+          actions.onApiTokenCreateSuccess(response);
+          setSuccessMessage(CREATE_MESSAGE);
+        }
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    onEngineSelect: (engineName: string) => {
+      if (values.activeApiToken?.engines?.includes(engineName)) {
+        actions.removeEngineName(engineName);
+      } else {
+        actions.addEngineName(engineName);
+      }
+    },
   }),
 });
