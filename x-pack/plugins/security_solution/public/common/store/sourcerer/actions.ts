@@ -38,4 +38,5 @@ export const setSelectedIndexPatterns = actionCreator<{
 export const initTimelineIndexPatterns = actionCreator<{
   id: SourcererScopeName;
   selectedPatterns: string[];
+  eventType?: TimelineEventsType;
 }>('INIT_TIMELINE_INDEX_PATTERNS');

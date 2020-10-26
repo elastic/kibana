@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-
+import { isEmpty } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -17,7 +16,7 @@ import {
   initTimelineIndexPatterns,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
-import { createDefaultIndexPatterns } from './helpers';
+import { createDefaultIndexPatterns, defaultIndexPatternByEventType } from './helpers';
 
 export type SourcererState = SourcererModel;
 
@@ -53,14 +52,16 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     };
   })
-  .case(initTimelineIndexPatterns, (state, { id, selectedPatterns }) => {
+  .case(initTimelineIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
     return {
       ...state,
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          selectedPatterns,
+          selectedPatterns: isEmpty(selectedPatterns)
+            ? defaultIndexPatternByEventType({ state, eventType })
+            : selectedPatterns,
         },
       },
     };
