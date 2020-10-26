@@ -352,11 +352,13 @@ export class AnalyticsManager {
       return result;
     }
   }
-  // TODO: add model nodes for extension as well
-  async extendAnalyticsMapForAnalyticsJob(analyticsId: string) {
+
+  async extendAnalyticsMapForAnalyticsJob(analyticsId: string): Promise<AnalyticsMapReturnType> {
     const result: any = { elements: [], details: {}, error: null };
 
     try {
+      await this.setInferenceModels();
+
       const jobData = await this.getAnalyticsJobData(analyticsId);
       const currentJobNodeId = `${jobData.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
       const destIndex = Array.isArray(jobData?.dest?.index)
@@ -365,6 +367,18 @@ export class AnalyticsManager {
       const destIndexNodeId = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX_PATTERN}`;
       const analyticsJobs = await this._client.ml.getDataFrameAnalytics();
       const jobs = analyticsJobs?.body?.data_frame_analytics || [];
+
+      // Fetch inference model for incoming job id and add node and edge
+      const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
+        analyticsId
+      );
+      if (isAnalyticsMapNodeElement(modelElement)) {
+        result.elements.push(modelElement);
+        result.details[modelElement.data.id] = modelDetails;
+      }
+      if (isAnalyticsMapEdgeElement(edgeElement)) {
+        result.elements.push(edgeElement);
+      }
 
       // If destIndex node has not been created, create it
       const destIndexDetails = await this.getIndexData(destIndex);

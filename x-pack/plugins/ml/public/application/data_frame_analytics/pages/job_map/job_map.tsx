@@ -9,6 +9,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import cytoscape from 'cytoscape';
+import { uniqWith, isEqual } from 'lodash';
 
 import { Cytoscape, Controls, JobMapLegend } from './components';
 import { ml } from '../../../services/ml_api_service';
@@ -87,7 +88,8 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
         setElements(nodeElements);
         setNodeDetails(details);
       } else {
-        setElements([...elements, ...nodeElements]);
+        const uniqueElements = uniqWith([...nodeElements, ...elements], isEqual);
+        setElements(uniqueElements);
         setNodeDetails({ ...details, ...nodeDetails });
       }
     }
