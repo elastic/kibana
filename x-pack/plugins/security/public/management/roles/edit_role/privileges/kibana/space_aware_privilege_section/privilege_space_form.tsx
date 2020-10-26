@@ -225,7 +225,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             legend={i18n.translate(
               'xpack.security.management.editRole.spacePrivilegeForm.basePrivilegeControlLegend',
               {
-                defaultMessage: 'Base privilege control',
+                defaultMessage: 'Privileges for all features',
               }
             )}
           />

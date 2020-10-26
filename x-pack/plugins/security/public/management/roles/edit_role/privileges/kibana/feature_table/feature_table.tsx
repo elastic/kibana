@@ -249,7 +249,7 @@ export class FeatureTable extends Component<Props, {}> {
       );
 
       const extraAction = (
-        <EuiText size={'s'} data-test-subj="reservedFeatureDescription">
+        <EuiText style={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
           {feature.reserved.description}
         </EuiText>
       );
