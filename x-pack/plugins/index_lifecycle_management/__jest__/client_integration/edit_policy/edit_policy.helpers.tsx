@@ -57,19 +57,19 @@ export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : Setup
 export const setup = async () => {
   const testBed = await initTestBed();
 
-  const { find, component } = testBed;
+  const { find, component, form } = testBed;
 
-  const createFormClickAction = (dataTestSubject: string) => async () => {
+  const createFormToggleAction = (dataTestSubject: string) => async (checked: boolean) => {
     await act(async () => {
-      find(dataTestSubject).simulate('click');
+      form.toggleEuiSwitch(dataTestSubject, checked);
     });
     component.update();
   };
 
-  function createFormSetValueAction<V = string>(dataTestSubject: string) {
+  function createFormSetValueAction<V extends string = string>(dataTestSubject: string) {
     return async (value: V) => {
       await act(async () => {
-        find(dataTestSubject).simulate('change', { target: { value } });
+        form.setInputValue(dataTestSubject, value);
       });
       component.update();
     };
@@ -89,7 +89,7 @@ export const setup = async () => {
     component.update();
   };
 
-  const toggleRollover = createFormClickAction('rolloverSwitch');
+  const toggleRollover = createFormToggleAction('rolloverSwitch');
 
   const setMaxSize = async (value: string, units?: string) => {
     await act(async () => {
@@ -115,19 +115,19 @@ export const setup = async () => {
     component.update();
   };
 
-  const toggleForceMerge = (phase: Phases) => createFormClickAction(`${phase}-forceMergeSwitch`);
+  const toggleForceMerge = (phase: Phases) => createFormToggleAction(`${phase}-forceMergeSwitch`);
 
   const setForcemergeSegmentsCount = (phase: Phases) =>
     createFormSetValueAction(`${phase}-selectedForceMergeSegments`);
 
-  const setBestCompression = (phase: Phases) => createFormClickAction(`${phase}-bestCompression`);
+  const setBestCompression = (phase: Phases) => createFormToggleAction(`${phase}-bestCompression`);
 
   const setIndexPriority = (phase: Phases) =>
     createFormSetValueAction(`${phase}-phaseIndexPriority`);
 
-  const enable = (phase: Phases) => createFormClickAction(`enablePhaseSwitch-${phase}`);
+  const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
 
-  const warmPhaseOnRollover = createFormClickAction(`warm-warmPhaseOnRollover`);
+  const warmPhaseOnRollover = createFormToggleAction(`warm-warmPhaseOnRollover`);
 
   const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
 
@@ -158,12 +158,12 @@ export const setup = async () => {
     createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
   const setReplicas = async (value: string) => {
-    await createFormClickAction('warm-setReplicasSwitch')();
+    await createFormToggleAction('warm-setReplicasSwitch')(true);
     await createFormSetValueAction('warm-selectedReplicaCount')(value);
   };
 
   const setShrink = async (value: string) => {
-    await createFormClickAction('shrinkSwitch')();
+    await createFormToggleAction('shrinkSwitch')(true);
     await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
   };
 

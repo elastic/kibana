@@ -47,9 +47,9 @@ describe('<EditPolicy />', () => {
         await actions.hot.setMaxSize('123', 'mb');
         await actions.hot.setMaxDocs('123');
         await actions.hot.setMaxAge('123', 'h');
-        await actions.hot.toggleForceMerge();
+        await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegments('123');
-        await actions.hot.setBestCompression();
+        await actions.hot.setBestCompression(true);
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -83,7 +83,7 @@ describe('<EditPolicy />', () => {
 
       test('disabling rollover', async () => {
         const { actions } = testBed;
-        await actions.hot.toggleRollover();
+        await actions.hot.toggleRollover(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const policy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
@@ -122,7 +122,7 @@ describe('<EditPolicy />', () => {
 
       test('default values', async () => {
         const { actions } = testBed;
-        await actions.warm.enable();
+        await actions.warm.enable(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
@@ -140,16 +140,16 @@ describe('<EditPolicy />', () => {
 
       test('setting all values', async () => {
         const { actions } = testBed;
-        await actions.warm.enable();
+        await actions.warm.enable(true);
         await actions.warm.setMinAgeValue('123');
         await actions.warm.setMinAgeUnits('d');
         await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.warm.setReplicas('123');
         await actions.warm.setShrink('123');
-        await actions.warm.toggleForceMerge();
+        await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegments('123');
-        await actions.warm.setBestCompression();
+        await actions.warm.setBestCompression(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -199,7 +199,7 @@ describe('<EditPolicy />', () => {
 
       test('default allocation with replicas set', async () => {
         const { actions } = testBed;
-        await actions.warm.enable();
+        await actions.warm.enable(true);
         await actions.warm.setReplicas('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -219,8 +219,8 @@ describe('<EditPolicy />', () => {
 
       test('setting warm phase on rollover to "true"', async () => {
         const { actions } = testBed;
-        await actions.warm.enable();
-        await actions.warm.warmPhaseOnRollover();
+        await actions.warm.enable(true);
+        await actions.warm.warmPhaseOnRollover(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const warmPhaseMinAge = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
@@ -270,7 +270,6 @@ describe('<EditPolicy />', () => {
 
   describe('delete phase', () => {
     beforeEach(async () => {
-      server.respondImmediately = true;
       httpRequestsMockHelpers.setLoadPolicies([DELETE_PHASE_POLICY]);
       httpRequestsMockHelpers.setLoadSnapshotPolicies([
         SNAPSHOT_POLICY_NAME,
