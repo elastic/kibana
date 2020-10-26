@@ -30,3 +30,29 @@ export async function getGitDir() {
     })
   ).stdout.trim();
 }
+
+// Checks if a correct git version is installed
+export async function isCorrectGitVersionInstalled() {
+  const rawGitVersionStr = (
+    await execa('git', ['--version'], {
+      cwd: REPO_ROOT,
+    })
+  ).stdout.trim();
+
+  const gitVersionMatches = rawGitVersionStr.match(/[0-9]+(\.[0-9]+)+/);
+  const gitVersion =
+    gitVersionMatches && gitVersionMatches.length > 0 ? gitVersionMatches[0] : false;
+
+  if (!gitVersion) {
+    return false;
+  }
+
+  const correctGitVersionMatches = gitVersion.match(/([0-9]+)\.([0-9]+)/);
+  if (!correctGitVersionMatches || correctGitVersionMatches.length < 3) {
+    return false;
+  }
+
+  const versionMajor = Number(correctGitVersionMatches[1]);
+  const versionMinor = Number(correctGitVersionMatches[2]);
+  return versionMajor >= 2 && versionMinor >= 5;
+}
