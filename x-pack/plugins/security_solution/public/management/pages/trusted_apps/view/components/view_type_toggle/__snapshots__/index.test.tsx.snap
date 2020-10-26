@@ -5,7 +5,7 @@ exports[`view_type_toggle ViewTypeToggle should render grid selection correctly 
   color="primary"
   data-test-subj="viewTypeToggleButtonGroup"
   idSelected="grid"
-  legend="View type toggle control"
+  legend="View type"
   onChange={[Function]}
   options={
     Array [
@@ -31,7 +31,7 @@ exports[`view_type_toggle ViewTypeToggle should render list selection correctly 
   color="primary"
   data-test-subj="viewTypeToggleButtonGroup"
   idSelected="list"
-  legend="View type toggle control"
+  legend="View type"
   onChange={[Function]}
   options={
     Array [
