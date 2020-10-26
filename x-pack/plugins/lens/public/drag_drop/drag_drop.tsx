@@ -5,7 +5,6 @@
  */
 
 import './drag_drop.scss';
-
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
@@ -278,6 +277,7 @@ const DragDropInner = React.memo(function DragDropInner(
           droppable,
           itemsInGroup,
           id: value.id,
+          isActive: state.isActive,
         }}
       >
         {children}
@@ -319,6 +319,7 @@ export const ReorderableDragDrop = ({
     droppable: DraggableProps['droppable'];
     itemsInGroup: string[];
     id: string;
+    isActive: boolean;
   };
   children: React.ReactElement;
   label: string;
@@ -330,6 +331,17 @@ export const ReorderableDragDrop = ({
   const groupLength = itemsInGroup.length;
 
   const currentIndex = itemsInGroup.indexOf(id);
+
+  const draggingClasses = classNames(
+    draggingProps.className,
+    reorderState && {
+      [reorderState.className]: reorderState?.reorderedItems.includes(id),
+    },
+    {
+      'lnsDragDrop-isReorderable': draggingProps.isReorderDragging,
+    }
+  );
+
   return (
     <div className="lnsDragDrop__reorderableContainer">
       {React.cloneElement(children, {
@@ -340,15 +352,7 @@ export const ReorderableDragDrop = ({
           setKeyboardMode(false);
         },
         ['data-test-subj']: draggingProps.dataTestSubj,
-        className: classNames(
-          draggingProps.className,
-          reorderState && {
-            [reorderState.className]: reorderState?.reorderedItems.includes(id),
-          },
-          {
-            'lnsDragDrop-isReorderable': draggingProps.isReorderDragging,
-          }
-        ),
+        className: draggingClasses,
       })}
       <div
         data-test-subj="lnsDragDrop-reorderableDrop"
@@ -367,23 +371,30 @@ export const ReorderableDragDrop = ({
             return;
           }
           dropProps.onDragOver(e);
+          if (!dropProps.isActive) {
+            const draggingIndex = itemsInGroup.indexOf(dragging.id);
+            const droppingIndex = currentIndex;
+            if (draggingIndex === droppingIndex) {
+              setReorderState({
+                ...reorderState,
+                reorderedItems: [],
+              });
+            }
 
-          if (!dragging) return;
-          const draggingIndex = itemsInGroup.indexOf(dragging.id);
-          const droppingIndex = currentIndex;
-          setReorderState(
-            draggingIndex < droppingIndex
-              ? {
-                  ...reorderState,
-                  reorderedItems: itemsInGroup.slice(draggingIndex + 1, droppingIndex + 1),
-                  className: 'lnsDragDrop-isReorderable--up',
-                }
-              : {
-                  ...reorderState,
-                  reorderedItems: itemsInGroup.slice(droppingIndex, draggingIndex),
-                  className: 'lnsDragDrop-isReorderable--down',
-                }
-          );
+            setReorderState(
+              draggingIndex < droppingIndex
+                ? {
+                    ...reorderState,
+                    reorderedItems: itemsInGroup.slice(draggingIndex + 1, droppingIndex + 1),
+                    className: 'lnsDragDrop-isReorderable--up',
+                  }
+                : {
+                    ...reorderState,
+                    reorderedItems: itemsInGroup.slice(droppingIndex, draggingIndex),
+                    className: 'lnsDragDrop-isReorderable--down',
+                  }
+            );
+          }
         }}
         onDragLeave={() => {
           dropProps.onDragLeave();
