@@ -115,9 +115,11 @@ export const TagSelector: FC<TagSelectorProps> = ({
   const createTagOption = useMemo(() => {
     // label and color will never be actually used for rendering.
     // label will only be used to check if the option matches the search,
-    // which will always be true because we set its value to the current search
+    // which will always be true because we set its value to the current search.
+    // The extra whitespace is required to avoid the combobox to consider that the value
+    // is selected when closing the dropdown
     return {
-      label: currentSearch,
+      label: `${currentSearch} `,
       color: '#FFFFFF',
       value: createOptionValue,
     };
