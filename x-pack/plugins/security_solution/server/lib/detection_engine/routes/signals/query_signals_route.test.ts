@@ -14,6 +14,7 @@ import {
   getEmptySignalsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+
 import { querySignalsRoute } from './query_signals_route';
 
 describe('query for signal', () => {
