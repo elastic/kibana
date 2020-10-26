@@ -50,7 +50,9 @@ export function MenuToggleProvider({ getService }: FtrProviderContext) {
     }
 
     private async setState(expectedState: boolean) {
-      log.debug('Ensuring that the', this.name, 'is', expectedState ? 'open' : 'closed');
+      log.debug(
+        `setting menu open state [name=${this.name}] [state=${expectedState ? 'open' : 'closed'}]`
+      );
 
       await retry.try(async () => {
         // if the menu is clearly in the expected state already, bail out quickly if so
