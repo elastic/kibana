@@ -26,6 +26,7 @@ import { ISearchSource } from 'src/plugins/data/public';
 import { KibanaRequest } from 'src/core/server';
 import { LegacyAPICaller } from 'kibana/server';
 import { Logger } from 'kibana/server';
+import { Logger as Logger_2 } from 'src/core/server';
 import { LoggerFactory } from '@kbn/logging';
 import { Moment } from 'moment';
 import moment from 'moment';
@@ -658,7 +659,7 @@ export const indexPatterns: {
 //
 // @public (undocumented)
 export class IndexPatternsFetcher {
-    constructor(callDataCluster: LegacyAPICaller);
+    constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices?: boolean);
     getFieldsForTimePattern(options: {
         pattern: string;
         metaFields: string[];
@@ -669,7 +670,7 @@ export class IndexPatternsFetcher {
         pattern: string | string[];
         metaFields?: string[];
         fieldCapsOptions?: {
-            allowNoIndices: boolean;
+            allow_no_indices: boolean;
         };
     }): Promise<FieldDescriptor[]>;
 }

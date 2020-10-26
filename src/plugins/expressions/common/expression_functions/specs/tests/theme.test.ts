@@ -37,7 +37,8 @@ describe('expression_functions', () => {
       };
 
       context = {
-        getInitialInput: () => {},
+        getSearchContext: () => ({} as any),
+        getSearchSessionId: () => undefined,
         types: {},
         variables: { theme: themeProps },
         abortSignal: {} as any,
