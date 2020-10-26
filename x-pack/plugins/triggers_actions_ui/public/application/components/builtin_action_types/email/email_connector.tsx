@@ -12,6 +12,7 @@ import {
   EuiFieldPassword,
   EuiSwitch,
   EuiFormRow,
+  EuiText,
   EuiTitle,
   EuiSpacer,
   EuiCallOut,
@@ -56,7 +57,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               >
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
-                  defaultMessage="Configuring email accounts."
+                  defaultMessage="Configure email accounts"
                 />
               </EuiLink>
             }
@@ -202,17 +203,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
       </EuiFlexGroup>
       {hasAuth ? (
         <>
-          {action.id ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                size="s"
-                title="Username and password are encrypted. Please reenter values for these fields."
-                iconType="iInCircle"
-              />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
+          {getEncryptedFieldNotifyLabel(!action.id)}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiFormRow
@@ -287,6 +278,41 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
 function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
+}
+
+function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiText size="s" data-test-subj="rememberValuesMessage">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.rememberValuesLabel"
+            defaultMessage="Remember these values. You must reenter them each time you edit the connector."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+  return (
+    <Fragment>
+      <EuiSpacer size="m" />
+      <EuiCallOut
+        size="s"
+        iconType="iInCircle"
+        data-test-subj="reenterValuesMessage"
+        title={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterValuesLabel',
+          {
+            defaultMessage:
+              'Username and password are encrypted. Please reenter values for these fields.',
+          }
+        )}
+      />
+      <EuiSpacer size="m" />
+    </Fragment>
+  );
 }
 
 // eslint-disable-next-line import/no-default-export
