@@ -67,14 +67,10 @@ export class DescendantsQuery {
    * TODO get rid of the unknowns
    */
   async search(client: IScopedClusterClient, nodes: Nodes): Promise<unknown> {
-    const query = this.query(nodes);
-    console.log(JSON.stringify(query, null, 2));
     const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
       body: this.query(nodes),
       index: this.indexPattern,
     });
-    console.log(JSON.stringify(response, null, 2));
-    // return response.body.hits.hits.map((hit) => hit._source);
     return this.uniqueID.getNodesFromAggs(response);
   }
 }

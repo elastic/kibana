@@ -6,7 +6,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { DescendantsQuery } from '../queries/children';
-import { UniqueID } from '../queries/unique_id';
+import { UniqueID, Schema } from '../queries/unique_id';
 
 /**
  * The query parameters passed in from the request. These define the limits for the ES requests for retrieving the
@@ -23,10 +23,7 @@ export interface TreeOptions {
     start: string;
     end: string;
   };
-  userFieldsDef: {
-    ancestry?: string;
-    connections: Array<{ id: string; parentID: string }>;
-  };
+  schema: Schema;
   nodes: Array<Map<string, string>>;
   indexPatterns: string[];
 }
@@ -44,7 +41,7 @@ export class Fetcher {
    */
   public async tree(options: TreeOptions) {
     const query = new DescendantsQuery(
-      new UniqueID(options.userFieldsDef),
+      new UniqueID(options.schema),
       options.indexPatterns,
       options.timerange,
       options.descendants

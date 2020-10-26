@@ -3,21 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse } from 'elasticsearch';
-
 import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 
-interface IDParts {
+export interface EdgeDefinition {
+  id: string;
+  parentID: string;
+}
+
+export interface Schema {
   ancestry?: string;
-  connections: Array<{ id: string; parentID: string }>;
+  edges: EdgeDefinition[];
 }
 
 export class UniqueID {
   public readonly sourceFilter: string[];
   private readonly parts: Set<string>;
   private readonly idToParent: Map<string, string>;
-  constructor(public readonly idParts: IDParts) {
+  constructor(public readonly idSchema: Schema) {
+    if (idSchema.edges.length <= 0) {
+      throw new Error('received empty edges schema');
+    }
+
     this.sourceFilter = this.createSourceFilter();
     this.parts = this.createMapParts();
     this.idToParent = this.createIDToParent();
@@ -25,11 +31,11 @@ export class UniqueID {
 
   private createMapParts(): Set<string> {
     const parts = new Set<string>();
-    if (this.idParts.ancestry) {
-      parts.add(this.idParts.ancestry);
+    if (this.idSchema.ancestry) {
+      parts.add(this.idSchema.ancestry);
     }
 
-    for (const connection of this.idParts.connections) {
+    for (const connection of this.idSchema.edges) {
       parts.add(connection.id);
       parts.add(connection.parentID);
     }
@@ -38,20 +44,20 @@ export class UniqueID {
 
   private createIDToParent(): Map<string, string> {
     const idToParent = new Map<string, string>();
-    for (const connection of this.idParts.connections) {
+    for (const connection of this.idSchema.edges) {
       idToParent.set(connection.id, connection.parentID);
     }
     return idToParent;
   }
 
   private createSourceFilter(): string[] {
-    const filter = this.idParts.connections.reduce((sourceFilterAcc: string[], connection) => {
+    const filter = this.idSchema.edges.reduce((sourceFilterAcc: string[], connection) => {
       sourceFilterAcc.push(connection.id, connection.parentID);
       return sourceFilterAcc;
     }, []);
 
-    if (this.idParts.ancestry) {
-      filter.push(this.idParts.ancestry);
+    if (this.idSchema.ancestry) {
+      filter.push(this.idSchema.ancestry);
     }
     return filter;
   }
@@ -146,7 +152,7 @@ export class UniqueID {
   public buildEmptyRestraints(): JsonObject[] {
     const filter = [];
 
-    for (const connection of this.idParts.connections) {
+    for (const connection of this.idSchema.edges) {
       filter.push(
         {
           exists: {
@@ -192,7 +198,7 @@ export class UniqueID {
   public buildAggregations(size: number): JsonValue {
     const accumulatedAggs: any = { aggs: {} };
     let current: JsonObject = accumulatedAggs;
-    for (const connection of this.idParts.connections) {
+    for (const connection of this.idSchema.edges) {
       current = this.buildSingleAgg(current, connection.id, size);
     }
 
@@ -200,43 +206,205 @@ export class UniqueID {
     return accumulatedAggs.aggs;
   }
 
-  private nodesFromAggsHelper(aggsResult: any, spec: Array<{ id: string; parentID: string }>) {
-    const nextAggsLevel = (aggs: any, field: string) => {
-      return aggs[field].buckets;
-    };
-
-    console.log('aggsResult', JSON.stringify(aggsResult, null, 2));
-    console.log('spec', spec);
-    if (spec && spec.length > 0 && aggsResult[spec[0].id].buckets) {
-      const connection = spec.shift();
-      if (!connection) {
-        throw new Error('this should never happen');
+  /**
+   * This is an example response when the edges are defined as:
+   * {
+   *    id: process.entity_id
+   *    parentID: process.parent.entity_id
+   * },
+   * {
+   *    id: host.id
+   *    parentID: host.id
+   * },
+   * {
+   *    id: host.name
+   *    parentID: host.name
+   * }
+   *
+  "body": {
+    "took": 3,
+    "timed_out": false,
+    "_shards": {
+      "total": 3,
+      "successful": 3,
+      "skipped": 0,
+      "failed": 0
+    },
+    "hits": {
+      "total": {
+        "value": 2,
+        "relation": "eq"
+      },
+      "max_score": null,
+      "hits": []
+    },
+    "aggregations": {
+      "process.entity_id": {
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+        "buckets": [
+          {
+            "key": "xcv7o96glx",
+            "doc_count": 1,
+            "host.id": {
+              "doc_count_error_upper_bound": 0,
+              "sum_other_doc_count": 0,
+              "buckets": [
+                {
+                  "key": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+                  "doc_count": 1,
+                  "host.name": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "Host-4dbzugdlqd",
+                        "doc_count": 1,
+                        "singleEvent": {
+                          "hits": {
+                            "total": {
+                              "value": 1,
+                              "relation": "eq"
+                            },
+                            "max_score": null,
+                            "hits": [
+                              {
+                                "_index": ".ds-logs-endpoint.events.process-default-000001",
+                                "_id": "bUzZUXUBfW9lQwgL4IZi",
+                                "_score": null,
+                                "_source": {
+                                  "process": {
+                                    "parent": {
+                                      "entity_id": "9tw2j9fryf"
+                                    },
+                                    "entity_id": "xcv7o96glx"
+                                  },
+                                  "host": {
+                                    "name": "Host-4dbzugdlqd",
+                                    "id": "b87eb510-3555-422c-b81d-b25e71ef09aa"
+                                  }
+                                },
+                                "sort": [
+                                  1603396040806
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "key": "zovg1ej2j3",
+            "doc_count": 1,
+            "host.id": {
+              "doc_count_error_upper_bound": 0,
+              "sum_other_doc_count": 0,
+              "buckets": [
+                {
+                  "key": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+                  "doc_count": 1,
+                  "host.name": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "Host-4dbzugdlqd",
+                        "doc_count": 1,
+                        "singleEvent": {
+                          "hits": {
+                            "total": {
+                              "value": 1,
+                              "relation": "eq"
+                            },
+                            "max_score": null,
+                            "hits": [
+                              {
+                                "_index": ".ds-logs-endpoint.events.process-default-000001",
+                                "_id": "e0zZUXUBfW9lQwgL4IZi",
+                                "_score": null,
+                                "_source": {
+                                  "process": {
+                                    "parent": {
+                                      "entity_id": "9tw2j9fryf"
+                                    },
+                                    "entity_id": "zovg1ej2j3"
+                                  },
+                                  "host": {
+                                    "name": "Host-4dbzugdlqd",
+                                    "id": "b87eb510-3555-422c-b81d-b25e71ef09aa"
+                                  }
+                                },
+                                "sort": [
+                                  1603396047806
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
       }
-      return this.nodesFromAggsHelper(nextAggsLevel(aggsResult, connection.id), spec);
     }
-
-    console.log('node recursion', JSON.stringify(aggsResult, null, 2));
-    const results = [];
-    for (const bucket of aggsResult) {
-      results.push(...bucket.singleEvent.hits.hits.map((hit) => hit._source));
-    }
-    return results;
   }
+    The returned nodes when calling getNodesFromAggs are:
+    [
+      {
+          "process": {
+              "parent": {
+                  "entity_id": "9tw2j9fryf"
+              },
+              "entity_id": "xcv7o96glx"
+          },
+          "host": {
+              "name": "Host-4dbzugdlqd",
+              "id": "b87eb510-3555-422c-b81d-b25e71ef09aa"
+          }
+      },
+      {
+          "process": {
+              "parent": {
+                  "entity_id": "9tw2j9fryf"
+              },
+              "entity_id": "zovg1ej2j3"
+          },
+          "host": {
+              "name": "Host-4dbzugdlqd",
+              "id": "b87eb510-3555-422c-b81d-b25e71ef09aa"
+          }
+      }
+    ]
+   */
 
   /**
-   * Need to test, I think this will work.
-   * @param buckets
-   * @param spec
+   * Recursively traverse the aggregation results to accumulate the top_hits entries within the inner most
+   * elements.
+   *
+   * @param buckets an array of unique elements corresponding to part of an edge schema.
+   * @param edgesSchema an array of schema information describing how edges are defined in the graph
    */
-  private nodesFromAggsHelper2(buckets: any, spec: Array<{ id: string; parentID: string }>) {
-    if (buckets && spec && spec.length) {
-      const edge = spec.shift();
-      if (!edge) {
-        throw new Error('this should neveer happen');
-      }
+  private traverseBuckets(aggregation: any, edgesSchema: EdgeDefinition[]) {
+    if (!aggregation?.buckets) {
+      return [];
+    }
+
+    const buckets = aggregation.buckets;
+
+    if (edgesSchema && edgesSchema.length > 0) {
+      const edge = edgesSchema[0];
 
       return buckets.reduce((results, bucket) => {
-        results.push(...this.nodesFromAggsHelper2(bucket[edge.id].buckets, spec));
+        results.push(...this.traverseBuckets(bucket[edge.id], edgesSchema.slice(1)));
         return results;
       }, []);
     }
@@ -244,13 +412,11 @@ export class UniqueID {
     return buckets.reduce((results, bucket) => {
       results.push(...bucket.singleEvent.hits.hits.map((hit) => hit._source));
       return results;
-    });
+    }, []);
   }
 
-  public getNodesFromAggs(response: ApiResponse<SearchResponse<unknown>>) {
-    const spec = [...this.idParts.connections];
-    const firstField = spec[0];
-    spec.shift();
-    return this.nodesFromAggsHelper(response.body.aggregations[firstField.id], spec);
+  public getNodesFromAggs(aggregations: any) {
+    const firstField = this.idSchema.edges[0];
+    return this.traverseBuckets(aggregations[firstField.id], this.idSchema.edges.slice(1));
   }
 }
