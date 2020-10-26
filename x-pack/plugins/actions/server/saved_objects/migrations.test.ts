@@ -25,10 +25,10 @@ describe('7.10.0', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const action = getMockDataForEmail({});
     const migratedAction = migration710(action, context);
-    expect(migratedAction.attributes.config).toMatchObject({
+    expect(migratedAction.attributes.config).toEqual({
       hasAuth: true,
     });
-    expect(migratedAction).toMatchObject({
+    expect(migratedAction).toEqual({
       ...action,
       attributes: {
         ...action.attributes,
@@ -43,10 +43,10 @@ describe('7.10.0', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const action = getMockData({});
     const migratedAction = migration710(action, context);
-    expect(migratedAction.attributes.config).toMatchObject({
+    expect(migratedAction.attributes.config).toEqual({
       incidentConfiguration: { mapping: [] },
     });
-    expect(migratedAction).toMatchObject({
+    expect(migratedAction).toEqual({
       ...action,
       attributes: {
         ...action.attributes,
