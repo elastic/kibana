@@ -48,7 +48,6 @@ function registerLensTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens usage fetch task',
-      type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
       createTaskRunner: telemetryTaskRunner(logger, core, config),
     },

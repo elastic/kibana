@@ -5,20 +5,10 @@
  */
 
 import React from 'react';
-import { Store, Action } from 'redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { AppMountParameters } from '../../../../../src/core/public';
-import { State } from '../common/store';
-import { StartServices } from '../types';
 import { SecurityApp } from './app';
-import { AppFrontendLibs } from '../common/lib/lib';
-
-interface RenderAppProps extends AppFrontendLibs, AppMountParameters {
-  services: StartServices;
-  store: Store<State, Action>;
-  SubPluginRoutes: React.FC;
-}
+import { RenderAppProps } from './types';
 
 export const renderApp = ({
   apolloClient,
@@ -27,7 +17,7 @@ export const renderApp = ({
   services,
   store,
   SubPluginRoutes,
-}: RenderAppProps) => {
+}: RenderAppProps): (() => void) => {
   render(
     <SecurityApp apolloClient={apolloClient} history={history} services={services} store={store}>
       <SubPluginRoutes />

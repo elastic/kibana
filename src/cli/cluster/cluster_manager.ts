@@ -110,6 +110,7 @@ export class ClusterManager {
         type: 'server',
         log: this.log,
         argv: serverArgv,
+        apmServiceName: 'kibana',
       })),
     ];
 

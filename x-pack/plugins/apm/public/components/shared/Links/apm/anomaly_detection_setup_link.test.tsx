@@ -96,4 +96,15 @@ describe('MissingJobsAlert', () => {
       expect(toolTipText).toBe(undefined);
     });
   });
+
+  describe('when at least one job exists and all environments are selected', () => {
+    it('does not show a warning', async () => {
+      const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
+        jobs: [{ environment: 'ENVIRONMENT_ALL', job_id: 'my_job_id' }],
+      });
+
+      expect(toolTipAnchor).not.toBeInTheDocument();
+      expect(toolTipText).toBe(undefined);
+    });
+  });
 });

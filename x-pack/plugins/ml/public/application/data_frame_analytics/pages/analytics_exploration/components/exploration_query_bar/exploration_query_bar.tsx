@@ -149,11 +149,11 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
               placeholder={
                 searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
                   ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
-                      defaultMessage: 'e.g. {example}',
+                      defaultMessage: 'Search for e.g. {example}',
                       values: { example: 'method : "GET" or status : "404"' },
                     })
                   : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
-                      defaultMessage: 'e.g. {example}',
+                      defaultMessage: 'Search for e.g. {example}',
                       values: { example: 'method:GET OR status:404' },
                     })
               }
@@ -163,7 +163,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
             />
           </EuiFlexItem>
           {filters && filters.options && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              data-test-subj="mlDFAnalyticsExplorationQueryBarFilterButtons"
+            >
               <EuiButtonGroup
                 legend={i18n.translate(
                   'xpack.ml.dataframe.analytics.explorationQueryBar.buttonGroupLegend',
@@ -172,7 +175,6 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                   }
                 )}
                 name="analyticsQueryBarFilterButtons"
-                data-test-subj="mlDFAnalyticsExplorationQueryBarFilterButtons"
                 options={filters.options}
                 type="multi"
                 idToSelectedMap={idToSelectedMap}

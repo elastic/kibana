@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { Observable } from 'rxjs';
+import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
 // @ts-ignore
 import fetch from 'node-fetch';
@@ -61,7 +61,7 @@ export class FetcherTask {
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly currentKibanaVersion: string;
   private readonly logger: Logger;
-  private intervalId?: NodeJS.Timeout;
+  private intervalId?: Subscription;
   private lastReported?: number;
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
@@ -82,15 +82,14 @@ export class FetcherTask {
     this.telemetryCollectionManager = telemetryCollectionManager;
     this.elasticsearchClient = elasticsearch.legacy.createClient('telemetry-fetcher');
 
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
+      this.sendIfDue()
+    );
   }
 
   public stop() {
     if (this.intervalId) {
-      clearInterval(this.intervalId);
+      this.intervalId.unsubscribe();
     }
     if (this.elasticsearchClient) {
       this.elasticsearchClient.close();
@@ -232,6 +231,7 @@ export class FetcherTask {
     await fetch(url, {
       method: 'post',
       body: cluster,
+      headers: { 'X-Elastic-Stack-Version': this.currentKibanaVersion },
     });
   }
 }

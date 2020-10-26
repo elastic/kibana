@@ -8,16 +8,19 @@ import { ServerApiError } from '../../../../common/types';
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
 
-export interface PaginationInfo {
-  index: number;
-  size: number;
+export interface Pagination {
+  pageIndex: number;
+  pageSize: number;
+  totalItemCount: number;
+  pageSizeOptions: number[];
 }
 
 export interface TrustedAppsListData {
   items: TrustedApp[];
-  totalItemsCount: number;
-  paginationInfo: PaginationInfo;
+  pageIndex: number;
+  pageSize: number;
   timestamp: number;
+  totalItemsCount: number;
 }
 
 /** Store State when an API request has been sent to create a new trusted app entry */

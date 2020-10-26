@@ -10,6 +10,7 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
+  ElasticsearchClient,
   ILegacyClusterClient,
   ILegacyScopedClusterClient,
   KibanaRequest,
@@ -45,6 +46,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 

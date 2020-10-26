@@ -56,7 +56,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    *
    * Note: this can only be used for multi-namespace object types.
    */
-  namespaces?: string[];
+  initialNamespaces?: string[];
 }
 
 /**
@@ -79,7 +79,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    *
    * Note: this can only be used for multi-namespace object types.
    */
-  namespaces?: string[];
+  initialNamespaces?: string[];
 }
 
 /**

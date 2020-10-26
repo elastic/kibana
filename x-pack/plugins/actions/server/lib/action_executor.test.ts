@@ -32,9 +32,10 @@ const executeParams = {
 };
 
 const spacesMock = spacesServiceMock.createSetupContract();
+const loggerMock = loggingSystemMock.create().get();
 const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
-  logger: loggingSystemMock.create().get(),
+  logger: loggerMock,
   spaces: spacesMock,
   getServices: () => services,
   getActionsClientWithRequest,
@@ -89,6 +90,9 @@ test('successfully executes', async () => {
   );
 
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('1', 'test', {
+    notifyUsage: true,
+  });
 
   expect(actionType.executor).toHaveBeenCalledWith({
     actionId: '1',
@@ -321,3 +325,87 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
     `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
   );
 });
+
+test('does not log warning when alert executor succeeds', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).not.toBeCalled();
+});
+
+test('logs a warning when alert executor has an error', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'error',
+    message: 'message for action execution error',
+    serviceMessage: 'serviceMessage for action execution error',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: message for action execution error: serviceMessage for action execution error'
+  );
+});
+
+test('logs a warning when alert executor throws an error', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: an error occurred while running the action executor: this action execution is intended to fail'
+  );
+});
+
+test('logs a warning when alert executor returns invalid status', async () => {
+  const executorMock = setupActionExecutorMock();
+  // object typed as any as it has an invalid status value, but we want to test that
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const alertExecutionStatus: any = {
+    actionId: '1',
+    status: 'invalid-status',
+    message: 'message for action execution error',
+    serviceMessage: 'serviceMessage for action execution error',
+  };
+  executorMock.mockResolvedValue(alertExecutionStatus);
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: returned unexpected result "invalid-status"'
+  );
+});
+
+function setupActionExecutorMock() {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    name: 'action-1',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.name,
+    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  return actionType.executor;
+}

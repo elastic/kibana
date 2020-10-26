@@ -88,7 +88,11 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
 
   if (ts.isUnionTypeNode(node)) {
     const types = node.types.filter(discardNullOrUndefined);
-    return types.map((typeNode) => getConstraints(typeNode, program));
+    return types.reduce<any>((acc, typeNode) => {
+      const constraints = getConstraints(typeNode, program);
+      const contraintsArray = Array.isArray(constraints) ? constraints : [constraints];
+      return [...acc, ...contraintsArray];
+    }, []);
   }
 
   if (ts.isLiteralTypeNode(node) && ts.isLiteralExpression(node.literal)) {

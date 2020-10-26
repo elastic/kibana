@@ -9,6 +9,7 @@ import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import {
+  AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -49,6 +50,7 @@ import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
+import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 
 export interface MapsPluginSetupDependencies {
@@ -70,6 +72,7 @@ export interface MapsPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
+  savedObjects: SavedObjectsStart;
 }
 
 /**
@@ -131,9 +134,9 @@ export class MapsPlugin
       icon: `plugins/${APP_ID}/icon.svg`,
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      async mount(context, params) {
+      async mount(params: AppMountParameters) {
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(context, params);
+        return renderApp(params);
       },
     });
   }

@@ -37,7 +37,7 @@ export function initAPIAuthorization(
       return toolkit.next();
     }
 
-    logger.warn(`User not authorized for "${request.url.path}": responding with 404`);
-    return response.notFound();
+    logger.warn(`User not authorized for "${request.url.path}": responding with 403`);
+    return response.forbidden();
   });
 }

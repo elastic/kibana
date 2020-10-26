@@ -19,8 +19,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function executionStatusAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/79249
-  describe.skip('executionStatus', () => {
+  describe('executionStatus', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(async () => await objectRemover.removeAll());
@@ -65,7 +64,6 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
       dates.push(response.body.executionStatus.lastExecutionDate);
-      dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['ok']));
@@ -100,7 +98,6 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
       dates.push(response.body.executionStatus.lastExecutionDate);
-      dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['active']));
@@ -132,7 +129,6 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
       dates.push(response.body.executionStatus.lastExecutionDate);
-      dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['error']));
@@ -260,14 +256,16 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${id}`
     );
     expect(response.status).to.eql(200);
-    const { status } = response.body.executionStatus;
+
+    const { executionStatus } = response.body || {};
+    const { status } = executionStatus || {};
 
     const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
-      response.body.executionStatus
+      executionStatus
     )}`;
 
     if (statuses.has(status)) {
-      return response.body.executionStatus;
+      return executionStatus;
     }
 
     // eslint-disable-next-line no-console
@@ -291,13 +289,14 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/${findUri}`);
 
     expect(response.status).to.eql(200);
-    const { executionStatus } = response.body.data.find((obj: any) => obj.id === id);
+    const { executionStatus } = response.body.data.find((obj: any) => obj.id === id) || {};
+    const { status } = executionStatus || {};
 
     const message = `waitForFindStatus(${Array.from(statuses)}): got ${JSON.stringify(
       executionStatus
     )}`;
 
-    if (statuses.has(executionStatus.status)) {
+    if (statuses.has(status)) {
       return executionStatus;
     }
 
@@ -310,6 +309,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 }
 
 function expectErrorExecutionStatus(executionStatus: Record<string, any>, startDate: number) {
+  expect(executionStatus).to.be.ok();
   expect(executionStatus.status).to.equal('error');
 
   const statusDate = Date.parse(executionStatus.lastExecutionDate);

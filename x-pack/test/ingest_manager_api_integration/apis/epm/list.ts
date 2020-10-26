@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
       it('lists all packages from the registry', async function () {
         const fetchPackageList = async () => {
           const response = await supertest
-            .get('/api/ingest_manager/epm/packages')
+            .get('/api/fleet/epm/packages')
             .set('kbn-xsrf', 'xxx')
             .expect(200);
           return response.body;
@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
       it('lists all limited packages from the registry', async function () {
         const fetchLimitedPackageList = async () => {
           const response = await supertest
-            .get('/api/ingest_manager/epm/packages/limited')
+            .get('/api/fleet/epm/packages/limited')
             .set('kbn-xsrf', 'xxx')
             .expect(200);
           return response.body;

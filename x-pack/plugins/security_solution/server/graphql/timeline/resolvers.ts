@@ -44,7 +44,7 @@ export const createTimelineResolvers = (
 } => ({
   Query: {
     async getOneTimeline(root, args, { req }) {
-      return libs.timeline.getTimeline(req, args.id);
+      return libs.timeline.getTimeline(req, args.id, args.timelineType);
     },
     async getAllTimeline(root, args, { req }) {
       return libs.timeline.getAllTimeline(

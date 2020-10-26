@@ -46,8 +46,8 @@ describe('interpreter/functions#kibana', () => {
       timeRange: { from: '2', to: '3' },
     };
     context = {
-      search,
-      getInitialInput: () => input,
+      getSearchContext: () => search,
+      getSearchSessionId: () => undefined,
       types: {},
       variables: {},
       abortSignal: {} as any,

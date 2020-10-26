@@ -157,11 +157,13 @@ describe('Keystore', () => {
     it('adds a key/value pair', () => {
       const keystore = new Keystore('/data/unprotected.keystore');
       keystore.add('a3', 'baz');
+      keystore.add('a4', [1, 'a', 2, 'b']);
 
       expect(keystore.data).toEqual({
         'a1.b2.c3': 'foo',
         a2: 'bar',
         a3: 'baz',
+        a4: [1, 'a', 2, 'b'],
       });
     });
   });

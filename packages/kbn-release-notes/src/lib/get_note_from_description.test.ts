@@ -35,7 +35,8 @@ it('extracts expected components from html', () => {
         ## Release Note:
 
         Checkout this feature
-      `)
+      `),
+      'release note'
     )
   ).toMatchInlineSnapshot(`"Checkout this feature"`);
 
@@ -46,10 +47,11 @@ it('extracts expected components from html', () => {
 
         Fixes: #1234
 
-        #### Release Note:
+        #### Dev docs:
 
         We fixed an issue
-      `)
+      `),
+      'dev docs'
     )
   ).toMatchInlineSnapshot(`"We fixed an issue"`);
 
@@ -60,8 +62,9 @@ it('extracts expected components from html', () => {
 
         Fixes: #1234
 
-        Release note: Checkout feature foo
-      `)
+        OTHER TITLE: Checkout feature foo
+      `),
+      'other title'
     )
   ).toMatchInlineSnapshot(`"Checkout feature foo"`);
 
@@ -73,7 +76,8 @@ it('extracts expected components from html', () => {
         My PR description
 
            release note : bar
-      `)
+      `),
+      'release note'
     )
   ).toMatchInlineSnapshot(`"bar"`);
 });

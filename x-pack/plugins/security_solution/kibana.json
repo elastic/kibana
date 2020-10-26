@@ -15,7 +15,7 @@
     "inspector",
     "licensing",
     "maps",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "uiActions"
   ],
   "optionalPlugins": [
@@ -28,7 +28,8 @@
     "usageCollection",
     "lists",
     "home",
-    "telemetry"
+    "telemetry",
+    "telemetryManagementSection"
   ],
   "server": true,
   "ui": true,

@@ -24,6 +24,14 @@ export const downLabel = i18n.translate(
   }
 );
 
+export const typeLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.label', {
+  defaultMessage: 'Type',
+});
+
+export const typeAriaLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.ariaLabel', {
+  defaultMessage: 'Monitor type',
+});
+
 export const monitorUrlLinkAriaLabel = i18n.translate(
   'xpack.uptime.monitorStatusBar.monitorUrlLinkAriaLabel',
   {

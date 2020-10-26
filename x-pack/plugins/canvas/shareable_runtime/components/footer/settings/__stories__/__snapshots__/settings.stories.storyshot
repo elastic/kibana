@@ -38,7 +38,7 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
             onClick={[Function]}
             type="button"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="gear"
@@ -90,7 +90,7 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
             onClick={[Function]}
             type="button"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="gear"

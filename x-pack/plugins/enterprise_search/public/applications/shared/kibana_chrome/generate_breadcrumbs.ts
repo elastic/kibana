@@ -7,7 +7,8 @@
 import { useValues } from 'kea';
 import { EuiBreadcrumb } from '@elastic/eui';
 
-import { KibanaLogic } from '../../shared/kibana';
+import { KibanaLogic } from '../kibana';
+import { HttpLogic } from '../http';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,
@@ -66,12 +67,13 @@ export const useGenerateBreadcrumbs = (trail: TBreadcrumbTrail): TBreadcrumbs =>
 
 export const useEuiBreadcrumbs = (breadcrumbs: TBreadcrumbs): EuiBreadcrumb[] => {
   const { navigateToUrl, history } = useValues(KibanaLogic);
+  const { http } = useValues(HttpLogic);
 
   return breadcrumbs.map(({ text, path, shouldNotCreateHref }) => {
     const breadcrumb: EuiBreadcrumb = { text };
 
     if (path) {
-      breadcrumb.href = createHref(path, history, { shouldNotCreateHref });
+      breadcrumb.href = createHref(path, { history, http }, { shouldNotCreateHref });
       breadcrumb.onClick = (event) => {
         if (letBrowserHandleEvent(event)) return;
         event.preventDefault();

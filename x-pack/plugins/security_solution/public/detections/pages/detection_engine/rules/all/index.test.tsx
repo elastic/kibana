@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
-import { shallow, mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { shallow, mount } from 'enzyme';
 
 import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
 import { TestProviders } from '../../../../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { AllRules } from './index';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -26,6 +26,9 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../../../common/components/link_to');
+jest.mock('../../../../../common/lib/kibana');
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('./reducer', () => {
   return {
@@ -161,6 +164,14 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('AllRules', () => {
+  beforeEach(() => {
+    useKibanaMock().services.application.capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      actions: { show: true },
+    };
+  });
   it('renders correctly', () => {
     const wrapper = shallow(
       <AllRules
@@ -181,9 +192,8 @@ describe('AllRules', () => {
   });
 
   describe('rules tab', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
-      wrapper = mount(
+    it('renders correctly', async () => {
+      const wrapper = mount(
         <TestProviders>
           <AllRules
             createPrePackagedRules={jest.fn()}
@@ -199,14 +209,10 @@ describe('AllRules', () => {
           />
         </TestProviders>
       );
-    });
 
-    it('renders correctly', async () => {
-      await act(async () => {
-        await waitFor(() => {
-          expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
-          expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
+        expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
       });
     });
   });

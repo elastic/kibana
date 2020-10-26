@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AppMountParameters } from 'kibana/public';
 import { ViewMode } from '../../embeddable_plugin';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
@@ -31,7 +32,8 @@ import { NavAction } from '../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean
+  hideWriteControls: boolean,
+  onAppLeave?: AppMountParameters['onAppLeave']
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:

@@ -23,7 +23,12 @@ import { useColorRange, ColorRangeLegend } from '../../../../../components/color
 import { DataGrid, UseIndexDataReturnType } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { defaultSearchQuery, DataFrameAnalyticsConfig, SEARCH_SIZE } from '../../../../common';
+import {
+  defaultSearchQuery,
+  DataFrameAnalyticsConfig,
+  SEARCH_SIZE,
+  getAnalysisType,
+} from '../../../../common';
 
 import {
   ExpandableSection,
@@ -113,6 +118,8 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     indexData.rowCount,
     colorRange
   );
+  const analysisType =
+    jobConfig && jobConfig.analysis ? getAnalysisType(jobConfig.analysis) : undefined;
   const resultsSectionContent = (
     <>
       {jobConfig !== undefined && needsDestIndexPattern && (
@@ -133,6 +140,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             {columnsWithCharts.length > 0 && tableItems.length > 0 && (
               <DataGrid
                 {...indexData}
+                analysisType={analysisType}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
               />

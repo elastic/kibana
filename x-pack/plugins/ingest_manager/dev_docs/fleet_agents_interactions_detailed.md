@@ -40,7 +40,7 @@ When an agent checkin fleet:
 
 This is really similar to the checkin (same auth mecanism) and it's used for agent to acknowlege action received during checkin.
 
-An agent can acknowledge one or multiple actions by calling `POST /api/ingest_manager/fleet/agents/{agentId}/acks`
+An agent can acknowledge one or multiple actions by calling `POST /api/fleet/agents/{agentId}/acks`
 
 ## Other interactions
 

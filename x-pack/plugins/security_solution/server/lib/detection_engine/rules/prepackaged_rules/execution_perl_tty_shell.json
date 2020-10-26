@@ -30,12 +30,12 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

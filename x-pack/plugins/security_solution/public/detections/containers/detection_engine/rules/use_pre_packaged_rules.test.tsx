@@ -32,6 +32,10 @@ describe('usePrePackagedRules', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
+        getLoadPrebuiltRulesAndTemplatesButton:
+          result.current.getLoadPrebuiltRulesAndTemplatesButton,
+        getReloadPrebuiltRulesAndTemplatesButton:
+          result.current.getReloadPrebuiltRulesAndTemplatesButton,
         createPrePackagedRules: null,
         loading: true,
         loadingCreatePrePackagedRules: false,
@@ -63,6 +67,10 @@ describe('usePrePackagedRules', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
+        getLoadPrebuiltRulesAndTemplatesButton:
+          result.current.getLoadPrebuiltRulesAndTemplatesButton,
+        getReloadPrebuiltRulesAndTemplatesButton:
+          result.current.getReloadPrebuiltRulesAndTemplatesButton,
         createPrePackagedRules: result.current.createPrePackagedRules,
         loading: false,
         loadingCreatePrePackagedRules: false,
@@ -100,6 +108,10 @@ describe('usePrePackagedRules', () => {
       expect(resp).toEqual(true);
       expect(spyOnCreatePrepackagedRules).toHaveBeenCalled();
       expect(result.current).toEqual({
+        getLoadPrebuiltRulesAndTemplatesButton:
+          result.current.getLoadPrebuiltRulesAndTemplatesButton,
+        getReloadPrebuiltRulesAndTemplatesButton:
+          result.current.getReloadPrebuiltRulesAndTemplatesButton,
         createPrePackagedRules: result.current.createPrePackagedRules,
         loading: false,
         loadingCreatePrePackagedRules: false,

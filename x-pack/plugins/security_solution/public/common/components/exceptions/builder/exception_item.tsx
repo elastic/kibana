@@ -8,6 +8,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
@@ -41,7 +42,9 @@ interface BuilderExceptionListItemProps {
   listType: ExceptionListType;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
+  setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
+  ruleType?: Type;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -55,7 +58,9 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     andLogicIncluded,
     onDeleteExceptionItem,
     onChangeExceptionItem,
+    setErrorsExist,
     onlyShowListOperators = false,
+    ruleType,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -118,7 +123,9 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                         }
                         onChange={handleEntryChange}
+                        setErrorsExist={setErrorsExist}
                         onlyShowListOperators={onlyShowListOperators}
+                        ruleType={ruleType}
                       />
                     </MyOverflowContainer>
                     <BuilderEntryDeleteButtonComponent

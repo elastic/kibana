@@ -62,6 +62,7 @@ interface ActionAccordionFormProps {
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   capabilities: ApplicationStart['capabilities'];
 }
 
@@ -83,6 +84,7 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   capabilities,
   docLinks,
 }: ActionAccordionFormProps) => {
@@ -170,6 +172,16 @@ export const ActionForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, actionTypesIndex]);
+
+  useEffect(() => {
+    const hasActionWithBrokenConnector = actions.some(
+      (action) => !connectors.find((connector) => connector.id === action.id)
+    );
+    if (setHasActionsWithBrokenConnector) {
+      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions, connectors]);
 
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
@@ -267,7 +279,7 @@ export const ActionForm = ({
                     }}
                   >
                     <FormattedMessage
-                      defaultMessage="Add new"
+                      defaultMessage="Add connector"
                       id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
                     />
                   </EuiButtonEmpty>

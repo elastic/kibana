@@ -28,7 +28,6 @@ import { OnChangeItemsPerPage, OnChangePage } from '../events';
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { PaginationEuiFlexItem } from '../../../../common/components/paginated_table';
 import { useManageTimeline } from '../../manage_timeline';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
@@ -179,13 +178,23 @@ interface PagingControlProps {
   activePage: number;
   isLoading: boolean;
   onPageClick: OnChangePage;
+  totalCount: number;
   totalPages: number;
 }
+
+const TimelinePaginationContainer = styled.div<{ hideLastPage: boolean }>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
+    }
+  }
+`;
 
 export const PagingControlComponent: React.FC<PagingControlProps> = ({
   activePage,
   isLoading,
   onPageClick,
+  totalCount,
   totalPages,
 }) => {
   if (isLoading) {
@@ -197,12 +206,14 @@ export const PagingControlComponent: React.FC<PagingControlProps> = ({
   }
 
   return (
-    <EuiPagination
-      data-test-subj="timeline-pagination"
-      pageCount={totalPages}
-      activePage={activePage}
-      onPageClick={onPageClick}
-    />
+    <TimelinePaginationContainer hideLastPage={totalCount > 9999}>
+      <EuiPagination
+        data-test-subj="timeline-pagination"
+        pageCount={totalPages}
+        activePage={activePage}
+        onPageClick={onPageClick}
+      />
+    </TimelinePaginationContainer>
   );
 };
 
@@ -223,8 +234,6 @@ interface FooterProps {
   itemsPerPageOptions: number[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
-  serverSideEventCount: number;
-  showMorePagesIndicator: boolean;
   totalCount: number;
 }
 
@@ -241,8 +250,6 @@ export const FooterComponent = ({
   itemsPerPageOptions,
   onChangeItemsPerPage,
   onChangePage,
-  serverSideEventCount,
-  showMorePagesIndicator,
   totalCount,
 }: FooterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -291,11 +298,6 @@ export const FooterComponent = ({
     itemsPerPage,
     totalCount,
   ]);
-
-  const PaginationWrapper = useMemo(
-    () => (showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem),
-    [showMorePagesIndicator]
-  );
 
   useEffect(() => {
     if (paginationLoading && !isLoading) {
@@ -347,7 +349,7 @@ export const FooterComponent = ({
               items={rowItems}
               itemsCount={itemsCount}
               onClick={onButtonClick}
-              serverSideEventCount={serverSideEventCount}
+              serverSideEventCount={totalCount}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -373,15 +375,14 @@ export const FooterComponent = ({
               </b>
             </EuiText>
           ) : (
-            <PaginationWrapper>
-              <PagingControl
-                data-test-subj="paging-control"
-                totalPages={totalPages}
-                activePage={activePage}
-                onPageClick={handleChangePageClick}
-                isLoading={isLoading}
-              />
-            </PaginationWrapper>
+            <PagingControl
+              data-test-subj="paging-control"
+              totalCount={totalCount}
+              totalPages={totalPages}
+              activePage={activePage}
+              onPageClick={handleChangePageClick}
+              isLoading={isLoading}
+            />
           )}
         </EuiFlexItem>
 

@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -290,6 +291,38 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemAdd('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
+      });
+    });
+
+    describe('refresh interval', function () {
+      it('should refetch when autofresh is enabled', async () => {
+        const intervalS = 5;
+        await PageObjects.timePicker.startAutoRefresh(intervalS);
+
+        // check inspector panel request stats for timestamp
+        await inspector.open();
+
+        const getRequestTimestamp = async () => {
+          const requestStats = await inspector.getTableData();
+          const requestTimestamp = requestStats.filter((r) =>
+            r[0].includes('Request timestamp')
+          )[0][1];
+          return requestTimestamp;
+        };
+
+        const requestTimestampBefore = await getRequestTimestamp();
+        await retry.waitFor('refetch because of refresh interval', async () => {
+          const requestTimestampAfter = await getRequestTimestamp();
+          log.debug(
+            `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
+          );
+          return requestTimestampBefore !== requestTimestampAfter;
+        });
+      });
+
+      after(async () => {
+        await inspector.close();
+        await PageObjects.timePicker.pauseAutoRefresh();
       });
     });
   });

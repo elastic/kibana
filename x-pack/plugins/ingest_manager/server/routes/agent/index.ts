@@ -14,6 +14,7 @@ import Ajv from 'ajv';
 import {
   PLUGIN_ID,
   AGENT_API_ROUTES,
+  AGENT_API_ROUTES_7_9,
   LIMITED_CONCURRENCY_ROUTE_TAG,
   AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
 } from '../../constants';
@@ -118,11 +119,33 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     getAgentsHandler
   );
 
-  const pollingRequestTimeout = config.fleet.pollingRequestTimeout;
+  const pollingRequestTimeout = config.agents.pollingRequestTimeout;
   // Agent checkin
   router.post(
     {
       path: AGENT_API_ROUTES.CHECKIN_PATTERN,
+      validate: {
+        params: makeValidator(PostAgentCheckinRequestParamsJSONSchema),
+        body: makeValidator(PostAgentCheckinRequestBodyJSONSchema),
+      },
+      options: {
+        tags: [],
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
+          ? {
+              timeout: {
+                idleSocket: pollingRequestTimeout,
+              },
+            }
+          : {}),
+      },
+    },
+    postAgentCheckinHandler
+  );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.CHECKIN_PATTERN,
       validate: {
         params: makeValidator(PostAgentCheckinRequestParamsJSONSchema),
         body: makeValidator(PostAgentCheckinRequestBodyJSONSchema),
@@ -153,11 +176,41 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     },
     postAgentEnrollHandler
   );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.ENROLL_PATTERN,
+      validate: {
+        body: makeValidator(PostAgentEnrollRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
+    },
+    postAgentEnrollHandler
+  );
 
   // Agent acks
   router.post(
     {
       path: AGENT_API_ROUTES.ACKS_PATTERN,
+      validate: {
+        params: makeValidator(PostAgentAcksRequestParamsJSONSchema),
+        body: makeValidator(PostAgentAcksRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
+    },
+    postAgentAcksHandlerBuilder({
+      acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
+      authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
+      getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
+        appContextService
+      ),
+      saveAgentEvents: AgentService.saveAgentEvents,
+    })
+  );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.ACKS_PATTERN,
       validate: {
         params: makeValidator(PostAgentAcksRequestParamsJSONSchema),
         body: makeValidator(PostAgentAcksRequestBodyJSONSchema),

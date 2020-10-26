@@ -1,0 +1,33 @@
+post:
+  summary: Agent policy - Delete
+  operationId: post-agent-policy-delete
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                success:
+                  type: boolean
+              required:
+                - id
+                - success
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            agentPolicyIds:
+              type: array
+              items:
+                type: string
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+parameters: []

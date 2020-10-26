@@ -55,6 +55,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -67,11 +68,11 @@ import {
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectEqlRuleType,
+  waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -88,11 +89,12 @@ const expectedNumberOfAlerts = 7;
 const expectedNumberOfSequenceAlerts = 1;
 
 describe('Detection rules, EQL', () => {
-  before(() => {
+  beforeEach(() => {
     esArchiverLoad('timeline');
   });
 
-  after(() => {
+  afterEach(() => {
+    deleteRule();
     esArchiverUnload('timeline');
   });
 
@@ -130,7 +132,7 @@ describe('Detection rules, EQL', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${eqlRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${eqlRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', eqlRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', eqlRule.severity);
@@ -144,7 +146,7 @@ describe('Detection rules, EQL', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${eqlRule.customQuery} `);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', eqlRule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Event Correlation');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });
@@ -159,14 +161,10 @@ describe('Detection rules, EQL', () => {
       );
     });
 
-    refreshPage();
     waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('eql', expectedNumberOfAlerts);
-      });
+    cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
     cy.get(ALERT_RULE_NAME).first().should('have.text', eqlRule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
@@ -198,14 +196,10 @@ describe('Detection rules, EQL', () => {
 
     filterByCustomRules();
     goToRuleDetails();
-    refreshPage();
     waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('eql', expectedNumberOfSequenceAlerts);
-      });
+    cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfSequenceAlerts);
     cy.get(ALERT_RULE_NAME).first().should('have.text', eqlSequenceRule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');

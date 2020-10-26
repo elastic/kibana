@@ -55,7 +55,6 @@ export function createTileMapTypeDefinition(dependencies) {
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
-    requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     responseHandler: convertToGeoJson,
     editorConfig: {

@@ -6,13 +6,15 @@
 
 import { CoreStart } from '../../../../src/core/public';
 import { LensPluginStartDependencies } from './plugin';
-import { AttributeService } from '../../../../src/plugins/dashboard/public';
+import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import {
   LensSavedObjectAttributes,
   LensByValueInput,
   LensByReferenceInput,
 } from './editor_frame_service/embeddable/embeddable';
-import { SavedObjectIndexStore, DOC_TYPE } from './persistence';
+import { SavedObjectIndexStore } from './persistence';
+import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { DOC_TYPE } from '../common';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,
@@ -25,12 +27,12 @@ export function getLensAttributeService(
   startDependencies: LensPluginStartDependencies
 ): LensAttributeService {
   const savedObjectStore = new SavedObjectIndexStore(core.savedObjects.client);
-  return startDependencies.dashboard.getAttributeService<
+  return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
   >(DOC_TYPE, {
-    customSaveMethod: async (
+    saveMethod: async (
       type: string,
       attributes: LensSavedObjectAttributes,
       savedObjectId?: string
@@ -42,11 +44,34 @@ export function getLensAttributeService(
       });
       return { id: savedDoc.savedObjectId };
     },
-    customUnwrapMethod: (savedObject) => {
+    unwrapMethod: async (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
+      const savedObject = await core.savedObjects.client.get<LensSavedObjectAttributes>(
+        DOC_TYPE,
+        savedObjectId
+      );
       return {
         ...savedObject.attributes,
         references: savedObject.references,
       };
+    },
+    checkForDuplicateTitle: (props: OnSaveProps) => {
+      const savedObjectsClient = core.savedObjects.client;
+      const overlays = core.overlays;
+      return checkForDuplicateTitle(
+        {
+          title: props.newTitle,
+          copyOnSave: false,
+          lastSavedTitle: '',
+          getEsType: () => DOC_TYPE,
+          getDisplayName: () => DOC_TYPE,
+        },
+        props.isTitleDuplicateConfirmed,
+        props.onTitleDuplicate,
+        {
+          savedObjectsClient,
+          overlays,
+        }
+      );
     },
   });
 }

@@ -43,6 +43,7 @@ import {
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
+import { licenseService } from '../../services';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -212,6 +213,12 @@ export const installPackageByUploadHandler: RequestHandler<
   undefined,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
+  if (!licenseService.isEnterprise()) {
+    return response.customError({
+      statusCode: 403,
+      body: { message: 'Requires Enterprise license' },
+    });
+  }
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later

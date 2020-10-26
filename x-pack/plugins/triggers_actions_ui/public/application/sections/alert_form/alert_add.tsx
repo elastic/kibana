@@ -27,6 +27,8 @@ import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
+import { ConfirmAlertSave } from './confirm_alert_save';
+import { hasShowActionsCapability } from '../../lib/capabilities';
 
 interface AlertAddProps {
   consumer: string;
@@ -59,6 +61,7 @@ export const AlertAdd = ({
 
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
 
   const setAlert = (value: any) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
@@ -74,7 +77,10 @@ export const AlertAdd = ({
     alertTypeRegistry,
     actionTypeRegistry,
     docLinks,
+    capabilities,
   } = useAlertsContext();
+
+  const canShowActions = hasShowActionsCapability(capabilities);
 
   useEffect(() => {
     setAlertProperty('alertTypeId', alertTypeId);
@@ -84,6 +90,17 @@ export const AlertAdd = ({
     setAddFlyoutVisibility(false);
     setAlert(initialAlert);
   }, [initialAlert, setAddFlyoutVisibility]);
+
+  const saveAlertAndCloseFlyout = async () => {
+    const savedAlert = await onSaveAlert();
+    setIsSaving(false);
+    if (savedAlert) {
+      closeFlyout();
+      if (reloadAlerts) {
+        reloadAlerts();
+      }
+    }
+  };
 
   if (!addFlyoutVisible) {
     return null;
@@ -109,12 +126,15 @@ export const AlertAdd = ({
         !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;
 
+  // Confirm before saving if user is able to add actions but hasn't added any to this alert
+  const shouldConfirmSave = canShowActions && alert.actions?.length === 0;
+
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await createAlert({ http, alert });
       toastNotifications.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-          defaultMessage: "Saved '{alertName}'",
+          defaultMessage: 'Created alert "{alertName}"',
           values: {
             alertName: newAlert.name,
           },
@@ -195,13 +215,10 @@ export const AlertAdd = ({
                   isLoading={isSaving}
                   onClick={async () => {
                     setIsSaving(true);
-                    const savedAlert = await onSaveAlert();
-                    setIsSaving(false);
-                    if (savedAlert) {
-                      closeFlyout();
-                      if (reloadAlerts) {
-                        reloadAlerts();
-                      }
+                    if (shouldConfirmSave) {
+                      setIsConfirmAlertSaveModalOpen(true);
+                    } else {
+                      await saveAlertAndCloseFlyout();
                     }
                   }}
                 >
@@ -214,6 +231,18 @@ export const AlertAdd = ({
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         </HealthCheck>
+        {isConfirmAlertSaveModalOpen && (
+          <ConfirmAlertSave
+            onConfirm={async () => {
+              setIsConfirmAlertSaveModalOpen(false);
+              await saveAlertAndCloseFlyout();
+            }}
+            onCancel={() => {
+              setIsSaving(false);
+              setIsConfirmAlertSaveModalOpen(false);
+            }}
+          />
+        )}
       </EuiFlyout>
     </EuiPortal>
   );

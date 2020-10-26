@@ -11,7 +11,7 @@
     "dataEnhanced",
     "visTypeTimeseries",
     "alerts",
-    "triggers_actions_ui"
+    "triggersActionsUi"
   ],
   "optionalPlugins": ["ml", "observability", "home"],
   "server": true,

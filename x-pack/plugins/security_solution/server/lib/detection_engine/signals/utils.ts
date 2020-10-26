@@ -7,6 +7,7 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
@@ -514,17 +515,55 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
   });
 };
 
-export const createSearchAfterReturnTypeFromResponse = ({
+/**
+ * Given a SignalSearchResponse this will return a valid last date if it can find one, otherwise it
+ * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
+ * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
+ * is not correctly ISO8601 or epoch milliseconds formatted.
+ * @param searchResult The result to try and parse out the timestamp.
+ * @param timestampOverride The timestamp override to use its values if we have it.
+ */
+export const lastValidDate = ({
   searchResult,
+  timestampOverride,
 }: {
   searchResult: SignalSearchResponse;
+  timestampOverride: TimestampOverrideOrUndefined;
+}): Date | undefined => {
+  if (searchResult.hits.hits.length === 0) {
+    return undefined;
+  } else {
+    const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
+    const timestamp = timestampOverride ?? '@timestamp';
+    const timestampValue =
+      lastRecord.fields != null && lastRecord.fields[timestamp] != null
+        ? lastRecord.fields[timestamp][0]
+        : lastRecord._source[timestamp];
+    const lastTimestamp =
+      typeof timestampValue === 'string' || typeof timestampValue === 'number'
+        ? timestampValue
+        : undefined;
+    if (lastTimestamp != null) {
+      const tempMoment = moment(lastTimestamp);
+      if (tempMoment.isValid()) {
+        return tempMoment.toDate();
+      } else {
+        return undefined;
+      }
+    }
+  }
+};
+
+export const createSearchAfterReturnTypeFromResponse = ({
+  searchResult,
+  timestampOverride,
+}: {
+  searchResult: SignalSearchResponse;
+  timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
     success: searchResult._shards.failed === 0,
-    lastLookBackDate:
-      searchResult.hits.hits.length > 0
-        ? new Date(searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp'])
-        : undefined,
+    lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
   });
 };
 

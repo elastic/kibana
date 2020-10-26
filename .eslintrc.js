@@ -1046,9 +1046,7 @@ module.exports = {
      */
     {
       // typescript only for front and back end
-      files: [
-        'x-pack/plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
-      ],
+      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1180,13 +1178,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
-      env: {
-        jquery: true,
-      },
-    },
-    {
-      files: ['x-pack/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },

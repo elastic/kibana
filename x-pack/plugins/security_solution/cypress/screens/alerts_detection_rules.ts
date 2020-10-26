@@ -33,6 +33,8 @@ export const LOADING_INITIAL_PREBUILT_RULES_TABLE =
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
+export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
+
 export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
 
 export const RISK_SCORE = '[data-test-subj="riskScore"]';

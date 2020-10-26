@@ -16,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const testUsers = [USER.ML_POWERUSER, USER.ML_POWERUSER_SPACES];
 
-  // flaky UI behavior makes this test fail, see https://github.com/elastic/kibana/issues/78965
-  describe.skip('for user with full ML access', function () {
+  describe('for user with full ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
 
     describe('with no data loaded', function () {

@@ -16,7 +16,6 @@ import { buildCommentUserActionItem } from '../../../../services/user_actions/he
 import { escapeHatch, transformNewComment, wrapError, flattenCaseSavedObject } from '../../utils';
 import { RouteDeps } from '../../types';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { getConnectorId } from '../helpers';
 
 export function initPostCommentApi({
   caseConfigureService,
@@ -52,7 +51,7 @@ export function initPostCommentApi({
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
-        const [newComment, updatedCase, myCaseConfigure] = await Promise.all([
+        const [newComment, updatedCase] = await Promise.all([
           caseService.postNewComment({
             client,
             attributes: transformNewComment({
@@ -79,10 +78,8 @@ export function initPostCommentApi({
             },
             version: myCase.version,
           }),
-          caseConfigureService.find({ client }),
         ]);
 
-        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
         const totalCommentsFindByCases = await caseService.getAllCaseComments({
           client,
           caseId,
@@ -130,7 +127,6 @@ export function initPostCommentApi({
                 references: myCase.references,
               },
               comments: comments.saved_objects,
-              caseConfigureConnectorId,
             })
           ),
         });

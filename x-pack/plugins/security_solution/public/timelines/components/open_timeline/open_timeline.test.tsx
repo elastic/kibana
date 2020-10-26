@@ -22,6 +22,15 @@ import { TimelineType, TimelineStatus } from '../../../../common/types/timeline'
 
 jest.mock('../../../common/lib/kibana');
 
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+
+  return {
+    ...actual,
+    useParams: jest.fn().mockReturnValue({ tabName: 'default' }),
+  };
+});
+
 describe('OpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';

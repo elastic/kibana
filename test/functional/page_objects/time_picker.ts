@@ -269,6 +269,17 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       return moment.duration(endMoment.diff(startMoment)).asHours();
     }
 
+    public async startAutoRefresh(intervalS = 3) {
+      await this.openQuickSelectTimeMenu();
+      await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
+      const refreshConfig = await this.getRefreshConfig(true);
+      if (refreshConfig.isPaused) {
+        log.debug('start auto refresh');
+        await testSubjects.click('superDatePickerToggleRefreshButton');
+      }
+      await this.closeQuickSelectTimeMenu();
+    }
+
     public async pauseAutoRefresh() {
       log.debug('pauseAutoRefresh');
       const refreshConfig = await this.getRefreshConfig(true);

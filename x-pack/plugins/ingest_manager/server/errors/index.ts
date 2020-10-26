@@ -18,6 +18,8 @@ export class RegistryConnectionError extends RegistryError {}
 export class RegistryResponseError extends RegistryError {}
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
+export class AgentPolicyError extends IngestManagerError {}
+export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
 export class PackageInvalidArchiveError extends IngestManagerError {}
 export class PackageCacheError extends IngestManagerError {}

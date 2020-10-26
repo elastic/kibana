@@ -627,7 +627,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .auth(KIBANA_ADMIN_USERNAME, KIBANA_ADMIN_PASSWORD)
           .send()
-          .expect(404);
+          .expect(403);
       });
 
       // Since this test re-encrypts objects it should always go last in this suite.

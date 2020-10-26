@@ -30,7 +30,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const [packagePolicies, setPackagePolicies] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -106,7 +106,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 'xpack.ingestManager.deletePackagePolicy.successSingleNotificationTitle',
                 {
                   defaultMessage: "Deleted integration '{id}'",
-                  values: { id: successfulResults[0].id },
+                  values: { id: successfulResults[0].name || successfulResults[0].id },
                 }
               );
           notifications.toasts.addSuccess(successMessage);

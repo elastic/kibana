@@ -99,5 +99,5 @@ export default {
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
-  reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
+  reporters: ['default', '<rootDir>/packages/kbn-test/target/jest/junit_reporter'],
 };

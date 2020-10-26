@@ -25,7 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { protocol, hostname, port } = kbnTestServer;
 
   const kibanaUrl = Url.format({
-    protocol,
     hostname,
     port,
   });
@@ -207,6 +206,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   events: { file: false, network: true, process: true },
                   logging: { file: 'info' },
                   malware: { mode: 'prevent' },
+                  popup: {
+                    malware: {
+                      enabled: true,
+                      message: '',
+                    },
+                  },
                 },
                 windows: {
                   events: {
@@ -220,6 +225,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   logging: { file: 'info' },
                   malware: { mode: 'prevent' },
+                  popup: {
+                    malware: {
+                      enabled: true,
+                      message: '',
+                    },
+                  },
                 },
               },
               streams: [],
@@ -237,6 +248,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           fleet: {
             kibana: {
               hosts: [kibanaUrl],
+              protocol,
             },
           },
           revision: 3,
@@ -276,7 +288,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await actionsButton.click();
         const menuPanel = await testSubjects.find('endpointActionsMenuPanel');
         const actionItems = await menuPanel.findAllByTagName<'button'>('button');
-        const expectedItems = ['Edit Security Policy', 'View Trusted Applications'];
+        const expectedItems = ['Edit Policy', 'Edit Trusted Applications'];
 
         for (const action of actionItems) {
           const buttonText = await action.getVisibleText();

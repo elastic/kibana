@@ -25,21 +25,21 @@ NoteContainer.displayName = 'NoteContainer';
 interface NoteCardsCompProps {
   children: React.ReactNode;
 }
+const NoteCardsCompContainer = styled(EuiPanel)`
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+`;
+NoteCardsCompContainer.displayName = 'NoteCardsCompContainer';
 
 const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
-  <EuiPanel
-    data-test-subj="note-cards"
-    hasShadow={false}
-    paddingSize="none"
-    style={{ border: 'none' }}
-  >
+  <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
     {children}
-  </EuiPanel>
+  </NoteCardsCompContainer>
 ));
 NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
-  padding: 0 5px;
   margin-bottom: 5px;
 `;
 NotesContainer.displayName = 'NotesContainer';

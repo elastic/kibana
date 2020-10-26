@@ -46,9 +46,10 @@ interface Props {
   ranks: number[];
   thresholds: Thresholds;
   title: string;
+  isCls?: boolean;
 }
 
-export function PaletteLegends({ ranks, title, onItemHover, thresholds }: Props) {
+export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   const palette = euiPaletteForStatus(3);
@@ -68,7 +69,7 @@ export function PaletteLegends({ ranks, title, onItemHover, thresholds }: Props)
           }}
         >
           <EuiToolTip
-            content={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind])}
+            content={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
             position="bottom"
           >
             <StyledSpan darkMode={darkMode}>

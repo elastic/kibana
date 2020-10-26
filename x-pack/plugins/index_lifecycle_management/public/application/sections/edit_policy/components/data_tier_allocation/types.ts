@@ -19,4 +19,10 @@ export interface SharedProps {
   isShowingErrors: boolean;
   nodes: ListNodesRouteResponse['nodesByAttributes'];
   hasNodeAttributes: boolean;
+  /**
+   * When on Cloud we want to disable the data tier allocation option when we detect that we are not
+   * using node roles in our Node config yet. See {@link ListNodesRouteResponse} for information about how this is
+   * detected.
+   */
+  disableDataTierOption: boolean;
 }

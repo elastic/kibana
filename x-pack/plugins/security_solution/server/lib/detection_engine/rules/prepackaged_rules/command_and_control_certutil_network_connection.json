@@ -30,12 +30,12 @@
       "technique": [
         {
           "id": "T1105",
-          "name": "Remote File Copy",
+          "name": "Ingress Tool Transfer",
           "reference": "https://attack.mitre.org/techniques/T1105/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

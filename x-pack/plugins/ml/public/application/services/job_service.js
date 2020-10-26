@@ -509,10 +509,10 @@ class JobService {
                 fields[job.data_description.time_field] = {};
               }
 
-              // console.log('fields: ', fields);
               const fieldsList = Object.keys(fields);
               if (fieldsList.length) {
-                body._source = fieldsList;
+                body.fields = fieldsList;
+                body._source = false;
               }
             }
 
@@ -805,7 +805,7 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   }
 
   path += `?_g=(ml:(jobIds:!(${idString}))`;
-  path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
+  path += `,refreshInterval:(display:Off,pause:!t,value:0),time:(from:'${from}'`;
   path += `,to:'${to}'`;
   if (mode === 'invalid') {
     path += `,mode:invalid`;

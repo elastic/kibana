@@ -34,7 +34,6 @@ import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines_ro
 import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines_route';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/get_draft_timelines_route';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_timelines_route';
-import { eqlValidationRoute } from '../lib/detection_engine/routes/eql/validation_route';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
@@ -95,7 +94,4 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
-
-  // Route used by the UI for form validation
-  eqlValidationRoute(router);
 };

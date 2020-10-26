@@ -88,11 +88,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = resolveImportErrorsTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     // use singleRequest to reduce execution time and/or test combined cases
     const singleRequest = true;
@@ -107,7 +107,11 @@ export default function ({ getService }: FtrProviderContext) {
             createNewCopies,
             spaceId,
             singleRequest,
-            responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype', 'sharedtype']),
+            responseBodyOverride: expectSavedObjectForbidden([
+              'globaltype',
+              'isolatedtype',
+              'sharedtype',
+            ]),
           }),
         ].flat(),
         authorized: createTestDefinitions(all, false, { createNewCopies, spaceId, singleRequest }),
@@ -126,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite,
           spaceId,
           singleRequest,
-          responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype']),
+          responseBodyOverride: expectSavedObjectForbidden(['globaltype', 'isolatedtype']),
         }),
         createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
       ].flat(),

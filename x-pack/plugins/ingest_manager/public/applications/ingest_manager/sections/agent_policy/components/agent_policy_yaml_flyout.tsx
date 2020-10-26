@@ -51,7 +51,9 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         {error.message}
       </EuiCallOut>
     ) : (
-      <EuiCodeBlock language="yaml" isCopyable fontSize="m">
+      // Property 'whiteSpace' does not exist on type 'IntrinsicAttributes & CommonProps & OwnProps & HTMLAttributes<HTMLElement> & { children?: ReactNode; }'.
+      // @ts-expect-error linter complains whiteSpace isn't available but docs show it on EuiCodeBlockImpl
+      <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
         {fullAgentPolicyToYaml(yamlData!.item)}
       </EuiCodeBlock>
     );

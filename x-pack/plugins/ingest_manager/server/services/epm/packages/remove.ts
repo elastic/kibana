@@ -44,9 +44,6 @@ export async function removeInstallation(options: {
       `unable to remove package with existing package policy(s) in use by agent(s)`
     );
 
-  // recreate or delete index patterns when a package is uninstalled
-  await installIndexPatterns(savedObjectsClient);
-
   // Delete the installed assets
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
   await deleteAssets(installedAssets, savedObjectsClient, callCluster);
@@ -54,6 +51,11 @@ export async function removeInstallation(options: {
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+
+  // recreate or delete index patterns when a package is uninstalled
+  // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
+  // from the registry again and reinstall the index patterns
+  await installIndexPatterns(savedObjectsClient);
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry

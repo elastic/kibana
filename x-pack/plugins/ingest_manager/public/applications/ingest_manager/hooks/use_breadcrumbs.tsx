@@ -18,6 +18,7 @@ const BASE_BREADCRUMB: ChromeBreadcrumb = {
 const breadcrumbGetters: {
   [key in Page]: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
 } = {
+  base: () => [BASE_BREADCRUMB],
   overview: () => [
     BASE_BREADCRUMB,
     {

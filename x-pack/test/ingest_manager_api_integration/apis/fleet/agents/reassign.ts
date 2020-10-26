@@ -23,21 +23,19 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should allow to reassign single agent', async () => {
       await supertest
-        .put(`/api/ingest_manager/fleet/agents/agent1/reassign`)
+        .put(`/api/fleet/agents/agent1/reassign`)
         .set('kbn-xsrf', 'xxx')
         .send({
           policy_id: 'policy2',
         })
         .expect(200);
-      const { body } = await supertest
-        .get(`/api/ingest_manager/fleet/agents/agent1`)
-        .set('kbn-xsrf', 'xxx');
+      const { body } = await supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx');
       expect(body.item.policy_id).to.eql('policy2');
     });
 
     it('should throw an error for invalid policy id for single reassign', async () => {
       await supertest
-        .put(`/api/ingest_manager/fleet/agents/agent1/reassign`)
+        .put(`/api/fleet/agents/agent1/reassign`)
         .set('kbn-xsrf', 'xxx')
         .send({
           policy_id: 'INVALID_ID',
@@ -47,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should allow to reassign multiple agents by id', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/bulk_reassign`)
+        .post(`/api/fleet/agents/bulk_reassign`)
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: ['agent2', 'agent3'],
@@ -55,8 +53,8 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       const [agent2data, agent3data] = await Promise.all([
-        supertest.get(`/api/ingest_manager/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
-        supertest.get(`/api/ingest_manager/fleet/agents/agent3`).set('kbn-xsrf', 'xxx'),
+        supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+        supertest.get(`/api/fleet/agents/agent3`).set('kbn-xsrf', 'xxx'),
       ]);
       expect(agent2data.body.item.policy_id).to.eql('policy2');
       expect(agent3data.body.item.policy_id).to.eql('policy2');
@@ -64,16 +62,14 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should allow to reassign multiple agents by kuery', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/bulk_reassign`)
+        .post(`/api/fleet/agents/bulk_reassign`)
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: 'fleet-agents.active: true',
           policy_id: 'policy2',
         })
         .expect(200);
-      const { body } = await supertest
-        .get(`/api/ingest_manager/fleet/agents`)
-        .set('kbn-xsrf', 'xxx');
+      const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
       expect(body.total).to.eql(4);
       body.list.forEach((agent: any) => {
         expect(agent.policy_id).to.eql('policy2');
@@ -82,7 +78,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should throw an error for invalid policy id for bulk reassign', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/bulk_reassign`)
+        .post(`/api/fleet/agents/bulk_reassign`)
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: ['agent2', 'agent3'],

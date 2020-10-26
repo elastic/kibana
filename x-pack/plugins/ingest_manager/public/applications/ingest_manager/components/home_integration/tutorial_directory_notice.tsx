@@ -16,10 +16,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import {
-  TutorialDirectoryNoticeComponent,
-  TutorialDirectoryHeaderLinkComponent,
-} from 'src/plugins/home/public';
+import type { TutorialDirectoryNoticeComponent } from 'src/plugins/home/public';
 import { sendPutSettings, useGetSettings, useLink, useCapabilities } from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
@@ -33,7 +30,7 @@ const tutorialDirectoryNoticeState$ = new BehaviorSubject({
   hasSeenNotice: false,
 });
 
-export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
+const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
   const { getHref } = useLink();
   const { show: hasIngestManager } = useCapabilities();
   const { data: settingsData, isLoading } = useGetSettings();
@@ -64,7 +61,7 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
         title={
           <FormattedMessage
             id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle"
-            defaultMessage="{newPrefix} Elastic Agent and Ingest Manager Beta"
+            defaultMessage="{newPrefix} Elastic Agent and Fleet Beta"
             values={{
               newPrefix: (
                 <strong>
@@ -101,8 +98,8 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
             <div>
               <EuiButton size="s" href={getHref('overview')}>
                 <FormattedMessage
-                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText"
-                  defaultMessage="Try Ingest Manager Beta"
+                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.fleetAppButtonText"
+                  defaultMessage="Try Fleet Beta"
                 />
               </EuiButton>
             </div>
@@ -128,27 +125,6 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
   ) : null;
 });
 
-export const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {
-  const { getHref } = useLink();
-  const { show: hasIngestManager } = useCapabilities();
-  const [noticeState, setNoticeState] = useState({
-    settingsDataLoaded: false,
-    hasSeenNotice: false,
-  });
-
-  useEffect(() => {
-    const subscription = tutorialDirectoryNoticeState$.subscribe((value) => setNoticeState(value));
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  return hasIngestManager && noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
-    <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
-      <FormattedMessage
-        id="xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText"
-        defaultMessage="Try Ingest Manager Beta"
-      />
-    </EuiButtonEmpty>
-  ) : null;
-});
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default TutorialDirectoryNotice;

@@ -11,6 +11,7 @@ import { RoutingAction } from '../../../../common/store/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE,
 } from '../../../common/constants';
@@ -20,7 +21,7 @@ import {
   FailedResourceState,
   LoadedResourceState,
   LoadingResourceState,
-  PaginationInfo,
+  Pagination,
   StaleResourceState,
   TrustedAppsListData,
   TrustedAppsListPageState,
@@ -32,11 +33,14 @@ import { TrustedAppsListResourceStateChanged } from '../store/action';
 
 const OS_LIST: Array<TrustedApp['os']> = ['windows', 'macos', 'linux'];
 
-export const createSampleTrustedApp = (i: number): TrustedApp => {
+const generate = <T>(count: number, generator: (i: number) => T) =>
+  [...new Array(count).keys()].map(generator);
+
+export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedApp => {
   return {
     id: String(i),
-    name: `trusted app ${i}`,
-    description: `Trusted App ${i}`,
+    name: generate(longTexts ? 10 : 1, () => `trusted app ${i}`).join(' '),
+    description: generate(longTexts ? 10 : 1, () => `Trusted App ${i}`).join(' '),
     created_at: '1 minute ago',
     created_by: 'someone',
     os: OS_LIST[i % 3],
@@ -44,20 +48,30 @@ export const createSampleTrustedApp = (i: number): TrustedApp => {
   };
 };
 
-export const createSampleTrustedApps = (paginationInfo: PaginationInfo): TrustedApp[] => {
-  return [...new Array(paginationInfo.size).keys()].map(createSampleTrustedApp);
+export const createSampleTrustedApps = (
+  pagination: Partial<Pagination>,
+  longTexts?: boolean
+): TrustedApp[] => {
+  const fullPagination = { ...createDefaultPagination(), ...pagination };
+
+  return generate(fullPagination.pageSize, (i: number) => createSampleTrustedApp(i, longTexts));
 };
 
 export const createTrustedAppsListData = (
-  paginationInfo: PaginationInfo,
-  totalItemsCount: number,
-  timestamp: number
-) => ({
-  items: createSampleTrustedApps(paginationInfo),
-  totalItemsCount,
-  paginationInfo,
-  timestamp,
-});
+  pagination: Partial<Pagination>,
+  timestamp: number,
+  longTexts?: boolean
+) => {
+  const fullPagination = { ...createDefaultPagination(), ...pagination };
+
+  return {
+    items: createSampleTrustedApps(fullPagination, longTexts),
+    pageSize: fullPagination.pageSize,
+    pageIndex: fullPagination.pageIndex,
+    totalItemsCount: fullPagination.totalItemCount,
+    timestamp,
+  };
+};
 
 export const createServerApiError = (message: string) => ({
   statusCode: 500,
@@ -70,12 +84,12 @@ export const createUninitialisedResourceState = (): UninitialisedResourceState =
 });
 
 export const createListLoadedResourceState = (
-  paginationInfo: PaginationInfo,
-  totalItemsCount: number,
-  timestamp: number
+  pagination: Partial<Pagination>,
+  timestamp: number,
+  longTexts?: boolean
 ): LoadedResourceState<TrustedAppsListData> => ({
   type: 'LoadedResourceState',
-  data: createTrustedAppsListData(paginationInfo, totalItemsCount, timestamp),
+  data: createTrustedAppsListData(pagination, timestamp, longTexts),
 });
 
 export const createListFailedResourceState = (
@@ -95,32 +109,28 @@ export const createListLoadingResourceState = (
 });
 
 export const createListComplexLoadingResourceState = (
-  paginationInfo: PaginationInfo,
-  totalItemsCount: number,
+  pagination: Partial<Pagination>,
   timestamp: number
 ): LoadingResourceState<TrustedAppsListData> =>
   createListLoadingResourceState(
     createListFailedResourceState(
       'Internal Server Error',
-      createListLoadedResourceState(paginationInfo, totalItemsCount, timestamp)
+      createListLoadedResourceState(pagination, timestamp)
     )
   );
 
-export const createDefaultPaginationInfo = () => ({
-  index: MANAGEMENT_DEFAULT_PAGE,
-  size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+export const createDefaultPagination = (): Pagination => ({
+  pageIndex: MANAGEMENT_DEFAULT_PAGE,
+  pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
+  totalItemCount: 200,
+  pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
 });
 
 export const createLoadedListViewWithPagination = (
   freshDataTimestamp: number,
-  paginationInfo: PaginationInfo = createDefaultPaginationInfo(),
-  totalItemsCount: number = 200
+  pagination: Partial<Pagination> = createDefaultPagination()
 ): TrustedAppsListPageState['listView'] => ({
-  listResourceState: createListLoadedResourceState(
-    paginationInfo,
-    totalItemsCount,
-    freshDataTimestamp
-  ),
+  listResourceState: createListLoadedResourceState(pagination, freshDataTimestamp),
   freshDataTimestamp,
 });
 

@@ -6,6 +6,7 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 import {
   AgentSOAttributes,
   PostAgentUpgradeResponse,
@@ -16,6 +17,8 @@ import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { savedObjectToAgent } from '../../services/agents/saved_objects';
+import { isAgentUpgradeable } from '../../../common/services';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -24,26 +27,37 @@ export const postAgentUpgradeHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const { version, source_uri: sourceUri } = request.body;
-
-  // temporarily only allow upgrading to the same version as the installed kibana version
   const kibanaVersion = appContextService.getKibanaVersion();
-  if (kibanaVersion !== version) {
+  try {
+    checkVersionIsSame(version, kibanaVersion);
+  } catch (err) {
     return response.customError({
       statusCode: 400,
       body: {
-        message: `cannot upgrade agent to ${version} because it is different than the installed kibana version ${kibanaVersion}`,
+        message: err.message,
       },
     });
   }
-  const agent = await soClient.get<AgentSOAttributes>(
+
+  const agentSO = await soClient.get<AgentSOAttributes>(
     AGENT_SAVED_OBJECT_TYPE,
     request.params.agentId
   );
-  if (agent.attributes.unenrollment_started_at || agent.attributes.unenrolled_at) {
+  if (agentSO.attributes.unenrollment_started_at || agentSO.attributes.unenrolled_at) {
     return response.customError({
       statusCode: 400,
       body: {
-        message: `cannot upgrade an unenrolling or unenrolled agent`,
+        message: 'cannot upgrade an unenrolling or unenrolled agent',
+      },
+    });
+  }
+
+  const agent = savedObjectToAgent(agentSO);
+  if (!isAgentUpgradeable(agent, kibanaVersion)) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `agent ${request.params.agentId} is not upgradeable`,
       },
     });
   }
@@ -70,14 +84,14 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const { version, source_uri: sourceUri, agents } = request.body;
-
-  // temporarily only allow upgrading to the same version as the installed kibana version
   const kibanaVersion = appContextService.getKibanaVersion();
-  if (kibanaVersion !== version) {
+  try {
+    checkVersionIsSame(version, kibanaVersion);
+  } catch (err) {
     return response.customError({
       statusCode: 400,
       body: {
-        message: `cannot upgrade agent to ${version} because it is different than the installed kibana version ${kibanaVersion}`,
+        message: err.message,
       },
     });
   }
@@ -102,4 +116,18 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
+};
+
+export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
+  // get version number only in case "-SNAPSHOT" is in it
+  const kibanaVersionNumber = semver.coerce(kibanaVersion)?.version;
+  if (!kibanaVersionNumber) throw new Error(`kibanaVersion ${kibanaVersionNumber} is not valid`);
+  const versionToUpgradeNumber = semver.coerce(version)?.version;
+  if (!versionToUpgradeNumber)
+    throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
+  // temporarily only allow upgrading to the same version as the installed kibana version
+  if (kibanaVersionNumber !== versionToUpgradeNumber)
+    throw new Error(
+      `cannot upgrade agent to ${versionToUpgradeNumber} because it is different than the installed kibana version ${kibanaVersionNumber}`
+    );
 };

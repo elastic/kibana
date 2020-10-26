@@ -22,6 +22,7 @@ import { URL } from 'url';
 import { Duration } from 'moment';
 import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
 import { ElasticsearchConfig } from '../elasticsearch_config';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 /**
  * Configuration options to be used to create a {@link IClusterClient | cluster client} using the
@@ -61,7 +62,10 @@ export function parseClientOptions(
   const clientOptions: ClientOptions = {
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
-    headers: config.customHeaders,
+    headers: {
+      ...DEFAULT_HEADERS,
+      ...config.customHeaders,
+    },
   };
 
   if (config.pingTimeout != null) {

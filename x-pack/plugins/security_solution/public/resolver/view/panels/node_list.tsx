@@ -42,6 +42,7 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { CopyablePanelField } from './copyable_panel_field';
 
 interface ProcessTableView {
   name?: string;
@@ -163,14 +164,14 @@ function NodeDetailLink({
     (mouseEvent: React.MouseEvent<HTMLAnchorElement>) => {
       linkProps.onClick(mouseEvent);
       dispatch({
-        type: 'userBroughtProcessIntoView',
+        type: 'userBroughtNodeIntoView',
         payload: {
-          process: event,
+          nodeID,
           time: timestamp(),
         },
       });
     },
-    [timestamp, linkProps, dispatch, event]
+    [timestamp, linkProps, dispatch, nodeID]
   );
   return (
     <EuiButtonEmpty onClick={handleOnClick} href={linkProps.href}>
@@ -214,5 +215,9 @@ function NodeDetailLink({
 const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }) => {
   const formattedDate = useFormattedDate(eventDate);
 
-  return formattedDate ? <>{formattedDate}</> : getEmptyTagValue();
+  return formattedDate ? (
+    <CopyablePanelField textToCopy={formattedDate} content={formattedDate} />
+  ) : (
+    getEmptyTagValue()
+  );
 });

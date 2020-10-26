@@ -27,7 +27,7 @@ class OutputService {
     const cloud = appContextService.getCloud();
     const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
     const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
-    const flagsUrl = appContextService.getConfig()!.fleet.elasticsearch.host;
+    const flagsUrl = appContextService.getConfig()!.agents.elasticsearch.host;
     const defaultUrl = 'http://localhost:9200';
     const defaultOutputUrl = cloudUrl || flagsUrl || defaultUrl;
 
@@ -35,7 +35,7 @@ class OutputService {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: [defaultOutputUrl],
-        ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
+        ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
       } as NewOutput;
 
       return await this.create(soClient, newDefaultOutput);
@@ -65,8 +65,8 @@ class OutputService {
     return outputs.saved_objects[0].id;
   }
 
-  public async getAdminUser(soClient: SavedObjectsClientContract) {
-    if (cachedAdminUser) {
+  public async getAdminUser(soClient: SavedObjectsClientContract, useCache = true) {
+    if (useCache && cachedAdminUser) {
       return cachedAdminUser;
     }
 
