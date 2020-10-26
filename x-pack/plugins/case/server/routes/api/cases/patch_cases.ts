@@ -27,7 +27,7 @@ export function initPatchCasesApi({ router }: RouteDeps) {
 
       try {
         return response.ok({
-          body: await caseClient.update({ request, cases }),
+          body: await caseClient.update({ cases }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

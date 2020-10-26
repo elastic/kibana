@@ -32,10 +32,8 @@ export const update = ({
   savedObjectsClient,
   caseService,
   userActionService,
-}: CaseClientFactoryArguments) => async ({
   request,
-  cases,
-}: CaseClientUpdate): Promise<CasesResponse> => {
+}: CaseClientFactoryArguments) => async ({ cases }: CaseClientUpdate): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)

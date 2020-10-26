@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'kibana/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { CaseService, CaseConfigureService, CaseUserActionServiceSetup } from '../services';
 import { CaseClient } from './types';
@@ -25,6 +26,7 @@ export const createCaseClientWithMockSavedObjectsClient = async (
   services: { userActionService: jest.Mocked<CaseUserActionServiceSetup> };
 }> => {
   const log = loggingSystemMock.create().get('case');
+  const request = {} as KibanaRequest;
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
@@ -41,6 +43,7 @@ export const createCaseClientWithMockSavedObjectsClient = async (
   return {
     client: createCaseClient({
       savedObjectsClient,
+      request,
       caseService,
       caseConfigureService,
       userActionService,

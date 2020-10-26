@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
 import { ConnectorTypes, CasesPatchRequest } from '../../../common/api';
 import {
   createMockSavedObjectsRepository,
@@ -12,8 +11,6 @@ import {
   mockCases,
 } from '../../routes/api/__fixtures__';
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
-
-const request = {} as KibanaRequest;
 
 describe('update', () => {
   beforeEach(async () => {
@@ -41,7 +38,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ request, cases: patchCases });
+      const res = await caseClient.client.update({ cases: patchCases });
 
       expect(res).toEqual([
         {
@@ -115,7 +112,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ request, cases: patchCases });
+      const res = await caseClient.client.update({ cases: patchCases });
 
       expect(res).toEqual([
         {
@@ -160,7 +157,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ request, cases: patchCases });
+      const res = await caseClient.client.update({ cases: patchCases });
 
       expect(res).toEqual([
         {
@@ -210,7 +207,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.update({ request, cases: patchCases });
+      const res = await caseClient.client.update({ cases: patchCases });
 
       expect(res).toEqual([
         {
@@ -272,7 +269,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         // @ts-expect-error
-        .update({ request, cases: patchCases })
+        .update({ cases: patchCases })
         .catch((e) => expect(e).not.toBeNull());
     });
 
@@ -299,7 +296,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         // @ts-expect-error
-        .update({ request, cases: patchCases })
+        .update({ cases: patchCases })
         .catch((e) => expect(e).not.toBeNull());
     });
 
@@ -321,7 +318,7 @@ describe('update', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
-        .update({ request, cases: patchCases })
+        .update({ cases: patchCases })
         .catch((e) =>
           expect(e.message).toBe('All update fields are identical to current version.')
         );
@@ -349,7 +346,7 @@ describe('update', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
-        .update({ request, cases: patchCases })
+        .update({ cases: patchCases })
         .catch((e) =>
           expect(e.message).toBe(
             'These cases not-exists do not exist. Please check you have the correct ids.'
@@ -375,7 +372,7 @@ describe('update', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
-        .update({ request, cases: patchCases })
+        .update({ cases: patchCases })
         .catch((e) =>
           expect(e.message).toBe(
             'These cases mock-id-1 has been updated. Please refresh before saving additional updates.'

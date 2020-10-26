@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
-
 import {
   createMockSavedObjectsRepository,
   mockCaseComments,
   mockCases,
 } from '../../routes/api/__fixtures__';
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
-
-const request = {} as KibanaRequest;
 
 describe('addComment', () => {
   beforeEach(async () => {
@@ -33,7 +29,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       const res = await caseClient.client.addComment({
-        request,
         caseId: 'mock-id-1',
         comment: { comment: 'Wow, good luck catching that bad meanie!' },
       });
@@ -65,7 +60,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       const res = await caseClient.client.addComment({
-        request,
         caseId: 'mock-id-1',
         comment: { comment: 'Wow, good luck catching that bad meanie!' },
       });
@@ -86,7 +80,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       await caseClient.client.addComment({
-        request,
         caseId: 'mock-id-1',
         comment: { comment: 'Wow, good luck catching that bad meanie!' },
       });
@@ -131,7 +124,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient, true);
       const res = await caseClient.client.addComment({
-        request,
         caseId: 'mock-id-1',
         comment: { comment: 'Wow, good luck catching that bad meanie!' },
       });
@@ -166,7 +158,6 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         .addComment({
-          request,
           caseId: 'mock-id-1',
           // @ts-expect-error
           comment: {},
@@ -188,7 +179,6 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         .addComment({
-          request,
           caseId: 'not-exists',
           comment: { comment: 'Wow, good luck catching that bad meanie!' },
         })
@@ -209,7 +199,6 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         .addComment({
-          request,
           caseId: 'mock-id-1',
           comment: { comment: 'Throw an error' },
         })

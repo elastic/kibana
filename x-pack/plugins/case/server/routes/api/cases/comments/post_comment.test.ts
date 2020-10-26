@@ -120,7 +120,6 @@ describe('POST comment', () => {
 
     expect(caseClient.addComment).toHaveBeenCalledTimes(1);
     expect(caseClient.addComment).toHaveBeenCalledWith({
-      request,
       caseId: request.params.case_id,
       comment: request.body,
     });

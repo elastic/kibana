@@ -27,8 +27,8 @@ export const addComment = ({
   savedObjectsClient,
   caseService,
   userActionService,
-}: CaseClientFactoryArguments) => async ({
   request,
+}: CaseClientFactoryArguments) => async ({
   caseId,
   comment,
 }: CaseClientAddComment): Promise<CaseResponse> => {

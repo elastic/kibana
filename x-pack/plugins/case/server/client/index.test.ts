@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createCaseClient } from '.';
 import {
@@ -24,6 +25,7 @@ const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();
 const userActionService = createUserActionServiceMock();
 const savedObjectsClient = savedObjectsClientMock.create();
+const request = {} as KibanaRequest;
 
 const createMock = create as jest.Mock;
 const updateMock = update as jest.Mock;
@@ -33,6 +35,7 @@ describe('createCaseClient()', () => {
   test('it creates the client correctly', async () => {
     createCaseClient({
       savedObjectsClient,
+      request,
       caseConfigureService,
       caseService,
       userActionService,
@@ -40,6 +43,7 @@ describe('createCaseClient()', () => {
 
     expect(createMock).toHaveBeenCalledWith({
       savedObjectsClient,
+      request,
       caseConfigureService,
       caseService,
       userActionService,
@@ -47,6 +51,7 @@ describe('createCaseClient()', () => {
 
     expect(updateMock).toHaveBeenCalledWith({
       savedObjectsClient,
+      request,
       caseConfigureService,
       caseService,
       userActionService,
@@ -54,6 +59,7 @@ describe('createCaseClient()', () => {
 
     expect(addCommentMock).toHaveBeenCalledWith({
       savedObjectsClient,
+      request,
       caseConfigureService,
       caseService,
       userActionService,

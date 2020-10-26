@@ -13,15 +13,29 @@ export { CaseClient } from './types';
 
 export const createCaseClient = ({
   savedObjectsClient,
+  request,
   caseConfigureService,
   caseService,
   userActionService,
 }: CaseClientFactoryArguments): CaseClient => {
   return {
-    create: create({ savedObjectsClient, caseConfigureService, caseService, userActionService }),
-    update: update({ savedObjectsClient, caseConfigureService, caseService, userActionService }),
+    create: create({
+      savedObjectsClient,
+      request,
+      caseConfigureService,
+      caseService,
+      userActionService,
+    }),
+    update: update({
+      savedObjectsClient,
+      request,
+      caseConfigureService,
+      caseService,
+      userActionService,
+    }),
     addComment: addComment({
       savedObjectsClient,
+      request,
       caseConfigureService,
       caseService,
       userActionService,

@@ -31,10 +31,8 @@ export const create = ({
   caseService,
   caseConfigureService,
   userActionService,
-}: CaseClientFactoryArguments) => async ({
   request,
-  theCase,
-}: CaseClientCreate): Promise<CaseResponse> => {
+}: CaseClientFactoryArguments) => async ({ theCase }: CaseClientCreate): Promise<CaseResponse> => {
   const query = pipe(
     excess(CasePostRequestRt).decode(theCase),
     fold(throwErrors(Boom.badRequest), identity)

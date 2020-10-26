@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
 import { ConnectorTypes, CasePostRequest } from '../../../common/api';
 
 import {
@@ -13,8 +12,6 @@ import {
   mockCases,
 } from '../../routes/api/__fixtures__';
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
-
-const request = {} as KibanaRequest;
 
 describe('create', () => {
   beforeEach(async () => {
@@ -44,7 +41,7 @@ describe('create', () => {
         caseConfigureSavedObject: mockCaseConfigure,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.create({ request, theCase: postCase });
+      const res = await caseClient.client.create({ theCase: postCase });
 
       expect(res).toEqual({
         id: 'mock-it',
@@ -115,7 +112,7 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      const res = await caseClient.client.create({ request, theCase: postCase });
+      const res = await caseClient.client.create({ theCase: postCase });
 
       expect(res).toEqual({
         id: 'mock-it',
@@ -154,7 +151,7 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient, true);
-      const res = await caseClient.client.create({ request, theCase: postCase });
+      const res = await caseClient.client.create({ theCase: postCase });
 
       expect(res).toEqual({
         id: 'mock-it',
@@ -201,7 +198,7 @@ describe('create', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         // @ts-expect-error
-        .create({ request, theCase: postCase })
+        .create({ theCase: postCase })
         .catch((e) => expect(e).not.toBeNull());
     });
 
@@ -224,7 +221,7 @@ describe('create', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         // @ts-expect-error
-        .create({ request, theCase: postCase })
+        .create({ theCase: postCase })
         .catch((e) => expect(e).not.toBeNull());
     });
 
@@ -247,7 +244,7 @@ describe('create', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         // @ts-expect-error
-        .create({ request, theCase: postCase })
+        .create({ theCase: postCase })
         .catch((e) => expect(e).not.toBeNull());
     });
 
@@ -265,7 +262,7 @@ describe('create', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         // @ts-expect-error
-        .create({ request, theCase: postCase })
+        .create({ theCase: postCase })
         .catch((e) => expect(e).not.toBeNull());
     });
 
@@ -289,7 +286,7 @@ describe('create', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
       caseClient.client
         // @ts-expect-error
-        .create({ request, theCase: postCase })
+        .create({ theCase: postCase })
         .catch((e) => expect(e).not.toBeNull());
     });
 
@@ -312,9 +309,7 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
-        .create({ request, theCase: postCase })
-        .catch((e) => expect(e).not.toBeNull());
+      caseClient.client.create({ theCase: postCase }).catch((e) => expect(e).not.toBeNull());
     });
 
     it(`Returns an error if postNewCase throws`, async () => {
@@ -334,9 +329,7 @@ describe('create', () => {
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
 
-      caseClient.client
-        .create({ request, theCase: postCase })
-        .catch((e) => expect(e).not.toBeNull());
+      caseClient.client.create({ theCase: postCase }).catch((e) => expect(e).not.toBeNull());
     });
   });
 });

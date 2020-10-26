@@ -80,7 +80,7 @@ describe('POST cases', () => {
     const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(caseClient.create).toHaveBeenCalledTimes(1);
-    expect(caseClient.create).toHaveBeenCalledWith({ request, theCase: request.body });
+    expect(caseClient.create).toHaveBeenCalledWith({ theCase: request.body });
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual(createResult);
   });

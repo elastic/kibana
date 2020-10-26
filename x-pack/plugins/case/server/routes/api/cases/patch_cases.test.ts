@@ -79,7 +79,7 @@ describe('PATCH cases', () => {
     const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(caseClient.update).toHaveBeenCalledTimes(1);
-    expect(caseClient.update).toHaveBeenCalledWith({ request, cases: request.body });
+    expect(caseClient.update).toHaveBeenCalledWith({ cases: request.body });
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual(patchResult);
   });

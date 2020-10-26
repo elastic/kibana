@@ -102,6 +102,7 @@ export class CasePlugin {
     const getCaseClientWithRequest = async (request: KibanaRequest) => {
       return createCaseClient({
         savedObjectsClient: core.savedObjects.getScopedClient(request),
+        request,
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
         userActionService: this.userActionService!,
@@ -137,6 +138,7 @@ export class CasePlugin {
             caseService,
             caseConfigureService,
             userActionService,
+            request,
           });
         },
       };

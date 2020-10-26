@@ -18,25 +18,22 @@ import {
   CaseUserActionServiceSetup,
 } from '../services';
 
-export interface CaseClientFunctionArguments {
-  request: KibanaRequest;
-}
-
-export interface CaseClientCreate extends CaseClientFunctionArguments {
+export interface CaseClientCreate {
   theCase: CasePostRequest;
 }
 
-export interface CaseClientUpdate extends CaseClientFunctionArguments {
+export interface CaseClientUpdate {
   cases: CasesPatchRequest;
 }
 
-export interface CaseClientAddComment extends CaseClientFunctionArguments {
+export interface CaseClientAddComment {
   caseId: string;
   comment: CommentRequest;
 }
 
 export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
+  request: KibanaRequest;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
