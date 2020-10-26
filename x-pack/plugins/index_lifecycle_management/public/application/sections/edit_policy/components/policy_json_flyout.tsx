@@ -45,12 +45,12 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
    */
   const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
 
-  const form = useFormContext();
+  const { validate: validateForm } = useFormContext();
   const [, getFormData] = useFormData<FormInternal>();
 
-  const getPolicy = useCallback(async () => {
+  const updatePolicy = useCallback(async () => {
     setPolicy(undefined);
-    if (await form.validate()) {
+    if (await validateForm()) {
       const p = getFormData() as SerializedPolicy;
       setPolicy({
         ...legacyPolicy,
@@ -63,11 +63,11 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
     } else {
       setPolicy(null);
     }
-  }, [setPolicy, getFormData, legacyPolicy, form]);
+  }, [setPolicy, getFormData, legacyPolicy, validateForm]);
 
   useEffect(() => {
-    getPolicy();
-  }, [getPolicy]);
+    updatePolicy();
+  }, [updatePolicy]);
 
   let content: React.ReactNode;
   switch (policy) {
