@@ -162,7 +162,6 @@ const DragDropInner = React.memo(function DragDropInner(
   const [state, setState] = useState({
     isActive: false,
     dragEnterClassNames: '',
-    keyboardMode: false,
   });
   const {
     className,
@@ -212,7 +211,7 @@ const DragDropInner = React.memo(function DragDropInner(
 
     // Chrome causes issues if you try to render from within a
     // dragStart event, so we drop a setTimeout to avoid that.
-    setState({ ...state, keyboardMode: false });
+    setState({ ...state });
     setTimeout(() => setDragging(value));
   };
 
@@ -257,32 +256,19 @@ const DragDropInner = React.memo(function DragDropInner(
     }
   };
 
-  let element = React.cloneElement(children, {
-    'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
-    className: classNames(children.props.className, classes),
-    onDragOver: dragOver,
-    onDragLeave: dragLeave,
-    onDrop: drop,
-    draggable,
-    onDragEnd: dragEnd,
-    onDragStart: dragStart,
-  });
-
-  if (
-    droppable &&
-    dropType === 'reorder' &&
-    itemsInGroup?.length &&
-    itemsInGroup.length > 1 &&
-    value?.id
-  ) {
-    element = (
+  if (draggable && itemsInGroup?.length && itemsInGroup.length > 1 && value?.id && dropTo) {
+    const { label } = props as DraggableProps;
+    return (
       <ReorderableDragDrop
+        dropTo={dropTo}
+        label={label}
         draggingProps={{
           className: classNames(children.props.className, classes),
           draggable,
           onDragEnd: dragEnd,
           onDragStart: dragStart,
           dataTestSubj: props['data-test-subj'] || 'lnsDragDrop',
+          isReorderDragging: dragType === 'reorder' && draggable,
         }}
         dropProps={{
           onDrop: drop,
@@ -298,77 +284,24 @@ const DragDropInner = React.memo(function DragDropInner(
       </ReorderableDragDrop>
     );
   }
-
-  if (!itemsInGroup?.length || itemsInGroup.length < 2 || !value || !dropTo || !draggable) {
-    return element;
-  }
-  const groupLength = itemsInGroup.length;
-  const currentIndex = itemsInGroup.indexOf(value.id);
-
-  const { label } = props as DraggableProps;
-
-  return (
-    <>
-      <EuiScreenReaderOnly>
-        <button
-          aria-label={
-            !state.keyboardMode
-              ? i18n.translate('xpack.lens.dragDrop.reorderInactive', {
-                  defaultMessage:
-                    '{label} is ranked {position} out of {groupLength}. Press enter/space to initiate reorder',
-                  values: {
-                    label,
-                    position: currentIndex + 1,
-                    groupLength,
-                  },
-                })
-              : i18n.translate('xpack.lens.dragDrop.reorderActive', {
-                  defaultMessage:
-                    'Element {label} grabbed. ${label} is ranked {position} out of {groupLength}. Use arrows to change position. Press enter/space to confirm.',
-                  values: {
-                    label,
-                    position: currentIndex + 1,
-                    groupLength,
-                  },
-                })
-          }
-          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-            if (e.key === keys.ENTER || e.key === keys.SPACE) {
-              setState({ ...state, keyboardMode: !state.keyboardMode });
-            } else if (e.key === keys.ESCAPE) {
-              setState({ ...state, keyboardMode: false });
-            }
-            if (state.keyboardMode) {
-              e.stopPropagation();
-              e.preventDefault();
-
-              if (keys.ARROW_DOWN === e.key) {
-                if (currentIndex < groupLength - 1) {
-                  dropTo(itemsInGroup[currentIndex + 1]);
-                }
-              } else if (keys.ARROW_UP === e.key) {
-                if (currentIndex > 0) {
-                  dropTo(itemsInGroup[currentIndex - 1]);
-                }
-              }
-            }
-          }}
-        >
-          {i18n.translate('xpack.lens.dragDrop.keyboardReorderHandle', {
-            defaultMessage: 'Keyboard reorder handle',
-          })}
-        </button>
-      </EuiScreenReaderOnly>
-
-      {element}
-    </>
-  );
+  return React.cloneElement(children, {
+    'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
+    className: classNames(children.props.className, classes),
+    onDragOver: dragOver,
+    onDragLeave: dragLeave,
+    onDrop: drop,
+    draggable,
+    onDragEnd: dragEnd,
+    onDragStart: dragStart,
+  });
 });
 
 export const ReorderableDragDrop = ({
   draggingProps,
   dropProps,
   children,
+  label,
+  dropTo,
 }: {
   draggingProps: {
     className: string;
@@ -376,6 +309,7 @@ export const ReorderableDragDrop = ({
     onDragEnd: (e: DroppableEvent) => void;
     onDragStart: (e: DroppableEvent) => void;
     dataTestSubj: string;
+    isReorderDragging: boolean;
   };
   dropProps: {
     onDrop: (e: DroppableEvent) => void;
@@ -387,16 +321,24 @@ export const ReorderableDragDrop = ({
     id: string;
   };
   children: React.ReactElement;
-  'data-test-subj'?: string;
+  label: string;
+  dropTo: DropToHandler;
 }) => {
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
+  const [keyboardMode, setKeyboardMode] = useState(false);
+  const groupLength = itemsInGroup.length;
+
+  const currentIndex = itemsInGroup.indexOf(id);
   return (
     <div className="lnsDragDrop__reorderableContainer">
       {React.cloneElement(children, {
         draggable: draggingProps.draggable,
         onDragEnd: draggingProps.onDragEnd,
-        onDragStart: draggingProps.onDragStart,
+        onDragStart: (e: DroppableEvent) => {
+          draggingProps.onDragStart(e);
+          setKeyboardMode(false);
+        },
         ['data-test-subj']: draggingProps.dataTestSubj,
         className: classNames(
           draggingProps.className,
@@ -404,7 +346,7 @@ export const ReorderableDragDrop = ({
             [reorderState.className]: reorderState?.reorderedItems.includes(id),
           },
           {
-            'lnsDragDrop-isReorderable': draggingProps.draggable,
+            'lnsDragDrop-isReorderable': draggingProps.isReorderDragging,
           }
         ),
       })}
@@ -428,8 +370,7 @@ export const ReorderableDragDrop = ({
 
           if (!dragging) return;
           const draggingIndex = itemsInGroup.indexOf(dragging.id);
-          const droppingIndex = itemsInGroup.indexOf(id);
-
+          const droppingIndex = currentIndex;
           setReorderState(
             draggingIndex < droppingIndex
               ? {
@@ -452,6 +393,57 @@ export const ReorderableDragDrop = ({
           });
         }}
       />
+      <EuiScreenReaderOnly>
+        <button
+          data-test-subj="lnsDragDrop-keyboardHandler"
+          aria-label={
+            !keyboardMode
+              ? i18n.translate('xpack.lens.dragDrop.reorderInactive', {
+                  defaultMessage:
+                    '{label} is ranked {position} out of {groupLength}. Press enter/space to initiate reorder',
+                  values: {
+                    label,
+                    position: currentIndex + 1,
+                    groupLength,
+                  },
+                })
+              : i18n.translate('xpack.lens.dragDrop.reorderActive', {
+                  defaultMessage:
+                    'Element {label} grabbed. {label} is ranked {position} out of {groupLength}. Use arrows to change position. Press enter/space to confirm.',
+                  values: {
+                    label,
+                    position: currentIndex + 1,
+                    groupLength,
+                  },
+                })
+          }
+          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (e.key === keys.ENTER || e.key === keys.SPACE) {
+              setKeyboardMode(!keyboardMode);
+            } else if (e.key === keys.ESCAPE) {
+              setKeyboardMode(false);
+            }
+            if (keyboardMode) {
+              e.stopPropagation();
+              e.preventDefault();
+
+              if (keys.ARROW_DOWN === e.key) {
+                if (currentIndex < groupLength - 1) {
+                  dropTo(itemsInGroup[currentIndex + 1]);
+                }
+              } else if (keys.ARROW_UP === e.key) {
+                if (currentIndex > 0) {
+                  dropTo(itemsInGroup[currentIndex - 1]);
+                }
+              }
+            }
+          }}
+        >
+          {i18n.translate('xpack.lens.dragDrop.keyboardReorderHandle', {
+            defaultMessage: 'Keyboard reorder handle',
+          })}
+        </button>
+      </EuiScreenReaderOnly>
     </div>
   );
 };
