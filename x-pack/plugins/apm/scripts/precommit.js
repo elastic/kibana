@@ -25,7 +25,7 @@ const tasks = new Listr(
           [
             resolve(__dirname, './jest.js'),
             '--reporters',
-            resolve(__dirname, './node_modules/jest-silent-reporter'),
+            resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
             '--collect-coverage',
             'false',
           ],
@@ -60,6 +60,8 @@ const tasks = new Listr(
 tasks.run().catch((error) => {
   // from src/dev/typescript/exec_in_projects.ts
   process.exitCode = 1;
+
+  console.log(error);
 
   const errors = error.errors || [error];
 
