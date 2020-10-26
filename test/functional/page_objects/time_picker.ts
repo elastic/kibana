@@ -42,7 +42,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const kibanaServer = getService('kibanaServer');
   const MenuToggle = getService('MenuToggle');
 
-  const quickSelectTimeMenu = new MenuToggle({
+  const quickSelectTimeMenuToggle = new MenuToggle({
     name: 'QuickSelectTime Menu',
     menuTestSubject: 'openQuickSelectTimeMenu',
     toggleButtonTestSubject: 'superDatePickerToggleQuickMenuButton',
@@ -165,11 +165,11 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async openQuickSelectTimeMenu() {
-      await quickSelectTimeMenu.open();
+      await quickSelectTimeMenuToggle.open();
     }
 
     public async closeQuickSelectTimeMenu() {
-      await quickSelectTimeMenu.close();
+      await quickSelectTimeMenuToggle.close();
     }
 
     public async getRefreshConfig(keepQuickSelectOpen = false) {

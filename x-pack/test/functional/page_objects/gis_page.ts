@@ -22,7 +22,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   const browser = getService('browser');
   const MenuToggle = getService('MenuToggle');
 
-  const setViewPopover = new MenuToggle({
+  const setViewPopoverToggle = new MenuToggle({
     name: 'SetView Popover',
     menuTestSubject: 'mapSetViewForm',
     toggleButtonTestSubject: 'toggleSetViewVisibilityButton',
@@ -242,11 +242,11 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     }
 
     async openSetViewPopover() {
-      await setViewPopover.open();
+      await setViewPopoverToggle.open();
     }
 
     async closeSetViewPopover() {
-      await setViewPopover.close();
+      await setViewPopoverToggle.close();
     }
 
     async setView(lat: number, lon: number, zoom: number) {
