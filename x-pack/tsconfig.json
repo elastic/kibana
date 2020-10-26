@@ -16,6 +16,7 @@
     "plugins/global_search/**/*",
     "plugins/licensing/**/*",
     "plugins/security_solution/cypress/**/*",
+    "plugins/telemetry_collection_xpack/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -40,6 +41,7 @@
     { "path": "../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
     { "path": "./plugins/global_search/tsconfig.json" },
-    { "path": "./plugins/licensing/tsconfig.json" }
+    { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" }
   ]
 }
