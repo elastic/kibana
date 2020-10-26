@@ -25,7 +25,7 @@ import {
   STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
 } from '../../../../../common/constants';
-import { styleFieldsCustodianFactory } from '../style_fields_custodian';
+import { createStyleFieldsHelper } from '../style_fields_helper';
 
 export class VectorStyleEditor extends Component {
   state = {
@@ -52,17 +52,17 @@ export class VectorStyleEditor extends Component {
   }
 
   async _loadFields() {
-    const styleFieldsCustodian = await styleFieldsCustodianFactory(
+    const styleFieldsHelper = await createStyleFieldsHelper(
       await this.props.layer.getStyleEditorFields()
     );
-    const styleFields = styleFieldsCustodian.getStyleFields();
+    const styleFields = styleFieldsHelper.getStyleFields();
     if (!this._isMounted || _.isEqual(styleFields, this.state.styleFields)) {
       return;
     }
 
     this.setState({
       styleFields,
-      styleFieldsCustodian,
+      styleFieldsHelper,
     });
   }
 
@@ -139,7 +139,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.FILL_COLOR]}
-        fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.FILL_COLOR)}
+        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.FILL_COLOR)}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.FILL_COLOR].options
         }
@@ -160,7 +160,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_COLOR]}
-        fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.LINE_COLOR)}
+        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LINE_COLOR)}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.LINE_COLOR].options
         }
@@ -179,7 +179,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH]}
-        fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.LINE_WIDTH)}
+        fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LINE_WIDTH)}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.LINE_WIDTH].options
         }
@@ -199,7 +199,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT]}
-          fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.LABEL_TEXT)}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_TEXT)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_TEXT].options
           }
@@ -216,7 +216,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_COLOR]}
-          fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.LABEL_COLOR)}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_COLOR)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_COLOR].options
           }
@@ -232,7 +232,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_SIZE]}
-          fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.LABEL_SIZE)}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_SIZE)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_SIZE].options
           }
@@ -249,9 +249,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]}
-          fields={this.state.styleFieldsCustodian.getFieldsForStyle(
-            VECTOR_STYLES.LABEL_BORDER_COLOR
-          )}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.LABEL_BORDER_COLOR)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
           }
@@ -285,9 +283,7 @@ export class VectorStyleEditor extends Component {
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_ORIENTATION]}
-            fields={this.state.styleFieldsCustodian.getFieldsForStyle(
-              VECTOR_STYLES.ICON_ORIENTATION
-            )}
+            fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON_ORIENTATION)}
             defaultStaticStyleOptions={
               this.state.defaultStaticProperties[VECTOR_STYLES.ICON_ORIENTATION].options
             }
@@ -306,7 +302,7 @@ export class VectorStyleEditor extends Component {
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON]}
-            fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.ICON)}
+            fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON)}
             defaultStaticStyleOptions={
               this.state.defaultStaticProperties[VECTOR_STYLES.ICON].options
             }
@@ -346,7 +342,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON_SIZE]}
-          fields={this.state.styleFieldsCustodian.getFieldsForStyle(VECTOR_STYLES.ICON_SIZE)}
+          fields={this.state.styleFieldsHelper.getFieldsForStyle(VECTOR_STYLES.ICON_SIZE)}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.ICON_SIZE].options
           }
@@ -387,9 +383,9 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderProperties() {
-    const { supportedFeatures, selectedFeature, styleFieldsCustodian } = this.state;
+    const { supportedFeatures, selectedFeature, styleFieldsHelper } = this.state;
 
-    if (!supportedFeatures || !styleFieldsCustodian) {
+    if (!supportedFeatures || !styleFieldsHelper) {
       return null;
     }
 

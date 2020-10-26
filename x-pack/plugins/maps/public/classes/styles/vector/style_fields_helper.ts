@@ -20,7 +20,7 @@ export interface StyleField {
   supportsAutoDomain: boolean;
 }
 
-export async function styleFieldsCustodianFactory(fields: IField[]): Promise<StyleFieldsCustodian> {
+export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFieldsCustodian> {
   const promises: Array<Promise<StyleField>> = fields.map(async (field: IField) => {
     return {
       label: await field.getLabel(),
@@ -69,7 +69,7 @@ class StyleFieldsCustodian {
     this._ordinalFields = ordinalFields;
   }
 
-  getFieldsForStyle(styleName: VECTOR_STYLES) {
+  getFieldsForStyle(styleName: VECTOR_STYLES): StyleField[] {
     switch (styleName) {
       case VECTOR_STYLES.ICON_ORIENTATION:
         return this._numberFields;
@@ -90,7 +90,7 @@ class StyleFieldsCustodian {
     }
   }
 
-  getStyleFields() {
+  getStyleFields(): StyleField[] {
     return this._styleFields;
   }
 }
