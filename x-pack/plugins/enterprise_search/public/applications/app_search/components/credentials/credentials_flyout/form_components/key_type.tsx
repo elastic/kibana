@@ -25,7 +25,7 @@ export const FormKeyType: React.FC = () => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.enterpriseSearch.appSearch.tokens.formType.label', {
+      label={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.formType.label', {
         defaultMessage: 'Key type',
       })}
       fullWidth
@@ -34,11 +34,11 @@ export const FormKeyType: React.FC = () => {
           <p>
             {tokenDescription && <strong>{tokenDescription}</strong>}{' '}
             <EuiLink href={DOCS_HREF}>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.tokens.documentationLink1', {
+              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.documentationLink1', {
                 defaultMessage: 'Visit the documentation',
               })}
             </EuiLink>{' '}
-            {i18n.translate('xpack.enterpriseSearch.appSearch.tokens.documentationLink2', {
+            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.documentationLink2', {
               defaultMessage: 'to learn more about keys.',
             })}
           </p>
@@ -51,7 +51,7 @@ export const FormKeyType: React.FC = () => {
         value={activeApiToken.type}
         onChange={(e) => setTokenType(e.target.value)}
         placeholder={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.tokens.formType.placeholder',
+          'xpack.enterpriseSearch.appSearch.credentials.formType.placeholder',
           { defaultMessage: 'Select a key type' }
         )}
         disabled={activeApiTokenExists}

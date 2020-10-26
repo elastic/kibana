@@ -22,13 +22,13 @@ export const FormKeyReadWriteAccess: React.FC = () => {
       <EuiPanel>
         <EuiTitle size="xs">
           <h3>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.tokens.formReadWrite.label', {
+            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.formReadWrite.label', {
               defaultMessage: 'Read and Write Access Levels',
             })}
           </h3>
         </EuiTitle>
         <EuiText>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.tokens.formReadWrite.helpText', {
+          {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.formReadWrite.helpText', {
             defaultMessage: 'Only applies to Private API Keys.',
           })}
         </EuiText>
@@ -38,9 +38,10 @@ export const FormKeyReadWriteAccess: React.FC = () => {
           id="read"
           checked={activeApiToken.read}
           onChange={(e) => setTokenReadWrite(e.target as ITokenReadWrite)}
-          label={i18n.translate('xpack.enterpriseSearch.appSearch.tokens.formReadWrite.readLabel', {
-            defaultMessage: 'Read Access',
-          })}
+          label={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.credentials.formReadWrite.readLabel',
+            { defaultMessage: 'Read Access' }
+          )}
         />
         <EuiCheckbox
           name="write"
@@ -48,7 +49,7 @@ export const FormKeyReadWriteAccess: React.FC = () => {
           checked={activeApiToken.write}
           onChange={(e) => setTokenReadWrite(e.target as ITokenReadWrite)}
           label={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.tokens.formReadWrite.writeLabel',
+            'xpack.enterpriseSearch.appSearch.credentials.formReadWrite.writeLabel',
             { defaultMessage: 'Write Access' }
           )}
         />

@@ -29,9 +29,10 @@ export const FormKeyEngineAccess: React.FC = () => {
     <>
       <EuiSpacer />
       <EuiFormRow
-        label={i18n.translate('xpack.enterpriseSearch.appSearch.tokens.formEngineAccess.label', {
-          defaultMessage: 'Engine Access Control',
-        })}
+        label={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.credentials.formEngineAccess.label',
+          { defaultMessage: 'Engine Access Control' }
+        )}
       >
         <>
           <EuiRadio
@@ -42,14 +43,14 @@ export const FormKeyEngineAccess: React.FC = () => {
                 <EuiTitle size="xxs">
                   <h3>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.tokens.formEngineAccess.fullAccess.label',
+                      'xpack.enterpriseSearch.appSearch.credentials.formEngineAccess.fullAccess.label',
                       { defaultMessage: 'Full Engine Access' }
                     )}
                   </h3>
                 </EuiTitle>
                 <EuiText size="s">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.tokens.formEngineAccess.fullAccess.helpText',
+                    'xpack.enterpriseSearch.appSearch.credentials.formEngineAccess.fullAccess.helpText',
                     { defaultMessage: 'Access to all current and future Engines.' }
                   )}
                 </EuiText>
@@ -69,14 +70,14 @@ export const FormKeyEngineAccess: React.FC = () => {
                 <EuiTitle size="xxs">
                   <h3>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.tokens.formEngineAccess.limitedAccess.label',
+                      'xpack.enterpriseSearch.appSearch.credentials.formEngineAccess.limitedAccess.label',
                       { defaultMessage: 'Limited Engine Access' }
                     )}
                   </h3>
                 </EuiTitle>
                 <EuiText size="s">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.tokens.formEngineAccess.limitedAccess.helpText',
+                    'xpack.enterpriseSearch.appSearch.credentials.formEngineAccess.limitedAccess.helpText',
                     { defaultMessage: 'Limit key access to specific Engines.' }
                   )}
                 </EuiText>
@@ -104,14 +105,14 @@ export const EngineSelection: React.FC = () => {
         <EuiTitle size="xs">
           <h4>
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.tokens.formEngineAccess.engineAccess.label',
+              'xpack.enterpriseSearch.appSearch.credentials.formEngineAccess.engineAccess.label',
               { defaultMessage: 'Select Engines' }
             )}
           </h4>
         </EuiTitle>
         <EuiText>
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.tokens.formEngineAccess.engineAccess.helpText',
+            'xpack.enterpriseSearch.appSearch.credentials.formEngineAccess.engineAccess.helpText',
             { defaultMessage: 'Engines which the key can access:' }
           )}
         </EuiText>

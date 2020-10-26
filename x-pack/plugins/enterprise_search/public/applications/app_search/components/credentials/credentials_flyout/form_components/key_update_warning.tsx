@@ -12,14 +12,14 @@ export const FormKeyUpdateWarning: React.FC = () => (
   <>
     <EuiSpacer />
     <EuiCallOut
-      title={i18n.translate('xpack.enterpriseSearch.appSearch.tokens.updateWarningTitle', {
+      title={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.updateWarningTitle', {
         defaultMessage: 'Proceed with caution!',
       })}
       color="warning"
       iconType="alert"
     >
       <p>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.tokens.updateWarning', {
+        {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.updateWarning', {
           defaultMessage:
             'Existing API keys may be shared between users. Changing permissions for this key will affect all users who have access to this key.',
         })}

@@ -21,12 +21,12 @@ export const FormKeyName: React.FC = () => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.enterpriseSearch.appSearch.tokens.formName.label', {
+      label={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.formName.label', {
         defaultMessage: 'Key name',
       })}
       helpText={
         !!name && name !== rawName
-          ? i18n.translate('xpack.enterpriseSearch.appSearch.tokens.formName.helpText', {
+          ? i18n.translate('xpack.enterpriseSearch.appSearch.credentials.formName.helpText', {
               defaultMessage: 'Your key will be named: {name}',
               values: { name },
             })
@@ -38,7 +38,7 @@ export const FormKeyName: React.FC = () => {
         name="raw_name"
         id="raw_name"
         placeholder={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.tokens.formName.placeholder',
+          'xpack.enterpriseSearch.appSearch.credentials.formName.placeholder',
           { defaultMessage: 'i.e., my-engine-key' }
         )}
         data-test-subj="APIKeyField"
