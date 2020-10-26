@@ -20,6 +20,13 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   const comboBox = getService('comboBox');
   const renderable = getService('renderable');
   const browser = getService('browser');
+  const MenuToggle = getService('MenuToggle');
+
+  const setViewPopover = new MenuToggle({
+    name: 'SetView Popover',
+    menuTestSubject: 'mapSetViewForm',
+    toggleButtonTestSubject: 'toggleSetViewVisibilityButton',
+  });
 
   function escapeLayerName(layerName: string) {
     return layerName.split(' ').join('_');
@@ -235,34 +242,11 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     }
 
     async openSetViewPopover() {
-      await this.changeSetViewPopoverOpenState(true);
+      await setViewPopover.open();
     }
 
     async closeSetViewPopover() {
-      await this.changeSetViewPopoverOpenState(false);
-    }
-
-    private async changeSetViewPopoverOpenState(expectedOpenState: boolean) {
-      log.debug('Ensuring that the setViewPopover is', expectedOpenState ? 'open' : 'closed');
-
-      await retry.try(async () => {
-        // if the popover is clearly in the expected state already bail out quickly
-        const isOpen = await testSubjects.exists('mapSetViewForm', { timeout: 500 });
-        if (isOpen === expectedOpenState) {
-          return;
-        }
-
-        // toggle the view state by clicking the button
-        await testSubjects.click('toggleSetViewVisibilityButton');
-
-        if (expectedOpenState === true) {
-          // wait for up to 10 seconds for the form to show up, otherwise fail and retry
-          await testSubjects.existOrFail('mapSetViewForm', { timeout: 10000 });
-        } else {
-          // wait for the form to hide, otherwise fail and retry
-          await testSubjects.waitForDeleted('mapSetViewForm');
-        }
-      });
+      await setViewPopover.close();
     }
 
     async setView(lat: number, lon: number, zoom: number) {
