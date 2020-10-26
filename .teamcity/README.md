@@ -16,7 +16,7 @@
 - Barebones Slack notifications via plugin
 - Dynamically creating environment variables / secrets at runtime for subsequent steps
 - "Baseline CI" job that runs a subset of CI for every commit
-- "Full CI" job that runs full CI hourly, if changes are detected. Re-uses builds that ran during "Baseline CI" for same commit
+- "Hourly CI" job that runs full CI hourly, if changes are detected. Re-uses builds that ran during "Baseline CI" for same commit
 - Performance monitoring enabled for all jobs
 - Jobs with multiple VCS roots (Kibana + Elasticsearch)
 - GCS uploading using service account key file and gsutil
@@ -86,14 +86,24 @@ and with additional properties:
 ### Baseline CI
 
 - Generates baseline metrics needed for PR comparisons
-- Only runs OSS and default builds and visual regression tests
+- Only runs OSS and default builds, and generates default saved object field metrics
 - Runs for each commit (each build should build a single commit)
 
 ### Full CI
 
-- Runs everything in CI
-- Runs hourly, currently only if there are changes since the last run
+- Runs everything in CI - all tests and builds
 - Re-uses builds from Baseline CI if they are finished or in-progress
+- Not generally triggered directly, is triggered by other jobs
+
+### Hourly CI
+
+- Triggers every hour and groups up all changes since the last run
+- Runs whatever is in `Full CI`
+
+### Pull Request CI
+
+- Kibana TeamCity PR bot triggers this build for PRs (new commits, trigger comments)
+- Sets many PR related parameters/env vars, then runs `Full CI`
 
 ![Diagram](Kibana.png)
 
@@ -144,7 +154,3 @@ Desires:
 - snapshot dependency only on `Build Snapshot`
 - same as `Promote Snapshot` but skips testing
 - can only be triggered manually
-
-```
-
-```
