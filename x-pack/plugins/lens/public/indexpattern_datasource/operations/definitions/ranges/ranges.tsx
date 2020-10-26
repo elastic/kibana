@@ -7,13 +7,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { supportedFormats } from '../../../../editor_frame_service/format_column';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { Range } from '../../../../../../../../src/plugins/expressions/common/expression_types/index';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
+import { supportedFormats } from '../../../format_column';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
 
@@ -37,7 +37,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
     format?: { id: string; params?: { decimals: number } };
     parentFormat?: {
       id: string;
-      params?: { template?: string; id?: string; replaceInfinity?: boolean };
+      params?: { id?: string; template?: string; replaceInfinity?: boolean };
     };
   };
 }
