@@ -47,7 +47,17 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
+        exclude: [
+          /node_modules/,
+          // prevent package code from being touched by babel-loader, except the kbn/optimizer fixtures.
+          //
+          // TODO: once we move to TeamCity and get rid of the splaying of the
+          // kibana repo we can focus this selector to avoid some gotchas
+          {
+            include: [/[\/\\]packages[\/\\]/],
+            exclude: [path.resolve(__dirname, '../__fixtures__')],
+          },
+        ],
         loaders: 'babel-loader',
         options: {
           presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
