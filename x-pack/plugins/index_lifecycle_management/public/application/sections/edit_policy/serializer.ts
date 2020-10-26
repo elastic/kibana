@@ -6,57 +6,54 @@
 
 import { isEmpty } from 'lodash';
 
-import { AllocateAction, SerializedPhase, SerializedPolicy } from '../../../../common/types';
+import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../common/types';
 
 import { FormInternal, DataAllocationMetaFields } from './types';
 import { isNumber } from '../../services/policies/policy_serialization';
 
-const unsafeSerializePhaseWithAllocation = (
-  dataAllocationMetaFields: DataAllocationMetaFields,
-  actions: SerializedPhase['actions'] = {},
-  originalAllocation: AllocateAction = {}
-) => {
-  if (dataAllocationMetaFields.dataTierAllocationType === 'node_attrs') {
-    if (dataAllocationMetaFields.allocationNodeAttribute) {
-      const [name, value] = dataAllocationMetaFields.allocationNodeAttribute.split(':');
-      actions.allocate = {
-        // copy over any other allocate details like "number_of_replicas"
-        ...actions.allocate,
-        require: {
-          [name]: value,
-        },
-      };
-    }
+const serializeAllocateAction = (
+  { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,
+  newActions: SerializedActionWithAllocation = {},
+  originalActions: SerializedActionWithAllocation = {}
+): SerializedActionWithAllocation => {
+  const { allocate, migrate, ...rest } = newActions;
+  // First copy over all non-allocate and migrate actions.
+  const actions: SerializedActionWithAllocation = { allocate, migrate, ...rest };
 
-    // copy over the original include and exclude values until we can set them in the form.
-    if (!isEmpty(originalAllocation.include)) {
-      actions.allocate = {
-        ...actions.allocate,
-        include: { ...originalAllocation.include },
-      };
-    }
+  switch (dataTierAllocationType) {
+    case 'node_attrs':
+      if (allocationNodeAttribute) {
+        const [name, value] = allocationNodeAttribute.split(':');
+        actions.allocate = {
+          // copy over any other allocate details like "number_of_replicas"
+          ...actions.allocate,
+          require: {
+            [name]: value,
+          },
+        };
+      }
 
-    if (!isEmpty(originalAllocation.exclude)) {
-      actions.allocate = {
-        ...actions.allocate,
-        exclude: { ...originalAllocation.exclude },
-      };
-    }
-  } else if (dataAllocationMetaFields.dataTierAllocationType === 'none') {
-    actions.migrate = { enabled: false };
-    if (actions.allocate) {
-      delete actions.allocate.require;
-      delete actions.allocate.include;
-      delete actions.allocate.exclude;
-    }
-  } else if (dataAllocationMetaFields.dataTierAllocationType === 'node_roles') {
-    if (actions.allocate) {
-      delete actions.allocate.require;
-      delete actions.allocate.include;
-      delete actions.allocate.exclude;
-    }
-    delete actions.migrate;
+      // copy over the original include and exclude values until we can set them in the form.
+      if (!isEmpty(originalActions?.allocate?.include)) {
+        actions.allocate = {
+          ...actions.allocate,
+          include: { ...originalActions?.allocate?.include },
+        };
+      }
+
+      if (!isEmpty(originalActions?.allocate?.exclude)) {
+        actions.allocate = {
+          ...actions.allocate,
+          exclude: { ...originalActions?.allocate?.exclude },
+        };
+      }
+      break;
+    case 'none':
+      actions.migrate = { enabled: false };
+      break;
+    default:
   }
+  return actions;
 };
 
 export const createSerializer = (originalPolicy?: SerializedPolicy) => (
@@ -109,10 +106,10 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       policy.phases.warm.min_age = `${policy.phases.warm.min_age}${_meta.warm.minAgeUnit}`;
     }
 
-    unsafeSerializePhaseWithAllocation(
+    policy.phases.warm.actions = serializeAllocateAction(
       _meta.warm,
       policy.phases.warm.actions,
-      originalPolicy?.phases.warm?.actions.allocate
+      originalPolicy?.phases.warm?.actions
     );
 
     if (
