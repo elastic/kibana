@@ -30,9 +30,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
       from(
         new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
           const { elasticsearch } = context.core;
-          const indexPatternsFetcher = new IndexPatternsFetcher(
-            elasticsearch.legacy.client.callAsCurrentUser
-          );
+          const indexPatternsFetcher = new IndexPatternsFetcher(elasticsearch.client.asCurrentUser);
           const dedupeIndices = dedupeIndexName(request.indices);
 
           const responsesIndexFields = await Promise.all(
