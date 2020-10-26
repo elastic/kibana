@@ -8,18 +8,18 @@ import '../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { EuiLink, EuiButton } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiPanel } from '@elastic/eui';
 
 import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
-import { EuiReactRouterLink, EuiReactRouterButton } from './eui_link';
+import { EuiReactRouterLink, EuiReactRouterButton, EuiReactRouterPanel } from './eui_link';
 
 describe('EUI & React Router Component Helpers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders', () => {
+  it('renders an EuiLink', () => {
     const wrapper = shallow(<EuiReactRouterLink to="/" />);
 
     expect(wrapper.find(EuiLink)).toHaveLength(1);
@@ -29,6 +29,13 @@ describe('EUI & React Router Component Helpers', () => {
     const wrapper = shallow(<EuiReactRouterButton to="/" />);
 
     expect(wrapper.find(EuiButton)).toHaveLength(1);
+  });
+
+  it('renders an EuiPanel', () => {
+    const wrapper = shallow(<EuiReactRouterPanel to="/" paddingSize="l" />);
+
+    expect(wrapper.find(EuiPanel)).toHaveLength(1);
+    expect(wrapper.find(EuiPanel).prop('paddingSize')).toEqual('l');
   });
 
   it('passes down all ...rest props', () => {
