@@ -29,8 +29,6 @@ function getExpressionForLayer(
   }
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-  const bucketsCount = columnEntries.filter(([, entry]) => entry.isBucketed).length;
-  const metricsCount = columnEntries.length - bucketsCount;
 
   if (columnEntries.length) {
     const aggs = columnEntries.map(([colId, col]) => {

@@ -198,8 +198,6 @@ export function PieComponent(
     setState({ isReady: true });
   }, []);
 
-  const reverseGroups = [...columnGroups].reverse();
-
   const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
