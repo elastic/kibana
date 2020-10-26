@@ -262,11 +262,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
         await queryBar.setQuery('');
         await queryBar.submitQuery();
-        const expectedLibraryData = ['329 network', '1 library', '1 library'];
+        const expectedLibraryData = [
+          '1 authentication',
+          '1 session',
+          '329 network',
+          '1 library',
+          '1 library',
+        ];
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.library'
         );
+        for (let i = 0; i < 7; i++) {
+          await (await testSubjects.find('resolver:graph-controls:west-button')).click();
+        }
         await pageObjects.hosts.runNodeEvents(expectedLibraryData);
       });
     });
