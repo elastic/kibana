@@ -18,7 +18,7 @@ import {
   REGION_NAME,
   TRANSACTION_DURATION_COUNTRY,
   TRANSACTION_DURATION_REGION,
-} from './LayerList';
+} from './useLayerList';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { I18LABELS } from '../translations';
 
