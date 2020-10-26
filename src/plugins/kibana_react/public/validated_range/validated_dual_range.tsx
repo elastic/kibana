@@ -105,6 +105,11 @@ export class ValidatedDualRange extends Component<Props> {
       allowEmptyRange,
       ...rest // TODO: Consider alternatives for spread operator in component
     } = this.props;
+    // Ensure the form row is display as compressed if compressed is true
+    let evaluatedDisplay = formRowDisplay;
+    if (!evaluatedDisplay) {
+      evaluatedDisplay = compressed ? 'rowCompressed' : 'row';
+    }
 
     return (
       <EuiFormRow
@@ -112,7 +117,7 @@ export class ValidatedDualRange extends Component<Props> {
         isInvalid={!this.state.isValid}
         error={this.state.errorMessage ? [this.state.errorMessage] : []}
         label={label}
-        display={formRowDisplay}
+        display={evaluatedDisplay}
       >
         <EuiDualRange
           compressed={compressed}

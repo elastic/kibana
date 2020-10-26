@@ -38,7 +38,6 @@ export function DynamicSizeForm({
         maxSize={styleOptions.maxSize}
         showLabels
         compressed
-        formRowDisplay="rowCompressed"
       />
     );
   }
