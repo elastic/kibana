@@ -18,7 +18,7 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getAPMHref } from '../../../shared/Links/apm/APMLink';
 
-export function CopyTraceLink({ transaction }: { transaction: ITransaction }) {
+export function CopyTraceLink({ transaction }: { transaction: Transaction }) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
   const toasts = useKibana().services.notifications?.toasts;
