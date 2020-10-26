@@ -62,7 +62,9 @@ export const OverviewPageFooter: FC<Props> = ({
         size="xs"
         onClick={(event: MouseEvent) => {
           application.navigateToUrl(addBasePath('/app/management/kibana/settings#defaultRoute'));
-          onChangeDefaultRoute(event);
+          if (onChangeDefaultRoute) {
+            onChangeDefaultRoute(event);
+          }
         }}
       >
         <FormattedMessage
@@ -83,7 +85,9 @@ export const OverviewPageFooter: FC<Props> = ({
             defaultMessage: 'Landing page updated',
           }),
         });
-        onSetDefaultRoute(event);
+        if (onSetDefaultRoute) {
+          onSetDefaultRoute(event);
+        }
       }}
       size="xs"
     >
