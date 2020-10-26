@@ -23,6 +23,7 @@ export {
   OnSaveProps,
   SavedObjectSaveModal,
   SavedObjectSaveModalOrigin,
+  OriginSaveModalProps,
   SaveModalState,
   SaveResult,
   showSaveModal,

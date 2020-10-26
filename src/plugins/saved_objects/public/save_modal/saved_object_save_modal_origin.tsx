@@ -30,7 +30,7 @@ interface SaveModalDocumentInfo {
   description?: string;
 }
 
-interface OriginSaveModalProps {
+export interface OriginSaveModalProps {
   originatingApp?: string;
   getAppNameFromId?: (appId: string) => string | undefined;
   originatingAppName?: string;

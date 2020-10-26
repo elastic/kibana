@@ -8,6 +8,7 @@ import { OverlayStart } from 'src/core/public';
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { TagsCapabilities } from '../../common';
 import { ITagsCache, ITagInternalClient } from '../tags';
+import { getTagIdsFromReferences, updateTagsReferences } from '../utils';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
 import { buildGetSearchBarFilter } from './get_search_bar_filter';
@@ -37,5 +38,7 @@ export const getUiApi = ({
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
     hasTagDecoration,
+    getTagIdsFromReferences,
+    updateTagsReferences,
   };
 };

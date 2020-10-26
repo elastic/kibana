@@ -19,10 +19,10 @@
 
 import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import { SavedObject } from '../../../core/types';
+import { SavedObject, SavedObjectReference } from '../../../core/types';
+import { SavedObjectsFindOptionsReference } from '../../../core/public';
 import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
 import { TagDecoratedSavedObject } from './decorator';
-import { SavedObjectsFindOptionsReference } from '../../../core/public';
 import { ITagsClient } from '../common';
 
 /**
@@ -115,6 +115,22 @@ export interface SavedObjectsTaggingApiUi {
    * ```
    */
   parseSearchQuery(query: string, options?: ParseSearchQueryOptions): ParsedSearchQuery;
+
+  /**
+   * Returns the object ids for the tag references from given references array
+   */
+  getTagIdsFromReferences(
+    references: Array<SavedObjectReference | SavedObjectsFindOptionsReference>
+  ): string[];
+
+  /**
+   * Returns a new references array that replace the old tag references with references to the
+   * new given tag ids, while preserving all non-tag references.
+   */
+  updateTagsReferences(
+    references: SavedObjectReference[],
+    newTagIds: string[]
+  ): SavedObjectReference[];
 
   /**
    * {@link SavedObjectsTaggingApiUiComponent | React components} to support the tagging feature.

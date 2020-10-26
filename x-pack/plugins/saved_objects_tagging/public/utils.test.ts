@@ -5,7 +5,14 @@
  */
 
 import { SavedObject, SavedObjectReference } from 'src/core/types';
-import { getObjectTags, convertTagNameToId, byNameTagSorter } from './utils';
+import {
+  getObjectTags,
+  convertTagNameToId,
+  byNameTagSorter,
+  updateTagsReferences,
+  getTagIdsFromReferences,
+  tagIdToReference,
+} from './utils';
 
 const createTag = (id: string, name: string = id) => ({
   id,
@@ -78,5 +85,49 @@ describe('byNameTagSorter', () => {
     tags.sort(byNameTagSorter);
 
     expect(tags.map(({ id }) => id)).toEqual(['id-2', 'id-1', 'id-4', 'id-3']);
+  });
+});
+
+describe('tagIdToReference', () => {
+  it('returns a reference for given tag id', () => {
+    expect(tagIdToReference('some-tag-id')).toEqual({
+      id: 'some-tag-id',
+      type: 'tag',
+      name: 'tag-ref-some-tag-id',
+    });
+  });
+});
+
+describe('getTagIdsFromReferences', () => {
+  it('returns the tag ids from the given references', () => {
+    expect(
+      getTagIdsFromReferences([
+        tagRef('tag-1'),
+        ref('dashboard', 'dash-1'),
+        tagRef('tag-2'),
+        ref('lens', 'lens-1'),
+      ])
+    ).toEqual(['tag-1', 'tag-2']);
+  });
+});
+
+describe('updateTagsReferences', () => {
+  it('updates the tag references', () => {
+    expect(
+      updateTagsReferences([tagRef('tag-1'), tagRef('tag-2'), tagRef('tag-3')], ['tag-2', 'tag-4'])
+    ).toEqual([tagRef('tag-2'), tagRef('tag-4')]);
+  });
+  it('leaves the non-tag references unchanged', () => {
+    expect(
+      updateTagsReferences(
+        [ref('dashboard', 'dash-1'), tagRef('tag-1'), ref('lens', 'lens-1'), tagRef('tag-2')],
+        ['tag-2', 'tag-4']
+      )
+    ).toEqual([
+      ref('dashboard', 'dash-1'),
+      ref('lens', 'lens-1'),
+      tagRef('tag-2'),
+      tagRef('tag-4'),
+    ]);
   });
 });
