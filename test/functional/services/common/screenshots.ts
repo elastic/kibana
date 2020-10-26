@@ -52,7 +52,6 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
      * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
      */
     async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
-      log.debug('compareAgainstBaseline');
       const sessionPath = resolve(SESSION_DIRECTORY, `${name}.png`);
       await this._take(sessionPath, el);
 
@@ -66,6 +65,7 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
         await writeFileAsync(baselinePath, readFileSync(sessionPath));
         return 0;
       } else {
+        log.debug(`compareAgainstBaseline: ${name}`);
         await mkdirAsync(FAILURE_DIRECTORY, { recursive: true });
         return await comparePngs(sessionPath, baselinePath, failurePath, SESSION_DIRECTORY, log);
       }
