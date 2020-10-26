@@ -8,6 +8,7 @@ import { ApplicationStart } from 'kibana/public';
 import { NewPackagePolicy, PackagePolicy } from '../../../../ingest_manager/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './os';
 export * from './trusted_apps';
 
 /**
