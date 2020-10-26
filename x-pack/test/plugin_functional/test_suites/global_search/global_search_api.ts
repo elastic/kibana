@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
 
-    it('return no results when no provider return results', async () => {
+    // See https://github.com/elastic/kibana/issues/81397
+    it.skip('return no results when no provider return results', async () => {
       const results = await findResultsWithAPI('no_match');
       expect(results.length).to.be(0);
     });
