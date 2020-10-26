@@ -25,8 +25,8 @@ import { SolutionPanel } from './solution_panel';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 
 const sortByOrder = (
-  { order: orderA = 0 }: FeatureCatalogueSolution,
-  { order: orderB = 0 }: FeatureCatalogueSolution
+  { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,
+  { order: orderB = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry
 ) => orderA - orderB;
 
 interface Props {
@@ -38,7 +38,9 @@ interface Props {
 export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directories }) => {
   // Separate Kibana from other solutions
   const kibana = solutions.find(({ id }) => id === 'kibana');
-  const kibanaApps = directories.filter(({ solutionId }) => solutionId === 'kibana');
+  const kibanaApps = directories
+    .filter(({ solutionId }) => solutionId === 'kibana')
+    .sort(sortByOrder);
   solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'kibana');
 
   return (
