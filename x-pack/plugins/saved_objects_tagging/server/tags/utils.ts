@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TagsClient } from './tags_client';
-export { TagValidationError } from './errors';
-export { savedObjectToTag } from './utils';
+import { Tag, TagSavedObject } from '../../common/types';
+
+export const savedObjectToTag = (savedObject: TagSavedObject): Tag => {
+  return {
+    id: savedObject.id,
+    ...savedObject.attributes,
+  };
+};

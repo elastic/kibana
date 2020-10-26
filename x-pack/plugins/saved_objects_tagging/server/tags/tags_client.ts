@@ -4,24 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import { Tag, TagAttributes, ITagsClient } from '../../common/types';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { TagSavedObject, TagAttributes, ITagsClient } from '../../common/types';
 import { tagSavedObjectTypeName } from '../../common/constants';
 import { TagValidationError } from './errors';
 import { validateTag } from './validate_tag';
-
-type TagSavedObject = SavedObject<TagAttributes>;
+import { savedObjectToTag } from './utils';
 
 interface TagsClientOptions {
   client: SavedObjectsClientContract;
 }
-
-const savedObjectToTag = (savedObject: TagSavedObject): Tag => {
-  return {
-    id: savedObject.id,
-    ...savedObject.attributes,
-  };
-};
 
 export class TagsClient implements ITagsClient {
   private readonly soClient: SavedObjectsClientContract;

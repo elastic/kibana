@@ -7,7 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 import { tagsInternalApiPrefix, tagSavedObjectTypeName } from '../../../common/constants';
-import { TagAttributes, Tag } from '../../../common/types';
+import { TagAttributes } from '../../../common/types';
+import { savedObjectToTag } from '../../tags';
 import { addConnectionCount } from '../lib';
 
 export const registerInternalFindTagsRoute = (router: IRouter) => {
@@ -34,12 +35,9 @@ export const registerInternalFindTagsRoute = (router: IRouter) => {
         searchFields: ['title', 'description'],
       });
 
-      const tags: Tag[] = findResponse.saved_objects.map((tag) => ({
-        id: tag.id,
-        ...tag.attributes,
-      }));
-
+      const tags = findResponse.saved_objects.map(savedObjectToTag);
       const allTypes = typeRegistry.getAllTypes().map((type) => type.name);
+
       const tagsWithConnections = await addConnectionCount(tags, allTypes, client);
 
       return res.ok({
