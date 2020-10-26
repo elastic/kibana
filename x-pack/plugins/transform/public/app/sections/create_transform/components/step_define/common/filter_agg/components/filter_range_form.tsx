@@ -67,7 +67,6 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
                   onChange={(e: any) => {
                     updateConfig({ includeFrom: e.target.checked });
                   }}
-                  isSelected={includeFrom}
                   fill={includeFrom}
                 >
                   {includeFrom ? '≥' : '>'}
@@ -98,7 +97,6 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
                   onClick={() => {
                     updateConfig({ includeTo: !includeTo });
                   }}
-                  isSelected={includeTo}
                   fill={includeTo}
                 >
                   {includeTo ? '≤' : '<'}s
