@@ -10,12 +10,16 @@ export * from './policies';
 
 /**
  * These roles reflect how nodes are stratified into different data tiers.
- *
  */
-export type NodeDataRole = 'data_hot' | 'data_warm' | 'data_cold';
+export type DataTierRole = 'data_hot' | 'data_warm' | 'data_cold';
 
 /**
- * The "data" role can store data on any tier and the "data_content" role can store
- * all data the ES stack uses for feature functionality like security related indices.
+ * The "data_content" role can store all data the ES stack uses for feature
+ * functionality like security-related indices.
  */
-export type NodeDataRoleWithCatchAll = 'data' | 'data_content' | NodeDataRole;
+export type DataRole = 'data_content' | DataTierRole;
+
+/**
+ * The "data" role can store data allocated to any tier.
+ */
+export type AnyDataRole = 'data' | DataRole;

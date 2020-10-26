@@ -5,14 +5,14 @@
  */
 
 import {
-  NodeDataRole,
+  DataTierRole,
   ListNodesRouteResponse,
   PhaseWithAllocation,
 } from '../../../../common/types';
 
 import { phaseToNodePreferenceMap } from '../../../../common/constants';
 
-export type AllocationNodeRole = NodeDataRole | 'none';
+export type AllocationNodeRole = DataTierRole | 'none';
 
 /**
  * Given a phase and current cluster node roles, determine which nodes the phase

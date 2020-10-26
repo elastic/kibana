@@ -8,11 +8,11 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-import { PhaseWithAllocation, NodeDataRole } from '../../../../../../common/types';
+import { PhaseWithAllocation, DataTierRole } from '../../../../../../common/types';
 
 import { AllocationNodeRole } from '../../../../lib';
 
-const i18nTextsNodeRoleToDataTier: Record<NodeDataRole, string> = {
+const i18nTextsNodeRoleToDataTier: Record<DataTierRole, string> = {
   data_hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierHotLabel', {
     defaultMessage: 'hot',
   }),
@@ -31,7 +31,7 @@ const i18nTexts = {
         'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.warm.title',
         { defaultMessage: 'No nodes assigned to the warm tier' }
       ),
-      body: (nodeRole: NodeDataRole) =>
+      body: (nodeRole: DataTierRole) =>
         i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.warm', {
           defaultMessage:
             'This policy will move data in the warm phase to {tier} tier nodes instead.',
@@ -43,7 +43,7 @@ const i18nTexts = {
         'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.cold.title',
         { defaultMessage: 'No nodes assigned to the cold tier' }
       ),
-      body: (nodeRole: NodeDataRole) =>
+      body: (nodeRole: DataTierRole) =>
         i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.cold', {
           defaultMessage:
             'This policy will move data in the cold phase to {tier} tier nodes instead.',
