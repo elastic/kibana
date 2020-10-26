@@ -43,6 +43,7 @@ import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { Version } from './version';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -165,6 +166,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+        version: new Version(injectedMetadata.getKibanaVersion()),
       };
 
       // Services that do not expose contracts at setup
@@ -245,6 +247,7 @@ export class CoreSystem {
         overlays,
         uiSettings,
         fatalErrors,
+        version: new Version(injectedMetadata.getKibanaVersion()),
       };
 
       await this.plugins.start(core);

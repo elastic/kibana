@@ -1,19 +1,29 @@
-import { i18n } from '@kbn/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../src/core/public';
 import {
   VersionBranchingExamplesPluginSetup,
   VersionBranchingExamplesPluginStart,
   AppPluginStartDependencies,
+  AppPluginSetupDependencies,
 } from './types';
-import { PLUGIN_NAME } from '../common';
 
 export class VersionBranchingExamplesPlugin
   implements Plugin<VersionBranchingExamplesPluginSetup, VersionBranchingExamplesPluginStart> {
-  public setup(core: CoreSetup): VersionBranchingExamplesPluginSetup {
-    // Register an application into the side navigation menu
+  public setup(
+    core: CoreSetup,
+    deps: AppPluginSetupDependencies
+  ): VersionBranchingExamplesPluginSetup {
+    const { developerExamples } = deps;
+
     core.application.register({
-      id: 'versionBranchingExamples',
-      title: PLUGIN_NAME,
+      id: 'version_branching_examples',
+      title: 'version branching examples',
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -24,20 +34,29 @@ export class VersionBranchingExamplesPlugin
       },
     });
 
+    developerExamples.register({
+      appId: 'version_branching_examples',
+      title: 'version branching examples',
+      description: 'example branching based on the version',
+      links: [
+        {
+          label: 'README',
+          href: 'https://github.com/elastic/kibana/blob/master/src/plugins/bfetch/README.md',
+          iconType: 'logoGithub',
+          size: 's',
+          target: '_blank',
+        },
+      ],
+    });
+
     // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('versionBranchingExamples.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
+    return {};
   }
 
-  public start(core: CoreStart): VersionBranchingExamplesPluginStart {
+  public start(
+    core: CoreStart,
+    deps: AppPluginStartDependencies
+  ): VersionBranchingExamplesPluginStart {
     return {};
   }
 

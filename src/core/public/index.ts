@@ -76,6 +76,7 @@ import {
   HandlerContextType,
   HandlerParameters,
 } from './context';
+import { Version } from './version';
 
 export { PackageInfo, EnvironmentMode } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
@@ -225,6 +226,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** {@link Version} */
+  version: Version;
 }
 
 /**
@@ -278,6 +281,8 @@ export interface CoreStart {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
+  /** {@link Version} */
+  version: Version;
 }
 
 export {
@@ -323,6 +328,7 @@ export {
   IUiSettingsClient,
   UiSettingsState,
   NavType,
+  Version,
 };
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';
