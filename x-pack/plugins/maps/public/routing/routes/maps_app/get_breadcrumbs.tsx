@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { getNavigateToApp } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../maps_router';
+import { getAppTitle } from '../../../../common/i18n_getters';
 
 export const unsavedChangesWarning = i18n.translate(
   'xpack.maps.breadCrumbs.unsavedChangesWarning',
@@ -37,9 +38,7 @@ export function getBreadcrumbs({
   }
 
   breadcrumbs.push({
-    text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
-      defaultMessage: 'Maps',
-    }),
+    text: getAppTitle(),
     onClick: () => {
       if (getHasUnsavedChanges()) {
         const navigateAway = window.confirm(unsavedChangesWarning);

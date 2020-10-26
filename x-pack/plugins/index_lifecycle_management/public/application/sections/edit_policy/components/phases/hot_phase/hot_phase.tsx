@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, FunctionComponent, useEffect, useState } from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -45,8 +46,11 @@ const hotProperty: keyof Phases = 'hot';
 export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) => void }> = ({
   setWarmPhaseOnRollover,
 }) => {
-  const [{ [useRolloverPath]: isRolloverEnabled }] = useFormData({ watch: [useRolloverPath] });
   const form = useFormContext();
+  const [formData] = useFormData({
+    watch: useRolloverPath,
+  });
+  const isRolloverEnabled = get(formData, useRolloverPath);
 
   const isShowingErrors = form.isValid === false;
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);

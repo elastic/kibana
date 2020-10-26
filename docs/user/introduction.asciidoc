@@ -20,11 +20,11 @@ and more &mdash; all from the convenience of a {kib} UI.
 document discovery to SIEM, {kib} is the portal for accessing these and other capabilities.
 
 [role="screenshot"]
-image::images/intro-kibana.png[]
+image::images/intro-kibana.png[Kibana home page]
 
 [float]
 [[get-data-into-kibana]]
-=== Add data
+=== Ingest data
 
 {kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
 and processes the data, with {kib} sitting on top. From the home page, {kib} provides
@@ -44,7 +44,7 @@ search for hidden insights and relationships. Ask your questions, and then
 narrow the results to just the data you want.
 
 [role="screenshot"]
-image::images/intro-discover.png[]
+image::images/intro-discover.png[Discover UI]
 
 [float]
 [[visualize-and-analyze]]
@@ -63,7 +63,7 @@ use <<dashboard, Dashboard>> to collect them in one place. A dashboard provides
 insights into your data from multiple perspectives.
 
 [role="screenshot"]
-image::images/intro-dashboard.png[]
+image::images/intro-dashboard.png[Sample eCommerce data set dashboard]
 
 {kib} also offers these visualization features:
 
@@ -140,5 +140,4 @@ You can also <<install, install {kib} on your own>> &mdash; no code, no addi
 infrastructure required.
 
 Our <<get-started, Quick start>> and in-product guidance can
-help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[]
-in the top navigation bar for help with questions or to provide feedback.
+help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[Help icon in navigation bar] for help with questions or to provide feedback.

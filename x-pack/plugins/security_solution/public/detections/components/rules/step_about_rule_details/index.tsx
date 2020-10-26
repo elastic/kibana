@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../common/components/header_section';
-import { Markdown } from '../../../../common/components/markdown';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { AboutStepRule, AboutStepRuleDetails } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { StepAboutRule } from '../step_about_rule';
@@ -136,7 +136,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   maxHeight={aboutPanelHeight}
                   className="eui-yScrollWithShadows"
                 >
-                  <Markdown raw={stepDataDetails.note} />
+                  <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
