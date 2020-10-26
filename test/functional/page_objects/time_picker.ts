@@ -44,7 +44,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
 
   const quickSelectTimeMenuToggle = new MenuToggle({
     name: 'QuickSelectTime Menu',
-    menuTestSubject: 'openQuickSelectTimeMenu',
+    menuTestSubject: 'superDatePickerQuickMenu',
     toggleButtonTestSubject: 'superDatePickerToggleQuickMenuButton',
   });
 
