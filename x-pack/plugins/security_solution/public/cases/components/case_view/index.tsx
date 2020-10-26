@@ -362,7 +362,6 @@ export const CaseComponent = React.memo<CaseProps>(
                           data-test-subj={caseStatusData['data-test-subj']}
                           iconType={caseStatusData.icon}
                           isDisabled={!userCanCrud}
-                          isSelected={caseStatusData.isSelected}
                           isLoading={isLoading && updateKey === 'status'}
                           fill={caseStatusData.isSelected}
                           onClick={() => toggleStatusCase(!caseStatusData.isSelected)}

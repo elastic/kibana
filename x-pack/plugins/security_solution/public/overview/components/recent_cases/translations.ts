@@ -45,6 +45,6 @@ export const VIEW_ALL_CASES = i18n.translate(
 export const CASES_FILTER_CONTROL = i18n.translate(
   'xpack.securitySolution.recentCases.controlLegend',
   {
-    defaultMessage: 'Cases filter control',
+    defaultMessage: 'Cases filter',
   }
 );

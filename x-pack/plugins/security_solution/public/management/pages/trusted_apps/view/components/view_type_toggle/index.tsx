@@ -47,7 +47,7 @@ export const ViewTypeToggle = memo(({ selectedOption, onToggle }: ViewTypeToggle
       ]}
       onChange={handleChange}
       legend={i18n.translate('xpack.securitySolution.trustedapps.viewTypeToggle.controlLegend', {
-        defaultMessage: 'View type toggle control',
+        defaultMessage: 'View type',
       })}
     />
   );

@@ -97,7 +97,6 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
             isDisabled={disabled}
             iconType={icon}
             isLoading={isLoading}
-            isSelected={isSelected}
             fill={isSelected}
             onClick={() => toggleStatusCase(!isSelected)}
           >
