@@ -23,7 +23,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -52,7 +52,7 @@ function DefaultEditorControls({
 }: DefaultEditorControlsProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
-  const toggleAutoApply = useCallback((e) => setAutoApplyEnabled(e.target.checked), []);
+  const toggleAutoApply = useCallback((e) => setAutoApplyEnabled((enabled) => !enabled), []);
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
 
   useDebounce(
@@ -131,18 +131,32 @@ function DefaultEditorControls({
             defaultMessage: 'Auto updates the visualization on every change.',
           })}
         >
-          <EuiButtonIcon
-            aria-label={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesAriaLabel', {
-              defaultMessage: 'Auto apply editor changes',
-            })}
+          <EuiButton
             className="visEditorSidebar__autoApplyButton"
             data-test-subj="visualizeEditorAutoButton"
             iconType="refresh"
-            color={autoApplyEnabled ? 'primary' : 'subdued'}
-            isSelected={autoApplyEnabled}
-            onChange={toggleAutoApply}
+            color={autoApplyEnabled ? 'primary' : 'text'}
+            fill
+            onClick={toggleAutoApply}
             size="s"
-          />
+            minWidth={80}
+          >
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabel', {
+                  defaultMessage: 'Auto apply is',
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+
+            {autoApplyEnabled
+              ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOn', {
+                  defaultMessage: 'On',
+                })
+              : i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOff', {
+                  defaultMessage: 'Off',
+                })}
+          </EuiButton>
         </EuiToolTip>
       )}
     </div>
