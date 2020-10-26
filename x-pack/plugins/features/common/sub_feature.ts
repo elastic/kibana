@@ -72,7 +72,8 @@ export interface SubFeaturePrivilegeConfig
 
   /**
    * The minimum supported license level for this sub-feature privilege.
-   * If no license level is supplied, then this privilege will be available for all valid licenses.
+   * If no license level is supplied, then this privilege will be available for all licences
+   * that are valid for the overall feature.
    */
   minimumLicense?: LicenseType;
 }
