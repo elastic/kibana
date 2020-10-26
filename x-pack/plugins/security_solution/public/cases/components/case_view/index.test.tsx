@@ -183,10 +183,7 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      wrapper
-        .find('[data-test-subj="toggle-case-status"]')
-        .first()
-        .simulate('change', { target: { checked: true } });
+      wrapper.find('[data-test-subj="toggle-case-status"]').first().simulate('click');
       expect(updateCaseProperty).toHaveBeenCalled();
     });
   });

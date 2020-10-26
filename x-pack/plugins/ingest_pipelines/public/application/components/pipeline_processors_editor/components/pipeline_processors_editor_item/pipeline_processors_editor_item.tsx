@@ -134,7 +134,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           size="s"
           isDisabled={disabled}
           aria-label={label}
-          onChange={() => {
+          onClick={() => {
             if (isMovingThisProcessor) {
               onCancelMove();
             } else {
