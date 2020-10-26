@@ -8,7 +8,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { getHostPolicyResponseHandler } from './handlers';
+import { getHostPolicyResponseHandler, getPolicySummariesHandler } from './handlers';
 import {
   ILegacyScopedClusterClient,
   KibanaResponseFactory,
@@ -31,64 +31,114 @@ describe('test policy response handler', () => {
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 
-  beforeEach(() => {
-    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockSavedObjectClient = savedObjectsClientMock.create();
-    mockResponse = httpServerMock.createResponseFactory();
-    endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+  describe('test policy response handler', () => {
+    beforeEach(() => {
+      mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      mockSavedObjectClient = savedObjectsClientMock.create();
+      mockResponse = httpServerMock.createResponseFactory();
+      endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+    });
+
+    afterEach(() => endpointAppContextService.stop());
+
+    it('should return the latest policy response for a host', async () => {
+      const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      });
+
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { agentId: 'id' },
+      });
+
+      await hostPolicyResponseHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toBeCalled();
+      const result = mockResponse.ok.mock.calls[0][0]?.body as GetHostPolicyResponse;
+      expect(result.policy_response.agent.id).toEqual(response.hits.hits[0]._source.agent.id);
+    });
+
+    it('should return not found when there is no response policy for host', async () => {
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      });
+
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+        Promise.resolve(createSearchResponse())
+      );
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { agentId: 'id' },
+      });
+
+      await hostPolicyResponseHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.notFound).toBeCalled();
+      const message = mockResponse.notFound.mock.calls[0][0]?.body;
+      expect(message).toEqual('Policy Response Not Found');
+    });
   });
 
-  afterEach(() => endpointAppContextService.stop());
-
-  it('should return the latest policy response for a host', async () => {
-    const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
-    const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
+  describe('test policy summaries handler', () => {
+    beforeEach(() => {
+      mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      mockSavedObjectClient = savedObjectsClientMock.create();
+      mockResponse = httpServerMock.createResponseFactory();
+      endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     });
 
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-    const mockRequest = httpServerMock.createKibanaRequest({
-      params: { agentId: 'id' },
+    afterEach(() => endpointAppContextService.stop());
+
+    it('should return the summary of all the policies with the given policy name', async () => {
+      const policySummariesHandler = getPolicySummariesHandler({
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { policyName: 'my-policy' },
+      });
+
+      await policySummariesHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockResponse.ok).toBeCalled();
     });
 
-    await hostPolicyResponseHandler(
-      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-      mockRequest,
-      mockResponse
-    );
+    it('should return the summary of all the policies', async () => {
+      const policySummariesHandler = getPolicySummariesHandler({
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      });
 
-    expect(mockResponse.ok).toBeCalled();
-    const result = mockResponse.ok.mock.calls[0][0]?.body as GetHostPolicyResponse;
-    expect(result.policy_response.agent.id).toEqual(response.hits.hits[0]._source.agent.id);
-  });
+      const mockRequest = httpServerMock.createKibanaRequest();
 
-  it('should return not found when there is no response policy for host', async () => {
-    const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
+      await policySummariesHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockResponse.ok).toBeCalled();
     });
-
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve(createSearchResponse())
-    );
-
-    const mockRequest = httpServerMock.createKibanaRequest({
-      params: { agentId: 'id' },
-    });
-
-    await hostPolicyResponseHandler(
-      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockResponse.notFound).toBeCalled();
-    const message = mockResponse.notFound.mock.calls[0][0]?.body;
-    expect(message).toEqual('Policy Response Not Found');
   });
 });
 

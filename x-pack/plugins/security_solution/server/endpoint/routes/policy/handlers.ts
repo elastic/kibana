@@ -6,7 +6,10 @@
 import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
-import { GetPolicyResponseSchema } from '../../../../common/endpoint/schema/policy';
+import {
+  GetPolicyResponseSchema,
+  GetPolicySummariesSchema,
+} from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
 import { getPolicyResponseByAgentId } from './service';
 
@@ -26,6 +29,19 @@ export const getHostPolicyResponseHandler = function (
       }
 
       return response.notFound({ body: 'Policy Response Not Found' });
+    } catch (err) {
+      return response.internalError({ body: err });
+    }
+  };
+};
+
+export const getPolicySummariesHandler = function (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<undefined, TypeOf<typeof GetPolicySummariesSchema.query>, undefined> {
+  return async (context, request, response) => {
+    try {
+      return response.ok({ body: 'ok' });
+      // return response.notFound({ body: 'Policy Response Not Found' });
     } catch (err) {
       return response.internalError({ body: err });
     }
