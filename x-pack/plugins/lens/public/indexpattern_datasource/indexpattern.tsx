@@ -358,7 +358,7 @@ export function getIndexPatternDatasource({
               shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
                 defaultMessage: 'Invalid references',
               }),
-              longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
+              longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
                 defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {has} other {have}} invalid reference`,
                 values: { layers: realIndex.length, layersList: realIndex.join(', ') },
               }),
