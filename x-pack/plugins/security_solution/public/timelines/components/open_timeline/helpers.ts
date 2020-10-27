@@ -378,7 +378,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(
-    sourcererActions.setSelectedIndexPatterns({
+    sourcererActions.initTimelineIndexPatterns({
       id: SourcererScopeName.timeline,
       selectedPatterns: timeline.indexNames,
       eventType: timeline.eventType,
