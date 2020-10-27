@@ -16,7 +16,7 @@ Before you upgrade {kib}:
 * Back up your data with <<snapshot-repositories, Snapshot and Restore>>. To roll back to an earlier version, you **must** have a snapshot of the `.kibana*` indices. 
 * Although not a requirement for rollbacks, we recommend taking a snapshot of all {kib} indices created by the plugins you use such as the `.reporting*` indices created by the reporting plugin.  
 * Before you upgrade production servers, test the upgrades in a dev environment.
-* See <<upgrade-migrations#preventing-migration-failures], preventing migration failures>> for common reasons upgrades fail and how to prevent these.
+* See <<preventing-migration-failures, preventing migration failures>> for common reasons upgrades fail and how to prevent these.
 * If you are using custom plugins, check that a compatible version is
   available.
 * Shut down all {kib} instances. Running more than one {kib} version against
