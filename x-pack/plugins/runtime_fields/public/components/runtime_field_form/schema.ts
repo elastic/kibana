@@ -5,18 +5,29 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema } from '../../shared_imports';
+import { FormSchema, fieldValidators } from '../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { RuntimeField, RuntimeType, ComboBoxOption } from '../../types';
 
+const { emptyField } = fieldValidators;
+
 export const schema: FormSchema<RuntimeField> = {
   name: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.nameLabel', {
+    label: i18n.translate('xpack.runtimeFields.form.nameLabel', {
       defaultMessage: 'Name',
     }),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate('xpack.runtimeFields.form.validations.scriptIsRequiredErrorMessage', {
+            defaultMessage: 'Give a name to the field.',
+          })
+        ),
+      },
+    ],
   },
   type: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.runtimeTypeLabel', {
+    label: i18n.translate('xpack.runtimeFields.form.runtimeTypeLabel', {
       defaultMessage: 'Type',
     }),
     defaultValue: 'keyword',
@@ -31,8 +42,17 @@ export const schema: FormSchema<RuntimeField> = {
     serializer: (value: Array<ComboBoxOption<RuntimeType>>) => value[0].value!,
   },
   script: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.defineFieldLabel', {
+    label: i18n.translate('xpack.runtimeFields.form.defineFieldLabel', {
       defaultMessage: 'Define field',
     }),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate('xpack.runtimeFields.form.validations.scriptIsRequiredErrorMessage', {
+            defaultMessage: 'Script must emit() a value.',
+          })
+        ),
+      },
+    ],
   },
 };
