@@ -152,7 +152,7 @@
     "copy-to-clipboard": "^3.0.8",
     "copy-webpack-plugin": "^6.0.2",
     "cronstrue": "^1.51.0",
-    "cypress": "^5.0.0",
+    "cypress": "5.4.0",
     "cypress-multi-reporters": "^1.2.3",
     "cypress-promise": "^1.1.0",
     "d3": "3.5.17",

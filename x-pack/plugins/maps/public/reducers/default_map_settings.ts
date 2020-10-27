@@ -9,7 +9,7 @@ import { MapSettings } from './map';
 
 export function getDefaultMapSettings(): MapSettings {
   return {
-    autoFitToDataBounds: true,
+    autoFitToDataBounds: false,
     initialLocation: INITIAL_LOCATION.LAST_SAVED_LOCATION,
     fixedLocation: { lat: 0, lon: 0, zoom: 2 },
     browserLocation: { zoom: 2 },
