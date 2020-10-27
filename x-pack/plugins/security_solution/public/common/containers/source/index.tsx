@@ -75,9 +75,6 @@ export const getBrowserFields = memoizeOne(
       if (accumulator[field.category].fields == null) {
         accumulator[field.category].fields = {};
       }
-      if (accumulator[field.category].fields[field.name] == null) {
-        (accumulator[field.category].fields as DangerCastForMutation)[field.name] = {};
-      }
       accumulator[field.category].fields[field.name] = (field as unknown) as BrowserField;
       return accumulator;
     }, {});
