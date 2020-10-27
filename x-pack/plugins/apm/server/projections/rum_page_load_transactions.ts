@@ -80,7 +80,6 @@ export function getRumErrorsProjection({
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [AGENT_NAME]: 'rum-js' } },
-      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
       {
         term: {
           [SERVICE_LANGUAGE_NAME]: 'javascript',

@@ -9,26 +9,35 @@ Object {
   },
   "body": Object {
     "aggs": Object {
-      "backEnd": Object {
-        "percentiles": Object {
-          "field": "transaction.marks.agent.timeToFirstByte",
-          "hdr": Object {
-            "number_of_significant_value_digits": 3,
+      "hasFetchStartField": Object {
+        "aggs": Object {
+          "backEnd": Object {
+            "percentiles": Object {
+              "field": "transaction.marks.agent.timeToFirstByte",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
           },
-          "percents": Array [
-            50,
-          ],
+          "domInteractive": Object {
+            "percentiles": Object {
+              "field": "transaction.marks.agent.domInteractive",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
+          },
         },
-      },
-      "domInteractive": Object {
-        "percentiles": Object {
-          "field": "transaction.marks.agent.domInteractive",
-          "hdr": Object {
-            "number_of_significant_value_digits": 3,
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.marks.navigationTiming.fetchStart",
           },
-          "percents": Array [
-            50,
-          ],
         },
       },
     },
@@ -128,11 +137,6 @@ Object {
           Object {
             "term": Object {
               "agent.name": "rum-js",
-            },
-          },
-          Object {
-            "term": Object {
-              "transaction.type": "page-load",
             },
           },
           Object {
@@ -534,11 +538,6 @@ Object {
           Object {
             "term": Object {
               "transaction.type": "page-load",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
           Object {

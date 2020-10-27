@@ -32,21 +32,28 @@ export async function getClientMetrics({
       size: 0,
       track_total_hits: true,
       aggs: {
-        backEnd: {
-          percentiles: {
-            field: TRANSACTION_TIME_TO_FIRST_BYTE,
-            percents: [percentile],
-            hdr: {
-              number_of_significant_value_digits: 3,
-            },
+        hasFetchStartField: {
+          filter: {
+            exists: { field: 'transaction.marks.navigationTiming.fetchStart' },
           },
-        },
-        domInteractive: {
-          percentiles: {
-            field: TRANSACTION_DOM_INTERACTIVE,
-            percents: [percentile],
-            hdr: {
-              number_of_significant_value_digits: 3,
+          aggs: {
+            backEnd: {
+              percentiles: {
+                field: TRANSACTION_TIME_TO_FIRST_BYTE,
+                percents: [percentile],
+                hdr: {
+                  number_of_significant_value_digits: 3,
+                },
+              },
+            },
+            domInteractive: {
+              percentiles: {
+                field: TRANSACTION_DOM_INTERACTIVE,
+                percents: [percentile],
+                hdr: {
+                  number_of_significant_value_digits: 3,
+                },
+              },
             },
           },
         },
@@ -56,7 +63,9 @@ export async function getClientMetrics({
 
   const { apmEventClient } = setup;
   const response = await apmEventClient.search(params);
-  const { backEnd, domInteractive } = response.aggregations!;
+  const {
+    hasFetchStartField: { backEnd, domInteractive },
+  } = response.aggregations!;
 
   const pkey = percentile.toFixed(1);
 
