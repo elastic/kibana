@@ -22,6 +22,7 @@ import classNames from 'classnames';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
+import 'brace/mode/json';
 
 import {
   EuiBadge,
