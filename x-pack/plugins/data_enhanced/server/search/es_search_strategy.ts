@@ -5,11 +5,16 @@
  */
 
 import { from } from 'rxjs';
-import { first, switchMap, map, mergeMap } from 'rxjs/operators';
+import { first, switchMap, map } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 
-import { getShardTimeout, shimHitsTotal, search } from '../../../../../src/plugins/data/server';
+import {
+  getShardTimeout,
+  shimHitsTotal,
+  search,
+  DoSearchFnArgs,
+} from '../../../../../src/plugins/data/server';
 import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
 
@@ -40,16 +45,18 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const asyncOptions = getAsyncOptions();
 
-    return config$.pipe(
-      first(),
-      mergeMap(async () => ({
-        params: {
-          ...(await getDefaultSearchParams(context.core.uiSettings.client)),
-          batchedReduceSize: 64,
-          ...asyncOptions,
-          ...request.params,
-        },
-      })),
+    return from(
+      new Promise<DoSearchFnArgs>(async (resolve) => {
+        resolve({
+          params: {
+            ...(await getDefaultSearchParams(context.core.uiSettings.client)),
+            batchedReduceSize: 64,
+            ...asyncOptions,
+            ...request.params,
+          },
+        });
+      })
+    ).pipe(
       switchMap(
         doPartialSearch(
           (...args) => context.core.elasticsearch.client.asCurrentUser.asyncSearch.submit(...args),
