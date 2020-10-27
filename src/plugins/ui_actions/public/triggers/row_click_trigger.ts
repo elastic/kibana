@@ -35,4 +35,6 @@ export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'> = {
 
 export interface RowClickContext {
   embeddable?: IEmbeddable;
+  // TODO: change it to something specific once we know its shape.
+  data: any;
 }

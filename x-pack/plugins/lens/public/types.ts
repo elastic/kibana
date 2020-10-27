@@ -8,6 +8,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { SavedObjectReference } from 'kibana/public';
+import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
@@ -563,9 +564,15 @@ export interface LensFilterEvent {
   name: 'filter';
   data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
 }
+
 export interface LensBrushEvent {
   name: 'brush';
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+export interface LensTableRowContextMenuEvent {
+  name: 'tableRowContextMenuClick';
+  data: TriggerContext<typeof ROW_CLICK_TRIGGER>['data'];
 }
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
@@ -576,11 +583,17 @@ export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensB
   return event.name === 'brush';
 }
 
+export function isLensTableRowContextMenuClickEvent(
+  event: ExpressionRendererEvent
+): event is LensBrushEvent {
+  return event.name === 'tableRowContextMenuClick';
+}
+
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
  * version of the general render handlers, specifying supported event types. If this type is
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensFilterEvent | LensBrushEvent) => void;
+  event: (event: LensFilterEvent | LensBrushEvent | LensTableRowContextMenuEvent) => void;
 }
