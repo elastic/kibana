@@ -5,3 +5,4 @@
  */
 
 export { MlClient, getMlClient } from './ml_client';
+export { MLJobNotFound } from './errors';

@@ -8,6 +8,7 @@ import RE2 from 're2';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 import { JobType } from '../../common/types/saved_objects';
+import { MLJobNotFound } from '../lib/ml_client';
 
 interface JobObject {
   job_id: string;
@@ -74,7 +75,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     const jobs = await _getJobObjects(jobType, jobId);
     const job = jobs[0];
     if (job === undefined) {
-      throw new Error('job not found');
+      throw new MLJobNotFound('job not found');
     }
 
     await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id);
@@ -104,7 +105,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     const jobs = await _getJobObjects('anomaly-detector', jobId);
     const job = jobs[0];
     if (job === undefined) {
-      throw new Error('job not found');
+      throw new MLJobNotFound(`'${datafeedId}' not found`);
     }
 
     const jobObject = job.attributes;
@@ -116,7 +117,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     const jobs = await _getJobObjects('anomaly-detector', undefined, datafeedId);
     const job = jobs[0];
     if (job === undefined) {
-      throw new Error('job not found');
+      throw new MLJobNotFound(`'${datafeedId}' not found`);
     }
 
     const jobObject = job.attributes;
