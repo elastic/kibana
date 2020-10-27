@@ -212,15 +212,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const dispatch = useDispatch();
-  const previousIndexesName = useRef<string[]>([]);
-
   const indexNamesSelectedSelector = useMemo(
     () => sourcererSelectors.getIndexNamesSelectedSelector(),
     []
   );
-  const indexNames = useShallowEqualSelector<string[]>((state) =>
-    indexNamesSelectedSelector(state, sourcererScopeName)
-  );
+  const { indexNames, previousIndexNames } = useShallowEqualSelector<{
+    indexNames: string[];
+    previousIndexNames: string;
+  }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
 
   const setLoading = useCallback(
     (loading: boolean) => {
@@ -248,7 +247,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
                   const stringifyIndices = response.indicesExist.sort().join();
-                  previousIndexesName.current = response.indicesExist;
                   dispatch(
                     sourcererActions.setSource({
                       id: sourcererScopeName,
@@ -297,8 +295,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
+    if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
       indexFieldsSearch(indexNames);
     }
-  }, [indexNames, indexFieldsSearch, previousIndexesName]);
+  }, [indexNames, indexFieldsSearch, previousIndexNames]);
 };
