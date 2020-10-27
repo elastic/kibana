@@ -1598,13 +1598,13 @@ export interface OptionedValueProp {
     value: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "KbnError" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "PainlessError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class PainlessError extends KbnError {
-    // Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
-    constructor(err: EsError, request: IKibanaSearchRequest);
+export class PainlessError extends EsError {
+    // Warning: (ae-forgotten-export) The symbol "IEsError" needs to be exported by the entry point index.d.ts
+    constructor(err: IEsError, request: IKibanaSearchRequest);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
@@ -2134,6 +2134,7 @@ export interface SearchSourceFields {
     version?: boolean;
 }
 
+// Warning: (ae-forgotten-export) The symbol "KbnError" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "SearchTimeoutError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
