@@ -8,6 +8,13 @@ the index patterns that retrieve your data from {es}.
 image::images/management-index-patterns.png[]
 
 [float]
+=== Required permissions
+
+The `Index Pattern Management` {kib} privilege is required to access the *Index patterns* UI.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
+
+[float]
 === Create an index pattern
 
 An index pattern is the glue that connects {kib} to your {es} data. Create an
