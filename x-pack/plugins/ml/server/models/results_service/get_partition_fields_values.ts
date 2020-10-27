@@ -156,7 +156,13 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
         return !!v?.anomalousOnly;
       }
     );
-    const isModelPlotSearch = !!(isModelPlotEnabled && !isAnomalousOnly);
+
+    const isModelPlotSearch = !!isModelPlotEnabled && !isAnomalousOnly;
+
+    // Remove the time filter in case model plot is not enabled
+    // and not only anomalous records have been requested, so
+    // it includes the records that occurred as anomalies historically
+    const searchAllTime = !isModelPlotEnabled && !isAnomalousOnly;
 
     const requestBody = {
       query: {
@@ -174,11 +180,9 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
                 job_id: jobId,
               },
             },
-            // Remove the time filter in case model plot is not enabled
-            // and not only anomalous records have been requested.
-            // It includes the records that occurred as anomalies historically
-            ...(!isModelPlotEnabled && !isAnomalousOnly
-              ? [
+            ...(searchAllTime
+              ? []
+              : [
                   {
                     range: {
                       timestamp: {
@@ -188,8 +192,7 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
                       },
                     },
                   },
-                ]
-              : []),
+                ]),
             {
               term: {
                 result_type: isModelPlotSearch ? 'model_plot' : 'record',
