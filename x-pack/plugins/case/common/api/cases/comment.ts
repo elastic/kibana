@@ -8,10 +8,15 @@ import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
 
-const CommentBasicRt = rt.type({
+const CommentRequiredFieldsRt = rt.type({
   comment: rt.string,
-  type: rt.union([rt.string, rt.null, rt.undefined]),
 });
+
+const CommentOptionalFieldsRt = rt.partial({
+  type: rt.union([rt.literal('alert'), rt.literal('normal'), rt.null, rt.undefined]),
+});
+
+const CommentBasicRt = rt.intersection([CommentRequiredFieldsRt, CommentOptionalFieldsRt]);
 
 export const CommentAttributesRt = rt.intersection([
   CommentBasicRt,
@@ -25,7 +30,10 @@ export const CommentAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CommentRequestRt = CommentBasicRt;
+export const CommentRequestRt = rt.type({
+  ...CommentOptionalFieldsRt.props,
+  ...CommentRequiredFieldsRt.props,
+});
 
 export const CommentResponseRt = rt.intersection([
   CommentAttributesRt,
@@ -38,7 +46,8 @@ export const CommentResponseRt = rt.intersection([
 export const AllCommentsResponseRT = rt.array(CommentResponseRt);
 
 export const CommentPatchRequestRt = rt.intersection([
-  rt.partial(CommentRequestRt.props),
+  rt.partial(CommentRequiredFieldsRt.props),
+  CommentOptionalFieldsRt,
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
