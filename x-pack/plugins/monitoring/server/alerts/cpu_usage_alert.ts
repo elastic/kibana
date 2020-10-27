@@ -106,18 +106,15 @@ export class CpuUsageAlert extends BaseAlert {
       this.config.ui.max_bucket_size
     );
     return stats.map((stat) => {
-      let cpuUsage = 0;
       if (this.config.ui.container.elasticsearch.enabled) {
-        cpuUsage =
+        stat.cpuUsage =
           (stat.containerUsage / (stat.containerPeriods * stat.containerQuota * 1000)) * 100;
-      } else {
-        cpuUsage = stat.cpuUsage;
       }
 
       return {
         instanceKey: `${stat.clusterUuid}:${stat.nodeId}`,
         clusterUuid: stat.clusterUuid,
-        shouldFire: cpuUsage > params.threshold,
+        shouldFire: stat.cpuUsage > params.threshold,
         severity: AlertSeverity.Danger,
         meta: stat,
         ccs: stat.ccs,
