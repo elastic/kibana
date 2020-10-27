@@ -125,7 +125,7 @@ The following Ingest Manager API routes changed:
 * All API routes moved from `/api/ingest_manager/*`  to `/api/fleet/*`
 * All previous Fleet routes moved from `/api/ingest_manager/fleet/*`  to `/api/fleet/*`. This includes:
 ** `/api/ingest_manager/fleet/agents` => `/api/fleet/agents`
-** `/api/ingest_manager/fleet/enrollement_tokens` => `/api/fleet/enrollement_tokens`
+** `/api/ingest_manager/fleet/enrollment-api-keys` => `/api/fleet/enrollment-api-keys`
 * The Fleet setup API moved from `/api/ingest_manager/fleet/setup` to `/api/fleet/agents/setup`
 
 *via https://github.com/elastic/kibana/pull/79193[#79193]*
