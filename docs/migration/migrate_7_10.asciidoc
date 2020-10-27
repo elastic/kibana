@@ -92,9 +92,9 @@ more information about this property.
 [%collapsible]
 ====
 
-To rename the ingest manger plugin fleet:
+To rename the Ingest Manger plugin to Fleet:
 
-* The {kib} config for ingest manager moved from `xpack.ingestManager.*` to `xpack.fleet.*`.
+* The {kib} config for Ingest Manager moved from `xpack.ingestManager.*` to `xpack.fleet.*`.
 * The config options specific to agents moved to `xpack.ingestManager.fleet.*` and `xpack.fleet.agents.*`.
 
 *via https://github.com/elastic/kibana/pull/79406[#79406]*
