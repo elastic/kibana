@@ -112,7 +112,7 @@ export class UsersGridPage extends Component<Props, State> {
         render: (username: string) => (
           <EuiLink
             data-test-subj="userRowUserName"
-            {...reactRouterNavigate(this.props.history, `/edit/${username}`)}
+            {...reactRouterNavigate(this.props.history, `/edit/${encodeURIComponent(username)}`)}
           >
             {username}
           </EuiLink>
@@ -151,14 +151,16 @@ export class UsersGridPage extends Component<Props, State> {
           const roleLinks = rolenames.map((rolename, index) => {
             const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
             return (
-              <RoleTableDisplay
-                role={roleDefinition}
-                key={rolename}
-                navigateToApp={this.props.navigateToApp}
-              />
+              <EuiFlexItem grow={false} key={rolename}>
+                <RoleTableDisplay role={roleDefinition} navigateToApp={this.props.navigateToApp} />
+              </EuiFlexItem>
             );
           });
-          return <div data-test-subj="userRowRoles">{roleLinks}</div>;
+          return (
+            <EuiFlexGroup data-test-subj="userRowRoles" gutterSize="s" wrap>
+              {roleLinks}
+            </EuiFlexGroup>
+          );
         },
       },
       {
