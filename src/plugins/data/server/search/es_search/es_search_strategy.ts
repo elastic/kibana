@@ -46,6 +46,7 @@ export const esSearchStrategyProvider = (
     }
 
     return config$.pipe(
+      first(),
       mergeMap(async (config) => ({
         params: {
           ...(await getDefaultSearchParams(context.core.uiSettings.client)),
@@ -61,10 +62,7 @@ export const esSearchStrategyProvider = (
       ),
       toKibanaSearchResponse(),
       trackSearchStatus(logger, usage),
-      includeTotalLoaded(),
-
-      // OSS search strategy doesn't support of async search. We should complete stream on getting first response.
-      first()
+      includeTotalLoaded()
     );
   },
 });

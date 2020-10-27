@@ -36,7 +36,7 @@ export const doPartialSearch = <SearchResponse extends IEsRawSearchResponse = IE
   partialSearchMethod: SearchMethod,
   requestId: IKibanaSearchRequest['id'],
   asyncOptions: Record<string, any>,
-  { abortSignal, pollInterval }: IAsyncSearchOptions
+  { abortSignal, pollInterval, waitForCompletion }: IAsyncSearchOptions
 ) => ({ params, options }: DoSearchFnArgs) => {
   const isCompleted = (response: ApiResponse<SearchResponse>) =>
     !(response.body.is_partial && response.body.is_running);
@@ -66,9 +66,3 @@ export const doPartialSearch = <SearchResponse extends IEsRawSearchResponse = IE
         )
       );
 };
-
-export const takeUntilPollingComplete = (waitForCompletion: boolean = false) =>
-  takeWhile(
-    (response: IKibanaSearchResponse) => waitForCompletion && !isCompleteResponse(response),
-    true
-  );

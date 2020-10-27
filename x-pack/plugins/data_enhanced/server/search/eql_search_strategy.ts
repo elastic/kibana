@@ -5,13 +5,10 @@
  */
 
 import { Logger, SharedGlobalConfig } from 'kibana/server';
-import { switchMap, mergeMap } from 'rxjs/operators';
+import { switchMap, mergeMap, first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { search } from '../../../../../src/plugins/data/server';
-import {
-  doPartialSearch,
-  takeUntilPollingComplete,
-} from '../../common/search/es_search/es_search_rxjs_utils';
+import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
 
 import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
@@ -39,6 +36,7 @@ export const eqlSearchStrategyProvider = (
       const asyncOptions = getAsyncOptions();
 
       return config$.pipe(
+        first(),
         mergeMap(async () => {
           const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
             context.core.uiSettings.client
@@ -63,8 +61,7 @@ export const eqlSearchStrategyProvider = (
             options
           )
         ),
-        esSearch.toKibanaSearchResponse(),
-        takeUntilPollingComplete(options.waitForCompletion)
+        esSearch.toKibanaSearchResponse()
       );
     },
   };

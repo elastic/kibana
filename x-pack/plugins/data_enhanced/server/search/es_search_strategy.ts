@@ -10,10 +10,7 @@ import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 
 import { getShardTimeout, shimHitsTotal, search } from '../../../../../src/plugins/data/server';
-import {
-  doPartialSearch,
-  takeUntilPollingComplete,
-} from '../../common/search/es_search/es_search_rxjs_utils';
+import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
 
 import type { ISearchStrategy, SearchUsage } from '../../../../../src/plugins/data/server';
@@ -44,6 +41,7 @@ export const enhancedEsSearchStrategyProvider = (
     const asyncOptions = getAsyncOptions();
 
     return config$.pipe(
+      first(),
       mergeMap(async () => ({
         params: {
           ...(await getDefaultSearchParams(context.core.uiSettings.client)),
@@ -67,8 +65,7 @@ export const enhancedEsSearchStrategyProvider = (
         rawResponse: shimHitsTotal(response.rawResponse.response!),
       })),
       esSearch.trackSearchStatus(logger, usage),
-      esSearch.includeTotalLoaded(),
-      takeUntilPollingComplete(options.waitForCompletion)
+      esSearch.includeTotalLoaded()
     );
   }
 
