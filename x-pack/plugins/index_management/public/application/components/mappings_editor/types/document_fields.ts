@@ -76,8 +76,6 @@ export type SubType = NumericType | RangeType;
 
 export type DataType = MainType | SubType;
 
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-
 export type NumericType =
   | 'long'
   | 'integer'

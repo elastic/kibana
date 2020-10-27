@@ -14,10 +14,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { UseField } from '../../../shared_imports';
+import { UseField, RUNTIME_FIELD_OPTIONS } from '../../../shared_imports';
 import { DataType } from '../../../types';
 import { getFieldConfig } from '../../../lib';
-import { RUNTIME_FIELD_OPTIONS, TYPE_DEFINITION } from '../../../constants';
+import { TYPE_DEFINITION } from '../../../constants';
 import { EditFieldFormRow, FieldDescriptionSection } from '../fields/edit_field';
 
 interface Props {
