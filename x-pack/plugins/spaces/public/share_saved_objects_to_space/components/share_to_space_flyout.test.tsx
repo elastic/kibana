@@ -21,6 +21,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { NoSpacesAvailable } from './no_spaces_available';
 import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+import { ContextWrapper } from '.';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -93,16 +94,25 @@ const setup = async (opts: SetupOpts = {}) => {
   };
   getStartServices.mockResolvedValue([startServices, , ,]);
 
+  // the flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
+  // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
   const wrapper = mountWithIntl(
-    <ShareSavedObjectsToSpaceFlyout
-      savedObject={savedObjectToShare}
-      spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-      toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
-      onClose={onClose}
-      onObjectUpdated={onObjectUpdated}
-      getStartServices={getStartServices}
-    />
+    <ContextWrapper getStartServices={getStartServices}>
+      <ShareSavedObjectsToSpaceFlyout
+        savedObject={savedObjectToShare}
+        spacesManager={(mockSpacesManager as unknown) as SpacesManager}
+        toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
+        onClose={onClose}
+        onObjectUpdated={onObjectUpdated}
+      />
+    </ContextWrapper>
   );
+
+  // wait for context wrapper to rerender
+  await act(async () => {
+    await nextTick();
+    wrapper.update();
+  });
 
   if (!opts.returnBeforeSpacesLoad) {
     // Wait for spaces manager to complete and flyout to rerender

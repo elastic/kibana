@@ -10,7 +10,7 @@ import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
 } from '../../../../../src/plugins/saved_objects_management/public';
-import { ShareSavedObjectsToSpaceFlyout } from './components';
+import { ContextWrapper, ShareSavedObjectsToSpaceFlyout } from './components';
 import { SpacesManager } from '../spaces_manager';
 import { PluginsStart } from '../plugin';
 
@@ -52,14 +52,15 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     }
 
     return (
-      <ShareSavedObjectsToSpaceFlyout
-        onClose={this.onClose}
-        onObjectUpdated={() => (this.isDataChanged = true)}
-        savedObject={this.record}
-        spacesManager={this.spacesManager}
-        toastNotifications={this.notifications.toasts}
-        getStartServices={this.getStartServices}
-      />
+      <ContextWrapper getStartServices={this.getStartServices}>
+        <ShareSavedObjectsToSpaceFlyout
+          onClose={this.onClose}
+          onObjectUpdated={() => (this.isDataChanged = true)}
+          savedObject={this.record}
+          spacesManager={this.spacesManager}
+          toastNotifications={this.notifications.toasts}
+        />
+      </ContextWrapper>
     );
   };
 
