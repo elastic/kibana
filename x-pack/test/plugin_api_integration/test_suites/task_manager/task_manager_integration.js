@@ -607,5 +607,34 @@ export default function ({ getService }) {
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
     });
+
+    it('should mark non-recurring task as failed if task is still running but maxAttempts has been reached', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleOneTimeTaskTimingOut',
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.eql('failed');
+        expect(scheduledTask.attempts).to.eql(3);
+      });
+    });
+
+    it('should continue claiming recurring task even if maxAttempts has been reached', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskTimingOut',
+        schedule: { interval: '1s' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.eql('claiming');
+        expect(scheduledTask.attempts).to.eql(4);
+      });
+    });
   });
 }
