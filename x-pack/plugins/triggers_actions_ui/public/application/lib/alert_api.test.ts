@@ -170,6 +170,7 @@ describe('loadAlerts', () => {
           "query": Object {
             "default_search_operator": "AND",
             "filter": undefined,
+            "get_aggregations": undefined,
             "page": 1,
             "per_page": 10,
             "search": undefined,
@@ -200,10 +201,45 @@ describe('loadAlerts', () => {
           "query": Object {
             "default_search_operator": "AND",
             "filter": undefined,
+            "get_aggregations": undefined,
             "page": 1,
             "per_page": 10,
             "search": "apples",
             "search_fields": "[\\"name\\",\\"tags\\"]",
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
+  });
+
+  test('should call find API with get_aggregations', async () => {
+    const resolvedValue = {
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+      aggregations: {
+        alertExecutionStatus: {},
+      },
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadAlerts({ http, page: { index: 0, size: 10 }, getAggregations: true });
+    expect(result).toEqual(resolvedValue);
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/alerts/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": undefined,
+            "get_aggregations": true,
+            "page": 1,
+            "per_page": 10,
+            "search": undefined,
+            "search_fields": undefined,
             "sort_field": "name.keyword",
             "sort_order": "asc",
           },
@@ -234,6 +270,7 @@ describe('loadAlerts', () => {
           "query": Object {
             "default_search_operator": "AND",
             "filter": undefined,
+            "get_aggregations": undefined,
             "page": 1,
             "per_page": 10,
             "search": "foo",
@@ -268,6 +305,7 @@ describe('loadAlerts', () => {
           "query": Object {
             "default_search_operator": "AND",
             "filter": "alert.attributes.alertTypeId:(foo or bar)",
+            "get_aggregations": undefined,
             "page": 1,
             "per_page": 10,
             "search": undefined,
@@ -303,6 +341,7 @@ describe('loadAlerts', () => {
           "query": Object {
             "default_search_operator": "AND",
             "filter": "alert.attributes.alertTypeId:(foo or bar)",
+            "get_aggregations": undefined,
             "page": 1,
             "per_page": 10,
             "search": "baz",
@@ -338,6 +377,7 @@ describe('loadAlerts', () => {
           "query": Object {
             "default_search_operator": "AND",
             "filter": "alert.attributes.alertTypeId:(foo or bar)",
+            "get_aggregations": undefined,
             "page": 1,
             "per_page": 10,
             "search": "apples, foo, baz",
