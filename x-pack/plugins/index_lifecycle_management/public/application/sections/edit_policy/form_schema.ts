@@ -69,6 +69,30 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
     },
+    cold: {
+      enabled: {
+        defaultValue: false,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel',
+          { defaultMessage: 'Activate cold phase' }
+        ),
+      },
+      freezeEnabled: {
+        defaultValue: false,
+        label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
+          defaultMessage: 'Freeze index',
+        }),
+      },
+      minAgeUnit: {
+        defaultValue: 'ms',
+      },
+      dataTierAllocationType: {
+        label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
+      },
+      allocationNodeAttribute: {
+        label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+    },
   },
   phases: {
     hot: {
@@ -206,6 +230,31 @@ export const schema: FormSchema<FormInternal> = {
                   )
                 ),
               },
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+            serializer: serializers.stringToNumber,
+          },
+        },
+        set_priority: {
+          priority: {
+            defaultValue: defaultPhaseIndexPriority as any,
+            label: i18nTexts.editPolicy.setPriorityFieldLabel,
+            validations: [{ validator: ifExistsNumberGreaterThanZero }],
+            serializer: serializers.stringToNumber,
+          },
+        },
+      },
+    },
+    cold: {
+      actions: {
+        allocate: {
+          number_of_replicas: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel', {
+              defaultMessage: 'Number of replicas (optional)',
+            }),
+            validations: [
               {
                 validator: ifExistsNumberGreaterThanZero,
               },
