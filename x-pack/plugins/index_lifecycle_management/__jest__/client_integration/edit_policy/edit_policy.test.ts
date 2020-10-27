@@ -233,6 +233,7 @@ describe('<EditPolicy />', () => {
       test('preserves include, exclude allocation settings', async () => {
         const { actions } = testBed;
         await actions.warm.setDataAllocation('node_attrs');
+        await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const warmPhaseAllocate = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
@@ -244,6 +245,9 @@ describe('<EditPolicy />', () => {
             },
             "include": Object {
               "abc": "123",
+            },
+            "require": Object {
+              "test": "123",
             },
           }
         `);

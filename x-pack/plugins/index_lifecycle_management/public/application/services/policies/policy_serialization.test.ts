@@ -7,8 +7,7 @@
 // eslint-disable-next-line no-restricted-imports
 import cloneDeep from 'lodash/cloneDeep';
 import { deserializePolicy, legacySerializePolicy } from './policy_serialization';
-import { defaultNewColdPhase, defaultNewDeletePhase } from '../../constants';
-import { DataTierAllocationType } from '../../../../common/types';
+import { defaultNewDeletePhase } from '../../constants';
 
 describe('Policy serialization', () => {
   test('serialize a policy using "default" data allocation', () => {
@@ -24,24 +23,12 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            cold: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
           },
         }
       )
     ).toEqual({
       name: 'test',
-      phases: {
-        cold: {
-          actions: {
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
-      },
+      phases: {},
     });
   });
 
@@ -58,37 +45,12 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            cold: {
-              actions: {
-                allocate: {
-                  include: { keep: 'this' },
-                  exclude: { keep: 'this' },
-                  require: { something: 'here' },
-                },
-              },
-            },
           },
         }
       )
     ).toEqual({
       name: 'test',
-      phases: {
-        cold: {
-          actions: {
-            allocate: {
-              include: { keep: 'this' },
-              exclude: { keep: 'this' },
-              require: {
-                another: 'thing',
-              },
-            },
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
-      },
+      phases: {},
     });
   });
 
@@ -105,26 +67,13 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            cold: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
           },
         }
       )
     ).toEqual({
       // There should be no allocation action in any phases...
       name: 'test',
-      phases: {
-        cold: {
-          actions: {
-            allocate: { include: {}, exclude: {}, require: { something: 'here' } },
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
-      },
+      phases: {},
     });
   });
 
@@ -141,39 +90,20 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            cold: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
           },
         }
       )
     ).toEqual({
       // There should be no allocation action in any phases...
       name: 'test',
-      phases: {
-        cold: {
-          actions: {
-            migrate: {
-              enabled: false,
-            },
-            set_priority: {
-              priority: 0,
-            },
-          },
-          min_age: '0d',
-        },
-      },
+      phases: {},
     });
   });
 
   test('serialization does not alter the original policy', () => {
     const originalPolicy = {
       name: 'test',
-      phases: {
-        cold: {
-          actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-        },
-      },
+      phases: {},
     };
 
     const originalClone = cloneDeep(originalPolicy);
@@ -181,13 +111,6 @@ describe('Policy serialization', () => {
     const deserializedPolicy = {
       name: 'test',
       phases: {
-        cold: {
-          ...defaultNewColdPhase,
-          dataTierAllocationType: 'none' as DataTierAllocationType,
-          selectedNodeAttrs: 'ignore:this',
-          phaseEnabled: true,
-        },
-
         delete: { ...defaultNewDeletePhase },
       },
     };
