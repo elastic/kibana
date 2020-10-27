@@ -146,7 +146,9 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toMatchInlineSnapshot(`
                                   Object {
-                                    "runAt": 1970-01-01T00:00:10.000Z,
+                                    "schedule": Object {
+                                      "interval": "10s",
+                                    },
                                     "state": Object {
                                       "alertInstances": Object {},
                                       "alertTypeState": undefined,
@@ -620,7 +622,9 @@ describe('Task Runner', () => {
     });
     expect(await taskRunner.run()).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:00:10.000Z,
+        "schedule": Object {
+          "interval": "10s",
+        },
         "state": Object {},
       }
     `);
@@ -724,7 +728,9 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:00:10.000Z,
+        "schedule": Object {
+          "interval": "10s",
+        },
         "state": Object {},
       }
     `);
@@ -776,7 +782,9 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:05:00.000Z,
+        "schedule": Object {
+          "interval": "5m",
+        },
         "state": Object {},
       }
     `);
@@ -807,7 +815,9 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:05:00.000Z,
+        "schedule": Object {
+          "interval": "5m",
+        },
         "state": Object {},
       }
     `);
@@ -837,7 +847,9 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:05:00.000Z,
+        "schedule": Object {
+          "interval": "5m",
+        },
         "state": Object {},
       }
     `);
@@ -904,7 +916,7 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": undefined,
+        "schedule": undefined,
         "state": Object {},
       }
     `);

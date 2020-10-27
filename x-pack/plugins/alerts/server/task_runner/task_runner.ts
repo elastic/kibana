@@ -10,7 +10,6 @@ import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
-import { getNextRunAt } from './get_next_run_at';
 import {
   validateAlertTypeParams,
   executionStatusFromState,

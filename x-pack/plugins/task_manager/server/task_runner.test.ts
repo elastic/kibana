@@ -10,7 +10,7 @@ import { secondsFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
 import { TaskManagerRunner, TaskRunResult } from './task_runner';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from './task_events';
-import { ConcreteTaskInstance, TaskStatus, TaskDefinition, RunResult } from './task';
+import { ConcreteTaskInstance, TaskStatus, TaskDefinition, SuccessfulRunResult } from './task';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -1067,7 +1067,7 @@ describe('TaskManagerRunner', () => {
         bar: {
           title: 'Bar!',
           createTaskRunner: () => ({
-            run: async () => result as RunResult,
+            run: async () => result as SuccessfulRunResult,
           }),
         },
       },

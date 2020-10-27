@@ -14,7 +14,7 @@ import { Logger } from 'src/core/server';
 import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
 import Joi from 'joi';
-import { identity, defaults, flow, isEmpty } from 'lodash';
+import { identity, defaults, flow } from 'lodash';
 
 import { Middleware } from './lib/middleware';
 import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from './lib/result_type';
