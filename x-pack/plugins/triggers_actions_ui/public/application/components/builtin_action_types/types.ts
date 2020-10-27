@@ -110,7 +110,6 @@ export interface WebhookConfig {
   method: string;
   url: string;
   headers: Record<string, string>;
-  hasAuth: boolean;
 }
 
 export interface WebhookSecrets {
