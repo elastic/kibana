@@ -980,7 +980,7 @@ export const mockStatusAlertQuery: object = {
 
 export const mockSignalIndex: AlertsIndex = {
   name: 'mock-signal-index',
-  template_outdated: false,
+  index_mapping_outdated: false,
 };
 
 export const mockUserPrivilege: Privilege = {
