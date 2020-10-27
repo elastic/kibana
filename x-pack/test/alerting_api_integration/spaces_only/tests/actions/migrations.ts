@@ -30,24 +30,29 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body.config).key('incidentConfiguration');
       expect(response.body.config).not.key('casesConfiguration');
-      expect(response.body.config.incidentConfiguration).to.eql({
-        mapping: [
-          {
-            actionType: 'overwrite',
-            source: 'title',
-            target: 'summary',
-          },
-          {
-            actionType: 'overwrite',
-            source: 'description',
-            target: 'description',
-          },
-          {
-            actionType: 'append',
-            source: 'comments',
-            target: 'comments',
-          },
-        ],
+      expect(response.body.config).to.eql({
+        apiUrl:
+          'http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira',
+        incidentConfiguration: {
+          mapping: [
+            {
+              actionType: 'overwrite',
+              source: 'title',
+              target: 'summary',
+            },
+            {
+              actionType: 'overwrite',
+              source: 'description',
+              target: 'description',
+            },
+            {
+              actionType: 'append',
+              source: 'comments',
+              target: 'comments',
+            },
+          ],
+        },
+        projectKey: 'CK',
       });
     });
   });
