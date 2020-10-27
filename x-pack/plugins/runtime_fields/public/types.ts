@@ -20,7 +20,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
 }
 
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number] & string;
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export interface RuntimeField {
   name: string;
