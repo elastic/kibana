@@ -324,6 +324,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
                 onClick: () => {
                   onRowContextMenuClick({
                     rowIndex: 0,
+                    table: firstTable,
                   });
                 },
               },

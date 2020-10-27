@@ -124,6 +124,8 @@ export interface RangeSelectTriggerEventScope {
 
 export interface RowClickTriggerEventScope {
   rowIndex: number;
+  values: Primitive[];
+  keys: string[];
 }
 
 export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEventScope {
@@ -170,11 +172,18 @@ function getEventScopeFromValueClickTriggerContext(
   });
 }
 
-function getEventScopeFromRowClickTriggerContext(
-  eventScopeInput: RowClickContext
-): RowClickTriggerEventScope {
+function getEventScopeFromRowClickTriggerContext({
+  data,
+}: RowClickContext): RowClickTriggerEventScope {
+  const values: Primitive[] = [];
+  const keys: string[] = [];
+  // for (const column of data.table.columns) {
+  //   values.push(column.name);
+  // }
   return {
-    rowIndex: eventScopeInput.data.rowIndex,
+    rowIndex: data.rowIndex,
+    values,
+    keys,
   };
 }
 

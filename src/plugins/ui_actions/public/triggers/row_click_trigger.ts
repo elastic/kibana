@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../../../embeddable/public';
 import { Trigger } from '.';
+import { Datatable } from '../../../expressions';
 
 export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';
 
@@ -37,5 +38,6 @@ export interface RowClickContext {
   embeddable?: IEmbeddable;
   data: {
     rowIndex: number;
+    table: Datatable;
   };
 }
