@@ -16,10 +16,38 @@ import {
 import { AbstractField, IField } from '../../../../fields/field';
 import { IStyle } from '../../../style';
 
-class MockField extends AbstractField {
+export class MockField extends AbstractField {
+  private readonly _dataType: string;
+  private readonly _supportsAutoDomain: boolean;
+
+  constructor({
+    fieldName,
+    origin = FIELD_ORIGIN.SOURCE,
+    dataType = 'string',
+    supportsAutoDomain = true,
+  }: {
+    fieldName: string;
+    origin?: FIELD_ORIGIN;
+    dataType?: string;
+    supportsAutoDomain?: boolean;
+  }) {
+    super({ fieldName, origin });
+    this._dataType = dataType;
+    this._supportsAutoDomain = supportsAutoDomain;
+  }
+
   async getLabel(): Promise<string> {
     return this.getName() + '_label';
   }
+
+  async getDataType(): Promise<string> {
+    return this._dataType;
+  }
+
+  supportsAutoDomain(): boolean {
+    return this._supportsAutoDomain;
+  }
+
   supportsFieldMeta(): boolean {
     return true;
   }
