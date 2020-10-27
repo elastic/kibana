@@ -24,6 +24,8 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timestamp, unencrypted: true })
         .expect(200);
+
+      expect(body).length(3);
       expect(body).to.eql(multiClusterFixture);
 
       await esArchiver.unload(archive);
@@ -41,6 +43,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({ timestamp, unencrypted: true })
           .expect(200);
+
         expect(body).to.eql(basicClusterFixture);
 
         await esArchiver.unload(archive);
