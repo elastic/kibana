@@ -17,8 +17,26 @@
  * under the License.
  */
 
-import { IServiceProvider } from 'angular';
+import { KibanaConfig } from '../kbn_server';
+import { fromRoot } from '../../../core/server/utils';
+import { I18N_RC } from './constants';
+import { getTranslationPaths } from './get_translation_paths';
 
-export type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
-
-export function PrivateProvider(): IServiceProvider;
+export async function getKibanaTranslationPaths(config: Pick<KibanaConfig, 'get'>) {
+  return await Promise.all([
+    getTranslationPaths({
+      cwd: fromRoot('.'),
+      glob: `*/${I18N_RC}`,
+    }),
+    ...(config.get('plugins.paths') as string[]).map((cwd) =>
+      getTranslationPaths({ cwd, glob: I18N_RC })
+    ),
+    ...(config.get('plugins.scanDirs') as string[]).map((cwd) =>
+      getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })
+    ),
+    getTranslationPaths({
+      cwd: fromRoot('../kibana-extra'),
+      glob: `*/${I18N_RC}`,
+    }),
+  ]);
+}
