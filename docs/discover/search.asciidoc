@@ -104,7 +104,7 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 ==== Save a search
 To save the current search:
 
-. Click *Save* in the Kibana toolbar.
+. Click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
 
 To import, export, and delete saved searches, open the main menu, then click *Stack Management > Saved Ojbects*.
@@ -112,7 +112,7 @@ To import, export, and delete saved searches, open the main menu, then click *St
 ==== Open a saved search
 To load a saved search into Discover:
 
-. Click *Open* in the Kibana toolbar.
+. Click *Open* in the toolbar.
 . Select the search you want to open.
 
 If the saved search is associated with a different index pattern than is currently
