@@ -26,6 +26,14 @@ jest.mock('../properties/use_create_timeline', () => ({
   useCreateTimelineButton: jest.fn(),
 }));
 
+jest.mock('react-redux', () => {
+  const actual = jest.requireActual('react-redux');
+  return {
+    ...actual,
+    useDispatch: jest.fn(),
+  };
+});
+
 describe('TimelineTitleAndDescription', () => {
   describe('save timeline', () => {
     const props = {

@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiProgress,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { TimelineType } from '../../../../../common/types/timeline';
@@ -49,6 +49,14 @@ const Wrapper = styled(EuiModalBody)`
 
 Wrapper.displayName = 'Wrapper';
 
+const usePrevious = (value: unknown) => {
+  const ref = useRef<unknown>();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+};
+
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
   ({ timelineId, toggleSaveTimeline, updateTitle, updateDescription }) => {
     const timeline = useShallowEqualSelector((state) =>
@@ -57,6 +65,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
 
     const { description, isSaving, savedObjectId, title, timelineType } = timeline;
 
+    const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
     const onSaveTimeline = useCallback(
       (args: TimelineInput) => dispatch(timelineActions.saveTimeline(args)),
@@ -86,6 +95,12 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       [getButton, timelineType]
     );
 
+    useEffect(() => {
+      if (!isSaving && prevIsSaving) {
+        toggleSaveTimeline();
+      }
+    }, [isSaving, prevIsSaving, toggleSaveTimeline]);
+
     const modalHeader =
       savedObjectId == null
         ? timelineType === TimelineType.template
@@ -113,14 +128,17 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
           <EuiFlexItem grow={true}>
             <EuiFormRow label={TIMELINE_TITLE}>
               <Name
+                autoFocus={true}
+                className="timeline-modal-title"
+                disableTooltip={true}
+                disableAutoSave={true}
+                data-test-subj="save-timeline-name"
                 timelineId={timelineId}
                 timelineType={timelineType}
                 title={title}
                 updateTitle={updateTitle}
                 width="100%"
                 marginRight={10}
-                disableAutoSave={true}
-                data-test-subj="save-timeline-name"
               />
             </EuiFormRow>
             <EuiSpacer />
@@ -128,13 +146,14 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
           <EuiFlexItem grow={true}>
             <EuiFormRow label={DESCRIPTION}>
               <Description
+                data-test-subj="save-timeline-description"
                 description={description}
+                disableTooltip={true}
+                disableAutoSave={true}
                 timelineId={timelineId}
                 updateDescription={updateDescription}
                 isTextArea={true}
-                disableAutoSave={true}
                 marginRight={0}
-                data-test-subj="save-timeline-description"
               />
             </EuiFormRow>
             <EuiSpacer />

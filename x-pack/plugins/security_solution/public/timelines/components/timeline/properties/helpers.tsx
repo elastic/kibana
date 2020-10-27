@@ -18,7 +18,7 @@ import {
   EuiToolTip,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -57,6 +57,7 @@ import { useCreateTimelineButton } from './use_create_timeline';
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
+export const TIMELINE_TITLE_CLASSNAME = 'timeline-title';
 
 const NotesCountBadge = (styled(EuiBadge)`
   margin-left: 5px;
@@ -131,6 +132,7 @@ interface DescriptionProps {
   updateDescription: UpdateDescription;
   isTextArea?: boolean;
   disableAutoSave?: boolean;
+  disableTooltip?: boolean;
   marginRight?: number;
 }
 
@@ -141,6 +143,7 @@ export const Description = React.memo<DescriptionProps>(
     updateDescription,
     isTextArea = false,
     disableAutoSave = false,
+    disableTooltip = false,
     marginRight,
   }) => {
     const onDescriptionChanged = useCallback(
@@ -149,33 +152,42 @@ export const Description = React.memo<DescriptionProps>(
       },
       [updateDescription, disableAutoSave, timelineId]
     );
+    const inputField = useMemo(
+      () =>
+        isTextArea ? (
+          <EuiTextArea
+            data-test-subj="timeline-description-textarea"
+            aria-label={i18n.TIMELINE_DESCRIPTION}
+            fullWidth={true}
+            onChange={onDescriptionChanged}
+            placeholder={i18n.DESCRIPTION}
+            value={description}
+          />
+        ) : (
+          <EuiFieldText
+            aria-label={i18n.TIMELINE_DESCRIPTION}
+            data-test-subj="timeline-description"
+            fullWidth={true}
+            onChange={onDescriptionChanged}
+            placeholder={i18n.DESCRIPTION}
+            spellCheck={true}
+            value={description}
+          />
+        ),
+      [description, isTextArea, onDescriptionChanged]
+    );
     return (
       <DescriptionContainer data-test-subj="description-container" marginRight={marginRight}>
-        <EuiToolTip
-          data-test-subj="timeline-description-tool-tip"
-          content={i18n.DESCRIPTION_TOOL_TIP}
-        >
-          {isTextArea ? (
-            <EuiTextArea
-              data-test-subj="timeline-description-textarea"
-              aria-label={i18n.TIMELINE_DESCRIPTION}
-              fullWidth={true}
-              onChange={onDescriptionChanged}
-              placeholder={i18n.DESCRIPTION}
-              value={description}
-            />
-          ) : (
-            <EuiFieldText
-              aria-label={i18n.TIMELINE_DESCRIPTION}
-              data-test-subj="timeline-description"
-              fullWidth={true}
-              onChange={onDescriptionChanged}
-              placeholder={i18n.DESCRIPTION}
-              spellCheck={true}
-              value={description}
-            />
-          )}
-        </EuiToolTip>
+        {disableTooltip ? (
+          inputField
+        ) : (
+          <EuiToolTip
+            data-test-subj="timeline-description-tool-tip"
+            content={i18n.DESCRIPTION_TOOL_TIP}
+          >
+            {inputField}
+          </EuiToolTip>
+        )}
       </DescriptionContainer>
     );
   }
@@ -183,48 +195,77 @@ export const Description = React.memo<DescriptionProps>(
 Description.displayName = 'Description';
 
 interface NameProps {
+  autoFocus?: boolean;
+  className?: string;
+  disableAutoSave?: boolean;
+  disableTooltip?: boolean;
   timelineId: string;
   timelineType: TimelineType;
   title: string;
   updateTitle: UpdateTitle;
   width?: string;
   marginRight?: number;
-  disableAutoSave?: boolean;
 }
 
 export const Name = React.memo<NameProps>(
   ({
+    autoFocus = false,
+    className = TIMELINE_TITLE_CLASSNAME,
+    disableAutoSave = false,
+    disableTooltip = false,
     timelineId,
     timelineType,
     title,
     updateTitle,
     width,
     marginRight,
-    disableAutoSave = false,
   }) => {
     const handleChange = useCallback(
       (e) => updateTitle({ id: timelineId, title: e.target.value, disableAutoSave }),
       [timelineId, updateTitle, disableAutoSave]
     );
 
+    useEffect(() => {
+      const focusInput = () => {
+        const elements = document.querySelector<HTMLElement>(`.${className}`);
+
+        if (elements != null) {
+          elements.focus();
+        }
+      };
+      if (autoFocus) {
+        focusInput();
+      }
+    }, [autoFocus, className]);
+
+    const nameField = useMemo(
+      () => (
+        <NameField
+          aria-label={i18n.TIMELINE_TITLE}
+          data-test-subj="timeline-title"
+          onChange={handleChange}
+          placeholder={
+            timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
+          }
+          spellCheck={true}
+          value={title}
+          width={width}
+          marginRight={marginRight}
+          className={className}
+        />
+      ),
+      [handleChange, marginRight, timelineType, title, width, className]
+    );
+
     return (
       <NameWrapper>
-        <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-          <NameField
-            aria-label={i18n.TIMELINE_TITLE}
-            data-test-subj="timeline-title"
-            onChange={handleChange}
-            placeholder={
-              timelineType === TimelineType.template
-                ? i18n.UNTITLED_TEMPLATE
-                : i18n.UNTITLED_TIMELINE
-            }
-            spellCheck={true}
-            value={title}
-            width={width}
-            marginRight={marginRight}
-          />
-        </EuiToolTip>
+        {disableTooltip ? (
+          nameField
+        ) : (
+          <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
+            {nameField}
+          </EuiToolTip>
+        )}
       </NameWrapper>
     );
   }
