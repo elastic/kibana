@@ -12,17 +12,35 @@ import { i18nTexts } from './i18n_texts';
 
 const { numberGreaterThanField } = fieldValidators;
 
-export const ifExistsNumberGreaterThanZero: ValidationFunc<any, any, any> = (arg) => {
-  if (arg.value) {
-    return numberGreaterThanField({
-      than: 0,
-      message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
-    })({
-      ...arg,
-      value: parseInt(arg.value, 10),
-    });
-  }
+const createIfNumberExistsValidator = ({
+  than,
+  message,
+}: {
+  than: number;
+  message: string;
+}): ValidationFunc<any, any, any> => {
+  return (arg) => {
+    if (arg.value) {
+      return numberGreaterThanField({
+        than: 0,
+        message,
+      })({
+        ...arg,
+        value: parseInt(arg.value, 10),
+      });
+    }
+  };
 };
+
+export const ifExistsNumberGreaterThanZero = createIfNumberExistsValidator({
+  than: 0,
+  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+});
+
+export const ifExistsNumberNonNegative = createIfNumberExistsValidator({
+  than: -1,
+  message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
+});
 
 /**
  * A special validation type used to keep track of validation errors for

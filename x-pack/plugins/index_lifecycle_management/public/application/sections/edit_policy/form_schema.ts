@@ -11,7 +11,11 @@ import { defaultSetPriority, defaultPhaseIndexPriority } from '../../constants';
 
 import { FormInternal } from './types';
 
-import { ifExistsNumberGreaterThanZero, rolloverThresholdsValidator } from './form_validations';
+import {
+  ifExistsNumberGreaterThanZero,
+  ifExistsNumberNonNegative,
+  rolloverThresholdsValidator,
+} from './form_validations';
 
 import { i18nTexts } from './i18n_texts';
 
@@ -162,7 +166,7 @@ export const schema: FormSchema<FormInternal> = {
           priority: {
             defaultValue: defaultSetPriority as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberGreaterThanZero }],
+            validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },
         },
@@ -241,7 +245,7 @@ export const schema: FormSchema<FormInternal> = {
           priority: {
             defaultValue: defaultPhaseIndexPriority as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberGreaterThanZero }],
+            validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },
         },
@@ -282,7 +286,7 @@ export const schema: FormSchema<FormInternal> = {
           priority: {
             defaultValue: defaultPhaseIndexPriority as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberGreaterThanZero }],
+            validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },
         },
