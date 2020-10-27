@@ -31,9 +31,9 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState(searchTerm ?? '');
 
-  const [debouncedValue, setDebouncedValue] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState(searchTerm ?? '');
 
   useDebounce(
     () => {
@@ -45,12 +45,16 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   const updateSearchTerm = useCallback(
     (searchTermN: string) => {
+      const newQuery = {
+        ...toQuery(history.location.search),
+        searchTerm: searchTermN || undefined,
+      };
+      if (!searchTermN) {
+        delete newQuery.searchTerm;
+      }
       const newLocation = {
         ...history.location,
-        search: fromQuery({
-          ...toQuery(history.location.search),
-          searchTerm: searchTermN,
-        }),
+        search: fromQuery(newQuery),
       };
       history.push(newLocation);
     },
@@ -139,6 +143,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         <h4>{I18LABELS.url}</h4>
       </EuiTitle>
       <SelectableUrlList
+        initialValue={searchTerm}
         loading={isLoading}
         onInputChange={onInputChange}
         onTermChange={onTermChange}
