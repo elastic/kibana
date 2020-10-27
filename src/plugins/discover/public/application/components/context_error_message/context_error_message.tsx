@@ -34,9 +34,6 @@ export interface ContextErrorMessageProps {
 }
 
 export function ContextErrorMessage({ status, reason }: ContextErrorMessageProps) {
-  if (status !== LOADING_STATUS.FAILED) {
-    return null;
-  }
   return (
     <I18nProvider>
       <EuiCallOut
