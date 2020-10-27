@@ -226,7 +226,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
             }}
           >
             <EuiText>
-              <EuiFlexGroup gutterSize={'xs'} alignItems={'baseline'}>
+              <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
                 <EuiFlexItem grow={false}>
                   <EuiSwitch
                     label={
@@ -250,8 +250,9 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                     data-test-subj={`mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entity.fieldName}`}
                   />
                 </EuiFlexItem>
-                {!this.props.config?.anomalousOnly ? (
-                  <EuiFlexItem grow={false}>
+
+                <EuiFlexItem grow={false} style={{ width: '16px', height: '24px' }}>
+                  {!this.props.config?.anomalousOnly ? (
                     <EuiToolTip
                       position="top"
                       content={
@@ -270,8 +271,8 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                     >
                       <EuiIcon tabIndex={0} type="iInCircle" color={'accent'} />
                     </EuiToolTip>
-                  </EuiFlexItem>
-                ) : null}
+                  ) : null}
+                </EuiFlexItem>
               </EuiFlexGroup>
 
               <EuiHorizontalRule margin="s" />
