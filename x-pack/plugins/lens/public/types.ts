@@ -180,6 +180,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  getErrorMessages: (state: T) => Array<{ shortMessage: string; longMessage: string }> | undefined;
 }
 
 /**
@@ -561,10 +562,10 @@ export interface Visualization<T = unknown> {
    * The frame will call this function on all visualizations at error time in order
    * to provide more context to the error and show it to the user
    */
-  getErrorMessage: (
+  getErrorMessages: (
     state: T,
     frame: FramePublicAPI
-  ) => { shortMessage: string; longMessage: string } | undefined;
+  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
 }
 
 export interface LensFilterEvent {

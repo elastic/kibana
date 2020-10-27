@@ -194,7 +194,7 @@ describe('metric_visualization', () => {
     });
   });
 
-  describe('#getErrorMessage', () => {
+  describe('#getErrorMessages', () => {
     it('returns undefined if no error is raised', () => {
       const datasource: DatasourcePublicAPI = {
         ...createMockDatasource('l1').publicAPIMock,
@@ -212,7 +212,7 @@ describe('metric_visualization', () => {
         datasourceLayers: { l1: datasource },
       };
 
-      const error = metricVisualization.getErrorMessage(exampleState(), frame);
+      const error = metricVisualization.getErrorMessages(exampleState(), frame);
 
       expect(error).not.toBeDefined();
     });

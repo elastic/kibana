@@ -42,7 +42,7 @@ function mockFrame(): FramePublicAPI {
 
 // Just a basic bootstrap here to kickstart the tests
 describe('pie_visualization', () => {
-  describe('#getErrorMessage', () => {
+  describe('#getErrorMessages', () => {
     it('returns undefined if no error is raised', () => {
       const datasource: DatasourcePublicAPI = {
         ...createMockDatasource('l1').publicAPIMock,
@@ -60,7 +60,7 @@ describe('pie_visualization', () => {
         datasourceLayers: { l1: datasource },
       };
 
-      const error = pieVisualization.getErrorMessage(exampleState(), frame);
+      const error = pieVisualization.getErrorMessages(exampleState(), frame);
 
       expect(error).not.toBeDefined();
     });

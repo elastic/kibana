@@ -9,7 +9,16 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTextColor,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
@@ -66,7 +75,8 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  expressionBuildError?: { shortMessage: string; longMessage: string };
+  configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
+  expressionBuildError?: Array<{ shortMessage: string; longMessage: string }>;
   expandError: boolean;
 }
 
@@ -117,6 +127,7 @@ export function WorkspacePanel({
   );
 
   const [localState, setLocalState] = useState<WorkspaceState>({
+    configurationValidationError: undefined,
     expressionBuildError: undefined,
     expandError: false,
   });
@@ -124,8 +135,32 @@ export function WorkspacePanel({
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
     : null;
+
   const expression = useMemo(
     () => {
+      if (activeDatasourceId) {
+        const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
+        const dataMessages = activeDatasource?.getErrorMessages(
+          datasourceStates[activeDatasourceId]?.state
+        );
+        if (dataMessages) {
+          setLocalState((s) => ({
+            ...s,
+            configurationValidationError: dataMessages,
+          }));
+          // TS will infer "void" if this is omitted
+          return;
+        }
+      }
+      const vizMessages = activeVisualization?.getErrorMessages(visualizationState, framePublicAPI);
+      if (vizMessages || localState.configurationValidationError) {
+        setLocalState((s) => ({
+          ...s,
+          configurationValidationError: vizMessages,
+        }));
+        // TS will infer "void" if this is omitted
+        return;
+      }
       try {
         return buildExpression({
           visualization: activeVisualization,
@@ -135,13 +170,19 @@ export function WorkspacePanel({
           datasourceLayers: framePublicAPI.datasourceLayers,
         });
       } catch (e) {
-        const message = activeVisualization?.getErrorMessage(visualizationState, framePublicAPI);
+        const buildMessages = activeVisualization?.getErrorMessages(
+          visualizationState,
+          framePublicAPI
+        );
         const defaultMessage = {
-          shortMessage: 'An error occurred in the expression',
+          shortMessage: 'One error occurred in the expression',
           longMessage: e.toString(),
         };
         // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({ ...s, expressionBuildError: message || defaultMessage }));
+        setLocalState((s) => ({
+          ...s,
+          expressionBuildError: buildMessages ?? [defaultMessage],
+        }));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -255,8 +296,6 @@ export function WorkspacePanel({
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={localState}
-        visualizationState={visualizationState}
-        visualization={activeVisualization}
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
@@ -298,8 +337,6 @@ export const InnerVisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
-  visualizationState,
-  visualization,
 }: {
   expression: Ast | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -308,8 +345,6 @@ export const InnerVisualizationWrapper = ({
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState;
   ExpressionRendererComponent: ReactExpressionRendererType;
-  visualizationState: unknown;
-  visualization: Visualization | null;
 }) => {
   const autoRefreshFetch$ = useMemo(() => timefilter.getAutoRefreshFetch$(), [timefilter]);
 
@@ -330,6 +365,36 @@ export const InnerVisualizationWrapper = ({
     ]
   );
 
+  if (localState.configurationValidationError) {
+    return (
+      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+        <EuiFlexItem>
+          <EuiIcon type="alert" size="xl" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="configuration-failure">
+          <EuiTitle size="s">
+            <EuiTextColor color="danger">
+              <FormattedMessage
+                id="xpack.lens.editorFrame.configurationFailure"
+                defaultMessage="Invalid configuration"
+              />
+            </EuiTextColor>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>{localState.configurationValidationError[0].shortMessage}</EuiFlexItem>
+        <EuiFlexItem className="eui-textBreakAll">
+          {localState.configurationValidationError[0].longMessage}
+          {localState.configurationValidationError.length > 1
+            ? i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
+                defaultMessage: ` + {errors} {errors, plural, one {error} other {errors}}`,
+                values: { errors: localState.configurationValidationError.length },
+              })
+            : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (localState.expressionBuildError) {
     return (
       <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
@@ -342,7 +407,7 @@ export const InnerVisualizationWrapper = ({
             defaultMessage="An error occurred in the expression"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{localState.expressionBuildError.longMessage}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{localState.expressionBuildError[0].longMessage}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -358,20 +423,16 @@ export const InnerVisualizationWrapper = ({
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
 
-          const { shortMessage, longMessage } =
-            visualization?.getErrorMessage(visualizationState, framePublicAPI) || {};
           return (
             <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
               <EuiFlexItem>
                 <EuiIcon type="alert" size="xl" color="danger" />
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="expression-failure">
-                {shortMessage ?? (
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.dataFailure"
-                    defaultMessage="An error occurred when loading data."
-                  />
-                )}
+                <FormattedMessage
+                  id="xpack.lens.editorFrame.dataFailure"
+                  defaultMessage="An error occurred when loading data."
+                />
               </EuiFlexItem>
               {visibleErrorMessage ? (
                 <EuiFlexItem className="eui-textBreakAll" grow={false}>
@@ -388,7 +449,7 @@ export const InnerVisualizationWrapper = ({
                     })}
                   </EuiButtonEmpty>
 
-                  {localState.expandError ? longMessage || visibleErrorMessage : null}
+                  {localState.expandError ? visibleErrorMessage : null}
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>

@@ -156,6 +156,8 @@ export const xyVisualization: Visualization<State> = {
 
   getConfiguration(props) {
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    // Make it required only if there's a multi-layer inconsistency
+    const someLayersHaveXConfigured = props.state.layers.some((l) => l.xAccessor);
     return {
       groups: [
         {
@@ -167,7 +169,7 @@ export const xyVisualization: Visualization<State> = {
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: !layer.seriesType.includes('percentage'),
+          required: !layer.seriesType.includes('percentage') && someLayersHaveXConfigured,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
@@ -279,14 +281,19 @@ export const xyVisualization: Visualization<State> = {
   toExpression,
   toPreviewExpression,
 
-  getErrorMessage(state, frame) {
+  getErrorMessages(state, frame) {
     // Data error handling below here
     const hasNoXAccessor = ({ xAccessor }: LayerConfig) => xAccessor == null;
     const hasNoAccessors = ({ accessors }: LayerConfig) =>
       accessors == null || accessors.length === 0;
 
-    // check if the layes in the state are compatible with this type of chart
-    if (state.layers.length > 1) {
+    const errors: Array<{
+      shortMessage: string;
+      longMessage: string;
+    }> = [];
+
+    // check if the layers in the state are compatible with this type of chart
+    if (state && state.layers.length > 1) {
       const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
         ['X', hasNoXAccessor],
         ['Y', hasNoAccessors],
@@ -300,11 +307,11 @@ export const xyVisualization: Visualization<State> = {
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
         if (!result.valid) {
-          return result.payload;
+          errors.push(result.payload);
         }
       }
     }
-    return undefined;
+    return errors.length ? errors : undefined;
   },
 };
 
@@ -326,6 +333,7 @@ function validateLayersForDimension(
     }
     return missing;
   }, []);
+
   return {
     valid: false,
     payload: getMessageIdsForDimension(dimension, layerMissingAccessors),
@@ -339,20 +347,20 @@ function getMessageIdsForDimension(dimension: string, layers: number[]) {
     case 'X':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXShort', {
-          defaultMessage: `Some layers are missing the X dimension`,
+          defaultMessage: `Missing X-axis`,
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {has} other {have}} no dimension field set for the X axis`,
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the X-axis`,
           values: { layers: layers.length, layersList },
         }),
       };
     case 'Y':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
-          defaultMessage: `Some layers are missing the Y dimension`,
+          defaultMessage: `Missing Y-axis`,
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {has} other {have}} no dimension field set for the Y axis`,
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the Y-axis`,
           values: { layers: layers.length, layersList },
         }),
       };

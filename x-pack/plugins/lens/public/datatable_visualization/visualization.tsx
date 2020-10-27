@@ -236,25 +236,32 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  getErrorMessage(state, frame) {
-    const { sortedColumns, datasource } =
-      getDataSourceAndSortedColumns(state, frame.datasourceLayers, state.layers[0].layerId) || {};
+  getErrorMessages(state, frame) {
+    const errors: Array<{
+      shortMessage: string;
+      longMessage: string;
+    }> = [];
+    if (state) {
+      const { sortedColumns, datasource } =
+        getDataSourceAndSortedColumns(state, frame.datasourceLayers, state.layers[0].layerId) || {};
 
-    // Data validation below
-    if (
-      sortedColumns &&
-      sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length === 0
-    ) {
-      return {
-        shortMessage: i18n.translate('xpack.lens.datatable.dataFailureShort', {
-          defaultMessage: `No metric dimension configured`,
-        }),
-        longMessage: i18n.translate('xpack.lens.datatable.dataFailureLong', {
-          defaultMessage: `Add a field to the metric dimension panel`,
-        }),
-      };
+      // Data validation below
+      if (
+        sortedColumns &&
+        sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length ===
+          0
+      ) {
+        errors.push({
+          shortMessage: i18n.translate('xpack.lens.datatable.dataFailureShort', {
+            defaultMessage: `Missing metric`,
+          }),
+          longMessage: i18n.translate('xpack.lens.datatable.dataFailureLong', {
+            defaultMessage: `Add a field in the Metrics panel`,
+          }),
+        });
+      }
     }
-    return undefined;
+    return errors.length ? errors : undefined;
   },
 };
 

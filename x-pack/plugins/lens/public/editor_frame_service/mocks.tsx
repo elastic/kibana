@@ -51,7 +51,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    getErrorMessage: jest.fn((_state, _frame) => undefined),
+    getErrorMessages: jest.fn((_state, _frame) => undefined),
   };
 }
 
@@ -91,6 +91,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
+    getErrorMessages: jest.fn((_state) => undefined),
   };
 }
 

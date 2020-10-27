@@ -373,7 +373,7 @@ describe('Datatable Visualization', () => {
     });
   });
 
-  describe('#getErrorMessage', () => {
+  describe('#getErrorMessages', () => {
     it('returns an error explanation if the datasource is missing a metric dimension', () => {
       const datasource = createMockDatasource('test');
       const layer = { layerId: 'a', columns: ['b', 'c'] };
@@ -386,11 +386,11 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessage({ layers: [layer] }, frame);
+      const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).toBeDefined();
-      expect(error!.shortMessage).toMatch('No metric dimension configured');
-      expect(error!.longMessage).toMatch('Add a field to the metric dimension panel');
+      expect(error).toHaveLength(1);
+      expect(error![0].shortMessage).toMatch('Missing metric');
+      expect(error![0].longMessage).toMatch('Add a field in the Metrics panel');
     });
 
     it('returns undefined if the metric dimension is defined', () => {
@@ -405,7 +405,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessage({ layers: [layer] }, frame);
+      const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
       expect(error).not.toBeDefined();
     });

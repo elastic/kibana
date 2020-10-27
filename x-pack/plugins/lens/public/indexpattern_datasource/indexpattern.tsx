@@ -39,7 +39,7 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isDraggedField, normalizeOperationDataType } from './utils';
+import { getInvalidReferences, isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
 import {
@@ -340,6 +340,32 @@ export function getIndexPatternDatasource({
     },
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
+
+    getErrorMessages(state) {
+      if (state) {
+        const invalidLayers = getInvalidReferences(state);
+        if (invalidLayers.length > 0) {
+          const realIndex = Object.values(state.layers)
+            .map((layer, i) => {
+              if (invalidLayers.includes(layer)) {
+                return i + 1;
+              }
+            })
+            .filter(Boolean) as number[];
+          return [
+            {
+              shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
+                defaultMessage: 'Invalid references',
+              }),
+              longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
+                defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {has} other {have}} invalid reference`,
+                values: { layers: realIndex.length, layersList: realIndex.join(', ') },
+              }),
+            },
+          ];
+        }
+      }
+    },
   };
 
   return indexPatternDatasource;

@@ -215,7 +215,7 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
     );
   },
 
-  getErrorMessage(state, frame) {
+  getErrorMessages(state, frame) {
     // not possible to break it?
     return undefined;
   },

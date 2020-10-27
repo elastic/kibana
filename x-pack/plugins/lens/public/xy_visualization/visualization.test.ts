@@ -372,10 +372,10 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#getErrorMessage', () => {
+  describe('#getErrorMessages', () => {
     it("should not return an error when there's only one dimension", () => {
       expect(
-        xyVisualization.getErrorMessage(
+        xyVisualization.getErrorMessages(
           {
             ...exampleState(),
             layers: [
@@ -393,7 +393,7 @@ describe('xy_visualization', () => {
     });
     it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
       expect(
-        xyVisualization.getErrorMessage(
+        xyVisualization.getErrorMessages(
           {
             ...exampleState(),
             layers: [
@@ -417,7 +417,7 @@ describe('xy_visualization', () => {
     });
     it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
       expect(
-        xyVisualization.getErrorMessage(
+        xyVisualization.getErrorMessages(
           {
             ...exampleState(),
             layers: [
@@ -437,14 +437,20 @@ describe('xy_visualization', () => {
           },
           createMockFramePublicAPI()
         )
-      ).toEqual({
-        shortMessage: 'Some layers are missing the X dimension',
-        longMessage: 'Layer 2 has no dimension field set for the X axis',
-      });
+      ).toEqual([
+        {
+          shortMessage: 'Missing X-axis',
+          longMessage: 'Layer 2 requires a field for the X-axis',
+        },
+        {
+          shortMessage: 'Missing Y-axis',
+          longMessage: 'Layer 1 requires a field for the Y-axis',
+        },
+      ]);
     });
     it('should return an error with batched messages for the same error with multiple layers', () => {
       expect(
-        xyVisualization.getErrorMessage(
+        xyVisualization.getErrorMessages(
           {
             ...exampleState(),
             layers: [
@@ -452,7 +458,7 @@ describe('xy_visualization', () => {
                 layerId: 'first',
                 seriesType: 'area',
                 xAccessor: 'a',
-                accessors: [],
+                accessors: ['a'],
               },
               {
                 layerId: 'second',
@@ -470,14 +476,16 @@ describe('xy_visualization', () => {
           },
           createMockFramePublicAPI()
         )
-      ).toEqual({
-        shortMessage: 'Some layers are missing the X dimension',
-        longMessage: 'Layers 2, 3 have no dimension field set for the X axis',
-      });
+      ).toEqual([
+        {
+          shortMessage: 'Missing X-axis',
+          longMessage: 'Layers 2, 3 require a field for the X-axis',
+        },
+      ]);
     });
     it("should return an error when some layers are complete but other layers aren't", () => {
       expect(
-        xyVisualization.getErrorMessage(
+        xyVisualization.getErrorMessages(
           {
             ...exampleState(),
             layers: [
@@ -503,10 +511,12 @@ describe('xy_visualization', () => {
           },
           createMockFramePublicAPI()
         )
-      ).toEqual({
-        shortMessage: 'Some layers are missing the Y dimension',
-        longMessage: 'Layer 1 has no dimension field set for the Y axis',
-      });
+      ).toEqual([
+        {
+          shortMessage: 'Missing Y-axis',
+          longMessage: 'Layer 1 requires a field for the Y-axis',
+        },
+      ]);
     });
   });
 });
