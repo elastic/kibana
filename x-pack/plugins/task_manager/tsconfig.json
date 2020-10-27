@@ -13,6 +13,8 @@
     "../../../typings/index.d.ts"
   ],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" }
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../apm/tsconfig.json" }
   ]
 }
