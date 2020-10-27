@@ -28,24 +28,31 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
               defaultValue: 'any',
             }
           ),
+          allowPartialAuthorization: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside GET /api/spaces/space`);
 
-      const purpose = request.query.purpose;
+      const { purpose, allowPartialAuthorization } = request.query;
 
       const spacesClient = await spacesService.scopedClient(request);
 
       let spaces: Space[];
 
       try {
-        log.debug(`Attempting to retrieve all spaces for ${purpose} purpose`);
-        spaces = await spacesClient.getAll(purpose);
-        log.debug(`Retrieved ${spaces.length} spaces for ${purpose} purpose`);
+        log.debug(
+          `Attempting to retrieve all spaces for ${purpose} purpose with allowPartialAuthorization=${allowPartialAuthorization}`
+        );
+        spaces = await spacesClient.getAll({ purpose, allowPartialAuthorization });
+        log.debug(
+          `Retrieved ${spaces.length} spaces for ${purpose} purpose with allowPartialAuthorization=${allowPartialAuthorization}`
+        );
       } catch (error) {
-        log.debug(`Error retrieving spaces for ${purpose} purpose: ${error}`);
+        log.debug(
+          `Error retrieving spaces for ${purpose} purpose with allowPartialAuthorization=${allowPartialAuthorization}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
 

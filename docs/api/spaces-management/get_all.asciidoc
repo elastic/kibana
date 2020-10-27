@@ -11,6 +11,18 @@ experimental[] Retrieve all {kib} spaces.
 
 `GET <kibana host>:<port>/api/spaces/space`
 
+[[spaces-api-get-all-query-params]]
+==== Query parameters
+
+`purpose`::
+  (Optional, string) Valid options include `any`, `copySavedObjectsIntoSpace`, and `shareSavedObjectsIntoSpace`. This determines what
+  authorization checks are applied to the API call. If `purpose` is not provided in the URL, the `any` purpose is used.
+
+`allowPartialAuthorization`::
+  (Optional, boolean) When enabled, the API will return any spaces that the user is partially authorized to access. This only has an effect
+  when _not_ using the `any` purpose. Any partially authorized results (for instance, spaces that the user has read-only access to) will be
+  contain the `isPartiallyAuthorized: true` attribute.
+
 [[spaces-api-get-all-response-codes]]
 ==== Response code
 
@@ -18,7 +30,17 @@ experimental[] Retrieve all {kib} spaces.
   Indicates a successful call.
 
 [[spaces-api-get-all-example]]
-==== Example
+==== Examples
+
+[[spaces-api-get-all-example-1]]
+===== Default options
+
+Retrieve all spaces without specifying any options:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/spaces/space
+--------------------------------------------------
 
 The API returns the following:
 
@@ -48,6 +70,49 @@ The API returns the following:
     "initials": "MK",
     "disabledFeatures": ["discover", "timelion"],
     "imageUrl": ""
+  }
+]
+--------------------------------------------------
+
+[[spaces-api-get-all-example-2]]
+===== Custom options
+
+The user has read-only access to the Sales space. Retrieve all spaces and specify options:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/spaces/space?purpose=shareSavedObjectsIntoSpace&allowPartialAuthorization=true
+--------------------------------------------------
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": "default",
+    "name": "Default",
+    "description" : "This is the Default Space",
+    "disabledFeatures": [],
+    "imageUrl": "",
+    "_reserved": true
+  },
+  {
+    "id": "marketing",
+    "name": "Marketing",
+    "description" : "This is the Marketing Space",
+    "color": "#aabbcc",
+    "disabledFeatures": ["apm"],
+    "initials": "MK",
+    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU"
+  },
+  {
+    "id": "sales",
+    "name": "Sales",
+    "initials": "MK",
+    "disabledFeatures": ["discover", "timelion"],
+    "imageUrl": "",
+    "isPartiallyAuthorized": true
   }
 ]
 --------------------------------------------------

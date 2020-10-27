@@ -25,7 +25,7 @@ import { ToastsStart, StartServicesAccessor, CoreStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { Space } from '../../../common/model/space';
+import { GetSpaceResult } from '../../../common/model/types';
 import { SpacesManager } from '../../spaces_manager';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { ShareOptions, SpaceTarget } from '../types';
@@ -64,7 +64,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     spaces: SpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('shareSavedObjectsIntoSpace');
+    const getSpaces = spacesManager.getSpaces('shareSavedObjectsIntoSpace', true);
     const getActiveSpace = spacesManager.getActiveSpace();
     const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObject.type);
     Promise.all([getSpaces, getActiveSpace, getPermissions, getStartServices()])
@@ -75,7 +75,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
           selectedSpaceIds: currentNamespaces.filter((spaceId) => spaceId !== activeSpace.id),
         });
         setCanShareToAllSpaces(permissions.shareToAllSpaces);
-        const createSpaceTarget = (space: Space): SpaceTarget => ({
+        const createSpaceTarget = (space: GetSpaceResult): SpaceTarget => ({
           ...space,
           isActiveSpace: space.id === activeSpace.id,
         });

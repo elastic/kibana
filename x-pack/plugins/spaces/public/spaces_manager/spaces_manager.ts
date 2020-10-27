@@ -8,7 +8,7 @@ import { skipWhile } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
 import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../common/model/space';
-import { GetSpacePurpose } from '../../common/model/types';
+import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
@@ -30,8 +30,13 @@ export class SpacesManager {
     this.refreshActiveSpace();
   }
 
-  public async getSpaces(purpose?: GetSpacePurpose): Promise<Space[]> {
-    return await this.http.get('/api/spaces/space', { query: { purpose } });
+  public async getSpaces(
+    purpose?: GetAllSpacesPurpose,
+    allowPartialAuthorization?: boolean
+  ): Promise<GetSpaceResult[]> {
+    return await this.http.get('/api/spaces/space', {
+      query: { purpose, allowPartialAuthorization },
+    });
   }
 
   public async getSpace(id: string): Promise<Space> {

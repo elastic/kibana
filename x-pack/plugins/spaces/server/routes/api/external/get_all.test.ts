@@ -75,66 +75,34 @@ describe('GET /spaces/space', () => {
     };
   };
 
-  it(`returns all available spaces`, async () => {
-    const { routeHandler } = await setup();
+  [undefined, 'any', 'copySavedObjectsIntoSpace', 'shareSavedObjectsIntoSpace'].forEach(
+    (purpose) => {
+      describe(`with purpose='${purpose}'`, () => {
+        it(`returns all available spaces`, async () => {
+          const { routeHandler } = await setup();
 
-    const request = httpServerMock.createKibanaRequest({
-      method: 'get',
-    });
+          const request = httpServerMock.createKibanaRequest({ method: 'get', query: { purpose } });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+          expect(response.status).toEqual(200);
+          expect(response.payload).toEqual(spaces);
+        });
 
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
+        it(`returns all available spaces when specifying allowPartialAuthorization=true`, async () => {
+          const { routeHandler } = await setup();
 
-  it(`returns all available spaces with the 'any' purpose`, async () => {
-    const { routeHandler } = await setup();
+          const request = httpServerMock.createKibanaRequest({
+            method: 'get',
+            query: { purpose, allowPartialAuthorization: true },
+          });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        purpose: 'any',
-      },
-      method: 'get',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
-
-  it(`returns all available spaces with the 'copySavedObjectsIntoSpace' purpose`, async () => {
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        purpose: 'copySavedObjectsIntoSpace',
-      },
-      method: 'get',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
-
-  it(`returns all available spaces with the 'shareSavedObjectsIntoSpace' purpose`, async () => {
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        purpose: 'shareSavedObjectsIntoSpace',
-      },
-      method: 'get',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
+          expect(response.status).toEqual(200);
+          expect(response.payload).toEqual(spaces);
+        });
+      });
+    }
+  );
 
   it(`returns http/403 when the license is invalid`, async () => {
     const { routeHandler } = await setup();
