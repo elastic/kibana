@@ -110,12 +110,18 @@ describe('validate', () => {
         total: 0,
       };
       const [validated, errors] = transformValidateFindAlerts(findResult, []);
-      expect(validated).toEqual({
+      const expected: {
+        page: number;
+        perPage: number;
+        total: number;
+        data: Array<Partial<RulesSchema>>;
+      } | null = {
         data: [ruleOutput()],
         page: 1,
         perPage: 0,
         total: 0,
-      });
+      };
+      expect(validated).toEqual(expected);
       expect(errors).toEqual(null);
     });
 
@@ -160,13 +166,14 @@ describe('validate', () => {
       const ruleStatus = getFindResultStatus();
       const ruleAlert = getResult();
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null, ruleStatus);
-      expect(validatedOrError).toEqual({
+      const expected: RulesSchema = {
         ...ruleOutput(),
         status: 'succeeded',
         status_date: '2020-02-18T15:26:49.783Z',
         last_success_at: '2020-02-18T15:26:49.783Z',
         last_success_message: 'succeeded',
-      });
+      };
+      expect(validatedOrError).toEqual(expected);
     });
 
     test('it should return error object if "alert" is not expected alert type', () => {
