@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { TelemetryLogic } from './telemetry_logic';
 export { sendTelemetry } from './send_telemetry';
 export {
   SendEnterpriseSearchTelemetry,
