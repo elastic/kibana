@@ -1,0 +1,37 @@
+{
+  "elasticsearch": {
+    "cluster": ["manage"],
+    "indices": [
+      {
+        "names": [
+          "apm-*-transaction*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "winlogbeat-*",
+          ".lists*",
+          ".items*"
+        ],
+        "privileges": ["read", "write"]
+      },
+      {
+        "names": [".siem-signals-*"],
+        "privileges": ["read", "write", "create_index"]
+      }
+    ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "ml": ["read"],
+        "siem": ["all"],
+        "actions": ["all"],
+        "builtInAlerts": ["all"],
+        "savedObjectsManagement": ["all"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}
