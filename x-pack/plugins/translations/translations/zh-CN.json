@@ -20387,7 +20387,6 @@
     "xpack.triggersActionsUI.sections.alertsList.alertStatusOk": "确定",
     "xpack.triggersActionsUI.sections.alertsList.alertStatusPending": "待处理",
     "xpack.triggersActionsUI.sections.alertsList.alertStatusUnknown": "未知",
-    "xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle": "在 {totalStausesError} 个 {totalStausesError, plural, one {{singleTitle}} other {# 个 {multipleTitle}}}中发现错误。",
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.buttonTitle": "管理告警",
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle": "删除",
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle": "禁用",

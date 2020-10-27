@@ -80,7 +80,7 @@ function renameCasesConfigurationObject(
 const addHasAuthConfigurationObject = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
-  if (doc.attributes.actionTypeId !== '.email') {
+  if (doc.attributes.actionTypeId !== '.email' && doc.attributes.actionTypeId !== '.webhook') {
     return doc;
   }
   const hasAuth = !!doc.attributes.secrets.user || !!doc.attributes.secrets.password;

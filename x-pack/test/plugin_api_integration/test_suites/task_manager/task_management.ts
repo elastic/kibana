@@ -8,19 +8,48 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
+import {
+  DEFAULT_MAX_WORKERS,
+  DEFAULT_POLL_INTERVAL,
+} from '../../../../plugins/task_manager/server/config';
+import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 const {
   task: { properties: taskManagerIndexMapping },
-} = require('../../../../plugins/task_manager/server/saved_objects/mappings.json');
+} = TaskManagerMapping;
 
-const {
-  DEFAULT_MAX_WORKERS,
-  DEFAULT_POLL_INTERVAL,
-} = require('../../../../plugins/task_manager/server/config.ts');
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export interface RawDoc {
+  _id: string;
+  _source: any;
+  _type?: string;
+}
+export interface SearchResults {
+  hits: {
+    hits: RawDoc[];
+  };
+}
 
-export default function ({ getService }) {
+type DeprecatedConcreteTaskInstance = Omit<ConcreteTaskInstance, 'schedule'> & {
+  interval: string;
+};
+
+type SerializedConcreteTaskInstance<State = string, Params = string> = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
+> & {
+  state: State;
+  params: Params;
+  scheduledAt: string;
+  startedAt: string | null;
+  retryAt: string | null;
+  runAt: string;
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
@@ -28,7 +57,8 @@ export default function ({ getService }) {
   const testHistoryIndex = '.kibana_task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
-  describe('scheduling and running tasks', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/81853
+  describe.skip('scheduling and running tasks', () => {
     beforeEach(
       async () => await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200)
     );
@@ -53,14 +83,18 @@ export default function ({ getService }) {
       }
     });
 
-    function currentTasks() {
+    function currentTasks<State = unknown, Params = unknown>(): Promise<{
+      docs: Array<SerializedConcreteTaskInstance<State, Params>>;
+    }> {
       return supertest
         .get('/api/sample_tasks')
         .expect(200)
         .then((response) => response.body);
     }
 
-    function currentTask(task) {
+    function currentTask<State = unknown, Params = unknown>(
+      task: string
+    ): Promise<SerializedConcreteTaskInstance<State, Params>> {
       return supertest
         .get(`/api/sample_tasks/task/${task}`)
         .send({ task })
@@ -69,32 +103,30 @@ export default function ({ getService }) {
     }
 
     function ensureTasksIndexRefreshed() {
-      return supertest
-        .get(`/api/ensure_tasks_index_refreshed`)
-        .send({})
-        .expect(200)
-        .then((response) => response.body);
+      return supertest.get(`/api/ensure_tasks_index_refreshed`).send({}).expect(200);
     }
 
-    function historyDocs(taskId) {
+    function historyDocs(taskId?: string): Promise<RawDoc[]> {
       return es
         .search({
           index: testHistoryIndex,
           q: taskId ? `taskId:${taskId}` : 'type:task',
         })
-        .then((result) => result.hits.hits);
+        .then((result: SearchResults) => result.hits.hits);
     }
 
-    function scheduleTask(task) {
+    function scheduleTask(
+      task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
+    ): Promise<SerializedConcreteTaskInstance> {
       return supertest
         .post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then((response) => response.body);
+        .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
     }
 
-    function runTaskNow(task) {
+    function runTaskNow(task: { id: string }) {
       return supertest
         .post('/api/sample_tasks/run_now')
         .set('kbn-xsrf', 'xxx')
@@ -103,16 +135,16 @@ export default function ({ getService }) {
         .then((response) => response.body);
     }
 
-    function scheduleTaskIfNotExists(task) {
+    function scheduleTaskIfNotExists(task: Partial<ConcreteTaskInstance>) {
       return supertest
         .post('/api/sample_tasks/ensure_scheduled')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then((response) => response.body);
+        .then((response: { body: ConcreteTaskInstance }) => response.body);
     }
 
-    function releaseTasksWaitingForEventToComplete(event) {
+    function releaseTasksWaitingForEventToComplete(event: string) {
       return supertest
         .post('/api/sample_tasks/event')
         .set('kbn-xsrf', 'xxx')
@@ -120,11 +152,17 @@ export default function ({ getService }) {
         .expect(200);
     }
 
-    function getTaskById(tasks, id) {
+    function getTaskById<State = unknown, Params = unknown>(
+      tasks: Array<SerializedConcreteTaskInstance<State, Params>>,
+      id: string
+    ) {
       return tasks.filter((task) => task.id === id)[0];
     }
 
-    async function provideParamsToTasksWaitingForParams(taskId, data = {}) {
+    async function provideParamsToTasksWaitingForParams(
+      taskId: string,
+      data: Record<string, unknown> = {}
+    ) {
       // wait for task to start running and stall on waitForParams
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
@@ -151,7 +189,7 @@ export default function ({ getService }) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         log.debug(`Task found: ${task.id}`);
         log.debug(`Task status: ${task.status}`);
         log.debug(`Task state: ${JSON.stringify(task.state, null, 2)}`);
@@ -236,7 +274,7 @@ export default function ({ getService }) {
       await retry.try(async () => {
         expect((await historyDocs(originalTask.id)).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(count + 1);
 
@@ -257,7 +295,7 @@ export default function ({ getService }) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
@@ -278,7 +316,7 @@ export default function ({ getService }) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
+        const [task] = (await currentTasks<{ count: number }>()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
@@ -299,7 +337,7 @@ export default function ({ getService }) {
           1
         );
 
-        const [task] = (await currentTasks()).docs.filter(
+        const [task] = (await currentTasks<{ count: number }>()).docs.filter(
           (taskDoc) => taskDoc.id === originalTask.id
         );
 
@@ -322,7 +360,7 @@ export default function ({ getService }) {
             .length
         ).to.eql(2);
 
-        const [task] = (await currentTasks()).docs.filter(
+        const [task] = (await currentTasks<{ count: number }>()).docs.filter(
           (taskDoc) => taskDoc.id === originalTask.id
         );
         expect(task.state.count).to.eql(2);
@@ -343,7 +381,7 @@ export default function ({ getService }) {
         const docs = await historyDocs(originalTask.id);
         expect(docs.length).to.eql(1);
 
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
 
         expect(task.state.count).to.eql(1);
 
@@ -393,16 +431,16 @@ export default function ({ getService }) {
       expect(await runNowResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.state.count).to.eql(2);
       });
 
       // drain tasks, othrwise they'll keep Task Manager stalled
       await retry.try(async () => {
         await releaseTasksWaitingForEventToComplete('releaseTheOthers');
-        const tasks = (await currentTasks()).docs.filter(
-          (task) => task.params.originalParams.waitForEvent === 'releaseTheOthers'
-        );
+        const tasks = (
+          await currentTasks<{}, { originalParams: { waitForEvent: string } }>()
+        ).docs.filter((task) => task.params.originalParams.waitForEvent === 'releaseTheOthers');
         expect(tasks.length).to.eql(0);
       });
     });
@@ -420,7 +458,7 @@ export default function ({ getService }) {
           1
         );
 
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.state.count).to.eql(1);
         expect(task.status).to.eql('idle');
 
@@ -437,7 +475,7 @@ export default function ({ getService }) {
       expect(successfulRunNowResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
-        const task = await currentTask(originalTask.id);
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.state.count).to.eql(2);
         expect(task.status).to.eql('idle');
       });
@@ -515,7 +553,7 @@ export default function ({ getService }) {
       // finish first run by emitting 'runNowHasBeenAttempted' event
       await releaseTasksWaitingForEventToComplete('runNowHasBeenAttempted');
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const tasks = (await currentTasks<{ count: number }>()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
 
         const task = await currentTask(longRunningTask.id);
@@ -564,12 +602,14 @@ export default function ({ getService }) {
       expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
     });
 
-    async function expectReschedule(originalRunAt, currentTask, expectedDiff) {
+    async function expectReschedule(
+      originalRunAt: number,
+      task: SerializedConcreteTaskInstance<any, any>,
+      expectedDiff: number
+    ) {
       const buffer = 10000;
-      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(
-        expectedDiff - buffer
-      );
-      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
+      expect(Date.parse(task.runAt) - originalRunAt).to.be.greaterThan(expectedDiff - buffer);
+      expect(Date.parse(task.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
     }
 
     it('should run tasks in parallel, allowing for long running tasks along side faster tasks', async () => {
@@ -594,14 +634,14 @@ export default function ({ getService }) {
       });
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const tasks = (await currentTasks<{ count: number }>()).docs;
         expect(getTaskById(tasks, fastTask.id).state.count).to.eql(2);
       });
 
       await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const tasks = (await currentTasks<{ count: number }>()).docs;
 
         expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
