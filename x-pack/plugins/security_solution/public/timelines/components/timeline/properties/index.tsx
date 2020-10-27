@@ -17,7 +17,6 @@ import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
 import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
-import { SaveTimeline } from './helpers';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -36,7 +35,6 @@ interface Props {
   timelineId: string;
   timelineType: TimelineTypeLiteral;
   status: TimelineStatusLiteral;
-  saveTimeline: SaveTimeline;
   title: string;
   toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
@@ -68,7 +66,6 @@ export const Properties = React.memo<Props>(
     isDatepickerLocked,
     isFavorite,
     noteIds,
-    saveTimeline,
     status,
     timelineId,
     timelineType,
@@ -129,7 +126,6 @@ export const Properties = React.memo<Props>(
           onToggleShowNotes={onToggleShowNotes}
           onToggleSaveTimeline={onToggleSaveTimeline}
           status={status}
-          saveTimeline={saveTimeline}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}

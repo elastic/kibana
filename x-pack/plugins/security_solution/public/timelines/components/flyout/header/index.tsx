@@ -20,7 +20,6 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { TimelineInput } from '../../../store/timeline/actions';
 
 interface OwnProps {
   timelineId: string;
@@ -40,7 +39,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
     noteIds,
     notesById,
     status,
-    saveTimeline,
     timelineId,
     timelineType,
     title,
@@ -66,7 +64,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
         isFavorite={isFavorite}
         noteIds={noteIds}
         status={status}
-        saveTimeline={saveTimeline}
         timelineId={timelineId}
         timelineType={timelineType}
         title={title}
@@ -151,7 +148,6 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   }) => dispatch(timelineActions.updateTitle({ id, title, disableAutoSave })),
   toggleLock: ({ linkToId }: { linkToId: InputsModelId }) =>
     dispatch(inputsActions.toggleTimelineLinkTo({ linkToId })),
-  saveTimeline: (args: TimelineInput) => dispatch(timelineActions.saveTimeline(args)),
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

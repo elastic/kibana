@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 
 import React from 'react';
 import styled from 'styled-components';
-import { Description, Name, NotesButton, SaveTimeline, StarIcon } from './helpers';
+import { Description, Name, NotesButton, StarIcon } from './helpers';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
 import { Note } from '../../../../common/lib/note';
@@ -16,7 +16,7 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
-import { SaveTimelineButton } from '../header/save_timeline';
+import { SaveTimelineButton } from '../header/save_timeline_button';
 import { ENABLE_NEWTIMELINE } from '../../../../../common/constants';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -35,7 +35,6 @@ interface Props {
   updateDescription: UpdateDescription;
   showNotes: boolean;
   status: TimelineStatusLiteral;
-  saveTimeline: SaveTimeline;
   associateNote: AssociateNote;
   showNotesFromWidth: boolean;
   showSaveTimelineOverlay: boolean;
@@ -91,7 +90,6 @@ export const PropertiesLeft = React.memo<Props>(
     updateTitle,
     updateDescription,
     status,
-    saveTimeline,
     showNotes,
     showNotesFromWidth,
     showSaveTimelineOverlay,
@@ -135,7 +133,6 @@ export const PropertiesLeft = React.memo<Props>(
           timelineId={timelineId}
           showOverlay={showSaveTimelineOverlay}
           toggleSaveTimeline={onToggleSaveTimeline}
-          onSaveTimeline={saveTimeline}
           updateTitle={updateTitle}
           updateDescription={updateDescription}
         />
