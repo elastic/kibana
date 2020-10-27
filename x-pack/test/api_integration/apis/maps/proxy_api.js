@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/81844
   describe('EMS proxy', () => {
     it('should correctly rewrite url and format', async () => {
       const resp = await supertest
