@@ -5,30 +5,40 @@
  */
 
 import * as rt from 'io-ts';
+import { logEntriesCursorRT } from '../../http_api/log_entries';
+import { jsonArrayRT } from '../../typed_json';
+import { errorRT } from '../common/errors';
 
 export const LOG_ENTRY_SEARCH_STRATEGY = 'infra/log-entry';
 
 export const logEntrySearchRequestParamsRT = rt.type({
   sourceId: rt.string,
-  id: rt.string,
+  logEntryId: rt.string,
 });
 
 export type LogEntrySearchRequestParams = rt.TypeOf<typeof logEntrySearchRequestParamsRT>;
 
-// const logEntriesItemFieldRT = rt.type({ field: rt.string, value: rt.string });
-// const logEntriesItemRT = rt.type({
-//   id: rt.string,
-//   index: rt.string,
-//   fields: rt.array(logEntriesItemFieldRT),
-//   key: logEntriesCursorRT,
-// });
-// export const logEntriesItemResponseRT = rt.type({
-//   data: logEntriesItemRT,
-// });
+const logEntryFieldRT = rt.type({
+  field: rt.string,
+  value: jsonArrayRT,
+});
 
-// export type LogEntriesItemField = rt.TypeOf<typeof logEntriesItemFieldRT>;
-// export type LogEntriesItem = rt.TypeOf<typeof logEntriesItemRT>;
-// export type LogEntriesItemResponse = rt.TypeOf<typeof logEntriesItemResponseRT>;
-// export const logEntrySearchRequestParamsRT = logEntriesItemRequestRT;
+export const logEntryRT = rt.type({
+  id: rt.string,
+  index: rt.string,
+  fields: rt.array(logEntryFieldRT),
+  key: logEntriesCursorRT,
+});
 
-// export type LogEntrySearchRequestParams = LogEntriesItemRequest;
+export type LogEntry = rt.TypeOf<typeof logEntryRT>;
+
+export const logEntrySearchResponsePayloadRT = rt.intersection([
+  rt.type({
+    data: logEntryRT,
+  }),
+  rt.partial({
+    errors: rt.array(errorRT),
+  }),
+]);
+
+export type LogEntrySearchResponsePayload = rt.TypeOf<typeof logEntrySearchResponsePayloadRT>;

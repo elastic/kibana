@@ -13,7 +13,7 @@ export const createGetLogEntryQuery = (
   logEntryId: string,
   timestampField: string,
   tiebreakerField: string
-): RequestParams.Search => ({
+): RequestParams.Search<Record<string, any>> => ({
   index: logEntryIndex,
   terminate_after: 1,
   track_scores: false,
@@ -34,8 +34,10 @@ export const logEntryHitRT = rt.type({
   fields: rt.record(rt.string, jsonArrayRT),
 });
 
-export const logEntryCategoriesResponseRT = rt.type({
+export const getLogEntryResponseRT = rt.type({
   hits: rt.type({
     hits: rt.array(logEntryHitRT),
   }),
 });
+
+export type GetLogEntryResponse = rt.TypeOf<typeof getLogEntryResponseRT>;
