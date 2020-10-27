@@ -64,7 +64,9 @@ describe('healthRoute', () => {
     await sleep(600);
     stats$.next(nextMockStat);
 
-    const firstDebug = JSON.parse((logger as jest.Mocked<Logger>).debug.mock.calls[0][0]);
+    const firstDebug = JSON.parse(
+      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+    );
     expect(firstDebug).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -72,7 +74,9 @@ describe('healthRoute', () => {
       ...summarizeMonitoringStats(mockStat, getTaskManagerConfig({})),
     });
 
-    const secondDebug = JSON.parse((logger as jest.Mocked<Logger>).debug.mock.calls[1][0]);
+    const secondDebug = JSON.parse(
+      (logger as jest.Mocked<Logger>).debug.mock.calls[1][0].replace('Latest Monitored Stats: ', '')
+    );
     expect(secondDebug).not.toMatchObject({
       id,
       timestamp: expect.any(String),
