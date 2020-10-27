@@ -20,7 +20,7 @@ These metrics help contributors know how they are impacting the size of the bund
 [[ci-metric-page-load-bundle-size]] `page load bundle size` ::
 The size of the entry file produced for each bundle/plugin. This file is always loaded on every page load, so it should be as small as possible. To reduce this metric you can put any code that isn't necessary on every page load behind an https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`].
 +
-Code that is shared statically with other plugins will contribute to the `page load bundle size` of that plugin. This includes exports from the `public/index.ts` file and any file referenced by the `extraPublicDirs` manifest property. 
+Code that is shared statically with other plugins will contribute to the `page load bundle size` of that plugin. This includes exports from the `public/index.ts` file and any file referenced by the `extraPublicDirs` manifest property.
 
 [[ci-metric-async-chunks-size]] `async chunks size` ::
 An "async chunk" is created for the files imported by each https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`] statement. This metric tracks the sum size of these chunks, in bytes, broken down by plugin/bundle id. You can think of this as the amount of code users will have to download if they access all the components/applications within a bundle.
@@ -48,7 +48,7 @@ The number of files included in the default distributable.
 The number of files included in the OSS distributable.
 
 [[ci-metric-distributable-size]] `distributable size` ::
-The size, in bytes, of the default distributable. _(not reported on PRs)_ 
+The size, in bytes, of the default distributable. _(not reported on PRs)_
 
 [[ci-metric-oss-distributable-size]] `oss distributable size` ::
 The size, in bytes, of the OSS distributable. _(not reported on PRs)_
@@ -75,7 +75,7 @@ In order to prevent the page load bundles from growing unexpectedly large we lim
 
 In most cases the limit should be high enough that PRs shouldn't trigger overages, but when they do make sure it's clear what is cuasing the overage by trying the following:
 
-1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{pluginId}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited.
+1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{pluginId}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way that we {kib-repo}blob/{branch}/src/core/MIGRATION.md#keep-kibana-fast[reduce the size of page load chunks].
 +
 [source,shell]
 -----------
@@ -99,7 +99,19 @@ jq -r .modules[].id {pluginDir}/target/public/stats.json | sort - > moduleids.tx
 +
 Produce a moduleids.txt file for both your branch and master and then pop them into Beyond Compare to get a very specific view of what's new.
 
-5. If all else fails reach out to Operations for help.
+5. As a last resort you might want to try comparing the bundle source directly. It's usually best to do this using the production source so that you're inspecting the actual change in bytes that CI is seeing. After building the distributable version of your bundle run it through prettier and then dropping it into Beyond Compare along with the chunk from upstream:
++
+[source,shell]
+-----------
+node scripts/build_kibana_platform_plugins --focus {pluginId} --dist
+npm install -g prettier
+prettier -w {pluginDir}/target/public/{pluginId}.plugin.js
+# repeat these steps for upstream and then compare the two {pluginId}.plugin.js files in Beyond Compare
+-----------
+
+6. If all else fails reach out to Operations for help.
+
+Once you've identified the files which were added to the build you likely just need to stick them behind an async import as described in {kib-repo}blob/{branch}/src/core/MIGRATION.md#keep-kibana-fast[the MIGRATION.md docs].
 
 In the case that the bundle size is not being bloated by anything obvious, but it's still larger than the limit, you can raise the limit in your PR. Do this either by editting the {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml` file] manually or by running the following to have the limit updated to the current size + 15kb
 
