@@ -31,7 +31,7 @@ export interface Props<T, FormType = FormData, I = T> {
   componentProps?: Record<string, any>;
   readDefaultValueOnForm?: boolean;
   onChange?: (value: I) => void;
-  children?: (field: FieldHook<T, I>) => JSX.Element;
+  children?: (field: FieldHook<T, I>) => JSX.Element | null;
   [key: string]: any;
 }
 

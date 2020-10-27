@@ -5,6 +5,8 @@
  */
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 
+import { RUNTIME_FIELD_TYPES } from './constants';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
 
@@ -18,8 +20,15 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
 }
 
-export interface RuntTimeField {
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number] & string;
+
+export interface RuntimeField {
   name: string;
-  returnType: string;
+  type: RuntimeType;
   script: string;
+}
+
+export interface ComboBoxOption<T = unknown> {
+  label: string;
+  value?: T;
 }
