@@ -18,6 +18,7 @@ import {
   DataPublicPluginStartUi,
   IndexPatternsContract,
 } from 'src/plugins/data/public';
+import { KibanaFeature } from '../../../../features/common';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
@@ -35,6 +36,7 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   metadata?: MetaData;
   dataUi?: DataPublicPluginStartUi;
   dataIndexPatterns?: IndexPatternsContract;
+  kibanaFeatures?: KibanaFeature[];
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

@@ -102,6 +102,7 @@ export const AlertForm = ({
     actionTypeRegistry,
     docLinks,
     capabilities,
+    kibanaFeatures,
   } = alertsContext;
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -301,8 +302,12 @@ export const AlertForm = ({
     );
   };
 
+  const getProducerName = (producer: string) => {
+    return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
+  };
+
   const alertTypeOptions = sortBy(Object.entries(groupAlertTypesByProducer())).map((item) => ({
-    label: capitalize(item[0]),
+    label: getProducerName(item[0]) ?? capitalize(item[0]),
     options: item[1],
   }));
 
