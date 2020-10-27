@@ -33,10 +33,16 @@ import { UMServerLibs } from '../lib';
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
 const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(monitorId + '-' + location),
+    new Set<string>()
+  );
 
 const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
-  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(monitorId + '-' + location),
+    new Set<string>()
+  );
 
 export const getUniqueIdsByLoc = (
   downMonitorsByLocation: GetMonitorStatusResult[],
@@ -293,7 +299,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
 
           const urlText = monitorInfo.url?.full?.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
-          const alertInstance = alertInstanceFactory(urlText + monitorLoc.location);
+          const alertInstance = alertInstanceFactory(urlText + '-' + monitorLoc.location);
 
           const monitorSummary = getMonitorSummary(monitorInfo);
           const statusMessage = getStatusMessage(monitorInfo);
@@ -339,7 +345,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         // replace url special characters with -
         const urlText = monitorInfo.url?.full?.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
-        const alertInstance = alertInstanceFactory(urlText + monIdByLoc);
+        const alertInstance = alertInstanceFactory(urlText + '-' + monIdByLoc);
 
         alertInstance.replaceState({
           ...updateState(state, true),
