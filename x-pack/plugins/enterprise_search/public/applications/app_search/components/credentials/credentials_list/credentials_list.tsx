@@ -61,6 +61,10 @@ export const CredentialsList: React.FC = () => {
           </EuiCopy>
         );
       },
+      mobileOptions: {
+        // @ts-ignore - EUI's type definitions need to be updated
+        width: '100%',
+      },
     },
     {
       name: 'Modes',
