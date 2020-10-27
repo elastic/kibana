@@ -11,7 +11,7 @@ export const featureCatalogueEntry = {
   id: 'canvas',
   title: 'Canvas',
   subtitle: i18n.translate('xpack.canvas.featureCatalogue.canvasSubtitle', {
-    defaultMessage: 'Design pixel-perfect reports.',
+    defaultMessage: 'Design pixel-perfect presentations.',
   }),
   description: i18n.translate('xpack.canvas.appDescription', {
     defaultMessage: 'Showcase your data in a pixel-perfect way.',

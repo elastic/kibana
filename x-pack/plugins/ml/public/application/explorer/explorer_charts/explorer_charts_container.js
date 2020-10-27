@@ -34,8 +34,7 @@ import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
-    'This selection contains too many buckets to be displayed.' +
-    'The dashboard is best viewed over a shorter time range.',
+    'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
 });
 const textViewButton = i18n.translate(
   'xpack.ml.explorer.charts.openInSingleMetricViewerButtonLabel',
