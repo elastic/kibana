@@ -30,6 +30,11 @@
   @include lnsDroppableActive;
 }
 
+// Highlighting the items when in keyboard mode
+.lnsDragDrop-isKeyboardModeActive {
+  @include lnsDroppableActive;
+}
+
 // Drop area while hovering with item
 .lnsDragDrop-isActiveDropTarget {
   @include lnsDroppableActiveHover;

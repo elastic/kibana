@@ -103,6 +103,10 @@ interface ReorderState {
    * Class responsible for transform (translation)
    */
   className: 'lnsDragDrop-isReorderable--down' | 'lnsDragDrop-isReorderable--up';
+  /**
+   * indicates that user is in keyboard mode
+   */
+  isInKeyboardMode: boolean;
 }
 
 export interface ReorderContextState {
@@ -114,12 +118,14 @@ export const ReorderContext = React.createContext<ReorderContextState>({
   reorderState: {
     reorderedItems: [],
     className: 'lnsDragDrop-isReorderable--down',
+    isInKeyboardMode: false,
   },
   setReorderState: () => {},
 });
 
 export function ReorderProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
+    isInKeyboardMode: false,
     reorderedItems: [],
     className: 'lnsDragDrop-isReorderable--down',
   });

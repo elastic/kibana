@@ -337,7 +337,6 @@ export const ReorderableDragDrop = ({
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
 
-  const [keyboardMode, setKeyboardMode] = useState(false);
   const groupLength = itemsInGroup.length;
 
   const currentIndex = itemsInGroup.indexOf(id);
@@ -345,7 +344,8 @@ export const ReorderableDragDrop = ({
   const draggingClasses = classNames(
     draggingProps.className,
     reorderState && {
-      [reorderState.className]: reorderState?.reorderedItems.includes(id),
+      [reorderState.className]: reorderState.reorderedItems.includes(id),
+      'lnsDragDrop-isKeyboardModeActive': reorderState.isInKeyboardMode,
     },
     {
       'lnsDragDrop-isReorderable': draggingProps.isReorderDragging,
@@ -358,7 +358,10 @@ export const ReorderableDragDrop = ({
         draggable: draggingProps.draggable,
         onDragEnd: draggingProps.onDragEnd,
         onDragStart: (e: DroppableEvent) => {
-          setKeyboardMode(false);
+          setReorderState({
+            ...reorderState,
+            isInKeyboardMode: false,
+          });
           draggingProps.onDragStart(e);
         },
         ['data-test-subj']: draggingProps.dataTestSubj,
@@ -425,11 +428,17 @@ export const ReorderableDragDrop = ({
           data-test-subj="lnsDragDrop-keyboardHandler"
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
-              setKeyboardMode(!keyboardMode);
+              setReorderState({
+                ...reorderState,
+                isInKeyboardMode: !reorderState.isInKeyboardMode,
+              });
             } else if (e.key === keys.ESCAPE) {
-              setKeyboardMode(false);
+              setReorderState({
+                ...reorderState,
+                isInKeyboardMode: false,
+              });
             }
-            if (keyboardMode) {
+            if (reorderState.isInKeyboardMode) {
               e.stopPropagation();
               e.preventDefault();
 
