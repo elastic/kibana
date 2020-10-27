@@ -5,6 +5,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export type Dragging =
   | (Record<string, unknown> & {
@@ -126,8 +128,18 @@ export function ReorderProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   return (
-    <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
-      {children}
-    </ReorderContext.Provider>
+    <>
+      <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
+        {children}
+      </ReorderContext.Provider>
+      <EuiScreenReaderOnly>
+        <p id="lnsDragDrop-reorderInstructions">
+          {i18n.translate('xpack.lens.dragDrop.reorderInstructions', {
+            defaultMessage:
+              'When dragging, use arrow keys to reorder. Activate button again to finish. Escape to finish.',
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+    </>
   );
 }

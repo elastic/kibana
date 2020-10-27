@@ -8,7 +8,6 @@ import './drag_drop.scss';
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DragContext, DragContextState, ReorderContext } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
@@ -256,7 +255,7 @@ const DragDropInner = React.memo(function DragDropInner(
     }
   };
 
-  const isReorderDragging = itemsInGroup?.includes(dragging?.id);
+  const isReorderDragging = dragging && itemsInGroup?.includes(dragging.id);
 
   if (
     draggable &&
@@ -337,6 +336,7 @@ export const ReorderableDragDrop = ({
 }) => {
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
+
   const [keyboardMode, setKeyboardMode] = useState(false);
   const groupLength = itemsInGroup.length;
 
@@ -358,8 +358,8 @@ export const ReorderableDragDrop = ({
         draggable: draggingProps.draggable,
         onDragEnd: draggingProps.onDragEnd,
         onDragStart: (e: DroppableEvent) => {
-          draggingProps.onDragStart(e);
           setKeyboardMode(false);
+          draggingProps.onDragStart(e);
         },
         ['data-test-subj']: draggingProps.dataTestSubj,
         className: draggingClasses,
@@ -382,6 +382,9 @@ export const ReorderableDragDrop = ({
           }
           dropProps.onDragOver(e);
           if (!dropProps.isActive) {
+            if (!dragging) {
+              return;
+            }
             const draggingIndex = itemsInGroup.indexOf(dragging.id);
             const droppingIndex = currentIndex;
             if (draggingIndex === droppingIndex) {
@@ -414,30 +417,12 @@ export const ReorderableDragDrop = ({
           });
         }}
       />
-      <EuiScreenReaderOnly>
+      <EuiScreenReaderOnly showOnFocus>
         <button
+          aria-label={`Grab ${label}`}
+          aria-describedby="lnsDragDrop-reorderInstructions"
+          className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
-          aria-label={
-            !keyboardMode
-              ? i18n.translate('xpack.lens.dragDrop.reorderInactive', {
-                  defaultMessage:
-                    '{label} is ranked {position} out of {groupLength}. Press enter/space to initiate reorder',
-                  values: {
-                    label,
-                    position: currentIndex + 1,
-                    groupLength,
-                  },
-                })
-              : i18n.translate('xpack.lens.dragDrop.reorderActive', {
-                  defaultMessage:
-                    'Element {label} grabbed. {label} is ranked {position} out of {groupLength}. Use arrows to change position. Press enter/space to confirm.',
-                  values: {
-                    label,
-                    position: currentIndex + 1,
-                    groupLength,
-                  },
-                })
-          }
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
               setKeyboardMode(!keyboardMode);
@@ -459,11 +444,7 @@ export const ReorderableDragDrop = ({
               }
             }
           }}
-        >
-          {i18n.translate('xpack.lens.dragDrop.keyboardReorderHandle', {
-            defaultMessage: 'Keyboard reorder handle',
-          })}
-        </button>
+        />
       </EuiScreenReaderOnly>
     </div>
   );

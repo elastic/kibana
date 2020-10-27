@@ -76,3 +76,14 @@
   opacity: 0;
 }
 
+.lnsDragDrop__keyboardHandler {
+  top: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  &:focus {
+    @include euiFocusRing;
+    pointer-events: none;
+  }
+}
