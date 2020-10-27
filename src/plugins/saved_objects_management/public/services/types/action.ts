@@ -18,6 +18,7 @@
  */
 
 import { ReactNode } from '@elastic/eui/node_modules/@types/react';
+import { ApplicationStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '.';
 
 export abstract class SavedObjectsManagementAction {
@@ -37,7 +38,12 @@ export abstract class SavedObjectsManagementAction {
 
   private callbacks: Function[] = [];
 
+  protected capabilities: ApplicationStart['capabilities'] | null = null;
   protected record: SavedObjectsManagementRecord | null = null;
+
+  public setUiCapabilities(capabilities: ApplicationStart['capabilities']) {
+    this.capabilities = capabilities;
+  }
 
   public registerOnFinishCallback(callback: Function) {
     this.callbacks.push(callback);
