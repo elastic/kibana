@@ -157,9 +157,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         body.aggs.byTime.aggs = {};
 
         const metricAgg: any = {
-          [metricFunction]: {
-            field: metricFieldName,
-          },
+          [metricFunction]: {},
         };
         if (scriptFields !== undefined && scriptFields[metricFieldName] !== undefined) {
           metricAgg[metricFunction].script = scriptFields[metricFieldName].script;
