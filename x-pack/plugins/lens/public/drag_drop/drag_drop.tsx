@@ -255,7 +255,7 @@ const DragDropInner = React.memo(function DragDropInner(
     }
   };
 
-  const isReorderDragging = dragging && itemsInGroup?.includes(dragging.id);
+  const isReorderDragging = !!(dragging && itemsInGroup?.includes(dragging.id));
 
   if (
     draggable &&
