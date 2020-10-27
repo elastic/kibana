@@ -10,11 +10,6 @@ import {
   EuiTitle,
   EuiFlyoutHeader,
   EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
   EuiFlyoutBody,
   EuiPortal,
   EuiBetaBadge,
@@ -29,6 +24,8 @@ import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
 import { ConfirmAlertSave } from './confirm_alert_save';
 import { hasShowActionsCapability } from '../../lib/capabilities';
+import AlertAddFooter from './alert_add_footer';
+import { HealthContextProvider } from '../../context/health_context';
 
 interface AlertAddProps {
   consumer: string;
@@ -183,54 +180,37 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
-          <EuiFlyoutBody>
-            <AlertForm
-              alert={alert}
-              dispatch={dispatch}
-              errors={errors}
-              canChangeTrigger={canChangeTrigger}
-              operation={i18n.translate('xpack.triggersActionsUI.sections.alertAdd.operationName', {
-                defaultMessage: 'create',
-              })}
+        <HealthContextProvider>
+          <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={false}>
+            <EuiFlyoutBody>
+              <AlertForm
+                alert={alert}
+                dispatch={dispatch}
+                errors={errors}
+                canChangeTrigger={canChangeTrigger}
+                operation={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertAdd.operationName',
+                  {
+                    defaultMessage: 'create',
+                  }
+                )}
+              />
+            </EuiFlyoutBody>
+            <AlertAddFooter
+              isSaving={isSaving}
+              hasErrors={hasErrors || hasActionErrors}
+              onSave={async () => {
+                setIsSaving(true);
+                if (shouldConfirmSave) {
+                  setIsConfirmAlertSaveModalOpen(true);
+                } else {
+                  await saveAlertAndCloseFlyout();
+                }
+              }}
+              onCancel={closeFlyout}
             />
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
-                  {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
-                    defaultMessage: 'Cancel',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="secondary"
-                  data-test-subj="saveAlertButton"
-                  type="submit"
-                  iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
-                  isLoading={isSaving}
-                  onClick={async () => {
-                    setIsSaving(true);
-                    if (shouldConfirmSave) {
-                      setIsConfirmAlertSaveModalOpen(true);
-                    } else {
-                      await saveAlertAndCloseFlyout();
-                    }
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </HealthCheck>
+          </HealthCheck>
+        </HealthContextProvider>
         {isConfirmAlertSaveModalOpen && (
           <ConfirmAlertSave
             onConfirm={async () => {
