@@ -24,7 +24,6 @@ describe('WebhookActionConnectorFields renders', () => {
         method: 'PUT',
         url: 'http:\\test',
         headers: { 'content-type': 'text' },
-        hasAuth: true,
       },
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(
@@ -51,9 +50,7 @@ describe('WebhookActionConnectorFields renders', () => {
       secrets: {},
       actionTypeId: '.webhook',
       isPreconfigured: false,
-      config: {
-        hasAuth: true,
-      },
+      config: {},
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(
       <WebhookActionConnectorFields
@@ -83,7 +80,6 @@ describe('WebhookActionConnectorFields renders', () => {
         method: 'PUT',
         url: 'http:\\test',
         headers: { 'content-type': 'text' },
-        hasAuth: true,
       },
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(

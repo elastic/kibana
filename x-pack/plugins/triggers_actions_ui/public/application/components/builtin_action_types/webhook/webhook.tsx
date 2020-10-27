@@ -74,42 +74,22 @@ export function getActionType(): ActionTypeModel<
           )
         );
       }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+      if (!action.secrets.user && action.secrets.password) {
         errors.user.push(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthUserNameText',
+            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHostText',
             {
               defaultMessage: 'Username is required.',
             }
           )
         );
       }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        errors.password.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthPasswordText',
-            {
-              defaultMessage: 'Password is required.',
-            }
-          )
-        );
-      }
-      if (action.secrets.user && !action.secrets.password) {
+      if (!action.secrets.password && action.secrets.user) {
         errors.password.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
             {
-              defaultMessage: 'Password is required when username is used.',
-            }
-          )
-        );
-      }
-      if (!action.secrets.user && action.secrets.password) {
-        errors.user.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredUserText',
-            {
-              defaultMessage: 'Username is required when password is used.',
+              defaultMessage: 'Password is required.',
             }
           )
         );
