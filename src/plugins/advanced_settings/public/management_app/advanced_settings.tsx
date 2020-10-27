@@ -21,7 +21,7 @@ import React, { Component } from 'react';
 import { Subscription } from 'rxjs';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
-import { useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
@@ -43,6 +43,7 @@ interface AdvancedSettingsProps {
 
 interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
   queryText: string;
+  setUrlQuery: (query?: string) => void;
 }
 
 interface AdvancedSettingsState {
@@ -176,6 +177,8 @@ export class AdvancedSettingsComponent extends Component<
   }
 
   onQueryChange = ({ query }: { query: Query }) => {
+    this.props.setUrlQuery(query.text);
+
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
@@ -183,6 +186,8 @@ export class AdvancedSettingsComponent extends Component<
   };
 
   clearQuery = () => {
+    this.props.setUrlQuery('');
+
     this.setState({
       query: Query.parse(''),
       footerQueryMatched: false,
@@ -254,10 +259,15 @@ export class AdvancedSettingsComponent extends Component<
 }
 
 export const AdvancedSettings = (props: AdvancedSettingsProps) => {
-  const { query } = useParams<{ query: string }>();
+  const query = useParams<{ query: string }>().query ?? '';
+  const { push } = useHistory();
+  const location = useLocation();
+  const setUrlQuery = (q: string = '') => push({ ...location, pathname: q });
+
   return (
     <AdvancedSettingsComponent
-      queryText={query || ''}
+      queryText={query}
+      setUrlQuery={setUrlQuery}
       enableSaving={props.enableSaving}
       uiSettings={props.uiSettings}
       dockLinks={props.dockLinks}
