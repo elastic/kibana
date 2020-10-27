@@ -8,6 +8,7 @@ import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
+  CommentResponse,
   ConnectorTypes,
 } from '../../../../plugins/case/common/api';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
@@ -27,8 +28,11 @@ export const postCommentReq: { comment: string } = {
   comment: 'This is a cool comment',
 };
 
-export const postCaseResp = (id: string): Partial<CaseResponse> => ({
-  ...postCaseReq,
+export const postCaseResp = (
+  id: string,
+  req: CasePostRequest = postCaseReq
+): Partial<CaseResponse> => ({
+  ...req,
   id,
   comments: [],
   totalComment: 0,
@@ -45,6 +49,16 @@ export const removeServerGeneratedPropertiesFromCase = (
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { closed_at, created_at, updated_at, version, ...rest } = config;
   return rest;
+};
+
+export const removeServerGeneratedPropertiesFromComments = (
+  comments: CommentResponse[]
+): Array<Partial<CommentResponse>> => {
+  return comments.map((comment) => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { created_at, updated_at, version, ...rest } = comment;
+    return rest;
+  });
 };
 
 export const findCasesResp: CasesFindResponse = {
