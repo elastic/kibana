@@ -129,5 +129,36 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     }
   }
 
+  /**
+   * COLD PHASE SERIALIZATION
+   */
+  if (policy.phases.cold) {
+    if (policy.phases.cold.min_age) {
+      policy.phases.cold.min_age = `${policy.phases.cold.min_age}${_meta.cold.minAgeUnit}`;
+    }
+
+    policy.phases.cold.actions = serializeAllocateAction(
+      _meta.cold,
+      policy.phases.cold.actions,
+      originalPolicy?.phases.cold?.actions
+    );
+
+    if (
+      policy.phases.cold.actions.allocate &&
+      !policy.phases.cold.actions.allocate.require &&
+      !isNumber(policy.phases.cold.actions.allocate.number_of_replicas) &&
+      isEmpty(policy.phases.cold.actions.allocate.include) &&
+      isEmpty(policy.phases.cold.actions.allocate.exclude)
+    ) {
+      // remove allocate action if it does not define require or number of nodes
+      // and both include and exclude are empty objects (ES will fail to parse if we don't)
+      delete policy.phases.cold.actions.allocate;
+    }
+
+    if (_meta.cold.freezeEnabled) {
+      policy.phases.cold.actions.freeze = {};
+    }
+  }
+
   return policy;
 };

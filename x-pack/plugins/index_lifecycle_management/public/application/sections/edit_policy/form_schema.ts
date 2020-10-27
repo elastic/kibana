@@ -84,7 +84,7 @@ export const schema: FormSchema<FormInternal> = {
         }),
       },
       minAgeUnit: {
-        defaultValue: 'ms',
+        defaultValue: 'd',
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -248,6 +248,22 @@ export const schema: FormSchema<FormInternal> = {
       },
     },
     cold: {
+      min_age: {
+        defaultValue: '0',
+        validations: [
+          {
+            validator: (arg) =>
+              numberGreaterThanField({
+                than: 0,
+                allowEquality: true,
+                message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
+              })({
+                ...arg,
+                value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
+              }),
+          },
+        ],
+      },
       actions: {
         allocate: {
           number_of_replicas: {

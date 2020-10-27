@@ -9,7 +9,6 @@ import cloneDeep from 'lodash/cloneDeep';
 import { deserializePolicy, legacySerializePolicy } from './policy_serialization';
 import { defaultNewColdPhase, defaultNewDeletePhase } from '../../constants';
 import { DataTierAllocationType } from '../../../../common/types';
-import { coldPhaseInitialization } from './cold_phase';
 
 describe('Policy serialization', () => {
   test('serialize a policy using "default" data allocation', () => {
@@ -18,12 +17,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            cold: {
-              ...defaultNewColdPhase,
-              dataTierAllocationType: 'default',
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -58,12 +51,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            cold: {
-              ...defaultNewColdPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -111,12 +98,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            cold: {
-              ...defaultNewColdPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: '',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -153,12 +134,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            cold: {
-              ...defaultNewColdPhase,
-              dataTierAllocationType: 'none',
-              selectedNodeAttrs: 'ignore:this',
-              phaseEnabled: true,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -227,9 +202,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            cold: {
-              ...defaultNewColdPhase,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
@@ -276,9 +248,6 @@ describe('Policy serialization', () => {
     ).toEqual({
       name: 'test',
       phases: {
-        cold: {
-          ...coldPhaseInitialization,
-        },
         delete: { ...defaultNewDeletePhase },
       },
     });
@@ -290,9 +259,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            cold: {
-              ...defaultNewColdPhase,
-            },
             delete: { ...defaultNewDeletePhase },
           },
         },
