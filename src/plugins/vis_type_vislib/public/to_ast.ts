@@ -69,7 +69,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
     }
   }
 
-  const visConfig = vis.params;
+  const visConfig = { ...vis.params };
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];

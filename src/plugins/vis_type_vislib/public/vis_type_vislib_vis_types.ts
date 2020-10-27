@@ -17,11 +17,22 @@
  * under the License.
  */
 
-export { histogramVisTypeDefinition } from './histogram';
-export { lineVisTypeDefinition } from './line';
+import { histogramVisTypeDefinition } from './histogram';
+import { lineVisTypeDefinition } from './line';
+import { areaVisTypeDefinition } from './area';
+import { heatmapVisTypeDefinition } from './heatmap';
+import { horizontalBarVisTypeDefinition } from './horizontal_bar';
+import { gaugeVisTypeDefinition } from './gauge';
+import { goalVisTypeDefinition } from './goal';
+
 export { pieVisTypeDefinition } from './pie';
-export { areaVisTypeDefinition } from './area';
-export { heatmapVisTypeDefinition } from './heatmap';
-export { horizontalBarVisTypeDefinition } from './horizontal_bar';
-export { gaugeVisTypeDefinition } from './gauge';
-export { goalVisTypeDefinition } from './goal';
+
+export const visLibVisTypeDefinitions = [
+  histogramVisTypeDefinition,
+  lineVisTypeDefinition,
+  areaVisTypeDefinition,
+  heatmapVisTypeDefinition,
+  horizontalBarVisTypeDefinition,
+  gaugeVisTypeDefinition,
+  goalVisTypeDefinition,
+];

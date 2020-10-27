@@ -22,25 +22,23 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 import { IInterpreterRenderHandlers } from '../../expressions/public';
+import { ChartsPluginSetup } from '../../charts/public';
 
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
-import { VislibVisController } from './vis_controller';
+import { createVislibVisController, VislibVisController } from './vis_controller';
+import { VisTypeVislibCoreSetup } from './plugin';
 
 import './index.scss';
 
 type VislibWrapperProps = VislibRenderValue & {
+  core: VisTypeVislibCoreSetup;
+  charts: ChartsPluginSetup;
   handlers: IInterpreterRenderHandlers;
-  controller: VislibVisController;
 };
 
-export const VislibWrapper = ({
-  visData,
-  visConfig,
-  handlers,
-  controller: Controller,
-}: VislibWrapperProps) => {
+const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
-  const visController = useRef<any>(null);
+  const visController = useRef<VislibVisController | null>(null);
 
   const updateChart = useMemo(
     () =>
@@ -54,22 +52,20 @@ export const VislibWrapper = ({
 
   useEffect(() => {
     if (chartDiv.current) {
+      const Controller = createVislibVisController(core, charts);
       visController.current = new Controller(chartDiv.current);
     }
     return () => {
-      visController.current.destroy();
+      visController.current?.destroy();
       visController.current = null;
-      handlers.reload();
     };
-  }, [Controller, chartDiv, handlers]);
+  }, [core, charts, handlers]);
 
   useEffect(updateChart, [updateChart]);
 
   useEffect(() => {
     if (handlers.uiState) {
-      handlers.uiState.on('colorChanged', () => {
-        updateChart();
-      });
+      handlers.uiState.on('colorChanged', updateChart);
     }
   }, [handlers.uiState, updateChart]);
 

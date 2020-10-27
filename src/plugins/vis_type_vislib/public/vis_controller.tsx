@@ -37,7 +37,7 @@ const legendClassName = {
   right: 'vislib--legend-right',
 };
 
-export type VislibVisController = ReturnType<typeof createVislibVisController>;
+export type VislibVisController = InstanceType<ReturnType<typeof createVislibVisController>>;
 
 export const createVislibVisController = (
   core: VisTypeVislibCoreSetup,

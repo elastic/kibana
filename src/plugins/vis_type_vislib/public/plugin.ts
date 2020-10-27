@@ -24,16 +24,7 @@ import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { BaseVisTypeOptions, VisualizationsSetup } from '../../visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
-import {
-  histogramVisTypeDefinition,
-  lineVisTypeDefinition,
-  pieVisTypeDefinition,
-  areaVisTypeDefinition,
-  heatmapVisTypeDefinition,
-  horizontalBarVisTypeDefinition,
-  gaugeVisTypeDefinition,
-  goalVisTypeDefinition,
-} from './vis_type_vislib_vis_types';
+import { visLibVisTypeDefinitions, pieVisTypeDefinition } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
@@ -78,15 +69,7 @@ export class VisTypeVislibPlugin
       expressions.registerRenderer(getVislibVisRenderer(core, charts));
     }
     // Register non-converted types
-    [
-      histogramVisTypeDefinition,
-      lineVisTypeDefinition,
-      areaVisTypeDefinition,
-      heatmapVisTypeDefinition,
-      horizontalBarVisTypeDefinition,
-      gaugeVisTypeDefinition,
-      goalVisTypeDefinition,
-    ].forEach(visualizations.createBaseVisualization);
+    visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
     visualizations.createBaseVisualization(pieVisTypeDefinition);
     expressions.registerRenderer(getVislibVisRenderer(core, charts));
     [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);

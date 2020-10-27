@@ -49,14 +49,12 @@ export const getVislibVisRenderer: (
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(config.visData, config.visType);
-    const { createVislibVisController } = await import('./vis_controller');
-    const Controller = createVislibVisController(core, charts);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
 
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-        <VislibWrapper {...config} controller={Controller} handlers={handlers} />
+        <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
       </VisualizationContainer>,
       domNode
     );
