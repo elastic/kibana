@@ -43,7 +43,7 @@ import {
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from './top_nav_config';
-import { getBreadcrumbs, unsavedChangesWarning } from './get_breadcrumbs';
+import { getBreadcrumbs, unsavedChangesTitle, unsavedChangesWarning } from './get_breadcrumbs';
 import {
   LayerDescriptor,
   MapRefreshConfig,
@@ -138,9 +138,7 @@ export class MapsAppView extends React.Component<Props, State> {
 
     this.props.onAppLeave((actions) => {
       if (this._hasUnsavedChanges()) {
-        if (!window.confirm(unsavedChangesWarning)) {
-          return {} as AppLeaveAction;
-        }
+        return actions.confirm(unsavedChangesWarning, unsavedChangesTitle);
       }
       return actions.default() as AppLeaveAction;
     });
