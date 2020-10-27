@@ -24,7 +24,11 @@ describe('7.10.0', () => {
   test('add hasAuth config property for .email actions', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const action = getMockDataForEmail({});
-    expect(migration710(action, context)).toMatchObject({
+    const migratedAction = migration710(action, context);
+    expect(migratedAction.attributes.config).toEqual({
+      hasAuth: true,
+    });
+    expect(migratedAction).toEqual({
       ...action,
       attributes: {
         ...action.attributes,
@@ -38,7 +42,11 @@ describe('7.10.0', () => {
   test('rename cases configuration object', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const action = getMockData({});
-    expect(migration710(action, context)).toMatchObject({
+    const migratedAction = migration710(action, context);
+    expect(migratedAction.attributes.config).toEqual({
+      incidentConfiguration: { mapping: [] },
+    });
+    expect(migratedAction).toEqual({
       ...action,
       attributes: {
         ...action.attributes,
