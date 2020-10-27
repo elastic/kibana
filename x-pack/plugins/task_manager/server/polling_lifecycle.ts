@@ -9,6 +9,7 @@ import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr } from './lib/result_type';
@@ -21,6 +22,8 @@ import {
   TaskClaim,
   TaskRunRequest,
   asTaskRunRequestEvent,
+  TaskPollingCycle,
+  asTaskPollingCycleEvent,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -48,7 +51,12 @@ export type TaskPollingLifecycleOpts = {
   elasticsearchAndSOAvailability$: Observable<boolean>;
 } & ManagedConfiguration;
 
-export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRunRequest;
+export type TaskLifecycleEvent =
+  | TaskMarkRunning
+  | TaskRun
+  | TaskClaim
+  | TaskRunRequest
+  | TaskPollingCycle;
 
 /**
  * The public interface into the task manager system.
@@ -146,17 +154,23 @@ export class TaskPollingLifecycle {
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable && !this.isStarted) {
         // start polling for work
-        this.pollingSubscription = poller$.subscribe(
-          mapErr((error: PollingError<string>) => {
-            if (error.type === PollingErrorType.RequestCapacityReached) {
-              pipe(
-                error.data,
-                mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
-              );
-            }
-            logger.error(error.message);
-          })
-        );
+        this.pollingSubscription = poller$
+          .pipe(
+            tap(
+              mapErr((error: PollingError<string>) => {
+                if (error.type === PollingErrorType.RequestCapacityReached) {
+                  pipe(
+                    error.data,
+                    mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+                  );
+                }
+                this.logger.error(error.message);
+              })
+            )
+          )
+          .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
+            this.emitEvent(asTaskPollingCycleEvent<string>(event));
+          });
       } else if (!areESAndSOAvailable && this.isStarted) {
         this.pollingSubscription.unsubscribe();
         this.pool.cancelRunningTasks();
