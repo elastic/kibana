@@ -181,10 +181,6 @@ export function ApmIndices() {
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2></h2>
-            </EuiTitle>
-
             <EuiForm>
               {APM_INDEX_LABELS.map(({ configurationName, label }) => {
                 const matchedConfiguration = data.find(
