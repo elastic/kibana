@@ -63,7 +63,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
         notifications.toasts.addSuccess(
           i18n.translate('xpack.ingestManager.deleteAgentPolicy.successSingleNotificationTitle', {
             defaultMessage: "Deleted agent policy '{id}'",
-            values: { id: agentPolicy },
+            values: { id: data.name || data.id },
           })
         );
         if (onSuccessCallback.current) {
