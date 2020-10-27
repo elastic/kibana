@@ -38,6 +38,13 @@ export async function getWebCoreVitals({
         },
       },
       aggs: {
+        coreVitalPages: {
+          filter: {
+            exists: {
+              field: 'transaction.experience',
+            },
+          },
+        },
         lcp: {
           percentiles: {
             field: LCP_FIELD,
@@ -96,8 +103,17 @@ export async function getWebCoreVitals({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { lcp, cls, fid, tbt, fcp, lcpRanks, fidRanks, clsRanks } =
-    response.aggregations ?? {};
+  const {
+    lcp,
+    cls,
+    fid,
+    tbt,
+    fcp,
+    lcpRanks,
+    fidRanks,
+    clsRanks,
+    coreVitalPages,
+  } = response.aggregations ?? {};
 
   const getRanksPercentages = (
     ranks?: Array<{ key: number; value: number }>
@@ -115,6 +131,7 @@ export async function getWebCoreVitals({
   const pkey = percentile.toFixed(1);
 
   return {
+    coreVitalPages: coreVitalPages?.doc_count ?? 0,
     cls: cls?.values[pkey]?.toFixed(3) || null,
     fid: fid?.values[pkey],
     lcp: lcp?.values[pkey],

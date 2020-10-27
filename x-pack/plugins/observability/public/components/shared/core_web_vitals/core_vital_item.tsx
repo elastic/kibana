@@ -34,7 +34,7 @@ export interface Thresholds {
 
 interface Props {
   title: string;
-  value?: string;
+  value?: string | null;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;

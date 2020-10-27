@@ -23,6 +23,7 @@ export interface UXMetrics {
   lcp: number;
   tbt: number;
   fcp: number;
+  coreVitalPages: number;
   lcpRanks: number[];
   fidRanks: number[];
   clsRanks: number[];
@@ -48,6 +49,8 @@ interface Props {
   data?: UXMetrics | null;
   displayServiceName?: boolean;
   serviceName?: string;
+  totalPageViews?: number;
+  displayTrafficMetric?: boolean;
 }
 
 function formatValue(value?: number) {
@@ -57,12 +60,24 @@ function formatValue(value?: number) {
   return formatToSec(value, 'ms');
 }
 
-export function CoreVitals({ data, loading, displayServiceName, serviceName }: Props) {
-  const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
+export function CoreVitals({
+  data,
+  loading,
+  displayServiceName,
+  serviceName,
+  totalPageViews,
+  displayTrafficMetric = false,
+}: Props) {
+  const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks, coreVitalPages } = data || {};
 
   return (
     <>
-      <WebCoreVitalsTitle />
+      <WebCoreVitalsTitle
+        loading={loading}
+        coreVitalPages={coreVitalPages}
+        totalPageViews={totalPageViews}
+        displayTrafficMetric={displayTrafficMetric}
+      />
       <EuiSpacer size="s" />
       {displayServiceName && <ServiceName name={serviceName!} />}
       <EuiSpacer size="s" />
