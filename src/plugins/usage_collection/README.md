@@ -171,7 +171,7 @@ export const myCollector = makeUsageCollector<Usage>({
     },
     some_obj: {
       total: {
-        type: 'number',
+        type: 'long',
       },
     },
     some_array: {
@@ -182,7 +182,7 @@ export const myCollector = makeUsageCollector<Usage>({
       type: 'array',
       items: { 
         total: {
-          type: 'number',
+          type: 'long',
         },
       },   
     },
