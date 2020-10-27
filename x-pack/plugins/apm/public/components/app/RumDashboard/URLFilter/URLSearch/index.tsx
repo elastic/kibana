@@ -101,8 +101,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setCheckedUrls(clickedItems.map((item) => item.url));
   };
 
-  const percTitle =
-    percentile === 50 ? I18LABELS.median : getPercentileLabel(percentile!);
+  const percTitle = getPercentileLabel(percentile!);
 
   const items: UrlOption[] = (data?.items ?? []).map((item) => ({
     label: item.url,

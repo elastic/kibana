@@ -49,11 +49,7 @@ export function UXMetrics() {
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiTitle size="xs">
             <h3>
-              {I18LABELS.metrics} (
-              {percentile === 50
-                ? I18LABELS.median
-                : getPercentileLabel(percentile!)}
-              )
+              {I18LABELS.metrics} ({getPercentileLabel(percentile!)})
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />

@@ -17,7 +17,7 @@ export const I18LABELS = {
     defaultMessage: 'Frontend',
   }),
   pageViews: i18n.translate('xpack.apm.rum.dashboard.pageViews', {
-    defaultMessage: 'Total Page views',
+    defaultMessage: 'Total page views',
   }),
   percPageLoaded: i18n.translate('xpack.apm.rum.dashboard.pagesLoaded.label', {
     defaultMessage: 'Pages loaded',

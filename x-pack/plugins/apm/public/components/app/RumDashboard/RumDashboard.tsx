@@ -37,10 +37,7 @@ export function RumDashboard() {
               <EuiTitle size="xs">
                 <h3>
                   {I18LABELS.pageLoadDuration} (
-                  {percentile === 50
-                    ? I18LABELS.median
-                    : getPercentileLabel(percentile!)}
-                  )
+                  {getPercentileLabel(percentile!)})
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
