@@ -20,7 +20,6 @@ import {
   CaseActionType,
   CaseActionTypeExecutorOptions,
 } from './types';
-import * as i18n from './translations';
 
 import { GetActionTypeParams } from '..';
 
@@ -36,7 +35,7 @@ export function getActionType({
   return {
     id: '.case',
     minimumLicenseRequired: 'platinum',
-    name: i18n.NAME,
+    name: 'Case',
     validate: {
       config: CaseConfigurationSchema,
       params: CaseExecutorParamsSchema,
