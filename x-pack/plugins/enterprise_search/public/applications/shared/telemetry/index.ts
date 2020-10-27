@@ -5,7 +5,6 @@
  */
 
 export { TelemetryLogic } from './telemetry_logic';
-export { sendTelemetry } from './send_telemetry';
 export {
   SendEnterpriseSearchTelemetry,
   SendAppSearchTelemetry,
