@@ -20,6 +20,8 @@ import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CriteriaField } from './index';
+import type { DatafeedOverride } from '../../../../common/types/modules';
+import type { Aggregation } from '../../../../common/types/anomaly_detection_jobs/datafeed';
 
 interface ResultResponse {
   success: boolean;
@@ -70,8 +72,11 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
-      scriptFields: any | undefined
+      dataFeedConfig?: DatafeedOverride
     ): Observable<MetricData> {
+      const scriptFields: any | undefined = dataFeedConfig?.script_fields;
+      const aggFields: Aggregation | undefined = dataFeedConfig?.aggregations;
+
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
       // plus any additional supplied query.
@@ -165,7 +170,22 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         if (metricFunction === 'percentiles') {
           metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
         }
-        body.aggs.byTime.aggs.metric = metricAgg;
+
+        // when the field is an aggregation field, because the field doesn't actually exist in the indices
+        // we need to pass all the sub aggs from the original datafeed config
+        // so that we can access the aggregated field
+        if (typeof aggFields === 'object' && Object.keys(aggFields).length > 0) {
+          // first item under aggregations can be any name, not necessarily 'buckets'
+          const accessor = Object.keys(aggFields)[0];
+          const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
+          if (tempAggs.hasOwnProperty(metricFieldName)) {
+            tempAggs.metric = aggFields[accessor].aggs[metricFieldName];
+            delete tempAggs[metricFieldName];
+          }
+          body.aggs.byTime.aggs = tempAggs;
+        } else {
+          body.aggs.byTime.aggs.metric = metricAgg;
+        }
       }
 
       return mlApiServices.esSearch$({ index, body }).pipe(

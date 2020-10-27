@@ -125,7 +125,8 @@ export const anomalyDataChange = function (
           config.timeField,
           range.min,
           range.max,
-          bucketSpanSeconds * 1000
+          bucketSpanSeconds * 1000,
+          config.datafeedConfig
         )
         .toPromise();
     } else {
