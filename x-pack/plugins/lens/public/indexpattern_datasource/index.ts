@@ -13,7 +13,6 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { Datasource, EditorFrameSetup } from '../types';
-import { formatColumn } from './format_column';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
@@ -34,7 +33,9 @@ export class IndexPatternDatasource {
     { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
-      const { getIndexPatternDatasource, renameColumns } = await import('../async_services');
+      const { getIndexPatternDatasource, renameColumns, formatColumn } = await import(
+        '../async_services'
+      );
       expressions.registerFunction(renameColumns);
       expressions.registerFunction(formatColumn);
       return core.getStartServices().then(([coreStart, { data }]) =>
