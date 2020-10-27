@@ -20,6 +20,10 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   StackMode,
+  RecursivePartial,
+  Theme,
+  VerticalAlignment,
+  HorizontalAlignment,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -210,8 +214,11 @@ export const getXyChartRenderer = (dependencies: {
   },
 });
 
-function mergeThemeWithValueLabelsStyling(theme, valuesLabelMode: string, isHorizontal: boolean) {
-  const VALUE_LABELS_ARE_INSIDE = valuesLabelMode === 'inside';
+function mergeThemeWithValueLabelsStyling(
+  theme: RecursivePartial<Theme>,
+  valuesLabelMode: string = 'hide',
+  isHorizontal: boolean
+) {
   const VALUE_LABELS_FONTSIZE = 15;
 
   if (valuesLabelMode === 'hide') {
@@ -220,13 +227,6 @@ function mergeThemeWithValueLabelsStyling(theme, valuesLabelMode: string, isHori
   return {
     ...theme,
     ...{
-      chartMargins: {
-        ...theme.chartMargins,
-        ...(!VALUE_LABELS_ARE_INSIDE && {
-          top: isHorizontal ? theme.chartMargins?.top : VALUE_LABELS_FONTSIZE,
-          right: isHorizontal ? 1.5 * VALUE_LABELS_FONTSIZE : theme.chartMargins?.right,
-        }),
-      },
       barSeriesStyle: {
         ...theme.barSeriesStyle,
         displayValue: {
@@ -234,11 +234,11 @@ function mergeThemeWithValueLabelsStyling(theme, valuesLabelMode: string, isHori
           fill: { textInverted: true, textBorder: true },
           alignment: isHorizontal
             ? {
-                vertical: 'middle',
+                vertical: VerticalAlignment.Middle,
               }
-            : { horizontal: 'center' },
-          offsetX: isHorizontal ? (VALUE_LABELS_ARE_INSIDE ? 5 : -(2 * VALUE_LABELS_FONTSIZE)) : 0,
-          offsetY: isHorizontal ? 0 : VALUE_LABELS_ARE_INSIDE ? -5 : VALUE_LABELS_FONTSIZE,
+            : { horizontal: HorizontalAlignment.Center },
+          offsetX: isHorizontal ? 10 : 0,
+          offsetY: isHorizontal ? 0 : -5,
         },
       },
     },
@@ -425,12 +425,23 @@ export function XYChart({
     };
     return style;
   };
+  // Based on the XY toPreviewExpression logic
+  const isSuggestionPreview = !legend.isVisible && layers.every(({ hide }) => hide);
+  const shouldShowValueLabels =
+    // No stacked bar charts
+    filteredLayers.every((layer) => !layer.seriesType.includes('stacked')) &&
+    // No histogram charts
+    !isHistogramViz &&
+    // No suggestion charts
+    !isSuggestionPreview;
 
-  const baseThemeWithMaybeValueLabels = mergeThemeWithValueLabelsStyling(
-    chartTheme,
-    valueLabels?.mode || 'hide',
-    shouldRotate
-  );
+  const baseThemeWithMaybeValueLabels = !shouldShowValueLabels
+    ? chartTheme
+    : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels?.mode || 'hide', shouldRotate);
+
+  if (!isSuggestionPreview) {
+    console.log({ shouldShowValueLabels, valueLabels });
+  }
 
   return (
     <Chart>
@@ -646,6 +657,10 @@ export function XYChart({
             });
           }
 
+          const yAxis = yAxesConfiguration.find((axisConfiguration) =>
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+          );
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
@@ -656,9 +671,7 @@ export function XYChart({
             xScaleType: xAccessor ? xScaleType : 'ordinal',
             yScaleType,
             color: () => getSeriesColor(layer, accessor),
-            groupId: yAxesConfiguration.find((axisConfiguration) =>
-              axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
-            )?.groupId,
+            groupId: yAxis?.groupId,
             enableHistogramMode:
               isHistogram &&
               (seriesType.includes('stacked') || !splitAccessor) &&
@@ -732,13 +745,14 @@ export function XYChart({
             case 'bar_horizontal_percentage_stacked':
               const valueLabelsSettings = {
                 displayValueSettings: {
-                  // TODO: workaround for elastic-charts issue with horizontal bar chart and isValueContainedInElement flag
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  // valueFormatter: (d: any): string => associatedAxes?.formatter.convert(d) || '',
-                  showValueLabel: true,
+                  // This format double fixes two issues in elastic-chart
+                  // * when rotating the chart, the formatter is not correctly picked
+                  // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
+                  valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
+                  showValueLabel: shouldShowValueLabels && valueLabels?.mode !== 'hide',
                   isAlternatingValueLabel: false,
-                  isValueContainedInElement: false, // TODO: check inside mode
-                  hideClippedValue: false, // TODO: check inside mode
+                  isValueContainedInElement: true,
+                  hideClippedValue: true,
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;

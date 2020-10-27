@@ -74,6 +74,8 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
   },
 ];
 
+// TODO: inside/outside logic requires some more work on the elastic-chart side
+// as for now limit to a show/hide logic
 const valueLabelsOptions: Array<{
   id: string;
   value: 'hide' | 'inside' | 'outside';
@@ -90,14 +92,7 @@ const valueLabelsOptions: Array<{
     id: `value_labels_inside`,
     value: 'inside',
     label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
-      defaultMessage: 'Inside',
-    }),
-  },
-  {
-    id: `value_labels_outside`,
-    value: 'outside',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.hide', {
-      defaultMessage: 'Outside',
+      defaultMessage: 'Show',
     }),
   },
 ];
@@ -163,16 +158,12 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
-  const IsBarSingleSeries = state?.layers.some(({ seriesType }) =>
+  const IsBarNotStacked = state?.layers.some(({ seriesType }) =>
     ['bar', 'bar_horizontal'].includes(seriesType)
   );
 
-  const isHistogramSeries =
-    IsBarSingleSeries &&
-    state?.layers.every((layer) => {
-      console.log({ state, layer });
-      return false;
-    });
+  // TODO: Check for histograms to enable/disable value labels visibility
+  const isHistogramSeries = IsBarNotStacked && false;
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
@@ -243,9 +234,15 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       : 'show';
 
   const valueLabelsVisibilityMode = state?.valueLabels?.mode || 'hide';
-  const tooltipContentValueLabels = !IsBarSingleSeries
+  const tooltipContentValueLabels = !IsBarNotStacked
     ? valueTooltipContentDisabled.stacked
     : valueTooltipContentDisabled.histogram;
+  // console.log({
+  //   legendMode,
+  //   legend: state?.legend,
+  //   valueLabels: state?.valueLabels,
+  //   valueLabelsVisibilityMode,
+  // });
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
@@ -253,13 +250,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
             tooltipContent={tooltipContentValueLabels}
-            condition={!hasNonBarSeries && !IsBarSingleSeries && !isHistogramSeries}
+            condition={!hasNonBarSeries && !IsBarNotStacked && !isHistogramSeries}
           >
             <ToolbarPopover
               title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
                 defaultMessage: 'Values',
               })}
-              isDisabled={!hasNonBarSeries && !IsBarSingleSeries}
+              isDisabled={!hasNonBarSeries && !IsBarNotStacked}
               type="values"
               groupPosition="left"
               buttonDataTestSubj="lnsMissingValuesButton"
@@ -270,19 +267,22 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                   defaultMessage: 'Display',
                 })}
               >
-                <EuiSuperSelect
+                <EuiButtonGroup
+                  isFullWidth
+                  legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
+                    defaultMessage: 'Display',
+                  })}
                   data-test-subj="lnsValueLabelsDisplay"
-                  disabled={!hasNonBarSeries && !IsBarSingleSeries}
-                  compressed
-                  options={valueLabelsOptions.map(({ value, label }) => ({
-                    value,
-                    inputDisplay: label,
-                  }))}
-                  valueOfSelected={valueLabelsVisibilityMode}
-                  onChange={(value: DisplayValueVisibilityModes) =>
-                    setState({ ...state, valueLabels: { mode: value } })
+                  name="valueLabelsDisplay"
+                  buttonSize="compressed"
+                  options={valueLabelsOptions}
+                  idSelected={
+                    valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!.id
                   }
-                  itemLayoutAlign="top"
+                  onChange={(modeId) => {
+                    const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
+                    setState({ ...state, valueLabels: { mode: newMode } });
+                  }}
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -293,7 +293,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               >
                 <EuiSuperSelect
                   data-test-subj="lnsMissingValuesSelect"
-                  disabled={!hasNonBarSeries && IsBarSingleSeries}
+                  disabled={!hasNonBarSeries && IsBarNotStacked}
                   compressed
                   options={fittingFunctionDefinitions.map(({ id, title, description }) => {
                     return {

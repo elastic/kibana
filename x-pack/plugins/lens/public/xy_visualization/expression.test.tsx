@@ -248,8 +248,8 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
   },
   valueLabels: {
     type: 'lens_xy_valueLabelsConfig',
-    mode: 'hide'
-  }
+    mode: 'hide',
+  },
   axisTitlesVisibilitySettings: {
     type: 'lens_xy_axisTitlesVisibilityConfig',
     x: true,
@@ -1798,6 +1798,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: { type: 'lens_xy_valueLabelsConfig', mode: 'hide' },
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1880,6 +1881,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: { type: 'lens_xy_valueLabelsConfig', mode: 'hide' },
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1949,6 +1951,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        valueLabels: { type: 'lens_xy_valueLabelsConfig', mode: 'hide' },
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
