@@ -70,6 +70,9 @@ function renameCasesConfigurationObject(
 const addHasAuthConfigurationObject = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
+  if (doc.attributes.actionTypeId !== '.email') {
+    return doc;
+  }
   const hasAuth = !!doc.attributes.secrets.user || !!doc.attributes.secrets.password;
   return {
     ...doc,
