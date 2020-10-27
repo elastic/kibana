@@ -285,6 +285,15 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE]: {
+      name: 'Read fields from _source',
+      description: `Disable to retrieve fields via the new <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-fields.html#search-fields"
+        target="_blank" rel="noopener">Fields API</a> in the high-level search service. Keep this setting enabled
+        to continue retrieving fields directly from \`_source\`.`,
+      value: true,
+      category: ['search'],
+      schema: schema.boolean(),
+    },
     [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
