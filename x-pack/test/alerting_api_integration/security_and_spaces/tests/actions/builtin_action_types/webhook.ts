@@ -20,7 +20,6 @@ import {
 const defaultValues: Record<string, any> = {
   headers: null,
   method: 'post',
-  hasAuth: true,
 };
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
