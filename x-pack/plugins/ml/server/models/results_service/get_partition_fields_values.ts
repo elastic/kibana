@@ -11,6 +11,7 @@ import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
 import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
 
 type SearchTerm =
   | {
@@ -140,9 +141,14 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
 
-    const job = jobsResponse.jobs[0];
+    const job: Job = jobsResponse.jobs[0];
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
+    const isAnomalousOnly = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(
+      ([k, v]) => {
+        return !!v?.anomalousOnly;
+      }
+    );
 
     const requestBody = {
       query: {
@@ -160,21 +166,25 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
                 job_id: jobId,
               },
             },
-            {
-              range: {
-                timestamp: {
-                  gte: earliestMs,
-                  lte: latestMs,
-                  format: 'epoch_millis',
-                },
-              },
-            },
+            // Remove the time filter in case model plot is not enabled
+            // and not only anomalous records have been requested.
+            // It includes the records that occurred as anomalies historically
+            ...(!isModelPlotEnabled && !isAnomalousOnly
+              ? [
+                  {
+                    range: {
+                      timestamp: {
+                        gte: earliestMs,
+                        lte: latestMs,
+                        format: 'epoch_millis',
+                      },
+                    },
+                  },
+                ]
+              : []),
             {
               term: {
-                result_type:
-                  isModelPlotEnabled && Object.values(fieldsConfig).every((v) => !v?.anomalousOnly)
-                    ? 'model_plot'
-                    : 'record',
+                result_type: isModelPlotEnabled && !isAnomalousOnly ? 'model_plot' : 'record',
               },
             },
           ],
