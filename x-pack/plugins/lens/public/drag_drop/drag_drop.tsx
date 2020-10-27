@@ -180,6 +180,7 @@ const DragDropInner = React.memo(function DragDropInner(
   } = props;
 
   const isMoveDragging = isDragging && dragType === 'move';
+
   const classes = classNames(
     'lnsDragDrop',
     {
@@ -255,7 +256,16 @@ const DragDropInner = React.memo(function DragDropInner(
     }
   };
 
-  if (draggable && itemsInGroup?.length && itemsInGroup.length > 1 && value?.id && dropTo) {
+  const isReorderDragging = itemsInGroup?.includes(dragging?.id);
+
+  if (
+    draggable &&
+    itemsInGroup?.length &&
+    itemsInGroup.length > 1 &&
+    value?.id &&
+    dropTo &&
+    (!dragging || isReorderDragging)
+  ) {
     const { label } = props as DraggableProps;
     return (
       <ReorderableDragDrop
@@ -267,7 +277,7 @@ const DragDropInner = React.memo(function DragDropInner(
           onDragEnd: dragEnd,
           onDragStart: dragStart,
           dataTestSubj: props['data-test-subj'] || 'lnsDragDrop',
-          isReorderDragging: dragType === 'reorder' && draggable,
+          isReorderDragging,
         }}
         dropProps={{
           onDrop: drop,
