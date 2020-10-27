@@ -18,10 +18,10 @@
  */
 
 import { ConfigDeprecationLogger } from './types';
-import { configDeprecationFactory } from './deprecation_factory';
+import { configDeprecationFactory, copyFromRoot } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
-  const { rename, unused, renameFromRoot, unusedFromRoot, copyFromRoot } = configDeprecationFactory;
+  const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
 
   let deprecationMessages: string[];
   const logger: ConfigDeprecationLogger = (msg) => deprecationMessages.push(msg);

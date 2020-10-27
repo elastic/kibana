@@ -100,7 +100,7 @@ const renameFromRoot = (oldKey: string, newKey: string, silent?: boolean): Confi
   log
 ) => _rename(config, '', log, oldKey, newKey, silent);
 
-const copyFromRoot = (originKey: string, destinationKey: string): ConfigDeprecation => (
+export const copyFromRoot = (originKey: string, destinationKey: string): ConfigDeprecation => (
   config,
   rootPath,
   log
@@ -123,7 +123,6 @@ const getPath = (rootPath: string, subPath: string) =>
 export const configDeprecationFactory: ConfigDeprecationFactory = {
   rename,
   renameFromRoot,
-  copyFromRoot,
   unused,
   unusedFromRoot,
 };

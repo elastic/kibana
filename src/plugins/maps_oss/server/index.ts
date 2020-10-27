@@ -18,12 +18,12 @@
  */
 
 import { PluginConfigDescriptor } from 'kibana/server';
-
+import { copyFromRoot } from '@kbn/config';
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  deprecations: ({ copyFromRoot }) => [copyFromRoot('xpack.maps.enabled', 'maps_oss.enabled')],
+  deprecations: () => [copyFromRoot('xpack.maps.enabled', 'maps_oss.enabled')],
 };
 
 export const plugin = () => ({

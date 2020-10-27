@@ -104,18 +104,6 @@ export interface ConfigDeprecationFactory {
    */
   renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
   /**
-   * Copy a configuration property from the root configuration to another.
-   *
-   * @example
-   * Copy 'originPlugin.key' to 'destinationplugin.key'
-   * ```typescript
-   * const provider: ConfigDeprecationProvider = ({ copyFromRoot }) => [
-   *   copyFromRoot('originPlugin.key', 'destinationplugin.key'),
-   * ]
-   * ```
-   */
-  copyFromRoot(originKey: string, destinationKey: string): ConfigDeprecation;
-  /**
    * Remove a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the unused key was found and deprecation applied.
    *
