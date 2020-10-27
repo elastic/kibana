@@ -8,10 +8,20 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const es = getService('es');
   const testSubjects = getService('testSubjects');
+  const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
 
   describe('dashboard with async search', () => {
+    before(async function () {
+      const { body } = await es.info();
+      if (!body.version.number.includes('SNAPSHOT')) {
+        log.debug('Skipping because this build does not have the required shard_delay agg');
+        this.skip();
+      }
+    });
+
     it('not delayed should load', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.gotoDashboardEditMode('Not Delayed');
