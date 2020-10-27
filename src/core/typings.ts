@@ -17,11 +17,11 @@
  * under the License.
  */
 
-type DeeplyMockedKeys<T> = {
+export type DeeplyMockedKeys<T> = {
   [P in keyof T]: T[P] extends (...args: any[]) => any
     ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
     : DeeplyMockedKeys<T[P]>;
 } &
   T;
 
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+export type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
