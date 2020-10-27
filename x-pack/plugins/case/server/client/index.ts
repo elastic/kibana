@@ -7,7 +7,7 @@
 import { CaseClientFactoryArguments, CaseClient } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
-import { addComment } from './comments/add_comment';
+import { addComment } from './comments/add';
 
 export { CaseClient } from './types';
 

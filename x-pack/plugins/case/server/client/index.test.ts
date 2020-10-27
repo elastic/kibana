@@ -15,11 +15,11 @@ import {
 
 import { create } from './cases/create';
 import { update } from './cases/update';
-import { addComment } from './comments/add_comment';
+import { addComment } from './comments/add';
 
 jest.mock('./cases/create');
 jest.mock('./cases/update');
-jest.mock('./comments/add_comment');
+jest.mock('./comments/add');
 
 const caseService = createCaseServiceMock();
 const caseConfigureService = createConfigureServiceMock();

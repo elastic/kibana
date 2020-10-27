@@ -119,7 +119,8 @@ describe('POST comment', () => {
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
-      })
+      }),
+      true
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
