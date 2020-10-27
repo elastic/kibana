@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, from, Subscription } from 'rxjs';
-import { tap, takeUntil, finalize, catchError, switchMap } from 'rxjs/operators';
+import { throwError, from, Subscription, of, merge } from 'rxjs';
+import { tap, takeUntil, finalize, catchError, concatMap } from 'rxjs/operators';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
@@ -81,15 +81,20 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           return throwError(new AbortError());
         }
       }),
-      switchMap((r) =>
-        !isCompleteResponse(r)
-          ? takePartialSearch(
-              () => this.runSearch({ ...request, id: r.id }, combinedSignal, strategy),
-              isCompleteResponse,
-              pollInterval
-            )
-          : Promise.resolve(r)
-      ),
+      concatMap((r) => {
+        if (isCompleteResponse(r)) {
+          return of(r);
+        }
+
+        return merge(
+          of(r),
+          takePartialSearch(
+            () => this.runSearch({ ...request, id: r.id }, combinedSignal, strategy),
+            isCompleteResponse,
+            pollInterval
+          )
+        );
+      }),
       takeUntil(aborted$),
       catchError((e: any) => {
         // If we haven't received the response to the initial request, including the ID, then

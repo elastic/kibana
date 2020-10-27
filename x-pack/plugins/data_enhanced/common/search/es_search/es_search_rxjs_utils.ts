@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from, of, timer, Observable, EMPTY } from 'rxjs';
-import { first, expand, mergeMap, takeWhile, switchMap } from 'rxjs/operators';
+import { of, interval, Observable } from 'rxjs';
+import { concatMap, takeWhile, switchMap } from 'rxjs/operators';
 import { ApiResponse } from '@elastic/elasticsearch';
 
 import {
@@ -24,29 +24,23 @@ export const takePartialSearch = <TResponse = any>(
   searchMethod: () => Promise<TResponse> | Observable<TResponse>,
   hasRequestCompleted: (r: TResponse) => boolean,
   pollInterval: IAsyncSearchOptions['pollInterval']
-): Observable<TResponse> =>
-  from(searchMethod()).pipe(
-    expand((r) => {
-      if (!hasRequestCompleted(r)) {
-        return timer(pollInterval ?? 1000).pipe(
-          switchMap(() => takePartialSearch(searchMethod, hasRequestCompleted, pollInterval)),
-          first()
-        );
-      }
-      return EMPTY;
-    })
+): Observable<TResponse> => {
+  return interval(pollInterval ?? 1000).pipe(
+    concatMap(() => searchMethod()),
+    takeWhile((r) => !hasRequestCompleted(r), true)
   );
+};
 
 export const doPartialSearch = <SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse>(
   searchMethod: SearchMethod,
   partialSearchMethod: SearchMethod,
   requestId: IKibanaSearchRequest['id'],
   asyncOptions: Record<string, any>,
-  { abortSignal, waitForCompletion, pollInterval }: IAsyncSearchOptions
+  { abortSignal, pollInterval }: IAsyncSearchOptions
 ) => ({ params, options }: DoSearchFnArgs) => {
   const isCompleted = (response: ApiResponse<SearchResponse>) =>
     !(response.body.is_partial && response.body.is_running);
-
+  const waitForCompletion = true;
   const partialSearch = (id: IKibanaSearchRequest['id']) =>
     takePartialSearch<ApiResponse<SearchResponse>>(
       () =>
@@ -65,7 +59,7 @@ export const doPartialSearch = <SearchResponse extends IEsRawSearchResponse = IE
     ? partialSearch(requestId)
     : of({ params, options }).pipe(
         switchMap(doSearch<SearchResponse>(searchMethod, abortSignal)),
-        mergeMap((response) =>
+        concatMap((response) =>
           waitForCompletion && !isCompleted(response)
             ? partialSearch(response.body.id)
             : Promise.resolve(response)
