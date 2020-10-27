@@ -31,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const results = await findResultsWithAPI('no_match');
       expect(results.length).to.be(0);
     });
-    it('return results from the client provider', async () => {
+    // See https://github.com/elastic/kibana/issues/81397
+    it.skip('return results from the client provider', async () => {
       const results = await findResultsWithAPI('client');
       expect(results.length).to.be(2);
       expect(results.map((r) => r.id)).to.eql(['client1', 'client2']);
