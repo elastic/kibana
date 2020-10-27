@@ -24,7 +24,7 @@ import {
   mlNetworkSingleIpNullKqlQuery,
 } from '../urls/ml_conditional_links';
 
-describe('ml conditional links', () => {
+describe.skip('ml conditional links', () => {
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkSingleIpKqlQuery);
     cy.get(KQL_INPUT)
