@@ -20400,7 +20400,6 @@
     "xpack.triggersActionsUI.sections.alertsList.typeFilterLabel": "タイプ",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage": "アクションタイプを読み込めません",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage": "アラートを読み込めません",
-    "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage": "アラートステータス情報を読み込めません",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage": "アラートタイプを読み込めません",
     "xpack.triggersActionsUI.sections.alertsList.viewBunnerButtonLabel": "表示",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton": "Cc を追加",

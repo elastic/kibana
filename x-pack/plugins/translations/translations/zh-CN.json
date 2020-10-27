@@ -20420,7 +20420,6 @@
     "xpack.triggersActionsUI.sections.alertsList.typeFilterLabel": "类型",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage": "无法加载操作类型",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage": "无法加载告警",
-    "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage": "无法加载告警状态信息",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage": "无法加载告警类型",
     "xpack.triggersActionsUI.sections.alertsList.viewBunnerButtonLabel": "查看",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton": "添加抄送收件人",
