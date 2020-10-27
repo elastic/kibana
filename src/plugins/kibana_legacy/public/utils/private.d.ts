@@ -17,4 +17,8 @@
  * under the License.
  */
 
+import { IServiceProvider } from 'angular';
+
 export type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
+
+export function PrivateProvider(): IServiceProvider;
