@@ -27,8 +27,10 @@ image::images/intro-kibana.png[Kibana home page]
 === Ingest data
 
 {kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
-and processes the data, with {kib} sitting on top. From the home page, {kib} provides
-built-in options for collecting data from popular apps or services and uploading a file.
+and processes the data, with {kib} sitting on top.
+
+To start working with your data in Kibana, use one of the many ingest options,
+available from the home page. You can collect data from an app or service or upload a file that contains your data.
 If you're not ready to use your own data, you can add a sample data set
 to give {kib} a test drive.
 
