@@ -11,13 +11,16 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Unusual Network Connection Sequence via RunDLL32",
-  "query": "sequence by process.entity_id with maxspan=2h\n  [process where event.type in (\"start\", \"process_started\") and\n     (process.name == \"rundll32.exe\" or process.pe.original_file_name == \"rundll32.exe\") and\n\n     /* zero arguments excluding the binary itself (and accounting for when the binary may not be logged in args) */\n     ((process.args == \"rundll32.exe\" and process.args_count == 1) or\n      (process.args != \"rundll32.exe\" and process.args_count == 0))]\n\n  [network where event.type == \"connection\" and\n     (process.name == \"rundll32.exe\" or process.pe.original_file_name == \"rundll32.exe\")]\n",
+  "query": "sequence by process.entity_id with maxspan=2h\n  [process where event.type in (\"start\", \"process_started\") and\n                                    /* uncomment once in winlogbeat */\n     (process.name : \"rundll32.exe\" /* or process.pe.original_file_name == \"RUNDLL32.EXE\" */ ) and\n     process.args_count < 2]\n  [network where event.type == \"connection\" and\n                                     /* uncomment once in winlogbeat */\n     (process.name : \"rundll32.exe\" /* or process.pe.original_file_name == \"RUNDLL32.EXE\" */ )]\n",
   "risk_score": 21,
   "rule_id": "2b347f66-6739-4ae3-bd94-195036dde8b3",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
