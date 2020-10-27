@@ -24,7 +24,6 @@ import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { useDebounce } from 'react-use';
 import { IExpressionLoaderParams, ExpressionRenderError } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
@@ -89,13 +88,18 @@ export const ReactExpressionRenderer = ({
     null
   );
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
-  useDebounce(
-    () => {
+  useEffect(() => {
+    if (debounce === undefined) {
+      return;
+    }
+    const handler = setTimeout(() => {
       setDebouncedExpression(expression);
-    },
-    debounce ?? 0,
-    [expression]
-  );
+    }, debounce);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [expression, debounce]);
 
   const activeExpression = debounce !== undefined ? debouncedExpression : expression;
   const waitingForDebounceToComplete = debounce !== undefined && expression !== debouncedExpression;
