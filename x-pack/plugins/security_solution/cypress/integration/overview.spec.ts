@@ -38,6 +38,7 @@ describe('Overview Page', () => {
   describe('with no data', () => {
     before(() => {
       esArchiverUnload('auditbeat');
+      esArchiverLoad('empty_kibana');
       loginAndWaitForPage(OVERVIEW_URL);
     });
 
