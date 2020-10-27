@@ -8,7 +8,6 @@ import { curry } from 'lodash';
 
 import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import { ActionType, ActionTypeExecutorOptions } from '../../../../actions/server';
 import { CasePatchRequest, ConnectorTypes } from '../../../common/api';
 import { createCaseClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
@@ -18,6 +17,8 @@ import {
   ExecutorSubActionCreateParams,
   ExecutorSubActionUpdateParams,
   ExecutorSubActionAddCommentParams,
+  CaseActionType,
+  CaseActionTypeExecutorOptions,
 } from './types';
 import * as i18n from './translations';
 
@@ -31,7 +32,7 @@ export function getActionType({
   caseService,
   caseConfigureService,
   userActionService,
-}: GetActionTypeParams): ActionType<{}, {}, CaseExecutorParams, CaseExecutorResponse | {}> {
+}: GetActionTypeParams): CaseActionType {
   return {
     id: '.case',
     minimumLicenseRequired: 'platinum',
@@ -48,7 +49,7 @@ export function getActionType({
 
 async function executor(
   { logger, caseService, caseConfigureService, userActionService }: GetActionTypeParams,
-  execOptions: ActionTypeExecutorOptions<{}, {}, CaseExecutorParams>
+  execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
   const { actionId, params, services } = execOptions;
   const { subAction, subActionParams } = params as CaseExecutorParams;

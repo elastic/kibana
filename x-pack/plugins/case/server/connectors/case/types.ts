@@ -5,6 +5,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { ActionType, ActionTypeExecutorOptions } from '../../../../actions/server';
 import {
   CaseExecutorParamsSchema,
   ExecutorSubActionCreateParamsSchema,
@@ -24,3 +25,16 @@ export type ExecutorSubActionAddCommentParams = TypeOf<
 
 export type CaseExecutorParams = TypeOf<typeof CaseExecutorParamsSchema>;
 export type CaseExecutorResponse = CaseResponse | CasesResponse;
+
+export type CaseActionType = ActionType<
+  CaseConfiguration,
+  {},
+  CaseExecutorParams,
+  CaseExecutorResponse | {}
+>;
+
+export type CaseActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  CaseConfiguration,
+  {},
+  CaseExecutorParams
+>;
