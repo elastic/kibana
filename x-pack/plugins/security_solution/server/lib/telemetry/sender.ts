@@ -150,7 +150,13 @@ export class TelemetryEventsSender {
       }));
       this.queue = [];
 
-      await this.sendEvents(toSend, telemetryUrl, clusterInfo.cluster_uuid, licenseInfo?.uid);
+      await this.sendEvents(
+        toSend,
+        telemetryUrl,
+        clusterInfo.cluster_uuid,
+        clusterInfo.version?.number,
+        licenseInfo?.uid
+      );
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
       this.queue = [];
@@ -202,6 +208,7 @@ export class TelemetryEventsSender {
     events: unknown[],
     telemetryUrl: string,
     clusterUuid: string,
+    clusterVersionNumber: string | undefined,
     licenseId: string | undefined
   ) {
     // this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
@@ -213,8 +220,8 @@ export class TelemetryEventsSender {
         headers: {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
+          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.10.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
-          'X-Elastic-Telemetry': '1', // TODO: no longer needed?
         },
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);

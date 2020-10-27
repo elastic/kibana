@@ -12,13 +12,9 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "visualizations"
+    "visualizations",
+    "savedObjects"
   ],
   "optionalPlugins": ["home", "share"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "home",
-    "savedObjects",
-    "kibanaReact"
-  ]
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact"]
 }

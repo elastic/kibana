@@ -102,7 +102,7 @@ export class ActionExecutor {
       namespace.namespace
     );
 
-    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
     const actionType = actionTypeRegistry.get(actionTypeId);

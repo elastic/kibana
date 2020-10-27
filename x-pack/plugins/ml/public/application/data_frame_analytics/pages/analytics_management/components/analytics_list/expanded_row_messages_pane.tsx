@@ -12,6 +12,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { JobMessages } from '../../../../../components/job_messages';
 import { JobMessage } from '../../../../../../../common/types/audit_message';
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 interface Props {
   analyticsId: string;
@@ -21,6 +22,7 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const toastNotificationService = useToastNotificationService();
 
   const getMessages = useCallback(async () => {
     try {
@@ -30,6 +32,16 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
       setMessages(messagesResp);
     } catch (error) {
       setIsLoading(false);
+      toastNotificationService.displayErrorToast(
+        error,
+        i18n.translate(
+          'xpack.ml.dfAnalyticsList.analyticsDetails.messagesPane.errorToastMessageTitle',
+          {
+            defaultMessage: 'Error loading job messages',
+          }
+        )
+      );
+
       setErrorMessage(
         i18n.translate('xpack.ml.dfAnalyticsList.analyticsDetails.messagesPane.errorMessage', {
           defaultMessage: 'Messages could not be loaded',

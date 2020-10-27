@@ -58,7 +58,7 @@ interface State {
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
-  return `/${action}${roleName ? `/${roleName}` : ''}`;
+  return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
 export class RolesGridPage extends Component<Props, State> {
@@ -153,6 +153,7 @@ export class RolesGridPage extends Component<Props, State> {
                 toolsRight: this.renderToolsRight(),
                 box: {
                   incremental: true,
+                  'data-test-subj': 'searchRoles',
                 },
                 onChange: (query: Record<string, any>) => {
                   this.setState({

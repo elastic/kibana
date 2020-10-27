@@ -20,7 +20,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-import { getSavedObjectFinder } from '../../saved_objects/public';
+import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
 import {
@@ -47,6 +47,7 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   EmbeddablePanel,
+  SavedObjectEmbeddableInput,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
@@ -56,6 +57,8 @@ import {
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
 import { PersistableState, SerializableState } from '../../kibana_utils/common';
+import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
+import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;
@@ -93,6 +96,16 @@ export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
   EmbeddablePanel: EmbeddablePanelHOC;
   getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
+  getAttributeService: <
+    A extends { title: string },
+    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    },
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  >(
+    type: string,
+    options: AttributeServiceOptions<A>
+  ) => AttributeService<A, V, R>;
 }
 
 export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
@@ -178,6 +191,15 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
+      getAttributeService: (type: string, options) =>
+        new AttributeService(
+          type,
+          showSaveModal,
+          core.i18n.Context,
+          core.notifications.toasts,
+          options,
+          this.getEmbeddableFactory
+        ),
       getStateTransfer: (history?: ScopedHistory) => {
         return history
           ? new EmbeddableStateTransfer(core.application.navigateToApp, history, this.appList)

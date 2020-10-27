@@ -77,6 +77,8 @@ export {
   EmbeddableRendererProps,
 } from './lib';
 
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
+
 export { EnhancementRegistryDefinition } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {

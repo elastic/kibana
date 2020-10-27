@@ -6,6 +6,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
@@ -32,6 +34,9 @@ export const useResultsViewConfig = (jobId: string) => {
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const [indexPatternErrorMessage, setIndexPatternErrorMessage] = useState<undefined | string>(
+    undefined
+  );
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [needsDestIndexPattern, setNeedsDestIndexPattern] = useState<boolean>(false);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
@@ -105,7 +110,11 @@ export const useResultsViewConfig = (jobId: string) => {
               setNeedsDestIndexPattern(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-              indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+              try {
+                indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+              } catch (e) {
+                indexP = undefined;
+              }
             }
 
             if (indexP !== undefined) {
@@ -114,6 +123,16 @@ export const useResultsViewConfig = (jobId: string) => {
               setIndexPattern(indexP);
               setIsInitialized(true);
               setIsLoadingJobConfig(false);
+            } else {
+              setIndexPatternErrorMessage(
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.results.indexPatternsMissingErrorMessage',
+                  {
+                    defaultMessage:
+                      'To view this page, a Kibana index pattern is necessary for either the destination or source index of this analytics job.',
+                  }
+                )
+              );
             }
           } catch (e) {
             setJobCapsServiceErrorMessage(extractErrorMessage(e));
@@ -129,6 +148,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
   return {
     indexPattern,
+    indexPatternErrorMessage,
     isInitialized,
     isLoadingJobConfig,
     jobCapsServiceErrorMessage,

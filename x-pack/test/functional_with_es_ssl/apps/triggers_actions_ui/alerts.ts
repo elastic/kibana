@@ -54,6 +54,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function defineAlert(alertName: string) {
+    await pageObjects.triggersActionsUI.clickCreateAlertButton();
+    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.click('.index-threshold-SelectOption');
+    await testSubjects.click('selectIndexExpression');
+    const comboBox = await find.byCssSelector('#indexSelectSearchBox');
+    await comboBox.click();
+    await comboBox.type('k');
+    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
+    await filterSelectItem.click();
+    await testSubjects.click('thresholdAlertTimeFieldSelect');
+    await retry.try(async () => {
+      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
+      expect(fieldOptions[1]).not.to.be(undefined);
+      await fieldOptions[1].click();
+    });
+    await testSubjects.click('closePopover');
+    // need this two out of popup clicks to close them
+    const nameInput = await testSubjects.find('alertNameInput');
+    await nameInput.click();
+  }
+
   describe('alerts', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
@@ -62,25 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
-      await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('alertNameInput', alertName);
-      await testSubjects.click('.index-threshold-SelectOption');
-      await testSubjects.click('selectIndexExpression');
-      const comboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await comboBox.click();
-      await comboBox.type('k');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
-      await testSubjects.click('thresholdAlertTimeFieldSelect');
-      await retry.try(async () => {
-        const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
-        expect(fieldOptions[1]).not.to.be(undefined);
-        await fieldOptions[1].click();
-      });
-      await testSubjects.click('closePopover');
-      // need this two out of popup clicks to close them
-      const nameInput = await testSubjects.find('alertNameInput');
-      await nameInput.click();
+      await defineAlert(alertName);
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
@@ -106,7 +110,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Saved '${alertName}'`);
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterSave).to.eql([
+        {
+          name: alertName,
+          tagsText: '',
+          alertType: 'Index threshold',
+          interval: '1m',
+        },
+      ]);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
+    it('should show save confirmation before creating alert with no actions', async () => {
+      const alertName = generateUniqueKey();
+      await defineAlert(alertName);
+
+      await testSubjects.click('saveAlertButton');
+      await testSubjects.existOrFail('confirmAlertSaveModal');
+      await testSubjects.click('confirmAlertSaveModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmAlertSaveModal');
+      await find.existsByCssSelector('[data-test-subj="saveAlertButton"]:not(disabled)');
+
+      await testSubjects.click('saveAlertButton');
+      await testSubjects.existOrFail('confirmAlertSaveModal');
+      await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('confirmAlertSaveModal');
+
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([
@@ -385,11 +422,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const namePrefix = generateUniqueKey();
       let count = 0;
       const createdAlertsFirstPage = await Promise.all(
-        times(10, () => createAlert({ name: `${namePrefix}-0${count++}` }))
-      );
-
-      const createdAlertsSecondPage = await Promise.all(
-        times(2, () => createAlert({ name: `${namePrefix}-1${count++}` }))
+        times(2, () => createAlert({ name: `${namePrefix}-0${count++}` }))
       );
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
@@ -405,18 +438,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      await retry.try(async () => {
+      await retry.tryForTime(30000, async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 10 alerts');
+        expect(toastTitle).to.eql('Deleted 2 alerts');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterDelete).to.have.length(2);
-      expect(searchResultsAfterDelete[0].name).to.eql(createdAlertsSecondPage[0].name);
-      expect(searchResultsAfterDelete[1].name).to.eql(createdAlertsSecondPage[1].name);
-
-      await deleteAlerts([createdAlertsSecondPage[0].id, createdAlertsSecondPage[1].id]);
+      expect(searchResultsAfterDelete).to.have.length(0);
     });
   });
 };

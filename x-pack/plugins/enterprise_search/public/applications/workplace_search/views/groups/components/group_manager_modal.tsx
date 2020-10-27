@@ -139,7 +139,7 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleSelectAll}>
+            <EuiButtonEmpty data-test-subj="SelectAllGroups" onClick={handleSelectAll}>
               {i18n.translate(
                 'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSelectAllToggle',
                 {
@@ -152,7 +152,9 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handleClose}>{CANCEL_BUTTON_TEXT}</EuiButtonEmpty>
+                <EuiButtonEmpty data-test-subj="CloseGroupsModal" onClick={handleClose}>
+                  {CANCEL_BUTTON_TEXT}
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton isDisabled={false} onClick={saveItems} fill>

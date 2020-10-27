@@ -23,8 +23,8 @@ import {
   IndexPattern,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
-  expandShorthand,
 } from '../../../../data/public';
+import { expandShorthand } from './field_mapping';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given

@@ -32,4 +32,8 @@
 .mlDataFrameAnalyticsClassification__dataGridMinWidth {
   min-width: 480px;
   width: 100%;
+
+  .euiDataGridRowCell--boolean {
+    text-transform: none;
+  }
 }

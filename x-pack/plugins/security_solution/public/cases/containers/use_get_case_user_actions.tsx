@@ -12,7 +12,7 @@ import { errorToToaster, useStateToaster } from '../../common/components/toaster
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
 import { getCaseUserActions } from './api';
 import * as i18n from './translations';
-import { CaseExternalService, CaseUserActions, ElasticUser } from './types';
+import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
 
 export interface CaseService extends CaseExternalService {
@@ -51,27 +51,65 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
 const getExternalService = (value: string): CaseExternalService | null =>
   convertToCamelCase<CaseFullExternalService, CaseExternalService>(parseString(`${value}`));
 
-const connectorHasChangedFields = (action: CaseUserActions, connectorId: string): boolean => {
-  if (action.action !== 'update' || action.actionField[0] !== 'connector') {
+const groupConnectorFields = (
+  userActions: CaseUserActions[]
+): Record<string, Array<CaseConnector['fields']>> =>
+  userActions.reduce((acc, mua) => {
+    if (mua.actionField[0] !== 'connector') {
+      return acc;
+    }
+
+    const oldValue = parseString(`${mua.oldValue}`);
+    const newValue = parseString(`${mua.newValue}`);
+
+    if (oldValue == null || newValue == null) {
+      return acc;
+    }
+
+    return {
+      ...acc,
+      [oldValue.id]: [
+        ...(acc[oldValue.id] || []),
+        ...(oldValue.id === newValue.id ? [oldValue.fields, newValue.fields] : [oldValue.fields]),
+      ],
+      [newValue.id]: [
+        ...(acc[newValue.id] || []),
+        ...(oldValue.id === newValue.id ? [oldValue.fields, newValue.fields] : [newValue.fields]),
+      ],
+    };
+  }, {} as Record<string, Array<CaseConnector['fields']>>);
+
+const connectorHasChangedFields = ({
+  connectorFieldsBeforePush,
+  connectorFieldsAfterPush,
+  connectorId,
+}: {
+  connectorFieldsBeforePush: Record<string, Array<CaseConnector['fields']>> | null;
+  connectorFieldsAfterPush: Record<string, Array<CaseConnector['fields']>> | null;
+  connectorId: string;
+}): boolean => {
+  if (connectorFieldsAfterPush == null || connectorFieldsAfterPush[connectorId] == null) {
     return false;
   }
 
-  const oldValue = parseString(`${action.oldValue}`);
-  const newValue = parseString(`${action.newValue}`);
+  const fieldsAfterPush = connectorFieldsAfterPush[connectorId];
 
-  if (oldValue == null || newValue == null) {
-    return false;
+  if (connectorFieldsBeforePush != null && connectorFieldsBeforePush[connectorId] != null) {
+    const fieldsBeforePush = connectorFieldsBeforePush[connectorId];
+    return !deepEqual(
+      fieldsBeforePush[fieldsBeforePush.length - 1],
+      fieldsAfterPush[fieldsAfterPush.length - 1]
+    );
   }
 
-  if (oldValue.id !== connectorId || newValue.id !== connectorId) {
-    return false;
+  if (fieldsAfterPush.length >= 2) {
+    return !deepEqual(
+      fieldsAfterPush[fieldsAfterPush.length - 2],
+      fieldsAfterPush[fieldsAfterPush.length - 1]
+    );
   }
 
-  if (oldValue.id !== newValue.id) {
-    return false;
-  }
-
-  return !deepEqual(oldValue.fields, newValue.fields);
+  return false;
 };
 
 interface CommentsAndIndex {
@@ -86,22 +124,40 @@ export const getPushedInfo = (
   caseServices: CaseServices;
   hasDataToPush: boolean;
 } => {
-  const hasDataToPushForConnector = (connectorId: string) => {
-    const userActionsForPushLessServiceUpdates = caseUserActions.filter((mua) => {
-      if (mua.action !== 'push-to-service') {
-        if (mua.action === 'update' && mua.actionField[0] === 'connector') {
-          return connectorHasChangedFields(mua, connectorId);
-        } else {
-          return true;
-        }
-      } else {
-        return connectorId === getExternalService(`${mua.newValue}`)?.connectorId;
-      }
+  const hasDataToPushForConnector = (connectorId: string): boolean => {
+    const caseUserActionsReversed = [...caseUserActions].reverse();
+    const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
+      (mua) =>
+        mua.action === 'push-to-service' &&
+        getExternalService(`${mua.newValue}`)?.connectorId === connectorId
+    );
+
+    if (lastPushOfConnectorReversedIndex === -1) {
+      return true;
+    }
+
+    const lastPushOfConnectorIndex =
+      caseUserActionsReversed.length - lastPushOfConnectorReversedIndex - 1;
+
+    const actionsBeforePush = caseUserActions.slice(0, lastPushOfConnectorIndex);
+    const actionsAfterPush = caseUserActions.slice(
+      lastPushOfConnectorIndex + 1,
+      caseUserActionsReversed.length
+    );
+
+    const connectorFieldsBeforePush = groupConnectorFields(actionsBeforePush);
+    const connectorFieldsAfterPush = groupConnectorFields(actionsAfterPush);
+
+    const connectorHasChanged = connectorHasChangedFields({
+      connectorFieldsBeforePush,
+      connectorFieldsAfterPush,
+      connectorId,
     });
 
     return (
-      userActionsForPushLessServiceUpdates[userActionsForPushLessServiceUpdates.length - 1]
-        .action !== 'push-to-service'
+      actionsAfterPush.some(
+        (mua) => mua.actionField[0] !== 'connector' && mua.action !== 'push-to-service'
+      ) || connectorHasChanged
     );
   };
 

@@ -100,7 +100,7 @@ export function registerTelemetryOptInRoutes({
         const optInStatusUrl = config.optInStatusUrl;
         sendTelemetryOptInStatus(
           telemetryCollectionManager,
-          { optInStatusUrl, newOptInStatus },
+          { optInStatusUrl, newOptInStatus, currentKibanaVersion },
           statsGetterConfig
         ).catch((err) => {
           // The server is likely behind a firewall and can't reach the remote service

@@ -29,7 +29,7 @@ import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 import { Ecs } from '../../../../../common/ecs';
-import { AddExceptionModal as AddExceptionModalComponent } from '../../../../common/components/exceptions/add_exception_modal';
+import { AddExceptionModal } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
 import {
@@ -45,6 +45,7 @@ interface AlertContextMenuProps {
   disabled: boolean;
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   timelineId: string;
 }
 
@@ -52,6 +53,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   disabled,
   ecsRowData,
   refetch,
+  onRuleChange,
   timelineId,
 }) => {
   const dispatch = useDispatch();
@@ -378,7 +380,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         </EventsTdContent>
       </EventsTd>
       {exceptionModalType != null && ruleId != null && ecsRowData != null && (
-        <AddExceptionModalComponent
+        <AddExceptionModal
           ruleName={ruleName}
           ruleId={ruleId}
           ruleIndices={ruleIndices}
@@ -387,6 +389,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
           alertStatus={alertStatus}
+          onRuleChange={onRuleChange}
         />
       )}
     </>

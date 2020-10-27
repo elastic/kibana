@@ -180,7 +180,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                 size="xl"
                                 type="alert"
                               >
-                                <div
+                                <span
                                   data-euiicon-type="alert"
                                   size="xl"
                                 />
@@ -536,7 +536,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                 size="xl"
                                 type="alert"
                               >
-                                <div
+                                <span
                                   data-euiicon-type="alert"
                                   size="xl"
                                 />
@@ -892,7 +892,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                 size="xl"
                                 type="alert"
                               >
-                                <div
+                                <span
                                   data-euiicon-type="alert"
                                   size="xl"
                                 />

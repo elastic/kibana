@@ -24,7 +24,7 @@ import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray, tap, filter } from 'rxjs/operators';
+import { tap, filter } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog } from '@kbn/dev-utils';
 import {
@@ -34,6 +34,8 @@ import {
   logOptimizerState,
   readLimits,
 } from '@kbn/optimizer';
+
+import { allValuesFrom } from '../common';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
@@ -83,13 +85,12 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(config).toMatchSnapshot('OptimizerConfig');
 
-  const msgs = await runOptimizer(config)
-    .pipe(
+  const msgs = await allValuesFrom(
+    runOptimizer(config).pipe(
       logOptimizerState(log, config),
-      filter((x) => x.event?.type !== 'worker stdio'),
-      toArray()
+      filter((x) => x.event?.type !== 'worker stdio')
     )
-    .toPromise();
+  );
 
   const assert = (statement: string, truth: boolean, altStates?: OptimizerUpdate[]) => {
     if (!truth) {
@@ -208,17 +209,16 @@ it('uses cache on second run and exist cleanly', async () => {
     dist: false,
   });
 
-  const msgs = await runOptimizer(config)
-    .pipe(
+  const msgs = await allValuesFrom(
+    runOptimizer(config).pipe(
       tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
           console.log('worker', state.event.stream, state.event.line);
         }
-      }),
-      toArray()
+      })
     )
-    .toPromise();
+  );
 
   expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
     Array [
@@ -240,7 +240,7 @@ it('prepares assets for distribution', async () => {
     dist: true,
   });
 
-  await runOptimizer(config).pipe(logOptimizerState(log, config), toArray()).toPromise();
+  await allValuesFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(

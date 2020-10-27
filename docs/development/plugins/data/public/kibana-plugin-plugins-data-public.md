@@ -59,7 +59,6 @@
 |  [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) | Data plugin prewired UI components |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
-|  [FieldMappingSpec](./kibana-plugin-plugins-data-public.fieldmappingspec.md) |  |
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
@@ -108,7 +107,6 @@
 |  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-public.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-public.esquery.md) |  |
-|  [expandShorthand](./kibana-plugin-plugins-data-public.expandshorthand.md) |  |
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
@@ -163,7 +161,6 @@
 |  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |
 |  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) | search source interface |
-|  [MappingObject](./kibana-plugin-plugins-data-public.mappingobject.md) |  |
 |  [MatchAllFilter](./kibana-plugin-plugins-data-public.matchallfilter.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-public.parsedinterval.md) |  |
 |  [PhraseFilter](./kibana-plugin-plugins-data-public.phrasefilter.md) |  |

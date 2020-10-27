@@ -26,6 +26,7 @@ export interface Range {
   type: typeof name;
   from: number;
   to: number;
+  label?: string;
 }
 
 export const range: ExpressionTypeDefinition<typeof name, Range> = {
@@ -41,7 +42,7 @@ export const range: ExpressionTypeDefinition<typeof name, Range> = {
   },
   to: {
     render: (value: Range): ExpressionValueRender<{ text: string }> => {
-      const text = `from ${value.from} to ${value.to}`;
+      const text = value?.label || `from ${value.from} to ${value.to}`;
       return {
         type: 'render',
         as: 'text',

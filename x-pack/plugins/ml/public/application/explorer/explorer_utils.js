@@ -198,7 +198,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
     latestMs = bounds.max.valueOf();
     if (selectedCells.times[1] !== undefined) {
       // Subtract 1 ms so search does not include start of next bucket.
-      latestMs = (selectedCells.times[1] + interval) * 1000 - 1;
+      latestMs = selectedCells.times[1] * 1000 - 1;
     }
   }
 

@@ -122,7 +122,7 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
               error={i18n.translate(
                 'xpack.ingestManager.permissionsRequestErrorMessageDescription',
                 {
-                  defaultMessage: 'There was a problem checking Ingest Manager permissions',
+                  defaultMessage: 'There was a problem checking Fleet permissions',
                 }
               )}
             />
@@ -150,13 +150,13 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
                     {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
                       <FormattedMessage
                         id="xpack.ingestManager.permissionDeniedErrorMessage"
-                        defaultMessage="You are not authorized to access Ingest Manager. Ingest Manager requires {roleName} privileges."
+                        defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
                         values={{ roleName: <EuiCode>superuser</EuiCode> }}
                       />
                     ) : (
                       <FormattedMessage
                         id="xpack.ingestManager.securityRequiredErrorMessage"
-                        defaultMessage="You must enable security in Kibana and Elasticsearch to use Ingest Manager."
+                        defaultMessage="You must enable security in Kibana and Elasticsearch to use Fleet."
                       />
                     )}
                   </p>
@@ -176,7 +176,7 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
               title={
                 <FormattedMessage
                   id="xpack.ingestManager.initializationErrorMessageTitle"
-                  defaultMessage="Unable to initialize Ingest Manager"
+                  defaultMessage="Unable to initialize Fleet"
                 />
               }
               error={initializationError}

@@ -41,6 +41,7 @@ import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
+import { useUiSettings } from '../contexts/kibana';
 
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
@@ -159,6 +160,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
+  const isDarkTheme = !!useUiSettings().get('theme:darkMode');
+
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
 
@@ -210,7 +213,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     // Persists container height during loading to prevent page from jumping
     return isLoading
       ? containerHeightRef.current
-      : rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + (showTimeline ? Y_AXIS_HEIGHT : 0);
+      : // TODO update when elastic charts X label will be fixed
+        rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + (true ? Y_AXIS_HEIGHT : 0);
   }, [isLoading, rowsCount, showTimeline]);
 
   useEffect(() => {
@@ -235,67 +239,76 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
   }, [selection, swimlaneData, swimlaneType]);
 
-  const swimLaneConfig: HeatmapSpec['config'] = useMemo(
-    () =>
-      showSwimlane
-        ? {
-            onBrushEnd: (e: HeatmapBrushEvent) => {
-              onCellsSelection({
-                lanes: e.y as string[],
-                times: e.x.map((v) => (v as number) / 1000),
-                type: swimlaneType,
-                viewByFieldName: swimlaneData.fieldName,
-              });
-            },
-            grid: {
-              cellHeight: {
-                min: CELL_HEIGHT,
-                max: CELL_HEIGHT,
-              },
-              stroke: {
-                width: 1,
-                color: '#D3DAE6',
-              },
-            },
-            cell: {
-              maxWidth: 'fill',
-              maxHeight: 'fill',
-              label: {
-                visible: false,
-              },
-              border: {
-                stroke: '#D3DAE6',
-                strokeWidth: 0,
-              },
-            },
-            yAxisLabel: {
-              visible: true,
-              width: 170,
-              // eui color subdued
-              fill: `#6a717d`,
-              padding: 8,
-              formatter: (laneLabel: string) => {
-                return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
-              },
-            },
-            xAxisLabel: {
-              visible: showTimeline,
-              // eui color subdued
-              fill: `#98A2B3`,
-              formatter: (v: number) => {
-                timeBuckets.setInterval(`${swimlaneData.interval}s`);
-                const a = timeBuckets.getScaledDateFormat();
-                return moment(v).format(a);
-              },
-            },
-            brushMask: {
-              fill: 'rgb(247 247 247 / 50%)',
-            },
-            maxLegendHeight: LEGEND_HEIGHT,
-          }
-        : {},
-    [showSwimlane, swimlaneType, swimlaneData?.fieldName]
-  );
+  const swimLaneConfig: HeatmapSpec['config'] = useMemo(() => {
+    if (!showSwimlane) return {};
+
+    return {
+      onBrushEnd: (e: HeatmapBrushEvent) => {
+        onCellsSelection({
+          lanes: e.y as string[],
+          times: e.x.map((v) => (v as number) / 1000),
+          type: swimlaneType,
+          viewByFieldName: swimlaneData.fieldName,
+        });
+      },
+      grid: {
+        cellHeight: {
+          min: CELL_HEIGHT,
+          max: CELL_HEIGHT,
+        },
+        stroke: {
+          width: 1,
+          color: '#D3DAE6',
+        },
+      },
+      cell: {
+        maxWidth: 'fill',
+        maxHeight: 'fill',
+        label: {
+          visible: false,
+        },
+        border: {
+          stroke: '#D3DAE6',
+          strokeWidth: 0,
+        },
+      },
+      yAxisLabel: {
+        visible: true,
+        width: 170,
+        // eui color subdued
+        fill: `#6a717d`,
+        padding: 8,
+        formatter: (laneLabel: string) => {
+          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
+        },
+      },
+      xAxisLabel: {
+        visible: true,
+        // eui color subdued
+        fill: `#98A2B3`,
+        formatter: (v: number) => {
+          timeBuckets.setInterval(`${swimlaneData.interval}s`);
+          const scaledDateFormat = timeBuckets.getScaledDateFormat();
+          return moment(v).format(scaledDateFormat);
+        },
+      },
+      brushMask: {
+        fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+      },
+      brushArea: {
+        stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
+      },
+      maxLegendHeight: LEGEND_HEIGHT,
+      timeZone: 'UTC',
+    };
+  }, [
+    showSwimlane,
+    swimlaneType,
+    swimlaneData?.fieldName,
+    isDarkTheme,
+    timeBuckets,
+    onCellsSelection,
+  ]);
 
   // @ts-ignore
   const onElementClick: ElementClickListener = useCallback(
@@ -310,7 +323,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       };
       onCellsSelection(payload);
     },
-    [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval]
+    [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   );
 
   const tooltipOptions: TooltipSettings = useMemo(

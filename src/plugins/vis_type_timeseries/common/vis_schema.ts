@@ -165,6 +165,7 @@ export const seriesItems = schema.object({
   hide_in_legend: numberIntegerOptional,
   hidden: schema.maybe(schema.boolean()),
   id: stringRequired,
+  ignore_global_filter: numberOptional,
   label: stringOptionalNullable,
   line_width: numberOptionalOrEmptyString,
   metrics: schema.arrayOf(metricsItems),

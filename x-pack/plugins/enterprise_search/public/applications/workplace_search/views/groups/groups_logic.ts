@@ -335,6 +335,9 @@ export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
         flashAPIErrors(e);
       }
     },
+    setActivePage: () => {
+      actions.getSearchResults();
+    },
     openNewGroupModal: () => {
       FlashMessagesLogic.actions.clearFlashMessages();
     },

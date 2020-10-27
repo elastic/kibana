@@ -34,6 +34,7 @@ import { TopClasses } from '../../../../common/types/feature_importance';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
+import './data_grid.scss';
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
 

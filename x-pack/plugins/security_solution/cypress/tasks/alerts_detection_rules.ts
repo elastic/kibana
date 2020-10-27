@@ -27,6 +27,7 @@ import {
   EDIT_RULE_ACTION_BTN,
   NEXT_BTN,
 } from '../screens/alerts_detection_rules';
+import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
@@ -45,6 +46,11 @@ export const editFirstRule = () => {
 export const deleteFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DELETE_RULE_ACTION_BTN).click();
+};
+
+export const deleteRule = () => {
+  cy.get(ALL_ACTIONS).click();
+  cy.get(DELETE_RULE).click();
 };
 
 export const deleteSelectedRules = () => {
