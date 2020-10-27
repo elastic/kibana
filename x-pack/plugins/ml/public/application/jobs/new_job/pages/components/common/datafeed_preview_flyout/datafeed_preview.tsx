@@ -62,15 +62,10 @@ export const DatafeedPreview: FC<{
       try {
         const resp = await mlJobService.searchPreview(combinedJob);
         let data = resp.hits.hits;
-        let aggField = '';
-        if (resp.aggs) aggField = 'aggs';
-        if (resp.aggregations) aggField = 'aggregations';
-
-        if (aggField !== '') {
-          if (Object.keys(resp[aggField]).length > 0) {
-            const accessor = Object.keys(resp[aggField])[0];
-            data = resp[aggField][accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
-          }
+        // the first item under aggregations can be any name
+        if (typeof resp.aggregations === 'object' && Object.keys(resp.aggregations).length > 0) {
+          const accessor = Object.keys(resp.aggregations)[0];
+          data = resp.aggregations[accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
         }
 
         setPreviewJsonString(JSON.stringify(data, null, 2));
