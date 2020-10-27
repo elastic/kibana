@@ -14,11 +14,18 @@ function generateUniqueKey() {
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const alerting = getService('alerting');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
-  const find = getService('find');
   const retry = getService('retry');
+
+  async function deleteAlerts(alertIds: string[]) {
+    alertIds.forEach(async (alertId: string) => {
+      await supertest.delete(`/api/alerts/alert/${alertId}`).set('kbn-xsrf', 'foo').expect(204, '');
+    });
+  }
 
   async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
@@ -40,124 +47,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  async function getAlertsByName(name: string) {
-    const {
-      body: { data: alerts },
-    } = await supertest.get(`/api/alerts/_find?search=${name}&search_fields=name`).expect(200);
-
-    return alerts;
+  async function createFailingAlert(overwrites: Record<string, any> = {}) {
+    const { body: createdAlert } = await supertest
+      .post(`/api/alerts/alert`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        enabled: true,
+        name: generateUniqueKey(),
+        tags: ['foo', 'bar'],
+        alertTypeId: 'test.failing',
+        consumer: 'alerts',
+        schedule: { interval: '30s' },
+        throttle: '1m',
+        actions: [],
+        params: {},
+        ...overwrites,
+      })
+      .expect(200);
+    return createdAlert;
   }
 
-  async function deleteAlerts(alertIds: string[]) {
-    alertIds.forEach(async (alertId: string) => {
-      await supertest.delete(`/api/alerts/alert/${alertId}`).set('kbn-xsrf', 'foo').expect(204, '');
-    });
+  async function refreshAlertsList() {
+    await testSubjects.click('alertsTab');
   }
 
-  async function defineAlert(alertName: string) {
-    await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('alertNameInput', alertName);
-    await testSubjects.click('.index-threshold-SelectOption');
-    await testSubjects.click('selectIndexExpression');
-    const comboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await comboBox.click();
-    await comboBox.type('k');
-    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-    await filterSelectItem.click();
-    await testSubjects.click('thresholdAlertTimeFieldSelect');
-    await retry.try(async () => {
-      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
-      expect(fieldOptions[1]).not.to.be(undefined);
-      await fieldOptions[1].click();
-    });
-    await testSubjects.click('closePopover');
-    // need this two out of popup clicks to close them
-    const nameInput = await testSubjects.find('alertNameInput');
-    await nameInput.click();
-  }
-
-  describe('alerts', function () {
+  describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
-    });
-
-    it('should create an alert', async () => {
-      const alertName = generateUniqueKey();
-      await defineAlert(alertName);
-
-      await testSubjects.click('.slack-ActionTypeSelectOption');
-      await testSubjects.click('addNewActionConnectorButton-.slack');
-      const slackConnectorName = generateUniqueKey();
-      await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
-      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
-      expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
-      await testSubjects.setValue('messageTextArea', 'test message ');
-      await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-0');
-      const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
-      expect(await messageTextArea.getAttribute('value')).to.eql('test message {{alertId}}');
-      await messageTextArea.type(' some additional text ');
-
-      await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-1');
-
-      expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertId}} some additional text {{alertInstanceId}}'
-      );
-
-      await testSubjects.click('saveAlertButton');
-      const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
-      await pageObjects.triggersActionsUI.searchAlerts(alertName);
-      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
-    });
-
-    it('should show save confirmation before creating alert with no actions', async () => {
-      const alertName = generateUniqueKey();
-      await defineAlert(alertName);
-
-      await testSubjects.click('saveAlertButton');
-      await testSubjects.existOrFail('confirmAlertSaveModal');
-      await testSubjects.click('confirmAlertSaveModal > confirmModalCancelButton');
-      await testSubjects.missingOrFail('confirmAlertSaveModal');
-      await find.existsByCssSelector('[data-test-subj="saveAlertButton"]:not(disabled)');
-
-      await testSubjects.click('saveAlertButton');
-      await testSubjects.existOrFail('confirmAlertSaveModal');
-      await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('confirmAlertSaveModal');
-
-      const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
-      await pageObjects.triggersActionsUI.searchAlerts(alertName);
-      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should display alerts in alphabetical order', async () => {
@@ -165,7 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const a = await createAlert({ name: 'b', tags: [uniqueKey] });
       const b = await createAlert({ name: 'c', tags: [uniqueKey] });
       const c = await createAlert({ name: 'a', tags: [uniqueKey] });
-
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(uniqueKey);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -179,6 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should search for alert', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -195,6 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should search for tags', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -210,13 +129,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should display an empty list when search did not return any alerts', async () => {
+      const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(`An Alert That For Sure Doesn't Exist!`);
 
       expect(await pageObjects.triggersActionsUI.isAlertsListDisplayed()).to.eql(true);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should disable single alert', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -235,6 +158,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -259,6 +183,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should mute single alert', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -277,6 +202,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -302,6 +228,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should delete single alert', async () => {
       const firstAlert = await createAlert();
       const secondAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -325,6 +252,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should mute all selection', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -348,6 +276,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should unmute all selection', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -373,6 +302,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should disable all selection', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -396,6 +326,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should enable all selection', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
@@ -425,7 +356,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const createdAlertsFirstPage = await Promise.all(
         times(2, () => createAlert({ name: `${namePrefix}-0${count++}` }))
       );
-
+      await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
 
       for (const createdAlert of createdAlertsFirstPage) {
@@ -447,6 +378,141 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterDelete).to.have.length(0);
+    });
+
+    it('should filter alerts by the status', async () => {
+      const createdAlert = await createAlert();
+      const failinfAlert = await createFailingAlert();
+      // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution statuses
+      await retry.try(async () => {
+        await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.map((item) => item.status).sort()).to.eql(['Error', 'Ok']);
+      });
+      await testSubjects.click('alertStatusFilterButton');
+      await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter
+      await retry.try(async () => {
+        const filterErrorOnlyResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(filterErrorOnlyResults).to.eql([
+          {
+            name: failinfAlert.name,
+            tagsText: 'foo, bar',
+            alertType: 'Test: Failing',
+            interval: '30s',
+            status: 'Error',
+          },
+        ]);
+      });
+
+      await deleteAlerts([createdAlert.id, failinfAlert.id]);
+    });
+
+    it('should display total alerts by status and error banner only when exists alerts with status error', async () => {
+      const createdAlert = await createAlert();
+      await retry.try(async () => {
+        await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults).to.eql([
+          {
+            name: createdAlert.name,
+            tagsText: 'foo, bar',
+            alertType: 'Test: Noop',
+            interval: '1m',
+            status: 'Ok',
+          },
+        ]);
+      });
+
+      const alertsErrorBannerWhenNoErrors = await find.allByCssSelector(
+        '[data-test-subj="alertsErrorBanner"]'
+      );
+      expect(alertsErrorBannerWhenNoErrors).to.have.length(0);
+
+      const failingAlert = await createFailingAlert();
+      await retry.try(async () => {
+        await refreshAlertsList();
+        const alertsErrorBannerExistErrors = await find.allByCssSelector(
+          '[data-test-subj="alertsErrorBanner"]'
+        );
+        expect(alertsErrorBannerExistErrors).to.have.length(1);
+        expect(
+          await (
+            await alertsErrorBannerExistErrors[0].findByCssSelector('.euiCallOutHeader')
+          ).getVisibleText()
+        ).to.equal('Error found in 1 alert.');
+      });
+
+      expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be(
+        'Showing: 2 of 2 alerts.'
+      );
+      expect(await testSubjects.getVisibleText('totalActiveAlertsCount')).to.be('Active: 0');
+      expect(await testSubjects.getVisibleText('totalOkAlertsCount')).to.be('Ok: 1');
+      expect(await testSubjects.getVisibleText('totalErrorAlertsCount')).to.be('Error: 1');
+      expect(await testSubjects.getVisibleText('totalPendingAlertsCount')).to.be('Pending: 0');
+      expect(await testSubjects.getVisibleText('totalUnknownAlertsCount')).to.be('Unknown: 0');
+
+      await deleteAlerts([createdAlert.id, failingAlert.id]);
+    });
+
+    it('should filter alerts by the alert type', async () => {
+      const noopAlert = await createAlert();
+      const failinfAlert = await createFailingAlert();
+      await refreshAlertsList();
+      await testSubjects.click('alertTypeFilterButton');
+      await testSubjects.click('alertTypetest.failingFilterOption');
+
+      await retry.try(async () => {
+        const filterFailingAlertOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filterFailingAlertOnlyResults).to.eql([
+          {
+            name: failinfAlert.name,
+            tagsText: 'foo, bar',
+            alertType: 'Test: Failing',
+            interval: '30s',
+          },
+        ]);
+      });
+
+      await deleteAlerts([noopAlert.id, failinfAlert.id]);
+    });
+
+    it('should filter alerts by the action type', async () => {
+      const noopAlert = await createAlert();
+      const action = await alerting.actions.createAction({
+        name: `slack-${Date.now()}`,
+        actionTypeId: '.slack',
+        config: {},
+        secrets: {
+          webhookUrl: 'https://test',
+        },
+      });
+      const noopAlertWithAction = await createAlert({
+        actions: [
+          {
+            id: action.id,
+            actionTypeId: '.slack',
+            group: 'default',
+            params: { level: 'info', message: 'gfghfhg' },
+          },
+        ],
+      });
+      await refreshAlertsList();
+      await testSubjects.click('actionTypeFilterButton');
+      await testSubjects.click('actionType.slackFilterOption');
+
+      await retry.try(async () => {
+        const filterWithSlackOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filterWithSlackOnlyResults).to.eql([
+          {
+            name: noopAlertWithAction.name,
+            tagsText: 'foo, bar',
+            alertType: 'Test: Noop',
+            interval: '1m',
+          },
+        ]);
+      });
+
+      await deleteAlerts([noopAlertWithAction.id, noopAlert.id]);
     });
   });
 };
