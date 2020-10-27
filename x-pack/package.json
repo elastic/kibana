@@ -258,7 +258,7 @@
     "venn.js": "0.2.20",
     "vinyl-fs": "^3.0.3",
     "whatwg-fetch": "^3.0.0",
-    "xml-crypto": "^1.4.0",
+    "xml-crypto": "^2.0.0",
     "yargs": "^15.4.1"
   },
   "dependencies": {
