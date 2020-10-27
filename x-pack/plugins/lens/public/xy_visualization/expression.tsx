@@ -125,6 +125,10 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    valueLabels: {
+      types: ['lens_xy_valueLabelsConfig'],
+      help: '',
+    },
     tickLabelsVisibilitySettings: {
       types: ['lens_xy_tickLabelsConfig'],
       help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
@@ -206,6 +210,41 @@ export const getXyChartRenderer = (dependencies: {
   },
 });
 
+function mergeThemeWithValueLabelsStyling(theme, valuesLabelMode: string, isHorizontal: boolean) {
+  const VALUE_LABELS_ARE_INSIDE = valuesLabelMode === 'inside';
+  const VALUE_LABELS_FONTSIZE = 15;
+
+  if (valuesLabelMode === 'hide') {
+    return theme;
+  }
+  return {
+    ...theme,
+    ...{
+      chartMargins: {
+        ...theme.chartMargins,
+        ...(!VALUE_LABELS_ARE_INSIDE && {
+          top: isHorizontal ? theme.chartMargins?.top : VALUE_LABELS_FONTSIZE,
+          right: isHorizontal ? 1.5 * VALUE_LABELS_FONTSIZE : theme.chartMargins?.right,
+        }),
+      },
+      barSeriesStyle: {
+        ...theme.barSeriesStyle,
+        displayValue: {
+          fontSize: { min: 5, max: VALUE_LABELS_FONTSIZE },
+          fill: { textInverted: true, textBorder: true },
+          alignment: isHorizontal
+            ? {
+                vertical: 'middle',
+              }
+            : { horizontal: 'center' },
+          offsetX: isHorizontal ? (VALUE_LABELS_ARE_INSIDE ? 5 : -(2 * VALUE_LABELS_FONTSIZE)) : 0,
+          offsetY: isHorizontal ? 0 : VALUE_LABELS_ARE_INSIDE ? -5 : VALUE_LABELS_FONTSIZE,
+        },
+      },
+    },
+  };
+}
+
 function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find((c) => c.id === seriesType)!.icon || 'empty';
 }
@@ -245,7 +284,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -387,6 +426,12 @@ export function XYChart({
     return style;
   };
 
+  const baseThemeWithMaybeValueLabels = mergeThemeWithValueLabelsStyling(
+    chartTheme,
+    valueLabels?.mode || 'hide',
+    shouldRotate
+  );
+
   return (
     <Chart>
       <Settings
@@ -397,7 +442,7 @@ export function XYChart({
         }
         legendPosition={legend.position}
         showLegendExtra={false}
-        theme={chartTheme}
+        theme={baseThemeWithMaybeValueLabels}
         baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
@@ -685,7 +730,18 @@ export function XYChart({
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
             case 'bar_horizontal_percentage_stacked':
-              return <BarSeries key={index} {...seriesProps} />;
+              const valueLabelsSettings = {
+                displayValueSettings: {
+                  // TODO: workaround for elastic-charts issue with horizontal bar chart and isValueContainedInElement flag
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  // valueFormatter: (d: any): string => associatedAxes?.formatter.convert(d) || '',
+                  showValueLabel: true,
+                  isAlternatingValueLabel: false,
+                  isValueContainedInElement: false, // TODO: check inside mode
+                  hideClippedValue: false, // TODO: check inside mode
+                },
+              };
+              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
             case 'area_stacked':
             case 'area_percentage_stacked':
               return (

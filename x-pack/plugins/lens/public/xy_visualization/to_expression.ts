@@ -171,6 +171,20 @@ export const buildExpression = (
               ],
             },
           ],
+          valueLabels: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_valueLabelsConfig',
+                  arguments: {
+                    mode: [state?.valueLabels?.mode ?? 'hide'],
+                  },
+                },
+              ],
+            },
+          ],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 

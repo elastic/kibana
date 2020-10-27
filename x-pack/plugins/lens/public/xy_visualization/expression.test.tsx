@@ -246,6 +246,10 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
+  valueLabels: {
+    type: 'lens_xy_valueLabelsConfig',
+    mode: 'hide'
+  }
   axisTitlesVisibilitySettings: {
     type: 'lens_xy_axisTitlesVisibilityConfig',
     x: true,

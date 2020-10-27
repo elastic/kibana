@@ -38,6 +38,7 @@ import { getAxesConfiguration } from './axes_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
+type DisplayValueVisibilityModes = typeof valueLabelsOptions[number]['value'];
 
 function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
   const newLayers = [...state.layers];
@@ -72,6 +73,45 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
     }),
   },
 ];
+
+const valueLabelsOptions: Array<{
+  id: string;
+  value: 'hide' | 'inside' | 'outside';
+  label: string;
+}> = [
+  {
+    id: `value_labels_hide`,
+    value: 'hide',
+    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
+      defaultMessage: 'Hide',
+    }),
+  },
+  {
+    id: `value_labels_inside`,
+    value: 'inside',
+    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
+      defaultMessage: 'Inside',
+    }),
+  },
+  {
+    id: `value_labels_outside`,
+    value: 'outside',
+    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.hide', {
+      defaultMessage: 'Outside',
+    }),
+  },
+];
+
+const valueTooltipContentDisabled = {
+  stacked: i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+    defaultMessage:
+      'This setting cannot be applied to stacked bar charts. Try other type of charts',
+  }),
+  histogram: i18n.translate('xpack.lens.xyChart.valuesDisabledHelpText', {
+    defaultMessage:
+      'This setting cannot be applied to bar charts having time dimension on the x axis.',
+  }),
+};
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
@@ -122,6 +162,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
+
+  const IsBarSingleSeries = state?.layers.some(({ seriesType }) =>
+    ['bar', 'bar_horizontal'].includes(seriesType)
+  );
+
+  const isHistogramSeries =
+    IsBarSingleSeries &&
+    state?.layers.every((layer) => {
+      console.log({ state, layer });
+      return false;
+    });
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
@@ -190,25 +241,50 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       : !state?.legend.isVisible
       ? 'hide'
       : 'show';
+
+  const valueLabelsVisibilityMode = state?.valueLabels?.mode || 'hide';
+  const tooltipContentValueLabels = !IsBarSingleSeries
+    ? valueTooltipContentDisabled.stacked
+    : valueTooltipContentDisabled.histogram;
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-              defaultMessage: 'This setting only applies to line and area charts.',
-            })}
-            condition={!hasNonBarSeries}
+            tooltipContent={tooltipContentValueLabels}
+            condition={!hasNonBarSeries && !IsBarSingleSeries && !isHistogramSeries}
           >
             <ToolbarPopover
               title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
                 defaultMessage: 'Values',
               })}
-              isDisabled={!hasNonBarSeries}
+              isDisabled={!hasNonBarSeries && !IsBarSingleSeries}
               type="values"
               groupPosition="left"
               buttonDataTestSubj="lnsMissingValuesButton"
             >
+              <EuiFormRow
+                display="columnCompressed"
+                label={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+                  defaultMessage: 'Display',
+                })}
+              >
+                <EuiSuperSelect
+                  data-test-subj="lnsValueLabelsDisplay"
+                  disabled={!hasNonBarSeries && !IsBarSingleSeries}
+                  compressed
+                  options={valueLabelsOptions.map(({ value, label }) => ({
+                    value,
+                    inputDisplay: label,
+                  }))}
+                  valueOfSelected={valueLabelsVisibilityMode}
+                  onChange={(value: DisplayValueVisibilityModes) =>
+                    setState({ ...state, valueLabels: { mode: value } })
+                  }
+                  itemLayoutAlign="top"
+                />
+              </EuiFormRow>
               <EuiFormRow
                 display="columnCompressed"
                 label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
@@ -217,6 +293,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               >
                 <EuiSuperSelect
                   data-test-subj="lnsMissingValuesSelect"
+                  disabled={!hasNonBarSeries && IsBarSingleSeries}
                   compressed
                   options={fittingFunctionDefinitions.map(({ id, title, description }) => {
                     return {

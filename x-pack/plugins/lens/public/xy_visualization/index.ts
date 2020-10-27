@@ -40,6 +40,7 @@ export class XyVisualization {
         yAxisConfig,
         tickLabelsConfig,
         gridlinesConfig,
+        valueLabelsConfig,
         axisTitlesVisibilityConfig,
         layerConfig,
         xyChart,
@@ -47,6 +48,7 @@ export class XyVisualization {
         xyVisualization,
       } = await import('../async_services');
       expressions.registerFunction(() => legendConfig);
+      expressions.registerFunction(() => valueLabelsConfig);
       expressions.registerFunction(() => yAxisConfig);
       expressions.registerFunction(() => tickLabelsConfig);
       expressions.registerFunction(() => gridlinesConfig);
