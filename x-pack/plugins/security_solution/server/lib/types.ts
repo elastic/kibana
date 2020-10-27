@@ -48,21 +48,26 @@ export interface ShardsResponse {
   failures?: ShardError[];
 }
 
-export interface ShardError {
+/**
+ * This type is being very conservative with the partials to not expect anything to
+ * be guaranteed on the type as we don't have regular and proper types of ShardError.
+ * Once we do, remove this type for the regular ShardError type from the elastic library.
+ */
+export type ShardError = Partial<{
   shard: number;
   index: string;
   node: string;
-  reason: {
+  reason: Partial<{
     type: string;
     reason: string;
     index_uuid: string;
     index: string;
-    caused_by: {
+    caused_by: Partial<{
       type: string;
       reason: string;
-    };
-  };
-}
+    }>;
+  }>;
+}>;
 
 export interface SearchResponse<T> {
   took: number;

@@ -28,7 +28,7 @@ import {
   DescribedFormField,
 } from '../';
 
-import { DataTierAllocationField, useRolloverPath } from './shared';
+import { DataTierAllocationFieldLegacy, useRolloverPath } from './shared';
 
 const i18nTexts = {
   freezeLabel: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
@@ -124,7 +124,7 @@ export const ColdPhase: FunctionComponent<Props> = ({
         {phaseData.phaseEnabled ? (
           <Fragment>
             {/* Data tier allocation section */}
-            <DataTierAllocationField
+            <DataTierAllocationFieldLegacy
               description={i18nTexts.dataTierAllocation.description}
               phase={coldProperty}
               setPhaseData={setPhaseData}

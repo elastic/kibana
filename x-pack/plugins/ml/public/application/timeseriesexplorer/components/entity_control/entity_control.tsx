@@ -18,7 +18,6 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiText,
-  EuiToolTip,
   EuiRadioGroup,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -300,9 +299,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     return (
       <EuiFlexItem grow={false}>
         <EuiFormRow label={entity.fieldName} helpText={forceSelection ? selectMessage : null}>
-          <EuiToolTip position="right" content={forceSelection ? selectMessage : null}>
-            {control}
-          </EuiToolTip>
+          {control}
         </EuiFormRow>
       </EuiFlexItem>
     );
