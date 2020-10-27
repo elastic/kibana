@@ -15,6 +15,7 @@ interface JobObject {
   datafeed_id: string | null;
   type: JobType;
 }
+type JobObjectFilter = { [k in keyof JobObject]?: string };
 
 export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
 
@@ -25,36 +26,29 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     datafeedId?: string,
     currentSpaceOnly: boolean = true
   ) {
+    const filterObject: JobObjectFilter = {};
+
+    if (jobType !== undefined) {
+      filterObject.type = jobType;
+    }
+    if (jobId !== undefined) {
+      filterObject.job_id = jobId;
+    } else if (datafeedId !== undefined) {
+      filterObject.datafeed_id = datafeedId;
+    }
+    const { filter, searchFields } = createSavedObjectFilter(filterObject);
+
     const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
-      searchFields: [],
-      search: '',
       perPage: 10000,
       ...(currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
+      searchFields,
+      filter,
     };
-
-    const allJobs = jobId === undefined && datafeedId === undefined;
-
-    if (allJobs) {
-      if (jobType !== undefined) {
-        options.searchFields!.push('type');
-        options.search = jobType;
-      }
-    } else {
-      if (jobId !== undefined) {
-        options.searchFields!.push('job_id');
-        options.search += jobId;
-      } else if (datafeedId !== undefined) {
-        options.searchFields!.push('datafeed_id');
-        options.search += datafeedId;
-      }
-    }
 
     const jobs = await savedObjectsClient.find<JobObject>(options);
 
-    return allJobs === true
-      ? jobs.saved_objects
-      : jobs.saved_objects.filter((j) => j.attributes.type === jobType);
+    return jobs.saved_objects;
   }
 
   async function _createJob(jobType: JobType, jobId: string) {
@@ -276,4 +270,15 @@ export function createError(id: string, key: keyof JobObject) {
     },
     status: 404,
   };
+}
+
+function createSavedObjectFilter(filterObject: JobObjectFilter) {
+  const searchFields: string[] = [];
+  const filter = Object.entries(filterObject)
+    .map(([k, v]) => {
+      searchFields.push(k);
+      return `${ML_SAVED_OBJECT_TYPE}.attributes.${k}: "${v}"`;
+    })
+    .join(' AND ');
+  return { filter, searchFields };
 }
