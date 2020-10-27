@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('task_manager', function taskManagerSuite() {
-    this.tags('ciGroup4');
-    loadTestFile(require.resolve('./task_manager_integration'));
-  });
-}
+export { healthRoute } from './health';
