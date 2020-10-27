@@ -25,8 +25,18 @@ export function getMigrations(
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
+  const migrationWebhookConnectorHasAuth = encryptedSavedObjects.createMigration<
+    RawAction,
+    RawAction
+  >(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      doc.attributes.actionTypeId === '.webhook',
+    pipeMigrations(addHasAuthConfigurationObject)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActions, '7.10.0'),
+    '7.11.0': executeMigrationWithErrorHandling(migrationWebhookConnectorHasAuth, '7.11.0'),
   };
 }
 
