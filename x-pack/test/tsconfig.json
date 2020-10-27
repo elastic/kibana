@@ -27,6 +27,7 @@
     { "path": "../../src/plugins/telemetry/tsconfig.json" },
     { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../../src/plugins/newsfeed/tsconfig.json" },
+    { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "../plugins/task_manager/tsconfig.json"}
   ]
 }
