@@ -164,7 +164,7 @@ function getReferencesFilter(
   }
 }
 
-function getClauseForReference(reference: HasReferenceQueryParams) {
+export function getClauseForReference(reference: HasReferenceQueryParams) {
   return {
     nested: {
       path: 'references',

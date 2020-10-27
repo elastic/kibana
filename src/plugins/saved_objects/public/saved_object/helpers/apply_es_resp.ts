@@ -37,10 +37,10 @@ export async function applyESResp(
   dependencies: SavedObjectKibanaServices
 ) {
   const mapping = expandShorthand(config.mapping ?? {});
-  const esType = config.type || '';
+  const savedObjectType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
   if (typeof resp.found === 'boolean' && !resp.found) {
-    throw new SavedObjectNotFound(esType, savedObject.id || '');
+    throw new SavedObjectNotFound(savedObjectType, savedObject.id || '');
   }
 
   const meta = resp._source.kibanaSavedObjectMeta || {};

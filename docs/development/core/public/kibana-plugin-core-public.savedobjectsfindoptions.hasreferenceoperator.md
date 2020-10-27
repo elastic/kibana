@@ -4,6 +4,8 @@
 
 ## SavedObjectsFindOptions.hasReferenceOperator property
 
+The operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`
+
 <b>Signature:</b>
 
 ```typescript

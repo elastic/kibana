@@ -1059,9 +1059,7 @@ export interface SavedObjectsFindOptions {
     //
     // (undocumented)
     filter?: string | KueryNode;
-    // (undocumented)
     hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
-    // (undocumented)
     hasReferenceOperator?: 'AND' | 'OR';
     // (undocumented)
     namespaces?: string[];

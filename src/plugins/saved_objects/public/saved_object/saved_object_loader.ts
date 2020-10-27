@@ -115,12 +115,16 @@ export class SavedObjectLoader {
    * @param hit
    * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
    */
-  mapSavedObjectApiHits(hit: {
+  mapSavedObjectApiHits({
+    attributes,
+    id,
+    references = [],
+  }: {
     attributes: Record<string, unknown>;
     id: string;
     references?: SavedObjectReference[];
   }) {
-    return this.mapHitSource(hit.attributes, hit.id, hit.references || []);
+    return this.mapHitSource(attributes, id, references);
   }
 
   /**

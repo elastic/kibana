@@ -23,7 +23,7 @@ type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
 import { ALL_NAMESPACES_STRING } from '../utils';
-import { getQueryParams, HasReferenceQueryParams } from './query_params';
+import { getQueryParams, getClauseForReference } from './query_params';
 
 const registry = typeRegistryMock.create();
 
@@ -162,17 +162,6 @@ describe('#getQueryParams', () => {
           return clauses[0].nested?.path === 'references' ?? false;
         });
       };
-
-      const getClauseForReference = ({ id, type }: HasReferenceQueryParams) => ({
-        nested: {
-          path: 'references',
-          query: {
-            bool: {
-              must: [{ term: { 'references.id': id } }, { term: { 'references.type': type } }],
-            },
-          },
-        },
-      });
 
       it('does not include the clause when `hasReference` is not specified', () => {
         const result = getQueryParams({

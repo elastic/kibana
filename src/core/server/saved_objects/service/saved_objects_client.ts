@@ -454,10 +454,6 @@ export class SavedObjectsClient {
 
   /**
    * Updates all objects containing a reference to given {type, id} tuple to remove the said reference.
-   *
-   * @param type
-   * @param id
-   * @param options
    */
   async removeReferencesTo(
     type: string,
