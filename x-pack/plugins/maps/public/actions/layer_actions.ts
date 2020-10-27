@@ -441,7 +441,7 @@ export function clearMissingStyleProperties(layerId: string) {
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = (style as IVectorStyle).getDescriptorWithMissingStylePropsRemoved(
+    } = await (style as IVectorStyle).getDescriptorWithMissingStylePropsRemoved(
       nextFields,
       getMapColors(getState())
     );
