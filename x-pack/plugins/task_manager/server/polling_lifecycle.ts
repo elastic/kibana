@@ -154,23 +154,7 @@ export class TaskPollingLifecycle {
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable && !this.isStarted) {
         // start polling for work
-        this.pollingSubscription = poller$
-          .pipe(
-            tap(
-              mapErr((error: PollingError<string>) => {
-                if (error.type === PollingErrorType.RequestCapacityReached) {
-                  pipe(
-                    error.data,
-                    mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
-                  );
-                }
-                this.logger.error(error.message);
-              })
-            )
-          )
-          .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
-            this.emitEvent(asTaskPollingCycleEvent<string>(event));
-          });
+        this.pollingSubscription = this.subscribeToPoller(poller$);
       } else if (!areESAndSOAvailable && this.isStarted) {
         this.pollingSubscription.unsubscribe();
         this.pool.cancelRunningTasks();
@@ -204,6 +188,26 @@ export class TaskPollingLifecycle {
 
   public get isStarted() {
     return !this.pollingSubscription.closed;
+  }
+
+  private subscribeToPoller(poller$: Observable<Result<FillPoolResult, PollingError<string>>>) {
+    return poller$
+      .pipe(
+        tap(
+          mapErr((error: PollingError<string>) => {
+            if (error.type === PollingErrorType.RequestCapacityReached) {
+              pipe(
+                error.data,
+                mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+              );
+            }
+            this.logger.error(error.message);
+          })
+        )
+      )
+      .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
+        this.emitEvent(asTaskPollingCycleEvent<string>(event));
+      });
   }
 
   private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
