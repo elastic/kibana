@@ -19761,7 +19761,6 @@
     "xpack.transform.stepDefineForm.groupByExistsErrorMessage": "「{aggName}」という名前のグループ分け構成は既に存在します。",
     "xpack.transform.stepDefineForm.groupByLabel": "グループ分けの条件",
     "xpack.transform.stepDefineForm.groupByPlaceholder": "グループ分けの条件フィールドを追加…",
-    "xpack.transform.stepDefineForm.indexPatternHelpText": "このインデックスパターンのオプションのクエリはサポートされていません。サポートされているインデックスフィールドの数は {maxIndexFields} で、このインデックスには {numIndexFields} 個のフィールドがあります。",
     "xpack.transform.stepDefineForm.indexPatternLabel": "インデックスパターン",
     "xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar": "無効なクエリ：{errorMessage}",
     "xpack.transform.stepDefineForm.maxSubAggsLevelsLimitMessage": "フォームで追加できる下位集約の最大レベル数に達しました。別のレベルを追加する場合は、JSON構成を編集してください。",
