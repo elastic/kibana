@@ -401,8 +401,8 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     await eitherAsync(
       result,
-      async ({ runAt }: SuccessfulRunResult) => {
-        if (runAt || this.instance.schedule) {
+      async ({ runAt, schedule }: SuccessfulRunResult) => {
+        if (runAt || schedule || this.instance.schedule) {
           await this.processResultForRecurringTask(result);
         } else {
           await this.processResultWhenDone();

@@ -74,7 +74,7 @@ export type FailedRunResult = SuccessfulRunResult & {
   error: Error;
 };
 
-type RunResult = FailedRunResult | SuccessfulRunResult;
+export type RunResult = FailedRunResult | SuccessfulRunResult;
 
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);

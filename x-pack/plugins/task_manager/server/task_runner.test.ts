@@ -192,6 +192,34 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWithMatch(store.update, { runAt });
   });
 
+  test('reschedules tasks that return a schedule', async () => {
+    const runAt = minutesFromNow(1);
+    const schedule = {
+      interval: '1m',
+    };
+    const { runner, store } = testOpts({
+      instance: {
+        status: TaskStatus.Running,
+        startedAt: new Date(),
+      },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          createTaskRunner: () => ({
+            async run() {
+              return { schedule, state: {} };
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledWithMatch(store.update, { runAt });
+  });
+
   test('tasks that return runAt override the schedule', async () => {
     const runAt = minutesFromNow(_.random(5));
     const { runner, store } = testOpts({
