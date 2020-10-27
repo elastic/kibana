@@ -5,7 +5,8 @@
 .mlJobMapLegend__indexPattern {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: $euiColorVis2;
+  background-color: '#FFFFFF';
+  border: 1px solid $euiColorVis2;
   transform: rotate(45deg);
   display: 'inline-block';
 }
@@ -13,14 +14,25 @@
 .mlJobMapLegend__transform {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: $euiColorVis1;
+  background-color: '#FFFFFF';
+  border: 1px solid $euiColorVis1;
   display: 'inline-block';
 }
 
 .mlJobMapLegend__analytics {
   height: $euiSizeM;
   width: $euiSizeM;
-  background-color: $euiColorVis0;
+  background-color: '#FFFFFF';
+  border: 1px solid $euiColorVis0;
+  border-radius: 50%;
+  display: 'inline-block';
+}
+
+.mlJobMapLegend__inferenceModel {
+  height: $euiSizeM;
+  width: $euiSizeM;
+  background-color: '#FFFFFF';
+  border: 1px solid $euiColorMediumShade;
   border-radius: 50%;
   display: 'inline-block';
 }

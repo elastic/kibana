@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useMlUrlGenerator, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { getViewLinkStatus } from '../action_view/get_view_link_status';
 
 import { mapActionButtonText, MapButton } from './map_button';
 
@@ -30,7 +31,7 @@ export const useMapAction = () => {
     () => ({
       isPrimary: true,
       name: (item: DataFrameAnalyticsListRow) => <MapButton item={item} />,
-      enabled: () => true,
+      enabled: (item: DataFrameAnalyticsListRow) => !getViewLinkStatus(item).disabled,
       description: mapActionButtonText,
       icon: 'graphApp',
       type: 'icon',

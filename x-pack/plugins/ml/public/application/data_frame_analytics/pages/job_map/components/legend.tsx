@@ -46,5 +46,17 @@ export const JobMapLegend: FC = () => (
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <span className="mlJobMapLegend__inferenceModel" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {'inference model'}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   </EuiFlexGroup>
 );

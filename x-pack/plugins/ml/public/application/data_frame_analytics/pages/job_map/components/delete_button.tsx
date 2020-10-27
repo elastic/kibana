@@ -47,7 +47,7 @@ export const DeleteButton: FC<Props> = ({ id, type }) => {
 
   return (
     <EuiButton onClick={onDelete} iconType="trash" color="danger" size="s">
-      {i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.fetchRelatedNodesButton', {
+      {i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.deleteJobButton', {
         defaultMessage: 'Delete job',
       })}
     </EuiButton>

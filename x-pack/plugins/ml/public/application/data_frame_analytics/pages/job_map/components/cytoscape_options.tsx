@@ -6,9 +6,15 @@
 
 import cytoscape from 'cytoscape';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../common/constants/data_frame_analytics';
 import { JOB_MAP_NODE_TYPES } from '../common';
+import classificationJobIcon from './icons/ml_classification_job.svg';
+import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
+import regressionJobIcon from './icons/ml_regression_job.svg';
 
 const lineColor = '#C5CCD7';
+// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
+const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 enum MAP_SHAPES {
   ELLIPSE = 'ellipse',
@@ -30,17 +36,37 @@ function shapeForNode(el: cytoscape.NodeSingular): MAP_SHAPES {
   }
 }
 
-function colorForNode(el: cytoscape.NodeSingular) {
+function iconForNode(el: cytoscape.NodeSingular) {
+  const type = el.data('analysisType');
+
+  switch (type) {
+    case ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION:
+      return outlierDetectionJobIcon;
+    case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
+      return classificationJobIcon;
+    case ANALYSIS_CONFIG_TYPE.REGRESSION:
+      return regressionJobIcon;
+    default:
+      return undefined;
+  }
+}
+
+function borderColorForNode(el: cytoscape.NodeSingular) {
+  if (el.selected()) {
+    return theme.euiColorPrimary;
+  }
+
   const type = el.data('type');
+
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
-      return theme.euiColorVis0;
+      return theme.euiColorSecondary;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return theme.euiColorVis1;
     case JOB_MAP_NODE_TYPES.INDEX_PATTERN:
       return theme.euiColorVis2;
     default:
-      return 'white';
+      return theme.euiColorMediumShade;
   }
 }
 
@@ -54,12 +80,14 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
     {
       selector: 'node',
       style: {
-        'background-color': (el: cytoscape.NodeSingular) => colorForNode(el),
+        'background-color': theme.euiColorGhost,
         'background-height': '60%',
         'background-width': '60%',
-        'border-color': (el: cytoscape.NodeSingular) =>
-          el.selected() ? theme.euiColorPrimary : theme.euiColorMediumShade,
-        'border-width': 2,
+        'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el),
+        'border-style': 'solid',
+        // @ts-ignore
+        'background-image': isIE11 ? undefined : (el: cytoscape.NodeSingular) => iconForNode(el),
+        'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 2 : 1),
         // @ts-ignore
         color: theme.textColors.default,
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
