@@ -22,17 +22,24 @@ type SearchTerm =
 /**
  * Gets an object for aggregation query to retrieve field name and values.
  * @param fieldType - Field type
+ * @param isModelPlotSearch
  * @param query - Optional query string for partition value
  * @param fieldConfig - Optional config for filtering and sorting
  * @returns {Object}
  */
-function getFieldAgg(fieldType: PartitionFieldsType, query?: string, fieldConfig?: FieldConfig) {
+function getFieldAgg(
+  fieldType: PartitionFieldsType,
+  isModelPlotSearch: boolean,
+  query?: string,
+  fieldConfig?: FieldConfig
+) {
   const AGG_SIZE = 100;
 
   const fieldNameKey = `${fieldType}_name`;
   const fieldValueKey = `${fieldType}_value`;
 
-  const sortByField = fieldConfig?.sort?.by === 'name' ? '_key' : 'anomaly_score';
+  const sortByField =
+    fieldConfig?.sort?.by === 'name' || isModelPlotSearch ? '_key' : 'anomaly_score';
 
   return {
     [fieldNameKey]: {
@@ -149,6 +156,7 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
         return !!v?.anomalousOnly;
       }
     );
+    const isModelPlotSearch = !!(isModelPlotEnabled && !isAnomalousOnly);
 
     const requestBody = {
       query: {
@@ -184,7 +192,7 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
               : []),
             {
               term: {
-                result_type: isModelPlotEnabled && !isAnomalousOnly ? 'model_plot' : 'record',
+                result_type: isModelPlotSearch ? 'model_plot' : 'record',
               },
             },
           ],
@@ -194,7 +202,7 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
         ...PARTITION_FIELDS.reduce((acc, key) => {
           return {
             ...acc,
-            ...getFieldAgg(key, searchTerm[key], fieldsConfig[key]),
+            ...getFieldAgg(key, isModelPlotSearch, searchTerm[key], fieldsConfig[key]),
           };
         }, {}),
       },

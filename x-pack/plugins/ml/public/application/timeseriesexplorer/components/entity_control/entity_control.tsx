@@ -23,10 +23,10 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiFlexGroup,
+  EuiRadioGroupOption,
 } from '@elastic/eui';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
-import { PartitionFieldConfig } from '../../../../../common/types/storage';
-import { DeepPartial } from '../../../../../common/types/common';
+import { UiPartitionFieldConfig } from '../series_controls/series_controls';
 
 export interface Entity {
   fieldName: string;
@@ -47,8 +47,8 @@ export interface EntityControlProps {
   entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
-  config: PartitionFieldConfig;
-  onConfigChange: (fieldType: EntityFieldType, config: DeepPartial<PartitionFieldConfig>) => void;
+  config: UiPartitionFieldConfig;
+  onConfigChange: (fieldType: EntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
   forceSelection: boolean;
   options: Array<EuiComboBoxOptionOption<string>>;
   isModelPlotEnabled: boolean;
@@ -141,22 +141,25 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     return label === EMPTY_FIELD_VALUE_LABEL ? <i>{label}</i> : label;
   };
 
-  private readonly sortOptions = [
-    {
-      id: 'anomaly_score',
-      label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByScoreLabel', {
-        defaultMessage: 'Anomaly score',
-      }),
-    },
-    {
-      id: 'name',
-      label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByNameLabel', {
-        defaultMessage: 'Name',
-      }),
-    },
-  ];
+  getSortOptions = (): EuiRadioGroupOption[] => {
+    return [
+      {
+        id: 'anomaly_score',
+        label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByScoreLabel', {
+          defaultMessage: 'Anomaly score',
+        }),
+        disabled: !this.props.config?.anomalousOnly && this.props.isModelPlotEnabled,
+      },
+      {
+        id: 'name',
+        label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByNameLabel', {
+          defaultMessage: 'Name',
+        }),
+      },
+    ];
+  };
 
-  private readonly orderOptions = [
+  private readonly orderOptions: EuiRadioGroupOption[] = [
     {
       id: 'asc',
       label: i18n.translate('xpack.ml.timeSeriesExplorer.ascOptionsOrderLabel', {
@@ -234,8 +237,13 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                     }
                     checked={!!this.props.config?.anomalousOnly}
                     onChange={(e) => {
+                      const isAnomalousOnly = e.target.checked;
                       this.props.onConfigChange(this.props.entity.fieldType, {
-                        anomalousOnly: e.target.checked,
+                        anomalousOnly: isAnomalousOnly,
+                        sort: {
+                          order: this.props.config.sort.order,
+                          by: this.props.config.sort.by,
+                        },
                       });
                     }}
                     compressed
@@ -276,12 +284,12 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                 }
               >
                 <EuiRadioGroup
-                  options={this.sortOptions}
+                  options={this.getSortOptions()}
                   idSelected={this.props.config?.sort?.by}
                   onChange={(id) => {
                     this.props.onConfigChange(this.props.entity.fieldType, {
                       sort: {
-                        ...(this.props.config?.sort ? this.props.config.sort : {}),
+                        order: this.props.config.sort.order,
                         by: id,
                       },
                     });
@@ -304,7 +312,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                   onChange={(id) => {
                     this.props.onConfigChange(this.props.entity.fieldType, {
                       sort: {
-                        ...(this.props.config?.sort ? this.props.config.sort : {}),
+                        by: this.props.config.sort.by,
                         order: id,
                       },
                     });

@@ -8,15 +8,19 @@ import { EntityFieldType } from './anomalies';
 
 export const ML_PARTITION_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
 
-export type PartitionFieldConfig = {
-  anomalousOnly?: boolean;
-  sort?: {
-    by: string; // 'anomaly_score' | 'name';
-    order?: string; // 'asc' | 'desc';
-  };
-} | null;
+export type PartitionFieldConfig =
+  | {
+      anomalousOnly: boolean;
+      sort: {
+        by: string; // 'anomaly_score' | 'name';
+        order: string; // 'asc' | 'desc';
+      };
+    }
+  | undefined;
 
-export type PartitionFieldsConfig = Partial<Record<EntityFieldType, PartitionFieldConfig>> | null;
+export type PartitionFieldsConfig =
+  | Partial<Record<EntityFieldType, PartitionFieldConfig>>
+  | undefined;
 
 export type MlStorage = Partial<{
   [ML_PARTITION_FIELDS_CONFIG]: PartitionFieldsConfig;

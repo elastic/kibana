@@ -47,13 +47,11 @@ export const categoryExamplesSchema = schema.object({
 
 const fieldConfig = schema.maybe(
   schema.object({
-    anomalousOnly: schema.maybe(schema.boolean()),
-    sort: schema.maybe(
-      schema.object({
-        by: schema.string(),
-        order: schema.maybe(schema.string()),
-      })
-    ),
+    anomalousOnly: schema.boolean(),
+    sort: schema.object({
+      by: schema.string(),
+      order: schema.maybe(schema.string()),
+    }),
   })
 );
 

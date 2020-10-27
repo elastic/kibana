@@ -19,6 +19,7 @@ import { getControlsForDetector } from '../../get_controls_for_detector';
 import { getViewableDetectors } from '../../timeseriesexplorer';
 import {
   ML_PARTITION_FIELDS_CONFIG,
+  PartitionFieldConfig,
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
 import { useStorage } from '../../../contexts/ml/use_storage';
@@ -34,14 +35,19 @@ function getEntityControlOptions(fieldValues: any[]) {
   });
 }
 
-type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, null>;
+export type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, undefined>;
+
+export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
 
 /**
  * Provides default fields configuration.
  */
-const getDefaultFieldConfig = (fieldTypes: EntityFieldType[]): UiPartitionFieldsConfig => {
+const getDefaultFieldConfig = (
+  fieldTypes: EntityFieldType[],
+  isAnomalousOnly: boolean
+): UiPartitionFieldsConfig => {
   return fieldTypes.reduce((acc, f) => {
-    acc[f] = { anomalousOnly: true, sort: { by: 'anomaly_score', order: 'desc' } };
+    acc[f] = { anomalousOnly: isAnomalousOnly, sort: { by: 'anomaly_score', order: 'desc' } };
     return acc;
   }, {} as UiPartitionFieldsConfig);
 };
@@ -91,18 +97,22 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
-  const [partitionFieldsConfig, setPartitionFieldsConfig] = useStorage<UiPartitionFieldsConfig>(
-    ML_PARTITION_FIELDS_CONFIG,
-    getDefaultFieldConfig(entityControls.map((v) => v.fieldType))
+  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<PartitionFieldsConfig>(
+    ML_PARTITION_FIELDS_CONFIG
   );
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {
     return {
-      ...getDefaultFieldConfig(entityControls.map((v) => v.fieldType)),
-      ...partitionFieldsConfig,
+      ...getDefaultFieldConfig(
+        entityControls.map((v) => v.fieldType),
+        !storageFieldsConfig
+          ? true
+          : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly)
+      ),
+      ...(!storageFieldsConfig ? {} : storageFieldsConfig),
     };
-  }, [entityControls, partitionFieldsConfig]);
+  }, [entityControls, storageFieldsConfig]);
 
   /**
    * Loads available entity values.
@@ -203,17 +213,32 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     text: d.detector_description,
   }));
 
-  const onConfigChange: EntityControlProps['onConfigChange'] = useCallback(
+  const onFieldConfigChange: EntityControlProps['onConfigChange'] = useCallback(
     (fieldType, config) => {
-      setPartitionFieldsConfig({
-        ...resultFieldsConfig,
-        [fieldType]: {
-          ...(resultFieldsConfig[fieldType] ? resultFieldsConfig[fieldType] : {}),
-          ...config,
-        },
+      const updatedFieldConfig = {
+        ...(resultFieldsConfig[fieldType] ? resultFieldsConfig[fieldType] : {}),
+        ...config,
+      } as UiPartitionFieldConfig;
+
+      const updatedResultConfig = { ...resultFieldsConfig };
+
+      if (resultFieldsConfig[fieldType]?.anomalousOnly !== updatedFieldConfig.anomalousOnly) {
+        // In case anomalous selector has been changed
+        // we need to change it for all the other fields
+        for (const c in updatedResultConfig) {
+          if (updatedResultConfig.hasOwnProperty(c)) {
+            updatedResultConfig[c as EntityFieldType]!.anomalousOnly =
+              updatedFieldConfig.anomalousOnly;
+          }
+        }
+      }
+
+      setStorageFieldsConfig({
+        ...updatedResultConfig,
+        [fieldType]: updatedFieldConfig,
       });
     },
-    [resultFieldsConfig, setPartitionFieldsConfig]
+    [resultFieldsConfig, setStorageFieldsConfig]
   );
 
   /** Indicates if any of the previous controls is empty */
@@ -250,7 +275,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
               isLoading={entitiesLoading}
               onSearchChange={entityFieldSearchChanged}
               config={resultFieldsConfig[entity.fieldType]!}
-              onConfigChange={onConfigChange}
+              onConfigChange={onFieldConfigChange}
               forceSelection={forceSelection}
               key={entityKey}
               options={getEntityControlOptions(entityValues[entity.fieldName])}
