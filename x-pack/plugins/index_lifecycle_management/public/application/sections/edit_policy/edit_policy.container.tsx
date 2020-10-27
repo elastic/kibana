@@ -82,7 +82,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
       decodedPolicyName = decodeURIComponent(policyName);
     } catch (e) {
       // %25 is automatically decoded to %, so decoding it again will throw an error
-      // that have to be ignored (link to kibana issue for explanation)
+      // that have to be ignored (https://github.com/elastic/kibana/pull/81664)
     }
   }
 
