@@ -17,13 +17,13 @@
  * under the License.
  */
 
-export {
-  PluginsService,
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  UiPlugins,
-} from './plugins_service';
-export { config, PluginsConfig } from './plugins_config';
-/** @internal */
-export { isNewPlatformPlugin } from './discovery';
-export * from './types';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const config = {
+  path: 'i18n',
+  schema: schema.object({
+    locale: schema.string({ defaultValue: 'en' }),
+  }),
+};
+
+export type I18nConfigType = TypeOf<typeof config.schema>;

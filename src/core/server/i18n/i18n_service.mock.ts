@@ -17,13 +17,20 @@
  * under the License.
  */
 
-export {
-  PluginsService,
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  UiPlugins,
-} from './plugins_service';
-export { config, PluginsConfig } from './plugins_config';
-/** @internal */
-export { isNewPlatformPlugin } from './discovery';
-export * from './types';
+import { I18nServiceSetup } from './i18n_service';
+
+const createSetupContractMock = (): jest.Mocked<I18nServiceSetup> => {
+  const mock = {
+    getLocale: jest.fn(),
+    getTranslationFiles: jest.fn(),
+  };
+
+  mock.getLocale.mockReturnValue('en');
+  mock.getTranslationFiles.mockReturnValue([]);
+
+  return mock;
+};
+
+export const i18nServiceMock = {
+  createSetupContract: createSetupContractMock,
+};

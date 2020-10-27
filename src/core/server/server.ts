@@ -29,11 +29,12 @@ import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService } from '../server/saved_objects';
+import { SavedObjectsService } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
-import { StatusService } from './status/status_service';
+import { StatusService } from './status';
+import { I18nService } from './i18n';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -44,6 +45,7 @@ import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
+import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
@@ -72,6 +74,7 @@ export class Server {
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
+  private readonly i18n: I18nService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -103,6 +106,7 @@ export class Server {
     this.httpResources = new HttpResourcesService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
+    this.i18n = new I18nService(core);
   }
 
   public async setup() {
@@ -112,10 +116,12 @@ export class Server {
     const environmentSetup = await this.environment.setup();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins } = await this.plugins.discover({
+    const { pluginTree, uiPlugins, pluginConfig } = await this.plugins.discover({
       environment: environmentSetup,
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
+
+    const i18nServiceSetup = await this.i18n.setup({ pluginConfig });
 
     // rely on dev server to validate config, don't validate in the parent process
     if (!this.env.isDevClusterMaster) {
@@ -190,6 +196,7 @@ export class Server {
       elasticsearch: elasticsearchServiceSetup,
       environment: environmentSetup,
       http: httpSetup,
+      i18n: i18nServiceSetup,
       savedObjects: savedObjectsSetup,
       status: statusSetup,
       uiSettings: uiSettingsSetup,
@@ -302,6 +309,7 @@ export class Server {
       opsConfig,
       statusConfig,
       pidConfig,
+      i18nConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

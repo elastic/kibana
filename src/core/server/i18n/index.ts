@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export const I18N_RC = '.i18nrc.json';
+export { config, I18nConfigType } from './i18n_config';
+export { I18nService, I18nServiceSetup } from './i18n_service';

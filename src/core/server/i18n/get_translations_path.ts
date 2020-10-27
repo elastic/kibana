@@ -28,7 +28,10 @@ interface I18NRCFileStructure {
   translations?: string[];
 }
 
-export async function getTranslationPaths({ cwd, glob }: { cwd: string; glob: string }) {
+const I18N_RC = '.i18nrc.json';
+
+export async function getTranslationPaths({ cwd, nested }: { cwd: string; nested: boolean }) {
+  const glob = nested ? `*/${I18N_RC}` : I18N_RC;
   const entries = await globby(glob, { cwd });
   const translationPaths: string[] = [];
 
