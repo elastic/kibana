@@ -31,6 +31,11 @@ const serializeAllocateAction = (
             [name]: value,
           },
         };
+      } else {
+        // The form has been configured to use node attribute based allocation but no node attribute
+        // was selected. We fall back to what was originally selected in this case. This might be
+        // migrate.enabled: "false"
+        actions.migrate = originalActions.migrate;
       }
 
       // copy over the original include and exclude values until we can set them in the form.
