@@ -190,6 +190,23 @@ export class TaskPollingLifecycle {
     return !this.pollingSubscription.closed;
   }
 
+  private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
+    return fillPool(
+      // claim available tasks
+      () =>
+        claimAvailableTasks(
+          tasksToClaim.splice(0, this.pool.availableWorkers),
+          this.store.claimAvailableTasks,
+          this.pool.availableWorkers,
+          this.logger
+        ),
+      // wrap each task in a Task Runner
+      this.createTaskRunnerForTask,
+      // place tasks in the Task Pool
+      async (tasks: TaskRunner[]) => await this.pool.run(tasks)
+    );
+  };
+
   private subscribeToPoller(poller$: Observable<Result<FillPoolResult, PollingError<string>>>) {
     return poller$
       .pipe(
@@ -209,23 +226,6 @@ export class TaskPollingLifecycle {
         this.emitEvent(asTaskPollingCycleEvent<string>(event));
       });
   }
-
-  private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
-    return fillPool(
-      // claim available tasks
-      () =>
-        claimAvailableTasks(
-          tasksToClaim.splice(0, this.pool.availableWorkers),
-          this.store.claimAvailableTasks,
-          this.pool.availableWorkers,
-          this.logger
-        ),
-      // wrap each task in a Task Runner
-      this.createTaskRunnerForTask,
-      // place tasks in the Task Pool
-      async (tasks: TaskRunner[]) => await this.pool.run(tasks)
-    );
-  };
 }
 
 export async function claimAvailableTasks(
