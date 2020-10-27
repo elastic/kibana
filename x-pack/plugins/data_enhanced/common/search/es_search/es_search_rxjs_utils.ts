@@ -22,41 +22,31 @@ export const takePartialSearch = <TResponse = any>(
   searchMethod: () => Promise<TResponse> | Observable<TResponse>,
   hasRequestCompleted: (r: TResponse) => boolean,
   pollInterval: IAsyncSearchOptions['pollInterval']
-): Observable<TResponse> => {
-  return interval(pollInterval ?? 1000).pipe(
+): Observable<TResponse> =>
+  interval(pollInterval ?? 1000).pipe(
     concatMap(() => searchMethod()),
     takeWhile((r) => !hasRequestCompleted(r), true)
   );
-};
 
 export const doPartialSearch = <SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse>(
   searchMethod: SearchMethod,
   partialSearchMethod: SearchMethod,
   requestId: IKibanaSearchRequest['id'],
-  asyncOptions: Record<string, any>,
   { abortSignal, pollInterval, waitForCompletion }: IAsyncSearchOptions
-) => ({ params, options }: DoSearchFnArgs) => {
+) => {
   const isCompleted = (response: ApiResponse<SearchResponse>) =>
     !(response.body.is_partial && response.body.is_running);
 
   const partialSearch = (id: IKibanaSearchRequest['id']) =>
     takePartialSearch<ApiResponse<SearchResponse>>(
-      () =>
-        partialSearchMethod(
-          {
-            id,
-            ...toSnakeCase(asyncOptions),
-          },
-          options
-        ),
+      () => doSearch(() => partialSearchMethod(id), abortSignal),
       (response) => (waitForCompletion ? isCompleted(response) : true),
       pollInterval
     );
 
   return requestId
     ? partialSearch(requestId)
-    : of({ params, options }).pipe(
-        switchMap(doSearch<SearchResponse>(searchMethod, abortSignal)),
+    : doSearch<SearchResponse>(searchMethod, abortSignal).pipe(
         concatMap((response) =>
           waitForCompletion && !isCompleted(response)
             ? partialSearch(response.body.id)

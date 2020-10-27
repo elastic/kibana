@@ -20,7 +20,7 @@ import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_pa
 
 import type { ISearchStrategy, SearchUsage } from '../../../../../src/plugins/data/server';
 import type { IEnhancedEsSearchRequest } from '../../common';
-import { shimAbortSignal } from '../../../../../src/plugins/data/common/search';
+import { shimAbortSignal, toSnakeCase } from '../../../../../src/plugins/data/common/search';
 import type {
   ISearchOptions,
   IEsSearchResponse,
@@ -45,27 +45,26 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const asyncOptions = getAsyncOptions();
 
-    return from(
-      new Promise<DoSearchFnArgs>(async (resolve) => {
-        resolve({
-          params: {
+    return doPartialSearch(
+      async () =>
+        context.core.elasticsearch.client.asCurrentUser.asyncSearch.submit(
+          toSnakeCase({
             ...(await getDefaultSearchParams(context.core.uiSettings.client)),
             batchedReduceSize: 64,
             ...asyncOptions,
             ...request.params,
-          },
-        });
-      })
+          })
+        ),
+      (id) =>
+        context.core.elasticsearch.client.asCurrentUser.asyncSearch.get(
+          toSnakeCase({
+            id,
+            ...asyncOptions,
+          })
+        ),
+      request.id,
+      options
     ).pipe(
-      switchMap(
-        doPartialSearch(
-          (...args) => context.core.elasticsearch.client.asCurrentUser.asyncSearch.submit(...args),
-          (...args) => context.core.elasticsearch.client.asCurrentUser.asyncSearch.get(...args),
-          request.id,
-          asyncOptions,
-          options
-        )
-      ),
       esSearch.toKibanaSearchResponse(),
       map((response) => ({
         ...response,

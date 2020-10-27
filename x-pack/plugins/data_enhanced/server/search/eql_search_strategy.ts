@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from } from 'rxjs';
 import { Logger } from 'kibana/server';
-import { switchMap } from 'rxjs/operators';
-import { DoSearchFnArgs, search } from '../../../../../src/plugins/data/server';
+import { search } from '../../../../../src/plugins/data/server';
 import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
-import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
+import { getAsyncOptions, getDefaultSearchParams } from './get_default_search_params';
 
 import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
 import type {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
 } from '../../common/search/types';
+
+import { toSnakeCase } from '../../../../../src/plugins/data/common/search/es_search';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger
@@ -33,35 +33,32 @@ export const eqlSearchStrategyProvider = (
 
       const { esSearch } = search;
       const asyncOptions = getAsyncOptions();
+      const requestOptions = toSnakeCase({ ...request.options });
 
-      return from(
-        new Promise<DoSearchFnArgs>(async (resolve) => {
+      return doPartialSearch(
+        async () => {
           const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
             context.core.uiSettings.client
           );
 
-          resolve({
-            params: {
+          return context.core.elasticsearch.client.asCurrentUser.eql.search(
+            toSnakeCase({
               ignoreThrottled,
               ignoreUnavailable,
               ...asyncOptions,
               ...request.params,
-            },
-            options: { ...request.options },
-          });
-        })
-      ).pipe(
-        switchMap(
-          doPartialSearch(
-            (...args) => context.core.elasticsearch.client.asCurrentUser.eql.search(...args),
-            (...args) => context.core.elasticsearch.client.asCurrentUser.eql.get(...args),
-            request.id,
-            asyncOptions,
-            options
-          )
-        ),
-        esSearch.toKibanaSearchResponse()
-      );
+            }),
+            requestOptions
+          );
+        },
+        (id) =>
+          context.core.elasticsearch.client.asCurrentUser.eql.get(
+            toSnakeCase({ id, ...asyncOptions }),
+            requestOptions
+          ),
+        request.id,
+        options
+      ).pipe(esSearch.toKibanaSearchResponse());
     },
   };
 };

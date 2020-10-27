@@ -32,26 +32,14 @@ import { getTotalLoaded } from './get_total_loaded';
 import type { IEsRawSearchResponse } from './types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
-export type SearchMethod = <SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse>(
-  params: DoSearchFnArgs['params'],
-  options?: DoSearchFnArgs['options']
-) => TransportRequestPromise<ApiResponse<SearchResponse>>;
-
-export interface DoSearchFnArgs {
-  params: IKibanaSearchRequest['params'];
-  options?: Record<string, any>;
-}
+export type SearchMethod = <
+  SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse
+>() => TransportRequestPromise<ApiResponse<SearchResponse>>;
 
 export const doSearch = <SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse>(
   searchMethod: SearchMethod,
   abortSignal?: AbortSignal
-) => ({ params, options }: DoSearchFnArgs) =>
-  from(
-    shimAbortSignal(
-      searchMethod<SearchResponse>(toSnakeCase(params), options && toSnakeCase(options)),
-      abortSignal
-    )
-  );
+) => from(shimAbortSignal(searchMethod<SearchResponse>(), abortSignal));
 
 export const toKibanaSearchResponse = <
   SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse,

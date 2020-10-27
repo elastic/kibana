@@ -30,6 +30,7 @@ import {
 } from '../../../common/search/es_search/es_search_rxjs_utils';
 import { trackSearchStatus } from './es_search_rxjs_utils';
 
+import { toSnakeCase } from '../../../common/search/es_search';
 import { getDefaultSearchParams, getShardTimeout } from '..';
 import type { ISearchStrategy } from '..';
 
@@ -45,21 +46,16 @@ export const esSearchStrategyProvider = (
       throw new Error(`Unsupported index pattern type ${request.indexType}`);
     }
 
-    return config$.pipe(
-      first(),
-      mergeMap(async (config) => ({
-        params: {
-          ...(await getDefaultSearchParams(context.core.uiSettings.client)),
-          ...getShardTimeout(config),
-          ...request.params,
-        },
-      })),
-      switchMap(
-        doSearch(
-          (...args) => context.core.elasticsearch.client.asCurrentUser.search(...args),
-          abortSignal
-        )
-      ),
+    return doSearch(async () => {
+      const config = await config$.pipe(first()).toPromise();
+      const params = toSnakeCase({
+        ...(await getDefaultSearchParams(context.core.uiSettings.client)),
+        ...getShardTimeout(config),
+        ...request.params,
+      });
+
+      return context.core.elasticsearch.client.asCurrentUser.search(params);
+    }, abortSignal).pipe(
       toKibanaSearchResponse(),
       trackSearchStatus(logger, usage),
       includeTotalLoaded()
