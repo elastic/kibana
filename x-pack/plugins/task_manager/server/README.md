@@ -50,6 +50,8 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
   - This allows sysadmins to tweak the operational performance of Kibana, allowing more or fewer tasks of a specific type to run simultaneously
 - `monitored_aggregated_stats_refresh_rate` - Dictates how often we refresh the "Cold" metrics. Learn More: [./MONITORING](./MONITORING.MD)
 - `monitored_stats_running_average_window`- Dictates the size of the window used to calculate the running average of various "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_stats_required_freshness` - Dictates the _required freshness_ of critical "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_task_execution_thresholds`- Dictates the threshold of failed task executions. Learn More: [./MONITORING](./MONITORING.MD)
 
 ## Task definitions
 

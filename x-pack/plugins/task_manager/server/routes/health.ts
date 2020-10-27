@@ -84,7 +84,7 @@ export function healthRoute(
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
-      logger.debug(JSON.stringify(monitoredHealth));
+      logger.debug(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
     });
 
   router.get(
