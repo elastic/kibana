@@ -514,7 +514,9 @@ export enum ES_FIELD_TYPES {
     // (undocumented)
     TOKEN_COUNT = "token_count",
     // (undocumented)
-    _TYPE = "_type"
+    _TYPE = "_type",
+    // (undocumented)
+    UNSIGNED_LONG = "unsigned_long"
 }
 
 // Warning: (ae-missing-release-tag) "ES_SEARCH_STRATEGY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1063,6 +1065,8 @@ export class IndexPattern implements IIndexPattern {
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
+    deleteFieldFormat: (fieldName: string) => void;
+    // (undocumented)
     fieldFormatMap: Record<string, any>;
     // (undocumented)
     fields: IIndexPatternFieldList & {
@@ -1108,6 +1112,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
+    getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     getOriginalSavedObjectBody: () => {
@@ -1139,6 +1144,8 @@ export class IndexPattern implements IIndexPattern {
     metaFields: string[];
     removeScriptedField(fieldName: string): void;
     resetOriginalSavedObjectBody: () => void;
+    // (undocumented)
+    setFieldFormat: (fieldName: string, format: SerializedFieldFormat) => void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1287,6 +1294,8 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
 //
 // @public (undocumented)
 export interface IndexPatternSpec {
+    // (undocumented)
+    fieldFormats?: Record<string, SerializedFieldFormat>;
     // (undocumented)
     fields?: IndexPatternFieldMap;
     // (undocumented)
@@ -1589,13 +1598,13 @@ export interface OptionedValueProp {
     value: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "KbnError" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "PainlessError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class PainlessError extends KbnError {
-    // Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
-    constructor(err: EsError, request: IKibanaSearchRequest);
+export class PainlessError extends EsError {
+    // Warning: (ae-forgotten-export) The symbol "IEsError" needs to be exported by the entry point index.d.ts
+    constructor(err: IEsError, request: IKibanaSearchRequest);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
@@ -2125,6 +2134,7 @@ export interface SearchSourceFields {
     version?: boolean;
 }
 
+// Warning: (ae-forgotten-export) The symbol "KbnError" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "SearchTimeoutError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -2274,7 +2284,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:70:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:62:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:98:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:67:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts

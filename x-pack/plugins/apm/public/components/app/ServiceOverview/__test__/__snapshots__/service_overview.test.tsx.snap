@@ -106,7 +106,7 @@ NodeList [
                 <span
                   class="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     class="euiButtonContent__icon"
                     data-euiicon-type="help"
                   />
@@ -283,7 +283,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -336,7 +336,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -389,7 +389,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -552,7 +552,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -605,7 +605,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />
@@ -658,7 +658,7 @@ NodeList [
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="subdued"
                   data-euiicon-type="visLine"
                 />

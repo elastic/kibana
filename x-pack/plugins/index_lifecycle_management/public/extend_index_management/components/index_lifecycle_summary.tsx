@@ -143,7 +143,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
     );
     return (
       <Fragment key="phaseDefinition">
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle key="phaseDefinition_title">
           <strong>
             <FormattedMessage
               defaultMessage="Phase definition"
@@ -204,14 +204,14 @@ export class IndexLifecycleSummary extends Component<Props, State> {
       }
       content = content || '-';
       const cell = (
-        <>
+        <Fragment key={String(arrayIndex)}>
           <EuiDescriptionListTitle key={fieldName}>
             <strong>{label}</strong>
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription key={fieldName + '_desc'}>
             {content}
           </EuiDescriptionListDescription>
-        </>
+        </Fragment>
       );
       if (arrayIndex % 2 === 0) {
         rows.left.push(cell);

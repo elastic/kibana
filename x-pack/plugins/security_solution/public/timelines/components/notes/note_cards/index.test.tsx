@@ -83,7 +83,7 @@ describe('NoteCards', () => {
       wrapper
         .find('[data-test-subj="note-card"]')
         .find('[data-test-subj="note-card-body"]')
-        .find('[data-test-subj="markdown-root"]')
+        .find('.euiMarkdownFormat')
         .first()
         .text()
     ).toEqual(getNotesByIds(noteIds)[0].note);

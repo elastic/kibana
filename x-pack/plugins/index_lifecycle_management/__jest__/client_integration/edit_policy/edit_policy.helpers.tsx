@@ -7,12 +7,17 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+
+import { EditPolicy } from '../../../public/application/sections/edit_policy';
+import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
+
+import { Phases as PolicyPhases } from '../../../common/types';
+
+type Phases = keyof PolicyPhases;
 
 import { POLICY_NAME } from './constants';
 import { TestSubjects } from '../helpers';
-
-import { EditPolicy } from '../../../public/application/sections/edit_policy';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -43,32 +48,123 @@ const testBedConfig: TestBedConfig = {
   },
 };
 
-const initTestBed = registerTestBed(EditPolicy, testBedConfig);
+const initTestBed = registerTestBed<TestSubjects>(EditPolicy, testBedConfig);
 
-export interface EditPolicyTestBed extends TestBed<TestSubjects> {
-  actions: {
-    setWaitForSnapshotPolicy: (snapshotPolicyName: string) => void;
-    savePolicy: () => void;
-  };
-}
+type SetupReturn = ReturnType<typeof setup>;
 
-export const setup = async (): Promise<EditPolicyTestBed> => {
+export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
+
+export const setup = async () => {
   const testBed = await initTestBed();
 
+  const { find, component, form } = testBed;
+
+  const createFormToggleAction = (dataTestSubject: string) => async (checked: boolean) => {
+    await act(async () => {
+      form.toggleEuiSwitch(dataTestSubject, checked);
+    });
+    component.update();
+  };
+
+  function createFormSetValueAction<V extends string = string>(dataTestSubject: string) {
+    return async (value: V) => {
+      await act(async () => {
+        form.setInputValue(dataTestSubject, value);
+      });
+      component.update();
+    };
+  }
+
   const setWaitForSnapshotPolicy = async (snapshotPolicyName: string) => {
-    const { component } = testBed;
     act(() => {
-      testBed.find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
+      find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
     });
     component.update();
   };
 
   const savePolicy = async () => {
-    const { component, find } = testBed;
     await act(async () => {
       find('savePolicyButton').simulate('click');
     });
     component.update();
+  };
+
+  const toggleRollover = createFormToggleAction('rolloverSwitch');
+
+  const setMaxSize = async (value: string, units?: string) => {
+    await act(async () => {
+      find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
+      if (units) {
+        find('hot-selectedMaxSizeStoredUnits.select').simulate('change', {
+          target: { value: units },
+        });
+      }
+    });
+    component.update();
+  };
+
+  const setMaxDocs = createFormSetValueAction('hot-selectedMaxDocuments');
+
+  const setMaxAge = async (value: string, units?: string) => {
+    await act(async () => {
+      find('hot-selectedMaxAge').simulate('change', { target: { value } });
+      if (units) {
+        find('hot-selectedMaxAgeUnits.select').simulate('change', { target: { value: units } });
+      }
+    });
+    component.update();
+  };
+
+  const toggleForceMerge = (phase: Phases) => createFormToggleAction(`${phase}-forceMergeSwitch`);
+
+  const setForcemergeSegmentsCount = (phase: Phases) =>
+    createFormSetValueAction(`${phase}-selectedForceMergeSegments`);
+
+  const setBestCompression = (phase: Phases) => createFormToggleAction(`${phase}-bestCompression`);
+
+  const setIndexPriority = (phase: Phases) =>
+    createFormSetValueAction(`${phase}-phaseIndexPriority`);
+
+  const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
+
+  const warmPhaseOnRollover = createFormToggleAction(`warm-warmPhaseOnRollover`);
+
+  const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
+
+  const setMinAgeUnits = (phase: Phases) =>
+    createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`);
+
+  const setDataAllocation = (phase: Phases) => async (value: DataTierAllocationType) => {
+    act(() => {
+      find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
+    });
+    component.update();
+    await act(async () => {
+      switch (value) {
+        case 'node_roles':
+          find(`${phase}-dataTierAllocationControls.defaultDataAllocationOption`).simulate('click');
+          break;
+        case 'node_attrs':
+          find(`${phase}-dataTierAllocationControls.customDataAllocationOption`).simulate('click');
+          break;
+        default:
+          find(`${phase}-dataTierAllocationControls.noneDataAllocationOption`).simulate('click');
+      }
+    });
+    component.update();
+  };
+
+  const setSelectedNodeAttribute = (phase: string) =>
+    createFormSetValueAction(`${phase}-selectedNodeAttrs`);
+
+  const setReplicas = async (value: string) => {
+    await createFormToggleAction('warm-setReplicasSwitch')(true);
+    await createFormSetValueAction('warm-selectedReplicaCount')(value);
+  };
+
+  const setShrink = async (value: string) => {
+    await createFormToggleAction('shrinkSwitch')(true);
+    await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
   };
 
   return {
@@ -76,6 +172,30 @@ export const setup = async (): Promise<EditPolicyTestBed> => {
     actions: {
       setWaitForSnapshotPolicy,
       savePolicy,
+      hot: {
+        setMaxSize,
+        setMaxDocs,
+        setMaxAge,
+        toggleRollover,
+        toggleForceMerge: toggleForceMerge('hot'),
+        setForcemergeSegments: setForcemergeSegmentsCount('hot'),
+        setBestCompression: setBestCompression('hot'),
+        setIndexPriority: setIndexPriority('hot'),
+      },
+      warm: {
+        enable: enable('warm'),
+        warmPhaseOnRollover,
+        setMinAgeValue: setMinAgeValue('warm'),
+        setMinAgeUnits: setMinAgeUnits('warm'),
+        setDataAllocation: setDataAllocation('warm'),
+        setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
+        setReplicas,
+        setShrink,
+        toggleForceMerge: toggleForceMerge('warm'),
+        setForcemergeSegments: setForcemergeSegmentsCount('warm'),
+        setBestCompression: setBestCompression('warm'),
+        setIndexPriority: setIndexPriority('warm'),
+      },
     },
   };
 };
