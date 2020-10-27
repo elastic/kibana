@@ -163,19 +163,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ] = useFetchIndex(threatIndex);
 
   // reset form when rule type changes
-  const { setFieldValue } = form;
   useEffect(() => {
-    if (isThreatMatchRule(ruleType)) {
-      setFieldValue('queryBar', {
-        query: { query: '*:*', language: 'kuery' },
-        filters: [],
-        saved_id: undefined,
-      });
-    } else {
-      setFieldValue('queryBar', stepDefineDefaultValue.queryBar);
-    }
     reset({ resetValues: false });
-  }, [reset, ruleType, setFieldValue]);
+  }, [reset, ruleType]);
 
   useEffect(() => {
     setIndexModified(!isEqual(index, indicesConfig));
