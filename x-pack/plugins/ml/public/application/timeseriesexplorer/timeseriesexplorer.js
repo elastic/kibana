@@ -1133,23 +1133,25 @@ export class TimeSeriesExplorer extends React.Component {
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
         {fieldNamesWithEmptyValues.length > 0 && (
-          <EuiCallOut
-            className="single-metric-request-callout"
-            title={
-              <FormattedMessage
-                id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
-                defaultMessage="To view a single metric you must select {missingValuesCount, plural, one {a value for {fieldName1}} other {values for {fieldName1} and {fieldName2}}}"
-                values={{
-                  missingValuesCount: fieldNamesWithEmptyValues.length,
-                  fieldName1: fieldNamesWithEmptyValues[0],
-                  fieldName2: fieldNamesWithEmptyValues[1],
-                }}
-              />
-            }
-            color="warning"
-            iconType="help"
-            size="s"
-          />
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
+                  defaultMessage="To view a single metric you must select {missingValuesCount, plural, one {a value for {fieldName1}} other {values for {fieldName1} and {fieldName2}}}"
+                  values={{
+                    missingValuesCount: fieldNamesWithEmptyValues.length,
+                    fieldName1: fieldNamesWithEmptyValues[0],
+                    fieldName2: fieldNamesWithEmptyValues[1],
+                  }}
+                />
+              }
+              color="warning"
+              iconType="help"
+              size="s"
+            />
+            <EuiSpacer size="m" />
+          </>
         )}
 
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
