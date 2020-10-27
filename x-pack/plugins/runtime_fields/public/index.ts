@@ -7,7 +7,7 @@ import { RuntimeFieldsPlugin } from './plugin';
 
 export { RuntimeFieldForm } from './components';
 export { RUNTIME_FIELD_OPTIONS } from './constants';
-export { RuntimeType } from './types';
+export { RuntimeField, RuntimeType } from './types';
 
 export function plugin() {
   return new RuntimeFieldsPlugin();

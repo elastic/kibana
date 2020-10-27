@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -15,19 +15,33 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { useForm, Form, UseField, TextField, CodeEditor } from '../../shared_imports';
+import { useForm, Form, FormHook, UseField, TextField, CodeEditor } from '../../shared_imports';
 import { RuntimeField } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 
 import { schema } from './schema';
 
+export interface FormState {
+  isValid: boolean | undefined;
+  isSubmitted: boolean;
+  submit: FormHook<RuntimeField>['submit'];
+}
+
 export interface Props {
   docsBaseUri: string;
   defaultValue?: RuntimeField;
+  onChange?: (state: FormState) => void;
 }
 
-export const RuntimeFieldForm = ({ defaultValue, docsBaseUri }: Props) => {
+export const RuntimeFieldForm = ({ defaultValue, onChange, docsBaseUri }: Props) => {
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
+  const { submit, isValid: isFormValid, isSubmitted } = form;
+
+  useEffect(() => {
+    if (onChange) {
+      onChange({ isValid: isFormValid, isSubmitted, submit });
+    }
+  }, [onChange, isFormValid, isSubmitted, submit]);
 
   return (
     <Form form={form}>
