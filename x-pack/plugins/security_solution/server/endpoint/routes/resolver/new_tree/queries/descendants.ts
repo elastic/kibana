@@ -104,7 +104,7 @@ export class DescendantsQuery {
           ],
         },
       },
-      aggs: this.uniqueID.buildAncestryAggregations(this.size),
+      aggs: this.uniqueID.buildAncestryAggregations(this.size, nodes),
     };
   }
 
@@ -125,7 +125,7 @@ export class DescendantsQuery {
     }
     const results: Array<ApiResponse<SearchResponse<unknown>>> = await Promise.all(searches);
     return results.reduce((allResults: unknown[], resultChunk) => {
-      allResults.push(...this.uniqueID.getNodesFromAggs(resultChunk));
+      allResults.push(...this.uniqueID.getNodesFromAggs(resultChunk.body.aggregations));
       return allResults;
     }, []);
   }
@@ -133,7 +133,16 @@ export class DescendantsQuery {
   private async searchWithAncestryArray(
     client: IScopedClusterClient,
     nodes: Nodes
-  ): Promise<unknown> {}
+  ): Promise<unknown> {
+    const body = this.queryWithAncestryArray(nodes);
+    console.log(JSON.stringify(body, null, 2));
+    const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
+      body: this.queryWithAncestryArray(nodes),
+      index: this.indexPatterns,
+    });
+    console.log(JSON.stringify(response, null, 2));
+    return this.uniqueID.getNodesFromAggs(response.body.aggregations);
+  }
 
   /**
    * TODO get rid of the unknowns

@@ -34,7 +34,6 @@ export function handleTree(
       });
     } catch (err) {
       log.warn(err);
-      log.warn(JSON.stringify(err, null, 2));
       return res.internalError({ body: 'Error retrieving tree.' });
     }
   };

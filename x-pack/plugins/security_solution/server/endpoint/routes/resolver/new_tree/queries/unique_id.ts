@@ -45,6 +45,7 @@ export class UniqueID {
       schemaParts.add(edge.id);
       schemaParts.add(edge.parentID);
       idToParent.set(edge.id, edge.parentID);
+      sourceFilter.push(edge.id, edge.parentID);
     }
 
     return { schemaParts, idToParent, sourceFilter };
@@ -134,25 +135,26 @@ export class UniqueID {
     return filters;
   }
 
+  private createAncestryTerms(nodes: Nodes): string[] {
+    return nodes.map((node) => {
+      this.validateKeys(node.keys());
+      const sortedEntries = Array.from(node.entries()).sort();
+
+      const ancestryValues = sortedEntries.map(([_, value]) => {
+        return value;
+      });
+      return ancestryValues.join('-');
+    });
+  }
+
   public buildDescendantsAncestryQueryFilters(nodes: Nodes): JsonValue[] {
     if (!this.idSchema.ancestry) {
       return [];
     }
 
-    const ancestryTerms = nodes.map((node) => {
-      this.validateKeys(node.keys());
-      let ancestryValue = '';
-      // extract out the building of the ancestry value
-      for (const [_, value] of node.entries()) {
-        // TODO make more performant?
-        ancestryValue = `${ancestryValue}-${value}`;
-      }
-      return ancestryValue;
-    });
-
     return [
       {
-        terms: { [this.idSchema.ancestry]: ancestryTerms },
+        terms: { [this.idSchema.ancestry]: this.createAncestryTerms(nodes) },
       },
     ];
   }
@@ -180,15 +182,7 @@ export class UniqueID {
   private buildFinalAgg(nestedAggs: any) {
     // TODO also add bucket_sort on @timestamp with a max metrics aggs
     nestedAggs.aggs = {
-      singleEvent: {
-        top_hits: {
-          // TODO figure out if we can use doc_values
-          _source: this.sourceFilter,
-          size: 1,
-          // TODO there might a use case to make the order configurable
-          sort: [{ '@timestamp': { order: 'asc' } }],
-        },
-      },
+      singleEvent: this.createSingleEventAggs(),
     };
   }
 
@@ -215,30 +209,34 @@ export class UniqueID {
     return accumulatedAggs.aggs;
   }
 
+  private createSingleEventAggs() {
+    return {
+      top_hits: {
+        // TODO figure out if we can use doc_values
+        _source: this.sourceFilter,
+        size: 1,
+        // TODO there might a use case to make the order configurable
+        sort: [{ '@timestamp': { order: 'asc' } }],
+      },
+    };
+  }
+
   private buildFinalAncestryAgg(nestedAggs: any, nodes: Nodes) {
     // TODO also add bucket_sort on @timestamp with a max metrics aggs
     nestedAggs.aggs = {
-      singleEvent: {
-        top_hits: {
-          // TODO figure out if we can use doc_values
-          _source: this.sourceFilter,
-          size: 1,
-          // TODO there might a use case to make the order configurable
-          sort: [{ '@timestamp': { order: 'asc' } }],
-        },
-      },
+      singleEvent: this.createSingleEventAggs(),
       ancestry: {
         max: {
           script: {
             source: `
-              Map ancestry = [:];
-              int length = params._source.process.Ext.ancestry.length;
+              Map ancestryToIndex = [:];
               List sourceAncestryArray = params._source.process.Ext.ancestry;
+              int length = sourceAncestryArray.length;
               for (int i = 0; i < length; i++) {
-                ancestry[sourceAncestryArray[i]] = i;
+                ancestryToIndex[sourceAncestryArray[i]] = i;
               }
               for (String id : params.ids) {
-                def index = ancestry[id];
+                def index = ancestryToIndex[id];
                 if (index != null) {
                   return index;
                 }
@@ -247,7 +245,7 @@ export class UniqueID {
             `,
             params: {
               // TODO this should be constructed using the nodes param
-              ids: ['yo', '9tw2j9fryf'],
+              ids: this.createAncestryTerms(nodes),
             },
           },
         },
@@ -262,7 +260,7 @@ export class UniqueID {
       current = this.buildSingleAgg(current, connection.id, size);
     }
 
-    this.buildFinalAgg(current);
+    this.buildFinalAncestryAgg(current, nodes);
     return accumulatedAggs.aggs;
   }
 
