@@ -201,7 +201,7 @@ const eventTypes = {
   saved_object_find: EventType.ACCESS,
   saved_object_add_to_spaces: EventType.CHANGE,
   saved_object_delete_from_spaces: EventType.CHANGE,
-  saved_object_remove_references: EventType.DELETION,
+  saved_object_remove_references: EventType.CHANGE,
 };
 
 export interface SavedObjectParams {

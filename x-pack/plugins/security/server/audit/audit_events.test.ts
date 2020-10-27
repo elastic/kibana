@@ -118,7 +118,7 @@ describe('#savedObjectEvent', () => {
           "action": "saved_object_remove_references",
           "category": "database",
           "outcome": "success",
-          "type": "deletion",
+          "type": "change",
         },
         "kibana": Object {
           "add_to_spaces": undefined,
