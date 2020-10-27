@@ -16,10 +16,10 @@
     "search": {
       "properties": {
         "successCount": {
-          "type": "number"
+          "type": "long"
         },
         "errorCount": {
-          "type": "number"
+          "type": "long"
         },
         "averageDuration": {
           "type": "long"

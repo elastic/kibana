@@ -3240,7 +3240,7 @@
           "type": "boolean"
         },
         "authProviderCount": {
-          "type": "number"
+          "type": "long"
         },
         "enabledAuthProviders": {
           "type": "array",
