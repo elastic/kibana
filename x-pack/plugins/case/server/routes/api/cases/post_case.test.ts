@@ -15,8 +15,8 @@ import {
 } from '../__fixtures__';
 import { initPostCaseApi } from './post_case';
 import { CASES_URL } from '../../../../common/constants';
+import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
 import { ConnectorTypes } from '../../../../common/api/connectors';
-import { CaseClient } from '../../../client';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -28,30 +28,123 @@ describe('POST cases', () => {
     }));
   });
 
-  it(`it creates a new case`, async () => {
-    const createResult = {
-      id: 'mock-it',
-      comments: [],
-      totalComment: 0,
-      closed_at: null,
-      closed_by: null,
-      connector: {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
+  it(`Posts a new case, no connector configured`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASES_URL,
+      method: 'post',
+      body: {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        title: 'Super Bad Security Issue',
+        tags: ['defacement'],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
       },
-      created_at: '2019-11-25T21:54:48.952Z',
-      created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
-      description: 'This is a brand new case of a bad meanie defacing data',
-      external_service: null,
-      title: 'Super Bad Security Issue',
-      status: 'open' as const,
-      tags: ['defacement'],
-      updated_at: null,
-      updated_by: null,
-      version: 'WzksMV0=',
-    };
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.id).toEqual('mock-it');
+    expect(response.payload.created_by.username).toEqual('awesome');
+    expect(response.payload.connector).toEqual({
+      id: 'none',
+      name: 'none',
+      type: ConnectorTypes.none,
+      fields: null,
+    });
+  });
+
+  it(`Posts a new case, connector provided`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASES_URL,
+      method: 'post',
+      body: {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        title: 'Super Bad Security Issue',
+        tags: ['defacement'],
+        connector: {
+          id: '123',
+          name: 'Jira',
+          type: '.jira',
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.connector).toEqual({
+      id: '123',
+      name: 'Jira',
+      type: '.jira',
+      fields: { issueType: 'Task', priority: 'High', parent: null },
+    });
+  });
+
+  it(`Error if you passing status for a new case`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASES_URL,
+      method: 'post',
+      body: {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        title: 'Super Bad Security Issue',
+        status: 'open',
+        tags: ['defacement'],
+        connector: null,
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(400);
+  });
+
+  it(`Returns an error if postNewCase throws`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASES_URL,
+      method: 'post',
+      body: {
+        description: 'Throw an error',
+        title: 'Super Bad Security Issue',
+        tags: ['error'],
+        connector: null,
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(400);
+    expect(response.payload.isBoom).toEqual(true);
+  });
+
+  it(`Allow user to create case without authentication`, async () => {
+    routeHandler = await createRoute(initPostCaseApi, 'post', true);
 
     const request = httpServerMock.createKibanaRequest({
       path: CASES_URL,
@@ -69,19 +162,42 @@ describe('POST cases', () => {
       },
     });
 
-    const context = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
-      })
+        caseConfigureSavedObject: mockCaseConfigure,
+      }),
+      true
     );
 
-    const caseClient = context.case!.getCaseClient() as jest.Mocked<CaseClient>;
-    caseClient.create.mockResolvedValueOnce(createResult);
-    const response = await routeHandler(context, request, kibanaResponseFactory);
-
-    expect(caseClient.create).toHaveBeenCalledTimes(1);
-    expect(caseClient.create).toHaveBeenCalledWith({ theCase: request.body });
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(createResult);
+    expect(response.payload).toEqual({
+      closed_at: null,
+      closed_by: null,
+      comments: [],
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+      created_at: '2019-11-25T21:54:48.952Z',
+      created_by: {
+        email: null,
+        full_name: null,
+        username: null,
+      },
+      description: 'This is a brand new case of a bad meanie defacing data',
+      external_service: null,
+      id: 'mock-it',
+      status: 'open',
+      tags: ['defacement'],
+      title: 'Super Bad Security Issue',
+      totalComment: 0,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzksMV0=',
+    });
   });
 });

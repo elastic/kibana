@@ -7,15 +7,16 @@
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { ConnectorTypes } from '../../../../common/api';
-import { CaseClient } from '../../../client';
 import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
   mockCases,
+  mockCaseComments,
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
+import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
+import { ConnectorTypes } from '../../../../common/api/connectors';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -27,8 +28,30 @@ describe('PATCH cases', () => {
     }));
   });
 
-  it(`it updates a new case`, async () => {
-    const patchResult = [
+  it(`Close a case`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-1',
+            status: 'closed',
+            version: 'WzAsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual([
       {
         closed_at: '2019-11-25T21:54:48.952Z',
         closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -44,7 +67,7 @@ describe('PATCH cases', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         id: 'mock-id-1',
         external_service: null,
-        status: 'closed' as const,
+        status: 'closed',
         tags: ['defacement'],
         title: 'Super Bad Security Issue',
         totalComment: 0,
@@ -52,8 +75,149 @@ describe('PATCH cases', () => {
         updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
         version: 'WzE3LDFd',
       },
-    ];
+    ]);
+  });
 
+  it(`Open a case`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-4',
+            status: 'open',
+            version: 'WzUsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual([
+      {
+        closed_at: null,
+        closed_by: null,
+        comments: [],
+        connector: {
+          id: '123',
+          name: 'My connector',
+          type: '.jira',
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
+        created_at: '2019-11-25T22:32:17.947Z',
+        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
+        description: 'Oh no, a bad meanie going LOLBins all over the place!',
+        id: 'mock-id-4',
+        external_service: null,
+        status: 'open',
+        tags: ['LOLBins'],
+        title: 'Another bad one',
+        totalComment: 0,
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        version: 'WzE3LDFd',
+      },
+    ]);
+  });
+
+  it(`Patches a case without a connector.id`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-no-connector_id',
+            status: 'closed',
+            version: 'WzAsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: [mockCaseNoConnectorId],
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload[0].connector.id).toEqual('none');
+  });
+
+  it(`Patches a case with a connector.id`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-3',
+            status: 'closed',
+            version: 'WzUsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload[0].connector.id).toEqual('123');
+  });
+
+  it(`Change connector`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-3',
+            connector: {
+              id: '456',
+              name: 'My connector 2',
+              type: '.jira',
+              fields: { issueType: 'Bug', priority: 'Low', parent: null },
+            },
+            version: 'WzUsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload[0].connector).toEqual({
+      id: '456',
+      name: 'My connector 2',
+      type: '.jira',
+      fields: { issueType: 'Bug', priority: 'Low', parent: null },
+    });
+  });
+
+  it(`Fails with 409 if version does not match`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
       method: 'patch',
@@ -61,26 +225,72 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'closed' as const,
+            case: { status: 'closed' },
+            version: 'badv=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(409);
+  });
+
+  it(`Fails with 406 if updated field is unchanged`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-1',
+            case: { status: 'open' },
             version: 'WzAsMV0=',
           },
         ],
       },
     });
 
-    const context = createRouteContext(
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(406);
+  });
+
+  it(`Returns an error if updateCase throws`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-does-not-exist',
+            status: 'closed',
+            version: 'WzAsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const caseClient = context.case!.getCaseClient() as jest.Mocked<CaseClient>;
-    caseClient.update.mockResolvedValueOnce(patchResult);
-    const response = await routeHandler(context, request, kibanaResponseFactory);
-
-    expect(caseClient.update).toHaveBeenCalledTimes(1);
-    expect(caseClient.update).toHaveBeenCalledWith({ cases: request.body });
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(patchResult);
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(404);
+    expect(response.payload.isBoom).toEqual(true);
   });
 });
