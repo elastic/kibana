@@ -49,7 +49,15 @@ export interface SetupTimeRange {
 interface SetupRequestParams {
   query?: {
     _debug?: boolean;
+
+    /**
+     * Timestamp in ms since epoch
+     */
     start?: string;
+
+    /**
+     * Timestamp in ms since epoch
+     */
     end?: string;
     uiFilters?: string;
     processorEvent?: ProcessorEvent;

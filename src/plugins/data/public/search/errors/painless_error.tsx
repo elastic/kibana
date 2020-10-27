@@ -22,22 +22,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import { KbnError } from '../../../../kibana_utils/common';
-import { EsError, isEsError } from './types';
+import { IEsError, isEsError } from './types';
+import { EsError } from './es_error';
+import { getRootCause } from './utils';
 import { IKibanaSearchRequest } from '..';
 
-export class PainlessError extends KbnError {
+export class PainlessError extends EsError {
   painlessStack?: string;
-  constructor(err: EsError, request: IKibanaSearchRequest) {
-    const rootCause = getRootCause(err as EsError);
-
-    super(
-      i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
-        defaultMessage: "Error executing Painless script: '{script}'.",
-        values: { script: rootCause?.script },
-      })
-    );
-    this.painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
+  constructor(err: IEsError, request: IKibanaSearchRequest) {
+    super(err);
   }
 
   public getErrorMessage(application: ApplicationStart) {
@@ -47,14 +40,20 @@ export class PainlessError extends KbnError {
       });
     }
 
+    const rootCause = getRootCause(this.err);
+    const painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
+
     return (
       <>
-        {this.message}
+        {i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
+          defaultMessage: "Error executing Painless script: '{script}'.",
+          values: { script: rootCause?.script },
+        })}
         <EuiSpacer size="s" />
         <EuiSpacer size="s" />
-        {this.painlessStack ? (
+        {painlessStack ? (
           <EuiCodeBlock data-test-subj="painlessStackTrace" isCopyable={true} paddingSize="s">
-            {this.painlessStack}
+            {painlessStack}
           </EuiCodeBlock>
         ) : null}
         <EuiText textAlign="right">
@@ -67,21 +66,10 @@ export class PainlessError extends KbnError {
   }
 }
 
-function getFailedShards(err: EsError) {
-  const failedShards =
-    err.body?.attributes?.error?.failed_shards ||
-    err.body?.attributes?.error?.caused_by?.failed_shards;
-  return failedShards ? failedShards[0] : undefined;
-}
-
-function getRootCause(err: EsError) {
-  return getFailedShards(err)?.reason;
-}
-
-export function isPainlessError(err: Error | EsError) {
+export function isPainlessError(err: Error | IEsError) {
   if (!isEsError(err)) return false;
 
-  const rootCause = getRootCause(err as EsError);
+  const rootCause = getRootCause(err as IEsError);
   if (!rootCause) return false;
 
   const { lang } = rootCause;

@@ -17,8 +17,12 @@
  * under the License.
  */
 
-export { monaco } from './monaco';
+// global setup for supported languages
+import './register_globals';
+
+export { monaco } from './monaco_imports';
 export { XJsonLang } from './xjson';
+export { PainlessLang } from './painless';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';

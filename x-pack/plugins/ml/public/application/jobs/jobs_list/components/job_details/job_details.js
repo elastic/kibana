@@ -19,8 +19,9 @@ import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
 import { i18n } from '@kbn/i18n';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-export class JobDetails extends Component {
+export class JobDetailsUI extends Component {
   constructor(props) {
     super(props);
 
@@ -39,7 +40,14 @@ export class JobDetails extends Component {
   }
 
   render() {
+    console.log('this.props', this.props);
     const { job } = this.state;
+    const {
+      services: {
+        http: { basePath },
+      },
+    } = this.props.kibana;
+
     if (job === undefined) {
       return (
         <div className="job-loading-spinner" data-test-subj="mlJobDetails loading">
@@ -62,7 +70,7 @@ export class JobDetails extends Component {
         modelSizeStats,
         jobTimingStats,
         datafeedTimingStats,
-      } = extractJobDetails(job);
+      } = extractJobDetails(job, basePath);
 
       const { showFullDetails, refreshJobList } = this.props;
       const tabs = [
@@ -197,7 +205,7 @@ export class JobDetails extends Component {
     }
   }
 }
-JobDetails.propTypes = {
+JobDetailsUI.propTypes = {
   jobId: PropTypes.string.isRequired,
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
@@ -205,3 +213,5 @@ JobDetails.propTypes = {
   showFullDetails: PropTypes.bool,
   refreshJobList: PropTypes.func,
 };
+
+export const JobDetails = withKibana(JobDetailsUI);

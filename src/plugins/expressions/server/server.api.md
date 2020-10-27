@@ -79,7 +79,7 @@ export interface DatatableColumn {
 // Warning: (ae-missing-release-tag) "DatatableColumnType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
+export type DatatableColumnType = '_source' | 'attachment' | 'boolean' | 'date' | 'geo_point' | 'geo_shape' | 'ip' | 'murmur3' | 'number' | 'string' | 'unknown' | 'conflict' | 'object' | 'nested' | 'histogram' | 'null';
 
 // Warning: (ae-missing-release-tag) "DatatableRow" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -87,33 +87,32 @@ export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'nu
 export type DatatableRow = Record<string, any>;
 
 // Warning: (ae-forgotten-export) The symbol "Adapters" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ExpressionExecutionParams" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DefaultInspectorAdapters" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "Execution" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class Execution<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown, InspectorAdapters extends Adapters = ExtraContext['inspectorAdapters'] extends object ? ExtraContext['inspectorAdapters'] : DefaultInspectorAdapters> {
-    constructor(params: ExecutionParams<ExtraContext>);
+export class Execution<Input = unknown, Output = unknown, InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object ? ExpressionExecutionParams['inspectorAdapters'] : DefaultInspectorAdapters> {
+    constructor(execution: ExecutionParams);
     cancel(): void;
     // (undocumented)
     cast(value: any, toTypeNames?: string[]): any;
-    readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
+    readonly context: ExecutionContext<InspectorAdapters>;
     // Warning: (ae-forgotten-export) The symbol "ExecutionContract" needs to be exported by the entry point index.d.ts
-    readonly contract: ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>;
+    readonly contract: ExecutionContract<Input, Output, InspectorAdapters>;
+    // (undocumented)
+    readonly execution: ExecutionParams;
     // (undocumented)
     readonly expression: string;
     input: Input;
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
-    // Warning: (ae-forgotten-export) The symbol "ExpressionExecOptions" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T, options?: ExpressionExecOptions): Promise<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown>;
     // (undocumented)
     invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any>;
     // (undocumented)
     invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Promise<any>;
-    // (undocumented)
-    readonly params: ExecutionParams<ExtraContext>;
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<any>;
     // (undocumented)
@@ -132,15 +131,15 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // Warning: (ae-missing-release-tag) "ExecutionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ExecutionContext<Input = unknown, InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
     abortSignal: AbortSignal;
-    getInitialInput: () => Input;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
     getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;
-    inspectorAdapters: InspectorAdapters;
     // Warning: (ae-forgotten-export) The symbol "ExecutionContextSearch" needs to be exported by the entry point index.d.ts
-    search?: ExecutionContextSearch;
+    getSearchContext: () => ExecutionContextSearch;
+    getSearchSessionId: () => string | undefined;
+    inspectorAdapters: InspectorAdapters;
     types: Record<string, ExpressionType>;
     variables: Record<string, unknown>;
 }
@@ -148,16 +147,15 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters extends Ada
 // Warning: (ae-missing-release-tag) "ExecutionParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface ExecutionParams<ExtraContext extends Record<string, unknown> = Record<string, unknown>> {
+export interface ExecutionParams {
     // (undocumented)
     ast?: ExpressionAstExpression;
-    // (undocumented)
-    context?: ExtraContext;
-    debug?: boolean;
     // (undocumented)
     executor: Executor<any>;
     // (undocumented)
     expression?: string;
+    // (undocumented)
+    params: ExpressionExecutionParams;
 }
 
 // Warning: (ae-missing-release-tag) "ExecutionState" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -180,7 +178,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     // (undocumented)
     get context(): Record<string, unknown>;
     // (undocumented)
-    createExecution<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, context?: ExtraContext, { debug }?: ExpressionExecOptions): Execution<Context & ExtraContext, Input, Output>;
+    createExecution<Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, params?: ExpressionExecutionParams): Execution<Input, Output>;
     // (undocumented)
     static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(state?: ExecutorState<Ctx>): Executor<Ctx>;
     // (undocumented)
@@ -210,7 +208,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext): Promise<Output>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Promise<Output>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -349,6 +347,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     clog: ExpressionFunctionClog;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionCumulativeSum" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    cumulative_sum: ExpressionFunctionCumulativeSum;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionFont" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -768,54 +770,6 @@ export type KIBANA_CONTEXT_NAME = 'kibana_context';
 // @public (undocumented)
 export type KibanaContext = ExpressionValueSearchContext;
 
-// Warning: (ae-missing-release-tag) "KibanaDatatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatable {
-    // (undocumented)
-    columns: KibanaDatatableColumn[];
-    // (undocumented)
-    rows: KibanaDatatableRow[];
-    // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    type: typeof name_3;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableColumn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableColumn {
-    // (undocumented)
-    formatHint?: SerializedFieldFormat;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    meta?: KibanaDatatableColumnMeta;
-    // (undocumented)
-    name: string;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableColumnMeta" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableColumnMeta {
-    // (undocumented)
-    aggConfigParams?: Record<string, any>;
-    // (undocumented)
-    indexPatternId?: string;
-    // (undocumented)
-    type: string;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableRow" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableRow {
-    // (undocumented)
-    [key: string]: unknown;
-}
-
 // Warning: (ae-missing-release-tag) "KnownTypeToString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -900,7 +854,7 @@ export interface Range {
     // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    type: typeof name_4;
+    type: typeof name_3;
 }
 
 // Warning: (ae-missing-release-tag) "SerializedDatatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

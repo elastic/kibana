@@ -135,4 +135,35 @@ describe('Ingest Manager - isAgentUpgradeable', () => {
       true
     );
   });
+  it('returns false if agent reports upgradeable, with agent snapshot version === kibana version', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }), '7.9.0')
+    ).toBe(false);
+  });
+  it('returns false if agent reports upgradeable, with agent version === kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '7.9.0-SNAPSHOT')
+    ).toBe(false);
+  });
+  it('returns true if agent reports upgradeable, with agent snapshot version < kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }),
+        '8.0.0-SNAPSHOT'
+      )
+    ).toBe(true);
+  });
+  it('returns false if agent reports upgradeable, with agent snapshot version === kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '8.0.0-SNAPSHOT', upgradeable: true }),
+        '8.0.0-SNAPSHOT'
+      )
+    ).toBe(false);
+  });
+  it('returns true if agent reports upgradeable, with agent version < kibana snapshot version', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0-SNAPSHOT')
+    ).toBe(true);
+  });
 });

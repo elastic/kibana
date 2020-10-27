@@ -23,7 +23,7 @@ export const createTileMapFn = () => ({
   name: 'tilemap',
   type: 'render',
   context: {
-    types: ['kibana_datatable'],
+    types: ['datatable'],
   },
   help: i18n.translate('tileMap.function.help', {
     defaultMessage: 'Tilemap visualization',

@@ -13,7 +13,7 @@ import {
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
 import { AuthenticationProvider } from '../../common/types';
-import { SecurityAuditLogger } from '../audit';
+import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -59,7 +59,8 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  audit: AuditServiceSetup;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'authc'>;
@@ -293,6 +294,20 @@ export class Authenticator {
           existingSessionValue,
         });
 
+        // Checking for presence of `user` object to determine success state rather than
+        // `success()` method since that indicates a successful authentication and `redirect()`
+        // could also (but does not always) authenticate a user successfully (e.g. SAML flow)
+        if (authenticationResult.user || authenticationResult.failed()) {
+          const auditLogger = this.options.audit.asScoped(request);
+          auditLogger.log(
+            userLoginEvent({
+              authenticationResult,
+              authenticationProvider: providerName,
+              authenticationType: provider.type,
+            })
+          );
+        }
+
         return this.handlePreAccessRedirects(
           request,
           authenticationResult,
@@ -421,7 +436,7 @@ export class Authenticator {
       accessAgreementAcknowledged: true,
     });
 
-    this.options.auditLogger.accessAgreementAcknowledged(
+    this.options.legacyAuditLogger.accessAgreementAcknowledged(
       currentUser.username,
       existingSessionValue.provider
     );

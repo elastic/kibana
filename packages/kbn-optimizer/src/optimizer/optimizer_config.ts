@@ -19,6 +19,7 @@
 
 import Path from 'path';
 import Os from 'os';
+import { getPluginSearchPaths } from '@kbn/config';
 
 import {
   Bundle,
@@ -167,19 +168,14 @@ export class OptimizerConfig {
       throw new TypeError('outputRoot must be an absolute path');
     }
 
-    /**
-     * BEWARE: this needs to stay roughly synchronized with
-     * `src/core/server/config/env.ts` which determines which paths
-     * should be searched for plugins to load
-     */
-    const pluginScanDirs = options.pluginScanDirs || [
-      Path.resolve(repoRoot, 'src/plugins'),
-      ...(oss ? [] : [Path.resolve(repoRoot, 'x-pack/plugins')]),
-      Path.resolve(repoRoot, 'plugins'),
-      ...(examples ? [Path.resolve('examples')] : []),
-      ...(examples && !oss ? [Path.resolve('x-pack/examples')] : []),
-      Path.resolve(repoRoot, '../kibana-extra'),
-    ];
+    const pluginScanDirs =
+      options.pluginScanDirs ||
+      getPluginSearchPaths({
+        rootDir: repoRoot,
+        oss,
+        examples,
+      });
+
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
     }

@@ -107,6 +107,7 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
 }
 
 export * from './rename_columns';
+export * from './format_column';
 
 export function getIndexPatternDatasource({
   core,

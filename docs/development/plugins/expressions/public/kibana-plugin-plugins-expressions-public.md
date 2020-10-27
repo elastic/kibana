@@ -72,10 +72,6 @@
 |  [IExpressionLoaderParams](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.md) |  |
 |  [IInterpreterRenderHandlers](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.md) |  |
 |  [IRegistry](./kibana-plugin-plugins-expressions-public.iregistry.md) |  |
-|  [KibanaDatatable](./kibana-plugin-plugins-expressions-public.kibanadatatable.md) |  |
-|  [KibanaDatatableColumn](./kibana-plugin-plugins-expressions-public.kibanadatatablecolumn.md) |  |
-|  [KibanaDatatableColumnMeta](./kibana-plugin-plugins-expressions-public.kibanadatatablecolumnmeta.md) |  |
-|  [KibanaDatatableRow](./kibana-plugin-plugins-expressions-public.kibanadatatablerow.md) |  |
 |  [PointSeriesColumn](./kibana-plugin-plugins-expressions-public.pointseriescolumn.md) | Column in a PointSeries |
 |  [Range](./kibana-plugin-plugins-expressions-public.range.md) |  |
 |  [ReactExpressionRendererProps](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.md) |  |
@@ -95,7 +91,7 @@
 |  [AnyExpressionFunctionDefinition](./kibana-plugin-plugins-expressions-public.anyexpressionfunctiondefinition.md) | Type to capture every possible expression function definition. |
 |  [AnyExpressionTypeDefinition](./kibana-plugin-plugins-expressions-public.anyexpressiontypedefinition.md) |  |
 |  [ArgumentType](./kibana-plugin-plugins-expressions-public.argumenttype.md) | This type represents all of the possible combinations of properties of an Argument in an Expression Function. The presence or absence of certain fields influence the shape and presence of others within each <code>arg</code> in the specification. |
-|  [DatatableColumnType](./kibana-plugin-plugins-expressions-public.datatablecolumntype.md) | This type represents the <code>type</code> of any <code>DatatableColumn</code> in a <code>Datatable</code>. |
+|  [DatatableColumnType](./kibana-plugin-plugins-expressions-public.datatablecolumntype.md) | This type represents the <code>type</code> of any <code>DatatableColumn</code> in a <code>Datatable</code>. its duplicated from KBN\_FIELD\_TYPES |
 |  [DatatableRow](./kibana-plugin-plugins-expressions-public.datatablerow.md) | This type represents a row in a <code>Datatable</code>. |
 |  [ExecutionContainer](./kibana-plugin-plugins-expressions-public.executioncontainer.md) |  |
 |  [ExecutorContainer](./kibana-plugin-plugins-expressions-public.executorcontainer.md) |  |
