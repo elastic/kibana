@@ -6,7 +6,6 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-import { isArray, isNumber } from 'lodash';
 import { MetricsAPIRequest, MetricsAPIResponse, afterKeyObjectRT } from '../../../common/http_api';
 import {
   ESSearchClient,
