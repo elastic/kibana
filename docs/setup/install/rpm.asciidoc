@@ -153,12 +153,7 @@ https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm
 
 endif::[]
 
-==== SysV `init` vs `systemd`
-
-include::init-systemd.asciidoc[]
-
-[[rpm-running-init]]
-include::rpm-init.asciidoc[]
+==== `systemd`
 
 [[rpm-running-systemd]]
 include::systemd.asciidoc[]
