@@ -43,6 +43,7 @@ describe('EqlQueryBar', () => {
 
     const expected = {
       filters: [],
+      edited: true,
       query: {
         query: 'newQuery',
         language: 'eql',

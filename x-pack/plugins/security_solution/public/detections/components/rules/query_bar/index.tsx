@@ -161,7 +161,7 @@ export const QueryBarDefineRule = ({
     (newQuery: Query) => {
       const { query } = field.value as FieldValueQueryBar;
       if (!deepEqual(query, newQuery)) {
-        field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
+        field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery, edited: true });
       }
     },
     [field]
@@ -171,7 +171,11 @@ export const QueryBarDefineRule = ({
     (newQuery: Query) => {
       const { query } = field.value as FieldValueQueryBar;
       if (!deepEqual(query, newQuery)) {
-        field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
+        field.setValue({
+          ...(field.value as FieldValueQueryBar),
+          query: newQuery,
+          edited: true,
+        });
       }
     },
     [field]
@@ -187,6 +191,7 @@ export const QueryBarDefineRule = ({
             filters: newSavedQuery.attributes.filters,
             query: newSavedQuery.attributes.query,
             saved_id: newSavedQuery.id,
+            edited: true,
           });
         }
       }

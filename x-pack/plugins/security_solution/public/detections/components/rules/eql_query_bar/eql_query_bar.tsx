@@ -72,6 +72,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           query: newQuery,
           language: 'eql',
         },
+        edited: true,
       });
     },
     [setValue]

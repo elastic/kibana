@@ -71,6 +71,7 @@ const stepDefineDefaultValue: DefineStepRule = {
     query: { query: '', language: 'kuery' },
     filters: [],
     saved_id: undefined,
+    edited: false,
   },
   threatQueryBar: {
     query: { query: '*:*', language: 'kuery' },
@@ -131,7 +132,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, reset, submit } = form;
+  const { getFields, getFormData, reset, submit, setFieldValue } = form;
   const [
     {
       index: formIndex,
@@ -165,7 +166,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // reset form when rule type changes
   useEffect(() => {
     reset({ resetValues: false });
-  }, [reset, ruleType]);
+    if (getFields().queryBar != null) {
+      const queryBar = getFields().queryBar.value as DefineStepRule['queryBar'];
+      if (queryBar.edited !== true && !isUpdateView) {
+        if (isThreatMatchRule(ruleType)) {
+          setFieldValue('queryBar', {
+            ...stepDefineDefaultValue.queryBar,
+            query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
+          });
+        } else {
+          setFieldValue('queryBar', stepDefineDefaultValue.queryBar);
+        }
+      }
+    }
+  }, [reset, ruleType, setFieldValue, getFields, isUpdateView]);
 
   useEffect(() => {
     setIndexModified(!isEqual(index, indicesConfig));

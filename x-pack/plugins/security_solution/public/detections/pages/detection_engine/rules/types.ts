@@ -124,7 +124,7 @@ export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
   machineLearningJobId: string;
-  queryBar: FieldValueQueryBar;
+  queryBar: FieldValueQueryBar & { edited: boolean };
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
