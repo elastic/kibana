@@ -45,8 +45,8 @@ export const createVislibVisController = (
 ) => {
   return class VislibVisController {
     private removeListeners?: () => void;
+    private unmountLegend?: () => void;
 
-    _unmountLegend?: () => void;
     legendRef: RefObject<VisLegend>;
     container: HTMLDivElement;
     chartEl: HTMLDivElement;
@@ -127,7 +127,7 @@ export const createVislibVisController = (
         visParams.addLegend &&
         CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
       ) {
-        this.unmountLegend();
+        this.unmountLegend?.();
         this.mountLegend(esResponse, visParams, fireEvent, uiState);
         this.vislibVis.render(esResponse, uiState);
       }
@@ -139,7 +139,7 @@ export const createVislibVisController = (
       fireEvent: IInterpreterRenderHandlers['event'],
       uiState?: PersistedState
     ) {
-      this._unmountLegend = mountReactNode(
+      this.unmountLegend = mountReactNode(
         <VisLegend
           ref={this.legendRef}
           vislibVis={this.vislibVis}
@@ -152,12 +152,8 @@ export const createVislibVisController = (
       )(this.legendEl);
     }
 
-    unmountLegend() {
-      this._unmountLegend?.();
-    }
-
     destroy(clearElement = true) {
-      this.unmountLegend();
+      this.unmountLegend?.();
 
       if (clearElement) {
         this.el.innerHTML = '';

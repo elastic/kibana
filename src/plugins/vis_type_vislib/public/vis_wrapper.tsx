@@ -65,7 +65,11 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
 
   useEffect(() => {
     if (handlers.uiState) {
-      handlers.uiState.on('colorChanged', updateChart);
+      handlers.uiState.on('change', updateChart);
+
+      return () => {
+        handlers.uiState?.off('change', updateChart);
+      };
     }
   }, [handlers.uiState, updateChart]);
 
