@@ -51,8 +51,8 @@ interface Props {
 }
 
 function formatValue(value?: number) {
-  if (typeof value === 'undefined') {
-    return undefined;
+  if (typeof value === 'undefined' || value === null) {
+    return null;
   }
   return formatToSec(value, 'ms');
 }
