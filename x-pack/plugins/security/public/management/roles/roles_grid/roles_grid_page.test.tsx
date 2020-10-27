@@ -5,6 +5,7 @@
  */
 
 import { EuiIcon, EuiBasicTable } from '@elastic/eui';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
