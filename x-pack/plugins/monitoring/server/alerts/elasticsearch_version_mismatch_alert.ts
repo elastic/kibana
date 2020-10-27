@@ -29,6 +29,12 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.label', {
     defaultMessage: 'Elasticsearch version mismatch',
   });
+  public description = i18n.translate(
+    'xpack.monitoring.alerts.elasticsearchVersionMismatch.label',
+    {
+      defaultMessage: 'Alert when there is a version mismatch in Elasticsearch.',
+    }
+  );
   public isLegacy = true;
 
   protected actionVariables = [

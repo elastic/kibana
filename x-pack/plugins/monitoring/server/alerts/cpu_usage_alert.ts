@@ -61,6 +61,9 @@ export class CpuUsageAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.cpuUsage.label', {
     defaultMessage: 'CPU Usage',
   });
+  public description = i18n.translate('xpack.monitoring.alerts.cpuUsage.description', {
+    defaultMessage: 'Alert when a node runs a consistently high CPU load.',
+  });
 
   protected defaultParams: CpuUsageParams = {
     threshold: DEFAULT_THRESHOLD,

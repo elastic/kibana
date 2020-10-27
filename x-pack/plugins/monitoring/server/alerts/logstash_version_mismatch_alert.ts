@@ -29,6 +29,12 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.label', {
     defaultMessage: 'Logstash version mismatch',
   });
+  public description = i18n.translate(
+    'xpack.monitoring.alerts.logstashVersionMismatch.description',
+    {
+      defaultMessage: 'Alert when there is a version mismatch in Logstash.',
+    }
+  );
   public isLegacy = true;
 
   protected actionVariables = [

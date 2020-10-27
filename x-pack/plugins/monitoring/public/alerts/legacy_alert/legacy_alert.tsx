@@ -19,6 +19,7 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
     return {
       id: legacyAlert,
       name: alert.label,
+      description: alert.description,
       iconClass: 'bell',
       alertParamsExpression: (props: any) => (
         <Fragment>

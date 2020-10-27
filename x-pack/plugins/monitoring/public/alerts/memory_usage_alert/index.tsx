@@ -18,6 +18,7 @@ export function createMemoryUsageAlertType(): AlertTypeModel {
   return {
     id: MemoryUsageAlert.TYPE,
     name: MemoryUsageAlert.LABEL,
+    description: MemoryUsageAlert.DESCRIPTION,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={MemoryUsageAlert.PARAM_DETAILS} />

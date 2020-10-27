@@ -17,6 +17,10 @@ export function registerApmAlerts(
     name: i18n.translate('xpack.apm.alertTypes.errorCount', {
       defaultMessage: 'Error count threshold',
     }),
+    description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
+      defaultMessage:
+        'Alert when the number of errors in a service exceeds a defined threshold.',
+    }),
     iconClass: 'bell',
     alertParamsExpression: lazy(() => import('./ErrorCountAlertTrigger')),
     validate: () => ({
@@ -41,6 +45,13 @@ export function registerApmAlerts(
     name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
       defaultMessage: 'Transaction duration threshold',
     }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionDuration.description',
+      {
+        defaultMessage:
+          'Alert when the duration of a specific transaction type in a service exceeds a defined threshold.',
+      }
+    ),
     iconClass: 'bell',
     alertParamsExpression: lazy(
       () => import('./TransactionDurationAlertTrigger')
@@ -68,6 +79,13 @@ export function registerApmAlerts(
     name: i18n.translate('xpack.apm.alertTypes.transactionErrorRate', {
       defaultMessage: 'Transaction error rate threshold',
     }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionErrorRate.description',
+      {
+        defaultMessage:
+          'Alert when the rate of a specific transaction error in a service exceeds a defined threshold.',
+      }
+    ),
     iconClass: 'bell',
     alertParamsExpression: lazy(
       () => import('./TransactionErrorRateAlertTrigger')
@@ -95,6 +113,13 @@ export function registerApmAlerts(
     name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
       defaultMessage: 'Transaction duration anomaly',
     }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionDurationAnomaly.description',
+      {
+        defaultMessage:
+          'Alert when the duration of a specific transaction is considered anomalous.',
+      }
+    ),
     iconClass: 'bell',
     alertParamsExpression: lazy(
       () => import('./TransactionDurationAnomalyAlertTrigger')

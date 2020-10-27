@@ -30,6 +30,9 @@ export class NodesChangedAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.nodesChanged.label', {
     defaultMessage: 'Nodes changed',
   });
+  public description = i18n.translate('xpack.monitoring.alerts.nodesChanged.description', {
+    defaultMessage: 'Alert when cluster nodes change.',
+  });
   public isLegacy = true;
 
   protected actionVariables = [

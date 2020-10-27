@@ -51,8 +51,15 @@ export class MemoryUsageAlert extends BaseAlert {
   public static readonly LABEL = i18n.translate('xpack.monitoring.alerts.memoryUsage.label', {
     defaultMessage: 'Memory Usage (JVM)',
   });
+  public static readonly DESCRIPTION = i18n.translate(
+    'xpack.monitoring.alerts.memoryUsage.description',
+    {
+      defaultMessage: 'Alert when a node is reporting high memory usage.',
+    }
+  );
   public type = MemoryUsageAlert.TYPE;
   public label = MemoryUsageAlert.LABEL;
+  public description = MemoryUsageAlert.DESCRIPTION;
 
   protected defaultParams = {
     threshold: 85,

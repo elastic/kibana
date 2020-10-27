@@ -31,6 +31,7 @@ describe('alert_form', () => {
     id: 'my-alert-type',
     iconClass: 'test',
     name: 'test-alert',
+    description: 'test',
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -57,6 +58,7 @@ describe('alert_form', () => {
     id: 'non-edit-alert-type',
     iconClass: 'test',
     name: 'non edit alert',
+    description: 'test',
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -241,6 +243,7 @@ describe('alert_form', () => {
           id: 'same-consumer-producer-alert-type',
           iconClass: 'test',
           name: 'test-alert',
+          description: 'test',
           validate: (): ValidationResult => {
             return { errors: {} };
           },
@@ -251,6 +254,7 @@ describe('alert_form', () => {
           id: 'other-consumer-producer-alert-type',
           iconClass: 'test',
           name: 'test-alert',
+          description: 'test',
           validate: (): ValidationResult => {
             return { errors: {} };
           },

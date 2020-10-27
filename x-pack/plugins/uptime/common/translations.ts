@@ -32,4 +32,7 @@ export const MonitorStatusTranslations = {
   name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
     defaultMessage: 'Uptime monitor status',
   }),
+  description: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
+    defaultMessage: 'Alert when the status of an Uptime monitor is down.',
+  }),
 };

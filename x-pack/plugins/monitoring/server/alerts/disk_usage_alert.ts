@@ -50,8 +50,15 @@ export class DiskUsageAlert extends BaseAlert {
   public static readonly LABEL = i18n.translate('xpack.monitoring.alerts.diskUsage.label', {
     defaultMessage: 'Disk Usage',
   });
+  public static readonly DESCRIPTION = i18n.translate(
+    'xpack.monitoring.alerts.diskUsage.description',
+    {
+      defaultMessage: 'Alert when a node runs a consistently high disk usage.',
+    }
+  );
   public type = DiskUsageAlert.TYPE;
   public label = DiskUsageAlert.LABEL;
+  public description = DiskUsageAlert.DESCRIPTION;
 
   protected defaultParams = {
     threshold: 80,

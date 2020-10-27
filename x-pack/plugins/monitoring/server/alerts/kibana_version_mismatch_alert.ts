@@ -29,6 +29,9 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.label', {
     defaultMessage: 'Kibana version mismatch',
   });
+  public description = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.description', {
+    defaultMessage: 'Alert when there is a version mismatch in Kibana.',
+  });
   public isLegacy = true;
 
   protected actionVariables = [

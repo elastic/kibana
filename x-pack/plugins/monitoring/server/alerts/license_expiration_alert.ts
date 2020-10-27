@@ -37,6 +37,9 @@ export class LicenseExpirationAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.licenseExpiration.label', {
     defaultMessage: 'License expiration',
   });
+  public description = i18n.translate('xpack.monitoring.alerts.licenseExpiration.description', {
+    defaultMessage: 'Alert when the license is about to expire.',
+  });
   public isLegacy = true;
   protected actionVariables = [
     {

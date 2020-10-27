@@ -83,6 +83,9 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.missingData.label', {
     defaultMessage: 'Missing monitoring data',
   });
+  public description = i18n.translate('xpack.monitoring.alerts.missingData.description', {
+    defaultMessage: 'Alert when monitoring data is missing.',
+  });
 
   protected defaultParams: MissingDataParams = {
     duration: DEFAULT_DURATION,
