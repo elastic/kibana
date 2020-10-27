@@ -43,7 +43,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -93,7 +93,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
@@ -144,7 +144,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
       })
@@ -170,7 +170,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -201,7 +201,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -232,7 +232,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -257,7 +257,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -283,7 +283,7 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })

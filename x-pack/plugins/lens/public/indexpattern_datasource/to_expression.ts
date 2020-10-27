@@ -45,32 +45,50 @@ function getExpressionForLayer(
       };
     }, {} as Record<string, OriginalColumn>);
 
-    type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
+    type FormattedColumn = Required<
+      Extract<
+        IndexPatternColumn,
+        | {
+            params?: {
+              format: unknown;
+            };
+          }
+        // when formatters are nested there's a slightly different format
+        | {
+            params: {
+              format?: unknown;
+              parentFormat?: unknown;
+            };
+          }
+      >
+    >;
 
     const columnsWithFormatters = columnEntries.filter(
-      ([, col]) => col.params && 'format' in col.params && col.params.format
+      ([, col]) =>
+        col.params &&
+        (('format' in col.params && col.params.format) ||
+          ('parentFormat' in col.params && col.params.parentFormat))
     ) as Array<[string, FormattedColumn]>;
-    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {
-      const format = (col as FormattedColumn).params!.format;
-      const base: ExpressionFunctionAST = {
-        type: 'function',
-        function: 'lens_format_column',
-        arguments: {
-          format: [format.id],
-          columnId: [id],
-        },
-      };
-      if (typeof format.params?.decimals === 'number') {
-        return {
-          ...base,
+    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(
+      ([id, col]: [string, FormattedColumn]) => {
+        // TODO: improve the type handling here
+        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
+        const format = (col as FormattedColumn).params!.format;
+
+        const base: ExpressionFunctionAST = {
+          type: 'function',
+          function: 'lens_format_column',
           arguments: {
-            ...base.arguments,
-            decimals: [format.params.decimals],
+            format: format ? [format.id] : [''],
+            columnId: [id],
+            decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+            parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
           },
         };
+
+        return base;
       }
-      return base;
-    });
+    );
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
