@@ -94,3 +94,28 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
   },
   name: POLICY_NAME,
 };
+
+export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: 'my_policy',
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          migrate: { enabled: false },
+        },
+      },
+    },
+  },
+  name: 'my_policy',
+};
