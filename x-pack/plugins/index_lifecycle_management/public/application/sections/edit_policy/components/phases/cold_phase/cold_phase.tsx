@@ -11,7 +11,7 @@ import { get } from 'lodash';
 
 import { EuiDescribedFormGroup, EuiTextColor } from '@elastic/eui';
 
-import { ColdPhase as ColdPhaseInterface, Phases } from '../../../../../../../common/types';
+import { Phases } from '../../../../../../../common/types';
 
 import {
   useFormData,
@@ -37,7 +37,6 @@ const i18nTexts = {
 };
 
 const coldProperty: keyof Phases = 'cold';
-const phaseProperty = (propertyName: keyof ColdPhaseInterface) => propertyName;
 
 const formFieldPaths = {
   enabled: '_meta.cold.enabled',
@@ -140,7 +139,7 @@ export const ColdPhase: FunctionComponent = () => {
                 componentProps={{
                   fullWidth: false,
                   euiFieldProps: {
-                    'data-test-subj': `${coldProperty}-${phaseProperty('selectedReplicaCount')}`,
+                    'data-test-subj': `${coldProperty}-selectedReplicaCount`,
                     min: 0,
                   },
                 }}
