@@ -94,6 +94,16 @@ export const treeParametersToFetch = composeSelectors(
   dataSelectors.treeParametersToFetch
 );
 
+export const resolverDataIsStale = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverDataIsStale
+);
+
+export const lastResponseParameters = composeSelectors(
+  dataStateSelector,
+  dataSelectors.lastResponseParameters
+);
+
 export const treeRequestParametersToAbort = composeSelectors(
   dataStateSelector,
   dataSelectors.treeRequestParametersToAbort

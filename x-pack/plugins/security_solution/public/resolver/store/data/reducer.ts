@@ -18,12 +18,21 @@ const initialState: DataState = {
   },
   relatedEvents: new Map(),
   resolverComponentInstanceID: undefined,
+  dataInvalidatedCount: 0,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
   if (action.type === 'appReceivedNewExternalProperties') {
+    const requestsMade = state.dataInvalidatedCount;
+    let dataInvalidatedCount: number;
+    if (action.payload.shouldUpdate) {
+      dataInvalidatedCount = requestsMade !== undefined ? requestsMade + 1 : 0;
+    } else {
+      dataInvalidatedCount = requestsMade !== undefined ? requestsMade : 0;
+    }
     const nextState: DataState = {
       ...state,
+      dataInvalidatedCount,
       tree: {
         ...state.tree,
         currentParameters: {
@@ -56,6 +65,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         pendingRequestParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
+          dataRequestID: action.payload.dataRequestID,
         },
       },
     };
@@ -78,7 +88,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     /** Only handle this if we are expecting a response */
     const nextState: DataState = {
       ...state,
-
       tree: {
         ...state.tree,
         /**

@@ -205,6 +205,11 @@ export interface TreeFetcherParameters {
    * The indices that the backend will use to search for the document ID.
    */
   indices: string[];
+
+  /**
+   * The count of data invalidation actions at the time the data was requested.
+   */
+  dataRequestID?: number;
 }
 
 /**
@@ -255,6 +260,11 @@ export interface DataState {
    * If new data is returned for the panel view, this may be updated.
    */
   readonly nodeEventsInCategory?: NodeEventsInCategoryState;
+
+  /**
+   * A counter used to have resolver fetch updated data.
+   */
+  readonly dataInvalidatedCount: number;
 
   /**
    * Used when the panelView is `eventDetail`.
@@ -621,6 +631,11 @@ export interface ResolverProps {
    * Indices that the backend should use to find the originating document.
    */
   indices: string[];
+
+  /**
+   * A flag to update data from an external source
+   */
+  shouldUpdate: boolean;
 }
 
 /**

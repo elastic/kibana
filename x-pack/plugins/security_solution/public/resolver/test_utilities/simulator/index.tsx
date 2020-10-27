@@ -124,6 +124,7 @@ export class Simulator {
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
         indices={indices}
+        shouldUpdate={false}
       />
     );
   }

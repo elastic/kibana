@@ -32,7 +32,7 @@ import { NewCase, ExistingCase } from '../timeline/properties/helpers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import { useAllCasesModal } from '../../../cases/components/use_all_cases_modal';
-
+import { isLoadingSelector } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -109,6 +109,7 @@ const GraphOverlayComponent = ({
   timelineId,
   title,
   timelineType,
+  shouldResolverUpdate,
 }: OwnProps & PropsFromRedux) => {
   const dispatch = useDispatch();
   const onCloseOverlay = useCallback(() => {
@@ -204,6 +205,7 @@ const GraphOverlayComponent = ({
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={currentTimeline.id}
           indices={indices}
+          shouldUpdate={shouldResolverUpdate}
         />
       )}
       <AllCasesModal />
@@ -216,10 +218,11 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const { status, title = '' } = timeline;
-
+    const shouldResolverUpdate = isLoadingSelector()(state.inputs.global);
     return {
       status,
       title,
+      shouldResolverUpdate,
     };
   };
   return mapStateToProps;

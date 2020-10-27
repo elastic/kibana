@@ -89,6 +89,11 @@ interface AppReceivedNewExternalProperties {
      * Indices that the backend will use to find the document.
      */
     indices: string[];
+
+    /**
+     * A flag to tell resolver to refetch data, if a refresh button outside of resolver is clicked for example.
+     */
+    shouldUpdate: boolean;
   };
 }
 

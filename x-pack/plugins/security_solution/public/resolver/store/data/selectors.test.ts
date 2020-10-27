@@ -79,6 +79,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
           },
         },
       ];
@@ -140,6 +141,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
           },
         },
         {
@@ -205,6 +207,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
           },
         },
         // this happens when the middleware starts the request
@@ -221,6 +224,7 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
           },
         },
       ];

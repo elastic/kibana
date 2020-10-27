@@ -28,8 +28,13 @@ export function ResolverTreeFetcher(
   // if the entityID changes while
   return async () => {
     const state = api.getState();
-    const databaseParameters = selectors.treeParametersToFetch(state);
-
+    let databaseParameters;
+    const shouldRefetch = selectors.resolverDataIsStale(state);
+    if (shouldRefetch) {
+      databaseParameters = selectors.lastResponseParameters(state);
+    } else {
+      databaseParameters = selectors.treeParametersToFetch(state);
+    }
     if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
       // calling abort will cause an action to be fired
@@ -38,6 +43,7 @@ export function ResolverTreeFetcher(
       let result: ResolverTree | undefined;
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
+      databaseParameters.dataRequestID = state.data.dataInvalidatedCount;
       api.dispatch({
         type: 'appRequestedResolverData',
         payload: databaseParameters,

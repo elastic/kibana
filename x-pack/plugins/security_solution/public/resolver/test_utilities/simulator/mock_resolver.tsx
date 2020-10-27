@@ -100,6 +100,7 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
                 databaseDocumentID={props.databaseDocumentID}
                 resolverComponentInstanceID={props.resolverComponentInstanceID}
                 indices={props.indices}
+                shouldUpdate={props.shouldUpdate}
               />
             </Provider>
           </SideEffectContext.Provider>

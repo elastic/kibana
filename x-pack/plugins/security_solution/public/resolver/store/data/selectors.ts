@@ -347,6 +347,22 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
+export function resolverDataIsStale(state: DataState): boolean {
+  if (state.tree?.lastResponse) {
+    return state.dataInvalidatedCount !== state.tree?.lastResponse?.parameters.dataRequestID;
+  } else {
+    return false;
+  }
+}
+
+export function lastResponseParameters(state: DataState): TreeFetcherParameters | null {
+  if (state.tree?.lastResponse) {
+    return state.tree?.lastResponse?.parameters;
+  } else {
+    return null;
+  }
+}
+
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,

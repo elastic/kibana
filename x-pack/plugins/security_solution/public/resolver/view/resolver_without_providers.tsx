@@ -33,7 +33,13 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
+    {
+      className,
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+    }: ResolverProps,
     refToForward
   ) {
     useResolverQueryParamCleaner();
@@ -41,7 +47,12 @@ export const ResolverWithoutProviders = React.memo(
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
      */
-    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID, indices });
+    useStateSyncingActions({
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+    });
 
     const { timestamp } = useContext(SideEffectContext);
 
