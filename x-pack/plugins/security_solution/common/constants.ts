@@ -180,4 +180,4 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-export const enableNewTimeline = false;
+export const ENABLE_NEWTIMELINE = false;
