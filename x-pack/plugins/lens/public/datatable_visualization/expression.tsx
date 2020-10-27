@@ -150,15 +150,13 @@ export const getDatatableRenderer = (dependencies: {
     };
     ReactDOM.render(
       <I18nProvider>
-        <div style={{ border: '1px solid red' }}>
-          <DatatableComponent
-            {...config}
-            formatFactory={resolvedFormatFactory}
-            onClickValue={onClickValue}
-            onRowContextMenuClick={onRowContextMenuClick}
-            getType={resolvedGetType}
-          />
-        </div>
+        <DatatableComponent
+          {...config}
+          formatFactory={resolvedFormatFactory}
+          onClickValue={onClickValue}
+          onRowContextMenuClick={onRowContextMenuClick}
+          getType={resolvedGetType}
+        />
       </I18nProvider>,
       domNode,
       () => {
@@ -324,7 +322,9 @@ export function DatatableComponent(props: DatatableRenderProps) {
                 type: 'icon',
                 icon: 'boxesVertical',
                 onClick: () => {
-                  onRowContextMenuClick(['test']);
+                  onRowContextMenuClick({
+                    rowIndex: 0,
+                  });
                 },
               },
             ],

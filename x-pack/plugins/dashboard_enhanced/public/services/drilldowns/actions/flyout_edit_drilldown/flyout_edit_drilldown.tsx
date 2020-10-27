@@ -5,7 +5,10 @@
  */
 
 import React from 'react';
-import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
+import {
+  ActionByType,
+  ROW_CLICK_TRIGGER,
+} from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
   toMountPoint,
@@ -67,7 +70,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           onClose={() => handle.close()}
           viewMode={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          triggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), ROW_CLICK_TRIGGER]}
           placeContext={{ embeddable }}
         />
       ),

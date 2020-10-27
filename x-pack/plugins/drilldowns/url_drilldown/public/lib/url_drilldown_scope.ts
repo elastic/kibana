@@ -14,11 +14,15 @@ import {
   IEmbeddable,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isRowClickTriggerContext,
   RangeSelectContext,
   ValueClickContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import type { ActionContext, ActionFactoryContext, UrlTrigger } from './url_drilldown';
-import { SELECT_RANGE_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  RowClickContext,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 type ContextScopeInput = ActionContext | ActionFactoryContext;
 
@@ -101,7 +105,10 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
  * URL drilldown event scope,
  * available as {{event.$}}
  */
-export type UrlDrilldownEventScope = ValueClickTriggerEventScope | RangeSelectTriggerEventScope;
+export type UrlDrilldownEventScope =
+  | ValueClickTriggerEventScope
+  | RangeSelectTriggerEventScope
+  | RowClickTriggerEventScope;
 export type EventScopeInput = ActionContext;
 export interface ValueClickTriggerEventScope {
   key?: string;
@@ -115,11 +122,17 @@ export interface RangeSelectTriggerEventScope {
   to?: string | number;
 }
 
+export interface RowClickTriggerEventScope {
+  rowIndex: number;
+}
+
 export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEventScope {
   if (isRangeSelectTriggerContext(eventScopeInput)) {
     return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
   } else if (isValueClickTriggerContext(eventScopeInput)) {
     return getEventScopeFromValueClickTriggerContext(eventScopeInput);
+  } else if (isRowClickTriggerContext(eventScopeInput)) {
+    return getEventScopeFromRowClickTriggerContext(eventScopeInput);
   } else {
     throw new Error("UrlDrilldown [getEventScope] can't build scope from not supported trigger");
   }
@@ -155,6 +168,14 @@ function getEventScopeFromValueClickTriggerContext(
     negate,
     points,
   });
+}
+
+function getEventScopeFromRowClickTriggerContext(
+  eventScopeInput: RowClickContext
+): RowClickTriggerEventScope {
+  return {
+    rowIndex: eventScopeInput.data.rowIndex,
+  };
 }
 
 /**
