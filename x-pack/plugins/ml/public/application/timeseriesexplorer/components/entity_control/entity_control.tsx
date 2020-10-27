@@ -257,12 +257,12 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                       content={
                         this.props.isModelPlotEnabled ? (
                           <FormattedMessage
-                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsInfo"
+                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo"
                             defaultMessage="You will be suggested to select values for all possible model plot results"
                           />
                         ) : (
                           <FormattedMessage
-                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsInfo"
+                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsAllRecordsInfo"
                             defaultMessage="You will be suggested to select values for all records created during the job lifetime"
                           />
                         )
