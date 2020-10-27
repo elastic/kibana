@@ -590,6 +590,13 @@ Object {
           ],
         },
       },
+      "coreVitalPages": Object {
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.experience",
+          },
+        },
+      },
       "fcp": Object {
         "percentiles": Object {
           "field": "transaction.marks.agent.firstContentfulPaint",
@@ -668,11 +675,6 @@ Object {
           Object {
             "term": Object {
               "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
-              "user_agent.name": "Chrome",
             },
           },
         ],

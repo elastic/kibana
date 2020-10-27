@@ -105,7 +105,7 @@ export function CoreVitals({
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={CLS_LABEL}
-            value={cls}
+            value={cls ?? null}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}
