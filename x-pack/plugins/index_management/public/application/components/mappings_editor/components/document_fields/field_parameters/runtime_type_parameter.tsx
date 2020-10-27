@@ -26,7 +26,10 @@ interface Props {
 
 export const RuntimeTypeParameter = ({ stack }: Props) => {
   return (
-    <UseField path="runtime_type" config={getFieldConfig('runtime_type')}>
+    <UseField<EuiComboBoxOptionOption[]>
+      path="runtime_type"
+      config={getFieldConfig('runtime_type')}
+    >
       {(runtimeTypeField) => {
         const { label, value, setValue } = runtimeTypeField;
         const typeDefinition =
@@ -44,8 +47,14 @@ export const RuntimeTypeParameter = ({ stack }: Props) => {
                 )}
                 singleSelection={{ asPlainText: true }}
                 options={RUNTIME_FIELD_OPTIONS}
-                selectedOptions={value as EuiComboBoxOptionOption[]}
-                onChange={setValue}
+                selectedOptions={value}
+                onChange={(newValue) => {
+                  if (newValue.length === 0) {
+                    // Don't allow clearing the type. One must always be selected
+                    return;
+                  }
+                  setValue(newValue);
+                }}
                 isClearable={false}
                 fullWidth
               />

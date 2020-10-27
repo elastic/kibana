@@ -11,6 +11,8 @@ export {
   UseField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
+export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
+
 export { TextField } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export { CodeEditor } from '../../../../src/plugins/kibana_react/public';
