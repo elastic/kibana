@@ -78,7 +78,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
         !required ? (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
-              id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+              id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
               defaultMessage="Optional"
             />
           </EuiText>
