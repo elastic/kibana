@@ -132,7 +132,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           {isSingleAgent ? (
             <FormattedMessage
               id="xpack.ingestManager.upgradeAgents.upgradeSingleDescription"
-              defaultMessage={`This action upgrades the agent running on "{hostName}" to version {version}. You can't undo this upgrade.`}
+              defaultMessage='This action upgrades the agent running on "{hostName}" to version {version}. You can&#39;t undo this upgrade.'
               values={{
                 hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
                 version,
