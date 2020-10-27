@@ -76,12 +76,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               {isSingleAgent ? (
                 <FormattedMessage
                   id="xpack.ingestManager.upgradeAgents.deleteSingleTitle"
-                  defaultMessage="Upgrade agent"
+                  defaultMessage="Upgrade agent?"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.ingestManager.upgradeAgents.deleteMultipleTitle"
-                  defaultMessage="Upgrade {count} agents"
+                  defaultMessage="Upgrade {count} agents?"
                   values={{ count: agentCount }}
                 />
               )}
@@ -97,7 +97,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
                 tooltipContent={
                   <FormattedMessage
                     id="xpack.ingestManager.upgradeAgents.experimentalLabelTooltip"
-                    defaultMessage="Upgrade agent is an experimental feature."
+                    defaultMessage="Upgrade agent might change or be removed in a future release and is not subject to the support SLA."
                   />
                 }
               />
@@ -132,7 +132,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           {isSingleAgent ? (
             <FormattedMessage
               id="xpack.ingestManager.upgradeAgents.upgradeSingleDescription"
-              defaultMessage='This action will upgrade the selected agent running on "{hostName}" to version {version}. It is currently an experimental feature. This action cannot be undone. Are you sure you wish to continue?'
+              defaultMessage={`This action upgrades the agent running on "{hostName}" to version {version}. You can't undo this upgrade.`}
               values={{
                 hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
                 version,
@@ -141,7 +141,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           ) : (
             <FormattedMessage
               id="xpack.ingestManager.upgradeAgents.upgradeMultipleDescription"
-              defaultMessage="This action will upgrade multiple agents to version {version}. It is currently an experimental feature. This action cannot be undone. Are you sure you wish to continue?"
+              defaultMessage="This action upgrades multiple agents to version {version}. You can't undo this upgrade."
               values={{ version }}
             />
           )}
