@@ -20,6 +20,9 @@ import {
   EuiText,
   EuiRadioGroup,
   EuiHorizontalRule,
+  EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { PartitionFieldConfig } from '../../../../../common/types/storage';
@@ -44,10 +47,11 @@ export interface EntityControlProps {
   entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
-  config?: PartitionFieldConfig;
+  config: PartitionFieldConfig;
   onConfigChange: (fieldType: EntityFieldType, config: DeepPartial<PartitionFieldConfig>) => void;
   forceSelection: boolean;
   options: Array<EuiComboBoxOptionOption<string>>;
+  isModelPlotEnabled: boolean;
 }
 
 interface EntityControlState {
@@ -219,22 +223,49 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
             }}
           >
             <EuiText>
-              <EuiSwitch
-                label={
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.anomalousOnlyLabel"
-                    defaultMessage="Anomalous only"
+              <EuiFlexGroup gutterSize={'xs'} alignItems={'baseline'}>
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={
+                      <FormattedMessage
+                        id="xpack.ml.timeSeriesExplorer.anomalousOnlyLabel"
+                        defaultMessage="Anomalous only"
+                      />
+                    }
+                    checked={!!this.props.config?.anomalousOnly}
+                    onChange={(e) => {
+                      this.props.onConfigChange(this.props.entity.fieldType, {
+                        anomalousOnly: e.target.checked,
+                      });
+                    }}
+                    compressed
+                    data-test-subj={`mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entity.fieldName}`}
                   />
-                }
-                checked={!!this.props.config?.anomalousOnly}
-                onChange={(e) => {
-                  this.props.onConfigChange(this.props.entity.fieldType, {
-                    anomalousOnly: e.target.checked,
-                  });
-                }}
-                compressed
-                data-test-subj={`mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entity.fieldName}`}
-              />
+                </EuiFlexItem>
+                {!this.props.config?.anomalousOnly ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        this.props.isModelPlotEnabled ? (
+                          <FormattedMessage
+                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsInfo"
+                            defaultMessage="You will be suggested to select values for all possible model plot results"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsInfo"
+                            defaultMessage="You will be suggested to select values for all records created during the job lifetime"
+                          />
+                        )
+                      }
+                    >
+                      <EuiIcon tabIndex={0} type="iInCircle" color={'accent'} />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+
               <EuiHorizontalRule margin="s" />
               <EuiFormRow
                 label={

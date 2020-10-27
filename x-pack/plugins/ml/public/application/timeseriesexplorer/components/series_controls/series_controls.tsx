@@ -36,9 +36,12 @@ function getEntityControlOptions(fieldValues: any[]) {
 
 type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, null>;
 
+/**
+ * Provides default fields configuration.
+ */
 const getDefaultFieldConfig = (fieldTypes: EntityFieldType[]): UiPartitionFieldsConfig => {
   return fieldTypes.reduce((acc, f) => {
-    acc[f] = { anomalousOnly: false, sort: { by: 'anomaly_score', order: 'desc' } };
+    acc[f] = { anomalousOnly: true, sort: { by: 'anomaly_score', order: 'desc' } };
     return acc;
   }, {} as UiPartitionFieldsConfig);
 };
@@ -72,6 +75,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   const selectedJob = useMemo(() => mlJobService.getJob(selectedJobId), [selectedJobId]);
 
+  const isModelPlotEnabled = !!selectedJob.model_plot_config?.enabled;
+
   const [entitiesLoading, setEntitiesLoading] = useState(false);
   const [entityValues, setEntityValues] = useState<Record<string, any>>({});
 
@@ -91,6 +96,14 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     getDefaultFieldConfig(entityControls.map((v) => v.fieldType))
   );
 
+  // Merge the default config with the one from the local storage
+  const resultFieldsConfig = useMemo(() => {
+    return {
+      ...getDefaultFieldConfig(entityControls.map((v) => v.fieldType)),
+      ...partitionFieldsConfig,
+    };
+  }, [entityControls, partitionFieldsConfig]);
+
   /**
    * Loads available entity values.
    * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
@@ -102,9 +115,9 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     // for the selected detector across the full time range. No need to pass through finish().
     const detectorIndex = selectedDetectorIndex;
 
-    const fieldsConfig = partitionFieldsConfig
+    const fieldsConfig = resultFieldsConfig
       ? Object.fromEntries(
-          Object.entries(partitionFieldsConfig).filter(([k]) =>
+          Object.entries(resultFieldsConfig).filter(([k]) =>
             entityControls.some((v) => v.fieldType === k)
           )
         )
@@ -152,12 +165,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   useEffect(() => {
     loadEntityValues();
-  }, [
-    selectedJobId,
-    selectedDetectorIndex,
-    JSON.stringify(selectedEntities),
-    partitionFieldsConfig,
-  ]);
+  }, [selectedJobId, selectedDetectorIndex, JSON.stringify(selectedEntities), resultFieldsConfig]);
 
   const entityFieldSearchChanged = debounce(async (entity, queryTerm) => {
     await loadEntityValues({
@@ -198,14 +206,14 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
   const onConfigChange: EntityControlProps['onConfigChange'] = useCallback(
     (fieldType, config) => {
       setPartitionFieldsConfig({
-        ...partitionFieldsConfig,
+        ...resultFieldsConfig,
         [fieldType]: {
-          ...(partitionFieldsConfig[fieldType] ? partitionFieldsConfig[fieldType] : {}),
+          ...(resultFieldsConfig[fieldType] ? resultFieldsConfig[fieldType] : {}),
           ...config,
         },
       });
     },
-    [partitionFieldsConfig, setPartitionFieldsConfig]
+    [resultFieldsConfig, setPartitionFieldsConfig]
   );
 
   /** Indicates if any of the previous controls is empty */
@@ -241,11 +249,12 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
               entityFieldValueChanged={entityFieldValueChanged}
               isLoading={entitiesLoading}
               onSearchChange={entityFieldSearchChanged}
-              config={partitionFieldsConfig?.[entity.fieldType]}
+              config={resultFieldsConfig[entity.fieldType]!}
               onConfigChange={onConfigChange}
               forceSelection={forceSelection}
               key={entityKey}
               options={getEntityControlOptions(entityValues[entity.fieldName])}
+              isModelPlotEnabled={isModelPlotEnabled}
             />
           );
         })}
