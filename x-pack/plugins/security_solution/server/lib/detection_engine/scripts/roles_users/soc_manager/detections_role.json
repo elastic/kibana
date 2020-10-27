@@ -10,15 +10,17 @@
           "filebeat-*",
           "logs-*",
           "packetbeat-*",
-          "winlogbeat-*",
-          ".lists*",
-          ".items*"
+          "winlogbeat-*"
         ],
         "privileges": ["read", "write"]
       },
       {
+        "names": [".lists*", ".items*"],
+        "privileges": ["read", "write", "create_index", "manage"]
+      },
+      {
         "names": [".siem-signals-*"],
-        "privileges": ["read", "write", "create_index"]
+        "privileges": ["read", "write", "create_index", "manage"]
       }
     ]
   },
