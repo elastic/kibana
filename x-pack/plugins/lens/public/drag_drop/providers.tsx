@@ -106,7 +106,11 @@ interface ReorderState {
   /**
    * indicates that user is in keyboard mode
    */
-  isInKeyboardMode: boolean;
+  isKeyboardReorderOn: boolean;
+  /**
+   * aria-live message for changes in reordering
+   */
+  keyboardReorderMessage: string;
 }
 
 export interface ReorderContextState {
@@ -118,16 +122,18 @@ export const ReorderContext = React.createContext<ReorderContextState>({
   reorderState: {
     reorderedItems: [],
     className: 'lnsDragDrop-isReorderable--down',
-    isInKeyboardMode: false,
+    isKeyboardReorderOn: false,
+    keyboardReorderMessage: '',
   },
   setReorderState: () => {},
 });
 
 export function ReorderProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
-    isInKeyboardMode: false,
+    isKeyboardReorderOn: false,
     reorderedItems: [],
     className: 'lnsDragDrop-isReorderable--down',
+    keyboardReorderMessage: '',
   });
   const setReorderState = useMemo(() => (reorderState: ReorderState) => setState(reorderState), [
     setState,
@@ -139,10 +145,12 @@ export function ReorderProvider({ children }: { children: React.ReactNode }) {
         {children}
       </ReorderContext.Provider>
       <EuiScreenReaderOnly>
+        <p aria-live="assertive">{state.keyboardReorderMessage}</p>
+      </EuiScreenReaderOnly>
+      <EuiScreenReaderOnly>
         <p id="lnsDragDrop-reorderInstructions">
           {i18n.translate('xpack.lens.dragDrop.reorderInstructions', {
-            defaultMessage:
-              'When dragging, use arrow keys to reorder. Activate button again to finish. Escape to finish.',
+            defaultMessage: `Press space bar to start a drag. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
           })}
         </p>
       </EuiScreenReaderOnly>

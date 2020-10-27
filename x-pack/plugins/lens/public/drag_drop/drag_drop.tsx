@@ -8,6 +8,7 @@ import './drag_drop.scss';
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DragContext, DragContextState, ReorderContext } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
@@ -305,6 +306,23 @@ const DragDropInner = React.memo(function DragDropInner(
   });
 });
 
+const getKeyboardReorderMessageMoved = (position: number, prevPosition: number) =>
+  i18n.translate('xpack.lens.dragDrop.elementMoved', {
+    defaultMessage: 'You have moved the item from position {prevPosition} to position {position}',
+    values: {
+      position,
+      prevPosition,
+    },
+  });
+
+const getKeyboardReorderMessageLifted = (position: number) =>
+  i18n.translate('xpack.lens.dragDrop.elementLifted', {
+    defaultMessage: 'You have lifted an item in position {position}',
+    values: {
+      position,
+    },
+  });
+
 export const ReorderableDragDrop = ({
   draggingProps,
   dropProps,
@@ -345,7 +363,7 @@ export const ReorderableDragDrop = ({
     draggingProps.className,
     reorderState && {
       [reorderState.className]: reorderState.reorderedItems.includes(id),
-      'lnsDragDrop-isKeyboardModeActive': reorderState.isInKeyboardMode,
+      'lnsDragDrop-isKeyboardModeActive': reorderState.isKeyboardReorderOn,
     },
     {
       'lnsDragDrop-isReorderable': draggingProps.isReorderDragging,
@@ -354,13 +372,72 @@ export const ReorderableDragDrop = ({
 
   return (
     <div className="lnsDragDrop__reorderableContainer">
+      <EuiScreenReaderOnly showOnFocus>
+        <button
+          aria-label={`Grab ${label}`}
+          aria-describedby="lnsDragDrop-reorderInstructions"
+          className="lnsDragDrop__keyboardHandler"
+          data-test-subj="lnsDragDrop-keyboardHandler"
+          onBlur={() => {
+            setReorderState({
+              ...reorderState,
+              isKeyboardReorderOn: false,
+              keyboardReorderMessage: '',
+            });
+          }}
+          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (e.key === keys.ENTER || e.key === keys.SPACE) {
+              setReorderState({
+                ...reorderState,
+                isKeyboardReorderOn: !reorderState.isKeyboardReorderOn,
+                keyboardReorderMessage: reorderState.isKeyboardReorderOn
+                  ? ''
+                  : getKeyboardReorderMessageLifted(currentIndex),
+              });
+            } else if (e.key === keys.ESCAPE) {
+              setReorderState({
+                ...reorderState,
+                isKeyboardReorderOn: false,
+                keyboardReorderMessage: '',
+              });
+            }
+            if (reorderState.isKeyboardReorderOn) {
+              e.stopPropagation();
+              e.preventDefault();
+
+              if (keys.ARROW_DOWN === e.key) {
+                if (currentIndex < groupLength - 1) {
+                  setReorderState({
+                    ...reorderState,
+                    keyboardReorderMessage: getKeyboardReorderMessageMoved(
+                      currentIndex + 2,
+                      currentIndex + 1
+                    ),
+                  });
+                  dropTo(itemsInGroup[currentIndex + 1]);
+                }
+              } else if (keys.ARROW_UP === e.key) {
+                if (currentIndex > 0) {
+                  setReorderState({
+                    ...reorderState,
+                    keyboardReorderMessage: getKeyboardReorderMessageMoved(
+                      currentIndex + 1,
+                      currentIndex
+                    ),
+                  });
+                  dropTo(itemsInGroup[currentIndex - 1]);
+                }
+              }
+            }
+          }}
+        />
+      </EuiScreenReaderOnly>
       {React.cloneElement(children, {
         draggable: draggingProps.draggable,
         onDragEnd: draggingProps.onDragEnd,
         onDragStart: (e: DroppableEvent) => {
           setReorderState({
             ...reorderState,
-            isInKeyboardMode: false,
           });
           draggingProps.onDragStart(e);
         },
@@ -420,41 +497,6 @@ export const ReorderableDragDrop = ({
           });
         }}
       />
-      <EuiScreenReaderOnly showOnFocus>
-        <button
-          aria-label={`Grab ${label}`}
-          aria-describedby="lnsDragDrop-reorderInstructions"
-          className="lnsDragDrop__keyboardHandler"
-          data-test-subj="lnsDragDrop-keyboardHandler"
-          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-            if (e.key === keys.ENTER || e.key === keys.SPACE) {
-              setReorderState({
-                ...reorderState,
-                isInKeyboardMode: !reorderState.isInKeyboardMode,
-              });
-            } else if (e.key === keys.ESCAPE) {
-              setReorderState({
-                ...reorderState,
-                isInKeyboardMode: false,
-              });
-            }
-            if (reorderState.isInKeyboardMode) {
-              e.stopPropagation();
-              e.preventDefault();
-
-              if (keys.ARROW_DOWN === e.key) {
-                if (currentIndex < groupLength - 1) {
-                  dropTo(itemsInGroup[currentIndex + 1]);
-                }
-              } else if (keys.ARROW_UP === e.key) {
-                if (currentIndex > 0) {
-                  dropTo(itemsInGroup[currentIndex - 1]);
-                }
-              }
-            }
-          }}
-        />
-      </EuiScreenReaderOnly>
     </div>
   );
 };
