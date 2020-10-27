@@ -20368,7 +20368,6 @@
     "xpack.triggersActionsUI.sections.alertsList.alertStatusOk": "OK",
     "xpack.triggersActionsUI.sections.alertsList.alertStatusPending": "保留中",
     "xpack.triggersActionsUI.sections.alertsList.alertStatusUnknown": "不明",
-    "xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle": "{totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}}でエラーが見つかりました。",
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.buttonTitle": "アラートを管理",
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle": "削除",
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle": "無効にする",
