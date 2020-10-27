@@ -41,20 +41,16 @@ import {
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
   asPinnedQuery,
   matchesClauses,
+  SortOptions,
 } from './queries/query_clauses';
 
 import {
-  updateFields,
+  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  TaskWithSchedule,
-  taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
@@ -258,19 +254,25 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
-    const tasksWithRemainingAttempts = [...this.definitions].map(([type, { maxAttempts }]) =>
-      taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-    );
+    const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
+      return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
+    }, {});
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      // Either task has a schedule or the attempts < the maximum configured
-      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
-        TaskWithSchedule,
-        ...tasksWithRemainingAttempts
-      )
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
     );
+
+    // The documents should be sorted by runAt/retryAt, unless there are pinned
+    // tasks being queried, in which case we want to sort by score first, and then
+    // the runAt/retryAt.  That way we'll get the pinned tasks first.  Note that
+    // the score seems to favor newer documents rather than older documents, so
+    // if there are not pinned tasks being queried, we do NOT want to sort by score
+    // at all, just by runAt/retryAt.
+    const sort: SortOptions = [SortByRunAtAndRetryAt];
+    if (claimTasksById && claimTasksById.length) {
+      sort.unshift('_score');
+    }
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const { updated } = await this.updateByQuery(
@@ -283,17 +285,15 @@ export class TaskStore {
           ),
           filterDownBy(InactiveTasks)
         ),
-        update: updateFields({
-          ownerId: this.taskManagerId,
-          status: 'claiming',
-          retryAt: claimOwnershipUntil,
-        }),
-        sort: [
-          // sort by score first, so the "pinned" Tasks are first
-          '_score',
-          // the nsort by other fields
-          SortByRunAtAndRetryAt,
-        ],
+        update: updateFieldsAndMarkAsFailed(
+          {
+            ownerId: this.taskManagerId,
+            retryAt: claimOwnershipUntil,
+          },
+          claimTasksById || [],
+          taskMaxAttempts
+        ),
+        sort,
       }),
       {
         max_docs: size,
