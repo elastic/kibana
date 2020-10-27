@@ -116,24 +116,102 @@ export class MapEmbeddable
     );
 
     this._store = createMapStore();
-    this._unsubscribeFromStore = this._store.subscribe(() => {
-      this._handleStoreChanges();
-    });
-
-    this.loadMapAttributes(initialInput);
-
+    this.initialize(initialInput);
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
   }
 
-  private async loadMapAttributes(input: MapEmbeddableInput) {
+  private async initialize(input: MapEmbeddableInput) {
     this._attributes = await attributeService.unwrapAttributes(input);
-    const layerList = getInitialLayers(this._attributes.layerListJSON);
-    this.setLayerList(layerList);
-    await this.initializeOutput();
+    this.initializeStore();
+    this.initializeOutput();
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
     }
+  }
+
+  private async initializeStore() {
+    this._store.dispatch(setReadOnly(true));
+    this._store.dispatch(disableScrollZoom());
+
+    if (this._attributes?.mapStateJSON) {
+      const mapState = JSON.parse(this._attributes.mapStateJSON);
+      if (mapState.settings) {
+        this._store.dispatch(setMapSettings(mapState.settings));
+      }
+    }
+
+    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
+    if (_.has(this.input, 'isLayerTOCOpen')) {
+      isLayerTOCOpen = this.input.isLayerTOCOpen;
+    } else if (this._attributes?.uiStateJSON) {
+      const uiState = JSON.parse(this._attributes.uiStateJSON);
+      if ('isLayerTOCOpen' in uiState) {
+        isLayerTOCOpen = uiState.isLayerTOCOpen;
+      }
+    }
+    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
+
+    let openTOCDetails = [];
+    if (_.has(this.input, 'openTOCDetails')) {
+      openTOCDetails = this.input.openTOCDetails;
+    } else if (this._attributes?.uiStateJSON) {
+      const uiState = JSON.parse(this._attributes.uiStateJSON);
+      if ('openTOCDetails' in uiState) {
+        openTOCDetails = uiState.openTOCDetails;
+      }
+    }
+    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
+
+    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
+      this._store.dispatch(disableInteractive());
+    }
+
+    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
+      this._store.dispatch(disableTooltipControl());
+    }
+    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
+      this._store.dispatch(hideToolbarOverlay());
+    }
+
+    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
+      this._store.dispatch(hideLayerControl());
+    }
+
+    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
+      this._store.dispatch(hideViewControl());
+    }
+
+    if (this.input.mapCenter) {
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: this.input.mapCenter.lat,
+          lon: this.input.mapCenter.lon,
+          zoom: this.input.mapCenter.zoom,
+        })
+      );
+    } else if (this._attributes?.mapStateJSON) {
+      const mapState = JSON.parse(this._attributes.mapStateJSON);
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: mapState.center.lat,
+          lon: mapState.center.lon,
+          zoom: mapState.zoom,
+        })
+      );
+    }
+
+    const layerList = getInitialLayers(this._attributes.layerListJSON);
+    this.setLayerList(layerList);
+    if (this.input.hiddenLayers) {
+      this._store.dispatch<any>(setHiddenLayers(this.input.hiddenLayers));
+    }
+    this._dispatchSetQuery(this.input);
+    this._dispatchSetRefreshConfig(this.input);
+
+    this._unsubscribeFromStore = this._store.subscribe(() => {
+      this._handleStoreChanges();
+    });
   }
 
   private async initializeOutput() {
@@ -248,82 +326,6 @@ export class MapEmbeddable
       return;
     }
 
-    this._store.dispatch(setReadOnly(true));
-    this._store.dispatch(disableScrollZoom());
-
-    if (this._attributes?.mapStateJSON) {
-      const mapState = JSON.parse(this._attributes.mapStateJSON);
-      if (mapState.settings) {
-        this._store.dispatch(setMapSettings(mapState.settings));
-      }
-    }
-
-    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
-    if (_.has(this.input, 'isLayerTOCOpen')) {
-      isLayerTOCOpen = this.input.isLayerTOCOpen;
-    } else if (this._attributes?.uiStateJSON) {
-      const uiState = JSON.parse(this._attributes.uiStateJSON);
-      if ('isLayerTOCOpen' in uiState) {
-        isLayerTOCOpen = uiState.isLayerTOCOpen;
-      }
-    }
-    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
-
-    let openTOCDetails = [];
-    if (_.has(this.input, 'openTOCDetails')) {
-      openTOCDetails = this.input.openTOCDetails;
-    } else if (this._attributes?.uiStateJSON) {
-      const uiState = JSON.parse(this._attributes.uiStateJSON);
-      if ('openTOCDetails' in uiState) {
-        openTOCDetails = uiState.openTOCDetails;
-      }
-    }
-    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
-
-    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      this._store.dispatch(disableInteractive());
-    }
-
-    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      this._store.dispatch(disableTooltipControl());
-    }
-    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      this._store.dispatch(hideToolbarOverlay());
-    }
-
-    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      this._store.dispatch(hideLayerControl());
-    }
-
-    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      this._store.dispatch(hideViewControl());
-    }
-
-    if (this.input.mapCenter) {
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: this.input.mapCenter.lat,
-          lon: this.input.mapCenter.lon,
-          zoom: this.input.mapCenter.zoom,
-        })
-      );
-    } else if (this._attributes?.mapStateJSON) {
-      const mapState = JSON.parse(this._attributes.mapStateJSON);
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: mapState.center.lat,
-          lon: mapState.center.lon,
-          zoom: mapState.zoom,
-        })
-      );
-    }
-
-    if (this.input.hiddenLayers) {
-      this._store.dispatch<any>(setHiddenLayers(this.input.hiddenLayers));
-    }
-    this._dispatchSetQuery(this.input);
-    this._dispatchSetRefreshConfig(this.input);
-
     const I18nContext = getCoreI18n().Context;
 
     render(
@@ -366,7 +368,7 @@ export class MapEmbeddable
     const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
     this.updateOutput({
       ...this.getOutput(),
-      indexPatterns: [],
+      indexPatterns,
     });
   }
 
