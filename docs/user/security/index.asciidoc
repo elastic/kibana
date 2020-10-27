@@ -11,6 +11,12 @@ auditing. For more information, see
 <<using-kibana-with-security,Configuring Security in {kib}>>.
 
 [float]
+=== Required permissions
+
+The `manage_security` cluster privilege is required to access all Security features.
+
+
+[float]
 === Users
 
 To create and manage users, open the main menu, then click *Stack Management > Users*.
