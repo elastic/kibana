@@ -11,13 +11,16 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "MsXsl Making Network Connections",
-  "query": "sequence by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.name == \"msxsl.exe\"]\n  [network where event.type == \"connection\" and process.name == \"msxsl.exe\" and network.direction == \"outgoing\"]\n",
+  "query": "sequence by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"msxsl.exe\"]\n  [network where event.type == \"connection\" and process.name : \"msxsl.exe\" and network.direction == \"outgoing\"]\n",
   "risk_score": 21,
   "rule_id": "870d1753-1078-403e-92d4-735f142edcca",
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
