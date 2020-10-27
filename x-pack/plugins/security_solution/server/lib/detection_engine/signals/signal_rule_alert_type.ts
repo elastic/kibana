@@ -25,22 +25,27 @@ import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import {
-  SignalRuleAlertTypeDefinition,
-  RuleAlertAttributes,
-  EqlSignalSearchResponse,
+  AggBucket,
   BaseSignalHit,
+  EqlSignalSearchResponse,
+  RuleAlertAttributes,
+  SignalRuleAlertTypeDefinition,
 } from './types';
 import {
-  getGapBetweenRuns,
-  getListsClient,
-  getExceptions,
-  getGapMaxCatchupRatio,
   MAX_RULE_GAP_RATIO,
-  wrapSignal,
   createErrorsFromShard,
   createSearchAfterReturnType,
-  mergeReturns,
   createSearchAfterReturnTypeFromResponse,
+  extractLookback,
+  getDocCount,
+  getExceptions,
+  getGapBetweenRuns,
+  getGapMaxCatchupRatio,
+  getListsClient,
+  getSecondsAgo,
+  mergeReturns,
+  parseInterval,
+  wrapSignal,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -180,6 +185,7 @@ export const signalRulesAlertType = ({
           await ruleStatusService.error(gapMessage, { gap: gapString });
         }
       }
+
       try {
         const { listClient, exceptionsClient } = getListsClient({
           services,
@@ -285,6 +291,13 @@ export const signalRulesAlertType = ({
             }),
           ]);
         } else if (isThresholdRule(type) && threshold) {
+          const intervalSeconds = parseInterval(interval)?.asSeconds();
+          const lookbackSeconds = extractLookback(from, interval)?.asSeconds();
+
+          if (intervalSeconds == null || lookbackSeconds == null) {
+            throw new Error('Unable to parse interval.');
+          }
+
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -297,6 +310,34 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
+          // Use the recorded start time of previous job if available. Otherwise,
+          // calculate it to be `now-intervalSeconds`.
+          const prevStartedSecondsAgo =
+            previousStartedAt != null
+              ? getSecondsAgo(previousStartedAt.toISOString())
+              : intervalSeconds;
+
+          // Recalculate interval that previous job would have run against.
+          const prevFrom = `now-${prevStartedSecondsAgo + lookbackSeconds + intervalSeconds}s`;
+          const prevTo = `now-${prevStartedSecondsAgo}s`;
+
+          // 1. Get results from previous interval
+          const {
+            searchResult: prevResults,
+            searchErrors: prevSearchErrors,
+          } = await findThresholdSignals({
+            inputIndexPattern: inputIndex,
+            from: prevFrom,
+            to: prevTo,
+            services,
+            logger,
+            filter: esFilter,
+            threshold,
+            timestampOverride,
+            buildRuleMessage,
+          });
+
+          // 2. Get results from this interval
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
             from,
@@ -308,6 +349,29 @@ export const signalRulesAlertType = ({
             timestampOverride,
             buildRuleMessage,
           });
+
+          const prevAggBuckets = prevResults.aggregations.threshold.buckets;
+          const curAggBuckets: AggBucket[] = thresholdResults.aggregations.threshold.buckets;
+
+          // If we've had >= threshold results over the current interval, then we create a new
+          // alert. Otherwise, throw it away (it's a duplicate from previous interval).
+          const dedupedAggBuckets = curAggBuckets.reduce<AggBucket[]>(
+            (acc, { key, doc_count: docCount }) => {
+              const newEventCount = docCount - getDocCount(prevAggBuckets, key);
+              if (newEventCount >= threshold.value) {
+                return [...acc, { key, doc_count: newEventCount }];
+              }
+              return acc;
+            },
+            []
+          );
+
+          thresholdResults.aggregations.threshold.buckets = dedupedAggBuckets;
+
+          // 3. It's possible that some of our matches occurred over an interval greater
+          // than the lookback interval... are these false positives? If so, we need to
+          // iterate over search results and double-check counts here.
+          // TODO
 
           const {
             success,
@@ -345,7 +409,7 @@ export const signalRulesAlertType = ({
             }),
             createSearchAfterReturnType({
               success,
-              errors: [...errors, ...searchErrors],
+              errors: [...errors, ...prevSearchErrors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),

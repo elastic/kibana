@@ -34,6 +34,11 @@ export type unitType = 's' | 'm' | 'h';
 export const isValidUnit = (unitParam: string): unitParam is unitType =>
   ['s', 'm', 'h'].includes(unitParam);
 
+export interface AggBucket {
+  key: string;
+  doc_count: number;
+}
+
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
   query: object | undefined | null;

@@ -14,14 +14,15 @@ import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../..
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
+  AggBucket,
+  BaseSignalHit,
   BulkResponse,
   BulkResponseErrorAggregation,
-  isValidUnit,
-  SignalHit,
-  BaseSignalHit,
   SearchAfterAndBulkCreateReturnType,
-  SignalSearchResponse,
   Signal,
+  SignalHit,
+  SignalSearchResponse,
+  isValidUnit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -276,6 +277,24 @@ export const parseInterval = (intervalString: string): moment.Duration | null =>
   } catch (err) {
     return null;
   }
+};
+
+export const extractLookback = (
+  fromString: string,
+  intervalString: string
+): moment.Duration | null => {
+  const from = parseInterval(fromString.replace('now-', ''))?.asSeconds();
+  const interval = parseInterval(intervalString)?.asSeconds();
+  return from != null && interval != null ? moment.duration(from - interval, 's') : null;
+};
+
+export const getSecondsAgo = (dateString: string): number => {
+  return Math.ceil(moment().diff(dateString) / 1000);
+};
+
+export const getDocCount = (buckets: AggBucket[], key: string): number => {
+  const maybeEntry = buckets.filter((entry) => entry.key === key);
+  return maybeEntry[0]?.doc_count || 0;
 };
 
 export const getDriftTolerance = ({
