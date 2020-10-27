@@ -72,6 +72,20 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
           draft._meta.warm.minAgeUnit = minAge.units;
         }
       }
+
+      if (draft.phases.cold) {
+        if (draft.phases.cold.actions?.allocate?.require) {
+          Object.entries(draft.phases.cold.actions.allocate.require).forEach((entry) => {
+            draft._meta.cold.allocationNodeAttribute = entry.join(':');
+          });
+        }
+
+        if (draft.phases.cold.min_age) {
+          const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
+          draft.phases.cold.min_age = minAge.size;
+          draft._meta.cold.minAgeUnit = minAge.units;
+        }
+      }
     }
   );
 };
