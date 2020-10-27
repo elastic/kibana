@@ -33,7 +33,7 @@ export interface Props {
   onChange?: (state: FormState) => void;
 }
 
-export const RuntimeFieldForm = ({ defaultValue, onChange, docsBaseUri }: Props) => {
+const RuntimeFieldFormComp = ({ defaultValue, onChange, docsBaseUri }: Props) => {
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;
 
@@ -144,3 +144,5 @@ export const RuntimeFieldForm = ({ defaultValue, onChange, docsBaseUri }: Props)
     </Form>
   );
 };
+
+export const RuntimeFieldForm = React.memo(RuntimeFieldFormComp);
