@@ -74,7 +74,6 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       onChangeSuccessorCount,
     } = renderProps;
     const isPredecessorType = type === PREDECESSOR_TYPE;
-
     return {
       defaultStepSize,
       docCount: isPredecessorType ? predecessorCount : successorCount,
