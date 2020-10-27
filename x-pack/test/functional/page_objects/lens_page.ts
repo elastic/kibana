@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -91,6 +92,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         field?: string;
         isPreviousIncompatible?: boolean;
         keepOpen?: boolean;
+        palette?: string;
       },
       layerIndex = 0
     ) {
@@ -109,9 +111,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await comboBox.setElement(target, opts.field);
       }
 
+      if (opts.palette) {
+        await testSubjects.click('lns-palettePicker');
+        await find.clickByCssSelector(`#${opts.palette}`);
+      }
+
       if (!opts.keepOpen) {
         this.closeDimensionEditor();
       }
+    },
+
+    async assertPalette(palette: string) {
+      await retry.try(async () => {
+        await testSubjects.click('lns-palettePicker');
+        const currentPalette = await (
+          await find.byCssSelector('[aria-selected=true]')
+        ).getAttribute('id');
+        expect(currentPalette).to.equal(palette);
+      });
     },
 
     /**

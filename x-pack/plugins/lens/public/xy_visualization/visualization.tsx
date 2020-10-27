@@ -140,7 +140,7 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
-  initialize(frame, state, mainPalette) {
+  initialize(frame, state) {
     return (
       state || {
         title: 'Empty XY chart',
@@ -153,7 +153,6 @@ export const getXyVisualization = ({
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
-            palette: mainPalette,
           },
         ],
       }

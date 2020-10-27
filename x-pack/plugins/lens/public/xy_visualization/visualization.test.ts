@@ -139,7 +139,6 @@ describe('xy_visualization', () => {
             Object {
               "accessors": Array [],
               "layerId": "",
-              "palette": undefined,
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,

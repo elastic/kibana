@@ -231,7 +231,8 @@ function getSuggestionsForLayer({
     changeType,
     xValue,
     keptLayerIds,
-    mainPalette,
+    // only use palette if there is a breakdown by dimension
+    mainPalette: splitBy ? mainPalette : undefined,
   };
 
   // handles the simplest cases, acting as a chart switcher

@@ -39,8 +39,8 @@ import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types
 import { LegacyColorsService } from '../legacy_colors';
 
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
-  const colors = euiPaletteColorBlind();
-  const behindTextColors = euiPaletteColorBlindBehindText();
+  const colors = euiPaletteColorBlind({ rotations: 2 });
+  const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
   function getColor(
     series: SeriesLayer[],
     chartConfiguration: ChartColorConfiguration = { behindText: false }

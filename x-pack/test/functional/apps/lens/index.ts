@@ -31,6 +31,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./lens_reporting'));
+      loadTestFile(require.resolve('./colors'));
 
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));
