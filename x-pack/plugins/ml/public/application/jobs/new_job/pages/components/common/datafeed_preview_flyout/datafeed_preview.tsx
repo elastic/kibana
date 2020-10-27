@@ -61,9 +61,17 @@ export const DatafeedPreview: FC<{
     if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
       try {
         const resp = await mlJobService.searchPreview(combinedJob);
-        const data = resp.aggregations
-          ? resp.aggregations.buckets.buckets.slice(0, ML_DATA_PREVIEW_COUNT)
-          : resp.hits.hits;
+        let data = resp.hits.hits;
+        let aggField = '';
+        if (resp.aggs) aggField = 'aggs';
+        if (resp.aggregations) aggField = 'aggregations';
+
+        if (aggField !== '') {
+          if (Object.keys(resp[aggField]).length > 0) {
+            const accessor = Object.keys(resp[aggField])[0];
+            data = resp[aggField][accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
+          }
+        }
 
         setPreviewJsonString(JSON.stringify(data, null, 2));
       } catch (error) {
