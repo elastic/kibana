@@ -413,7 +413,7 @@ the field as an argument and returns a formatter.
 [%collapsible]
 ====
 
-The following Ingest Manager API routes changed:
+The following Fleet (previously Ingest Manager) API routes changed:
 
 - `/api/ingest_manager/agent_configs/*` renamed to `/api/fleet/agent_policies/*`
 - `/api/ingest_manager/package_configs/*` renamed to `/api/fleet/package_policies/*`
