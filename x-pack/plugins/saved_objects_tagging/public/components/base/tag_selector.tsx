@@ -44,7 +44,7 @@ function isCreateOption(
 export interface TagSelectorProps {
   tags: Tag[];
   selected: string[];
-  setSelected: (ids: string[]) => void;
+  onTagsSelected: (ids: string[]) => void;
   'data-test-subj'?: string;
   allowCreate: boolean;
   openCreateModal: CreateModalOpener;
@@ -101,7 +101,7 @@ const renderOption = (option: TagComboBoxOption, searchValue: string, contentCla
 export const TagSelector: FC<TagSelectorProps> = ({
   tags,
   selected,
-  setSelected,
+  onTagsSelected,
   allowCreate,
   openCreateModal,
   ...otherProps
@@ -148,7 +148,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
       // create modal instead.
       const tagOptions = newSelectedOptions.filter(isTagOption);
       const selectedIds = tagOptions.map((option) => option.value!.id);
-      setSelected(selectedIds);
+      onTagsSelected(selectedIds);
 
       if (newSelectedOptions.find(isCreateOption)) {
         openCreateModal({
@@ -156,12 +156,12 @@ export const TagSelector: FC<TagSelectorProps> = ({
             name: currentSearch,
           },
           onCreate: (tag) => {
-            setSelected([...selected, tag.id]);
+            onTagsSelected([...selected, tag.id]);
           },
         });
       }
     },
-    [selected, setSelected, openCreateModal, currentSearch]
+    [selected, onTagsSelected, openCreateModal, currentSearch]
   );
 
   return (

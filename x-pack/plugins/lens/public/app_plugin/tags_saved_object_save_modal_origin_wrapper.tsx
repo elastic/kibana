@@ -33,7 +33,7 @@ export const TagEnhancedSavedObjectSaveModalOrigin: FC<TagEnhancedSavedObjectSav
       savedObjectsTagging ? (
         <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
           initialSelection={initialTags}
-          setSelected={setSelectedTags}
+          onTagsSelected={setSelectedTags}
         />
       ) : undefined,
     [savedObjectsTagging, initialTags]

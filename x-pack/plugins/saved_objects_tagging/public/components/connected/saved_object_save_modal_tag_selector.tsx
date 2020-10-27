@@ -27,7 +27,7 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
 }: GetConnectedTagSelectorOptions): FC<SavedObjectSaveModalTagSelectorComponentProps> => {
   return ({
     initialSelection,
-    setSelected: notifySelectionChange,
+    onTagsSelected: notifySelectionChange,
   }: SavedObjectSaveModalTagSelectorComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
     const [selected, setSelected] = useState<string[]>(initialSelection);
@@ -52,7 +52,7 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
       >
         <TagSelector
           selected={selected}
-          setSelected={setSelectedInternal}
+          onTagsSelected={setSelectedInternal}
           tags={tags}
           data-test-subj="savedObjectTagSelector"
           allowCreate={capabilities.create}

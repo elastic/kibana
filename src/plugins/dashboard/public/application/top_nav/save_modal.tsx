@@ -101,7 +101,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     const tagSelector = savedObjectsTagging ? (
       <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
         initialSelection={this.state.tags}
-        setSelected={(tags) => {
+        onTagsSelected={(tags) => {
           this.setState({
             tags,
           });

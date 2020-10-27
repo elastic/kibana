@@ -186,7 +186,7 @@ export interface TagSelectorComponentProps {
   /**
    * tags selection callback
    */
-  setSelected: (ids: string[]) => void;
+  onTagsSelected: (ids: string[]) => void;
 }
 
 /**
@@ -203,7 +203,7 @@ export interface SavedObjectSaveModalTagSelectorComponentProps {
   /**
    * tags selection callback
    */
-  setSelected: (ids: string[]) => void;
+  onTagsSelected: (ids: string[]) => void;
 }
 
 /**

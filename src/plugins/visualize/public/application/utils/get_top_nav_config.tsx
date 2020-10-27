@@ -338,7 +338,7 @@ export const getTopNavConfig = (
                 options = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}
-                    setSelected={(newSelection) => {
+                    onTagsSelected={(newSelection) => {
                       selectedTags = newSelection;
                     }}
                   />
