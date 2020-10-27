@@ -51,12 +51,12 @@ export const RuntimeFieldForm = () => {
                       singleSelection={{ asPlainText: true }}
                       options={RUNTIME_FIELD_OPTIONS}
                       selectedOptions={value}
-                      onChange={(comboBoxValue) => {
-                        if (comboBoxValue.length === 0) {
+                      onChange={(newValue) => {
+                        if (newValue.length === 0) {
                           // Don't allow clearing the type. One must always be selected
                           return;
                         }
-                        setValue(comboBoxValue);
+                        setValue(newValue);
                       }}
                       isClearable={false}
                       data-test-subj="typeField"
