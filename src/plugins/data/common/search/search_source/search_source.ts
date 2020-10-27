@@ -93,6 +93,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
   UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS,
   UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE,
+  UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE,
   UI_SETTINGS.DOC_HIGHLIGHT,
   UI_SETTINGS.META_FIELDS,
   UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS,
@@ -404,8 +405,13 @@ export class SearchSource {
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        const fields = uniq((data[key] || []).concat(val));
-        return addToRoot(key, fields);
+        if (getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
+          // preserve legacy behavior
+          const fields = uniq((data[key] || []).concat(val));
+          return addToRoot(key, fields);
+        }
+        // use new Fields API
+        return addToBody('fields', val);
       case 'index':
       case 'type':
       case 'highlightAll':
@@ -451,7 +457,12 @@ export class SearchSource {
   }
 
   private flatten() {
+    const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
+
+    if (!getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
+      return this.flattenWithFieldsApi(searchRequest);
+    }
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
@@ -471,8 +482,6 @@ export class SearchSource {
     if (!body.hasOwnProperty('_source') && index) {
       body._source = index.getSourceFiltering();
     }
-
-    const { getConfig } = this.dependencies;
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
@@ -494,6 +503,76 @@ export class SearchSource {
       setWith(body, '_source.includes', remainingFields, (nsValue) =>
         isObject(nsValue) ? {} : nsValue
       );
+    }
+
+    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
+    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+
+    if (highlightAll && body.query) {
+      body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
+      delete searchRequest.highlightAll;
+    }
+
+    return searchRequest;
+  }
+
+  private flattenWithFieldsApi(searchRequest: Record<string, any>) {
+    const { getConfig } = this.dependencies;
+
+    searchRequest.body = searchRequest.body || {};
+    const { body, index, query, filters, highlightAll } = searchRequest;
+    searchRequest.indexType = this.getIndexType(index);
+
+    const fieldListProvided = !!body.fields;
+
+    // get some special field types from the index pattern
+    const { storedFields, scriptFields, docvalueFields } = index
+      ? index.getComputedFields()
+      : {
+          storedFields: ['*'],
+          scriptFields: {},
+          docvalueFields: [],
+        };
+
+    // add docvalues to fields if no fields are explicitly provided
+    body.fields = fieldListProvided ? body.fields : docvalueFields;
+
+    // apply source filters from index pattern if specified by the user
+    if (index) {
+      const sourceFilters = index.getSourceFiltering();
+      if (!body.hasOwnProperty('_source')) {
+        body._source = sourceFilters;
+      }
+      const filter = fieldWildcardFilter(
+        sourceFilters.excludes,
+        getConfig(UI_SETTINGS.META_FIELDS)
+      );
+      body.fields = body.fields.filter((fld: any) =>
+        filter(typeof fld === 'string' ? fld : fld.field)
+      );
+    }
+
+    // add scripted fields
+    body.script_fields = pick(Object.assign(body.script_fields || {}, scriptFields), body.fields);
+    body.fields = body.fields.filter((fld: any) => {
+      const f = typeof fld === 'string' ? fld : fld.field;
+      return !Object.keys(body.script_fields).includes(f);
+    });
+
+    // request the remaining fields from stored_fields just in case, since the
+    // fields API does not handle stored fields
+    if (fieldListProvided) {
+      const bodyFieldNames = body.fields.map((field: any) =>
+        typeof field === 'string' ? field : field.field
+      );
+      const remainingFields = difference(bodyFieldNames, keys(body.script_fields));
+      body.stored_fields = remainingFields;
+
+      // remove _source, since everything's coming from fields API, scripted fields,
+      // or stored fields
+      body._source = false;
+    } else {
+      body.stored_fields = storedFields;
     }
 
     const esQueryConfigs = getEsQueryConfig({ get: getConfig });
