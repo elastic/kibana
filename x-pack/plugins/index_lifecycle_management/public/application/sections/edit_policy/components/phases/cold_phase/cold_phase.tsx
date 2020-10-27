@@ -123,6 +123,7 @@ export const ColdPhase: FunctionComponent = () => {
                 }
               )}
               switchProps={{
+                'data-test-subj': 'cold-setReplicasSwitch',
                 label: i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
                   { defaultMessage: 'Set replicas' }

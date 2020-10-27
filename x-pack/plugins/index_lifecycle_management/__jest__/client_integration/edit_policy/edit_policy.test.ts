@@ -199,26 +199,6 @@ describe('<EditPolicy />', () => {
         `);
       });
 
-      test('default allocation with replicas set', async () => {
-        const { actions } = testBed;
-        await actions.warm.enable(true);
-        await actions.warm.setReplicas('123');
-        await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const warmPhaseActions = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
-          .actions;
-        expect(warmPhaseActions).toMatchInlineSnapshot(`
-          Object {
-            "allocate": Object {
-              "number_of_replicas": 123,
-            },
-            "set_priority": Object {
-              "priority": 50,
-            },
-          }
-        `);
-      });
-
       test('setting warm phase on rollover to "true"', async () => {
         const { actions } = testBed;
         await actions.warm.enable(true);
@@ -263,6 +243,98 @@ describe('<EditPolicy />', () => {
             },
             "include": Object {
               "abc": "123",
+            },
+          }
+        `);
+      });
+    });
+  });
+
+  describe('cold phase', () => {
+    describe('serialization', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('default values', async () => {
+        const { actions } = testBed;
+
+        await actions.cold.enable(true);
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(entirePolicy.phases.cold).toMatchInlineSnapshot(`
+          Object {
+            "actions": Object {
+              "set_priority": Object {
+                "priority": 50,
+              },
+            },
+            "min_age": "0d",
+          }
+        `);
+      });
+
+      test('setting all values', async () => {
+        const { actions } = testBed;
+
+        await actions.cold.enable(true);
+        await actions.cold.setMinAgeValue('123');
+        await actions.cold.setMinAgeUnits('s');
+        await actions.cold.setDataAllocation('node_attrs');
+        await actions.cold.setSelectedNodeAttribute('test:123');
+        await actions.cold.setReplicas('123');
+        await actions.cold.setFreeze(true);
+        await actions.cold.setIndexPriority('123');
+
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+        expect(entirePolicy).toMatchInlineSnapshot(`
+          Object {
+            "name": "my_policy",
+            "phases": Object {
+              "cold": Object {
+                "actions": Object {
+                  "allocate": Object {
+                    "number_of_replicas": 123,
+                    "require": Object {
+                      "test": "123",
+                    },
+                  },
+                  "freeze": Object {},
+                  "set_priority": Object {
+                    "priority": 123,
+                  },
+                },
+                "min_age": "123s",
+              },
+              "hot": Object {
+                "actions": Object {
+                  "rollover": Object {
+                    "max_age": "30d",
+                    "max_size": "50gb",
+                  },
+                  "set_priority": Object {
+                    "priority": 100,
+                  },
+                },
+                "min_age": "0ms",
+              },
             },
           }
         `);
@@ -401,15 +473,32 @@ describe('<EditPolicy />', () => {
         const { component } = testBed;
         component.update();
       });
-      test('showing "default" type', () => {
+
+      test('detecting use of the recommended allocation type', () => {
         const { find } = testBed;
-        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toContain(
-          'recommended'
-        );
-        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).not.toContain(
-          'Custom'
-        );
-        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).not.toContain('Off');
+        const selectedDataAllocation = find(
+          'warm-dataTierAllocationControls.dataTierSelect'
+        ).text();
+        expect(selectedDataAllocation).toBe('Use warm nodes (recommended)');
+      });
+
+      test('setting replicas serialization', async () => {
+        const { actions } = testBed;
+        await actions.warm.setReplicas('123');
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const warmPhaseActions = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
+          .actions;
+        expect(warmPhaseActions).toMatchInlineSnapshot(`
+          Object {
+            "allocate": Object {
+              "number_of_replicas": 123,
+            },
+            "set_priority": Object {
+              "priority": 50,
+            },
+          }
+        `);
       });
     });
     describe('node attr and none', () => {
@@ -429,9 +518,12 @@ describe('<EditPolicy />', () => {
         component.update();
       });
 
-      test('showing "custom" and "off" types', () => {
+      test('detecting use of the custom allocation type', () => {
         const { find } = testBed;
-        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toContain('Custom');
+        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toBe('Custom');
+      });
+      test('detecting use of the "off" allocation type', () => {
+        const { find } = testBed;
         expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
       });
     });
