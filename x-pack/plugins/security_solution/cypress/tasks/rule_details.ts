@@ -31,6 +31,13 @@ export const activatesRule = () => {
   cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
 
+export const deactivatesRule = () => {
+  cy.get(RULE_SWITCH).should('be.visible');
+  cy.get(RULE_SWITCH).click();
+  cy.get(RULE_SWITCH_LOADER).should('exist');
+  cy.get(RULE_SWITCH_LOADER).should('not.exist');
+};
+
 export const addsException = (exception: Exception) => {
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');

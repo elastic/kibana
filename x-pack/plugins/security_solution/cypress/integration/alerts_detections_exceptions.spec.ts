@@ -16,12 +16,14 @@ import {
   waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
+import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import {
   activatesRule,
   addsException,
   addsExceptionFromRuleSettings,
+  deactivatesRule,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
@@ -51,6 +53,7 @@ describe('Exceptions', () => {
     activatesRule();
     waitForTheRuleToBeExecuted();
     refreshPage();
+    waitForAlertsToPopulate();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
@@ -58,8 +61,10 @@ describe('Exceptions', () => {
         cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);
       });
 
+    deactivatesRule();
     goToExceptionsTab();
     addsExceptionFromRuleSettings(exception);
+    activatesRule();
     esArchiverLoad('auditbeat');
     waitForTheRuleToBeExecuted();
     refreshPage();
@@ -86,10 +91,11 @@ describe('Exceptions', () => {
     goToExceptionsTab();
     removeException();
     esArchiverLoad('auditbeat');
-    goToAlertsTab();
     waitForTheRuleToBeExecuted();
-    refreshPage();
+    goToAlertsTab();
     goToOpenedAlerts();
+    refreshPage();
+    waitForAlertsToPopulate();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
@@ -97,6 +103,7 @@ describe('Exceptions', () => {
         cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);
       });
   });
+
   it('Creates an exception from an alert and deletes the exception', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
@@ -108,6 +115,7 @@ describe('Exceptions', () => {
     activatesRule();
     waitForTheRuleToBeExecuted();
     refreshPage();
+    waitForAlertsToPopulate();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
@@ -115,13 +123,16 @@ describe('Exceptions', () => {
         cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);
       });
 
+    deactivatesRule();
     addExceptionFromFirstAlert();
     addsException(exception);
+    activatesRule();
     esArchiverLoad('auditbeat');
 
     cy.get(SERVER_SIDE_EVENT_COUNT).should('have.attr', 'title', '0');
 
     goToClosedAlerts();
+    waitForAlertsToPopulate();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
@@ -130,7 +141,6 @@ describe('Exceptions', () => {
       });
 
     goToOpenedAlerts();
-    refreshPage();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
@@ -144,6 +154,7 @@ describe('Exceptions', () => {
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     refreshPage();
+    waitForAlertsToPopulate();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')

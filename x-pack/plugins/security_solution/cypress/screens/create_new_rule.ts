@@ -83,6 +83,8 @@ export const MITRE_TECHNIQUES_INPUT =
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';
 
+export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
+
 export const RISK_INPUT = '.euiRangeInput';
 
 export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';

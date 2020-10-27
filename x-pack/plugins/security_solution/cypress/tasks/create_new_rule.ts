@@ -265,16 +265,6 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForTheRuleToBeExecuted = () => {
-  cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click();
-    return cy
-      .get(RULE_STATUS)
-      .invoke('text')
-      .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
-};
-
 export const waitForAlertsToPopulate = async () => {
   cy.waitUntil(() => {
     refreshPage();
@@ -285,6 +275,16 @@ export const waitForAlertsToPopulate = async () => {
         const alertCount = parseInt(countText, 10) || 0;
         return alertCount > 0;
       });
+  });
+};
+
+export const waitForTheRuleToBeExecuted = () => {
+  cy.waitUntil(() => {
+    cy.get(REFRESH_BUTTON).click();
+    return cy
+      .get(RULE_STATUS)
+      .invoke('text')
+      .then((ruleStatus) => ruleStatus === 'succeeded');
   });
 };
 
