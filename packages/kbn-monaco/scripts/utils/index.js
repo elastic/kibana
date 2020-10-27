@@ -17,7 +17,10 @@
  * under the License.
  */
 
-// TODO temporary exports of stubbed data to handle autocomplete
-export { painlessTestContext } from './painless_test_context';
-export { filterContext } from './filter_context';
-export { scoreContext } from './score_context';
+const cloneAndCheckout = require('./clone_es');
+const createAutocompleteDefinitions = require('./create_autocomplete_definitions');
+
+module.exports = {
+  cloneAndCheckout,
+  createAutocompleteDefinitions,
+};

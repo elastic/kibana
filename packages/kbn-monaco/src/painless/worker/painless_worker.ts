@@ -36,22 +36,19 @@ export class PainlessWorker {
     // If the active typing contains dot notation, we assume we need to access the object's properties
     const isProperty = activeTyping.split('.').length === 2;
     // If the preceding word is a type, e.g., "boolean", we assume the user is declaring a variable and skip autocomplete
-    const hasDeclaredType = words.length === 2 && completionService.getTypes().includes(words[0]);
-    // If the preceding word contains the "new" keyword, we only provide constructor autcompletion
-    const isConstructor = words[words.length - 2] === 'new';
+    const hasDeclaredType =
+      words.length === 2 && completionService.getPrimitives().includes(words[0]);
 
     let autocompleteSuggestions: PainlessCompletionResult = {
       isIncomplete: false,
       suggestions: [],
     };
 
-    if (isConstructor) {
-      autocompleteSuggestions = completionService.getPainlessConstructorsToAutocomplete();
-    } else if (isProperty) {
+    if (isProperty) {
       const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
-      autocompleteSuggestions = completionService.getPainlessClassToAutocomplete(className);
+      autocompleteSuggestions = completionService.getPainlessClassSuggestions(className);
     } else if (!hasDeclaredType) {
-      autocompleteSuggestions = completionService.getPainlessClassesToAutocomplete();
+      autocompleteSuggestions = completionService.getStaticSuggestions();
     }
 
     return Promise.resolve(autocompleteSuggestions);
