@@ -25,6 +25,7 @@ class Test {
   getName() {
     return this.name;
   }
+  // @ts-expect-error
   private getDoubleName() {
     return this.name.repeat(2);
   }
