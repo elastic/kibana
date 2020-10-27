@@ -11,7 +11,7 @@ export const getTemplateDetailsLink = (name: string, isLegacy?: boolean) => {
   if (isLegacy) {
     url = `${url}?legacy=${isLegacy}`;
   }
-  return url;
+  return encodeURI(url);
 };
 
 export const getTemplateEditLink = (name: string, isLegacy?: boolean) => {
@@ -19,7 +19,7 @@ export const getTemplateEditLink = (name: string, isLegacy?: boolean) => {
   if (isLegacy) {
     url = `${url}?legacy=true`;
   }
-  return url;
+  return encodeURI(url);
 };
 
 export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
@@ -27,7 +27,7 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   if (isLegacy) {
     url = `${url}?legacy=true`;
   }
-  return url;
+  return encodeURI(url);
 };
 
 export const getILMPolicyPath = (policyName: string) => {
@@ -41,16 +41,15 @@ export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean)
     // React router tries to decode url params but it can't because the browser partially
     // decodes them. So we have to encode both the URL and the filter to get it all to
     // work correctly for filters with URL unsafe characters in them.
-    return `/indices?includeHiddenIndices=${hiddenIndicesParam}&filter=${encodeURIComponent(
-      filter
-    )}`;
+    return encodeURI(
+      `/indices?includeHiddenIndices=${hiddenIndicesParam}&filter=${encodeURIComponent(filter)}`
+    );
   }
 
   // If no filter, URI is already safe so no need to encode.
   return '/indices';
 };
 
-// Need to add some additonal encoding/decoding logic to work with React Router
-// For background, see: https://github.com/ReactTraining/history/issues/505
-export const encodePathForReactRouter = (pathname: string): string =>
-  encodeURIComponent(encodeURIComponent(pathname));
+export const getDataStreamDetailsLink = (name: string) => {
+  return encodeURI(`/data_streams/${encodeURIComponent(name)}`);
+};

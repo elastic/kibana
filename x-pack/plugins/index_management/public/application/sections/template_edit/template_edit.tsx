@@ -52,7 +52,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       return;
     }
 
-    history.push(getTemplateDetailsLink(name, updatedTemplate._kbnMeta.isLegacy));
+    history.push(getTemplateDetailsLink(decodedTemplateName, updatedTemplate._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {

@@ -235,7 +235,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           dataStreamName={attemptToURIDecode(dataStreamName)}
           backingIndicesLink={reactRouterNavigate(
             history,
-            getIndexListUri(`data_stream="${dataStreamName}"`, true)
+            getIndexListUri(`data_stream="${attemptToURIDecode(dataStreamName)}"`, true)
           )}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);

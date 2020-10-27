@@ -37,7 +37,7 @@ import {
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { reactRouterNavigate, attemptToURIDecode } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { encodePathForReactRouter } from '../../../../services/routing';
+import { getDataStreamDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
@@ -279,7 +279,7 @@ export class IndexTable extends Component {
         <EuiLink
           data-test-subj="dataStreamLink"
           {...reactRouterNavigate(history, {
-            pathname: `/data_streams/${encodePathForReactRouter(value)}`,
+            pathname: getDataStreamDetailsLink(value),
             search: '?isDeepLink=true',
           })}
         >
