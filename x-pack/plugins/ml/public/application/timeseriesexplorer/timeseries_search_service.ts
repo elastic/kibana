@@ -93,7 +93,8 @@ function getMetricData(
         chartConfig.timeField,
         earliestMs,
         latestMs,
-        intervalMs
+        intervalMs,
+        chartConfig?.datafeedConfig?.script_fields
       )
       .pipe(
         map((resp) => {

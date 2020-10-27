@@ -95,7 +95,6 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
-        scriptFields.indexOf(dtr.field_name!) === -1 &&
         scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
         scriptFields.indexOf(dtr.by_field_name!) === -1 &&
         scriptFields.indexOf(dtr.over_field_name!) === -1;

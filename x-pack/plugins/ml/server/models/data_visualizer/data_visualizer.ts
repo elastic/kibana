@@ -597,12 +597,14 @@ export class DataVisualizer {
     samplerShardSize: number,
     timeFieldName: string,
     earliestMs?: number,
-    latestMs?: number
+    latestMs?: number,
+    datafeedConfig?: any
   ) {
+    const datafeedHasScriptFields = typeof datafeedConfig?.script_fields === 'object';
+
     const index = indexPatternTitle;
     const size = 0;
     const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
-
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
     const aggs: Aggs = {};
@@ -611,9 +613,17 @@ export class DataVisualizer {
       aggs[`${safeFieldName}_count`] = {
         filter: { exists: { field } },
       };
-      aggs[`${safeFieldName}_cardinality`] = {
+
+      let cardinalField = {
         cardinality: { field },
       };
+      if (datafeedHasScriptFields && datafeedConfig?.script_fields.hasOwnProperty(field)) {
+        cardinalField = aggs[`${safeFieldName}_cardinality`] = {
+          cardinality: { script: datafeedConfig?.script_fields[field].script },
+        };
+      }
+
+      aggs[`${safeFieldName}_cardinality`] = cardinalField;
     });
 
     const searchBody = {
@@ -661,10 +671,27 @@ export class DataVisualizer {
           },
         });
       } else {
-        stats.aggregatableNotExistsFields.push({
-          fieldName: field,
-          existsInDocs: false,
-        });
+        if (datafeedHasScriptFields && datafeedConfig.script_fields.hasOwnProperty(field)) {
+          const cardinality = get(
+            aggregations,
+            [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
+            0
+          );
+          stats.aggregatableExistsFields.push({
+            fieldName: field,
+            existsInDocs: true,
+            stats: {
+              sampleCount,
+              count,
+              cardinality,
+            },
+          });
+        } else {
+          stats.aggregatableNotExistsFields.push({
+            fieldName: field,
+            existsInDocs: false,
+          });
+        }
       }
     });
 

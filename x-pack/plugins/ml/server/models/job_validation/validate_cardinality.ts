@@ -66,6 +66,7 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
     const relevantDetectors = detectors.filter((detector) => {
       return typeof detector[fieldName] !== 'undefined';
     });
+    const datafeedConfig = job.datafeed_config;
 
     if (relevantDetectors.length > 0) {
       try {
@@ -83,6 +84,12 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
         // parse fieldCaps to return an array of just the fields which are aggregatable
         if (typeof fieldCaps === 'object' && typeof fieldCaps.fields === 'object') {
           aggregatableFieldNames = uniqueFieldNames.filter((field) => {
+            if (
+              typeof datafeedConfig?.script_fields === 'object' &&
+              datafeedConfig?.script_fields.hasOwnProperty(field)
+            ) {
+              return true;
+            }
             if (typeof fieldCaps.fields[field] !== 'undefined') {
               const fieldType = Object.keys(fieldCaps.fields[field])[0];
               return fieldCaps.fields[field][fieldType].aggregatable;
@@ -96,7 +103,10 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
           job.datafeed_config.query,
           aggregatableFieldNames,
           0,
-          job.data_description.time_field
+          job.data_description.time_field,
+          undefined,
+          undefined,
+          datafeedConfig
         );
 
         uniqueFieldNames.forEach((uniqueFieldName) => {

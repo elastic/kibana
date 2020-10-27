@@ -30,7 +30,15 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
     client: IScopedClusterClient,
     payload: CalculateModelMemoryLimitPayload
   ) {
-    const { analysisConfig, indexPattern, query, timeFieldName, earliestMs, latestMs } = payload;
+    const {
+      datafeedConfig,
+      analysisConfig,
+      indexPattern,
+      query,
+      timeFieldName,
+      earliestMs,
+      latestMs,
+    } = payload;
 
     return calculateModelMemoryLimitProvider(client)(
       analysisConfig as AnalysisConfig,
@@ -38,7 +46,8 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       query,
       timeFieldName,
       earliestMs,
-      latestMs
+      latestMs,
+      datafeedConfig
     );
   }
 

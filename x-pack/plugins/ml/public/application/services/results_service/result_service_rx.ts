@@ -69,7 +69,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       timeFieldName: string,
       earliestMs: number,
       latestMs: number,
-      intervalMs: number
+      intervalMs: number,
+      scriptFields: any | undefined
     ): Observable<MetricData> {
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
@@ -155,6 +156,11 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
             field: metricFieldName,
           },
         };
+        if (scriptFields !== undefined && scriptFields[metricFieldName] !== undefined) {
+          metricAgg[metricFunction].script = scriptFields[metricFieldName].script;
+        } else {
+          metricAgg[metricFunction].field = metricFieldName;
+        }
 
         if (metricFunction === 'percentiles') {
           metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];

@@ -10,6 +10,7 @@ import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import { DatafeedOverride } from '../../../common/types/modules';
 
 export interface ModelMemoryEstimationResult {
   /**
@@ -45,7 +46,8 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
     query: any,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    datafeedConfig: DatafeedOverride
   ): Promise<{
     overallCardinality: { [key: string]: number };
     maxBucketCardinality: { [key: string]: number };
@@ -100,7 +102,8 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
         query,
         timeFieldName,
         earliestMs,
-        latestMs
+        latestMs,
+        datafeedConfig
       );
     }
 
@@ -139,6 +142,7 @@ export function calculateModelMemoryLimitProvider(client: IScopedClusterClient) 
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
+    datafeedConfig: DatafeedOverride,
     allowMMLGreaterThanMax = false
   ): Promise<ModelMemoryEstimationResult> {
     const { body: info } = await asInternalUser.ml.info<MlInfoResponse>();
@@ -151,7 +155,8 @@ export function calculateModelMemoryLimitProvider(client: IScopedClusterClient) 
       query,
       timeFieldName,
       earliestMs,
-      latestMs
+      latestMs,
+      datafeedConfig
     );
 
     const { body } = await asInternalUser.ml.estimateModelMemory<ModelMemoryEstimateResponse>({
