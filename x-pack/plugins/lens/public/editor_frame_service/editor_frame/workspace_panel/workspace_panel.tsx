@@ -387,7 +387,7 @@ export const InnerVisualizationWrapper = ({
           {localState.configurationValidationError.length > 1
             ? i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
                 defaultMessage: ` + {errors} {errors, plural, one {error} other {errors}}`,
-                values: { errors: localState.configurationValidationError.length },
+                values: { errors: localState.configurationValidationError.length - 1 },
               })
             : null}
         </EuiFlexItem>
