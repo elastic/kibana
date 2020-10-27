@@ -18,11 +18,11 @@ import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
 
 export interface UXMetrics {
-  cls: string;
-  fid: number;
-  lcp: number;
+  cls: string | null;
+  fid?: number | null;
+  lcp?: number | null;
   tbt: number;
-  fcp: number;
+  fcp?: number | null;
   coreVitalPages: number;
   lcpRanks: number[];
   fidRanks: number[];
@@ -53,7 +53,7 @@ interface Props {
   displayTrafficMetric?: boolean;
 }
 
-function formatValue(value?: number) {
+function formatValue(value?: number | null) {
   if (typeof value === 'undefined' || value === null) {
     return null;
   }
