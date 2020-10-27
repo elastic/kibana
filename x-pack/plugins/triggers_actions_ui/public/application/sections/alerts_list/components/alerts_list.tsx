@@ -175,6 +175,7 @@ export const AlertsList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           alertStatusesFilter,
+          getAggregations: true,
         });
         setAlertsState({
           isLoading: false,

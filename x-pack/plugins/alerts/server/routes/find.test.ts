@@ -73,6 +73,75 @@ describe('findAlertRoute', () => {
             "perPage": 1,
           },
         },
+        undefined,
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: findResult,
+    });
+  });
+
+  it('finds alerts with get_aggregate parameter defined', async () => {
+    const licenseState = mockLicenseState();
+    const router = httpServiceMock.createRouter();
+
+    findAlertRoute(router, licenseState);
+
+    const [config, handler] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_find"`);
+
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 0,
+      data: [],
+      aggregations: {
+        alertExecutionStatus: {},
+      },
+    };
+    alertsClient.find.mockResolvedValueOnce(findResult);
+
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        query: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+          get_aggregations: true,
+        },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggregations": Object {
+            "alertExecutionStatus": Object {},
+          },
+          "data": Array [],
+          "page": 1,
+          "perPage": 1,
+          "total": 0,
+        },
+      }
+    `);
+
+    expect(alertsClient.find).toHaveBeenCalledTimes(1);
+    expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "options": Object {
+            "defaultSearchOperator": "OR",
+            "get_aggregations": true,
+            "page": 1,
+            "perPage": 1,
+          },
+        },
+        true,
       ]
     `);
 

@@ -72,6 +72,7 @@ export async function loadAlerts({
   typesFilter,
   actionTypesFilter,
   alertStatusesFilter,
+  getAggregations,
 }: {
   http: HttpSetup;
   page: { index: number; size: number };
@@ -79,6 +80,7 @@ export async function loadAlerts({
   typesFilter?: string[];
   actionTypesFilter?: string[];
   alertStatusesFilter?: string[];
+  getAggregations?: boolean;
 }): Promise<{
   page: number;
   perPage: number;
@@ -114,6 +116,7 @@ export async function loadAlerts({
       default_search_operator: 'AND',
       sort_field: 'name.keyword',
       sort_order: 'asc',
+      get_aggregations: getAggregations,
     },
   });
 }

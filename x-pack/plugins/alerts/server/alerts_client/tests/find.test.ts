@@ -15,6 +15,7 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { AlertExecutionStatusValues } from '../../types';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -161,6 +162,132 @@ describe('find()', () => {
         },
       ]
     `);
+  });
+
+  test('returns aggregation if aggregate option is enabled', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 10,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 8,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 6,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 4,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 2,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              alertTypeId: 'myType',
+              schedule: { interval: '10s' },
+              params: {
+                bar: true,
+              },
+              createdAt: new Date().toISOString(),
+              actions: [
+                {
+                  group: 'default',
+                  actionRef: 'action_0',
+                  params: {
+                    foo: true,
+                  },
+                },
+              ],
+            },
+            score: 1,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+            ],
+          },
+        ],
+      });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const result = await alertsClient.find({ options: {} }, true);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "aggregations": Object {
+          "alertExecutionStatus": Object {
+            "active": 8,
+            "error": 6,
+            "ok": 10,
+            "pending": 4,
+            "unknown": 2,
+          },
+        },
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+            ],
+            "alertTypeId": "myType",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "1",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "updatedAt": 2019-02-12T21:01:22.479Z,
+          },
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 1,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(
+      AlertExecutionStatusValues.length + 1
+    );
+    AlertExecutionStatusValues.forEach((status: string, ndx: number) => {
+      expect(unsecuredSavedObjectsClient.find.mock.calls[ndx + 1]).toEqual([
+        {
+          fields: undefined,
+          filter: `alert.attributes.executionStatus.status:(${status})`,
+          page: 1,
+          perPage: 0,
+          type: 'alert',
+        },
+      ]);
+    });
   });
 
   describe('authorization', () => {

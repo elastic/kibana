@@ -41,6 +41,7 @@ const querySchema = schema.object({
   ),
   fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
+  get_aggregations: schema.maybe(schema.boolean()),
 });
 
 export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
@@ -83,7 +84,7 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
           : [query.search_fields];
       }
 
-      const findResult = await alertsClient.find({ options }, true);
+      const findResult = await alertsClient.find({ options }, query.get_aggregations);
       return res.ok({
         body: findResult,
       });
