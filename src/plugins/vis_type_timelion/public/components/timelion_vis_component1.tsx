@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { cloneDeep } from 'lodash';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { compact, cloneDeep, last, map } from 'lodash';
 import {
   AreaSeries,
   BarSeries,
@@ -75,6 +75,7 @@ function TimelionVisComponent1({
     setChart(newChart);
   }, [seriesList.list]);
 
+  // temp solution
   const getLegendPosition = function (chartGlobal: any) {
     if (chartGlobal && chartGlobal.legend) {
       switch (chartGlobal.legend.position) {
@@ -113,94 +114,101 @@ function TimelionVisComponent1({
     [fireEvent]
   );
 
-  const onRenderChange = function (data) {
-    if (!data[0]) {
+  const onRenderChange = function (isRendered: boolean) {
+    if (!isRendered) {
       renderComplete();
     }
   };
 
+  const title: string = useMemo(() => last(compact(map(seriesList.list, '_title'))) || '', [
+    seriesList.list,
+  ]);
+
   return (
-    <Chart renderer="canvas" className="timelionChart" size={{ width: '100%' }}>
-      <Settings
-        onBrushEnd={brushEndListener}
-        showLegend
-        legendPosition={getLegendPosition(chart[0]._global)}
-        onRenderChange={onRenderChange}
-        theme={[
-          {
-            crosshair: {
-              band: {
-                fill: '#F00',
+    <div className="timelionChart">
+      <div className="chart-top-title">{title}</div>
+      <Chart renderer="canvas" size={{ width: '100%' }}>
+        <Settings
+          onBrushEnd={brushEndListener}
+          showLegend
+          legendPosition={getLegendPosition(chart[0]._global)}
+          onRenderChange={onRenderChange}
+          theme={[
+            {
+              crosshair: {
+                band: {
+                  fill: '#F00',
+                },
               },
             },
-          },
-        ]}
-        tooltip={{
-          snap: true,
-          type: TooltipType.VerticalCursor,
-        }}
-      />
-      <Axis
-        id="bottom"
-        position={Position.Bottom}
-        showOverlappingTicks
-        tickFormat={options.xaxis.tickFormatter}
-      />
-      {chart[0]._global && chart[0]._global.yaxes ? (
-        chart[0]._global.yaxes.map((data, index) => {
-          return (
-            <Axis
-              key={data.position + index}
-              id={data.position + data.axisLabel}
-              title={data.axisLabel}
-              position={data.position}
-              gridLine={{
-                stroke: 'rgba(125,125,125,0.3)',
-                visible: true,
-              }}
-            />
-          );
-        })
-      ) : (
-        <Axis
-          id="left"
-          position={Position.Left}
-          gridLine={{
-            stroke: 'rgba(125,125,125,0.3)',
-            visible: true,
+          ]}
+          tooltip={{
+            snap: true,
+            type: TooltipType.VerticalCursor,
           }}
         />
-      )}
-      {chart.map((data, index) => {
-        if (data.bars) {
-          return (
-            <BarSeries
-              key={data.label + index}
-              id={data.label}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={data.data}
-              {...getBarStyles(data.bars, data.color)}
-            />
-          );
-        } else {
-          return (
-            <AreaSeries
-              key={data.label + index}
-              id={data.label}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={data.data}
-              {...getAreaStyles(data)}
-            />
-          );
-        }
-      })}
-    </Chart>
+        <Axis
+          id="bottom"
+          position={Position.Bottom}
+          showOverlappingTicks
+          tickFormat={options.xaxis.tickFormatter}
+        />
+        {chart[0]._global && chart[0]._global.yaxes ? (
+          chart[0]._global.yaxes.map((axis: any, index: number) => {
+            return (
+              <Axis
+                key={axis.position + index}
+                id={axis.position + axis.axisLabel}
+                title={axis.axisLabel}
+                position={axis.position}
+                gridLine={{
+                  stroke: 'rgba(125,125,125,0.3)',
+                  visible: true,
+                }}
+              />
+            );
+          })
+        ) : (
+          <Axis
+            id="left"
+            position={Position.Left}
+            gridLine={{
+              stroke: 'rgba(125,125,125,0.3)',
+              visible: true,
+            }}
+          />
+        )}
+        {chart.map((data, index) => {
+          if (data.bars) {
+            return (
+              <BarSeries
+                key={data.label + index}
+                id={data.label}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={0}
+                yAccessors={[1]}
+                data={data.data}
+                {...getBarStyles(data.bars, data.color)}
+              />
+            );
+          } else {
+            return (
+              <AreaSeries
+                key={data.label + index}
+                id={data.label}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={0}
+                yAccessors={[1]}
+                data={data.data}
+                {...getAreaStyles(data)}
+              />
+            );
+          }
+        })}
+      </Chart>
+    </div>
   );
 }
 
