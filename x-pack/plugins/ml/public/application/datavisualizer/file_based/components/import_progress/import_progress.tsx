@@ -276,12 +276,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
 
   return (
     <React.Fragment>
-      <EuiStepsHorizontal
-        steps={steps}
-        // TODO: Remove
-        // @ts-ignore
-        style={{ backgroundColor: 'transparent' }}
-      />
+      <EuiStepsHorizontal steps={steps} style={{ backgroundColor: 'transparent' }} />
       {statusInfo && (
         <React.Fragment>
           <EuiSpacer size="m" />
