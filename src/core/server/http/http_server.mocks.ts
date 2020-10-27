@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parse as parseUrl } from 'url';
+import { URL, format as formatUrl } from 'url';
 import { Request } from '@hapi/hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
@@ -73,7 +73,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
-  const url = parseUrl(`${path}${queryString ? `?${queryString}` : ''}`);
+  const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
   return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
@@ -120,9 +120,11 @@ type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
 function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   const pathname = customization.url?.pathname || '/';
   const path = `${pathname}${customization.url?.search || ''}`;
-  const url = Object.assign({ pathname, path, href: path }, customization.url);
+  const url = new URL(
+    formatUrl(Object.assign({ pathname, path, href: path }, customization.url)),
+    'http://localhost'
+  );
 
-  // @ts-expect-error _core isn't supposed to be accessed - remove once we upgrade to hapi v18
   return merge(
     {},
     {
@@ -138,12 +140,6 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
         req: {
           url: path,
           socket: {},
-        },
-      },
-      // TODO: Remove once we upgrade to hapi v18
-      _core: {
-        info: {
-          uri: 'http://localhost',
         },
       },
     },

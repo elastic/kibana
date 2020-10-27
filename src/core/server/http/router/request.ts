@@ -212,8 +212,7 @@ export class KibanaRequest<
     this.uuid = appState?.requestUuid ?? uuid.v4();
     this.rewrittenUrl = appState?.rewrittenUrl;
 
-    // @ts-expect-error request._core isn't supposed to be accessed - remove once we upgrade to hapi v18
-    this.url = new URL(request.url.href!, request._core.info.uri);
+    this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest =
       request.headers['kbn-system-request'] === 'true' ||
