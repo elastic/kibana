@@ -9,12 +9,7 @@ import { first, switchMap, map, mergeMap } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 
-import {
-  getShardTimeout,
-  shimHitsTotal,
-  search,
-  DoSearchFnArgs,
-} from '../../../../../src/plugins/data/server';
+import { getShardTimeout, shimHitsTotal, search } from '../../../../../src/plugins/data/server';
 import {
   doPartialSearch,
   takeUntilPollingComplete,
@@ -49,21 +44,14 @@ export const enhancedEsSearchStrategyProvider = (
     const asyncOptions = getAsyncOptions();
 
     return config$.pipe(
-      mergeMap(
-        () =>
-          new Promise<DoSearchFnArgs>(async (resolve) => {
-            const defaultParams = await getDefaultSearchParams(context.core.uiSettings.client);
-
-            resolve({
-              params: {
-                ...defaultParams,
-                batchedReduceSize: 64,
-                ...asyncOptions,
-                ...request.params,
-              },
-            });
-          })
-      ),
+      mergeMap(async () => ({
+        params: {
+          ...(await getDefaultSearchParams(context.core.uiSettings.client)),
+          batchedReduceSize: 64,
+          ...asyncOptions,
+          ...request.params,
+        },
+      })),
       switchMap(
         doPartialSearch(
           (...args) => context.core.elasticsearch.client.asCurrentUser.asyncSearch.submit(...args),

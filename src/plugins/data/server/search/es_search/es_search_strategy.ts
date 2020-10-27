@@ -27,7 +27,6 @@ import {
   doSearch,
   includeTotalLoaded,
   toKibanaSearchResponse,
-  DoSearchFnArgs,
 } from '../../../common/search/es_search/es_search_rxjs_utils';
 import { trackSearchStatus } from './es_search_rxjs_utils';
 
@@ -47,18 +46,13 @@ export const esSearchStrategyProvider = (
     }
 
     return config$.pipe(
-      mergeMap(
-        (config) =>
-          new Promise<DoSearchFnArgs>(async (resolve) => {
-            resolve({
-              params: {
-                ...(await getDefaultSearchParams(context.core.uiSettings.client)),
-                ...getShardTimeout(config),
-                ...request.params,
-              },
-            });
-          })
-      ),
+      mergeMap(async (config) => ({
+        params: {
+          ...(await getDefaultSearchParams(context.core.uiSettings.client)),
+          ...getShardTimeout(config),
+          ...request.params,
+        },
+      })),
       switchMap(
         doSearch(
           (...args) => context.core.elasticsearch.client.asCurrentUser.search(...args),

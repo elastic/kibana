@@ -30,15 +30,15 @@ import { toSnakeCase } from './to_snake_case';
 import { getTotalLoaded } from './get_total_loaded';
 
 import type { IEsRawSearchResponse } from './types';
-import type { IKibanaSearchResponse } from '../types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export type SearchMethod = <SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse>(
-  params: any,
-  options?: any
+  params: DoSearchFnArgs['params'],
+  options?: DoSearchFnArgs['options']
 ) => TransportRequestPromise<ApiResponse<SearchResponse>>;
 
 export interface DoSearchFnArgs {
-  params: Record<string, any>;
+  params: IKibanaSearchRequest['params'];
   options?: Record<string, any>;
 }
 

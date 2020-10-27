@@ -7,7 +7,7 @@
 import { Logger, SharedGlobalConfig } from 'kibana/server';
 import { switchMap, mergeMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { search, DoSearchFnArgs } from '../../../../../src/plugins/data/server';
+import { search } from '../../../../../src/plugins/data/server';
 import {
   doPartialSearch,
   takeUntilPollingComplete,
@@ -39,24 +39,21 @@ export const eqlSearchStrategyProvider = (
       const asyncOptions = getAsyncOptions();
 
       return config$.pipe(
-        mergeMap(
-          () =>
-            new Promise<DoSearchFnArgs>(async (resolve) => {
-              const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
-                context.core.uiSettings.client
-              );
+        mergeMap(async () => {
+          const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
+            context.core.uiSettings.client
+          );
 
-              resolve({
-                params: {
-                  ignoreThrottled,
-                  ignoreUnavailable,
-                  ...asyncOptions,
-                  ...request.params,
-                },
-                options: { ...request.options },
-              });
-            })
-        ),
+          return {
+            params: {
+              ignoreThrottled,
+              ignoreUnavailable,
+              ...asyncOptions,
+              ...request.params,
+            },
+            options: { ...request.options },
+          };
+        }),
         switchMap(
           doPartialSearch(
             (...args) => context.core.elasticsearch.client.asCurrentUser.eql.search(...args),
