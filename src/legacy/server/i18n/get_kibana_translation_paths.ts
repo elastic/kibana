@@ -22,7 +22,7 @@ import { fromRoot } from '../../../core/server/utils';
 import { I18N_RC } from './constants';
 import { getTranslationPaths } from './get_translation_paths';
 
-export async function getKibanaTranslatoinPaths(config: Pick<KibanaConfig, 'get'>) {
+export async function getKibanaTranslationPaths(config: Pick<KibanaConfig, 'get'>) {
   return await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),

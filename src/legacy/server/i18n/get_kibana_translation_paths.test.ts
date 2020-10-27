@@ -21,10 +21,10 @@ import { I18N_RC } from './constants';
 import { fromRoot } from '../../../core/server/utils';
 
 jest.mock('./get_translation_paths', () => ({ getTranslationPaths: jest.fn() }));
-import { getKibanaTranslatoinPaths } from './get_kibana_translation_paths';
+import { getKibanaTranslationPaths } from './get_kibana_translation_paths';
 import { getTranslationPaths as mockGetTranslationPaths } from './get_translation_paths';
 
-describe('getKibanaTranslatoinPaths', () => {
+describe('getKibanaTranslationPaths', () => {
   const mockConfig = { get: jest.fn() };
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('getKibanaTranslatoinPaths', () => {
 
   it('calls getTranslationPaths against kibana root and kibana-extra', async () => {
     mockConfig.get.mockReturnValue([]);
-    await getKibanaTranslatoinPaths(mockConfig);
+    await getKibanaTranslationPaths(mockConfig);
     expect(mockGetTranslationPaths).toHaveBeenNthCalledWith(1, {
       cwd: fromRoot('.'),
       glob: `*/${I18N_RC}`,
@@ -47,7 +47,7 @@ describe('getKibanaTranslatoinPaths', () => {
 
   it('calls getTranslationPaths for each config returned in plugin.paths and plugins.scanDirs', async () => {
     mockConfig.get.mockReturnValueOnce(['a', 'b']).mockReturnValueOnce(['c']);
-    await getKibanaTranslatoinPaths(mockConfig);
+    await getKibanaTranslationPaths(mockConfig);
     expect(mockConfig.get).toHaveBeenNthCalledWith(1, 'plugins.paths');
     expect(mockConfig.get).toHaveBeenNthCalledWith(2, 'plugins.scanDirs');
 

@@ -21,7 +21,7 @@ import { i18n, i18nLoader } from '@kbn/i18n';
 import { basename } from 'path';
 import { Server } from 'hapi';
 import type { UsageCollectionSetup } from '../../../plugins/usage_collection/server';
-import { getKibanaTranslatoinPaths } from './get_kibana_translation_paths';
+import { getKibanaTranslationPaths } from './get_kibana_translation_paths';
 import KbnServer, { KibanaConfig } from '../kbn_server';
 import { registerLocalizationUsageCollector } from './localization';
 
@@ -32,7 +32,7 @@ export async function i18nMixin(
 ) {
   const locale = config.get('i18n.locale') as string;
 
-  const translationPaths = await getKibanaTranslatoinPaths(config);
+  const translationPaths = await getKibanaTranslationPaths(config);
 
   const currentTranslationPaths = ([] as string[])
     .concat(...translationPaths)
