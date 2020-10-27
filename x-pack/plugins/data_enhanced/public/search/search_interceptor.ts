@@ -75,12 +75,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     return this.runSearch(request, combinedSignal, strategy).pipe(
-      tap((r) => {
-        // If the response indicates of an error, stop polling and complete the observable
-        if (isErrorResponse(r)) {
-          return throwError(new AbortError());
-        }
-      }),
       concatMap((r) => {
         if (isCompleteResponse(r)) {
           return of(r);
@@ -94,6 +88,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
             pollInterval
           )
         );
+      }),
+      tap((r) => {
+        // If the response indicates of an error, stop polling and complete the observable
+        if (isErrorResponse(r)) {
+          return throwError(new AbortError());
+        }
       }),
       takeUntil(aborted$),
       catchError((e: any) => {
