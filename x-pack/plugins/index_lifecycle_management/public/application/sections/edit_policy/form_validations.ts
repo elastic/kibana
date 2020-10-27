@@ -4,27 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { fieldValidators, ValidationFunc } from '../../../shared_imports';
-
-import { i18nTexts } from './components/phases/hot_phase/i18n_texts';
 
 import { ROLLOVER_FORM_PATHS } from './constants';
 
-const { numberGreaterThanField } = fieldValidators;
+import { i18nTexts } from './i18n_texts';
 
-export const positiveNumberRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.numberAboveZeroRequiredError',
-  {
-    defaultMessage: 'Only numbers above 0 are allowed.',
-  }
-);
+const { numberGreaterThanField } = fieldValidators;
 
 export const ifExistsNumberGreaterThanZero: ValidationFunc<any, any, any> = (arg) => {
   if (arg.value) {
     return numberGreaterThanField({
       than: 0,
-      message: positiveNumberRequiredMessage,
+      message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
     })({
       ...arg,
       value: parseInt(arg.value, 10),
@@ -54,16 +46,22 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
     )
   ) {
     fields[ROLLOVER_FORM_PATHS.maxAge].setErrors([
-      { validationType: ROLLOVER_EMPTY_VALIDATION, message: i18nTexts.maximumAgeRequiredMessage },
+      {
+        validationType: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
+      },
     ]);
     fields[ROLLOVER_FORM_PATHS.maxDocs].setErrors([
       {
         validationType: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.maximumDocumentsRequiredMessage,
+        message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
       },
     ]);
     fields[ROLLOVER_FORM_PATHS.maxSize].setErrors([
-      { validationType: ROLLOVER_EMPTY_VALIDATION, message: i18nTexts.maximumSizeRequiredMessage },
+      {
+        validationType: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
+      },
     ]);
   } else {
     fields[ROLLOVER_FORM_PATHS.maxAge].clearErrors(ROLLOVER_EMPTY_VALIDATION);
