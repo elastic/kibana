@@ -83,15 +83,13 @@ export const RenderWithFn: FC<Props> = ({
     []
   );
 
-  useEffect(() => {
+  const render = useCallback(() => {
     if (!isEqual(handlers.current, incomingHandlers)) {
       handlers.current = incomingHandlers;
     }
-  }, [incomingHandlers]);
 
-  const render = useCallback(() => {
     renderFn(renderTarget.current!, config, handlers.current);
-  }, [renderTarget, config, renderFn]);
+  }, [renderTarget, config, renderFn, incomingHandlers]);
 
   useEffect(() => {
     if (!domNode) {
