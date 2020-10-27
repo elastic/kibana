@@ -37,7 +37,7 @@ export function getMlClient(
 
   async function jobIdsCheck(jobType: JobType, p: MlClientParams, allowWildcards: boolean = false) {
     const jobIds =
-      jobType === 'anomaly-detector' ? getADJobIds(p) : getDFAJobIds(p as MlGetDFAParams);
+      jobType === 'anomaly-detector' ? getADJobIdsFromRequest(p) : getDFAJobIdsFromRequest(p);
     if (jobIds.length) {
       const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
       let missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
@@ -51,8 +51,50 @@ export function getMlClient(
     }
   }
 
+  async function groupIdsCheck(p: MlClientParams, allJobs: Job[], filteredJobIds: string[]) {
+    // if job ids have been specified, we need to check in case any of them are actually
+    // group ids, which will be unknown to the saved objects.
+    // find which ids are not group ids and check them.
+    const ids = getADJobIdsFromRequest(p);
+    if (ids.length) {
+      const responseGroupIds = [...new Set(allJobs.map((j) => j.groups ?? []).flat())];
+      const requestedGroupIds = ids.filter((id) => responseGroupIds.includes(id));
+
+      const groupIdsFromFilteredJobs = [
+        ...new Set(
+          allJobs
+            .filter((j) => filteredJobIds.includes(j.job_id))
+            .map((j) => j.groups ?? [])
+            .flat()
+        ),
+      ];
+
+      const groupsIdsThatDidNotMatch = requestedGroupIds.filter(
+        (id) => groupIdsFromFilteredJobs.includes(id) === false
+      );
+
+      if (groupsIdsThatDidNotMatch.length) {
+        // is there are group ids which were requested but didn't
+        // exist in filtered jobs, list them in an error
+        throw new MLJobNotFound(`No known job with id '${groupsIdsThatDidNotMatch.join(',')}'`);
+      }
+    }
+  }
+
+  async function groupIdsCheckFromJobStats(
+    filteredJobIds: string[],
+    ...p: Parameters<MlClient['getJobStats']>
+  ) {
+    // similar to groupIdsCheck above, however we need to load the jobs first to get the groups information
+    const ids = getADJobIdsFromRequest(p);
+    if (ids.length) {
+      const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
+      await groupIdsCheck(p, body.jobs, filteredJobIds);
+    }
+  }
+
   async function datafeedIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
-    const datafeedIds = getDatafeedIds(p);
+    const datafeedIds = getDatafeedIdsFromRequest(p);
     if (datafeedIds.length) {
       const filteredDatafeedIds = await jobSavedObjectService.filterDatafeedIdsForSpace(
         datafeedIds
@@ -83,7 +125,7 @@ export function getMlClient(
       throw error.body ?? error;
     }
 
-    const modelIds = getTrainedModelIds(p);
+    const modelIds = getTrainedModelIdsFromRequest(p);
 
     const modelJobIds: string[] = configs
       .map((m) => m.metadata?.analytics_config.id)
@@ -136,7 +178,7 @@ export function getMlClient(
     async deleteDatafeed(...p: any) {
       await datafeedIdsCheck(p);
       const resp = await mlClient.deleteDatafeed(...p);
-      const [datafeedId] = getDatafeedIds(p);
+      const [datafeedId] = getDatafeedIdsFromRequest(p);
       if (datafeedId !== undefined) {
         await jobSavedObjectService.deleteDatafeed(datafeedId);
       }
@@ -265,7 +307,7 @@ export function getMlClient(
       }
     },
     async getDatafeedStats(...p: Parameters<MlClient['getDatafeedStats']>) {
-      // await datafeedIdsCheck(p, true);
+      await datafeedIdsCheck(p, true);
       try {
         const { body } = await mlClient.getDatafeedStats<{ datafeeds: DatafeedStats[] }>(...p);
         const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace<DatafeedStats>(
@@ -282,7 +324,7 @@ export function getMlClient(
       }
     },
     async getDatafeeds(...p: Parameters<MlClient['getDatafeeds']>) {
-      // await datafeedIdsCheck(p, true);
+      await datafeedIdsCheck(p, true);
       try {
         const { body } = await mlClient.getDatafeeds<{ datafeeds: Datafeed[] }>(...p);
         const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace<Datafeed>(
@@ -306,7 +348,6 @@ export function getMlClient(
       return mlClient.getInfluencers(...p);
     },
     async getJobStats(...p: Parameters<MlClient['getJobStats']>) {
-      // await jobIdsCheck('anomaly-detector', p, true);
       try {
         const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<JobStats>(
@@ -314,8 +355,15 @@ export function getMlClient(
           body.jobs,
           'job_id'
         );
+        await groupIdsCheckFromJobStats(
+          jobs.map((j) => j.job_id),
+          ...p
+        );
         return { body: { ...body, count: jobs.length, jobs } };
       } catch (error) {
+        if (error instanceof MLJobNotFound) {
+          throw error;
+        }
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
@@ -323,7 +371,6 @@ export function getMlClient(
       }
     },
     async getJobs(...p: Parameters<MlClient['getJobs']>) {
-      // await jobIdsCheck('anomaly-detector', p, true);
       try {
         const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<Job>(
@@ -331,8 +378,16 @@ export function getMlClient(
           body.jobs,
           'job_id'
         );
+        await groupIdsCheck(
+          p,
+          body.jobs,
+          jobs.map((j) => j.job_id)
+        );
         return { body: { ...body, count: jobs.length, jobs } };
       } catch (error) {
+        if (error instanceof MLJobNotFound) {
+          throw error;
+        }
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
@@ -393,7 +448,7 @@ export function getMlClient(
     },
     async putDataFrameAnalytics(...p: Parameters<MlClient['putDataFrameAnalytics']>) {
       const resp = await mlClient.putDataFrameAnalytics(...p);
-      const [analyticsId] = getDFAJobIds(p);
+      const [analyticsId] = getDFAJobIdsFromRequest(p);
       if (analyticsId !== undefined) {
         await jobSavedObjectService.createDataFrameAnalyticsJob(analyticsId);
       }
@@ -401,7 +456,7 @@ export function getMlClient(
     },
     async putDatafeed(...p: Parameters<MlClient['putDatafeed']>) {
       const resp = await mlClient.putDatafeed(...p);
-      const [datafeedId] = getDatafeedIds(p);
+      const [datafeedId] = getDatafeedIdsFromRequest(p);
       const jobId = getJobIdFromBody(p);
       if (datafeedId !== undefined && jobId !== undefined) {
         await jobSavedObjectService.addDatafeed(datafeedId, jobId);
@@ -414,7 +469,7 @@ export function getMlClient(
     },
     async putJob(...p: Parameters<MlClient['putJob']>) {
       const resp = await mlClient.putJob(...p);
-      const [jobId] = getADJobIds(p);
+      const [jobId] = getADJobIdsFromRequest(p);
       if (jobId !== undefined) {
         await jobSavedObjectService.createAnomalyDetectionJob(jobId);
       }
@@ -476,17 +531,17 @@ export function getMlClient(
   } as MlClient;
 }
 
-function getDFAJobIds([params]: MlGetDFAParams): string[] {
+function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
   const ids = params?.id?.split(',');
   return ids || [];
 }
 
-function getADJobIds([params]: MlGetADParams): string[] {
+function getADJobIdsFromRequest([params]: MlGetADParams): string[] {
   const ids = params?.job_id?.split(',');
   return ids || [];
 }
 
-function getDatafeedIds([params]: MlGetDatafeedParams): string[] {
+function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
   const ids = params?.datafeed_id?.split(',');
   return ids || [];
 }
@@ -496,7 +551,7 @@ function getJobIdFromBody(p: any): string | undefined {
   return params?.body?.job_id;
 }
 
-function getTrainedModelIds(p: any): string[] {
+function getTrainedModelIdsFromRequest(p: any): string[] {
   const [params] = p;
   const ids = params?.model_id?.split(',');
   return ids || [];
