@@ -162,8 +162,10 @@ export const config: PluginConfigDescriptor<ConfigSchema>;
 export interface DoSearchFnArgs {
     // (undocumented)
     options?: Record<string, any>;
+    // Warning: (ae-forgotten-export) The symbol "IKibanaSearchRequest" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    params: Record<string, any>;
+    params: IKibanaSearchRequest['params'];
 }
 
 // @public (undocumented)
@@ -413,7 +415,6 @@ export type IAggConfigs = AggConfigs;
 // @public (undocumented)
 export type IAggType = AggType;
 
-// Warning: (ae-forgotten-export) The symbol "IKibanaSearchRequest" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ISearchRequestParams" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -956,7 +957,7 @@ export const search: {
     esSearch: {
         doSearch: <SearchResponse extends import("../common").IEsRawSearchResponse<any> = import("../common").IEsRawSearchResponse<any>>(searchMethod: import("../common").SearchMethod, abortSignal?: AbortSignal | undefined) => ({ params, options }: import("../common").DoSearchFnArgs) => import("rxjs").Observable<import("@elastic/elasticsearch").ApiResponse<SearchResponse, import("@elastic/elasticsearch/lib/Transport").Context>>;
         toSnakeCase: typeof toSnakeCase;
-        shimAbortSignal: <TResponse = any>(promise: import("@elastic/elasticsearch/lib/Transport").TransportRequestPromise<TResponse>, signal: AbortSignal | undefined) => import("@elastic/elasticsearch/lib/Transport").TransportRequestPromise<TResponse>;
+        shimAbortSignal: <T extends import("@elastic/elasticsearch/lib/Transport").TransportRequestPromise<unknown>>(promise: T, signal: AbortSignal | undefined) => T;
         trackSearchStatus: <KibanaResponse extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<any>>(logger: import("@kbn/logging/target/logger").Logger, usage?: import("./search").SearchUsage | undefined) => (source: import("rxjs").Observable<KibanaResponse>) => import("rxjs").Observable<KibanaResponse>;
         includeTotalLoaded: () => import("rxjs").OperatorFunction<import("../common").IKibanaSearchResponse<any>, Pick<Pick<import("../common").IKibanaSearchResponse<any>, "id" | "rawResponse" | "loaded" | "isRunning" | "isPartial"> & Pick<import("elasticsearch").ShardsResponse, "total"> & Pick<import("elasticsearch").ShardsResponse, "failed" | "successful" | "skipped">, "failed" | "id" | "total" | "successful" | "skipped" | "rawResponse" | "loaded" | "isRunning" | "isPartial">>;
         toKibanaSearchResponse: <SearchResponse_1 extends import("../common").IEsRawSearchResponse<any> = import("../common").IEsRawSearchResponse<any>, KibanaResponse_1 extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<SearchResponse_1>>() => import("rxjs").OperatorFunction<import("@elastic/elasticsearch").ApiResponse<SearchResponse_1, import("@elastic/elasticsearch/lib/Transport").Context>, KibanaResponse_1>;

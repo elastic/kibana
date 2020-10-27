@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-params: Record<string, any>;
+params: IKibanaSearchRequest['params'];
 ```

@@ -15,5 +15,5 @@ export interface DoSearchFnArgs
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [options](./kibana-plugin-plugins-data-server.dosearchfnargs.options.md) | <code>Record&lt;string, any&gt;</code> |  |
-|  [params](./kibana-plugin-plugins-data-server.dosearchfnargs.params.md) | <code>Record&lt;string, any&gt;</code> |  |
+|  [params](./kibana-plugin-plugins-data-server.dosearchfnargs.params.md) | <code>IKibanaSearchRequest['params']</code> |  |
 
