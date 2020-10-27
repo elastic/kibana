@@ -13,7 +13,7 @@ URL that triggers a report to generate.
 
 To create the POST URL for PDF reports:
 
-. Go to *Dashboard*, then open the visualization or dashboard.
+. Open then main menu, click *Dashboard*, then open a dashboard.
 +
 To specify a relative or absolute time period, use the time filter.
 

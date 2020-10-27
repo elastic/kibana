@@ -12,15 +12,7 @@ way possible.
 
 This page shows you how to use *Index Management* features to:
 
-* View and edit index settings.
-* View mappings and statistics for an index.
-* Perform index-level operations, such as refreshes and freezes.
-* View and manage data streams.
-* Create index templates to automatically configure new data streams and
-indices.
-
-To manage your indices, open the menu, then click *Stack Management > Index
-Management*.
+To manage your indices, open the main menu, then click *Stack Management > Index Management*.
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
