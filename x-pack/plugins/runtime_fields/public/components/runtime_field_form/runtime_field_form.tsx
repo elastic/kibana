@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiLink,
 } from '@elastic/eui';
 
 import { useForm, Form, UseField, TextField, CodeEditor } from '../../shared_imports';
@@ -20,7 +21,11 @@ import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 
 import { schema } from './schema';
 
-export const RuntimeFieldForm = () => {
+interface Props {
+  docsBaseUri: string;
+}
+
+export const RuntimeFieldForm = ({ docsBaseUri }: Props) => {
   const { form } = useForm<RuntimeField>({ schema });
 
   return (
@@ -74,9 +79,30 @@ export const RuntimeFieldForm = () => {
 
       {/* Script */}
       <UseField<string> path="script">
-        {({ value, setValue, label, isValid, getErrorsMessages }) => {
+        {({ value, setValue, label, helpText, isValid, getErrorsMessages }) => {
           return (
-            <EuiFormRow label={label} error={getErrorsMessages()} isInvalid={!isValid} fullWidth>
+            <EuiFormRow
+              label={label}
+              error={getErrorsMessages()}
+              isInvalid={!isValid}
+              helpText={
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      href={`${docsBaseUri}/to-be-defined`}
+                      target="_blank"
+                      external
+                      data-test-subj="painlessSyntaxLearnMoreLink"
+                    >
+                      {i18n.translate('xpack.runtimeFields.form.script.learnMoreLinkText', {
+                        defaultMessage: 'Learn more about syntax.',
+                      })}
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              fullWidth
+            >
               <CodeEditor
                 languageId="painless"
                 // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.

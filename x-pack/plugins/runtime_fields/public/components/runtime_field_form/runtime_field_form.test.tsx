@@ -14,11 +14,13 @@ const setup = registerTestBed(RuntimeFieldForm, {
   },
 });
 
+const docsBaseUri = 'https://jestTest.elastic.co';
+
 describe('Runtime field form', () => {
   let testBed: TestBed;
 
   beforeEach(() => {
-    testBed = setup() as TestBed;
+    testBed = setup({ docsBaseUri }) as TestBed;
   });
 
   test('should render expected 3 fields (name, returnType, script)', () => {
@@ -27,5 +29,12 @@ describe('Runtime field form', () => {
     expect(exists('nameField')).toBe(true);
     expect(exists('typeField')).toBe(true);
     expect(exists('scriptField')).toBe(true);
+  });
+
+  test('should have a link to learn more about painless syntax', () => {
+    const { exists, find } = testBed;
+
+    expect(exists('painlessSyntaxLearnMoreLink')).toBe(true);
+    expect(find('painlessSyntaxLearnMoreLink').props().href).toContain(docsBaseUri);
   });
 });
