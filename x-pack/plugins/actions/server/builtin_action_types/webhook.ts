@@ -42,7 +42,6 @@ const configSchemaProps = {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
-  hasAuth: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -129,12 +128,12 @@ export async function executor(
   execOptions: WebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { method, url, headers = {}, hasAuth } = execOptions.config;
+  const { method, url, headers = {} } = execOptions.config;
   const { body: data } = execOptions.params;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const basicAuth =
-    hasAuth && isString(secrets.user) && isString(secrets.password)
+    isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 
