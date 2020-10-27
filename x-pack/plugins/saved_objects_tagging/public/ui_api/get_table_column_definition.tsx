@@ -11,13 +11,17 @@ import {
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { ITagsCache } from '../tags';
+import { getTagsFromReferences, byNameTagSorter } from '../utils';
 
 export interface GetTableColumnDefinitionOptions {
   components: SavedObjectsTaggingApiUiComponent;
+  cache: ITagsCache;
 }
 
 export const buildGetTableColumnDefinition = ({
   components,
+  cache,
 }: GetTableColumnDefinitionOptions): SavedObjectsTaggingApiUi['getTableColumnDefinition'] => {
   return () => {
     return {
@@ -28,11 +32,15 @@ export const buildGetTableColumnDefinition = ({
       description: i18n.translate('xpack.savedObjectsTagging.uiApi.table.columnTagsDescription', {
         defaultMessage: 'Tags associated with this saved object',
       }),
-      sortable: false,
-      'data-test-subj': 'listingTableRowTags',
+      sortable: (object: SavedObject) => {
+        const { tags } = getTagsFromReferences(object.references, cache.getState());
+        tags.sort(byNameTagSorter);
+        return tags.length ? tags[0].name : undefined;
+      },
       render: (references: SavedObjectReference[], object: SavedObject) => {
         return <components.TagList object={object} />;
       },
+      'data-test-subj': 'listingTableRowTags',
     };
   };
 };

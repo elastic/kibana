@@ -8,8 +8,14 @@ import { SavedObject, SavedObjectReference } from 'src/core/types';
 import { SavedObjectsFindOptionsReference } from 'src/core/public';
 import { Tag, tagSavedObjectTypeName } from '../common';
 
+type SavedObjectReferenceLike = SavedObjectReference | SavedObjectsFindOptionsReference;
+
 export const getObjectTags = (object: SavedObject, allTags: Tag[]) => {
-  const tagReferences = object.references.filter((ref) => ref.type === tagSavedObjectTypeName);
+  return getTagsFromReferences(object.references, allTags);
+};
+
+export const getTagsFromReferences = (references: SavedObjectReference[], allTags: Tag[]) => {
+  const tagReferences = references.filter((ref) => ref.type === tagSavedObjectTypeName);
 
   const foundTags: Tag[] = [];
   const missingRefs: SavedObjectReference[] = [];
@@ -42,9 +48,7 @@ export const testSubjFriendly = (name: string) => {
   return name.replace(' ', '_');
 };
 
-export const getTagIdsFromReferences = (
-  references: Array<SavedObjectReference | SavedObjectsFindOptionsReference>
-): string[] => {
+export const getTagIdsFromReferences = (references: SavedObjectReferenceLike[]): string[] => {
   return references.filter((ref) => ref.type === tagSavedObjectTypeName).map(({ id }) => id);
 };
 

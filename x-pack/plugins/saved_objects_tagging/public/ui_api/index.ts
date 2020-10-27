@@ -33,7 +33,7 @@ export const getUiApi = ({
 
   return {
     components,
-    getTableColumnDefinition: buildGetTableColumnDefinition({ components }),
+    getTableColumnDefinition: buildGetTableColumnDefinition({ components, cache }),
     getSearchBarFilter: buildGetSearchBarFilter({ cache }),
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
