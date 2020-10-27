@@ -39,7 +39,15 @@ export const createMockSavedObjectsRepository = ({
           }
           const result = caseSavedObject.filter((s) => s.id === id);
           if (!result.length) {
-            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+            return {
+              id,
+              type,
+              error: {
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Saved object [cases/not-exist] not found',
+              },
+            };
           }
           return result[0];
         }),
