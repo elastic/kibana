@@ -9,11 +9,13 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
   IngestManagerStartContract,
   PackageService,
 } from '../../../ingest_manager/server';
+import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
@@ -24,6 +26,8 @@ import {
 } from './routes/metadata/support/query_strategies';
 import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
+import { AppClientFactory } from '../client';
+import { ConfigType } from '../config';
 
 export interface MetadataService {
   queryStrategy(
@@ -70,6 +74,10 @@ export type EndpointAppContextServiceStartContract = Partial<
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
+  appClientFactory: AppClientFactory;
+  security: SecurityPluginSetup;
+  alerts: AlertsPluginStartContract;
+  config: ConfigType;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
@@ -93,7 +101,14 @@ export class EndpointAppContextService {
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
         'packagePolicyCreate',
-        getPackagePolicyCreateCallback(dependencies.logger, this.manifestManager)
+        getPackagePolicyCreateCallback(
+          dependencies.logger,
+          this.manifestManager,
+          dependencies.appClientFactory,
+          dependencies.config.maxTimelineImportExportSize,
+          dependencies.security,
+          dependencies.alerts
+        )
       );
     }
   }
