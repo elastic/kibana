@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MlClient, getMlClient } from './ml_client';
+export { getMlClient } from './ml_client';
 export { MLJobNotFound } from './errors';
+export { MlClient } from './types';

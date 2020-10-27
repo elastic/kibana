@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { JobSavedObjectService } from '../../saved_objects';
 import { JobType } from '../../../common/types/saved_objects';
@@ -21,12 +21,13 @@ import { searchProvider } from './search';
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
 import { InferenceConfigResponse, TrainedModelStat } from '../../../common/types/trained_models';
 import { MLJobNotFound } from './errors';
-
-type OrigMlClient = ElasticsearchClient['ml'];
-
-export interface MlClient extends OrigMlClient {
-  anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
-}
+import {
+  MlClient,
+  MlClientParams,
+  MlGetADParams,
+  MlGetDFAParams,
+  MlGetDatafeedParams,
+} from './types';
 
 export function getMlClient(
   client: IScopedClusterClient,
@@ -34,8 +35,9 @@ export function getMlClient(
 ): MlClient {
   const mlClient = client.asInternalUser.ml;
 
-  async function jobIdsCheck(jobType: JobType, p: any, allowWildcards: boolean = false) {
-    const jobIds = jobType === 'anomaly-detector' ? getADJobIds(p) : getDFAJobIds(p);
+  async function jobIdsCheck(jobType: JobType, p: MlClientParams, allowWildcards: boolean = false) {
+    const jobIds =
+      jobType === 'anomaly-detector' ? getADJobIds(p) : getDFAJobIds(p as MlGetDFAParams);
     if (jobIds.length) {
       const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
       let missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
@@ -49,7 +51,7 @@ export function getMlClient(
     }
   }
 
-  async function datafeedIdsCheck(p: any, allowWildcards: boolean = false) {
+  async function datafeedIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
     const datafeedIds = getDatafeedIds(p);
     if (datafeedIds.length) {
       const filteredDatafeedIds = await jobSavedObjectService.filterDatafeedIdsForSpace(
@@ -66,7 +68,10 @@ export function getMlClient(
     }
   }
 
-  async function getFilterTrainedModels(p: any, allowWildcards: boolean = false) {
+  async function getFilterTrainedModels(
+    p: Parameters<MlClient['getTrainedModels']>,
+    allowWildcards: boolean = false
+  ) {
     let configs = [];
     try {
       const resp = await mlClient.getTrainedModels<InferenceConfigResponse>(...p);
@@ -471,20 +476,17 @@ export function getMlClient(
   } as MlClient;
 }
 
-function getDFAJobIds(p: any): string[] {
-  const [params] = p;
+function getDFAJobIds([params]: MlGetDFAParams): string[] {
   const ids = params?.id?.split(',');
   return ids || [];
 }
 
-function getADJobIds(p: any): string[] {
-  const [params] = p;
+function getADJobIds([params]: MlGetADParams): string[] {
   const ids = params?.job_id?.split(',');
   return ids || [];
 }
 
-function getDatafeedIds(p: any): string[] {
-  const [params] = p;
+function getDatafeedIds([params]: MlGetDatafeedParams): string[] {
   const ids = params?.datafeed_id?.split(',');
   return ids || [];
 }
