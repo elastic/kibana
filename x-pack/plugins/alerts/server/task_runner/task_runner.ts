@@ -314,7 +314,7 @@ export class TaskRunner {
   async run(): Promise<AlertTaskRunResult> {
     const {
       params: { alertId, spaceId },
-      startedAt: previousStartedAt,
+      startedAt,
       state: originalState,
     } = this.taskInstance;
 
@@ -352,7 +352,7 @@ export class TaskRunner {
         (stateUpdates: AlertTaskState) => {
           return {
             ...stateUpdates,
-            previousStartedAt,
+            previousStartedAt: startedAt,
           };
         },
         (err: Error) => {
@@ -362,10 +362,7 @@ export class TaskRunner {
           } else {
             this.logger.error(message);
           }
-          return {
-            ...originalState,
-            previousStartedAt,
-          };
+          return originalState;
         }
       ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (err) => {
