@@ -21,12 +21,13 @@ import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 
 import { schema } from './schema';
 
-interface Props {
+export interface Props {
   docsBaseUri: string;
+  defaultValue?: RuntimeField;
 }
 
-export const RuntimeFieldForm = ({ docsBaseUri }: Props) => {
-  const { form } = useForm<RuntimeField>({ schema });
+export const RuntimeFieldForm = ({ defaultValue, docsBaseUri }: Props) => {
+  const { form } = useForm<RuntimeField>({ defaultValue, schema });
 
   return (
     <Form form={form}>

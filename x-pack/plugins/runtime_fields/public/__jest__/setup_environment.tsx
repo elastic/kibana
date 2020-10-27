@@ -12,6 +12,7 @@ jest.mock('../../../../../src/plugins/kibana_react/public', () => {
     <input
       data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
       data-value={props.value}
+      value={props.value}
       onChange={(syntheticEvent: any) => {
         props.onChange([syntheticEvent['0']]);
       }}
@@ -33,6 +34,7 @@ jest.mock('@elastic/eui', () => {
       <input
         data-test-subj={props['data-test-subj'] || 'mockComboBox'}
         data-currentvalue={props.selectedOptions}
+        value={props.selectedOptions[0]?.value}
         onChange={async (syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
         }}
