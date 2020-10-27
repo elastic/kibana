@@ -15,8 +15,6 @@ import {
   DoSearchFnArgs,
   IEsRawSearchResponse,
   IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  isCompleteResponse,
 } from '../../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '../../../common/search/types';
 

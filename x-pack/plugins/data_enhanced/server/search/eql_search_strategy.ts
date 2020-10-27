@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, SharedGlobalConfig } from 'kibana/server';
-import { switchMap, mergeMap, first } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { search } from '../../../../../src/plugins/data/server';
+import { from } from 'rxjs';
+import { Logger } from 'kibana/server';
+import { switchMap } from 'rxjs/operators';
+import { DoSearchFnArgs, search } from '../../../../../src/plugins/data/server';
 import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
 
@@ -18,7 +18,6 @@ import type {
 } from '../../common/search/types';
 
 export const eqlSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>,
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   return {
@@ -35,14 +34,13 @@ export const eqlSearchStrategyProvider = (
       const { esSearch } = search;
       const asyncOptions = getAsyncOptions();
 
-      return config$.pipe(
-        first(),
-        mergeMap(async () => {
+      return from(
+        new Promise<DoSearchFnArgs>(async (resolve) => {
           const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
             context.core.uiSettings.client
           );
 
-          return {
+          resolve({
             params: {
               ignoreThrottled,
               ignoreUnavailable,
@@ -50,8 +48,9 @@ export const eqlSearchStrategyProvider = (
               ...request.params,
             },
             options: { ...request.options },
-          };
-        }),
+          });
+        })
+      ).pipe(
         switchMap(
           doPartialSearch(
             (...args) => context.core.elasticsearch.client.asCurrentUser.eql.search(...args),

@@ -47,17 +47,10 @@ export const doSearch = <SearchResponse extends IEsRawSearchResponse = IEsRawSea
   abortSignal?: AbortSignal
 ) => ({ params, options }: DoSearchFnArgs) =>
   from(
-    new Promise<ApiResponse<SearchResponse>>(async (resolve, reject) => {
-      try {
-        const apiResponse = await shimAbortSignal(
-          searchMethod<SearchResponse>(toSnakeCase(params), options && toSnakeCase(options)),
-          abortSignal
-        );
-        resolve(apiResponse);
-      } catch (e) {
-        reject(e);
-      }
-    })
+    shimAbortSignal(
+      searchMethod<SearchResponse>(toSnakeCase(params), options && toSnakeCase(options)),
+      abortSignal
+    )
   );
 
 export const toKibanaSearchResponse = <

@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { of } from 'rxjs';
-
-import type { SharedGlobalConfig, RequestHandlerContext, Logger } from 'kibana/server';
+import type { RequestHandlerContext, Logger } from 'kibana/server';
 
 import { EqlSearchStrategyRequest } from '../../common/search/types';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
@@ -29,7 +26,6 @@ const getMockEqlResponse = () => ({
 
 describe('EQL search strategy', () => {
   let mockLogger: Logger;
-  const config = {} as SharedGlobalConfig;
 
   beforeEach(() => {
     mockLogger = ({ debug: jest.fn() } as unknown) as Logger;
@@ -37,12 +33,12 @@ describe('EQL search strategy', () => {
 
   describe('strategy interface', () => {
     it('returns a strategy with a `search` function', async () => {
-      const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+      const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
       expect(typeof eqlSearch.search).toBe('function');
     });
 
     it('returns a strategy with a `cancel` function', async () => {
-      const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+      const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
       expect(typeof eqlSearch.cancel).toBe('function');
     });
   });
@@ -85,7 +81,7 @@ describe('EQL search strategy', () => {
 
     describe('async functionality', () => {
       it('performs an eql client search with params when no ID is provided', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch.search({ options, params }, {}, mockContext).toPromise();
         const [[request, requestOptions]] = mockEqlSearch.mock.calls;
 
@@ -95,7 +91,7 @@ describe('EQL search strategy', () => {
       });
 
       it('retrieves the current request if an id is provided', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch.search({ id: 'my-search-id' }, {}, mockContext).toPromise();
         const [[requestParams]] = mockEqlGet.mock.calls;
 
@@ -106,7 +102,7 @@ describe('EQL search strategy', () => {
       it('emits an error if the client throws', async () => {
         expect.assertions(1);
         mockEqlSearch.mockReset().mockRejectedValueOnce(new Error('client error'));
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         eqlSearch.search({ options, params }, {}, mockContext).subscribe(
           () => {},
           (err) => {
@@ -118,7 +114,7 @@ describe('EQL search strategy', () => {
 
     describe('arguments', () => {
       it('sends along async search options', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch.search({ options, params }, {}, mockContext).toPromise();
         const [[request]] = mockEqlSearch.mock.calls;
 
@@ -131,7 +127,7 @@ describe('EQL search strategy', () => {
       });
 
       it('sends along default search parameters', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch.search({ options, params }, {}, mockContext).toPromise();
         const [[request]] = mockEqlSearch.mock.calls;
 
@@ -144,7 +140,7 @@ describe('EQL search strategy', () => {
       });
 
       it('allows search parameters to be overridden', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch
           .search(
             {
@@ -171,7 +167,7 @@ describe('EQL search strategy', () => {
       });
 
       it('allows search options to be overridden', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch
           .search(
             {
@@ -193,7 +189,7 @@ describe('EQL search strategy', () => {
       });
 
       it('passes transport options for an existing request', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(of(config), mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch
           .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockContext)
           .toPromise();
