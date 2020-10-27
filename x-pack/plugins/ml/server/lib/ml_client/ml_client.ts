@@ -57,9 +57,12 @@ export function getMlClient(
     // find which ids are not group ids and check them.
     const ids = getADJobIdsFromRequest(p);
     if (ids.length) {
+      // find all groups from unfiltered jobs
       const responseGroupIds = [...new Set(allJobs.map((j) => j.groups ?? []).flat())];
+      // work out which ids requested are actually groups
       const requestedGroupIds = ids.filter((id) => responseGroupIds.includes(id));
 
+      // find all groups from filtered jobs
       const groupIdsFromFilteredJobs = [
         ...new Set(
           allJobs
