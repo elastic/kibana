@@ -37,8 +37,9 @@ interface Props {
   loading: boolean;
 }
 
-function formatTitle(unit: string, value?: number) {
-  if (typeof value === 'undefined') return DATA_UNDEFINED_LABEL;
+function formatTitle(unit: string, value?: number | null) {
+  if (typeof value === 'undefined' || value === null)
+    return DATA_UNDEFINED_LABEL;
   return formatToSec(value, unit);
 }
 
