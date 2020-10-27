@@ -38,7 +38,6 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Instance' }
     ),
     sortable: false,
-    truncateText: true,
     'data-test-subj': 'alertInstancesTableCell-instance',
   },
   {
@@ -167,6 +166,7 @@ export function AlertInstances({
         })}
         columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
+        tableLayout="auto"
       />
     </Fragment>
   );

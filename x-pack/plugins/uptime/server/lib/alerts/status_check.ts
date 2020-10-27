@@ -291,7 +291,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         for (const monitorLoc of downMonitorsByLocation) {
           const monitorInfo = monitorLoc.monitorInfo;
 
-          const urlText = monitorInfo.url.full.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+          const urlText = monitorInfo.url?.full?.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
           const alertInstance = alertInstanceFactory(urlText + monitorLoc.location);
 
@@ -336,7 +336,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         const monitorSummary = getMonitorSummary(monitorInfo);
         const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
 
-        const alertInstance = alertInstanceFactory(monitorInfo.url.full + monIdByLoc);
+        // replace url special characters with -
+        const urlText = monitorInfo.url?.full?.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+
+        const alertInstance = alertInstanceFactory(urlText + monIdByLoc);
 
         alertInstance.replaceState({
           ...updateState(state, true),
