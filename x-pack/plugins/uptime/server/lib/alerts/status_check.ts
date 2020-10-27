@@ -32,15 +32,19 @@ import { UMServerLibs } from '../lib';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
+const getMonIdByLoc = (monitorId: string, location: string) => {
+  return monitorId + '-' + location;
+};
+
 const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
   items.reduce(
-    (acc, { monitorId, location }) => acc.add(monitorId + '-' + location),
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
     new Set<string>()
   );
 
 const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
   items.reduce(
-    (acc, { monitorId, location }) => acc.add(monitorId + '-' + location),
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
     new Set<string>()
   );
 
@@ -330,11 +334,11 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
 
       mergedIdsByLoc.forEach((monIdByLoc) => {
         const availMonInfo = availabilityResults.find(
-          ({ monitorId, location }) => monitorId + location === monIdByLoc
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
         );
 
         const downMonInfo = downMonitorsByLocation.find(
-          ({ monitorId, location }) => monitorId + location === monIdByLoc
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
         )?.monitorInfo;
 
         const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;

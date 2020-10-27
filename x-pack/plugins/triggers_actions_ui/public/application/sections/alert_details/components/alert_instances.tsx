@@ -38,6 +38,7 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Instance' }
     ),
     sortable: false,
+    truncateText: true,
     'data-test-subj': 'alertInstancesTableCell-instance',
   },
   {
