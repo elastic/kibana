@@ -117,8 +117,6 @@ export interface TimelineModel {
   sort: Sort;
   /** status: active | draft */
   status: TimelineStatus;
-  /** Persists the UI state (width) of the timeline flyover */
-  width: number;
   /** timeline is saving */
   isSaving: boolean;
   isLoading: boolean;
@@ -159,7 +157,6 @@ export type SubsetTimelineModel = Readonly<
     | 'show'
     | 'showCheckboxes'
     | 'sort'
-    | 'width'
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
