@@ -4,15 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { useKibana } from '../../../../../../shared_imports';
-import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../../common/types';
-import { PhaseValidationErrors } from '../../../../../services/policies/policy_validation';
-import { getAvailableNodeRoleForPhase } from '../../../../../lib/data_tiers';
-import { isNodeRoleFirstPreference } from '../../../../../lib/data_tiers/is_node_role_first_preference';
+import { useKibana, useFormData } from '../../../../../../../shared_imports';
+
+import { PhaseWithAllocation } from '../../../../../../../../common/types';
+
+import { getAvailableNodeRoleForPhase } from '../../../../../../lib/data_tiers';
+
+import { isNodeRoleFirstPreference } from '../../../../../../lib';
+
+import { DataTierAllocationType } from '../../../../types';
 
 import {
   DataTierAllocation,
@@ -20,7 +26,7 @@ import {
   NoNodeAttributesWarning,
   NodesDataProvider,
   CloudDataTierCallout,
-} from '../../data_tier_allocation';
+} from './components';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
@@ -29,28 +35,21 @@ const i18nTexts = {
 };
 
 interface Props {
-  description: React.ReactNode;
   phase: PhaseWithAllocation;
-  setPhaseData: (dataKey: keyof PhaseWithAllocationAction, value: string) => void;
-  isShowingErrors: boolean;
-  errors?: PhaseValidationErrors<PhaseWithAllocationAction>;
-  phaseData: PhaseWithAllocationAction;
+  description: React.ReactNode;
 }
 
 /**
  * Top-level layout control for the data tier allocation field.
  */
-export const DataTierAllocationField: FunctionComponent<Props> = ({
-  description,
-  phase,
-  phaseData,
-  setPhaseData,
-  isShowingErrors,
-  errors,
-}) => {
+export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, description }) => {
   const {
     services: { cloud },
   } = useKibana();
+
+  const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
+  const [formData] = useFormData({ watch: dataTierAllocationTypePath });
+  const allocationType: DataTierAllocationType = get(formData, dataTierAllocationTypePath);
 
   return (
     <NodesDataProvider>
@@ -60,11 +59,11 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
           nodeRole.trim().startsWith('data_')
         );
         const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
+        const isCloudEnabled = cloud?.isCloudEnabled ?? false;
 
         const renderNotice = () => {
-          switch (phaseData.dataTierAllocationType) {
-            case 'default':
-              const isCloudEnabled = cloud?.isCloudEnabled ?? false;
+          switch (allocationType) {
+            case 'node_roles':
               if (isCloudEnabled && phase === 'cold') {
                 const isUsingNodeRolesAllocation =
                   !isUsingDeprecatedDataRoleConfig && hasDataNodeRoles;
@@ -94,7 +93,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                 );
               }
               break;
-            case 'custom':
+            case 'node_attrs':
               if (!hasNodeAttrs) {
                 return (
                   <>
@@ -120,13 +119,9 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                 <DataTierAllocation
                   hasNodeAttributes={hasNodeAttrs}
                   phase={phase}
-                  errors={errors}
-                  setPhaseData={setPhaseData}
-                  phaseData={phaseData}
-                  isShowingErrors={isShowingErrors}
                   nodes={nodesByAttributes}
                   disableDataTierOption={Boolean(
-                    cloud?.isCloudEnabled && !hasDataNodeRoles && isUsingDeprecatedDataRoleConfig
+                    isCloudEnabled && !hasDataNodeRoles && isUsingDeprecatedDataRoleConfig
                   )}
                 />
 
