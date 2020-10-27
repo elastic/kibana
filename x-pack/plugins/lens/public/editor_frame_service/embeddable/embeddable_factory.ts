@@ -44,9 +44,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     getIconForSavedObject: () => 'lensApp',
   };
 
-  constructor(private getStartServices: () => Promise<LensEmbeddableStartServices>) {
-    console.log(getStartServices);
-  }
+  constructor(private getStartServices: () => Promise<LensEmbeddableStartServices>) {}
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();

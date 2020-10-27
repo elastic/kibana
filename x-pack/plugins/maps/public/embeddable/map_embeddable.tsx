@@ -10,7 +10,12 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
-import { Embeddable, IContainer, ReferenceOrValueEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import { i18n } from '@kbn/i18n';
+import {
+  Embeddable,
+  IContainer,
+  ReferenceOrValueEmbeddable,
+} from '../../../../../src/plugins/embeddable/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
@@ -50,8 +55,18 @@ import {
   setEventHandlers,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
-import { getMapCenter, getMapZoom, getHiddenLayerIds, getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { APP_ID, getExistingMapPath, MAP_SAVED_OBJECT_TYPE, MAP_PATH } from '../../common/constants';
+import {
+  getMapCenter,
+  getMapZoom,
+  getHiddenLayerIds,
+  getQueryableUniqueIndexPatternIds,
+} from '../selectors/map_selectors';
+import {
+  APP_ID,
+  getExistingMapPath,
+  MAP_SAVED_OBJECT_TYPE,
+  MAP_PATH,
+} from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
@@ -59,10 +74,16 @@ import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapContainer } from '../connected_components/map_container';
 import { getMapAttributeService } from '../map_attribute_service';
 import { getInitialLayers } from '../routing/bootstrap/get_initial_layers';
-export { getIndexPatternsFromIds } from '../index_pattern_util';
+import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 
-import { MapByValueInput, MapByReferenceInput, MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from './types';
+import {
+  MapByValueInput,
+  MapByReferenceInput,
+  MapEmbeddableConfig,
+  MapEmbeddableInput,
+  MapEmbeddableOutput,
+} from './types';
 export { MapEmbeddableInput };
 
 const attributeService = getMapAttributeService();
@@ -84,11 +105,7 @@ export class MapEmbeddable
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
 
-  constructor(
-    config: MapEmbeddableConfig,
-    initialInput: MapEmbeddableInput,
-    parent?: IContainer,
-  ) {
+  constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
       initialInput,
       {
@@ -112,15 +129,15 @@ export class MapEmbeddable
     this._attributes = await attributeService.unwrapAttributes(input);
     const layerList = getInitialLayers(this._attributes.layerListJSON);
     this.setLayerList(layerList);
-    this.initializeOutput();
+    await this.initializeOutput();
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
     }
   }
 
-  private initializeOutput() {
-    const savedMapTitle = this._attributes?.title ? this._attributes.title : ''
+  private async initializeOutput() {
+    const savedMapTitle = this._attributes?.title ? this._attributes.title : '';
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
     const savedObjectId = (input as MapByReferenceInput).savedObjectId;
@@ -137,7 +154,7 @@ export class MapEmbeddable
     input: MapByValueInput | MapByReferenceInput
   ): input is MapByReferenceInput {
     return attributeService.inputIsRefType(input);
-  };
+  }
 
   public async getInputAsRefType(): Promise<MapByReferenceInput> {
     const input = attributeService.getExplicitInputFromEmbeddable(this);
@@ -145,12 +162,12 @@ export class MapEmbeddable
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
-  };
+  }
 
   public async getInputAsValueType(): Promise<MapByValueInput> {
     const input = attributeService.getExplicitInputFromEmbeddable(this);
     return attributeService.getInputAsValueType(input);
-  };
+  }
 
   public getDescription() {
     return this._attributes?.description;
@@ -346,9 +363,7 @@ export class MapEmbeddable
         })
       );
     }
-    //console.log('getIndexPatternsFromIds', getIndexPatternsFromIds);
-    //const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
-    //console.log('indexPatterns', indexPatterns);
+    const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
     this.updateOutput({
       ...this.getOutput(),
       indexPatterns: [],

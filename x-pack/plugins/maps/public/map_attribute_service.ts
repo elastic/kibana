@@ -7,13 +7,11 @@
 import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import {
-  MapByValueInput,
-  MapByReferenceInput,
-} from './embeddable/types';
+import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
-
+// @ts-expect-error
+import { extractReferences, injectReferences } from '../common/migrations/references';
 
 export type MapAttributeService = AttributeService<
   MapSavedObjectAttributes,
@@ -33,7 +31,7 @@ export function getMapAttributeService(): MapAttributeService {
       savedObjectId?: string
     ) => {
       throw new Error('saveMethod not implemented');
-      /*const savedDoc = await savedObjectStore.save({
+      /* const savedDoc = await savedObjectStore.save({
         ...attributes,
         savedObjectId,
         type: MAP_SAVED_OBJECT_TYPE,
@@ -45,10 +43,9 @@ export function getMapAttributeService(): MapAttributeService {
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
       );
-      return {
-        ...savedObject.attributes,
-        references: savedObject.references,
-      };
+
+      const { attributes } = injectReferences(savedObject);
+      return attributes;
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       return checkForDuplicateTitle(
