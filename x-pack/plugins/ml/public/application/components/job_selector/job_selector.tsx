@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -109,24 +109,22 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
     showFlyout();
   }
 
-  const applySelection: JobSelectorFlyoutProps['onSelectionConfirmed'] = ({
-    newSelection,
-    jobIds,
-    groups: newGroups,
-    time,
-  }) => {
-    setSelectedIds(newSelection);
+  const applySelection: JobSelectorFlyoutProps['onSelectionConfirmed'] = useCallback(
+    ({ newSelection, jobIds, groups: newGroups, time }) => {
+      setSelectedIds(newSelection);
 
-    setGlobalState({
-      ml: {
-        jobIds,
-        groups: newGroups,
-      },
-      ...(time !== undefined ? { time } : {}),
-    });
+      setGlobalState({
+        ml: {
+          jobIds,
+          groups: newGroups,
+        },
+        ...(time !== undefined ? { time } : {}),
+      });
 
-    closeFlyout();
-  };
+      closeFlyout();
+    },
+    [setGlobalState, setSelectedIds]
+  );
 
   function renderJobSelectionBar() {
     return (
@@ -167,7 +165,11 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   function renderFlyout() {
     if (isFlyoutVisible) {
       return (
-        <EuiFlyout onClose={closeFlyout}>
+        <EuiFlyout
+          onClose={closeFlyout}
+          data-test-subj="mlFlyoutJobSelector"
+          aria-labelledby="jobSelectorFlyout"
+        >
           <JobSelectorFlyoutContent
             dateFormatTz={dateFormatTz}
             timeseriesOnly={timeseriesOnly}

@@ -10,16 +10,23 @@
  * rescheduling, middleware application, etc.
  */
 
+import { Logger } from 'src/core/server';
 import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
-import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
-import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
+import { Middleware } from './lib/middleware';
+import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from './lib/result_type';
+import {
+  TaskRun,
+  TaskMarkRunning,
+  asTaskRunEvent,
+  asTaskMarkRunningEvent,
+  startTaskTimer,
+  TaskTiming,
+} from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { Logger } from './types';
-import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
@@ -29,10 +36,10 @@ import {
   FailedRunResult,
   FailedTaskResult,
   TaskDefinition,
-  TaskDictionary,
   validateRunResult,
   TaskStatus,
 } from './task';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
@@ -55,14 +62,27 @@ export interface Updatable {
   remove(id: string): Promise<void>;
 }
 
-interface Opts {
+type Opts = {
   logger: Logger;
-  definitions: TaskDictionary<TaskDefinition>;
+  definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  beforeRun: BeforeRunFunction;
-  beforeMarkRunning: BeforeMarkRunningFunction;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
+
+export enum TaskRunResult {
+  // Task completed successfully
+  Success = 'Success',
+  // Recurring Task completed successfully
+  SuccessRescheduled = 'Success',
+  // // Task completed successfully after a retry
+  // SuccessfulRetry = 'SuccessfulRetry',
+  // // Recurring Task completed successfully after a retry
+  // SuccessfulRetryRescheduled = 'SuccessfulRetry',
+  // Task has failed and a retry has been scheduled
+  RetryScheduled = 'RetryScheduled',
+  // Task has failed
+  Failed = 'Failed',
 }
 
 /**
@@ -76,11 +96,11 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<TaskDefinition>;
+  private definitions: TaskTypeDictionary;
   private logger: Logger;
   private bufferedTaskStore: Updatable;
-  private beforeRun: BeforeRunFunction;
-  private beforeMarkRunning: BeforeMarkRunningFunction;
+  private beforeRun: Middleware['beforeRun'];
+  private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
 
   /**
@@ -129,7 +149,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets the task defintion from the dictionary.
    */
   public get definition() {
-    return this.definitions[this.taskType];
+    return this.definitions.get(this.taskType);
   }
 
   /**
@@ -174,6 +194,7 @@ export class TaskManagerRunner implements TaskRunner {
       taskInstance: this.instance,
     });
 
+    const stopTaskTimer = startTaskTimer();
     const apmTrans = apm.startTransaction(
       `taskManager run ${this.instance.taskType}`,
       'taskManager'
@@ -183,13 +204,16 @@ export class TaskManagerRunner implements TaskRunner {
       const result = await this.task.run();
       const validatedResult = this.validateResult(result);
       if (apmTrans) apmTrans.end('success');
-      return this.processResult(validatedResult);
+      return this.processResult(validatedResult, stopTaskTimer());
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       if (apmTrans) apmTrans.end('error');
-      return this.processResult(asErr({ error: err, state: modifiedContext.taskInstance.state }));
+      return this.processResult(
+        asErr({ error: err, state: modifiedContext.taskInstance.state }),
+        stopTaskTimer()
+      );
     }
   }
 
@@ -339,8 +363,9 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(
     result: Result<SuccessfulRunResult, FailedRunResult>
-  ): Promise<void> {
-    const fieldUpdates = flow(
+  ): Promise<TaskRunResult> {
+    const hasTaskRunFailed = isOk(result);
+    const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
@@ -359,7 +384,7 @@ export class TaskManagerRunner implements TaskRunner {
     await this.bufferedTaskStore.update(
       defaults(
         {
-          ...(fieldUpdates as Partial<ConcreteTaskInstance>),
+          ...fieldUpdates,
           // reset fields that track the lifecycle of the concluded `task run`
           startedAt: null,
           retryAt: null,
@@ -368,9 +393,15 @@ export class TaskManagerRunner implements TaskRunner {
         this.instance
       )
     );
+
+    return fieldUpdates.status === TaskStatus.Failed
+      ? TaskRunResult.Failed
+      : hasTaskRunFailed
+      ? TaskRunResult.SuccessRescheduled
+      : TaskRunResult.RetryScheduled;
   }
 
-  private async processResultWhenDone(): Promise<void> {
+  private async processResultWhenDone(): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
       await this.bufferedTaskStore.remove(this.instance.id);
@@ -381,24 +412,38 @@ export class TaskManagerRunner implements TaskRunner {
         throw err;
       }
     }
+    return TaskRunResult.Success;
   }
 
   private async processResult(
-    result: Result<SuccessfulRunResult, FailedRunResult>
+    result: Result<SuccessfulRunResult, FailedRunResult>,
+    taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const task = this.instance;
     await eitherAsync(
       result,
       async ({ runAt }: SuccessfulRunResult) => {
-        if (runAt || this.instance.schedule) {
-          await this.processResultForRecurringTask(result);
-        } else {
-          await this.processResultWhenDone();
-        }
-        this.onTaskEvent(asTaskRunEvent(this.id, asOk(this.instance)));
+        this.onTaskEvent(
+          asTaskRunEvent(
+            this.id,
+            asOk({
+              task,
+              result: await (runAt || task.schedule
+                ? this.processResultForRecurringTask(result)
+                : this.processResultWhenDone()),
+            }),
+            taskTiming
+          )
+        );
       },
       async ({ error }: FailedRunResult) => {
-        await this.processResultForRecurringTask(result);
-        this.onTaskEvent(asTaskRunEvent(this.id, asErr(error)));
+        this.onTaskEvent(
+          asTaskRunEvent(
+            this.id,
+            asErr({ task, result: await this.processResultForRecurringTask(result), error }),
+            taskTiming
+          )
+        );
       }
     );
     return result;

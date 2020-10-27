@@ -6,31 +6,18 @@
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import cloneDeep from 'lodash/cloneDeep';
-import { deserializePolicy, serializePolicy } from './policy_serialization';
-import {
-  defaultNewColdPhase,
-  defaultNewDeletePhase,
-  defaultNewHotPhase,
-  defaultNewWarmPhase,
-} from '../../constants';
+import { deserializePolicy, legacySerializePolicy } from './policy_serialization';
+import { defaultNewColdPhase, defaultNewDeletePhase } from '../../constants';
 import { DataTierAllocationType } from '../../../../common/types';
 import { coldPhaseInitialization } from './cold_phase';
 
 describe('Policy serialization', () => {
   test('serialize a policy using "default" data allocation', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
-            hot: { ...defaultNewHotPhase },
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'default',
-              // These selected attrs should be ignored
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'default',
@@ -44,9 +31,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
             cold: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
@@ -56,24 +40,6 @@ describe('Policy serialization', () => {
     ).toEqual({
       name: 'test',
       phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_age: '30d',
-              max_size: '50gb',
-            },
-            set_priority: {
-              priority: 100,
-            },
-          },
-        },
-        warm: {
-          actions: {
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             set_priority: {
@@ -88,17 +54,10 @@ describe('Policy serialization', () => {
 
   test('serialize a policy using "custom" data allocation', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
-            hot: { ...defaultNewHotPhase },
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'custom',
@@ -112,15 +71,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: {
-                allocate: {
-                  include: { keep: 'this' },
-                  exclude: { keep: 'this' },
-                  require: { something: 'here' },
-                },
-              },
-            },
             cold: {
               actions: {
                 allocate: {
@@ -136,31 +86,6 @@ describe('Policy serialization', () => {
     ).toEqual({
       name: 'test',
       phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_age: '30d',
-              max_size: '50gb',
-            },
-            set_priority: {
-              priority: 100,
-            },
-          },
-        },
-        warm: {
-          actions: {
-            allocate: {
-              include: { keep: 'this' },
-              exclude: { keep: 'this' },
-              require: {
-                another: 'thing',
-              },
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             allocate: {
@@ -182,17 +107,10 @@ describe('Policy serialization', () => {
 
   test('serialize a policy using "custom" data allocation with no node attributes', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
-            hot: { ...defaultNewHotPhase },
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: '',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'custom',
@@ -206,9 +124,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
             cold: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
@@ -219,25 +134,6 @@ describe('Policy serialization', () => {
       // There should be no allocation action in any phases...
       name: 'test',
       phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_age: '30d',
-              max_size: '50gb',
-            },
-            set_priority: {
-              priority: 100,
-            },
-          },
-        },
-        warm: {
-          actions: {
-            allocate: { include: {}, exclude: {}, require: { something: 'here' } },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             allocate: { include: {}, exclude: {}, require: { something: 'here' } },
@@ -253,17 +149,10 @@ describe('Policy serialization', () => {
 
   test('serialize a policy using "none" data allocation with no node attributes', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
-            hot: { ...defaultNewHotPhase },
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'none',
-              selectedNodeAttrs: 'ignore:this',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'none',
@@ -277,9 +166,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
             cold: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
@@ -290,27 +176,6 @@ describe('Policy serialization', () => {
       // There should be no allocation action in any phases...
       name: 'test',
       phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_age: '30d',
-              max_size: '50gb',
-            },
-            set_priority: {
-              priority: 100,
-            },
-          },
-        },
-        warm: {
-          actions: {
-            migrate: {
-              enabled: false,
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             migrate: {
@@ -330,10 +195,6 @@ describe('Policy serialization', () => {
     const originalPolicy = {
       name: 'test',
       phases: {
-        hot: { actions: {} },
-        warm: {
-          actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-        },
         cold: {
           actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
         },
@@ -345,13 +206,6 @@ describe('Policy serialization', () => {
     const deserializedPolicy = {
       name: 'test',
       phases: {
-        hot: { ...defaultNewHotPhase },
-        warm: {
-          ...defaultNewWarmPhase,
-          dataTierAllocationType: 'none' as DataTierAllocationType,
-          selectedNodeAttrs: 'ignore:this',
-          phaseEnabled: true,
-        },
         cold: {
           ...defaultNewColdPhase,
           dataTierAllocationType: 'none' as DataTierAllocationType,
@@ -363,33 +217,16 @@ describe('Policy serialization', () => {
       },
     };
 
-    serializePolicy(deserializedPolicy, originalPolicy);
-    deserializedPolicy.phases.warm.dataTierAllocationType = 'custom';
-    serializePolicy(deserializedPolicy, originalPolicy);
-    deserializedPolicy.phases.warm.dataTierAllocationType = 'default';
-    serializePolicy(deserializedPolicy, originalPolicy);
+    legacySerializePolicy(deserializedPolicy, originalPolicy);
     expect(originalPolicy).toEqual(originalClone);
   });
 
   test('serialize a policy using "best_compression" codec for forcemerge', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
-            hot: {
-              ...defaultNewHotPhase,
-              forceMergeEnabled: true,
-              selectedForceMergeSegments: '1',
-              bestCompressionEnabled: true,
-            },
-            warm: {
-              ...defaultNewWarmPhase,
-              phaseEnabled: true,
-              forceMergeEnabled: true,
-              selectedForceMergeSegments: '1',
-              bestCompressionEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
             },
@@ -405,34 +242,7 @@ describe('Policy serialization', () => {
       )
     ).toEqual({
       name: 'test',
-      phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_age: '30d',
-              max_size: '50gb',
-            },
-            forcemerge: {
-              max_num_segments: 1,
-              index_codec: 'best_compression',
-            },
-            set_priority: {
-              priority: 100,
-            },
-          },
-        },
-        warm: {
-          actions: {
-            forcemerge: {
-              max_num_segments: 1,
-              index_codec: 'best_compression',
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
-      },
+      phases: {},
     });
   });
 
@@ -460,37 +270,12 @@ describe('Policy serialization', () => {
                 },
               },
             },
-            warm: {
-              actions: {
-                forcemerge: {
-                  max_num_segments: 1,
-                  index_codec: 'best_compression',
-                },
-                set_priority: {
-                  priority: 50,
-                },
-              },
-            },
           },
         },
       })
     ).toEqual({
       name: 'test',
       phases: {
-        hot: {
-          ...defaultNewHotPhase,
-          forceMergeEnabled: true,
-          selectedForceMergeSegments: '1',
-          bestCompressionEnabled: true,
-        },
-        warm: {
-          ...defaultNewWarmPhase,
-          warmPhaseOnRollover: false,
-          phaseEnabled: true,
-          forceMergeEnabled: true,
-          selectedForceMergeSegments: '1',
-          bestCompressionEnabled: true,
-        },
         cold: {
           ...coldPhaseInitialization,
         },
@@ -501,23 +286,10 @@ describe('Policy serialization', () => {
 
   test('delete "best_compression" codec for forcemerge if disabled in UI', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
-            hot: {
-              ...defaultNewHotPhase,
-              forceMergeEnabled: true,
-              selectedForceMergeSegments: '1',
-              bestCompressionEnabled: false,
-            },
-            warm: {
-              ...defaultNewWarmPhase,
-              phaseEnabled: true,
-              forceMergeEnabled: true,
-              selectedForceMergeSegments: '1',
-              bestCompressionEnabled: false,
-            },
             cold: {
               ...defaultNewColdPhase,
             },
@@ -526,47 +298,12 @@ describe('Policy serialization', () => {
         },
         {
           name: 'test',
-          phases: {
-            hot: { actions: {} },
-            warm: {
-              actions: {
-                forcemerge: {
-                  max_num_segments: 1,
-                  index_codec: 'best_compression',
-                },
-              },
-            },
-          },
+          phases: {},
         }
       )
     ).toEqual({
       name: 'test',
-      phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_age: '30d',
-              max_size: '50gb',
-            },
-            forcemerge: {
-              max_num_segments: 1,
-            },
-            set_priority: {
-              priority: 100,
-            },
-          },
-        },
-        warm: {
-          actions: {
-            forcemerge: {
-              max_num_segments: 1,
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
-      },
+      phases: {},
     });
   });
 });

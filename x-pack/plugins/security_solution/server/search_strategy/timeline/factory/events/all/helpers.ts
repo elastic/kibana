@@ -6,7 +6,7 @@
 
 import { get, has, merge, uniq } from 'lodash/fp';
 import { EventHit, TimelineEdges } from '../../../../../../common/search_strategy';
-import { toArray } from '../../../../helpers/to_array';
+import { toStringArray } from '../../../../helpers/to_array';
 
 export const formatTimelineData = (
   dataFields: readonly string[],
@@ -56,8 +56,8 @@ const mergeTimelineFieldsWithHit = <T>(
                 {
                   field: fieldName,
                   value: specialFields.includes(esField)
-                    ? toArray(get(esField, hit))
-                    : toArray(get(esField, hit._source)),
+                    ? toStringArray(get(esField, hit))
+                    : toStringArray(get(esField, hit._source)),
                 },
               ]
             : get('node.data', flattenedFields),
@@ -68,7 +68,7 @@ const mergeTimelineFieldsWithHit = <T>(
                 ...fieldName.split('.').reduceRight(
                   // @ts-expect-error
                   (obj, next) => ({ [next]: obj }),
-                  toArray<string>(get(esField, hit._source))
+                  toStringArray<string>(get(esField, hit._source))
                 ),
               }
             : get('node.ecs', flattenedFields),

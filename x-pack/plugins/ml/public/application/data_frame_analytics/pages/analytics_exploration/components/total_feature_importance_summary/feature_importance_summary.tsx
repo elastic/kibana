@@ -32,6 +32,9 @@ import {
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { ExpandableSection } from '../expandable_section';
+import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
+import { getAnalysisType } from '../../../../common';
+import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -69,6 +72,7 @@ const theme: PartialTheme = {
 
 export interface FeatureImportanceSummaryPanelProps {
   totalFeatureImportance: TotalFeatureImportance[];
+  jobConfig: DataFrameAnalyticsConfig;
 }
 
 const tooltipContent = i18n.translate(
@@ -88,6 +92,7 @@ const calculateTotalMeanImportance = (featureClass: ClassificationTotalFeatureIm
 
 export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps> = ({
   totalFeatureImportance,
+  jobConfig,
 }) => {
   const {
     services: { docLinks },
@@ -189,13 +194,52 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
 
   // do not expand by default if no feature importance data
-  const hasTotalFeatureImportance = useMemo(() => totalFeatureImportance.length > 1, [
-    totalFeatureImportance,
-  ]);
+  const noDataCallOut = useMemo(() => {
+    // if no total feature importance data
+    if (totalFeatureImportance.length === 0) {
+      // check if it's because num_top_feature_importance_values is set to 0
+      if (
+        (jobConfig?.analysis && isRegressionAnalysis(jobConfig?.analysis)) ||
+        isClassificationAnalysis(jobConfig?.analysis)
+      ) {
+        const analysisType = getAnalysisType(jobConfig.analysis);
+        if (
+          analysisType !== 'unknown' &&
+          jobConfig.analysis[analysisType].num_top_feature_importance_values === 0
+        ) {
+          return (
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.exploration.totalFeatureImportanceNotCalculatedCalloutMessage"
+                  defaultMessage="Feature importance was not calculated because num_top_feature_importance values is set to 0."
+                />
+              }
+            />
+          );
+        } else {
+          // or is it because the data is uniform
+          return (
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.exploration.noTotalFeatureImportanceCalloutMessage"
+                  defaultMessage="Total feature importance data is not available; the data set is uniform and the features have no significant impact on the prediction."
+                />
+              }
+            />
+          );
+        }
+      }
+    }
+    return undefined;
+  }, [totalFeatureImportance, jobConfig]);
   return (
     <>
       <ExpandableSection
-        isExpanded={hasTotalFeatureImportance}
+        isExpanded={noDataCallOut === undefined}
         dataTestId="FeatureImportanceSummary"
         title={
           <FormattedMessage
@@ -224,16 +268,8 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           },
         ]}
         content={
-          !hasTotalFeatureImportance ? (
-            <EuiCallOut
-              size="s"
-              title={
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analytics.exploration.noTotalFeatureImportanceCalloutMessage"
-                  defaultMessage="Total feature importance data is not available; the data set is uniform and the features have no significant impact on the prediction."
-                />
-              }
-            />
+          noDataCallOut ? (
+            noDataCallOut
           ) : (
             <Chart
               size={{

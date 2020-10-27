@@ -1381,6 +1381,126 @@ describe('IndexPattern Data Source suggestions', () => {
       );
     });
 
+    it('does not create an over time suggestion if tables with numeric buckets with time dimension', async () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['colb', 'cola'],
+            columns: {
+              cola: {
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'dest',
+                label: 'Unique count of dest',
+                operationType: 'cardinality',
+              },
+              colb: {
+                label: 'My Op',
+                dataType: 'number',
+                isBucketed: true,
+                operationType: 'range',
+                sourceField: 'bytes',
+                scale: 'interval',
+                params: {
+                  type: 'histogram',
+                  maxBars: 100,
+                  ranges: [],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(getDatasourceSuggestionsFromCurrentState(state)).not.toContainEqual(
+        expect.objectContaining({
+          table: {
+            isMultiRow: true,
+            label: 'Over time',
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
+    it('adds date histogram over default time field for custom range intervals', async () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['colb', 'cola'],
+            columns: {
+              cola: {
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'dest',
+                label: 'Unique count of dest',
+                operationType: 'cardinality',
+              },
+              colb: {
+                label: 'My Custom Range',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'range',
+                sourceField: 'bytes',
+                scale: 'ordinal',
+                params: {
+                  type: 'range',
+                  maxBars: 100,
+                  ranges: [{ from: 1, to: 2, label: '' }],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(getDatasourceSuggestionsFromCurrentState(state)).toContainEqual(
+        expect.objectContaining({
+          table: {
+            changeType: 'extended',
+            columns: [
+              {
+                columnId: 'colb',
+                operation: {
+                  dataType: 'string',
+                  isBucketed: true,
+                  label: 'My Custom Range',
+                  scale: 'ordinal',
+                },
+              },
+              {
+                columnId: 'id1',
+                operation: {
+                  dataType: 'date',
+                  isBucketed: true,
+                  label: 'timestampLabel',
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'cola',
+                operation: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'Unique count of dest',
+                  scale: undefined,
+                },
+              },
+            ],
+            isMultiRow: true,
+            label: 'Over time',
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
     it('does not create an over time suggestion if there is no default time field', async () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {

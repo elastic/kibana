@@ -70,7 +70,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
         <span
           className="euiButtonContent euiButton__content"
         >
-          <div
+          <span
             className="euiButtonContent__icon"
             data-euiicon-type="copy"
             size="m"

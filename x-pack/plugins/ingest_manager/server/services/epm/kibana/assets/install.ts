@@ -19,7 +19,7 @@ import {
   KibanaSavedObjectType,
 } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
-import { IndexPatternType } from '../index_pattern/install';
+import { indexPatternTypes } from '../index_pattern/install';
 
 type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
   type: KibanaSavedObjectType;
@@ -176,7 +176,7 @@ async function installKibanaIndexPatterns({
   kibanaAssets: ArchiveAsset[];
 }) {
   // Filter out any reserved index patterns
-  const reservedPatterns = Object.values<string>(IndexPatternType).map((pattern) => `${pattern}-*`);
+  const reservedPatterns = indexPatternTypes.map((pattern) => `${pattern}-*`);
 
   const nonReservedPatterns = kibanaAssets.filter((asset) => !reservedPatterns.includes(asset.id));
 

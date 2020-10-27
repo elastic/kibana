@@ -7,7 +7,7 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { IntervalSchedule } from '../../types';
@@ -15,11 +15,11 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { resolvable } from '../../test_utils';
-import { ActionsAuthorization } from '../../../../actions/server';
+import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
-const taskManager = taskManagerMock.start();
+const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
@@ -319,6 +319,11 @@ describe('update()', () => {
         "version": "123",
       }
     `);
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
+      ActionsClient
+    >;
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
   });
 
   it('calls the createApiKey function', async () => {

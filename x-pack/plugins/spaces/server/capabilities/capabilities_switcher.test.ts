@@ -22,7 +22,6 @@ const features = ([
   {
     id: 'feature_2',
     name: 'Feature 2',
-    navLinkId: 'feature2',
     app: ['feature2'],
     catalogue: ['feature2Entry'],
     management: {
@@ -42,7 +41,6 @@ const features = ([
   {
     id: 'feature_3',
     name: 'Feature 3',
-    navLinkId: 'feature3',
     app: ['feature3_app'],
     catalogue: ['feature3Entry'],
     management: {
@@ -63,7 +61,6 @@ const features = ([
     // feature 4 intentionally delcares the same items as feature 3
     id: 'feature_4',
     name: 'Feature 4',
-    navLinkId: 'feature3',
     app: ['feature3', 'feature3_app'],
     catalogue: ['feature3Entry'],
     management: {

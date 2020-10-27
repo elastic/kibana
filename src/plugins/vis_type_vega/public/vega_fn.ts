@@ -53,7 +53,7 @@ export const createVegaFn = (
   Input,
   Arguments,
   Output,
-  ExecutionContext<unknown, VegaInspectorAdapters>
+  ExecutionContext<VegaInspectorAdapters>
 > => ({
   name: 'vega',
   type: 'render',

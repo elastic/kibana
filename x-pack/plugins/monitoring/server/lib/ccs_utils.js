@@ -40,7 +40,7 @@ export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesO
   if (isFunction(config.get)) {
     ccsEnabled = config.get('monitoring.ui.ccs.enabled');
   } else {
-    ccsEnabled = get(config, 'monitoring.ui.ccs.enabled');
+    ccsEnabled = get(config, 'ui.ccs.enabled');
   }
 
   if (!ccsEnabled || !ccs) {

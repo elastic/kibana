@@ -1038,6 +1038,11 @@ export class AlertsClient {
       const actionsClient = await this.getActionsClient();
       const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
       const actionResults = await actionsClient.getBulk(actionIds);
+      const actionTypeIds = [...new Set(actionResults.map((action) => action.actionTypeId))];
+      actionTypeIds.forEach((id) => {
+        // Notify action type usage via "isActionTypeEnabled" function
+        actionsClient.isActionTypeEnabled(id, { notifyUsage: true });
+      });
       alertActions.forEach(({ id, ...alertAction }, i) => {
         const actionResultValue = actionResults.find((action) => action.id === id);
         if (actionResultValue) {

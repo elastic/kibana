@@ -94,8 +94,9 @@ export async function resolveAnomalySwimlaneUserInput(
         </KibanaContextProvider>
       ),
       {
-        'data-test-subj': 'mlAnomalySwimlaneEmbeddable',
+        'data-test-subj': 'mlFlyoutJobSelector',
         ownFocus: true,
+        closeButtonAriaLabel: 'jobSelectorFlyout',
       }
     );
 

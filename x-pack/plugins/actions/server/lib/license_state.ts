@@ -11,6 +11,8 @@ import { ILicense } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { ActionType } from '../types';
 import { ActionTypeDisabledError } from './errors';
+import { LicensingPluginStart } from '../../../licensing/server';
+import { getActionTypeFeatureUsageName } from './get_action_type_feature_usage_name';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -24,6 +26,7 @@ export class LicenseState {
   private licenseInformation: ActionsLicenseInformation = this.checkLicense(undefined);
   private subscription: Subscription;
   private license?: ILicense;
+  private _notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage'] | null = null;
 
   constructor(license$: Observable<ILicense>) {
     this.subscription = license$.subscribe(this.updateInformation.bind(this));
@@ -32,6 +35,10 @@ export class LicenseState {
   private updateInformation(license: ILicense | undefined) {
     this.license = license;
     this.licenseInformation = this.checkLicense(license);
+  }
+
+  public setNotifyUsage(notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']) {
+    this._notifyUsage = notifyUsage;
   }
 
   public clean() {
@@ -43,8 +50,13 @@ export class LicenseState {
   }
 
   public isLicenseValidForActionType(
-    actionType: ActionType
+    actionType: ActionType,
+    { notifyUsage }: { notifyUsage: boolean } = { notifyUsage: false }
   ): { isValid: true } | { isValid: false; reason: 'unavailable' | 'expired' | 'invalid' } {
+    if (notifyUsage) {
+      this.notifyUsage(actionType);
+    }
+
     if (!this.license?.isAvailable) {
       return { isValid: false, reason: 'unavailable' };
     }
@@ -65,7 +77,16 @@ export class LicenseState {
     }
   }
 
+  private notifyUsage(actionType: ActionType) {
+    // No need to notify usage on basic action types
+    if (this._notifyUsage && actionType.minimumLicenseRequired !== 'basic') {
+      this._notifyUsage(getActionTypeFeatureUsageName(actionType));
+    }
+  }
+
   public ensureLicenseForActionType(actionType: ActionType) {
+    this.notifyUsage(actionType);
+
     const check = this.isLicenseValidForActionType(actionType);
 
     if (check.isValid) {

@@ -75,6 +75,8 @@ export interface IndexPatternField {
   readFromDocValues: boolean;
 }
 
+export const indexPatternTypes = [DataType.logs, DataType.metrics];
+
 // TODO: use a function overload and make pkgName and pkgVersion required for install/update
 // and not for an update removal.  or separate out the functions
 export async function installIndexPatterns(
@@ -119,7 +121,6 @@ export async function installIndexPatterns(
   const packageVersionsInfo = await Promise.all(packageVersionsFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
-  const indexPatternTypes = [DataType.logs, DataType.metrics];
   indexPatternTypes.forEach(async (indexPatternType) => {
     // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
