@@ -233,11 +233,14 @@ function mockConfig() {
 }
 
 describe('AdvancedSettings', () => {
+  const setUrlQuery = jest.fn();
+
   it('should render specific setting if given setting key', async () => {
     const component = mountWithI18nProvider(
       <AdvancedSettingsComponent
         queryText="test:string:setting"
         enableSaving={true}
+        setUrlQuery={setUrlQuery}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
@@ -260,6 +263,7 @@ describe('AdvancedSettings', () => {
       <AdvancedSettingsComponent
         queryText="test:string:setting"
         enableSaving={false}
+        setUrlQuery={setUrlQuery}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
