@@ -18,7 +18,9 @@
  */
 
 import { monaco } from '../monaco_imports';
+import { ContextService } from './context_service';
 import { PainlessCompletionResult, PainlessCompletionKind } from './types';
+import { PainlessWorker } from './worker';
 
 const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.CompletionItemKind => {
   const monacoItemKind = monaco.languages.CompletionItemKind;
@@ -39,8 +41,13 @@ const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.Compl
 };
 
 export class PainlessCompletionAdapter implements monaco.languages.CompletionItemProvider {
-  // @ts-ignore
-  constructor(private _worker, private _painlessContext) {}
+  constructor(
+    private _worker: {
+      (...uris: monaco.Uri[]): Promise<PainlessWorker>;
+      (arg0: monaco.Uri): Promise<PainlessWorker>;
+    },
+    private _contextService: ContextService
+  ) {}
 
   public get triggerCharacters(): string[] {
     return ['.'];
@@ -59,9 +66,12 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
       endLineNumber: position.lineNumber,
       endColumn: position.column,
     });
-    return this._worker()
-      .then((worker: any) => {
-        return worker.provideAutocompleteSuggestions(currentLineChars, this._painlessContext);
+    return this._worker(model.uri)
+      .then((worker: PainlessWorker) => {
+        return worker.provideAutocompleteSuggestions(
+          currentLineChars,
+          this._contextService.workerContext
+        );
       })
       .then((completionInfo: PainlessCompletionResult) => {
         const wordInfo = model.getWordUntilPosition(position);

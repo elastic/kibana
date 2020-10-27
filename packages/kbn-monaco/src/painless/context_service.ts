@@ -17,10 +17,16 @@
  * under the License.
  */
 
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-import { getSuggestionProvider } from './language';
+import { PainlessContext } from './types';
 
-export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
+export class ContextService {
+  context: PainlessContext = 'painless_test';
 
-export { PainlessContext } from './types';
+  public get workerContext() {
+    return this.context;
+  }
+
+  public set workerContext(newContext: PainlessContext) {
+    this.context = newContext;
+  }
+}

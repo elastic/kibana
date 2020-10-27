@@ -23,10 +23,11 @@ import { PainlessWorker } from './worker';
 export class WorkerProxyService {
   private worker: monaco.editor.MonacoWebWorker<PainlessWorker> | undefined;
 
-  public async getWorker(resources: any[]) {
+  public async getWorker(resources: monaco.Uri[]) {
     if (!this.worker) {
       throw new Error('Worker Proxy Service has not been setup!');
     }
+
     await this.worker.withSyncedResources(resources);
     const proxy = await this.worker.getProxy();
     return proxy;

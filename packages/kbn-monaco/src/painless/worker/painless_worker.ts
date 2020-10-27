@@ -19,14 +19,15 @@
 
 import { PainlessCompletionResult, PainlessContext } from '../types';
 
-import { PainlessCompletionManager } from './completion_manager';
+import { PainlessCompletionService } from './services';
 
 export class PainlessWorker {
   async provideAutocompleteSuggestions(
     currentLineChars: string,
-    context: PainlessContext
+    context: PainlessContext,
+    index?: string
   ): Promise<PainlessCompletionResult> {
-    const completionManager = new PainlessCompletionManager(context);
+    const completionService = new PainlessCompletionService(context);
     // Array of the active line words, e.g., [boolean, isInCircle]
     const words = currentLineChars.replace('\t', '').split(' ');
     // What the user is currently typing
@@ -35,7 +36,7 @@ export class PainlessWorker {
     // If the active typing contains dot notation, we assume we need to access the object's properties
     const isProperty = activeTyping.split('.').length === 2;
     // If the preceding word is a type, e.g., "boolean", we assume the user is declaring a variable and skip autocomplete
-    const hasDeclaredType = words.length === 2 && completionManager.getTypes().includes(words[0]);
+    const hasDeclaredType = words.length === 2 && completionService.getTypes().includes(words[0]);
     // If the preceding word contains the "new" keyword, we only provide constructor autcompletion
     const isConstructor = words[words.length - 2] === 'new';
 
@@ -45,15 +46,12 @@ export class PainlessWorker {
     };
 
     if (isConstructor) {
-      autocompleteSuggestions = completionManager.getPainlessConstructorsToAutocomplete();
+      autocompleteSuggestions = completionService.getPainlessConstructorsToAutocomplete();
     } else if (isProperty) {
       const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
-
-      autocompleteSuggestions = completionManager.getPainlessClassToAutocomplete(className);
-    } else {
-      if (!hasDeclaredType) {
-        autocompleteSuggestions = completionManager.getPainlessClassesToAutocomplete();
-      }
+      autocompleteSuggestions = completionService.getPainlessClassToAutocomplete(className);
+    } else if (!hasDeclaredType) {
+      autocompleteSuggestions = completionService.getPainlessClassesToAutocomplete();
     }
 
     return Promise.resolve(autocompleteSuggestions);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PainlessCompletionResult, PainlessCompletionItem, PainlessContext } from '../types';
+import { PainlessCompletionResult, PainlessCompletionItem, PainlessContext } from '../../types';
 import { painlessTestContext, scoreContext, filterContext } from './context';
 
 interface Field {
@@ -96,7 +96,7 @@ const getMethodDescription = (
   return `${methodName}(${parameterDescription}): ${returnValue}`;
 };
 
-export class PainlessCompletionManager {
+export class PainlessCompletionService {
   context: Context;
   constructor(private _painlessContext: PainlessContext) {
     this.context = mapContextToData[this._painlessContext] as Context;
