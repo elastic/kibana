@@ -137,6 +137,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         <h4>{I18LABELS.url}</h4>
       </EuiTitle>
       <SelectableUrlList
+        initialValue={searchTerm}
         loading={isLoading}
         onInputChange={onInputChange}
         onTermChange={onTermChange}

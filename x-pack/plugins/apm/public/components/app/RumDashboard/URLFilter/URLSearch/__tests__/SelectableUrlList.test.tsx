@@ -12,11 +12,7 @@ import { render } from '../../../utils/test_helper';
 describe('SelectableUrlList', () => {
   it('it uses search term value from url', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: {
-        noOfLongTasks: 3.0009765625,
-        sumOfLongTasks: 520.4375,
-        longestLongTask: 271.4375,
-      },
+      data: {},
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
@@ -27,6 +23,7 @@ describe('SelectableUrlList', () => {
 
     const { getByDisplayValue } = render(
       <SelectableUrlList
+        initialValue={'blog'}
         loading={false}
         data={{ items: [], total: 0 }}
         onChange={jest.fn()}

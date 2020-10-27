@@ -39,7 +39,6 @@ import {
 } from './RenderOption';
 import { I18LABELS } from '../../translations';
 import { useUiSetting$ } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useUrlParams } from '../../../../../hooks/useUrlParams';
 
 const StyledRow = styled.div<{
   darkMode: boolean;
@@ -69,6 +68,7 @@ interface Props {
   searchValue: string;
   onClose: () => void;
   popoverIsOpen: boolean;
+  initialValue?: string;
   setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
 }
 
@@ -82,12 +82,9 @@ export function SelectableUrlList({
   onClose,
   popoverIsOpen,
   setPopoverIsOpen,
+  initialValue,
 }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
-  const { urlParams } = useUrlParams();
-
-  const { searchTerm } = urlParams;
 
   const [popoverRef, setPopoverRef] = useState<HTMLElement | null>(null);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
@@ -136,10 +133,12 @@ export function SelectableUrlList({
   };
 
   useEffect(() => {
-    if (searchRef && searchTerm) {
-      searchRef.value = searchTerm;
+    if (searchRef && initialValue) {
+      searchRef.value = initialValue;
     }
 
+    // only want to call it at initial render to set value
+    // coming from initial value/url
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchRef]);
 
