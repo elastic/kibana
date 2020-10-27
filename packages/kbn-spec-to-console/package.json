@@ -12,6 +12,9 @@
   },
   "author": "",
   "license": "Apache-2.0",
+  "kibana": {
+    "devOnly": true
+  },
   "bugs": {
     "url": "https://github.com/jbudz/spec-to-console/issues"
   },
