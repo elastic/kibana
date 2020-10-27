@@ -5040,7 +5040,6 @@
     "xpack.apm.rum.filters.url.noResults": "結果がありません",
     "xpack.apm.rum.jsErrors.errorMessage": "エラーメッセージ",
     "xpack.apm.rum.jsErrors.errorRate": "エラー率",
-    "xpack.apm.rum.jsErrors.errorRateValue": "{errorRate} %",
     "xpack.apm.rum.jsErrors.impactedPageLoads": "影響を受けるページ読み込み数",
     "xpack.apm.rum.jsErrors.totalErrors": "合計エラー数",
     "xpack.apm.rum.userExperienceMetrics": "ユーザーエクスペリエンスメトリック",
