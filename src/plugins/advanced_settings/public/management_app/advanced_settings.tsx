@@ -262,7 +262,7 @@ export const AdvancedSettings = (props: AdvancedSettingsProps) => {
   const query = useParams<{ query: string }>().query ?? '';
   const { push } = useHistory();
   const location = useLocation();
-  const setUrlQuery = (q: string = '') => push({ ...location, pathname: q });
+  const setUrlQuery = (q: string = '') => push({ ...location, pathname: q.toLowerCase() });
 
   return (
     <AdvancedSettingsComponent
