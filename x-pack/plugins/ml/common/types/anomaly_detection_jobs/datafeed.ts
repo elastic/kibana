@@ -30,7 +30,7 @@ export interface ChunkingConfig {
   time_span?: string;
 }
 
-interface Aggregation {
+export interface Aggregation {
   buckets: {
     date_histogram: {
       field: string;
