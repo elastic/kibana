@@ -40,7 +40,7 @@ export const doPartialSearch = <SearchResponse extends IEsRawSearchResponse = IE
 ) => ({ params, options }: DoSearchFnArgs) => {
   const isCompleted = (response: ApiResponse<SearchResponse>) =>
     !(response.body.is_partial && response.body.is_running);
-  const waitForCompletion = true;
+
   const partialSearch = (id: IKibanaSearchRequest['id']) =>
     takePartialSearch<ApiResponse<SearchResponse>>(
       () =>

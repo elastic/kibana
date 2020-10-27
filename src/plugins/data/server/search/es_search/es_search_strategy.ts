@@ -40,8 +40,8 @@ export const esSearchStrategyProvider = (
 ): ISearchStrategy => ({
   search: (request, { abortSignal }, context) => {
     // Only default index pattern type is supported here.
-    // See data_enhanced for other t ype support.
-    if (Boolean(request.indexType)) {
+    // See data_enhanced for other type support.
+    if (request.indexType) {
       throw new Error(`Unsupported index pattern type ${request.indexType}`);
     }
 
