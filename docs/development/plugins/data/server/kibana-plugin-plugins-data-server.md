@@ -41,7 +41,6 @@
 |  Interface | Description |
 |  --- | --- |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
-|  [DoSearchFnArgs](./kibana-plugin-plugins-data-server.dosearchfnargs.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |

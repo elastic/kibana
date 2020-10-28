@@ -17,7 +17,7 @@
  * under the License.
  */
 
-interface TransportRequestPromise<T> extends Promise<T> {
+export interface TransportRequestPromise<T> extends Promise<T> {
   abort?: () => void;
 }
 
