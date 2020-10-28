@@ -358,6 +358,8 @@ exports[`Overview render 1`] = `
           ],
         }
       }
+      onChangeDefaultRoute={[Function]}
+      onSetDefaultRoute={[Function]}
       path="/app/kibana_overview"
     />
   </div>
@@ -834,6 +836,8 @@ exports[`Overview without features 1`] = `
           ],
         }
       }
+      onChangeDefaultRoute={[Function]}
+      onSetDefaultRoute={[Function]}
       path="/app/kibana_overview"
     />
   </div>
@@ -1215,6 +1219,8 @@ exports[`Overview without solutions 1`] = `
           ],
         }
       }
+      onChangeDefaultRoute={[Function]}
+      onSetDefaultRoute={[Function]}
       path="/app/kibana_overview"
     />
   </div>

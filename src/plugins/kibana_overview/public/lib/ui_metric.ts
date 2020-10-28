@@ -17,26 +17,21 @@
  * under the License.
  */
 
-import { HomePublicPluginSetup, HomePublicPluginStart } from 'src/plugins/home/public';
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
+import { UiStatsMetricType, METRIC_TYPE } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface KibanaOverviewPluginSetup {}
+export { METRIC_TYPE };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface KibanaOverviewPluginStart {}
+export let reportUiStats: UsageCollectionSetup['reportUiStats'] | undefined;
 
-export interface AppPluginSetupDependencies {
-  home: HomePublicPluginSetup;
-  usageCollection?: UsageCollectionSetup;
+export function init(_reportUiStats: UsageCollectionSetup['reportUiStats']): void {
+  reportUiStats = _reportUiStats;
 }
 
-export interface AppPluginStartDependencies {
-  home: HomePublicPluginStart;
-  data: DataPublicPluginStart;
-  navigation: NavigationPublicPluginStart;
-  newsfeed?: NewsfeedPublicPluginStart;
+export function trackUiMetric(metricType: UiStatsMetricType, name: string | string[]) {
+  if (!reportUiStats) {
+    return;
+  }
+
+  reportUiStats('kibana_overview', metricType, name);
 }
