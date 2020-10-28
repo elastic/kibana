@@ -290,6 +290,94 @@ describe('find()', () => {
     });
   });
 
+  test('preserves other filters if aggregate option is enabled', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 10,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 8,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 6,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 4,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 2,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              alertTypeId: 'myType',
+              schedule: { interval: '10s' },
+              params: {
+                bar: true,
+              },
+              createdAt: new Date().toISOString(),
+              actions: [
+                {
+                  group: 'default',
+                  actionRef: 'action_0',
+                  params: {
+                    foo: true,
+                  },
+                },
+              ],
+            },
+            score: 1,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+            ],
+          },
+        ],
+      });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    await alertsClient.find({ options: { filter: 'someTerm' } }, true);
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(
+      AlertExecutionStatusValues.length + 1
+    );
+    AlertExecutionStatusValues.forEach((status: string, ndx: number) => {
+      expect(unsecuredSavedObjectsClient.find.mock.calls[ndx + 1]).toEqual([
+        {
+          fields: undefined,
+          filter: `someTerm and alert.attributes.executionStatus.status:(${status})`,
+          page: 1,
+          perPage: 0,
+          type: 'alert',
+        },
+      ]);
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
       const filter = esKuery.fromKueryExpression(
