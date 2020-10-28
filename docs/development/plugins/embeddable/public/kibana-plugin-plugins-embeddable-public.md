@@ -77,6 +77,7 @@
 |  [contextMenuTrigger](./kibana-plugin-plugins-embeddable-public.contextmenutrigger.md) |  |
 |  [defaultEmbeddableFactoryProvider](./kibana-plugin-plugins-embeddable-public.defaultembeddablefactoryprovider.md) |  |
 |  [EmbeddableRenderer](./kibana-plugin-plugins-embeddable-public.embeddablerenderer.md) | Helper react component to render an embeddable Can be used if you have an embeddable object or an embeddable factory Supports updating input by passing <code>input</code> prop |
+|  [ERROR\_EMBEDDABLE\_TYPE](./kibana-plugin-plugins-embeddable-public.error_embeddable_type.md) |  |
 |  [isRangeSelectTriggerContext](./kibana-plugin-plugins-embeddable-public.israngeselecttriggercontext.md) |  |
 |  [isValueClickTriggerContext](./kibana-plugin-plugins-embeddable-public.isvalueclicktriggercontext.md) |  |
 |  [PANEL\_BADGE\_TRIGGER](./kibana-plugin-plugins-embeddable-public.panel_badge_trigger.md) |  |
@@ -94,4 +95,5 @@
 |  [EmbeddableInput](./kibana-plugin-plugins-embeddable-public.embeddableinput.md) |  |
 |  [EmbeddablePanelHOC](./kibana-plugin-plugins-embeddable-public.embeddablepanelhoc.md) |  |
 |  [EmbeddableRendererProps](./kibana-plugin-plugins-embeddable-public.embeddablerendererprops.md) | This type is a publicly exposed props of [EmbeddableRenderer](./kibana-plugin-plugins-embeddable-public.embeddablerenderer.md) Union is used to validate that or factory or embeddable is passed in, but it can't be both simultaneously In case when embeddable is passed in, input is optional, because there is already an input inside of embeddable object In case when factory is used, then input is required, because it will be used as initial input to create an embeddable object |
+|  [ErrorEmbeddableInput](./kibana-plugin-plugins-embeddable-public.errorembeddableinput.md) |  |
 

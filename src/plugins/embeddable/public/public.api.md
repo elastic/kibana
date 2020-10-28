@@ -277,6 +277,8 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer);
     destroy(): void;
     // (undocumented)
+    protected fatalError(e: Error): void;
+    // (undocumented)
     getInput$(): Readonly<Rx.Observable<TEmbeddableInput>>;
     // (undocumented)
     getInput(): Readonly<TEmbeddableInput>;
@@ -317,8 +319,6 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     supportedTriggers(): Array<keyof TriggerContextMapping>;
     // (undocumented)
     abstract readonly type: string;
-    // (undocumented)
-    protected updateError(e: Error): void;
     // (undocumented)
     updateInput(changes: Partial<TEmbeddableInput>): void;
     // (undocumented)
@@ -641,11 +641,16 @@ export interface EnhancementRegistryDefinition<P extends SerializableState = Ser
     id: string;
 }
 
+// Warning: (ae-missing-release-tag) "ERROR_EMBEDDABLE_TYPE" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const ERROR_EMBEDDABLE_TYPE = "error";
+
 // Warning: (ae-missing-release-tag) "ErrorEmbeddable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
-    constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer);
+export class ErrorEmbeddable extends Embeddable<ErrorEmbeddableInput, EmbeddableOutput> {
+    constructor(error: Error | string, input: ErrorEmbeddableInput, parent?: IContainer);
     // (undocumented)
     destroy(): void;
     // (undocumented)
@@ -657,6 +662,13 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     // (undocumented)
     readonly type = "error";
 }
+
+// Warning: (ae-missing-release-tag) "ErrorEmbeddableInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ErrorEmbeddableInput = EmbeddableInput & {
+    error?: Error;
+};
 
 // Warning: (ae-missing-release-tag) "IContainer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

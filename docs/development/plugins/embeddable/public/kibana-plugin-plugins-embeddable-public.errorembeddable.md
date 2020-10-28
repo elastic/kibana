@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> 
+export declare class ErrorEmbeddable extends Embeddable<ErrorEmbeddableInput, EmbeddableOutput> 
 ```
 
 ## Constructors

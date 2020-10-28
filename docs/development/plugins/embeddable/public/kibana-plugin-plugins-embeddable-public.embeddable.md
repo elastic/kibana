@@ -35,6 +35,7 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [destroy()](./kibana-plugin-plugins-embeddable-public.embeddable.destroy.md) |  | Called when this embeddable is no longer used, this should be the place for implementors to add any additional clean up tasks, like unmounting and unsubscribing. |
+|  [fatalError(e)](./kibana-plugin-plugins-embeddable-public.embeddable.fatalerror.md) |  |  |
 |  [getInput()](./kibana-plugin-plugins-embeddable-public.embeddable.getinput.md) |  |  |
 |  [getInput$()](./kibana-plugin-plugins-embeddable-public.embeddable.getinput_.md) |  |  |
 |  [getInspectorAdapters()](./kibana-plugin-plugins-embeddable-public.embeddable.getinspectoradapters.md) |  | An embeddable can return inspector adapters if it want the inspector to be available via the context menu of that panel.  Inspector adapters that will be used to open an inspector for. |
@@ -46,7 +47,6 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 |  [reload()](./kibana-plugin-plugins-embeddable-public.embeddable.reload.md) |  | Reload will be called when there is a request to refresh the data or view, even if the input data did not change. |
 |  [render(el)](./kibana-plugin-plugins-embeddable-public.embeddable.render.md) |  |  |
 |  [supportedTriggers()](./kibana-plugin-plugins-embeddable-public.embeddable.supportedtriggers.md) |  |  |
-|  [updateError(e)](./kibana-plugin-plugins-embeddable-public.embeddable.updateerror.md) |  |  |
 |  [updateInput(changes)](./kibana-plugin-plugins-embeddable-public.embeddable.updateinput.md) |  |  |
 |  [updateOutput(outputChanges)](./kibana-plugin-plugins-embeddable-public.embeddable.updateoutput.md) |  |  |
 

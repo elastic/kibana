@@ -9,7 +9,7 @@ Constructs a new instance of the `ErrorEmbeddable` class
 <b>Signature:</b>
 
 ```typescript
-constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer);
+constructor(error: Error | string, input: ErrorEmbeddableInput, parent?: IContainer);
 ```
 
 ## Parameters
@@ -17,6 +17,6 @@ constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  error | <code>Error &#124; string</code> |  |
-|  input | <code>EmbeddableInput</code> |  |
+|  input | <code>ErrorEmbeddableInput</code> |  |
 |  parent | <code>IContainer</code> |  |
 
