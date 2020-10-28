@@ -25,6 +25,6 @@ export { TagDecoratedSavedObject } from './types';
 
 export const tagDecoratorConfig: SavedObjectDecoratorConfig<InternalTagDecoratedSavedObject> = {
   id: decoratorId,
-  priority: 1,
+  priority: 100,
   factory: tagDecoratorFactory,
 };

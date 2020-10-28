@@ -46,6 +46,9 @@ export class SavedObjectDecoratorRegistry {
     if (this.registry.has(config.id)) {
       throw new Error(`A decorator is already registered for id ${config.id}`);
     }
+    if ([...this.registry.values()].find(({ priority }) => priority === config.priority)) {
+      throw new Error(`A decorator is already registered for priority ${config.priority}`);
+    }
     this.registry.set(config.id, config);
   }
 

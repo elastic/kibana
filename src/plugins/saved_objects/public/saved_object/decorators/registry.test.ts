@@ -55,10 +55,26 @@ describe('SavedObjectDecoratorRegistry', () => {
       expect(() => {
         registry.register({
           id: 'foo',
-          priority: 9000,
+          priority: 42,
           factory: () => mockDecorator(),
         });
       }).toThrowErrorMatchingInlineSnapshot(`"A decorator is already registered for id foo"`);
+    });
+
+    it('throws when trying to register multiple decorators with the same priority', () => {
+      registry.register({
+        id: 'foo',
+        priority: 100,
+        factory: () => mockDecorator(),
+      });
+
+      expect(() => {
+        registry.register({
+          id: 'bar',
+          priority: 100,
+          factory: () => mockDecorator(),
+        });
+      }).toThrowErrorMatchingInlineSnapshot(`"A decorator is already registered for priority 100"`);
     });
   });
 
