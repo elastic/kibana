@@ -306,7 +306,7 @@ export class TaskRunner {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert)
       ),
-      schedule: asOk(alert.schedule),
+      schedule: asOk((await alertsClient.get({ id: alertId })).schedule),
     };
   }
 
