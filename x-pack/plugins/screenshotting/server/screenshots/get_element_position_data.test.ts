@@ -5,48 +5,21 @@
  * 2.0.
  */
 
-import { HeadlessChromiumDriver } from '../../browsers';
-import {
-  createMockBrowserDriverFactory,
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLayoutInstance,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
-import { LayoutInstance } from '../layouts';
+import type { Logger } from 'src/core/server';
+import { createMockBrowserDriver } from '../browsers/mock';
+import { createMockLayoutInstance } from '../layouts/mock';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 
 describe('getElementPositionAndAttributes', () => {
-  let layout: LayoutInstance;
-  let logger: ReturnType<typeof createMockLevelLogger>;
-  let browser: HeadlessChromiumDriver;
+  const logger = {} as jest.Mocked<Logger>;
+  let browser: ReturnType<typeof createMockBrowserDriver>;
+  let layout: ReturnType<typeof createMockLayoutInstance>;
 
   beforeEach(async () => {
-    const schema = createMockConfigSchema();
-    const config = createMockConfig(schema);
-    const captureConfig = config.get('capture');
-    const core = await createMockReportingCore(schema);
+    browser = createMockBrowserDriver();
+    layout = createMockLayoutInstance();
 
-    layout = createMockLayoutInstance(captureConfig);
-    logger = createMockLevelLogger();
-
-    await createMockBrowserDriverFactory(core, logger, {
-      evaluate: jest.fn(
-        async <T extends (...args: unknown[]) => unknown>({
-          fn,
-          args,
-        }: {
-          fn: T;
-          args: Parameters<T>;
-        }) => fn(...args)
-      ),
-      getCreatePage: (driver) => {
-        browser = driver;
-
-        return jest.fn();
-      },
-    });
+    browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
 
     // @see https://github.com/jsdom/jsdom/issues/653
     const querySelectorAll = document.querySelectorAll.bind(document);
@@ -69,7 +42,6 @@ describe('getElementPositionAndAttributes', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
     document.body.innerHTML = '';
   });
 
@@ -87,7 +59,7 @@ describe('getElementPositionAndAttributes', () => {
       />
     `;
 
-    await expect(getElementPositionAndAttributes(browser, layout, logger)).resolves
+    await expect(getElementPositionAndAttributes(browser, logger, layout)).resolves
       .toMatchInlineSnapshot(`
             Array [
               Object {
@@ -131,6 +103,6 @@ describe('getElementPositionAndAttributes', () => {
   });
 
   it('should return null when there are no elements matching', async () => {
-    await expect(getElementPositionAndAttributes(browser, layout, logger)).resolves.toBeNull();
+    await expect(getElementPositionAndAttributes(browser, logger, layout)).resolves.toBeNull();
   });
 });

@@ -6,21 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LevelLogger, startTrace } from '../';
-import { HeadlessChromiumDriver } from '../../browsers';
+import apm from 'elastic-apm-node';
+import type { Logger } from 'src/core/server';
+import type { HeadlessChromiumDriver } from '../browsers';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
-  loadDelay: number,
   browser: HeadlessChromiumDriver,
-  layout: LayoutInstance,
-  logger: LevelLogger
+  logger: Logger,
+  loadDelay: number,
+  layout: LayoutInstance
 ) => {
-  const endTrace = startTrace('wait_for_render', 'wait');
+  const span = apm.startSpan('wait_for_render', 'wait');
 
   logger.debug(
-    i18n.translate('xpack.reporting.screencapture.waitingForRenderComplete', {
+    i18n.translate('xpack.screenshotting.screencapture.waitingForRenderComplete', {
       defaultMessage: 'waiting for rendering to complete',
     })
   );
@@ -74,11 +75,11 @@ export const waitForRenderComplete = async (
     )
     .then(() => {
       logger.debug(
-        i18n.translate('xpack.reporting.screencapture.renderIsComplete', {
+        i18n.translate('xpack.screenshotting.screencapture.renderIsComplete', {
           defaultMessage: 'rendering is complete',
         })
       );
 
-      endTrace();
+      span?.end();
     });
 };

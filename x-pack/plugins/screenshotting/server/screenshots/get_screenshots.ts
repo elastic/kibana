@@ -6,17 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LevelLogger, startTrace } from '../';
-import { HeadlessChromiumDriver } from '../../browsers';
-import { ElementsPositionAndAttribute, Screenshot } from './';
+import apm from 'elastic-apm-node';
+import type { Logger } from 'src/core/server';
+import type { HeadlessChromiumDriver } from '../browsers';
+import type { ElementsPositionAndAttribute, Screenshot } from './';
 
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[],
-  logger: LevelLogger
+  logger: Logger,
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[]
 ): Promise<Screenshot[]> => {
   logger.info(
-    i18n.translate('xpack.reporting.screencapture.takingScreenshots', {
+    i18n.translate('xpack.screenshotting.screencapture.takingScreenshots', {
       defaultMessage: `taking screenshots`,
     })
   );
@@ -24,7 +25,7 @@ export const getScreenshots = async (
   const screenshots: Screenshot[] = [];
 
   for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
-    const endTrace = startTrace('get_screenshots', 'read');
+    const span = apm.startSpan('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
 
     const data = await browser.screenshot(item.position);
@@ -39,11 +40,11 @@ export const getScreenshots = async (
       description: item.attributes.description,
     });
 
-    endTrace();
+    span?.end();
   }
 
   logger.info(
-    i18n.translate('xpack.reporting.screencapture.screenshotsTaken', {
+    i18n.translate('xpack.screenshotting.screencapture.screenshotsTaken', {
       defaultMessage: `screenshots taken: {numScreenhots}`,
       values: {
         numScreenhots: screenshots.length,

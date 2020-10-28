@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { HeadlessChromiumDriver } from '../../browsers';
-import {
-  createMockBrowserDriverFactory,
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import type { Logger } from 'src/core/server';
+import { createMockBrowserDriver } from '../browsers/mock';
 import { getScreenshots } from './get_screenshots';
 
 describe('getScreenshots', () => {
@@ -31,31 +26,14 @@ describe('getScreenshots', () => {
       },
     },
   ];
-
-  let logger: ReturnType<typeof createMockLevelLogger>;
-  let browser: jest.Mocked<HeadlessChromiumDriver>;
+  let browser: ReturnType<typeof createMockBrowserDriver>;
+  let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
-    const core = await createMockReportingCore(createMockConfigSchema());
+    browser = createMockBrowserDriver();
+    logger = { info: jest.fn() } as unknown as jest.Mocked<Logger>;
 
-    logger = createMockLevelLogger();
-
-    await createMockBrowserDriverFactory(core, logger, {
-      evaluate: jest.fn(
-        async <T extends (...args: unknown[]) => unknown>({
-          fn,
-          args,
-        }: {
-          fn: T;
-          args: Parameters<T>;
-        }) => fn(...args)
-      ),
-      getCreatePage: (driver) => {
-        browser = driver as typeof browser;
-
-        return jest.fn();
-      },
-    });
+    browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
   });
 
   afterEach(() => {
@@ -63,7 +41,7 @@ describe('getScreenshots', () => {
   });
 
   it('should return screenshots', async () => {
-    await expect(getScreenshots(browser, elementsPositionAndAttributes, logger)).resolves
+    await expect(getScreenshots(browser, logger, elementsPositionAndAttributes)).resolves
       .toMatchInlineSnapshot(`
             Array [
               Object {
@@ -109,7 +87,7 @@ describe('getScreenshots', () => {
   });
 
   it('should forward elements positions', async () => {
-    await getScreenshots(browser, elementsPositionAndAttributes, logger);
+    await getScreenshots(browser, logger, elementsPositionAndAttributes);
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
     expect(browser.screenshot).toHaveBeenNthCalledWith(
@@ -126,7 +104,7 @@ describe('getScreenshots', () => {
     browser.screenshot.mockResolvedValue(Buffer.from(''));
 
     await expect(
-      getScreenshots(browser, elementsPositionAndAttributes, logger)
+      getScreenshots(browser, logger, elementsPositionAndAttributes)
     ).rejects.toBeInstanceOf(Error);
   });
 });

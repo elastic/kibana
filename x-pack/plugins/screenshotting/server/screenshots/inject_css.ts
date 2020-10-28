@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
-import { LevelLogger, startTrace } from '../';
-import { HeadlessChromiumDriver } from '../../browsers';
+import apm from 'elastic-apm-node';
+import type { Logger } from 'src/core/server';
+import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_INJECTCSS } from './constants';
 
@@ -17,12 +18,12 @@ const fsp = { readFile: promisify(fs.readFile) };
 
 export const injectCustomCss = async (
   browser: HeadlessChromiumDriver,
-  layout: Layout,
-  logger: LevelLogger
+  logger: Logger,
+  layout: Layout
 ): Promise<void> => {
-  const endTrace = startTrace('inject_css', 'correction');
+  const span = apm.startSpan('inject_css', 'correction');
   logger.debug(
-    i18n.translate('xpack.reporting.screencapture.injectingCss', {
+    i18n.translate('xpack.screenshotting.screencapture.injectingCss', {
       defaultMessage: 'injecting custom css',
     })
   );
@@ -49,12 +50,12 @@ export const injectCustomCss = async (
   } catch (err) {
     logger.error(err);
     throw new Error(
-      i18n.translate('xpack.reporting.screencapture.injectCss', {
+      i18n.translate('xpack.screenshotting.screencapture.injectCss', {
         defaultMessage: `An error occurred when trying to update Kibana CSS for reporting. {error}`,
         values: { error: err },
       })
     );
   }
 
-  endTrace();
+  span?.end();
 };

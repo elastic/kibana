@@ -5,74 +5,55 @@
  * 2.0.
  */
 
-jest.mock('puppeteer', () => ({
-  launch: () => ({
-    // Fixme needs event emitters
-    newPage: () => ({
-      emulateTimezone: jest.fn(),
-      setDefaultTimeout: jest.fn(),
-    }),
-    process: jest.fn(),
-    close: jest.fn(),
-  }),
-}));
-
-import moment from 'moment';
-import * as Rx from 'rxjs';
-import { ReportingCore } from '../..';
-import { HeadlessChromiumDriver } from '../../browsers';
-import { ConditionalHeaders } from '../../export_types/common';
-import {
-  createMockBrowserDriverFactory,
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLayoutInstance,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
-import * as contexts from './constants';
-import { getScreenshots$ } from './';
-
-/*
- * Mocks
- */
-const logger = createMockLevelLogger();
-
-const mockSchema = createMockConfigSchema({
-  capture: {
-    loadDelay: moment.duration(2, 's'),
-    timeouts: {
-      openUrl: moment.duration(2, 'm'),
-      waitForElements: moment.duration(20, 's'),
-      renderComplete: moment.duration(10, 's'),
-    },
-  },
-});
-const mockConfig = createMockConfig(mockSchema);
-const captureConfig = mockConfig.get('capture');
-const mockLayout = createMockLayoutInstance(captureConfig);
-
-let core: ReportingCore;
+import { of, throwError, NEVER } from 'rxjs';
+import type { Logger } from 'src/core/server';
+import { createMockBrowserDriver } from '../browsers/mock';
+import { createMockLayoutInstance } from '../layouts/mock';
+import type { HeadlessChromiumDriverFactory } from '../browsers';
+import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
+import { getScreenshots$ } from '.';
+import type { ScreenshotObservableOpts } from '.';
 
 /*
  * Tests
  */
 describe('Screenshot Observable Pipeline', () => {
-  let mockBrowserDriverFactory: any;
+  let driver: ReturnType<typeof createMockBrowserDriver>;
+  let driverFactory: jest.Mocked<HeadlessChromiumDriverFactory>;
+  let layout: ReturnType<typeof createMockLayoutInstance>;
+  let logger: jest.Mocked<Logger>;
+  let options: ScreenshotObservableOpts;
 
   beforeEach(async () => {
-    core = await createMockReportingCore(mockSchema);
-    mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {});
+    driver = createMockBrowserDriver();
+    driverFactory = {
+      createPage: jest.fn(() => of({ driver, exit$: NEVER })),
+    } as unknown as typeof driverFactory;
+    layout = createMockLayoutInstance();
+    logger = {
+      debug: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn(),
+    } as unknown as jest.Mocked<Logger>;
+
+    options = {
+      layout,
+      browserTimezone: 'UTC',
+      conditionalHeaders: {},
+      timeouts: {
+        loadDelay: 2000,
+        openUrl: 120000,
+        waitForElements: 20000,
+        renderComplete: 10000,
+      },
+      urls: ['/welcome/home/start/index.htm'],
+    } as unknown as typeof options;
+
+    driver.isPageOpen.mockReturnValue(true);
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
-      logger,
-      urlsOrUrlLocatorTuples: ['/welcome/home/start/index.htm'],
-      conditionalHeaders: {} as ConditionalHeaders,
-      layout: mockLayout,
-      browserTimezone: 'UTC',
-    }).toPromise();
+    const result = await getScreenshots$(driverFactory, logger, options).toPromise();
 
     expect(result).toMatchInlineSnapshot(`
       Array [
@@ -126,29 +107,14 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines multiple urls into', async () => {
-    // mock implementations
-    const mockScreenshot = jest.fn(async () => Buffer.from('some screenshots'));
-    const mockOpen = jest.fn();
+    driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
 
-    // mocks
-    mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
-      screenshot: mockScreenshot,
-      open: mockOpen,
-    });
-
-    // test
-    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
-      logger,
-      urlsOrUrlLocatorTuples: [
-        '/welcome/home/start/index2.htm',
-        '/welcome/home/start/index.php3?page=./home.php',
-      ],
-      conditionalHeaders: {} as ConditionalHeaders,
-      layout: mockLayout,
-      browserTimezone: 'UTC',
-    }).toPromise();
-
-    expect(result).toMatchInlineSnapshot(`
+    await expect(
+      getScreenshots$(driverFactory, logger, {
+        ...options,
+        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      }).toPromise()
+    ).resolves.toMatchInlineSnapshot(`
       Array [
         Object {
           "elementsPositionAndAttributes": Array [
@@ -255,43 +221,35 @@ describe('Screenshot Observable Pipeline', () => {
       ]
     `);
 
-    // ensures the correct selectors are waited on for multi URL jobs
-    expect(mockOpen.mock.calls.length).toBe(2);
-
-    const firstSelector = mockOpen.mock.calls[0][1].waitForSelector;
-    expect(firstSelector).toBe('.kbnAppWrapper');
-
-    const secondSelector = mockOpen.mock.calls[1][1].waitForSelector;
-    expect(secondSelector).toBe('[data-shared-page="2"]');
+    expect(driver.open).toHaveBeenCalledTimes(2);
+    expect(driver.open).nthCalledWith(
+      1,
+      expect.anything(),
+      expect.objectContaining({ waitForSelector: '.kbnAppWrapper' }),
+      expect.anything()
+    );
+    expect(driver.open).nthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ waitForSelector: '[data-shared-page="2"]' }),
+      expect.anything()
+    );
   });
 
   describe('error handling', () => {
     it('recovers if waitForSelector fails', async () => {
-      // mock implementations
-      const mockWaitForSelector = jest.fn().mockImplementation((selectorArg: string) => {
+      driver.waitForSelector.mockImplementation((selectorArg: string) => {
         throw new Error('Mock error!');
       });
-
-      // mocks
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
-        waitForSelector: mockWaitForSelector,
-      });
-
-      // test
-      const getScreenshot = async () => {
-        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
-          logger,
-          urlsOrUrlLocatorTuples: [
+      await expect(
+        getScreenshots$(driverFactory, logger, {
+          ...options,
+          urls: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
-          conditionalHeaders: {} as ConditionalHeaders,
-          layout: mockLayout,
-          browserTimezone: 'UTC',
-        }).toPromise();
-      };
-
-      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
+        }).toPromise()
+      ).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
                   "elementsPositionAndAttributes": Array [
@@ -382,64 +340,24 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     it('observes page exit', async () => {
-      // mocks
-      const mockGetCreatePage = (driver: HeadlessChromiumDriver) =>
-        jest
-          .fn()
-          .mockImplementation(() =>
-            Rx.of({ driver, exit$: Rx.throwError('Instant timeout has fired!') })
-          );
+      driverFactory.createPage.mockReturnValue(
+        of({ driver, exit$: throwError('Instant timeout has fired!') })
+      );
 
-      const mockWaitForSelector = jest.fn().mockImplementation((selectorArg: string) => {
-        return Rx.never().toPromise();
-      });
-
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
-        getCreatePage: mockGetCreatePage,
-        waitForSelector: mockWaitForSelector,
-      });
-
-      // test
-      const getScreenshot = async () => {
-        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
-          logger,
-          urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
-          conditionalHeaders: {} as ConditionalHeaders,
-          layout: mockLayout,
-          browserTimezone: 'UTC',
-        }).toPromise();
-      };
-
-      await expect(getScreenshot()).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
+      await expect(
+        getScreenshots$(driverFactory, logger, options).toPromise()
+      ).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
     });
 
     it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
-      // mocks
-      const mockBrowserEvaluate = jest.fn();
-      mockBrowserEvaluate.mockImplementation(() => {
-        const lastCallIndex = mockBrowserEvaluate.mock.calls.length - 1;
-        const { context: mockCall } = mockBrowserEvaluate.mock.calls[lastCallIndex][1];
+      driver.evaluate.mockImplementation(async (_, { context }) =>
+        context === CONTEXT_ELEMENTATTRIBUTES ? null : undefined
+      );
 
-        if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
-          return Promise.resolve(null);
-        } else {
-          return Promise.resolve();
-        }
-      });
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
-        evaluate: mockBrowserEvaluate,
-      });
-      mockLayout.getViewport = () => null;
+      layout.getViewport = () => null;
 
-      const screenshots = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
-        logger,
-        urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
-        conditionalHeaders: {} as ConditionalHeaders,
-        layout: mockLayout,
-        browserTimezone: 'UTC',
-      }).toPromise();
-
-      expect(screenshots).toMatchInlineSnapshot(`
+      await expect(getScreenshots$(driverFactory, logger, options).toPromise()).resolves
+        .toMatchInlineSnapshot(`
         Array [
           Object {
             "elementsPositionAndAttributes": Array [

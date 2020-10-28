@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { LevelLogger, startTrace } from '../';
+import apm from 'elastic-apm-node';
+import type { Logger } from 'src/core/server';
+import type { HeadlessChromiumDriver } from '../browsers';
 import { LayoutInstance } from '../layouts';
-import { HeadlessChromiumDriver } from '../../browsers';
 import { CONTEXT_GETTIMERANGE } from './constants';
 
 export const getTimeRange = async (
   browser: HeadlessChromiumDriver,
-  layout: LayoutInstance,
-  logger: LevelLogger
+  logger: Logger,
+  layout: LayoutInstance
 ): Promise<string | null> => {
-  const endTrace = startTrace('get_time_range', 'read');
+  const span = apm.startSpan('get_time_range', 'read');
   logger.debug('getting timeRange');
 
   const timeRange = await browser.evaluate(
@@ -46,7 +47,7 @@ export const getTimeRange = async (
     logger.debug('no timeRange');
   }
 
-  endTrace();
+  span?.end();
 
   return timeRange;
 };

@@ -6,23 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LevelLogger, startTrace } from '../';
-import { HeadlessChromiumDriver } from '../../browsers';
+import apm from 'elastic-apm-node';
+import type { Logger } from 'src/core/server';
+import type { HeadlessChromiumDriver } from '../browsers';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
 
 export const getNumberOfItems = async (
-  timeout: number,
   browser: HeadlessChromiumDriver,
-  layout: LayoutInstance,
-  logger: LevelLogger
+  logger: Logger,
+  timeout: number,
+  layout: LayoutInstance
 ): Promise<number> => {
-  const endTrace = startTrace('get_number_of_items', 'read');
+  const span = apm.startSpan('get_number_of_items', 'read');
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
 
   logger.debug(
-    i18n.translate('xpack.reporting.screencapture.logWaitingForElements', {
+    i18n.translate('xpack.screenshotting.screencapture.logWaitingForElements', {
       defaultMessage: 'waiting for elements or items count attribute; or not found to interrupt',
     })
   );
@@ -58,17 +59,17 @@ export const getNumberOfItems = async (
       { context: CONTEXT_GETNUMBEROFITEMS },
       logger
     );
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    logger.error(error);
     throw new Error(
-      i18n.translate('xpack.reporting.screencapture.readVisualizationsError', {
+      i18n.translate('xpack.screenshotting.screencapture.readVisualizationsError', {
         defaultMessage: `An error occurred when trying to read the page for visualization panel info: {error}`,
-        values: { error: err },
+        values: { error },
       })
     );
   }
 
-  endTrace();
+  span?.end();
 
   return itemsCount;
 };

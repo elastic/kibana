@@ -5,32 +5,24 @@
  * 2.0.
  */
 
-import { LevelLogger } from '../';
-import { UrlOrUrlLocatorTuple } from '../../../common/types';
-import { ConditionalHeaders } from '../../export_types/common';
-import { LayoutInstance } from '../layouts';
+import type { ConditionalHeaders } from '../browsers';
+import type { LayoutInstance } from '../layouts';
 
 export { getScreenshots$ } from './observable';
 
-export interface PhaseInstance {
-  timeoutValue: number;
-  configValue: string;
-  label: string;
-}
-
 export interface PhaseTimeouts {
-  openUrl: PhaseInstance;
-  waitForElements: PhaseInstance;
-  renderComplete: PhaseInstance;
+  openUrl: number;
+  waitForElements: number;
+  renderComplete: number;
   loadDelay: number;
 }
 
-export interface ScreenshotObservableOpts {
-  logger: LevelLogger;
-  urlsOrUrlLocatorTuples: UrlOrUrlLocatorTuple[];
+export interface ScreenshotObservableOptions {
+  browserTimezone?: string;
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
-  browserTimezone?: string;
+  timeouts: PhaseTimeouts;
+  urls: string[];
 }
 
 export interface AttributesMap {

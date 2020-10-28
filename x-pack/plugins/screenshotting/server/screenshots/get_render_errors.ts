@@ -6,17 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HeadlessChromiumDriver } from '../../browsers';
+import apm from 'elastic-apm-node';
+import type { Logger } from 'src/core/server';
+import type { HeadlessChromiumDriver } from '../browsers';
 import type { LayoutInstance } from '../layouts';
-import { LevelLogger, startTrace } from '../';
 import { CONTEXT_GETRENDERERRORS } from './constants';
 
 export const getRenderErrors = async (
   browser: HeadlessChromiumDriver,
-  layout: LayoutInstance,
-  logger: LevelLogger
+  logger: Logger,
+  layout: LayoutInstance
 ): Promise<undefined | string[]> => {
-  const endTrace = startTrace('get_render_errors', 'read');
+  const span = apm.startSpan('get_render_errors', 'read');
   logger.debug('reading render errors');
   const errorsFound: undefined | string[] = await browser.evaluate(
     {
@@ -38,11 +39,11 @@ export const getRenderErrors = async (
     { context: CONTEXT_GETRENDERERRORS },
     logger
   );
-  endTrace();
+  span?.end();
 
   if (errorsFound?.length) {
-    logger.warning(
-      i18n.translate('xpack.reporting.screencapture.renderErrorsFound', {
+    logger.warn(
+      i18n.translate('xpack.screenshotting.screencapture.renderErrorsFound', {
         defaultMessage: 'Found {count} error messages. See report object for more information.',
         values: { count: errorsFound.length },
       })
