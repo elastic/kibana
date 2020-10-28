@@ -30,7 +30,6 @@ export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
 
 export async function renderApp({
-  appBasePath,
   element,
   history,
   onAppLeave,
