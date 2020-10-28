@@ -189,18 +189,28 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const file = await emsClient.getDefaultFileManifest();
-      const layers = file.layers.map((layer) => {
-        const newLayer = { ...layer };
-        const id = encodeURIComponent(layer.layer_id);
+      const file = await emsClient.getDefaultFileManifest(); //need raw manifest
+      const fileLayers = await emsClient.getFileLayers();
+
+      const layers = file.layers.map((layerJson) => {
+        const newLayerJson = { ...layerJson };
+        const id = encodeURIComponent(layerJson.layer_id);
+
+        const fileLayer = fileLayers.find((fileLayer) => fileLayer.getId() === layerJson.layer_id);
+        const defaultFormat = layerJson.formats.find(
+          (format) => format.type === fileLayer.getDefaultFormatType()
+        );
+
         const newUrl = `${EMS_FILES_DEFAULT_JSON_PATH}?id=${id}`;
-        newLayer.formats = [
+
+        //Only proxy default-format. Others are unused in Maps-app
+        newLayerJson.formats = [
           {
-            ...layer.formats[0],
+            ...defaultFormat,
             url: newUrl,
           },
         ];
-        return newLayer;
+        return newLayerJson;
       });
       //rewrite
       return ok({

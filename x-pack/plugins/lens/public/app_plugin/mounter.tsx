@@ -98,9 +98,12 @@ export async function mountApp(
 
   const redirectTo = (routeProps: RouteComponentProps<{ id?: string }>, savedObjectId?: string) => {
     if (!savedObjectId) {
-      routeProps.history.push('/');
+      routeProps.history.push({ pathname: '/', search: routeProps.history.location.search });
     } else {
-      routeProps.history.push(`/edit/${savedObjectId}`);
+      routeProps.history.push({
+        pathname: `/edit/${savedObjectId}`,
+        search: routeProps.history.location.search,
+      });
     }
   };
 
