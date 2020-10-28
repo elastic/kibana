@@ -396,6 +396,16 @@ export function XYChart({
     return style;
   };
 
+  const seriesPerLayer = filteredLayers.map((layer, layerIndex) => {
+    const splits = uniq(
+      data.tables[layer.layerId].rows.map((row) => {
+        return layer.splitAccessor && row[layer.splitAccessor];
+      })
+    );
+    return (splits.length || 1) * layer.accessors.length;
+  });
+  const totalSeriesCount = seriesPerLayer.reduce((sum, perLayer) => sum + perLayer, 0);
+
   return (
     <Chart>
       <Settings
@@ -610,13 +620,12 @@ export function XYChart({
               });
             });
           }
+
           const splits = uniq(
             table.rows.map((row) => {
               return splitAccessor && row[splitAccessor];
             })
           );
-
-          const totalSeriesCount = (splits.length || 1) * accessors.length;
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
@@ -637,6 +646,11 @@ export function XYChart({
                   name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
                   totalSeriesAtDepth: totalSeriesCount,
                   rankAtDepth:
+                    (layerIndex === 0
+                      ? 0
+                      : seriesPerLayer
+                          .slice(0, layerIndex)
+                          .reduce((sum, perLayer) => sum + perLayer, 0)) +
                     (splitAccessor ? splits.indexOf(seriesKeys[0]) * accessors.length : 0) +
                     accessors.indexOf(String(yAccessor)),
                 },
