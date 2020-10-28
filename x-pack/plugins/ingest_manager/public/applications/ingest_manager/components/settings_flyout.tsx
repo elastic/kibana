@@ -41,21 +41,21 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const kibanaUrlsInput = useComboInput([], (value) => {
     if (value.length === 0) {
       return [
-        i18n.translate('xpack.ingestManager.settings.kibanaUrlEmptyError', {
+        i18n.translate('xpack.fleet.settings.kibanaUrlEmptyError', {
           defaultMessage: 'At least one URL is required',
         }),
       ];
     }
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
-        i18n.translate('xpack.ingestManager.settings.kibanaUrlError', {
+        i18n.translate('xpack.fleet.settings.kibanaUrlError', {
           defaultMessage: 'Invalid URL',
         }),
       ];
     }
     if (isDiffPathProtocol(value)) {
       return [
-        i18n.translate('xpack.ingestManager.settings.kibanaUrlDifferentPathOrProtocolError', {
+        i18n.translate('xpack.fleet.settings.kibanaUrlDifferentPathOrProtocolError', {
           defaultMessage: 'Protocol and path must be the same for each URL',
         }),
       ];
@@ -64,7 +64,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const elasticsearchUrlInput = useComboInput([], (value) => {
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
-        i18n.translate('xpack.ingestManager.settings.elasticHostError', {
+        i18n.translate('xpack.fleet.settings.elasticHostError', {
           defaultMessage: 'Invalid URL',
         }),
       ];
@@ -77,7 +77,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       return;
     } catch (error) {
       return [
-        i18n.translate('xpack.ingestManager.settings.invalidYamlFormatErrorMessage', {
+        i18n.translate('xpack.fleet.settings.invalidYamlFormatErrorMessage', {
           defaultMessage: 'Invalid YAML: {reason}',
           values: { reason: error.message },
         }),
@@ -114,7 +114,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           throw settingsResponse.error;
         }
         notifications.toasts.addSuccess(
-          i18n.translate('xpack.ingestManager.settings.success.message', {
+          i18n.translate('xpack.fleet.settings.success.message', {
             defaultMessage: 'Settings saved',
           })
         );
@@ -166,7 +166,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         options={[
           {
             id: 'enabled',
-            label: i18n.translate('xpack.ingestManager.settings.autoUpgradeEnabledLabel', {
+            label: i18n.translate('xpack.fleet.settings.autoUpgradeEnabledLabel', {
               defaultMessage:
                 'Automatically update agent binaries to use the latest minor version.',
             }),
@@ -174,7 +174,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           {
             id: 'disabled',
             disabled: true,
-            label: i18n.translate('xpack.ingestManager.settings.autoUpgradeDisabledLabel', {
+            label: i18n.translate('xpack.fleet.settings.autoUpgradeDisabledLabel', {
               defaultMessage:
                 'Manually manage agent binary versions. Requires a Gold subscription.',
             }),
@@ -187,7 +187,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
-                  id="xpack.ingestManager.settings.autoUpgradeFieldLabel"
+                  id="xpack.fleet.settings.autoUpgradeFieldLabel"
                   defaultMessage="Elastic Agent binary version"
                 />
               </h3>
@@ -200,23 +200,17 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         options={[
           {
             id: 'enabled',
-            label: i18n.translate(
-              'xpack.ingestManager.settings.integrationUpgradeEnabledFieldLabel',
-              {
-                defaultMessage:
-                  'Automatically update integrations to the latest version to get the latest assets. You might need to update agent policies to use new features.',
-              }
-            ),
+            label: i18n.translate('xpack.fleet.settings.integrationUpgradeEnabledFieldLabel', {
+              defaultMessage:
+                'Automatically update integrations to the latest version to get the latest assets. You might need to update agent policies to use new features.',
+            }),
           },
           {
             id: 'disabled',
             disabled: true,
-            label: i18n.translate(
-              'xpack.ingestManager.settings.integrationUpgradeDisabledFieldLabel',
-              {
-                defaultMessage: 'Manually manage integration versions yourself.',
-              }
-            ),
+            label: i18n.translate('xpack.fleet.settings.integrationUpgradeDisabledFieldLabel', {
+              defaultMessage: 'Manually manage integration versions yourself.',
+            }),
           },
         ]}
         idSelected={'enabled'}
@@ -226,7 +220,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
-                  id="xpack.ingestManager.settings.integrationUpgradeFieldLabel"
+                  id="xpack.fleet.settings.integrationUpgradeFieldLabel"
                   defaultMessage="Integration version"
                 />
               </h3>
@@ -238,7 +232,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
-            id="xpack.ingestManager.settings.globalOutputTitle"
+            id="xpack.fleet.settings.globalOutputTitle"
             defaultMessage="Global output"
           />
         </h3>
@@ -246,14 +240,14 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiSpacer size="s" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.ingestManager.settings.globalOutputDescription"
+          id="xpack.fleet.settings.globalOutputDescription"
           defaultMessage="Specify where to send data. These settings are applied to all Elastic Agent policies."
         />
       </EuiText>
       <EuiSpacer size="m" />
       <EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.ingestManager.settings.kibanaUrlLabel', {
+          label={i18n.translate('xpack.fleet.settings.kibanaUrlLabel', {
             defaultMessage: 'Kibana URL',
           })}
           {...inputs.kibanaUrls.formRowProps}
@@ -264,7 +258,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiSpacer size="m" />
       <EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.ingestManager.settings.elasticsearchUrlLabel', {
+          label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
             defaultMessage: 'Elasticsearch URL',
           })}
           {...inputs.elasticsearchUrl.formRowProps}
@@ -276,7 +270,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiFormRow fullWidth>
         <EuiFormRow
           {...inputs.additionalYamlConfig.formRowProps}
-          label={i18n.translate('xpack.ingestManager.settings.additionalYamlConfig', {
+          label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
             defaultMessage: 'Elasticsearch output configuration',
           })}
           fullWidth={true}
@@ -305,7 +299,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         <EuiTitle size="m">
           <h2 id="IngestManagerSettingsFlyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.settings.flyoutTitle"
+              id="xpack.fleet.settings.flyoutTitle"
               defaultMessage="Fleet settings"
             />
           </h2>
@@ -317,7 +311,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ingestManager.settings.cancelButtonLabel"
+                id="xpack.fleet.settings.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -325,7 +319,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <EuiFlexItem grow={false}>
             <EuiButton onClick={onSubmit} iconType="save" isLoading={isLoading}>
               <FormattedMessage
-                id="xpack.ingestManager.settings.saveButtonLabel"
+                id="xpack.fleet.settings.saveButtonLabel"
                 defaultMessage="Save settings"
               />
             </EuiButton>

@@ -20,28 +20,22 @@ export const ConfirmEnrollmentTokenDelete = (props: Props) => {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
-        title={i18n.translate('xpack.ingestManager.enrollmentTokenDeleteModal.title', {
+        title={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.title', {
           defaultMessage: 'Revoke enrollment token',
         })}
         onCancel={onCancel}
         onConfirm={onConfirm}
-        cancelButtonText={i18n.translate(
-          'xpack.ingestManager.enrollmentTokenDeleteModal.cancelButton',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.ingestManager.enrollmentTokenDeleteModal.deleteButton',
-          {
-            defaultMessage: 'Revoke enrollment token',
-          }
-        )}
+        cancelButtonText={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.cancelButton', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.deleteButton', {
+          defaultMessage: 'Revoke enrollment token',
+        })}
         defaultFocusedButton="confirm"
         buttonColor="danger"
       >
         <EuiCallOut
-          title={i18n.translate('xpack.ingestManager.enrollmentTokenDeleteModal.description', {
+          title={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.description', {
             defaultMessage:
               'Are your sure you want to revoke {keyName}? Agents that use this token will no longer be able to access policies or send data. ',
             values: {
