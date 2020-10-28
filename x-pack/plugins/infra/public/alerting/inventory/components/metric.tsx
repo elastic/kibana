@@ -235,7 +235,11 @@ export const MetricExpression = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued">
-                    <span>of</span>
+                    <span>
+                      {i18n.translate('xpack.infra.waffle.customMetrics.of', {
+                        defaultMessage: 'of',
+                      })}
+                    </span>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
