@@ -139,29 +139,24 @@ export function WorkspacePanel({
 
   const expression = useMemo(
     () => {
-      if (activeDatasourceId) {
-        const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
-        const dataMessages = activeDatasource?.getErrorMessages(
-          datasourceStates[activeDatasourceId]?.state
-        );
-        if (dataMessages) {
-          setLocalState((s) => ({
-            ...s,
-            configurationValidationError: dataMessages,
-          }));
-          // TS will infer "void" if this is omitted
-          return;
-        }
-      }
+      const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
+      const dataMessages = activeDatasourceId
+        ? activeDatasource?.getErrorMessages(datasourceStates[activeDatasourceId]?.state)
+        : undefined;
       const vizMessages = activeVisualization?.getErrorMessages(visualizationState, framePublicAPI);
-      if (vizMessages || localState.configurationValidationError) {
+
+      if (vizMessages || dataMessages) {
         setLocalState((s) => ({
           ...s,
-          configurationValidationError: vizMessages,
+          configurationValidationError: [...(vizMessages || []), ...(dataMessages || [])],
         }));
-        // TS will infer "void" if this is omitted
-        return;
+      } else if (localState.configurationValidationError) {
+        setLocalState((s) => ({
+          ...s,
+          configurationValidationError: undefined,
+        }));
       }
+
       try {
         return buildExpression({
           visualization: activeVisualization,
@@ -195,6 +190,7 @@ export function WorkspacePanel({
       framePublicAPI.dateRange,
       framePublicAPI.query,
       framePublicAPI.filters,
+      activeDatasourceId,
     ]
   );
 
@@ -413,6 +409,7 @@ export const InnerVisualizationWrapper = ({
       </EuiFlexGroup>
     );
   }
+
   return (
     <div className="lnsExpressionRenderer">
       <ExpressionRendererComponent
