@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from 'src/core/server';
-import { first } from 'rxjs/operators';
+import { combineLatest, Subject } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
@@ -14,6 +15,8 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
+import { healthRoute } from './routes';
+import { createMonitoringStats, MonitoringStats } from './monitoring';
 
 export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
   TaskTypeDictionary,
@@ -34,6 +37,7 @@ export class TaskManagerPlugin
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
+  private monitoringStats$ = new Subject<MonitoringStats>();
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -41,13 +45,13 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup({ savedObjects }: CoreSetup): Promise<TaskManagerSetupContract> {
+  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
     this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
       .toPromise();
 
-    setupSavedObjects(savedObjects, this.config);
+    setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -58,6 +62,26 @@ export class TaskManagerPlugin
     } else {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
+
+    // Routes
+    const router = core.http.createRouter();
+    const serviceStatus$ = healthRoute(
+      router,
+      this.monitoringStats$,
+      this.logger,
+      this.taskManagerId,
+      this.config!
+    );
+
+    core.getStartServices().then(async () => {
+      core.status.set(
+        combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
+          map(([derivedStatus, serviceStatus]) =>
+            serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          )
+        )
+      );
+    });
 
     return {
       addMiddleware: (middleware: Middleware) => {
@@ -84,7 +108,7 @@ export class TaskManagerPlugin
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
 
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+    const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
       startingMaxWorkers: this.config!.max_workers,
@@ -97,10 +121,17 @@ export class TaskManagerPlugin
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
+      ...managedConfiguration,
     });
     this.taskPollingLifecycle = taskPollingLifecycle;
+
+    createMonitoringStats(
+      taskPollingLifecycle,
+      taskStore,
+      this.config!,
+      managedConfiguration,
+      this.logger
+    ).subscribe((stat) => this.monitoringStats$.next(stat));
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
