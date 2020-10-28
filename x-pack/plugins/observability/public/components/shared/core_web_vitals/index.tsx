@@ -18,11 +18,12 @@ import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
 
 export interface UXMetrics {
-  cls: string;
-  fid: number;
-  lcp: number;
+  cls: string | null;
+  fid?: number | null;
+  lcp?: number | null;
   tbt: number;
-  fcp: number;
+  fcp?: number | null;
+  coreVitalPages: number;
   lcpRanks: number[];
   fidRanks: number[];
   clsRanks: number[];
@@ -48,21 +49,35 @@ interface Props {
   data?: UXMetrics | null;
   displayServiceName?: boolean;
   serviceName?: string;
+  totalPageViews?: number;
+  displayTrafficMetric?: boolean;
 }
 
-function formatValue(value?: number) {
-  if (typeof value === 'undefined') {
-    return undefined;
+function formatValue(value?: number | null) {
+  if (typeof value === 'undefined' || value === null) {
+    return null;
   }
   return formatToSec(value, 'ms');
 }
 
-export function CoreVitals({ data, loading, displayServiceName, serviceName }: Props) {
-  const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
+export function CoreVitals({
+  data,
+  loading,
+  displayServiceName,
+  serviceName,
+  totalPageViews,
+  displayTrafficMetric = false,
+}: Props) {
+  const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks, coreVitalPages } = data || {};
 
   return (
     <>
-      <WebCoreVitalsTitle />
+      <WebCoreVitalsTitle
+        loading={loading}
+        coreVitalPages={coreVitalPages}
+        totalPageViews={totalPageViews}
+        displayTrafficMetric={displayTrafficMetric}
+      />
       <EuiSpacer size="s" />
       {displayServiceName && <ServiceName name={serviceName!} />}
       <EuiSpacer size="s" />
@@ -90,7 +105,7 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={CLS_LABEL}
-            value={cls}
+            value={cls ?? null}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}
