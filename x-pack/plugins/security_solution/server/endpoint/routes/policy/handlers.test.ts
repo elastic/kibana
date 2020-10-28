@@ -24,6 +24,8 @@ import { SearchResponse } from 'elasticsearch';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
+import { Agent } from '../../../../../ingest_manager/common/types/models';
+import { AgentService } from '../../../../../ingest_manager/server/services';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -94,17 +96,48 @@ describe('test policy response handler', () => {
   });
 
   describe('test policy summaries handler', () => {
+    let mockAgentService: jest.Mocked<AgentService>;
     beforeEach(() => {
       mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
-      endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+      endpointAppContextService.start({
+        ...createMockEndpointAppContextServiceStartContract(),
+        ...{ agentService: mockAgentService },
+      });
     });
 
     afterEach(() => endpointAppContextService.stop());
 
     it('should return the summary of all the policies with the given policy name', async () => {
+      mockAgentService.listAgents
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            agents: [
+              ({
+                local_metadata: {
+                  elastic: {
+                    agent: {
+                      version: '8.0.0',
+                    },
+                  },
+                },
+              } as unknown) as Agent,
+            ],
+            total: 2,
+            page: 1,
+            perPage: 1,
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            agents: [],
+            total: 2,
+            page: 1,
+            perPage: 1,
+          })
+        );
       const policySummariesHandler = getPolicySummariesHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
@@ -112,7 +145,7 @@ describe('test policy response handler', () => {
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        params: { policyName: 'my-policy' },
+        query: { policy_name: 'my-policy', package_name: 'endpoint' },
       });
 
       await policySummariesHandler(
@@ -124,13 +157,42 @@ describe('test policy response handler', () => {
     });
 
     it('should return the summary of all the policies', async () => {
+      mockAgentService.listAgents
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            agents: [
+              ({
+                local_metadata: {
+                  elastic: {
+                    agent: {
+                      version: '8.0.0',
+                    },
+                  },
+                },
+              } as unknown) as Agent,
+            ],
+            total: 2,
+            page: 1,
+            perPage: 1,
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            agents: [],
+            total: 2,
+            page: 1,
+            perPage: 1,
+          })
+        );
       const policySummariesHandler = getPolicySummariesHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
       });
 
-      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: { package_name: 'endpoint' },
+      });
 
       await policySummariesHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),

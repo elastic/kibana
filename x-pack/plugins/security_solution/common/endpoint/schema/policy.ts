@@ -13,6 +13,7 @@ export const GetPolicyResponseSchema = {
 
 export const GetPolicySummariesSchema = {
   query: schema.object({
-    policyName: schema.nullable(schema.string()),
+    package_name: schema.string(),
+    policy_name: schema.nullable(schema.string()),
   }),
 };

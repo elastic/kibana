@@ -11,7 +11,7 @@ import {
   GetPolicySummariesSchema,
 } from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
-import { getPolicyResponseByAgentId } from './service';
+import { getAllAgentUniqueVersionCount, getPolicyResponseByAgentId } from './service';
 
 export const getHostPolicyResponseHandler = function (
   endpointAppContext: EndpointAppContext
@@ -40,8 +40,18 @@ export const getPolicySummariesHandler = function (
 ): RequestHandler<undefined, TypeOf<typeof GetPolicySummariesSchema.query>, undefined> {
   return async (context, request, response) => {
     try {
-      return response.ok({ body: 'ok' });
-      // return response.notFound({ body: 'Policy Response Not Found' });
+      const result = await getAllAgentUniqueVersionCount(
+        endpointAppContext.service.getAgentService()!,
+        context.core.savedObjects.client,
+        request.query.package_name,
+        request.query?.policy_name || undefined
+      );
+
+      return response.ok({
+        body: {
+          versions_count: result,
+        },
+      });
     } catch (err) {
       return response.internalError({ body: err });
     }
