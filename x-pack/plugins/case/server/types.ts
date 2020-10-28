@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const attemptToDecodeURI = (value: string) => {
-  let result: string;
+import { CaseClient } from './client';
 
-  try {
-    result = decodeURI(value);
-    result = decodeURIComponent(result);
-  } catch (e) {
-    result = decodeURIComponent(value);
+export interface CaseRequestContext {
+  getCaseClient: () => CaseClient;
+}
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    case?: CaseRequestContext;
   }
-
-  return result;
-};
+}
