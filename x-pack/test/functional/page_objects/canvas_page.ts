@@ -97,8 +97,6 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       const contentElem = await testSubjects.find('canvasDebug__content');
       const content = await contentElem.getVisibleText();
 
-      console.log(content);
-
       const filters = JSON.parse(content);
 
       return filters.and.filter((f: any) => f.filterType === 'exactly');
