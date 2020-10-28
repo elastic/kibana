@@ -320,4 +320,119 @@ describe('sortObjects()', () => {
       ]
     `);
   });
+  test('should not fail on complex circular dependencies', () => {
+    const docs = [
+      {
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [
+          {
+            name: 'ref12',
+            type: 'foo',
+            id: '2',
+          },
+          {
+            name: 'ref13',
+            type: 'baz',
+            id: '3',
+          },
+        ],
+      },
+      {
+        id: '2',
+        type: 'foo',
+        attributes: {},
+        references: [
+          {
+            name: 'ref13',
+            type: 'foo',
+            id: '3',
+          },
+        ],
+      },
+      {
+        id: '3',
+        type: 'baz',
+        attributes: {},
+        references: [
+          {
+            name: 'ref13',
+            type: 'xyz',
+            id: '4',
+          },
+        ],
+      },
+      {
+        id: '4',
+        type: 'xyz',
+        attributes: {},
+        references: [
+          {
+            name: 'ref14',
+            type: 'foo',
+            id: '1',
+          },
+        ],
+      },
+    ];
+
+    expect(sortObjects(docs)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "3",
+              "name": "ref13",
+              "type": "foo",
+            },
+          ],
+          "type": "foo",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref14",
+              "type": "foo",
+            },
+          ],
+          "type": "xyz",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [
+            Object {
+              "id": "4",
+              "name": "ref13",
+              "type": "xyz",
+            },
+          ],
+          "type": "baz",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "2",
+              "name": "ref12",
+              "type": "foo",
+            },
+            Object {
+              "id": "3",
+              "name": "ref13",
+              "type": "baz",
+            },
+          ],
+          "type": "foo",
+        },
+      ]
+    `);
+  });
 });
