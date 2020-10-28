@@ -433,7 +433,7 @@ export class TimeSeriesExplorer extends React.Component {
    * used to indicate existence of annotations that are beyond the selected time
    * in the time series brush area
    */
-  loadAnnotations = async (jobId) => {
+  loadAnnotations = (jobId) => {
     ml.annotations
       .getAnnotations({
         jobIds: [jobId],
@@ -442,7 +442,7 @@ export class TimeSeriesExplorer extends React.Component {
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
       .then((resp) => {
-        if (!this.unmounted && resp?.success === true) {
+        if (!this.unmounted && resp?.success === true && Array.isArray(resp.annotations[jobId])) {
           this.setState({ annotationData: resp.annotations[jobId] ?? [] });
         }
       })
