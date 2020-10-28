@@ -44,12 +44,10 @@ Cypress.Commands.add('stubSearchStrategyApi', function (
   dataFileName,
   searchStrategyName = 'securitySolutionSearchStrategy'
 ) {
-  cy.on('window:before:load', (win) => {
-    win.fetch = null;
-  });
-  cy.server();
   cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route('POST', `internal/search/${searchStrategyName}/${queryId}`, `@${dataFileName}JSON`);
+  cy.route2('POST', `internal/search/${searchStrategyName}/${queryId}`, {
+    fixture: 'overview_search_strategy.json',
+  });
 });
 
 Cypress.Commands.add(
