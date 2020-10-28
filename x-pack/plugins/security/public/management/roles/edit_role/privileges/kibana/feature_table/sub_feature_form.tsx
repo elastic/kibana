@@ -134,7 +134,7 @@ export const SubFeatureForm = (props: Props) => {
         legend={i18n.translate(
           'xpack.security.management.editRole.subFeatureForm.controlLegendText',
           {
-            defaultMessage: '{subFeatureName} privilege',
+            defaultMessage: '{subFeatureName} feature privilege',
             values: {
               subFeatureName: props.subFeature.name,
             },
