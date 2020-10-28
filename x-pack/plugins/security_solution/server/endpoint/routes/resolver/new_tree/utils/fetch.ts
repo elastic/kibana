@@ -6,25 +6,26 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { DescendantsQuery } from '../queries/descendants';
-import { UniqueID, Schema } from '../queries/unique_id';
+import { Schema } from '../queries/aggregation_utils';
 
 /**
  * The query parameters passed in from the request. These define the limits for the ES requests for retrieving the
  * resolver tree.
  */
 export interface TreeOptions {
-  levels: {
+  levels?: {
     ancestors: number;
     descendants: number;
-  } | null;
+  };
   descendants: number;
   ancestors: number;
   timerange: {
-    start: string;
-    end: string;
+    from: string;
+    to: string;
   };
   schema: Schema;
-  nodes: Array<Map<string, string>>;
+  // TODO figure out if we should use any or restrict the request to only string and number
+  nodes: Array<string | number>;
   indexPatterns: string[];
 }
 
@@ -41,7 +42,7 @@ export class Fetcher {
    */
   public async tree(options: TreeOptions) {
     const query = new DescendantsQuery({
-      uniqueID: new UniqueID(options.schema),
+      schema: options.schema,
       indexPatterns: options.indexPatterns,
       timerange: options.timerange,
       size: options.descendants,

@@ -6,18 +6,16 @@
 import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { UniqueID } from './unique_id';
+import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
+import { Nodes, sourceFilter, getNodesFromAggs, Schema } from './aggregation_utils';
 
 interface Timerange {
-  start: string;
-  end: string;
+  from: string;
+  to: string;
 }
 
-type Nodes = Array<Map<string, string>>;
-
 interface DescendantsParams {
-  uniqueID: UniqueID;
+  schema: Schema;
   indexPatterns: string | string[];
   timerange: Timerange;
   size: number;
@@ -27,21 +25,23 @@ interface DescendantsParams {
  * Builds a query for retrieving descendants of a node.
  */
 export class DescendantsQuery {
-  private readonly uniqueID: UniqueID;
+  private readonly schema: Schema;
   private readonly indexPatterns: string | string[];
   private readonly timerange: Timerange;
   private readonly size: number;
-  constructor({ uniqueID, indexPatterns, timerange, size }: DescendantsParams) {
-    this.uniqueID = uniqueID;
+  private readonly sourceFields: string[];
+  constructor({ schema, indexPatterns, timerange, size }: DescendantsParams) {
+    this.sourceFields = sourceFilter(schema);
+    this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timerange = timerange;
     this.size = size;
   }
 
-  private query(shouldClauses: JsonValue[]): JsonObject {
+  private query(nodes: Nodes): JsonObject {
     return {
       // TODO look into switching this to doc_values
-      _source: this.uniqueID.sourceFilter,
+      _source: this.sourceFields,
       size: 0,
       query: {
         bool: {
@@ -49,19 +49,26 @@ export class DescendantsQuery {
             {
               range: {
                 '@timestamp': {
-                  gte: this.timerange.start,
-                  lte: this.timerange.end,
+                  gte: this.timerange.from,
+                  lte: this.timerange.to,
                   // TODO this is what the search_strategy uses, need to double check
                   format: 'strict_date_optional_time',
                 },
               },
             },
             {
-              bool: {
-                should: shouldClauses,
+              terms: { [this.schema.parent]: nodes },
+            },
+            {
+              exists: {
+                field: this.schema.id,
               },
             },
-            ...this.uniqueID.buildConstraints(),
+            {
+              exists: {
+                field: this.schema.parent,
+              },
+            },
             {
               term: { 'event.category': 'process' },
             },
@@ -71,14 +78,35 @@ export class DescendantsQuery {
           ],
         },
       },
-      aggs: this.uniqueID.buildAggregations(this.size),
+      aggs: {
+        [this.schema.id]: {
+          terms: {
+            field: this.schema.id,
+            size: this.size,
+          },
+          singleEvent: {
+            top_hits: {
+              // TODO figure out if we can use doc_values
+              _source: this.sourceFields,
+              size: 1,
+              // TODO there might a use case to make the order configurable
+              sort: [{ '@timestamp': { order: 'asc' } }],
+            },
+          },
+          timestampMax: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
     };
   }
 
-  private queryWithAncestryArray(nodes: Nodes): JsonObject {
+  private queryWithAncestryArray(nodes: Nodes, ancestryField: string): JsonObject {
     return {
       // TODO look into switching this to doc_values
-      _source: this.uniqueID.sourceFilter,
+      _source: this.sourceFields,
       size: 0,
       query: {
         bool: {
@@ -86,15 +114,33 @@ export class DescendantsQuery {
             {
               range: {
                 '@timestamp': {
-                  gte: this.timerange.start,
-                  lte: this.timerange.end,
+                  gte: this.timerange.from,
+                  lte: this.timerange.to,
                   // TODO this is what the search_strategy uses, need to double check
                   format: 'strict_date_optional_time',
                 },
               },
             },
-            ...this.uniqueID.buildDescendantsAncestryQueryFilters(nodes),
-            ...this.uniqueID.buildConstraints(),
+            {
+              terms: {
+                [ancestryField]: nodes,
+              },
+            },
+            {
+              exists: {
+                field: this.schema.id,
+              },
+            },
+            {
+              exists: {
+                field: this.schema.parent,
+              },
+            },
+            {
+              exists: {
+                field: ancestryField,
+              },
+            },
             {
               term: { 'event.category': 'process' },
             },
@@ -104,53 +150,74 @@ export class DescendantsQuery {
           ],
         },
       },
-      aggs: this.uniqueID.buildAncestryAggregations(this.size, nodes),
+      aggs: {
+        [this.schema.id]: {
+          terms: {
+            field: this.schema.id,
+            size: this.size,
+          },
+          singleEvent: {
+            top_hits: {
+              // TODO figure out if we can use doc_values
+              _source: this.sourceFields,
+              size: 1,
+              // TODO there might a use case to make the order configurable
+              sort: [{ '@timestamp': { order: 'asc' } }],
+            },
+          },
+          timestampMax: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+          ancestry: {
+            max: {
+              script: {
+                // This will return the location of the id in the ancestry array field. This
+                // will allow us to sort by levels of the tree.
+                source: `
+                  Map ancestryToIndex = [:];
+                  List sourceAncestryArray = params._source.process.Ext.ancestry;
+                  int length = sourceAncestryArray.length;
+                  for (int i = 0; i < length; i++) {
+                    ancestryToIndex[sourceAncestryArray[i]] = i;
+                  }
+                  for (String id : params.ids) {
+                    def index = ancestryToIndex[id];
+                    if (index != null) {
+                      return index;
+                    }
+                  }
+                  return -1;
+                `,
+                params: {
+                  ids: nodes,
+                },
+              },
+            },
+          },
+        },
+      },
     };
-  }
-
-  private async searchChunked(client: IScopedClusterClient, nodes: Nodes): Promise<unknown> {
-    const filters = this.uniqueID.buildDescendantsQueryFilters(nodes);
-    const searches = [];
-    // this is the max number of bool clauses an elasticsearch query can contain is 1024 so let's
-    // make sure we're less than that
-    const chunkSize = 1000;
-    for (let i = 0; i < filters.length; i += chunkSize) {
-      const chunkedFilters = filters.slice(i, i + chunkSize);
-      searches.push(
-        client.asCurrentUser.search<SearchResponse<unknown>>({
-          body: this.query(chunkedFilters),
-          index: this.indexPatterns,
-        })
-      );
-    }
-    const results: Array<ApiResponse<SearchResponse<unknown>>> = await Promise.all(searches);
-    return results.reduce((allResults: unknown[], resultChunk) => {
-      allResults.push(...this.uniqueID.getNodesFromAggs(resultChunk.body.aggregations));
-      return allResults;
-    }, []);
-  }
-
-  private async searchWithAncestryArray(
-    client: IScopedClusterClient,
-    nodes: Nodes
-  ): Promise<unknown> {
-    const body = this.queryWithAncestryArray(nodes);
-    console.log(JSON.stringify(body, null, 2));
-    const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
-      body: this.queryWithAncestryArray(nodes),
-      index: this.indexPatterns,
-    });
-    console.log(JSON.stringify(response, null, 2));
-    return this.uniqueID.getNodesFromAggs(response.body.aggregations);
   }
 
   /**
    * TODO get rid of the unknowns
    */
   async search(client: IScopedClusterClient, nodes: Nodes): Promise<unknown> {
-    if (this.uniqueID.idSchema.ancestry) {
-      return this.searchWithAncestryArray(client, nodes);
+    let response: ApiResponse<SearchResponse<unknown>>;
+    if (this.schema.ancestry) {
+      response = await client.asCurrentUser.search({
+        body: this.queryWithAncestryArray(nodes, this.schema.ancestry),
+        index: this.indexPatterns,
+      });
+      return getNodesFromAggs(this.schema.id, response.body.aggregations);
     }
-    return this.searchChunked(client, nodes);
+
+    response = await client.asCurrentUser.search({
+      body: this.query(nodes),
+      index: this.indexPatterns,
+    });
+    return getNodesFromAggs(this.schema.id, response.body.aggregations);
   }
 }

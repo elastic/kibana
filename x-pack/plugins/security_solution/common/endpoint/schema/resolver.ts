@@ -72,24 +72,17 @@ export const validateTree2 = {
     descendants: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
     ancestors: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
     timerange: schema.object({
-      start: schema.string(),
-      end: schema.string(),
+      from: schema.string(),
+      to: schema.string(),
     }),
     schema: schema.object({
       // the ancestry field is optional
       ancestry: schema.maybe(schema.string()),
-      // TODO set a limit on the array size
-      edges: schema.arrayOf(
-        schema.object({
-          id: schema.string(),
-          parentID: schema.string(),
-        }),
-        { minSize: 1 }
-      ),
+      id: schema.string(),
+      parent: schema.string(),
     }),
-    // TODO would be great if we could enforce that the keys are the same as those defined in the userFieldsDef.relationship
-    // somehow
-    nodes: schema.arrayOf(schema.mapOf(schema.string(), schema.any()), { minSize: 1 }),
+    // TODO could we be more careful than `any`, it'd probably be nice to support numbers or strings
+    nodes: schema.arrayOf(schema.any(), { minSize: 1 }),
     indexPatterns: schema.arrayOf(schema.string(), { minSize: 1 }),
   }),
 };
