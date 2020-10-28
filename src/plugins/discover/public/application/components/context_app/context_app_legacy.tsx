@@ -119,7 +119,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
         <ContextErrorMessage status={status} reason={renderProps.reason} />
       ) : (
         <EuiPage>
-          <EuiPageContent paddingSize="s" className="cxtAppContent">
+          <EuiPageContent paddingSize="s" className="dscCxtAppContent">
             <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
             {loadingFeedback()}
             {isLoaded ? (
