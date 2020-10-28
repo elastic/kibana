@@ -742,7 +742,8 @@ describe('edit policy', () => {
       test('should hide data tier option on cloud using legacy node role configuration', async () => {
         http.setupNodeListResponse({
           nodesByAttributes: { test: ['123'] },
-          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          // On cloud, if using legacy config there will not be any "data_*" roles set.
+          nodesByRoles: { data: ['test'] },
           isUsingDeprecatedDataRoleConfig: true,
         });
         const rendered = mountWithIntl(component);

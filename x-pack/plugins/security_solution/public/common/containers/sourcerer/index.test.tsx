@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 
 import { useInitSourcerer } from '.';
 import { mockPatterns, mockSource } from './mocks';
-// import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SecurityPageName } from '../../../../common/constants';
 import { createStore, State } from '../../store';
@@ -85,7 +85,29 @@ describe('Sourcerer Hooks', () => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
-  const state: State = mockGlobalState;
+  const state: State = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+      },
+    },
+  };
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(
     state,

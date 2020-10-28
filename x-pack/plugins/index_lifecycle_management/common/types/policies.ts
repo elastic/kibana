@@ -35,6 +35,14 @@ export interface SerializedPhase {
   };
 }
 
+export interface MigrateAction {
+  /**
+   * If enabled is ever set it will probably only be set to `false` because the default value
+   * for this is `true`. Rather leave unspecified for true when serialising.
+   */
+  enabled: boolean;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
     rollover?: {
@@ -59,7 +67,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
-    migrate?: { enabled: boolean };
+    migrate?: MigrateAction;
   };
 }
 
@@ -70,7 +78,7 @@ export interface SerializedColdPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
-    migrate?: { enabled: boolean };
+    migrate?: MigrateAction;
   };
 }
 
@@ -91,13 +99,6 @@ export interface AllocateAction {
   exclude: {};
   require?: {
     [attribute: string]: string;
-  };
-  migrate?: {
-    /**
-     * If enabled is ever set it will only be set to `false` because the default value
-     * for this is `true`. Rather leave unspecified for true.
-     */
-    enabled: false;
   };
 }
 
