@@ -68,7 +68,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return {
       ...descriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      id: uuid(),
+      id: descriptor.id ? descriptor.id : uuid(),
       indexPatternId: descriptor.indexPatternId || '',
       geoField: descriptor.geoField || '',
       metrics:

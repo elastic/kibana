@@ -157,16 +157,16 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     let resp;
     try {
       if (inspectorRequest) {
-        inspectorRequest.stats(search.getRequestInspectorStats(searchSource));
+        const requestStats = search.getRequestInspectorStats(searchSource);
+        inspectorRequest.stats(requestStats);
         searchSource.getSearchRequestBody().then((body) => {
           inspectorRequest.json(body);
         });
       }
       resp = await searchSource.fetch({ abortSignal: abortController.signal });
       if (inspectorRequest) {
-        inspectorRequest
-          .stats(search.getResponseInspectorStats(resp, searchSource))
-          .ok({ json: resp });
+        const responseStats = search.getResponseInspectorStats(resp, searchSource);
+        inspectorRequest.stats(responseStats).ok({ json: resp });
       }
     } catch (error) {
       if (inspectorRequest) {
