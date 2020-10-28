@@ -43,7 +43,7 @@ export const validateTagName = (name: string): string | undefined => {
   }
   if (name.length > tagNameMaxLength) {
     return i18n.translate('xpack.savedObjectsTagging.validation.name.errorTooLong', {
-      defaultMessage: 'Tag name must be shorter than {length} characters',
+      defaultMessage: 'Tag name may not exceed {length} characters',
       values: {
         length: tagNameMaxLength,
       },
@@ -59,7 +59,7 @@ export const validateTagName = (name: string): string | undefined => {
 export const validateTagDescription = (description: string): string | undefined => {
   if (description.length > tagDescriptionMaxLength) {
     return i18n.translate('xpack.savedObjectsTagging.validation.description.errorTooLong', {
-      defaultMessage: 'Tag description must be shorter than {length} characters',
+      defaultMessage: 'Tag description may not exceed {length} characters',
       values: {
         length: tagDescriptionMaxLength,
       },
