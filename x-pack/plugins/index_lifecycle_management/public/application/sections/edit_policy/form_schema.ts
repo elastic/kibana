@@ -11,7 +11,11 @@ import { defaultSetPriority, defaultPhaseIndexPriority } from '../../constants';
 
 import { FormInternal } from './types';
 
-import { ifExistsNumberGreaterThanZero, rolloverThresholdsValidator } from './form_validations';
+import {
+  ifExistsNumberGreaterThanZero,
+  ifExistsNumberNonNegative,
+  rolloverThresholdsValidator,
+} from './form_validations';
 
 import { i18nTexts } from './i18n_texts';
 
@@ -61,6 +65,30 @@ export const schema: FormSchema<FormInternal> = {
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
         helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
+      },
+      dataTierAllocationType: {
+        label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
+      },
+      allocationNodeAttribute: {
+        label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+    },
+    cold: {
+      enabled: {
+        defaultValue: false,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel',
+          { defaultMessage: 'Activate cold phase' }
+        ),
+      },
+      freezeEnabled: {
+        defaultValue: false,
+        label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
+          defaultMessage: 'Freeze index',
+        }),
+      },
+      minAgeUnit: {
+        defaultValue: 'd',
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -138,7 +166,7 @@ export const schema: FormSchema<FormInternal> = {
           priority: {
             defaultValue: defaultSetPriority as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberGreaterThanZero }],
+            validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },
         },
@@ -217,7 +245,48 @@ export const schema: FormSchema<FormInternal> = {
           priority: {
             defaultValue: defaultPhaseIndexPriority as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberGreaterThanZero }],
+            validations: [{ validator: ifExistsNumberNonNegative }],
+            serializer: serializers.stringToNumber,
+          },
+        },
+      },
+    },
+    cold: {
+      min_age: {
+        defaultValue: '0',
+        validations: [
+          {
+            validator: (arg) =>
+              numberGreaterThanField({
+                than: 0,
+                allowEquality: true,
+                message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
+              })({
+                ...arg,
+                value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
+              }),
+          },
+        ],
+      },
+      actions: {
+        allocate: {
+          number_of_replicas: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel', {
+              defaultMessage: 'Number of replicas (optional)',
+            }),
+            validations: [
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+            serializer: serializers.stringToNumber,
+          },
+        },
+        set_priority: {
+          priority: {
+            defaultValue: '0' as any,
+            label: i18nTexts.editPolicy.setPriorityFieldLabel,
+            validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },
         },

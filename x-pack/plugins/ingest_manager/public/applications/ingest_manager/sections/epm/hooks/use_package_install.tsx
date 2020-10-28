@@ -73,14 +73,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageInstallErrorTitle"
+              id="xpack.fleet.integrations.packageInstallErrorTitle"
               defaultMessage="Failed to install {title} package"
               values={{ title }}
             />
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageInstallErrorDescription"
+              id="xpack.fleet.integrations.packageInstallErrorDescription"
               defaultMessage="Something went wrong while trying to install this package. Please try again later."
             />
           ),
@@ -98,14 +98,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         notifications.toasts.addSuccess({
           title: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageInstallSuccessTitle"
+              id="xpack.fleet.integrations.packageInstallSuccessTitle"
               defaultMessage="Installed {title}"
               values={{ title }}
             />
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageInstallSuccessDescription"
+              id="xpack.fleet.integrations.packageInstallSuccessDescription"
               defaultMessage="Successfully installed {title}"
               values={{ title }}
             />
@@ -127,14 +127,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageUninstallErrorTitle"
+              id="xpack.fleet.integrations.packageUninstallErrorTitle"
               defaultMessage="Failed to uninstall {title} package"
               values={{ title }}
             />
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageUninstallErrorDescription"
+              id="xpack.fleet.integrations.packageUninstallErrorDescription"
               defaultMessage="Something went wrong while trying to uninstall this package. Please try again later."
             />
           ),
@@ -146,14 +146,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         notifications.toasts.addSuccess({
           title: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageUninstallSuccessTitle"
+              id="xpack.fleet.integrations.packageUninstallSuccessTitle"
               defaultMessage="Uninstalled {title}"
               values={{ title }}
             />
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.ingestManager.integrations.packageUninstallSuccessDescription"
+              id="xpack.fleet.integrations.packageUninstallSuccessDescription"
               defaultMessage="Successfully uninstalled {title}"
               values={{ title }}
             />

@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { I18LABELS } from '../translations';
 
 export const DATA_UNDEFINED_LABEL = i18n.translate(
   'xpack.apm.rum.coreVitals.dataUndefined',
@@ -41,3 +42,14 @@ export const SUM_LONG_TASKS = i18n.translate(
     defaultMessage: 'Total long tasks duration',
   }
 );
+
+export const getPercentileLabel = (value: number) => {
+  if (value === 50) return I18LABELS.median;
+
+  return i18n.translate('xpack.apm.ux.percentiles.label', {
+    defaultMessage: '{value}th Perc.',
+    values: {
+      value,
+    },
+  });
+};
