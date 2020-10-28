@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_FILTER_BY_MAP_BOUNDS = true;
+export const DEFAULT_FILTER_BY_MAP_BOUNDS: boolean = true;

@@ -76,8 +76,9 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle?: string;
-  term?: string; // term field name
+  term: string; // term field name
   whereQuery?: Query;
+  id: string;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {

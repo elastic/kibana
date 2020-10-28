@@ -5,50 +5,83 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 
+import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
+import { IFieldType, IndexPattern, SortDirection } from 'src/plugins/data/public';
+import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import { getSearchService, getHttp } from '../../../kibana_services';
-import { hitsToGeoJson, getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
+import { getHttp, getSearchService } from '../../../kibana_services';
+import { addFieldToDSL, getField, hitsToGeoJson } from '../../../../common/elasticsearch_util';
+// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
+
 import {
-  SOURCE_TYPES,
-  ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
-  SORT_ORDER,
-  SCALING_TYPES,
-  VECTOR_SHAPE_TYPE,
-  MVT_SOURCE_LAYER_NAME,
+  ES_GEO_FIELD_TYPE,
+  FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
+  MVT_SOURCE_LAYER_NAME,
+  SCALING_TYPES,
+  SORT_ORDER,
+  SOURCE_TYPES,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './load_index_settings';
-import uuid from 'uuid/v4';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 
 import { registerSource } from '../source_registry';
+import {
+  ESSearchSourceDescriptor,
+  VectorSourceRequestMeta,
+  VectorSourceSyncMeta,
+} from '../../../../common/descriptor_types';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { ImmutableSourceProperty, PreIndexedShape, SourceEditorArgs } from '../source';
+import { IField } from '../../fields/field';
+import {
+  GeoJsonWithMeta,
+  ITiledSingleLayerVectorSource,
+  SourceTooltipConfig,
+} from '../vector_source';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { DataRequest } from '../../util/data_request';
+import { SortDirectionNumeric } from '../../../../../../../src/plugins/data/common/search/search_source';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
 });
 
-function getDocValueAndSourceFields(indexPattern, fieldNames) {
-  const docValueFields = [];
-  const sourceOnlyFields = [];
-  const scriptFields = {};
+export interface ScriptField {
+  source: string;
+  lang: string;
+}
+
+function getDocValueAndSourceFields(
+  indexPattern: IndexPattern,
+  fieldNames: string[]
+): {
+  docValueFields: Array<string | { format: string; field: string }>;
+  sourceOnlyFields: string[];
+  scriptFields: Record<string, { script: ScriptField }>;
+} {
+  const docValueFields: Array<string | { format: string; field: string }> = [];
+  const sourceOnlyFields: string[] = [];
+  const scriptFields: Record<string, { script: ScriptField }> = {};
   fieldNames.forEach((fieldName) => {
     const field = getField(indexPattern, fieldName);
     if (field.scripted) {
       scriptFields[field.name] = {
         script: {
-          source: field.script,
-          lang: field.lang,
+          source: field.script || '',
+          lang: field.lang || '',
         },
       };
     } else if (field.readFromDocValues) {
@@ -68,16 +101,18 @@ function getDocValueAndSourceFields(indexPattern, fieldNames) {
   return { docValueFields, sourceOnlyFields, scriptFields };
 }
 
-export class ESSearchSource extends AbstractESSource {
-  static type = SOURCE_TYPES.ES_SEARCH;
+export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
+  readonly _descriptor: ESSearchSourceDescriptor;
+  protected readonly _tooltipFields: ESDocField[];
 
-  static createDescriptor(descriptor) {
+  static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
+    descriptor = AbstractESSource.createDescriptor(descriptor);
     return {
       ...descriptor,
       id: descriptor.id ? descriptor.id : uuid(),
-      type: ESSearchSource.type,
-      indexPatternId: descriptor.indexPatternId,
-      geoField: descriptor.geoField,
+      type: SOURCE_TYPES.ES_SEARCH,
+      indexPatternId: descriptor.indexPatternId || '',
+      geoField: descriptor.geoField || '',
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
       sortField: _.get(descriptor, 'sortField', ''),
@@ -88,23 +123,27 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  constructor(descriptor, inspectorAdapters) {
-    super(ESSearchSource.createDescriptor(descriptor), inspectorAdapters);
-
-    this._tooltipFields = this._descriptor.tooltipProperties.map((property) =>
-      this.createField({ fieldName: property })
-    );
+  constructor(descriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters?: Adapters) {
+    const sourceDescriptor = ESSearchSource.createDescriptor(descriptor);
+    super(sourceDescriptor, inspectorAdapters);
+    this._descriptor = sourceDescriptor;
+    this._tooltipFields = this._descriptor.tooltipProperties
+      ? this._descriptor.tooltipProperties.map((property) => {
+          return this.createField({ fieldName: property });
+        })
+      : [];
   }
 
-  createField({ fieldName }) {
+  createField({ fieldName }: { fieldName: string }): ESDocField {
     return new ESDocField({
       fieldName,
       source: this,
+      origin: FIELD_ORIGIN.SOURCE,
       canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     const getGeoField = () => {
       return this._getGeoField();
     };
@@ -113,7 +152,7 @@ export class ESSearchSource extends AbstractESSource {
         source={this}
         indexPatternId={this.getIndexPatternId()}
         getGeoField={getGeoField}
-        onChange={onChange}
+        onChange={sourceEditorArgs.onChange}
         tooltipFields={this._tooltipFields}
         sortField={this._descriptor.sortField}
         sortOrder={this._descriptor.sortOrder}
@@ -125,29 +164,29 @@ export class ESSearchSource extends AbstractESSource {
     );
   }
 
-  async getFields() {
+  async getFields(): Promise<IField[]> {
     try {
       const indexPattern = await this.getIndexPattern();
-      return indexPattern.fields
-        .filter((field) => {
-          // Ensure fielddata is enabled for field.
-          // Search does not request _source
-          return field.aggregatable;
-        })
-        .map((field) => {
-          return this.createField({ fieldName: field.name });
-        });
+      const fields: IFieldType[] = indexPattern.fields.filter((field) => {
+        // Ensure fielddata is enabled for field.
+        // Search does not request _source
+        return field.aggregatable;
+      });
+
+      return (fields.map((field) => {
+        return this.createField({ fieldName: field.name }) as IField;
+      }) as unknown) as IField[];
     } catch (error) {
       // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
     }
   }
 
-  getFieldNames() {
-    return [this._descriptor.geoField];
+  getFieldNames(): string[] {
+    return typeof this._descriptor.geoField === 'string' ? [this._descriptor.geoField] : [];
   }
 
-  async getImmutableProperties() {
+  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     let indexPatternTitle = this.getIndexPatternId();
     let geoFieldType = '';
     try {
@@ -174,7 +213,7 @@ export class ESSearchSource extends AbstractESSource {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
           defaultMessage: 'Geospatial field',
         }),
-        value: this._descriptor.geoField,
+        value: typeof this._descriptor.geoField === 'string' ? this._descriptor.geoField : '',
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldTypeLabel', {
@@ -186,27 +225,45 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   // Returns sort content for an Elasticsearch search body
-  _buildEsSort() {
+  _buildEsSort(): Array<Record<string, SortDirection | SortDirectionNumeric>> {
     const { sortField, sortOrder } = this._descriptor;
+
+    if (!sortField) {
+      throw new Error('Cannot build sort');
+    }
     return [
       {
         [sortField]: {
-          order: sortOrder,
+          order: (sortOrder as unknown) as SortDirection,
         },
       },
     ];
   }
 
-  async _getTopHits(layerName, searchFilters, registerCancelCallback) {
+  async _getTopHits(
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void
+  ) {
     const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
-    const indexPattern = await this.getIndexPattern();
+    if (!topHitsSplitFieldName) {
+      throw new Error('Cannot _getTopHits without topHitsSplitField');
+    }
+
+    const indexPattern: IndexPattern = await this.getIndexPattern();
 
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
       searchFilters.fieldNames
     );
-    const topHits = {
+    const topHits: {
+      size: number | undefined;
+      script_fields: Record<string, { script: ScriptField }>;
+      docvalue_fields: Array<string | { format: string; field: string }>;
+      _source?: boolean | { includes: string[] };
+      sort?: Array<Record<string, SortDirection | SortDirectionNumeric>>;
+    } = {
       size: topHitsSize,
       script_fields: scriptFields,
       docvalue_fields: docValueFields,
@@ -215,6 +272,7 @@ export class ESSearchSource extends AbstractESSource {
     if (this._hasSort()) {
       topHits.sort = this._buildEsSort();
     }
+
     if (sourceOnlyFields.length === 0) {
       topHits._source = false;
     } else {
@@ -223,7 +281,7 @@ export class ESSearchSource extends AbstractESSource {
       };
     }
 
-    const topHitsSplitField = getField(indexPattern, topHitsSplitFieldName);
+    const topHitsSplitField: IFieldType = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -253,13 +311,13 @@ export class ESSearchSource extends AbstractESSource {
       requestDescription: 'Elasticsearch document top hits request',
     });
 
-    const allHits = [];
+    const allHits: any[] = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
     // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
     const areEntitiesTrimmed = entityBuckets.length >= DEFAULT_MAX_BUCKETS_LIMIT;
     let areTopHitsTrimmed = false;
-    entityBuckets.forEach((entityBucket) => {
+    entityBuckets.forEach((entityBucket: any) => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
@@ -282,7 +340,12 @@ export class ESSearchSource extends AbstractESSource {
 
   // searchFilters.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
-  async _getSearchHits(layerName, searchFilters, maxResultWindow, registerCancelCallback) {
+  async _getSearchHits(
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
+    maxResultWindow: number,
+    registerCancelCallback: (callback: () => void) => void
+  ) {
     const indexPattern = await this.getIndexPattern();
 
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
@@ -322,23 +385,28 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  _isTopHits() {
+  _isTopHits(): boolean {
     const { scalingType, topHitsSplitField } = this._descriptor;
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
-  _hasSort() {
+  _hasSort(): boolean {
     const { sortField, sortOrder } = this._descriptor;
     return !!sortField && !!sortOrder;
   }
 
-  async getMaxResultWindow() {
+  async getMaxResultWindow(): Promise<number> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
     return indexSettings.maxResultWindow;
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+  async getGeoJsonWithMeta(
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean
+  ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
 
     const indexSettings = await loadIndexSettings(indexPattern.title);
@@ -355,7 +423,7 @@ export class ESSearchSource extends AbstractESSource {
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
       return !['_id', '_index'].includes(metaField);
     });
-    const flattenHit = (hit) => {
+    const flattenHit = (hit: Record<string, any>) => {
       const properties = indexPattern.flattenHit(hit);
       // remove metaFields
       unusedMetaFields.forEach((metaField) => {
@@ -375,7 +443,7 @@ export class ESSearchSource extends AbstractESSource {
         hits,
         flattenHit,
         geoField.name,
-        geoField.type,
+        geoField.type as ES_GEO_FIELD_TYPE,
         epochMillisFields
       );
     } catch (error) {
@@ -394,11 +462,11 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  canFormatFeatureProperties() {
+  canFormatFeatureProperties(): boolean {
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId, index, indexPattern) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: IndexPattern) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -430,7 +498,7 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     const properties = indexPattern.flattenHit(hit);
-    indexPattern.metaFields.forEach((metaField) => {
+    indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {
         delete properties[metaField];
       }
@@ -438,7 +506,14 @@ export class ESSearchSource extends AbstractESSource {
     return properties;
   }
 
-  async getTooltipProperties(properties) {
+  _getTooltipPropertyNames(): string[] {
+    return this._tooltipFields.map((field: IField) => field.getName());
+  }
+
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+    if (properties === null) {
+      throw new Error('properties cannot be null');
+    }
     const indexPattern = await this.getIndexPattern();
     const propertyValues = await this._loadTooltipProperties(
       properties._id,
@@ -452,25 +527,25 @@ export class ESSearchSource extends AbstractESSource {
     return Promise.all(tooltipProperties);
   }
 
-  isFilterByMapBounds() {
-    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTER) {
+  isFilterByMapBounds(): boolean {
+    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
       return true;
     } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return false;
     } else {
-      return this._descriptor.filterByMapBounds;
+      return !!this._descriptor.filterByMapBounds;
     }
   }
 
-  async getLeftJoinFields() {
+  async getLeftJoinFields(): Promise<IField[]> {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
-    return getSourceFields(indexPattern.fields).map((field) =>
-      this.createField({ fieldName: field.name })
-    );
+    return getSourceFields(indexPattern.fields).map((field) => {
+      return this.createField({ fieldName: field.name }) as IField;
+    });
   }
 
-  async getSupportedShapeTypes() {
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
     let geoFieldType;
     try {
       const geoField = await this._getGeoField();
@@ -486,8 +561,10 @@ export class ESSearchSource extends AbstractESSource {
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest) {
-    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+    const featureCollection: FeatureCollection | null = sourceDataRequest
+      ? (sourceDataRequest.getData() as FeatureCollection)
+      : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!featureCollection || !meta) {
       // no tooltip content needed when there is no feature collection or meta
@@ -519,7 +596,7 @@ export class ESSearchSource extends AbstractESSource {
         tooltipContent: `${entitiesFoundMsg} ${docsPerEntityMsg}`,
         // Used to show trimmed icon in legend
         // user only needs to be notified of trimmed results when entities are trimmed
-        areResultsTrimmed: meta.areEntitiesTrimmed,
+        areResultsTrimmed: !!meta.areEntitiesTrimmed,
       };
     }
 
@@ -542,17 +619,24 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  getSyncMeta() {
+  getSyncMeta(): VectorSourceSyncMeta | null {
     return {
-      sortField: this._descriptor.sortField,
-      sortOrder: this._descriptor.sortOrder,
+      sortField: typeof this._descriptor.sortField === 'string' ? this._descriptor.sortField : '',
+      sortOrder: this._descriptor.sortOrder ? this._descriptor.sortOrder : SORT_ORDER.ASC,
       scalingType: this._descriptor.scalingType,
-      topHitsSplitField: this._descriptor.topHitsSplitField,
-      topHitsSize: this._descriptor.topHitsSize,
+      topHitsSplitField:
+        typeof this._descriptor.topHitsSplitField === 'string'
+          ? typeof this._descriptor.topHitsSplitField
+          : '',
+      topHitsSize:
+        typeof this._descriptor.topHitsSize === 'number' ? this._descriptor.topHitsSize : 1,
     };
   }
 
-  async getPreIndexedShape(properties) {
+  async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
+    if (properties === null) {
+      return null;
+    }
     const geoField = await this._getGeoField();
     return {
       index: properties._index, // Can not use index pattern title because it may reference many indices
@@ -561,7 +645,7 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  getJoinsDisabledReason() {
+  getJoinsDisabledReason(): string | null {
     let reason;
     if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
       reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
@@ -577,11 +661,18 @@ export class ESSearchSource extends AbstractESSource {
     return reason;
   }
 
-  getLayerName() {
+  getLayerName(): string {
     return MVT_SOURCE_LAYER_NAME;
   }
 
-  async getUrlTemplateWithMeta(searchFilters) {
+  async getUrlTemplateWithMeta(
+    searchFilters: VectorSourceRequestMeta
+  ): Promise<{
+    layerName: string;
+    urlTemplate: string;
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
@@ -621,7 +712,7 @@ export class ESSearchSource extends AbstractESSource {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate: urlTemplate,
+      urlTemplate,
     };
   }
 }

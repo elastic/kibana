@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   DEFAULT_MAX_RESULT_WINDOW,
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   INDEX_SETTINGS_API_PATH,
 } from '../../../../common/constants';
 import { getHttp, getToasts } from '../../../kibana_services';
-import { i18n } from '@kbn/i18n';
 
 let toastDisplayed = false;
-const indexSettings = new Map();
+const indexSettings = new Map<string, INDEX_SETTINGS | Promise<INDEX_SETTINGS>>();
 
-export async function loadIndexSettings(indexPatternTitle) {
+export interface INDEX_SETTINGS {
+  maxResultWindow: number;
+  maxInnerResultWindow: number;
+}
+
+export async function loadIndexSettings(indexPatternTitle: string): Promise<INDEX_SETTINGS> {
   if (indexSettings.has(indexPatternTitle)) {
-    return indexSettings.get(indexPatternTitle);
+    return indexSettings.get(indexPatternTitle) as INDEX_SETTINGS;
   }
 
   const fetchPromise = fetchIndexSettings(indexPatternTitle);
@@ -25,7 +30,7 @@ export async function loadIndexSettings(indexPatternTitle) {
   return fetchPromise;
 }
 
-async function fetchIndexSettings(indexPatternTitle) {
+async function fetchIndexSettings(indexPatternTitle: string): Promise<INDEX_SETTINGS> {
   const http = getHttp();
   const toasts = getToasts();
   try {
@@ -50,6 +55,7 @@ async function fetchIndexSettings(indexPatternTitle) {
       toastDisplayed = true;
       toasts.addWarning(warningMsg);
     }
+    // eslint-disable-next-line no-console
     console.warn(warningMsg);
     return {
       maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
