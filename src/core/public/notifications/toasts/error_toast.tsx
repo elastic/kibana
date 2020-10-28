@@ -19,6 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { has } from 'lodash';
 
 import {
   EuiButton,
@@ -42,15 +43,37 @@ interface ErrorToastProps {
   i18nContext: () => I18nStart['Context'];
 }
 
-interface RequestError extends Error {
-  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
+interface ErrorCause {
+  type: string;
+  reason: string;
 }
 
-const isRequestError = (e: Error | RequestError): e is RequestError => {
-  if ('body' in e) {
-    return e.body?.attributes?.error?.caused_by !== undefined;
+interface RequestError extends Error {
+  body: {
+    attributes: {
+      error: Partial<ErrorCause & { caused_by: ErrorCause }>;
+    };
+  };
+}
+
+const isRequestError = (e: unknown): e is RequestError =>
+  has(e, 'body.attributes.error.type') || has(e, 'body.attributes.error.caused_by');
+
+const getErrorText = (e: RequestError): string => {
+  const { error } = e.body.attributes;
+  let text = '';
+
+  if (error.type != null) {
+    text += `${error.type}\n`;
+    text += `${error.reason}\n`;
   }
-  return false;
+
+  if (error.caused_by != null) {
+    text += `${error.caused_by.type}\n`;
+    text += `${error.caused_by.reason}\n`;
+  }
+
+  return text;
 };
 
 /**
@@ -69,8 +92,7 @@ function showErrorDialog({
   let text = '';
 
   if (isRequestError(error)) {
-    text += `${error?.body?.attributes?.error?.caused_by.type}\n`;
-    text += `${error?.body?.attributes?.error?.caused_by.reason}\n\n`;
+    text += `${getErrorText(error)}\n`;
   }
 
   if (error.stack) {
