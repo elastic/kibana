@@ -144,6 +144,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 iconType="alert"
                 data-test-subj="save-timeline-callout"
               />
+              <EuiSpacer size="m" />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={true}>

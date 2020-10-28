@@ -78,6 +78,6 @@ export const CLOSE_MODAL = i18n.translate(
 
 export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineTypeLiteral) =>
   i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.warning.title', {
-    values: { timeline: timelineType === TimelineType.template ? 'Timeline template' : 'Timeline' },
+    values: { timeline: timelineType === TimelineType.template ? 'timeline template' : 'timeline' },
     defaultMessage: 'You have an unsaved {timeline}, do you wish to save it?',
   });
