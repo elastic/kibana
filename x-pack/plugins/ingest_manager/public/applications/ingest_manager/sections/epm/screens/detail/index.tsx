@@ -109,7 +109,7 @@ export function Detail() {
               href={getHref('integrations_all')}
             >
               <FormattedMessage
-                id="xpack.ingestManager.epm.browseAllButtonText"
+                id="xpack.fleet.epm.browseAllButtonText"
                 defaultMessage="Browse all integrations"
               />
             </EuiButtonEmpty>
@@ -161,7 +161,7 @@ export function Detail() {
           <EuiFlexGroup justifyContent="flexEnd" direction="row">
             {[
               {
-                label: i18n.translate('xpack.ingestManager.epm.versionLabel', {
+                label: i18n.translate('xpack.fleet.epm.versionLabel', {
                   defaultMessage: 'Version',
                 }),
                 content: (
@@ -187,7 +187,7 @@ export function Detail() {
                     })}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.epm.addPackagePolicyButtonText"
+                      id="xpack.fleet.epm.addPackagePolicyButtonText"
                       defaultMessage="Add {packageName}"
                       values={{
                         packageName: packageInfo.title,
@@ -227,7 +227,7 @@ export function Detail() {
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.epm.loadingIntegrationErrorTitle"
+              id="xpack.fleet.epm.loadingIntegrationErrorTitle"
               defaultMessage="Error loading integration details"
             />
           }
