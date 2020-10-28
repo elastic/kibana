@@ -57,10 +57,10 @@ export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
   id: CONTEXT_MENU_TRIGGER,
-  title: i18n.translate('xpack.embeddable.contextMenuTrigger.title', {
+  title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
     defaultMessage: 'Context menu',
   }),
-  description: i18n.translate('xpack.embeddable.contextMenuTrigger.description', {
+  description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
     defaultMessage: 'A panel top-right corner context menu click.',
   }),
 };
@@ -68,10 +68,10 @@ export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
 export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
   id: PANEL_BADGE_TRIGGER,
-  title: i18n.translate('xpack.embeddable.panelBadgeTrigger.title', {
+  title: i18n.translate('embeddableApi.panelBadgeTrigger.title', {
     defaultMessage: 'Panel badges',
   }),
-  description: i18n.translate('xpack.embeddable.panelBadgeTrigger.description', {
+  description: i18n.translate('embeddableApi.panelBadgeTrigger.description', {
     defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
   }),
 };
@@ -79,10 +79,10 @@ export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
 export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
 export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
   id: PANEL_NOTIFICATION_TRIGGER,
-  title: i18n.translate('xpack.embeddable.panelNotificationTrigger.title', {
+  title: i18n.translate('embeddableApi.panelNotificationTrigger.title', {
     defaultMessage: 'Panel notifications',
   }),
-  description: i18n.translate('xpack.embeddable.panelNotificationTrigger.description', {
+  description: i18n.translate('embeddableApi.panelNotificationTrigger.description', {
     defaultMessage: 'Actions appear in top-right corner of a panel.',
   }),
 };
