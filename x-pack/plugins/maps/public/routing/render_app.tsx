@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { AppMountParameters } from 'kibana/public';

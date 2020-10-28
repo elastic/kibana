@@ -56,6 +56,7 @@ import { MapSettings } from '../../../reducers/map';
 import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { goToSpecifiedPath } from '../../render_app';
+import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 
 interface Props {
   savedMapId?: string;
@@ -348,8 +349,8 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  async _loadSavedMap(): savedMap | null {
-    let savedMap: ISavedGisMap = null;
+  async _loadSavedMap(): ISavedMap | null {
+    let savedMap: ISavedGisMap | null = null;
     try {
       savedMap = await getMapsSavedObjectLoader().get(this.props.savedMapId);
     } catch (err) {
