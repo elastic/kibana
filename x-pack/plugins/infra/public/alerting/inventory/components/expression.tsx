@@ -94,7 +94,7 @@ interface Props {
   setAlertProperty(key: string, value: any): void;
 }
 
-const defaultExpression = {
+export const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
   comparator: Comparator.GT,
   threshold: [],
