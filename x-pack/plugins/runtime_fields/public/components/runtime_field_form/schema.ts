@@ -19,7 +19,7 @@ export const schema: FormSchema<RuntimeField> = {
     validations: [
       {
         validator: emptyField(
-          i18n.translate('xpack.runtimeFields.form.validations.scriptIsRequiredErrorMessage', {
+          i18n.translate('xpack.runtimeFields.form.validations.nameIsRequiredErrorMessage', {
             defaultMessage: 'Give a name to the field.',
           })
         ),
