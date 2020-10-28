@@ -17,7 +17,15 @@
  * under the License.
  */
 
-/** @internal */
-export { shortenDottedString } from './shorten_dotted_string';
-export { AbortError, toPromise, getCombinedSignal } from './abort_utils';
-export { tapFirst } from './tap_first';
+import { pipe } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+export function tapFirst<T>(next: (x: T) => void) {
+  let isFirst = true;
+  return pipe(
+    tap<T>((x: T) => {
+      if (isFirst) next(x);
+      isFirst = false;
+    })
+  );
+}

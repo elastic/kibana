@@ -27,6 +27,15 @@ export const backgroundSessionMapping: SavedObjectsType = {
   hidden: true,
   mappings: {
     properties: {
+      name: {
+        type: 'keyword',
+      },
+      url: {
+        type: 'keyword',
+      },
+      userId: {
+        type: 'keyword',
+      },
       expires: {
         type: 'date',
       },
@@ -39,6 +48,9 @@ export const backgroundSessionMapping: SavedObjectsType = {
 };
 
 export interface BackgroundSessionSavedObjectAttributes {
+  name: string;
+  userId: string;
+  url: string;
   expires: string;
   idMapping: Record<string, string>;
 }

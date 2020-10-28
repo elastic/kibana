@@ -69,11 +69,11 @@ import { ConfigSchema } from '../../config';
 import { BackgroundSessionService, ISearchSessionClient } from './session';
 import { registerSessionRoutes } from './routes/session';
 import { backgroundSessionMapping } from '../saved_objects';
-import { tapFirst } from '../lib/tap_once';
+import { tapFirst } from '../../common/utils';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    search?: ISearchClient;
+    search?: ISearchClient & { session: ISearchSessionClient };
   }
 }
 
@@ -122,7 +122,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
     registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
-    registerSessionRoutes(router, routeDependencies);
+    registerSessionRoutes(router);
 
     core.http.registerRouteHandlerContext('search', async (context, request) => {
       const [coreStart] = await core.getStartServices();
@@ -246,18 +246,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       options.strategy
     );
 
-    let isFirstResponse = true;
     return strategy.search(searchRequest, options, deps).pipe(
-      tap((response) => {
-        if (isFirstResponse) {
-          isFirstResponse = false;
-          this.sessionService.trackId(
-            { savedObjectsClient: deps.savedObjectsClient },
-            searchRequest,
-            response.id,
-            options
-          );
-        }
+      tapFirst((response) => {
+        if (!options.sessionId || !response.id) return;
+        this.sessionService.trackId(searchRequest, response.id, options, {
+          savedObjectsClient: deps.savedObjectsClient,
+        });
       })
     );
   };

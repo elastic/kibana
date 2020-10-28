@@ -17,7 +17,14 @@
  * under the License.
  */
 
-/** @internal */
-export { shortenDottedString } from './shorten_dotted_string';
-export { AbortError, toPromise, getCombinedSignal } from './abort_utils';
-export { tapFirst } from './tap_first';
+import { of } from 'rxjs';
+import { tapFirst } from './tap_first';
+
+describe('tapFirst', () => {
+  it('should tap the first and only the first', () => {
+    const fn = jest.fn();
+    of(1, 2, 3).pipe(tapFirst(fn)).subscribe();
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).lastCalledWith(1);
+  });
+});

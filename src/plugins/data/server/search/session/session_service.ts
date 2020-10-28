@@ -30,7 +30,9 @@ export interface BackgroundSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-export type ISearchSessionClient = Pick<BackgroundSessionService, 'save'>;
+export type ISearchSessionClient = ReturnType<
+  ReturnType<BackgroundSessionService['asScopedProvider']>
+>;
 
 export class BackgroundSessionService {
   /**
@@ -39,25 +41,41 @@ export class BackgroundSessionService {
    */
   private sessionSearchMap = new Map<string, Map<string, string>>();
 
+  private timeout?: NodeJS.Timeout;
+
   constructor() {}
 
   public setup = () => {};
 
-  public start = () => {
+  public start = (core: CoreStart) => {
     return {
       save: this.save,
       trackId: this.trackId,
+      asScoped: this.asScopedProvider(core),
     };
+
+    const savedObjectsClient = core.savedObjects.createInternalRepository([
+      BACKGROUND_SESSION_TYPE,
+    ]);
+
+    (async () => {
+      this.timeout = await this.updateBackgroundSessions({ savedObjectsClient });
+    })();
   };
 
   public stop = () => {
     this.clear();
+    if (this.timeout) clearTimeout(this.timeout);
   };
 
+  // TODO: Generate the `userId` from the realm type/realm name/username
   public save = (
-    { savedObjectsClient }: BackgroundSessionDependencies,
     sessionId: string,
-    expires: Date = new Date(Date.now() + DEFAULT_EXPIRATION)
+    name: string,
+    url: string,
+    userId: string,
+    expires: Date = new Date(Date.now() + DEFAULT_EXPIRATION),
+    { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
@@ -65,10 +83,8 @@ export class BackgroundSessionService {
     // Clear out the entries for this session ID so they don't get saved next time
     this.sessionSearchMap.delete(sessionId);
 
-    const attributes = {
-      expires: expires.toISOString(),
-      idMapping: Object.fromEntries(searchMap.entries()),
-    };
+    const idMapping = Object.fromEntries(searchMap.entries());
+    const attributes = { name, url, userId, expires: expires.toISOString(), idMapping };
     return savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,
@@ -77,7 +93,7 @@ export class BackgroundSessionService {
   };
 
   // TODO: Send 404 if the given ID doesn't belong to this user
-  public get = ({ savedObjectsClient }: BackgroundSessionDependencies, sessionId: string) => {
+  public get = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
     return savedObjectsClient.get<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       sessionId
@@ -85,7 +101,7 @@ export class BackgroundSessionService {
   };
 
   // TODO: Send 404 if the given ID doesn't belong to this user
-  public delete = ({ savedObjectsClient }: BackgroundSessionDependencies, sessionId: string) => {
+  public delete = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
     return savedObjectsClient.delete(BACKGROUND_SESSION_TYPE, sessionId);
   };
 
@@ -100,12 +116,13 @@ export class BackgroundSessionService {
    * @internal
    */
   public trackId = (
-    { savedObjectsClient }: BackgroundSessionDependencies,
     searchRequest: IKibanaSearchRequest,
-    searchId?: string,
-    { sessionId, isStored = false }: ISearchOptions = {}
+    searchId: string,
+    { sessionId, isStored = false }: ISearchOptions,
+    { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
-    if (!sessionId || !searchId) return;
+    if (!sessionId) return;
+    console.log(`trackId ${sessionId}:${searchId}`);
     const requestHash = createRequestHash(searchRequest.params);
 
     // If there is already a saved object for this session, update it to include this request/ID.
@@ -137,16 +154,29 @@ export class BackgroundSessionService {
         includedHiddenTypes: [BACKGROUND_SESSION_TYPE],
       });
       return {
-        save: (sessionId: string, expires?: Date) => {
-          return this.save({ savedObjectsClient }, sessionId, expires);
+        save: (sessionId: string, name: string, url: string, userId: string, expires?: Date) => {
+          return this.save(sessionId, name, url, userId, expires, { savedObjectsClient });
         },
         get: (sessionId: string) => {
-          return this.get({ savedObjectsClient }, sessionId);
+          return this.get(sessionId, { savedObjectsClient });
         },
         delete: (sessionId: string) => {
-          return this.delete({ savedObjectsClient }, sessionId);
+          return this.delete(sessionId, { savedObjectsClient });
         },
       };
     };
+  };
+
+  private updateBackgroundSessions = async ({
+    savedObjectsClient,
+  }: BackgroundSessionDependencies): Promise<NodeJS.Timeout> => {
+    for (const sessionId in this.sessionSearchMap.keys()) {
+      const searchMap = this.sessionSearchMap.get(sessionId);
+      const { attributes } = await this.get(sessionId, { savedObjectsClient });
+      const idMapping = Object.fromEntries(searchMap.entries());
+      console.log(`updateBackgroundSessions ${sessionId}`);
+      await savedObjectsClient.update(BACKGROUND_SESSION_TYPE, sessionId, { idMapping });
+    }
+    return setTimeout(() => this.updateBackgroundSessions({ savedObjectsClient }), 10000);
   };
 }
