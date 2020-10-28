@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { Writable } from '@kbn/utility-types';
 import { TimeSeriesQuerySchema, TimeSeriesQuery } from './time_series_types';
 import { runTests } from './core_query_types.test';
 import { TypeOf } from '@kbn/config-schema';

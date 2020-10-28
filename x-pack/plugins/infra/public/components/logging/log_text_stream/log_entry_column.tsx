@@ -39,7 +39,9 @@ export const LogEntryColumn = euiStyled.div.attrs(() => ({
   overflow: hidden;
 `;
 
-export const LogEntryColumnContent = euiStyled.div`
+export const LogEntryColumnContent = euiStyled.div.attrs({
+  'data-test-subj': 'LogEntryColumnContent',
+})`
   flex: 1 0 0%;
   padding: 2px ${COLUMN_PADDING}px;
 `;

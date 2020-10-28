@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Observable, Subscription } from 'rxjs';
 import { assertNever } from '@kbn/std';
 import { ILicense } from '../../../licensing/common/types';
