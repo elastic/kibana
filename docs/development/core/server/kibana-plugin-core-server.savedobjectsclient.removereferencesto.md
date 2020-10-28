@@ -4,7 +4,7 @@
 
 ## SavedObjectsClient.removeReferencesTo() method
 
-Updates all objects containing a reference to given {<!-- -->type, id<!-- -->} tuple to remove the said reference.
+Updates all objects containing a reference to the given {<!-- -->type, id<!-- -->} tuple to remove the said reference.
 
 <b>Signature:</b>
 
