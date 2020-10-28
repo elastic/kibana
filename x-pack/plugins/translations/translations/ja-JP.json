@@ -20257,7 +20257,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage": "アクションタイプを読み込めません",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderKeyText": "キーが必要です。",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderValueText": "値が必要です。",
-    "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHostText": "ユーザー名が必要です。",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredMethodText": "メソッドが必要です",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText": "パスワードが必要です。",
     "xpack.triggersActionsUI.sections.addAlert.error.greaterThenThreshold0Text": "しきい値 1 はしきい値 0 よりも大きい値にしてください。",

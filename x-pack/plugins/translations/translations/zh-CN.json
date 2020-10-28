@@ -20277,7 +20277,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage": "无法加载操作类型",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderKeyText": "“键”必填。",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderValueText": "“值”必填。",
-    "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHostText": "“用户名”必填。",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredMethodText": "“方法”必填",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText": "“密码”必填。",
     "xpack.triggersActionsUI.sections.addAlert.error.greaterThenThreshold0Text": "阈值 1 应 > 阈值 0。",
