@@ -259,7 +259,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                         this.props.isModelPlotEnabled ? (
                           <FormattedMessage
                             id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo"
-                            defaultMessage="The list contains values for all possible model plot results."
+                            defaultMessage="The list contains values for the model plot results."
                           />
                         ) : (
                           <FormattedMessage
