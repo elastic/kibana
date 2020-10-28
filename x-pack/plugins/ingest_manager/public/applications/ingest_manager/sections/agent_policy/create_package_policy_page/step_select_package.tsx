@@ -103,7 +103,7 @@ export const StepSelectPackage: React.FunctionComponent<{
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createPackagePolicy.stepSelectPackage.errorLoadingPolicyTitle"
+            id="xpack.fleet.createPackagePolicy.stepSelectPackage.errorLoadingPolicyTitle"
             defaultMessage="Error loading agent policy information"
           />
         }
@@ -118,7 +118,7 @@ export const StepSelectPackage: React.FunctionComponent<{
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createPackagePolicy.stepSelectPackage.errorLoadingPackagesTitle"
+            id="xpack.fleet.createPackagePolicy.stepSelectPackage.errorLoadingPackagesTitle"
             defaultMessage="Error loading integrations"
           />
         }
@@ -157,7 +157,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           }}
           searchProps={{
             placeholder: i18n.translate(
-              'xpack.ingestManager.createPackagePolicy.stepSelectPackage.filterPackagesInputPlaceholder',
+              'xpack.fleet.createPackagePolicy.stepSelectPackage.filterPackagesInputPlaceholder',
               {
                 defaultMessage: 'Search for integrations',
               }
@@ -190,7 +190,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           <Error
             title={
               <FormattedMessage
-                id="xpack.ingestManager.createPackagePolicy.stepSelectPackage.errorLoadingSelectedPackageTitle"
+                id="xpack.fleet.createPackagePolicy.stepSelectPackage.errorLoadingSelectedPackageTitle"
                 defaultMessage="Error loading selected integration"
               />
             }

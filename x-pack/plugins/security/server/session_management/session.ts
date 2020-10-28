@@ -5,6 +5,7 @@
  */
 
 import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { promisify } from 'util';
 import { randomBytes, createHash } from 'crypto';
 import { Duration } from 'moment';

@@ -6,6 +6,7 @@
 
 import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ILegacyClusterClient,
   IRouter,

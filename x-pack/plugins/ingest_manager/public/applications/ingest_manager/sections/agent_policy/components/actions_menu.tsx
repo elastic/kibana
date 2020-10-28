@@ -69,7 +69,7 @@ export const AgentPolicyActionMenu = memo<{
                         },
                         children: (
                           <FormattedMessage
-                            id="xpack.ingestManager.agentPolicyActionMenu.buttonText"
+                            id="xpack.fleet.agentPolicyActionMenu.buttonText"
                             defaultMessage="Actions"
                           />
                         ),
@@ -84,7 +84,7 @@ export const AgentPolicyActionMenu = memo<{
                     key="enrollAgents"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentPolicyActionMenu.enrollAgentActionText"
+                      id="xpack.fleet.agentPolicyActionMenu.enrollAgentActionText"
                       defaultMessage="Add agent"
                     />
                   </EuiContextMenuItem>,
@@ -94,7 +94,7 @@ export const AgentPolicyActionMenu = memo<{
                     key="viewPolicy"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentPolicyActionMenu.viewPolicyText"
+                      id="xpack.fleet.agentPolicyActionMenu.viewPolicyText"
                       defaultMessage="View policy"
                     />
                   </EuiContextMenuItem>,
@@ -107,7 +107,7 @@ export const AgentPolicyActionMenu = memo<{
                     key="copyPolicy"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentPolicyActionMenu.copyPolicyActionText"
+                      id="xpack.fleet.agentPolicyActionMenu.copyPolicyActionText"
                       defaultMessage="Copy policy"
                     />
                   </EuiContextMenuItem>,
