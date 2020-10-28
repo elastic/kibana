@@ -56,7 +56,6 @@ import { MapSettings } from '../../../reducers/map';
 import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { goToSpecifiedPath } from '../../render_app';
-import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 
 interface Props {
   savedMapId?: string;
@@ -263,7 +262,7 @@ export class MapApp extends React.Component<Props, State> {
     updateGlobalState(updatedGlobalState, !this.state.initialized);
   };
 
-  _initMapAndLayerSettings(savedMap: ISavedMap) {
+  _initMapAndLayerSettings(savedMap: ISavedGisMap) {
     const globalState: MapsGlobalState = getGlobalState();
 
     let savedObjectFilters = [];
@@ -349,7 +348,7 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  async _loadSavedMap(): ISavedMap | null {
+  async _loadSavedMap(): Promise<ISavedGisMap | null> {
     let savedMap: ISavedGisMap | null = null;
     try {
       savedMap = await getMapsSavedObjectLoader().get(this.props.savedMapId);
@@ -377,7 +376,7 @@ export class MapApp extends React.Component<Props, State> {
     this._setBreadcrumbs(savedMap.title);
     getCoreChrome().docTitle.change(savedMap.title);
     if (this.props.savedMapId) {
-      getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id);
+      getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap!.id);
     }
 
     this._initMapAndLayerSettings(savedMap);
