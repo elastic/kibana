@@ -454,6 +454,135 @@ describe('workspace_panel', () => {
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
   });
 
+  it('should show an error message if validation on datasource does not pass', () => {
+    mockDatasource.getErrorMessages.mockReturnValue([
+      { shortMessage: 'An error occurred', longMessage: 'An long description here' },
+    ]);
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    instance = mount(
+      <WorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+      />
+    );
+
+    expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+  });
+
+  it('should show an error message if validation on visualization does not pass', () => {
+    mockDatasource.getErrorMessages.mockReturnValue(undefined);
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    mockVisualization.getErrorMessages.mockReturnValue([
+      { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
+    ]);
+    mockVisualization.toExpression.mockReturnValue('vis');
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    instance = mount(
+      <WorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: mockVisualization,
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+      />
+    );
+
+    expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+  });
+
+  it('should show an error message if validation on both datasource and visualization do not pass', () => {
+    mockDatasource.getErrorMessages.mockReturnValue([
+      { shortMessage: 'An error occurred', longMessage: 'An long description here' },
+    ]);
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    mockVisualization.getErrorMessages.mockReturnValue([
+      { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
+    ]);
+    mockVisualization.toExpression.mockReturnValue('vis');
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    instance = mount(
+      <WorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: mockVisualization,
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+      />
+    );
+
+    // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
+    expect(
+      instance.find('[data-test-subj="configuration-failure-short-message"]').last().text()
+    ).toEqual('An error occurred');
+    expect(
+      instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
+    ).toEqual(' +1 error');
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+  });
+
   it('should show an error message if the expression fails to parse', () => {
     mockDatasource.toExpression.mockReturnValue('|||');
     mockDatasource.getLayers.mockReturnValue(['first']);
@@ -487,7 +616,7 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="expression-failure"]').first()).toBeTruthy();
+    expect(instance.find('[data-test-subj="expression-failure"]').exists()).toBeTruthy();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 

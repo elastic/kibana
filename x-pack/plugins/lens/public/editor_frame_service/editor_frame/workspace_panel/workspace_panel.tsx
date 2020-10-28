@@ -128,7 +128,6 @@ export function WorkspacePanel({
   );
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    configurationValidationError: undefined,
     expressionBuildError: undefined,
     expandError: false,
   });
@@ -137,48 +136,52 @@ export function WorkspacePanel({
     ? visualizationMap[activeVisualizationId]
     : null;
 
+  const configurationValidationError = useMemo(() => {
+    const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
+    const dataMessages = activeDatasourceId
+      ? activeDatasource?.getErrorMessages(datasourceStates[activeDatasourceId]?.state)
+      : undefined;
+    const vizMessages = activeVisualization?.getErrorMessages(visualizationState, framePublicAPI);
+
+    if (vizMessages || dataMessages) {
+      // Data first, visualization next
+      return [...(dataMessages || []), ...(vizMessages || [])];
+    }
+  }, [
+    activeVisualization?.getErrorMessages,
+    visualizationState,
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    framePublicAPI,
+  ]);
+
   const expression = useMemo(
     () => {
-      const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
-      const dataMessages = activeDatasourceId
-        ? activeDatasource?.getErrorMessages(datasourceStates[activeDatasourceId]?.state)
-        : undefined;
-      const vizMessages = activeVisualization?.getErrorMessages(visualizationState, framePublicAPI);
-
-      if (vizMessages || dataMessages) {
-        setLocalState((s) => ({
-          ...s,
-          configurationValidationError: [...(vizMessages || []), ...(dataMessages || [])],
-        }));
-      } else if (localState.configurationValidationError) {
-        setLocalState((s) => ({
-          ...s,
-          configurationValidationError: undefined,
-        }));
-      }
-
-      try {
-        return buildExpression({
-          visualization: activeVisualization,
-          visualizationState,
-          datasourceMap,
-          datasourceStates,
-          datasourceLayers: framePublicAPI.datasourceLayers,
-        });
-      } catch (e) {
-        const buildMessages = activeVisualization?.getErrorMessages(
-          visualizationState,
-          framePublicAPI
-        );
-        const defaultMessage = {
-          shortMessage: 'One error occurred in the expression',
-          longMessage: e.toString(),
-        };
-        // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({
-          ...s,
-          expressionBuildError: buildMessages ?? [defaultMessage],
-        }));
+      if (!configurationValidationError) {
+        try {
+          return buildExpression({
+            visualization: activeVisualization,
+            visualizationState,
+            datasourceMap,
+            datasourceStates,
+            datasourceLayers: framePublicAPI.datasourceLayers,
+          });
+        } catch (e) {
+          const buildMessages = activeVisualization?.getErrorMessages(
+            visualizationState,
+            framePublicAPI
+          );
+          const defaultMessage = {
+            shortMessage: 'One error occurred in the expression',
+            longMessage: e.toString(),
+          };
+          // Most likely an error in the expression provided by a datasource or visualization
+          setLocalState((s) => ({
+            ...s,
+            expressionBuildError: buildMessages ?? [defaultMessage],
+          }));
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -190,7 +193,6 @@ export function WorkspacePanel({
       framePublicAPI.dateRange,
       framePublicAPI.query,
       framePublicAPI.filters,
-      activeDatasourceId,
     ]
   );
 
@@ -292,7 +294,7 @@ export function WorkspacePanel({
         timefilter={plugins.data.query.timefilter.timefilter}
         onEvent={onEvent}
         setLocalState={setLocalState}
-        localState={localState}
+        localState={{ ...localState, configurationValidationError }}
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
@@ -364,11 +366,16 @@ export const InnerVisualizationWrapper = ({
 
   if (localState.configurationValidationError) {
     return (
-      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+      <EuiFlexGroup
+        style={{ maxWidth: '100%' }}
+        direction="column"
+        alignItems="center"
+        data-test-subj="configuration-failure"
+      >
         <EuiFlexItem>
           <EuiIcon type="alert" size="xl" color="danger" />
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj="configuration-failure">
+        <EuiFlexItem>
           <EuiTitle size="s">
             <EuiTextColor color="danger">
               <FormattedMessage
@@ -378,13 +385,19 @@ export const InnerVisualizationWrapper = ({
             </EuiTextColor>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>{localState.configurationValidationError[0].shortMessage}</EuiFlexItem>
+        <EuiFlexItem data-test-subj="configuration-failure-short-message">
+          {localState.configurationValidationError[0].shortMessage}
+        </EuiFlexItem>
         <EuiFlexItem className="eui-textBreakAll">
           {localState.configurationValidationError[0].longMessage}
-          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem
+          className="eui-textBreakAll"
+          data-test-subj="configuration-failure-more-errors"
+        >
           {localState.configurationValidationError.length > 1
             ? i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
-                defaultMessage: ` + {errors} {errors, plural, one {error} other {errors}}`,
+                defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
                 values: { errors: localState.configurationValidationError.length - 1 },
               })
             : null}
