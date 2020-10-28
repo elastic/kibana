@@ -61,7 +61,7 @@ export function VectorStyleSymbolizeAsEditor({
         idSelected={selectedOption ? selectedOption.id : undefined}
         onChange={onSymbolizeAsChange}
         isFullWidth
-        legend={i18n.translate('xpack.maps.vector.symbolControlLegend', {
+        legend={i18n.translate('xpack.maps.vector.symbolLabel', {
           defaultMessage: 'Symbol type',
         })}
       />
