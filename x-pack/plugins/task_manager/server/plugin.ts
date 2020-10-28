@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { first, map, distinctUntilChanged } from 'rxjs/operators';
+import { first, map, tap, distinctUntilChanged } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Plugin,
@@ -12,6 +12,7 @@ import {
   Logger,
   CoreStart,
   ServiceStatusLevels,
+  CoreStatus,
 } from '../../../../src/core/server';
 import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -59,14 +60,7 @@ export class TaskManagerPlugin
       .pipe(first())
       .toPromise();
 
-    this.elasticsearchAndSOAvailability$ = core.status.core$.pipe(
-      map(
-        ({ elasticsearch, savedObjects }) =>
-          elasticsearch.level === ServiceStatusLevels.available &&
-          savedObjects.level === ServiceStatusLevels.available
-      ),
-      distinctUntilChanged()
-    );
+    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -178,4 +172,17 @@ export class TaskManagerPlugin
       throw new Error(`Cannot ${operation} after the task manager has started`);
     }
   }
+}
+
+export function getElasticsearchAndSOAvailability(
+  core$: Observable<CoreStatus>
+): Observable<boolean> {
+  return core$.pipe(
+    map(
+      ({ elasticsearch, savedObjects }) =>
+        elasticsearch.level === ServiceStatusLevels.available &&
+        savedObjects.level === ServiceStatusLevels.available
+    ),
+    distinctUntilChanged()
+  );
 }
