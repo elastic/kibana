@@ -55,11 +55,12 @@ import {
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
 const focusHeight = focusZoomPanelHeight + focusChartHeight;
-const annotationHeight = ANNOTATION_SYMBOL_HEIGHT + 4;
 const contextChartHeight = 60;
 const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
+const ctxAnnotationMargin = 2;
+const annotationHeight = ANNOTATION_SYMBOL_HEIGHT + ctxAnnotationMargin * 2;
 const margin = { top: 10, right: 10, bottom: 15, left: 40 };
 
 const ZOOM_INTERVAL_OPTIONS = [
@@ -1026,20 +1027,24 @@ class TimeseriesChartIntl extends Component {
       .domain([chartLimits.min, chartLimits.max]);
 
     const borders = cxtGroup.append('g').attr('class', 'axis');
+    const brushChartHeight = cxtChartHeight + swlHeight + annotationHeight;
 
     // Add borders left and right.
-    borders
-      .append('line')
-      .attr('x1', 0)
-      .attr('y1', 0)
-      .attr('x2', 0)
-      .attr('y2', cxtChartHeight + swlHeight);
+    borders.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', brushChartHeight);
     borders
       .append('line')
       .attr('x1', cxtWidth)
       .attr('y1', 0)
       .attr('x2', cxtWidth)
-      .attr('y2', cxtChartHeight + swlHeight);
+      .attr('y2', brushChartHeight);
+
+    // Add bottom borders
+    borders
+      .append('line')
+      .attr('x1', 0)
+      .attr('y1', brushChartHeight)
+      .attr('x2', cxtWidth)
+      .attr('y2', brushChartHeight);
 
     // Add x axis.
     const timeBuckets = getTimeBucketsFromCache();
@@ -1112,8 +1117,8 @@ class TimeseriesChartIntl extends Component {
     ctxAnnotationRects
       .enter()
       .append('rect')
-      .attr('rx', 2)
-      .attr('ry', 2)
+      .attr('rx', ctxAnnotationMargin)
+      .attr('ry', ctxAnnotationMargin)
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
