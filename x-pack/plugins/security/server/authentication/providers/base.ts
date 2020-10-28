@@ -5,6 +5,7 @@
  */
 
 import { deepFreeze } from '@kbn/std';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   KibanaRequest,
   Logger,

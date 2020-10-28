@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { SearchSource } from './search_source';
