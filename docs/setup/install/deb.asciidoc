@@ -160,10 +160,7 @@ https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-amd64.deb
 
 endif::[]
 
-==== `systemd`
-
 [[deb-running-systemd]]
-
 include::systemd.asciidoc[]
 
 [[deb-configuring]]

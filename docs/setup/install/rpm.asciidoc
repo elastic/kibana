@@ -153,8 +153,6 @@ https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm
 
 endif::[]
 
-==== `systemd`
-
 [[rpm-running-systemd]]
 include::systemd.asciidoc[]
 
