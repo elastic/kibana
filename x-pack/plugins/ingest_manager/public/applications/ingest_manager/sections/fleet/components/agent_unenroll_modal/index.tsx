@@ -45,21 +45,19 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       setIsSubmitting(false);
       if (forceUnenroll) {
         const successMessage = isSingleAgent
-          ? i18n.translate(
-              'xpack.ingestManager.unenrollAgents.successForceSingleNotificationTitle',
-              { defaultMessage: 'Agent unenrolled' }
-            )
-          : i18n.translate(
-              'xpack.ingestManager.unenrollAgents.successForceMultiNotificationTitle',
-              { defaultMessage: 'Agents unenrolled' }
-            );
+          ? i18n.translate('xpack.fleet.unenrollAgents.successForceSingleNotificationTitle', {
+              defaultMessage: 'Agent unenrolled',
+            })
+          : i18n.translate('xpack.fleet.unenrollAgents.successForceMultiNotificationTitle', {
+              defaultMessage: 'Agents unenrolled',
+            });
         notifications.toasts.addSuccess(successMessage);
       } else {
         const successMessage = isSingleAgent
-          ? i18n.translate('xpack.ingestManager.unenrollAgents.successSingleNotificationTitle', {
+          ? i18n.translate('xpack.fleet.unenrollAgents.successSingleNotificationTitle', {
               defaultMessage: 'Unenrolling agent',
             })
-          : i18n.translate('xpack.ingestManager.unenrollAgents.successMultiNotificationTitle', {
+          : i18n.translate('xpack.fleet.unenrollAgents.successMultiNotificationTitle', {
               defaultMessage: 'Unenrolling agents',
             });
         notifications.toasts.addSuccess(successMessage);
@@ -68,7 +66,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
     } catch (error) {
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.ingestManager.unenrollAgents.fatalErrorNotificationTitle', {
+        title: i18n.translate('xpack.fleet.unenrollAgents.fatalErrorNotificationTitle', {
           defaultMessage: 'Error unenrolling {count, plural, one {agent} other {agents}}',
           values: { count: agentCount },
         }),
@@ -82,12 +80,12 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         title={
           isSingleAgent ? (
             <FormattedMessage
-              id="xpack.ingestManager.unenrollAgents.deleteSingleTitle"
+              id="xpack.fleet.unenrollAgents.deleteSingleTitle"
               defaultMessage="Unenroll agent"
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.unenrollAgents.forceDeleteMultipleTitle"
+              id="xpack.fleet.unenrollAgents.forceDeleteMultipleTitle"
               defaultMessage="Unenroll {count} agents"
               values={{ count: agentCount }}
             />
@@ -97,7 +95,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         onConfirm={onSubmit}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.unenrollAgents.cancelButtonLabel"
+            id="xpack.fleet.unenrollAgents.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
@@ -105,12 +103,12 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         confirmButtonText={
           isSingleAgent ? (
             <FormattedMessage
-              id="xpack.ingestManager.unenrollAgents.confirmSingleButtonLabel"
+              id="xpack.fleet.unenrollAgents.confirmSingleButtonLabel"
               defaultMessage="Unenroll agent"
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.unenrollAgents.confirmMultipleButtonLabel"
+              id="xpack.fleet.unenrollAgents.confirmMultipleButtonLabel"
               defaultMessage="Unenroll {count} agents"
               values={{ count: agentCount }}
             />
@@ -121,14 +119,14 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         <p>
           {isSingleAgent ? (
             <FormattedMessage
-              id="xpack.ingestManager.unenrollAgents.deleteSingleDescription"
+              id="xpack.fleet.unenrollAgents.deleteSingleDescription"
               defaultMessage='This action will remove the selected agent running on "{hostName}" from Fleet.
               Any data that was already sent by the agent will not be deleted. This action cannot be undone.'
               values={{ hostName: ((agents[0] as Agent).local_metadata.host as any).hostname }}
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.unenrollAgents.deleteMultipleDescription"
+              id="xpack.fleet.unenrollAgents.deleteMultipleDescription"
               defaultMessage="This action will remove multiple agents from Fleet and prevent new data from being ingested.
               Any data that was already sent by these agents will not be affected. This action cannot be undone."
             />
@@ -138,7 +136,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
           legend={{
             children: (
               <FormattedMessage
-                id="xpack.ingestManager.unenrollAgents.forceUnenrollLegendText"
+                id="xpack.fleet.unenrollAgents.forceUnenrollLegendText"
                 defaultMessage="Force unenroll {count, plural, one {agent} other {agents}}"
                 values={{ count: agentCount }}
               />
@@ -149,7 +147,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
             id="ingestManagerForceUnenrollAgents"
             label={
               <FormattedMessage
-                id="xpack.ingestManager.unenrollAgents.forceUnenrollCheckboxLabel"
+                id="xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel"
                 defaultMessage="Remove {count, plural, one {agent} other {agents}} immediately.
                   Do not wait for agent to send any last data."
                 values={{ count: agentCount }}
