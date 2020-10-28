@@ -13,7 +13,12 @@ you cannot use `kibana_admin` to grant access. You must create custom roles that
 [[kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, open the menu, go to *Stack Management > Security > Roles* and click **Create role**. 
+To create a role that grants {kib} privileges, open the menu, then click *Stack Management > Roles* and click **Create role**.
+
+[float]
+==== Required permissions
+
+The `manage_security` cluster privilege is required to access role management.
 
 [[adding_kibana_privileges]]
 ==== Adding {kib} privileges

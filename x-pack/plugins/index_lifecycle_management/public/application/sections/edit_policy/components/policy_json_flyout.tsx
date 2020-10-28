@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -25,6 +25,7 @@ import {
 import { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
+import { FormInternal } from '../types';
 
 interface Props {
   legacyPolicy: SerializedPolicy;
@@ -44,27 +45,29 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
    */
   const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
 
-  const form = useFormContext();
-  const [formData, getFormData] = useFormData();
+  const { validate: validateForm } = useFormContext();
+  const [, getFormData] = useFormData<FormInternal>();
+
+  const updatePolicy = useCallback(async () => {
+    setPolicy(undefined);
+    if (await validateForm()) {
+      const p = getFormData() as SerializedPolicy;
+      setPolicy({
+        ...legacyPolicy,
+        phases: {
+          ...legacyPolicy.phases,
+          hot: p.phases.hot,
+          warm: p.phases.warm,
+        },
+      });
+    } else {
+      setPolicy(null);
+    }
+  }, [setPolicy, getFormData, legacyPolicy, validateForm]);
 
   useEffect(() => {
-    (async function checkPolicy() {
-      setPolicy(undefined);
-      if (await form.validate()) {
-        const p = getFormData() as SerializedPolicy;
-        setPolicy({
-          ...legacyPolicy,
-          phases: {
-            ...legacyPolicy.phases,
-            hot: p.phases.hot,
-          },
-        });
-      } else {
-        setPolicy(null);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, legacyPolicy, formData]);
+    updatePolicy();
+  }, [updatePolicy]);
 
   let content: React.ReactNode;
   switch (policy) {

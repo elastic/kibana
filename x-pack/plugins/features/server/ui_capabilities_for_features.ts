@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly, Writable } from '@kbn/utility-types';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { ElasticsearchFeature, KibanaFeature } from '../common';
 
