@@ -4,53 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { of, interval, Observable } from 'rxjs';
-import { concatMap, takeWhile, switchMap } from 'rxjs/operators';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { interval, of, merge } from 'rxjs';
+import { concatMap, takeWhile } from 'rxjs/operators';
 
-import {
-  doSearch,
-  toSnakeCase,
-  SearchMethod,
-  DoSearchFnArgs,
-  IEsRawSearchResponse,
-  IKibanaSearchRequest,
-} from '../../../../../../src/plugins/data/common';
+import { doSearch, IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '../../../common/search/types';
 
-export const takePartialSearch = <TResponse = any>(
-  searchMethod: () => Promise<TResponse> | Observable<TResponse>,
-  hasRequestCompleted: (r: TResponse) => boolean,
-  pollInterval: IAsyncSearchOptions['pollInterval']
-): Observable<TResponse> =>
-  interval(pollInterval ?? 1000).pipe(
-    concatMap(() => searchMethod()),
-    takeWhile((r) => !hasRequestCompleted(r), true)
-  );
+const DEFAULT_POLLING_INTERVAL = 1000;
 
-export const doPartialSearch = <SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse>(
-  searchMethod: SearchMethod,
-  partialSearchMethod: SearchMethod,
+export const doPartialSearch = <SearchResponse = any>(
+  searchMethod: () => Promise<SearchResponse>,
+  partialSearchMethod: (id: IKibanaSearchRequest['id']) => Promise<SearchResponse>,
+  isCompleted: (response: SearchResponse) => boolean,
+  getId: (response: SearchResponse) => IKibanaSearchRequest['id'],
   requestId: IKibanaSearchRequest['id'],
   { abortSignal, pollInterval, waitForCompletion }: IAsyncSearchOptions
 ) => {
-  const isCompleted = (response: ApiResponse<SearchResponse>) =>
-    !(response.body.is_partial && response.body.is_running);
-
-  const partialSearch = (id: IKibanaSearchRequest['id']) =>
-    takePartialSearch<ApiResponse<SearchResponse>>(
-      () => doSearch(() => partialSearchMethod(id), abortSignal),
-      (response) => (waitForCompletion ? isCompleted(response) : true),
-      pollInterval
-    );
+  const partialSearch = (id: IKibanaSearchRequest['id']) => {
+    if (waitForCompletion) {
+      return interval(pollInterval ?? DEFAULT_POLLING_INTERVAL).pipe(
+        concatMap(() => doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal)),
+        takeWhile((response) => !isCompleted(response), true)
+      );
+    } else {
+      return doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal);
+    }
+  };
 
   return requestId
     ? partialSearch(requestId)
     : doSearch<SearchResponse>(searchMethod, abortSignal).pipe(
         concatMap((response) =>
           waitForCompletion && !isCompleted(response)
-            ? partialSearch(response.body.id)
-            : Promise.resolve(response)
+            ? merge(of(response), partialSearch(getId(response)))
+            : of(response)
         )
       );
 };

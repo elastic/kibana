@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+interface TransportRequestPromise<T> extends Promise<T> {
+  abort?: () => void;
+}
 
 /**
  *
@@ -36,7 +38,7 @@ export const shimAbortSignal = <T extends TransportRequestPromise<unknown>>(
   signal: AbortSignal | undefined
 ): T => {
   if (signal) {
-    signal.addEventListener('abort', () => promise.abort());
+    signal.addEventListener('abort', () => promise.abort && promise.abort());
   }
   return promise;
 };

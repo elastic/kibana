@@ -19,6 +19,6 @@
 
 import { mapKeys, snakeCase } from 'lodash';
 
-export function toSnakeCase(obj: Record<string, any>) {
+export function toSnakeCase(obj: Record<string, any>): Record<string, any> {
   return mapKeys(obj, (value, key) => snakeCase(key));
 }

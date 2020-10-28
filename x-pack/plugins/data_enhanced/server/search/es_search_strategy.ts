@@ -5,22 +5,22 @@
  */
 
 import { from } from 'rxjs';
-import { first, switchMap, map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 
-import {
-  getShardTimeout,
-  shimHitsTotal,
-  search,
-  DoSearchFnArgs,
-} from '../../../../../src/plugins/data/server';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { getShardTimeout, shimHitsTotal, search } from '../../../../../src/plugins/data/server';
 import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
 
 import type { ISearchStrategy, SearchUsage } from '../../../../../src/plugins/data/server';
 import type { IEnhancedEsSearchRequest } from '../../common';
-import { shimAbortSignal, toSnakeCase } from '../../../../../src/plugins/data/common/search';
+import {
+  IEsRawSearchResponse,
+  shimAbortSignal,
+  toSnakeCase,
+} from '../../../../../src/plugins/data/common/search';
 import type {
   ISearchOptions,
   IEsSearchResponse,
@@ -44,10 +44,11 @@ export const enhancedEsSearchStrategyProvider = (
     context: RequestHandlerContext
   ) {
     const asyncOptions = getAsyncOptions();
+    const client = context.core.elasticsearch.client.asCurrentUser.asyncSearch;
 
-    return doPartialSearch(
+    return doPartialSearch<ApiResponse<IEsRawSearchResponse>>(
       async () =>
-        context.core.elasticsearch.client.asCurrentUser.asyncSearch.submit(
+        client.submit(
           toSnakeCase({
             ...(await getDefaultSearchParams(context.core.uiSettings.client)),
             batchedReduceSize: 64,
@@ -56,12 +57,12 @@ export const enhancedEsSearchStrategyProvider = (
           })
         ),
       (id) =>
-        context.core.elasticsearch.client.asCurrentUser.asyncSearch.get(
-          toSnakeCase({
-            id,
-            ...asyncOptions,
-          })
-        ),
+        client.get({
+          id: id!,
+          ...toSnakeCase({ ...asyncOptions }),
+        }),
+      (response) => !(response.body.is_partial && response.body.is_running),
+      (response) => response.body.id,
       request.id,
       options
     ).pipe(
@@ -116,8 +117,7 @@ export const enhancedEsSearchStrategyProvider = (
     ) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
 
-      const isAsync = request.indexType !== 'rollup';
-      return isAsync
+      return request.indexType !== 'rollup'
         ? asyncSearch(request, options, context)
         : from(rollupSearch(request, options, context));
     },

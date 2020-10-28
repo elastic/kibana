@@ -21,25 +21,20 @@ import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { ShardsResponse } from 'elasticsearch';
-import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+
 import type { Assign } from 'utility-types';
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { shimAbortSignal } from './shim_abort_signal';
-import { toSnakeCase } from './to_snake_case';
 import { getTotalLoaded } from './get_total_loaded';
 
 import type { IEsRawSearchResponse } from './types';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
+import type { IKibanaSearchResponse } from '../types';
 
-export type SearchMethod = <
-  SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse
->() => TransportRequestPromise<ApiResponse<SearchResponse>>;
-
-export const doSearch = <SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse>(
-  searchMethod: SearchMethod,
+export const doSearch = <SearchResponse = any>(
+  searchMethod: () => Promise<SearchResponse>,
   abortSignal?: AbortSignal
-) => from(shimAbortSignal(searchMethod<SearchResponse>(), abortSignal));
+) => from(shimAbortSignal(searchMethod(), abortSignal));
 
 export const toKibanaSearchResponse = <
   SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse,

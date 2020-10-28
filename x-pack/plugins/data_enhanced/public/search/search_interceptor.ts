@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, from, Subscription, of, merge } from 'rxjs';
-import { tap, takeUntil, finalize, catchError, concatMap } from 'rxjs/operators';
+import { throwError, from, Subscription } from 'rxjs';
+import { tap, takeUntil, finalize, catchError } from 'rxjs/operators';
 import {
+  IEsSearchResponse,
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
@@ -20,7 +21,7 @@ import {
   IAsyncSearchOptions,
 } from '../../common';
 
-import { takePartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
+import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
@@ -74,21 +75,14 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-    return this.runSearch(request, combinedSignal, strategy).pipe(
-      concatMap((r) => {
-        if (isCompleteResponse(r)) {
-          return of(r);
-        }
-
-        return merge(
-          of(r),
-          takePartialSearch(
-            () => this.runSearch({ ...request, id: r.id }, combinedSignal, strategy),
-            isCompleteResponse,
-            pollInterval
-          )
-        );
-      }),
+    return doPartialSearch<IEsSearchResponse>(
+      () => this.runSearch(request, combinedSignal, strategy),
+      (requestId) => this.runSearch({ ...request, id: requestId }, combinedSignal, strategy),
+      isCompleteResponse,
+      (response) => response.id,
+      id,
+      { pollInterval, waitForCompletion: true }
+    ).pipe(
       tap((r) => {
         // If the response indicates of an error, stop polling and complete the observable
         if (isErrorResponse(r)) {

@@ -18,7 +18,8 @@
  */
 import { Logger } from 'kibana/server';
 import { Observable } from 'rxjs';
-import { switchMap, first, mergeMap } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
+import { ApiResponse } from '@elastic/elasticsearch';
 
 import type { SharedGlobalConfig } from 'kibana/server';
 
@@ -30,7 +31,7 @@ import {
 } from '../../../common/search/es_search/es_search_rxjs_utils';
 import { trackSearchStatus } from './es_search_rxjs_utils';
 
-import { toSnakeCase } from '../../../common/search/es_search';
+import { IEsRawSearchResponse, toSnakeCase } from '../../../common/search/es_search';
 import { getDefaultSearchParams, getShardTimeout } from '..';
 import type { ISearchStrategy } from '..';
 
@@ -46,7 +47,7 @@ export const esSearchStrategyProvider = (
       throw new Error(`Unsupported index pattern type ${request.indexType}`);
     }
 
-    return doSearch(async () => {
+    return doSearch<ApiResponse<IEsRawSearchResponse>>(async () => {
       const config = await config$.pipe(first()).toPromise();
       const params = toSnakeCase({
         ...(await getDefaultSearchParams(context.core.uiSettings.client)),

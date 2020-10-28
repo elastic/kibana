@@ -214,8 +214,6 @@ export {
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
-  // search
-  DoSearchFnArgs,
 } from '../common';
 
 export {
