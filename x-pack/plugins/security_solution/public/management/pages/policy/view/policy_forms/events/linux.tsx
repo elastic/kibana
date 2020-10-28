@@ -102,9 +102,7 @@ export const LinuxEvents = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.linux', {
-        defaultMessage: 'Linux',
-      })}
+      supportedOss={['linux']}
       dataTestSubj="linuxEventingForm"
       rightCorner={collectionsEnabled}
     >

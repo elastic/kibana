@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { FC, ReactNode, memo, useMemo } from 'react';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -16,6 +16,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
+import { OperatingSystem } from '../../../../../../common/endpoint/types';
+import { OS_TITLES } from '../../../../common/translations';
+
 const PolicyDetailCard = styled.div`
   .policyDetailTitleOS {
     flex-grow: 2;
@@ -24,7 +27,7 @@ const PolicyDetailCard = styled.div`
     margin: 0;
   }
 `;
-export const ConfigForm: React.FC<{
+export const ConfigForm: FC<{
   /**
    * A subtitle for this component.
    **/
@@ -32,12 +35,12 @@ export const ConfigForm: React.FC<{
   /**
    * Types of supported operating systems.
    */
-  supportedOss: React.ReactNode;
+  supportedOss: OperatingSystem[];
   children: React.ReactNode;
   dataTestSubj: string;
   /** React Node to be put on the right corner of the card */
-  rightCorner: React.ReactNode;
-}> = React.memo(({ type, supportedOss, children, dataTestSubj, rightCorner }) => {
+  rightCorner: ReactNode;
+}> = memo(({ type, supportedOss, children, dataTestSubj, rightCorner }) => {
   const typeTitle = useMemo(() => {
     return (
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
@@ -68,7 +71,7 @@ export const ConfigForm: React.FC<{
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem className="policyDetailTitleFlexItem">
-            <EuiText>{supportedOss}</EuiText>
+            <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>

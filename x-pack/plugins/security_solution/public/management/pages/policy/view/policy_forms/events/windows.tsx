@@ -142,9 +142,7 @@ export const WindowsEvents = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.windows', {
-        defaultMessage: 'Windows',
-      })}
+      supportedOss={['windows']}
       dataTestSubj="windowsEventingForm"
       rightCorner={collectionsEnabled}
     >
