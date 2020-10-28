@@ -19,8 +19,8 @@ experimental[] Retrieve all {kib} spaces.
   authorization checks are applied to the API call. If `purpose` is not provided in the URL, the `any` purpose is used.
 
 `allowPartialAuthorization`::
-  (Optional, boolean) When enabled, the API will return any spaces that the user is partially authorized to access. This only has an effect
-  when _not_ using the `any` purpose. Any partially authorized results (for instance, spaces that the user has read-only access to) will be
+  (Optional, boolean) When enabled, the API will return any space that the user is partially authorized to access. This only has an effect
+  when _not_ using the `any` purpose. Any partially authorized results (for instance, spaces that the user has read-only access to) will 
   contain the `isPartiallyAuthorized: true` attribute.
 
 [[spaces-api-get-all-response-codes]]
