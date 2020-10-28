@@ -28,12 +28,14 @@ export interface FormState {
 }
 
 export interface Props {
-  docsBaseUri: string;
+  links: {
+    painlessSyntax: string;
+  };
   defaultValue?: RuntimeField;
   onChange?: (state: FormState) => void;
 }
 
-const RuntimeFieldFormComp = ({ defaultValue, onChange, docsBaseUri }: Props) => {
+const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;
 
@@ -94,7 +96,7 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, docsBaseUri }: Props) =>
 
       {/* Script */}
       <UseField<string> path="script">
-        {({ value, setValue, label, helpText, isValid, getErrorsMessages }) => {
+        {({ value, setValue, label, isValid, getErrorsMessages }) => {
           return (
             <EuiFormRow
               label={label}
@@ -104,7 +106,7 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, docsBaseUri }: Props) =>
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiLink
-                      href={`${docsBaseUri}/to-be-defined`}
+                      href={links.painlessSyntax}
                       target="_blank"
                       external
                       data-test-subj="painlessSyntaxLearnMoreLink"
