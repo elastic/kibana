@@ -283,11 +283,7 @@ describe('<EditPolicy />', () => {
         const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
         expect(entirePolicy.phases.cold).toMatchInlineSnapshot(`
           Object {
-            "actions": Object {
-              "set_priority": Object {
-                "priority": 50,
-              },
-            },
+            "actions": Object {},
             "min_age": "0d",
           }
         `);
