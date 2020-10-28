@@ -5,7 +5,7 @@
  */
 import { RuntimeFieldsPlugin } from './plugin';
 
-export { RuntimeFieldForm } from './components';
+export { RuntimeFieldEditor } from './components';
 export { RUNTIME_FIELD_OPTIONS } from './constants';
 export { RuntimeField, RuntimeType } from './types';
 

@@ -5,3 +5,5 @@
  */
 
 export { RuntimeFieldForm } from './runtime_field_form';
+
+export { RuntimeFieldEditor } from './runtime_field_editor';
