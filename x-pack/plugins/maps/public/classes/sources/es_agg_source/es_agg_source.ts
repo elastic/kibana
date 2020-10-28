@@ -33,9 +33,21 @@ export abstract class AbstractESAggSource extends AbstractESSource {
   private readonly _metricFields: IESAggField[];
   private readonly _canReadFromGeoJson: boolean;
 
+  static createDescriptor(
+    descriptor: Partial<AbstractESAggSourceDescriptor>
+  ): AbstractESAggSourceDescriptor {
+    descriptor = AbstractESSource.createDescriptor(descriptor);
+    return {
+      ...descriptor,
+      indexPatternId: descriptor.indexPatternId ? descriptor.indexPatternId : '',
+      type: descriptor.type ? descriptor.type : '',
+      metrics: descriptor.metrics ? descriptor.metrics : [],
+    };
+  }
+
   constructor(
     descriptor: AbstractESAggSourceDescriptor,
-    inspectorAdapters: Adapters,
+    inspectorAdapters?: Adapters,
     canReadFromGeoJson = true
   ) {
     super(descriptor, inspectorAdapters);
@@ -55,7 +67,7 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     }
   }
 
-  getFieldByName(fieldName: string) {
+  getFieldByName(fieldName: string): IField | null {
     return this.getMetricFieldForName(fieldName);
   }
 
@@ -113,8 +125,8 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     }
   }
 
-  async getFields() {
-    return this.getMetricFields();
+  async getFields(): Promise<IField[]> {
+    return this.getMetricFields() as IField[];
   }
 
   getValueAggsDsl(indexPattern: IndexPattern) {
@@ -128,7 +140,7 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     return valueAggsDsl;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const metricFields = await this.getFields();
     const promises: Array<Promise<ITooltipProperty>> = [];
     metricFields.forEach((metricField) => {

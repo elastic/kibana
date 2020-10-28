@@ -7,6 +7,7 @@
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
+import { ISearchSource, Query } from 'src/plugins/data/public';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -20,58 +21,72 @@ import {
   getField,
   addFieldToDSL,
   extractPropertiesFromBucket,
+  BucketProperties,
 } from '../../../../common/elasticsearch_util';
 
 const TERMS_AGG_NAME = 'join';
 
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
-export function extractPropertiesMap(rawEsData, countPropertyName) {
-  const propertiesMap = new Map();
-  _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach((termBucket) => {
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  ESTermSourceDescriptor,
+  VectorJoinSourceRequestMeta,
+} from '../../../../common/descriptor_types';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
+
+export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
+  const propertiesMap = new Map<string, BucketProperties>();
+  const buckets: any[] = _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []);
+  buckets.forEach((termBucket: any) => {
     const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
     }
     propertiesMap.set(termBucket.key.toString(), properties);
   });
-  return propertiesMap;
+  return propertiesMap as PropertiesMap;
 }
 
 export class ESTermSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
-  constructor(descriptor, inspectorAdapters) {
-    super(descriptor, inspectorAdapters);
+  private readonly _termField: ESDocField;
+  readonly _descriptor: ESTermSourceDescriptor;
+
+  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters: Adapters) {
+    super(AbstractESAggSource.createDescriptor(descriptor), inspectorAdapters);
+    this._descriptor = descriptor;
     this._termField = new ESDocField({
-      fieldName: descriptor.term,
+      fieldName: this._descriptor.term,
       source: this,
       origin: this.getOriginForField(),
     });
-  }
-
-  static renderEditor({}) {
-    //no need to localize. this editor is never rendered.
-    return `<div>editor details</div>`;
   }
 
   hasCompleteConfig() {
     return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
-  getTermField() {
+  getTermField(): ESDocField {
     return this._termField;
   }
 
-  getOriginForField() {
+  getOriginForField(): FIELD_ORIGIN {
     return FIELD_ORIGIN.JOIN;
   }
 
-  getWhereQuery() {
+  getWhereQuery(): Query | undefined {
     return this._descriptor.whereQuery;
   }
 
-  getAggKey(aggType, fieldName) {
+  getAggKey(aggType: AGG_TYPE, fieldName?: string): string {
     return getJoinAggKey({
       aggType,
       aggFieldName: fieldName,
@@ -79,7 +94,7 @@ export class ESTermSource extends AbstractESAggSource {
     });
   }
 
-  getAggLabel(aggType, fieldName) {
+  getAggLabel(aggType: AGG_TYPE, fieldName: string) {
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
           defaultMessage: `Count of {indexPatternTitle}`,
@@ -88,13 +103,18 @@ export class ESTermSource extends AbstractESAggSource {
       : super.getAggLabel(aggType, fieldName);
   }
 
-  async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
+  async getPropertiesMap(
+    searchFilters: VectorJoinSourceRequestMeta,
+    leftSourceName: string,
+    leftFieldName: string,
+    registerCancelCallback: (callback: () => void) => void
+  ): Promise<PropertiesMap> {
     if (!this.hasCompleteConfig()) {
-      return [];
+      return new Map<string, BucketProperties>();
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = { size: DEFAULT_MAX_BUCKETS_LIMIT };
     searchSource.setField('aggs', {
@@ -122,16 +142,16 @@ export class ESTermSource extends AbstractESAggSource {
     return extractPropertiesMap(rawEsData, countPropertyName);
   }
 
-  isFilterByMapBounds() {
+  isFilterByMapBounds(): boolean {
     return false;
   }
 
-  async getDisplayName() {
-    //no need to localize. this is never rendered.
+  async getDisplayName(): Promise<string> {
+    // no need to localize. this is never rendered.
     return `es_table ${this.getIndexPatternId()}`;
   }
 
-  getFieldNames() {
+  getFieldNames(): string[] {
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 }
