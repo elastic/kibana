@@ -86,8 +86,8 @@ export function KeyUXMetrics({ data, loading }: Props) {
         <EuiStat
           titleSize="s"
           title={
-            longTaskData?.noOfLongTasks
-              ? numeral(longTaskData.noOfLongTasks).format('0,0')
+            longTaskData?.noOfLongTasks !== undefined
+              ? numeral(longTaskData?.noOfLongTasks).format('0,0')
               : DATA_UNDEFINED_LABEL
           }
           description={NO_OF_LONG_TASK}

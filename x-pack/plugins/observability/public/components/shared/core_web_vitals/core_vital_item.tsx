@@ -95,7 +95,7 @@ export function CoreVitalItem({
     <>
       <EuiStat
         titleSize="s"
-        title={value}
+        title={value ?? ''}
         description={
           <>
             {title}
