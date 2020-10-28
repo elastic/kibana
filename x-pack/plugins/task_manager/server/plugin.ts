@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { first, map, tap, distinctUntilChanged } from 'rxjs/operators';
+import { first, map, distinctUntilChanged } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Plugin,
