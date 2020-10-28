@@ -259,17 +259,17 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                         this.props.isModelPlotEnabled ? (
                           <FormattedMessage
                             id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo"
-                            defaultMessage="You will be suggested to select values for all possible model plot results"
+                            defaultMessage="The list contains values for all possible model plot results."
                           />
                         ) : (
                           <FormattedMessage
                             id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsAllRecordsInfo"
-                            defaultMessage="You will be suggested to select values for all records created during the job lifetime"
+                            defaultMessage="The list contains values from all records created during the lifetime of the job."
                           />
                         )
                       }
                     >
-                      <EuiIcon tabIndex={0} type="iInCircle" color={'accent'} />
+                      <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
                     </EuiToolTip>
                   ) : null}
                 </EuiFlexItem>
