@@ -81,24 +81,7 @@ export default function (providerContext: FtrProviderContext) {
     setupIngest(providerContext);
 
     describe('POST /api/fleet/agent_policies', () => {
-      it('should work and create an enrollment key for the policy', async () => {
-        const name = `test-${Date.now()}`;
-
-        const res = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name,
-            namespace: 'default',
-          })
-          .expect(200);
-
-        const policyId = res.body.item.id;
-        const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
-        expect(enrollmentKey).not.empty();
-      });
-
-      it('should create an agent action `POLICY_CHANGE` for the policy', async () => {
+      it('should create an enrollment key and an agent action `POLICY_CHANGE` for the policy', async () => {
         const name = `test-${Date.now()}`;
 
         const res = await supertest
@@ -128,24 +111,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies/copy', () => {
       const TEST_POLICY_ID = `policy1`;
-      it('should work and create an enrollment key for the new policy', async () => {
-        const name = `test-${Date.now()}`;
 
-        const res = await supertest
-          .post(`/api/fleet/agent_policies/${TEST_POLICY_ID}/copy`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name,
-            description: 'Test',
-          })
-          .expect(200);
-
-        const policyId = res.body.item.id;
-        const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
-        expect(enrollmentKey).not.empty();
-      });
-
-      it('should create an agent action `POLICY_CHANGE` for the policy', async () => {
+      it('should create an enrollment key and an agent action `POLICY_CHANGE` for the policy', async () => {
         const name = `test-${Date.now()}`;
 
         const res = await supertest
