@@ -23,6 +23,7 @@
   "severity": "medium",
   "tags": [
     "Elastic",
+    "Cloud",
     "GCP",
     "Continuous Monitoring",
     "SecOps",

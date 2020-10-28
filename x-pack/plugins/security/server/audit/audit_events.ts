@@ -104,7 +104,9 @@ export interface HttpRequestParams {
   request: KibanaRequest;
 }
 
-export function httpRequestEvent({ request: { url, route } }: HttpRequestParams): AuditEvent {
+export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
+  const url = request.rewrittenUrl ?? request.url;
+
   return {
     message: `User is requesting [${url.pathname}] endpoint`,
     event: {
@@ -114,7 +116,7 @@ export function httpRequestEvent({ request: { url, route } }: HttpRequestParams)
     },
     http: {
       request: {
-        method: route.method,
+        method: request.route.method,
       },
     },
     url: {
