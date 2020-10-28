@@ -27,7 +27,6 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent } from '../../../../../ingest_manager/common/types/models';
 import { AgentService } from '../../../../../ingest_manager/server/services';
-import { body } from '../../schemas/artifacts';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
