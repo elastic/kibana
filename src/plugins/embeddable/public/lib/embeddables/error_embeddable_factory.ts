@@ -16,18 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
-export * from './embeddable_factory';
-export * from './embeddable_factory_definition';
-export * from './default_embeddable_factory_provider';
-export {
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-  ErrorEmbeddableInput,
-  ERROR_EMBEDDABLE_TYPE,
-} from './error_embeddable';
-export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableRoot } from './embeddable_root';
-export * from './saved_object_embeddable';
-export { EmbeddableRenderer, EmbeddableRendererProps } from './embeddable_renderer';
+
+import { EmbeddableFactoryDefinition } from '.';
+import { ErrorEmbeddableInput, ERROR_EMBEDDABLE_TYPE } from './error_embeddable';
+import { ErrorEmbeddable, IContainer } from '..';
+
+export class ErrorEmbeddableFactory implements EmbeddableFactoryDefinition {
+  type = ERROR_EMBEDDABLE_TYPE;
+
+  getDisplayName() {
+    return '';
+  }
+
+  async isEditable() {
+    return false;
+  }
+
+  async create(input: ErrorEmbeddableInput, parent?: IContainer) {
+    return new ErrorEmbeddable(input.error || '', input, parent);
+  }
+}

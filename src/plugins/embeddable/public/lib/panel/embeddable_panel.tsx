@@ -19,8 +19,9 @@
 import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Subscription } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { catchError } from 'rxjs/operators';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
@@ -50,7 +51,7 @@ import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
-import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
+import { EmbeddableStateTransfer } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -257,21 +258,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe(
-          (output: EmbeddableOutput) => {
+        this.props.embeddable
+          .getOutput$()
+          .pipe(catchError(() => of({})))
+          .subscribe((output: EmbeddableOutput) => {
             this.setState({
               error: output.error,
               loading: output.loading,
             });
-          },
-          (error: Error) => {
-            if (this.embeddableRoot.current) {
-              this.props.embeddable.destroy();
-              const errorEmbeddable = new ErrorEmbeddable(error, this.props.embeddable.getInput());
-              errorEmbeddable.render(this.embeddableRoot.current);
-            }
-          }
-        )
+          })
       );
       this.props.embeddable.render(this.embeddableRoot.current);
     }

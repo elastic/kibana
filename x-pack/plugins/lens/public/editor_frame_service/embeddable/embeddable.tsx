@@ -130,7 +130,7 @@ export class Embeddable
     const attributes:
       | LensSavedObjectAttributes
       | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
-      this.updateError(e);
+      this.fatalError(e);
       return false;
     });
     if (!attributes) {

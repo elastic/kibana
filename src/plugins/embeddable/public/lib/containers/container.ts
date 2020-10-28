@@ -301,7 +301,7 @@ export abstract class Container<
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
     } catch (e) {
-      embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
+      embeddable = new ErrorEmbeddable(e, { error: e, id: panel.explicitInput.id }, this);
     }
 
     // EmbeddableFactory.create can return undefined without throwing an error, which indicates that an embeddable

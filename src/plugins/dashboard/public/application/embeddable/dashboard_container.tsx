@@ -159,31 +159,33 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
-    newStateComplete.then((newPanelState: Partial<PanelState>) =>
-      this.replacePanel(placeholderPanelState, newPanelState)
+    newStateComplete.then((newPanel: Partial<PanelState>) =>
+      this.replacePanel({ previousPanel: placeholderPanelState, newPanel })
     );
   }
 
-  public replacePanel(
-    previousPanelState: DashboardPanelState<EmbeddableInput>,
-    newPanelState: Partial<PanelState>
-  ) {
+  public replacePanel<I extends { id?: string } = Partial<EmbeddableInput>>(props: {
+    previousPanel: DashboardPanelState<EmbeddableInput> | string;
+    newPanel: Partial<Omit<PanelState, 'explicitInput'> & { explicitInput: I }>;
+  }) {
     // TODO: In the current infrastructure, embeddables in a container do not react properly to
     // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
     // until the container logic is fixed.
-
+    const { previousPanel, newPanel } = props;
+    const previousPanelState =
+      typeof previousPanel === 'string' ? this.input.panels[previousPanel] : previousPanel;
     const finalPanels = { ...this.input.panels };
     delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
+    const newPanelId = newPanel.explicitInput?.id || uuid.v4();
     finalPanels[newPanelId] = {
       ...previousPanelState,
-      ...newPanelState,
+      ...newPanel,
       gridData: {
         ...previousPanelState.gridData,
         i: newPanelId,
       },
       explicitInput: {
-        ...newPanelState.explicitInput,
+        ...newPanel.explicitInput,
         id: newPanelId,
       },
     };
@@ -200,11 +202,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
     const idToReplace = embeddableId || explicitInput.id;
     if (idToReplace && this.input.panels[idToReplace]) {
-      this.replacePanel(this.input.panels[idToReplace], {
-        type,
-        explicitInput: {
-          ...explicitInput,
-          id: uuid.v4(),
+      this.replacePanel({
+        previousPanel: idToReplace,
+        newPanel: {
+          type,
+          explicitInput: {
+            ...explicitInput,
+            id: uuid.v4(),
+          },
         },
       });
     } else {

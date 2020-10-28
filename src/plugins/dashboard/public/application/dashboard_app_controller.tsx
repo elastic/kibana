@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import angular from 'angular';
 import deepEqual from 'fast-deep-equal';
 
-import { Observable, pipe, Subscription, merge } from 'rxjs';
+import { Observable, pipe, Subscription, merge, of } from 'rxjs';
 import {
   filter,
   map,
@@ -35,6 +35,7 @@ import {
   startWith,
   switchMap,
   distinctUntilChanged,
+  catchError,
 } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
@@ -89,6 +90,7 @@ import {
   subscribeWithScope,
 } from '../../../kibana_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { ErrorEmbeddableInput, ERROR_EMBEDDABLE_TYPE } from '../../../embeddable/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -275,7 +277,10 @@ export class DashboardAppController {
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
-        if (isErrorEmbeddable(embeddableInstance)) return;
+        if (isErrorEmbeddable(embeddableInstance)) {
+          return;
+        }
+
         const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
@@ -442,7 +447,21 @@ export class DashboardAppController {
                 switchMap((newChildIds: string[]) =>
                   merge(
                     ...newChildIds.map((childId) =>
-                      dashboardContainer!.getChild(childId).getOutput$()
+                      dashboardContainer!
+                        .getChild(childId)
+                        .getOutput$()
+                        .pipe(
+                          catchError((error: Error) => {
+                            dashboardContainer?.replacePanel<Partial<ErrorEmbeddableInput>>({
+                              previousPanel: childId,
+                              newPanel: {
+                                type: ERROR_EMBEDDABLE_TYPE,
+                                explicitInput: { error },
+                              },
+                            });
+                            return of({});
+                          })
+                        )
                     )
                   )
                 )

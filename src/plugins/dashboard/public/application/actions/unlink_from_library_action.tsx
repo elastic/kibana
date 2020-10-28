@@ -88,7 +88,7 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
       type: embeddable.type,
       explicitInput: { ...newInput, id: uuid.v4() },
     };
-    dashboard.replacePanel(panelToReplace, newPanel);
+    dashboard.replacePanel({ previousPanel: panelToReplace, newPanel });
 
     const title = embeddable.getTitle()
       ? i18n.translate('dashboard.panel.unlinkFromLibrary.successMessageWithTitle', {

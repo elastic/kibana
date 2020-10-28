@@ -27,20 +27,24 @@ import { IContainer } from '../containers';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 
+export type ErrorEmbeddableInput = EmbeddableInput & {
+  error?: Error;
+};
+
 export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
   embeddable: TEmbeddable | ErrorEmbeddable
 ): embeddable is ErrorEmbeddable {
   return (embeddable as ErrorEmbeddable).error !== undefined;
 }
 
-export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
+export class ErrorEmbeddable extends Embeddable<ErrorEmbeddableInput, EmbeddableOutput> {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
   private dom?: HTMLElement;
 
-  constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
+  constructor(error: Error | string, input: ErrorEmbeddableInput, parent?: IContainer) {
     super(input, {}, parent);
-    this.error = error;
+    this.error = error ?? input.error;
   }
 
   public reload() {}

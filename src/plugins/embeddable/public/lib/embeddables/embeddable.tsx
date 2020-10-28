@@ -19,7 +19,7 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, map } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
@@ -85,6 +85,7 @@ export abstract class Embeddable<
 
     this.getOutput$()
       .pipe(
+        catchError((error, observable) => observable),
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
@@ -182,7 +183,7 @@ export abstract class Embeddable<
     return;
   }
 
-  protected updateError(e: Error) {
+  protected fatalError(e: Error) {
     this.output$.error(e);
   }
 
