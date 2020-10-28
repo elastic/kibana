@@ -21,8 +21,8 @@ import React, { FC, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-// @ts-expect-error untyped service
 import { METRIC_TYPE } from '@kbn/analytics';
+// @ts-expect-error untyped service
 import { FeatureCatalogueEntry } from '../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
