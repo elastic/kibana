@@ -11,7 +11,7 @@ import React, { useEffect, useMemo } from 'react';
 import url from 'url';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
-import { NoServicesMessage } from './NoServicesMessage';
+import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -31,7 +31,7 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-export function ServiceOverview() {
+export function ServiceInventory() {
   const { core } = useApmPluginContext();
   const {
     urlParams: { start, end },
@@ -56,13 +56,13 @@ export function ServiceOverview() {
       hasDisplayedToast = true;
 
       core.notifications.toasts.addWarning({
-        title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
+        title: i18n.translate('xpack.apm.serviceInventory.toastTitle', {
           defaultMessage:
             'Legacy data was detected within the selected time range',
         }),
         text: toMountPoint(
           <p>
-            {i18n.translate('xpack.apm.serviceOverview.toastText', {
+            {i18n.translate('xpack.apm.serviceInventory.toastText', {
               defaultMessage:
                 "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in ",
             })}
@@ -74,7 +74,7 @@ export function ServiceOverview() {
               })}
             >
               {i18n.translate(
-                'xpack.apm.serviceOverview.upgradeAssistantLink',
+                'xpack.apm.serviceInventory.upgradeAssistantLinkText',
                 {
                   defaultMessage: 'the upgrade assistant',
                 }
@@ -86,8 +86,11 @@ export function ServiceOverview() {
     }
   }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
 
+  // Tracking both of these to keep our data backwards compatible
   useTrackPageview({ app: 'apm', path: 'services_overview' });
+  useTrackPageview({ app: 'apm', path: 'service_inventory' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
+  useTrackPageview({ app: 'apm', path: 'service_inventory', delay: 15000 });
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({

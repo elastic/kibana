@@ -12,7 +12,7 @@ import { verifyClientMetrics } from './client_metrics_helper';
 export const DEFAULT_TIMEOUT = { timeout: 60 * 1000 };
 
 Given(`a user browses the APM UI application for RUM Data`, () => {
-  // open service overview page
+  // Open UX landing page
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
   loginAndWaitForPage(
