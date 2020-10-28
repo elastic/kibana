@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('metricbeat app', function () {
-    loadTestFile(require.resolve('./_metricbeat'));
-  });
-}
+export { healthRoute } from './health';

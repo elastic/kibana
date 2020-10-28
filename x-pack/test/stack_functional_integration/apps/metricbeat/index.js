@@ -5,8 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('task_manager', function taskManagerSuite() {
-    this.tags('ciGroup4');
-    loadTestFile(require.resolve('./task_manager_integration'));
+  describe('metricbeat app', function () {
+    loadTestFile(require.resolve('./_metricbeat'));
+    loadTestFile(require.resolve('./_metricbeat_dashboard'));
   });
 }
