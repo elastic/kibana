@@ -31,6 +31,7 @@ import { ActionsConnectorsList } from './sections/actions_connectors_list/compon
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { PLUGIN } from './constants/plugin';
 import { HealthCheck } from './components/health_check';
+import { HealthContextProvider } from './context/health_context';
 
 interface MatchParams {
   section: Section;
@@ -139,9 +140,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               exact
               path={routeToConnectors}
               component={() => (
-                <HealthCheck docLinks={docLinks} http={http}>
-                  <ActionsConnectorsList />
-                </HealthCheck>
+                <HealthContextProvider>
+                  <HealthCheck docLinks={docLinks} http={http} waitForCheck={true}>
+                    <ActionsConnectorsList />
+                  </HealthCheck>
+                </HealthContextProvider>
               )}
             />
           )}
@@ -149,9 +152,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             exact
             path={routeToAlerts}
             component={() => (
-              <HealthCheck docLinks={docLinks} http={http}>
-                <AlertsList />
-              </HealthCheck>
+              <HealthContextProvider>
+                <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={true}>
+                  <AlertsList />
+                </HealthCheck>
+              </HealthContextProvider>
             )}
           />
         </Switch>
