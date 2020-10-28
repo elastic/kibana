@@ -56,6 +56,7 @@ import {
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
+import { MenuToggleProvider } from './menu_toggle';
 
 export const services = {
   ...commonServiceProviders,
@@ -91,4 +92,5 @@ export const services = {
   elasticChart: ElasticChartProvider,
   supertest: KibanaSupertestProvider,
   managementMenu: ManagementMenuProvider,
+  MenuToggle: MenuToggleProvider,
 };

@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-interpret<T>(ast: ExpressionAstNode, input: T, options?: ExpressionExecOptions): Promise<unknown>;
+interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown>;
 ```
 
 ## Parameters
@@ -16,7 +16,6 @@ interpret<T>(ast: ExpressionAstNode, input: T, options?: ExpressionExecOptions):
 |  --- | --- | --- |
 |  ast | <code>ExpressionAstNode</code> |  |
 |  input | <code>T</code> |  |
-|  options | <code>ExpressionExecOptions</code> |  |
 
 <b>Returns:</b>
 

@@ -50,7 +50,7 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.missingData.firing', {
   defaultMessage: 'firing',
 });
 
-const DEFAULT_DURATION = '5m';
+const DEFAULT_DURATION = '15m';
 const DEFAULT_LIMIT = '1d';
 
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
@@ -76,6 +76,8 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       type: AlertParamType.Duration,
     } as CommonAlertParamDetail,
   };
+
+  public defaultThrottle: string = '6h';
 
   public type = ALERT_MISSING_MONITORING_DATA;
   public label = i18n.translate('xpack.monitoring.alerts.missingData.label', {

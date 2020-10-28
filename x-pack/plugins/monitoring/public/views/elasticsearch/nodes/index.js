@@ -63,7 +63,7 @@ uiRoutes.when('/elasticsearch/nodes', {
 
         const promise = globalState.cluster_uuid
           ? getNodes()
-          : new Promise((resolve) => resolve({}));
+          : new Promise((resolve) => resolve({ data: {} }));
         return promise
           .then((response) => response.data)
           .catch((err) => {
