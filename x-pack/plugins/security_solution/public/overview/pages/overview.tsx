@@ -131,7 +131,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                     <EventCounts
                       filters={filters}
                       from={from}
-                      indexNames={[]}
+                      indexNames={selectedPatterns}
                       indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}
