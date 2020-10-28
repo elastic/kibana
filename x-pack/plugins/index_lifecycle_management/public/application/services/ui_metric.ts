@@ -14,8 +14,8 @@ import {
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
   defaultNewColdPhase,
-  defaultNewWarmPhase,
   defaultSetPriority,
+  defaultPhaseIndexPriority,
 } from '../constants';
 
 import { Phases } from '../../../common/types';
@@ -50,8 +50,7 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
         const isWarmPhasePriorityChanged =
           phases.warm &&
           phases.warm.actions.set_priority &&
-          phases.warm.actions.set_priority.priority !==
-            parseInt(defaultNewWarmPhase.phaseIndexPriority, 10);
+          phases.warm.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
 
         const isColdPhasePriorityChanged =
           phases.cold &&

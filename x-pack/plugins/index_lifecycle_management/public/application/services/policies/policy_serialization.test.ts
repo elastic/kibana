@@ -7,7 +7,7 @@
 // eslint-disable-next-line no-restricted-imports
 import cloneDeep from 'lodash/cloneDeep';
 import { deserializePolicy, legacySerializePolicy } from './policy_serialization';
-import { defaultNewColdPhase, defaultNewDeletePhase, defaultNewWarmPhase } from '../../constants';
+import { defaultNewColdPhase, defaultNewDeletePhase } from '../../constants';
 import { DataTierAllocationType } from '../../../../common/types';
 import { coldPhaseInitialization } from './cold_phase';
 
@@ -18,13 +18,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'default',
-              // These selected attrs should be ignored
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'default',
@@ -38,9 +31,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
             cold: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
@@ -50,13 +40,6 @@ describe('Policy serialization', () => {
     ).toEqual({
       name: 'test',
       phases: {
-        warm: {
-          actions: {
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             set_priority: {
@@ -75,12 +58,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: 'another:thing',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'custom',
@@ -94,15 +71,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: {
-                allocate: {
-                  include: { keep: 'this' },
-                  exclude: { keep: 'this' },
-                  require: { something: 'here' },
-                },
-              },
-            },
             cold: {
               actions: {
                 allocate: {
@@ -118,20 +86,6 @@ describe('Policy serialization', () => {
     ).toEqual({
       name: 'test',
       phases: {
-        warm: {
-          actions: {
-            allocate: {
-              include: { keep: 'this' },
-              exclude: { keep: 'this' },
-              require: {
-                another: 'thing',
-              },
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             allocate: {
@@ -157,12 +111,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'custom',
-              selectedNodeAttrs: '',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'custom',
@@ -176,9 +124,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
             cold: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
@@ -189,14 +134,6 @@ describe('Policy serialization', () => {
       // There should be no allocation action in any phases...
       name: 'test',
       phases: {
-        warm: {
-          actions: {
-            allocate: { include: {}, exclude: {}, require: { something: 'here' } },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             allocate: { include: {}, exclude: {}, require: { something: 'here' } },
@@ -216,12 +153,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            warm: {
-              ...defaultNewWarmPhase,
-              dataTierAllocationType: 'none',
-              selectedNodeAttrs: 'ignore:this',
-              phaseEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
               dataTierAllocationType: 'none',
@@ -235,9 +166,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
             cold: {
               actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
             },
@@ -248,16 +176,6 @@ describe('Policy serialization', () => {
       // There should be no allocation action in any phases...
       name: 'test',
       phases: {
-        warm: {
-          actions: {
-            migrate: {
-              enabled: false,
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
         cold: {
           actions: {
             migrate: {
@@ -277,9 +195,6 @@ describe('Policy serialization', () => {
     const originalPolicy = {
       name: 'test',
       phases: {
-        warm: {
-          actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-        },
         cold: {
           actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
         },
@@ -291,12 +206,6 @@ describe('Policy serialization', () => {
     const deserializedPolicy = {
       name: 'test',
       phases: {
-        warm: {
-          ...defaultNewWarmPhase,
-          dataTierAllocationType: 'none' as DataTierAllocationType,
-          selectedNodeAttrs: 'ignore:this',
-          phaseEnabled: true,
-        },
         cold: {
           ...defaultNewColdPhase,
           dataTierAllocationType: 'none' as DataTierAllocationType,
@@ -309,10 +218,6 @@ describe('Policy serialization', () => {
     };
 
     legacySerializePolicy(deserializedPolicy, originalPolicy);
-    deserializedPolicy.phases.warm.dataTierAllocationType = 'custom';
-    legacySerializePolicy(deserializedPolicy, originalPolicy);
-    deserializedPolicy.phases.warm.dataTierAllocationType = 'default';
-    legacySerializePolicy(deserializedPolicy, originalPolicy);
     expect(originalPolicy).toEqual(originalClone);
   });
 
@@ -322,13 +227,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            warm: {
-              ...defaultNewWarmPhase,
-              phaseEnabled: true,
-              forceMergeEnabled: true,
-              selectedForceMergeSegments: '1',
-              bestCompressionEnabled: true,
-            },
             cold: {
               ...defaultNewColdPhase,
             },
@@ -344,19 +242,7 @@ describe('Policy serialization', () => {
       )
     ).toEqual({
       name: 'test',
-      phases: {
-        warm: {
-          actions: {
-            forcemerge: {
-              max_num_segments: 1,
-              index_codec: 'best_compression',
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
-      },
+      phases: {},
     });
   });
 
@@ -384,31 +270,12 @@ describe('Policy serialization', () => {
                 },
               },
             },
-            warm: {
-              actions: {
-                forcemerge: {
-                  max_num_segments: 1,
-                  index_codec: 'best_compression',
-                },
-                set_priority: {
-                  priority: 50,
-                },
-              },
-            },
           },
         },
       })
     ).toEqual({
       name: 'test',
       phases: {
-        warm: {
-          ...defaultNewWarmPhase,
-          warmPhaseOnRollover: false,
-          phaseEnabled: true,
-          forceMergeEnabled: true,
-          selectedForceMergeSegments: '1',
-          bestCompressionEnabled: true,
-        },
         cold: {
           ...coldPhaseInitialization,
         },
@@ -423,13 +290,6 @@ describe('Policy serialization', () => {
         {
           name: 'test',
           phases: {
-            warm: {
-              ...defaultNewWarmPhase,
-              phaseEnabled: true,
-              forceMergeEnabled: true,
-              selectedForceMergeSegments: '1',
-              bestCompressionEnabled: false,
-            },
             cold: {
               ...defaultNewColdPhase,
             },
@@ -438,32 +298,12 @@ describe('Policy serialization', () => {
         },
         {
           name: 'test',
-          phases: {
-            warm: {
-              actions: {
-                forcemerge: {
-                  max_num_segments: 1,
-                  index_codec: 'best_compression',
-                },
-              },
-            },
-          },
+          phases: {},
         }
       )
     ).toEqual({
       name: 'test',
-      phases: {
-        warm: {
-          actions: {
-            forcemerge: {
-              max_num_segments: 1,
-            },
-            set_priority: {
-              priority: 50,
-            },
-          },
-        },
-      },
+      phases: {},
     });
   });
 });
