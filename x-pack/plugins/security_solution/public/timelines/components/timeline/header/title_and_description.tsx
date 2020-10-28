@@ -13,6 +13,7 @@ import {
   EuiModalHeader,
   EuiSpacer,
   EuiProgress,
+  EuiCallOut,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
@@ -22,11 +23,12 @@ import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineInput } from '../../../store/timeline/actions';
 import { Description, Name, UpdateTitle, UpdateDescription } from '../properties/helpers';
-import { TIMELINE_TITLE, DESCRIPTION } from '../properties/translations';
+import { TIMELINE_TITLE, DESCRIPTION, OPTIONAL } from '../properties/translations';
 import { useCreateTimelineButton } from '../properties/use_create_timeline';
 import * as i18n from './translations';
 
 interface TimelineTitleAndDescriptionProps {
+  showWarning?: boolean;
   timelineId: string;
   toggleSaveTimeline: () => void;
   updateTitle: UpdateTitle;
@@ -57,8 +59,11 @@ const usePrevious = (value: unknown) => {
   return ref.current;
 };
 
+// when showWarning equals to true,
+// the modal is used as a reminder for users to save / discard
+// the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
-  ({ timelineId, toggleSaveTimeline, updateTitle, updateDescription }) => {
+  ({ timelineId, toggleSaveTimeline, updateTitle, updateDescription, showWarning }) => {
     const timeline = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
@@ -111,11 +116,17 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
         : i18n.NAME_TIMELINE;
 
     const saveButtonTitle =
-      savedObjectId == null
+      savedObjectId == null && showWarning
         ? timelineType === TimelineType.template
           ? i18n.SAVE_TIMELINE_TEMPLATE
           : i18n.SAVE_TIMELINE
         : i18n.SAVE;
+
+    const calloutMessage = useMemo(() => i18n.UNSAVED_TIMELINE_WARNING(timelineType), [
+      timelineType,
+    ]);
+
+    const descriptionLabel = savedObjectId == null ? `${DESCRIPTION} (${OPTIONAL})` : DESCRIPTION;
 
     return (
       <>
@@ -125,6 +136,16 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
         <EuiModalHeader data-test-subj="modal-header">{modalHeader}</EuiModalHeader>
 
         <Wrapper>
+          {showWarning && (
+            <EuiFlexItem grow={true}>
+              <EuiCallOut
+                title={calloutMessage}
+                color="danger"
+                iconType="alert"
+                data-test-subj="save-timeline-callout"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={true}>
             <EuiFormRow label={TIMELINE_TITLE}>
               <Name
@@ -132,6 +153,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 className="timeline-modal-title"
                 disableTooltip={true}
                 disableAutoSave={true}
+                disabled={isSaving}
                 data-test-subj="save-timeline-name"
                 timelineId={timelineId}
                 timelineType={timelineType}
@@ -144,12 +166,13 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             <EuiSpacer />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiFormRow label={DESCRIPTION}>
+            <EuiFormRow label={descriptionLabel}>
               <Description
                 data-test-subj="save-timeline-description"
                 description={description}
                 disableTooltip={true}
                 disableAutoSave={true}
+                disabled={isSaving}
                 timelineId={timelineId}
                 updateDescription={updateDescription}
                 isTextArea={true}
@@ -161,17 +184,22 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false} component="span">
-                {savedObjectId == null ? (
+                {savedObjectId == null && showWarning ? (
                   discardTimelineButton
                 ) : (
-                  <EuiButton fill={false} onClick={toggleSaveTimeline}>
+                  <EuiButton
+                    fill={false}
+                    onClick={toggleSaveTimeline}
+                    isDisabled={isSaving}
+                    data-test-subj="close-button"
+                  >
                     {i18n.CLOSE_MODAL}
                   </EuiButton>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false} component="span">
                 <EuiButton
-                  isDisabled={title.trim().length === 0}
+                  isDisabled={title.trim().length === 0 || isSaving}
                   fill={true}
                   onClick={handleClick}
                   data-test-subj="save-button"

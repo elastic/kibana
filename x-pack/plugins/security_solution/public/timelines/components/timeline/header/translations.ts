@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
 export const CALL_OUT_UNAUTHORIZED_MSG = i18n.translate(
   'xpack.securitySolution.timeline.callOut.unauthorized.message.description',
@@ -74,3 +75,9 @@ export const CLOSE_MODAL = i18n.translate(
     defaultMessage: 'Close',
   }
 );
+
+export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineTypeLiteral) =>
+  i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.warning.title', {
+    values: { timeline: timelineType === TimelineType.template ? 'Timeline template' : 'Timeline' },
+    defaultMessage: 'You have an unsaved {timeline}, do you wish to save it?',
+  });

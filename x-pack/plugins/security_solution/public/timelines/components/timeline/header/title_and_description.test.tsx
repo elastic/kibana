@@ -101,36 +101,9 @@ describe('TimelineTitleAndDescription', () => {
       expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
     });
 
-    test('Show discardTimelineButton', () => {
+    test('Show close button', () => {
       const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="mock-discard-button"]').exists()).toEqual(true);
-    });
-
-    test('get discardTimelineButton with correct props', () => {
-      shallow(<TimelineTitleAndDescription {...props} />);
-      expect(mockGetButton).toBeCalledWith({
-        title: i18n.DISCARD_TIMELINE,
-        outline: true,
-        iconType: '',
-        fill: false,
-      });
-    });
-
-    test('get discardTimelineTemplateButton with correct props', () => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
-        description: 'xxxx',
-        isSaving: true,
-        savedObjectId: null,
-        title: 'my timeline',
-        timelineType: TimelineType.template,
-      });
-      shallow(<TimelineTitleAndDescription {...props} />);
-      expect(mockGetButton).toBeCalledWith({
-        title: i18n.DISCARD_TIMELINE_TEMPLATE,
-        outline: true,
-        iconType: '',
-        fill: false,
-      });
+      expect(component.find('[data-test-subj="close-button"]').exists()).toEqual(true);
     });
 
     test('Show saveButton', () => {
@@ -205,9 +178,79 @@ describe('TimelineTitleAndDescription', () => {
       expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
     });
 
+    test('Show saveButton', () => {
+      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('showWarning', () => {
+    const props = {
+      timelineId: 'timeline-1',
+      toggleSaveTimeline: jest.fn(),
+      onSaveTimeline: jest.fn(),
+      updateTitle: jest.fn(),
+      updateDescription: jest.fn(),
+      showWarning: true,
+    };
+
+    const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
+
+    beforeEach(() => {
+      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+        description: '',
+        isSaving: true,
+        savedObjectId: null,
+        title: 'my timeline',
+        timelineType: TimelineType.default,
+        showWarnging: true,
+      });
+      (useCreateTimelineButton as jest.Mock).mockReturnValue({
+        getButton: mockGetButton,
+      });
+    });
+
+    afterEach(() => {
+      (useShallowEqualSelector as jest.Mock).mockReset();
+      (useCreateTimelineButton as jest.Mock).mockReset();
+      mockGetButton.mockClear();
+    });
+
+    test('Show EuiCallOut', () => {
+      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      expect(component.find('[data-test-subj="save-timeline-callout"]').exists()).toEqual(true);
+    });
+
     test('Show discardTimelineButton', () => {
       const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="mock-discard-button"]').exists()).toEqual(false);
+      expect(component.find('[data-test-subj="mock-discard-button"]').exists()).toEqual(true);
+    });
+
+    test('get discardTimelineButton with correct props', () => {
+      shallow(<TimelineTitleAndDescription {...props} />);
+      expect(mockGetButton).toBeCalledWith({
+        title: i18n.DISCARD_TIMELINE,
+        outline: true,
+        iconType: '',
+        fill: false,
+      });
+    });
+
+    test('get discardTimelineTemplateButton with correct props', () => {
+      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+        description: 'xxxx',
+        isSaving: true,
+        savedObjectId: null,
+        title: 'my timeline',
+        timelineType: TimelineType.template,
+      });
+      shallow(<TimelineTitleAndDescription {...props} />);
+      expect(mockGetButton).toBeCalledWith({
+        title: i18n.DISCARD_TIMELINE_TEMPLATE,
+        outline: true,
+        iconType: '',
+        fill: false,
+      });
     });
 
     test('Show saveButton', () => {

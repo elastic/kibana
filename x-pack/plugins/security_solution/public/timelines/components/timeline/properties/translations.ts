@@ -194,3 +194,10 @@ export const UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
     defaultMessage: 'Unlock date picker to global date picker',
   }
 );
+
+export const OPTIONAL = i18n.translate(
+  'xpack.securitySolution.timeline.properties.timelineDescriptionOptional',
+  {
+    defaultMessage: 'Optional',
+  }
+);

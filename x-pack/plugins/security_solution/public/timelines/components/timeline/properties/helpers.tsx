@@ -133,6 +133,7 @@ interface DescriptionProps {
   isTextArea?: boolean;
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
+  disabled?: boolean;
   marginRight?: number;
 }
 
@@ -144,6 +145,7 @@ export const Description = React.memo<DescriptionProps>(
     isTextArea = false,
     disableAutoSave = false,
     disableTooltip = false,
+    disabled = false,
     marginRight,
   }) => {
     const onDescriptionChanged = useCallback(
@@ -152,6 +154,7 @@ export const Description = React.memo<DescriptionProps>(
       },
       [updateDescription, disableAutoSave, timelineId]
     );
+
     const inputField = useMemo(
       () =>
         isTextArea ? (
@@ -162,6 +165,7 @@ export const Description = React.memo<DescriptionProps>(
             onChange={onDescriptionChanged}
             placeholder={i18n.DESCRIPTION}
             value={description}
+            disabled={disabled}
           />
         ) : (
           <EuiFieldText
@@ -174,7 +178,7 @@ export const Description = React.memo<DescriptionProps>(
             value={description}
           />
         ),
-      [description, isTextArea, onDescriptionChanged]
+      [description, isTextArea, onDescriptionChanged, disabled]
     );
     return (
       <DescriptionContainer data-test-subj="description-container" marginRight={marginRight}>
@@ -199,6 +203,7 @@ interface NameProps {
   className?: string;
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
+  disabled?: boolean;
   timelineId: string;
   timelineType: TimelineType;
   title: string;
@@ -213,6 +218,7 @@ export const Name = React.memo<NameProps>(
     className = TIMELINE_TITLE_CLASSNAME,
     disableAutoSave = false,
     disableTooltip = false,
+    disabled = false,
     timelineId,
     timelineType,
     title,
@@ -243,6 +249,7 @@ export const Name = React.memo<NameProps>(
         <NameField
           aria-label={i18n.TIMELINE_TITLE}
           data-test-subj="timeline-title"
+          disabled={disabled}
           onChange={handleChange}
           placeholder={
             timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
@@ -254,7 +261,7 @@ export const Name = React.memo<NameProps>(
           className={className}
         />
       ),
-      [handleChange, marginRight, timelineType, title, width, className]
+      [handleChange, marginRight, timelineType, title, width, className, disabled]
     );
 
     return (

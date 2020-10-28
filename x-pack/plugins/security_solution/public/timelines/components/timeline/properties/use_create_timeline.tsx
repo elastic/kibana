@@ -98,11 +98,13 @@ export const useCreateTimelineButton = ({
       title,
       iconType = 'plusInCircle',
       fill = true,
+      isDisabled = false,
     }: {
       outline?: boolean;
       title?: string;
       iconType?: string;
       fill?: boolean;
+      isDisabled?: boolean;
     }) => {
       const buttonProps = {
         iconType,
