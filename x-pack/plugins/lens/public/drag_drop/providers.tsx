@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, MutableRefObject } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -111,10 +111,12 @@ interface ReorderState {
    * aria-live message for changes in reordering
    */
   keyboardReorderMessage: string;
+  draggedElementOriginalPosition?: DOMRect;
 }
 
 export interface ReorderContextState {
   reorderState: ReorderState;
+  currentElementPosition: React.MutableRefObject<number | null>;
   setReorderState: (reorderState: ReorderState) => void;
 }
 
@@ -125,10 +127,12 @@ export const ReorderContext = React.createContext<ReorderContextState>({
     isKeyboardReorderOn: false,
     keyboardReorderMessage: '',
   },
+  currentElementPosition: React.createRef(),
   setReorderState: () => {},
 });
 
 export function ReorderProvider({ children }: { children: React.ReactNode }) {
+  const currentElementPosition: MutableRefObject<number | null> = useRef(null);
   const [state, setState] = useState<ReorderContextState['reorderState']>({
     isKeyboardReorderOn: false,
     reorderedItems: [],
@@ -140,8 +144,25 @@ export function ReorderProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   return (
-    <>
-      <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
+    <div
+      onDragOver={() => {
+        const overlapsWithOriginalPosition =
+          state.draggedElementOriginalPosition &&
+          currentElementPosition.current &&
+          currentElementPosition.current > state.draggedElementOriginalPosition.y &&
+          currentElementPosition.current <
+            state.draggedElementOriginalPosition.y + state.draggedElementOriginalPosition.height;
+        if (overlapsWithOriginalPosition) {
+          setReorderState({
+            ...state,
+            reorderedItems: [],
+          });
+        }
+      }}
+    >
+      <ReorderContext.Provider
+        value={{ reorderState: state, setReorderState, currentElementPosition }}
+      >
         {children}
       </ReorderContext.Provider>
       <EuiScreenReaderOnly>
@@ -154,6 +175,6 @@ export function ReorderProvider({ children }: { children: React.ReactNode }) {
           })}
         </p>
       </EuiScreenReaderOnly>
-    </>
+    </div>
   );
 }
