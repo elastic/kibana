@@ -45,13 +45,11 @@ export function UserPercentile() {
     {
       value: '50',
       text: I18LABELS.percentile50thMedian,
-      dropdownDisplay: I18LABELS.percentile50thMedian,
       'data-test-subj': 'p50Percentile',
     },
     {
       value: '75',
       text: I18LABELS.percentile75th,
-      dropdownDisplay: I18LABELS.percentile75th,
       'data-test-subj': 'p75Percentile',
     },
     {
