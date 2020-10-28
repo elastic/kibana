@@ -36,6 +36,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       expect(response.body.page).to.equal(1);
       expect(response.body.perPage).to.be.greaterThan(0);
       expect(response.body.total).to.be.greaterThan(0);
+      expect(response.body.aggregations).to.be(undefined);
       const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
       expect(match).to.eql({
         id: createdAlert.id,
@@ -60,6 +61,28 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       });
       expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
+    });
+
+    it('should handle find alert request with get_aggregations appropriately', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+
+      const response = await supertest.get(
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId&get_aggregations=true`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.page).to.equal(1);
+      expect(response.body.perPage).to.be.greaterThan(0);
+      expect(response.body.total).to.be.greaterThan(0);
+      expect(response.body.aggregations).not.to.be(undefined);
+      expect(response.body.aggregations.alertExecutionStatus).not.to.be(undefined);
     });
 
     it(`shouldn't find alert from another space`, async () => {
