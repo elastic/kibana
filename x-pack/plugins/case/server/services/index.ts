@@ -96,7 +96,7 @@ interface PatchComments extends ClientArgs {
 
 interface GetUserArgs {
   request: KibanaRequest;
-  response: KibanaResponseFactory;
+  response?: KibanaResponseFactory;
 }
 
 interface CaseServiceDeps {

@@ -127,6 +127,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         expect(EventName).to.equal(linkText);
         expect(EventName).to.equal(expectedData[i]);
       }
+      await testSubjects.click('full-screen');
     },
     /**
      * Navigate to Events Panel
@@ -146,7 +147,6 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
       await queryBar.submitQuery();
       await testSubjects.click('full-screen');
       await testSubjects.click('investigate-in-resolver-button');
-      await testSubjects.click('full-screen');
     },
   };
 }

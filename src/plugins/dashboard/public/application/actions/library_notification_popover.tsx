@@ -72,7 +72,7 @@ export function LibraryNotificationPopover({
           <p>
             {i18n.translate('dashboard.panel.libraryNotification.toolTip', {
               defaultMessage:
-                'This panel is linked to a library item. Editing the panel might affect other dashboards.',
+                'Editing this panel might affect other dashboards. To change to this panel only, unlink it from the library.',
             })}
           </p>
         </EuiText>

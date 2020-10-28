@@ -171,7 +171,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle"
+            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle"
             defaultMessage="Error loading package information"
           />
         }
@@ -186,7 +186,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle"
+            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle"
             defaultMessage="Error loading agent policies"
           />
         }
@@ -219,7 +219,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
                     defaultMessage="Agent policy"
                   />
                 </EuiFlexItem>
@@ -230,7 +230,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                       onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.createPackagePolicy.StepSelectPolicy.addButton"
+                        id="xpack.fleet.createPackagePolicy.StepSelectPolicy.addButton"
                         defaultMessage="Create agent policy"
                       />
                     </EuiLink>
@@ -241,7 +241,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
             helpText={
               isFleetReady && selectedPolicyId ? (
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
+                  id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
                   defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent policy."
                   values={{
                     count: agentPoliciesById[selectedPolicyId].agents || 0,
@@ -252,7 +252,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
           >
             <EuiComboBox
               placeholder={i18n.translate(
-                'xpack.ingestManager.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText',
+                'xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText',
                 {
                   defaultMessage: 'Select an agent policy to add this integration to',
                 }
@@ -277,7 +277,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                       <EuiFlexItem grow={2} className="eui-textRight">
                         <EuiTextColor color="subdued">
                           <FormattedMessage
-                            id="xpack.ingestManager.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsCountText"
+                            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsCountText"
                             defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
                             values={{
                               count: agentPoliciesById[option.value!].agents || 0,
@@ -309,7 +309,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
             <Error
               title={
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackagePolicy.StepSelectPolicy.errorLoadingSelectedAgentPolicyTitle"
+                  id="xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingSelectedAgentPolicyTitle"
                   defaultMessage="Error loading selected agent policy"
                 />
               }
