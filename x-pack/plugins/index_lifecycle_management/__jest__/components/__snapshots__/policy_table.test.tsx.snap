@@ -55,7 +55,7 @@ exports[`policy table should show empty state when there are not any policies 1`
     <div
       class="euiEmptyPrompt"
     >
-      <div
+      <span
         color="subdued"
         data-euiicon-type="managementApp"
       />
@@ -95,7 +95,7 @@ exports[`policy table should show empty state when there are not any policies 1`
         <span
           class="euiButtonContent euiButton__content"
         >
-          <div
+          <span
             class="euiButtonContent__icon"
             data-euiicon-type="plusInCircle"
           />

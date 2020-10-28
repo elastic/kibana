@@ -20,7 +20,7 @@ import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
-import { OperationSupportMatrix } from './dimension_panel';
+import { OperationSupportMatrix } from './operation_support';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';

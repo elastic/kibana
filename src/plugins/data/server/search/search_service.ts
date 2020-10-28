@@ -29,7 +29,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, tap } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import {
   ISearchSetup,
   ISearchStart,
@@ -69,6 +69,7 @@ import { ConfigSchema } from '../../config';
 import { BackgroundSessionService, ISearchSessionClient } from './session';
 import { registerSessionRoutes } from './routes/session';
 import { backgroundSessionMapping } from '../saved_objects';
+import { tapFirst } from '../lib/tap_once';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -237,16 +238,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    deps: SearchStrategyDependencies,
     searchRequest: SearchStrategyRequest,
-    options?: ISearchOptions
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
   ) => {
     const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options?.strategy
+      options.strategy
     );
 
     let isFirstResponse = true;
-    return strategy.search(deps, searchRequest, options).pipe(
+    return strategy.search(searchRequest, options, deps).pipe(
       tap((response) => {
         if (isFirstResponse) {
           isFirstResponse = false;
@@ -261,10 +262,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
   };
 
-  private cancel = (deps: SearchStrategyDependencies, id: string, options?: ISearchOptions) => {
-    const strategy = this.getSearchStrategy(options?.strategy);
+  private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
+    const strategy = this.getSearchStrategy(options.strategy);
 
-    return strategy.cancel ? strategy.cancel(deps, id) : Promise.resolve();
+    return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
   };
 
   private getSearchStrategy = <
@@ -292,8 +293,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
       };
       return {
-        search: (searchRequest, options) => this.search(deps, searchRequest, options),
-        cancel: (id, options) => this.cancel(deps, id, options),
+        search: (searchRequest, options = {}) => this.search(searchRequest, options, deps),
+        cancel: (id, options = {}) => this.cancel(id, options, deps),
       };
     };
   };

@@ -59,7 +59,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*' };
 
     await esSearchStrategyProvider(mockConfig$, mockLogger)
-      .search(mockDeps, { params }, {})
+      .search({ params }, {}, mockDeps)
       .subscribe(() => {
         expect(mockApiCaller).toBeCalled();
         expect(mockApiCaller.mock.calls[0][0]).toEqual({
@@ -75,7 +75,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
     await esSearchStrategyProvider(mockConfig$, mockLogger)
-      .search(mockDeps, { params }, {})
+      .search({ params }, {}, mockDeps)
       .subscribe(() => {
         expect(mockApiCaller).toBeCalled();
         expect(mockApiCaller.mock.calls[0][0]).toEqual({
@@ -89,11 +89,11 @@ describe('ES search strategy', () => {
   it('has all response parameters', async (done) =>
     await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search(
-        mockDeps,
         {
           params: { index: 'logstash-*' },
         },
-        {}
+        {},
+        mockDeps
       )
       .subscribe((data) => {
         expect(data.isRunning).toBe(false);

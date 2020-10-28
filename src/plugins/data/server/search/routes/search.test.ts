@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { from } from 'rxjs';
-
 import { CoreSetup, RequestHandlerContext } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { registerSearchRoute } from './search';

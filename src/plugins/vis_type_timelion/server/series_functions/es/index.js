@@ -130,16 +130,10 @@ export default new Datasource('es', {
 
     const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
 
-    const deps = (await tlConfig.getStartServices())[1];
-
-    const resp = await deps.data.search
-      .search(
-        body,
-        {
-          strategy: ES_SEARCH_STRATEGY,
-        },
-        tlConfig.context
-      )
+    const resp = await tlConfig.context.search
+      .search(body, {
+        strategy: ES_SEARCH_STRATEGY,
+      })
       .toPromise();
 
     if (!resp.rawResponse._shards.total) {

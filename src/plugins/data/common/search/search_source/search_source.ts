@@ -71,6 +71,7 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
+import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -311,8 +312,8 @@ export class SearchSource {
     });
 
     return search({ params, indexType: searchRequest.indexType }, options)
-      .toPromise()
-      .then(({ rawResponse }) => onResponse(searchRequest, rawResponse));
+      .pipe(map(({ rawResponse }) => onResponse(searchRequest, rawResponse)))
+      .toPromise();
   }
 
   /**

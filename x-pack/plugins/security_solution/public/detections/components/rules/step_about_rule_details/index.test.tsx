@@ -154,7 +154,9 @@ describe('StepAboutRuleToggleDetails', () => {
         .simulate('change', { target: { value: 'notes' } });
 
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeTruthy();
-      expect(wrapper.find('Markdown h1').text()).toEqual('this is some markdown documentation');
+      expect(wrapper.find('.euiMarkdownFormat').text()).toEqual(
+        'this is some markdown documentation'
+      );
     });
   });
 });

@@ -80,7 +80,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', body: { query: {} } };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search(mockDeps, { params }, {}).toPromise();
+    await esSearch.search({ params }, {}, mockDeps).toPromise();
 
     expect(mockSubmitCaller).toBeCalled();
     const request = mockSubmitCaller.mock.calls[0][0];
@@ -94,7 +94,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', body: { query: {} } };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search(mockDeps, { id: 'foo', params }, {}).toPromise();
+    await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
     expect(mockGetCaller).toBeCalled();
     const request = mockGetCaller.mock.calls[0][0];
@@ -111,12 +111,12 @@ describe('ES search strategy', () => {
 
     await esSearch
       .search(
-        mockDeps,
         {
           indexType: 'rollup',
           params,
         },
-        {}
+        {},
+        mockDeps
       )
       .toPromise();
 
@@ -132,7 +132,7 @@ describe('ES search strategy', () => {
     const params = { index: 'foo-*', body: {} };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search(mockDeps, { params }, {}).toPromise();
+    await esSearch.search({ params }, {}, mockDeps).toPromise();
 
     expect(mockSubmitCaller).toBeCalled();
     const request = mockSubmitCaller.mock.calls[0][0];

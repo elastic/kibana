@@ -50,6 +50,13 @@ interface Props {
   serviceName?: string;
 }
 
+function formatValue(value?: number) {
+  if (typeof value === 'undefined') {
+    return undefined;
+  }
+  return formatToSec(value, 'ms');
+}
+
 export function CoreVitals({ data, loading, displayServiceName, serviceName }: Props) {
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
 
@@ -63,7 +70,7 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={LCP_LABEL}
-            value={formatToSec(lcp, 'ms')}
+            value={formatValue(lcp)}
             ranks={lcpRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
@@ -73,7 +80,7 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={FID_LABEL}
-            value={formatToSec(fid, 'ms')}
+            value={formatValue(fid)}
             ranks={fidRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.FID}
@@ -83,7 +90,7 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={CLS_LABEL}
-            value={cls ?? '0'}
+            value={cls}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}

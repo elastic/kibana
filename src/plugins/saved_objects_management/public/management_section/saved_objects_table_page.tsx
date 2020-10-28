@@ -77,7 +77,9 @@ const SavedObjectsTablePage = ({
       goInspectObject={(savedObject) => {
         const { editUrl } = savedObject.meta;
         if (editUrl) {
-          return coreStart.application.navigateToUrl('/app' + editUrl);
+          return coreStart.application.navigateToUrl(
+            coreStart.http.basePath.prepend(`/app${editUrl}`)
+          );
         }
       }}
       canGoInApp={(savedObject) => {

@@ -21,55 +21,59 @@ export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   return {
-    cancel: async ({ esClient }, id) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
       await esClient.asCurrentUser.eql.delete({
         id,
       });
     },
-    search: ({ esClient, uiSettingsClient }, request, options) =>
+    search: (request, options, { esClient, uiSettingsClient }) =>
       from(
-        new Promise<EqlSearchStrategyResponse>(async (resolve) => {
+        new Promise<EqlSearchStrategyResponse>(async (resolve, reject) => {
           logger.debug(`_eql/search ${JSON.stringify(request.params) || request.id}`);
           let promise: TransportRequestPromise<ApiResponse>;
           const eqlClient = esClient.asCurrentUser.eql;
           const asyncOptions = getAsyncOptions();
           const searchOptions = toSnakeCase({ ...request.options });
 
-          if (request.id) {
-            promise = eqlClient.get(
-              {
-                id: request.id,
-                ...toSnakeCase(asyncOptions),
-              },
-              searchOptions
-            );
-          } else {
-            const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
-              uiSettingsClient
-            );
-            const searchParams = toSnakeCase({
-              ignoreThrottled,
-              ignoreUnavailable,
-              ...asyncOptions,
-              ...request.params,
+          try {
+            if (request.id) {
+              promise = eqlClient.get(
+                {
+                  id: request.id,
+                  ...toSnakeCase(asyncOptions),
+                },
+                searchOptions
+              );
+            } else {
+              const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
+                uiSettingsClient
+              );
+              const searchParams = toSnakeCase({
+                ignoreThrottled,
+                ignoreUnavailable,
+                ...asyncOptions,
+                ...request.params,
+              });
+
+              promise = eqlClient.search(
+                searchParams as EqlSearchStrategyRequest['params'],
+                searchOptions
+              );
+            }
+
+            const rawResponse = await shimAbortSignal(promise, options.abortSignal);
+            const { id, is_partial: isPartial, is_running: isRunning } = rawResponse.body;
+
+            resolve({
+              id,
+              isPartial,
+              isRunning,
+              rawResponse,
             });
-
-            promise = eqlClient.search(
-              searchParams as EqlSearchStrategyRequest['params'],
-              searchOptions
-            );
+          } catch (e) {
+            reject(e);
           }
-
-          const rawResponse = await shimAbortSignal(promise, options?.abortSignal);
-          const { id, is_partial: isPartial, is_running: isRunning } = rawResponse.body;
-
-          resolve({
-            id,
-            isPartial,
-            isRunning,
-            rawResponse,
-          });
         })
       ),
   };

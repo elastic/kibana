@@ -12,8 +12,9 @@ import {
   LensByValueInput,
   LensByReferenceInput,
 } from './editor_frame_service/embeddable/embeddable';
-import { SavedObjectIndexStore, DOC_TYPE } from './persistence';
+import { SavedObjectIndexStore } from './persistence';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { DOC_TYPE } from '../common';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,
