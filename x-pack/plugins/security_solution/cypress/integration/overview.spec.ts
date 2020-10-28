@@ -17,7 +17,6 @@ describe('Overview Page', () => {
     cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
     cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
     loginAndWaitForPage(OVERVIEW_URL);
-    cy.reload();
   });
 
   it('Host stats render with correct values', () => {
