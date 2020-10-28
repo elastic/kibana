@@ -458,8 +458,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       try {
         const { body } = await client.asInternalUser.ml.stopDataFrameAnalytics({
           id: request.params.analyticsId,
-          // @ts-expect-error TODO: update types
-          force: request.url.searchParams.get('force'),
+          force: request.query.force,
         });
         return response.ok({
           body,
