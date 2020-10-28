@@ -407,6 +407,10 @@ export interface LayerConfig {
   splitAccessor?: string;
 }
 
+export interface ValidLayer extends LayerConfig {
+  xAccessor: NonNullable<LayerConfig['xAccessor']>;
+}
+
 export type LayerArgs = LayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';

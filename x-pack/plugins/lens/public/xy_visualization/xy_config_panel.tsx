@@ -27,8 +27,20 @@ import {
   VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
-import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
+import {
+  State,
+  SeriesType,
+  visualizationTypes,
+  YAxisMode,
+  AxesSettingsConfig,
+  ValidLayer,
+} from './types';
+import {
+  isHorizontalChart,
+  isHorizontalSeries,
+  getSeriesColor,
+  hasHistogramSeries,
+} from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
 import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
@@ -151,18 +163,19 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 }
 
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const { state, setState } = props;
+  const { state, setState, frame } = props;
 
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
-  const IsBarNotStacked = state?.layers.some(({ seriesType }) =>
+  const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
     ['bar', 'bar_horizontal'].includes(seriesType)
   );
 
-  // TODO: Check for histograms to enable/disable value labels visibility
-  const isHistogramSeries = IsBarNotStacked && false;
+  const isHistogramSeries = Boolean(
+    hasHistogramSeries(state?.layers as ValidLayer[], frame.datasourceLayers)
+  );
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
@@ -233,9 +246,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       : 'show';
 
   const valueLabelsVisibilityMode = state?.valueLabels?.mode || 'hide';
-  const tooltipContentValueLabels = !IsBarNotStacked
-    ? valueTooltipContentDisabled.stacked
-    : valueTooltipContentDisabled.histogram;
+  const tooltipContentValueLabels = isHistogramSeries
+    ? valueTooltipContentDisabled.histogram
+    : valueTooltipContentDisabled.stacked;
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
@@ -243,13 +256,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
             tooltipContent={tooltipContentValueLabels}
-            condition={!hasNonBarSeries && !IsBarNotStacked && !isHistogramSeries}
+            condition={!hasNonBarSeries && (!hasBarNotStacked || isHistogramSeries)}
           >
             <ToolbarPopover
               title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
                 defaultMessage: 'Values',
               })}
-              isDisabled={!hasNonBarSeries && !IsBarNotStacked}
+              isDisabled={!hasNonBarSeries && (!hasBarNotStacked || isHistogramSeries)}
               type="values"
               groupPosition="left"
               buttonDataTestSubj="lnsMissingValuesButton"
@@ -287,7 +300,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               >
                 <EuiSuperSelect
                   data-test-subj="lnsMissingValuesSelect"
-                  disabled={!hasNonBarSeries && IsBarNotStacked}
+                  disabled={!hasNonBarSeries && hasBarNotStacked}
                   compressed
                   options={fittingFunctionDefinitions.map(({ id, title, description }) => {
                     return {

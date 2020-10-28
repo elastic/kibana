@@ -6,12 +6,8 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
-import { State, LayerConfig } from './types';
+import { State, ValidLayer } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
-
-interface ValidLayer extends LayerConfig {
-  xAccessor: NonNullable<LayerConfig['xAccessor']>;
-}
 
 export const toExpression = (
   state: State,
