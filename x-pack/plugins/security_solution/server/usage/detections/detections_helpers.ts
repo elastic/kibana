@@ -175,7 +175,7 @@ export const getMlJobsUsage = async (
 
   if (ml) {
     try {
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = { headers: {} } as KibanaRequest;
 
       const modules = await ml.modulesProvider(fakeRequest, savedObjectClient).listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);

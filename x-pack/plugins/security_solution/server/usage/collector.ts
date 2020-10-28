@@ -85,7 +85,7 @@ export const registerCollector: RegisterCollector = ({
           kibanaIndex,
           callCluster,
           ml,
-          (savedObjectsClient as never) as SavedObjectsClientContract
+          (savedObjectsClient as unknown) as SavedObjectsClientContract
         ),
         getEndpointTelemetryFromFleet(savedObjectsClient),
       ]);
