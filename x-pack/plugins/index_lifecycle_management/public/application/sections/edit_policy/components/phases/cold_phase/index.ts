@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { attemptToURIDecode } from './attempt_to_uri_decode';
+export { ColdPhase } from './cold_phase';

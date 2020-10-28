@@ -33,7 +33,7 @@ const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo((
   return hasIngestManager && noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
     <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
       <FormattedMessage
-        id="xpack.ingestManager.homeIntegration.tutorialDirectory.fleetAppButtonText"
+        id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
         defaultMessage="Try Fleet Beta"
       />
     </EuiButtonEmpty>
