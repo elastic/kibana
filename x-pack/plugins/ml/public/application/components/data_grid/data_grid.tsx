@@ -118,7 +118,10 @@ export const DataGrid: FC<Props> = memo(
               if (!row) return <div />;
               // if resultsField for some reason is not available then use ml
               const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
-              const parsedFIArray = row[mlResultsField].feature_importance;
+
+              const parsedFIArray = row[mlResultsField]?.feature_importance;
+              if (!parsedFIArray) return <div />;
+
               let predictedValue: string | number | undefined;
               let predictedProbability: number | undefined;
               let topClasses: TopClasses = [];
