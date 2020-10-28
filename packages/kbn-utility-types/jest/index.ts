@@ -16,27 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export type DeeplyMockedKeys<T> = {
+  [P in keyof T]: T[P] extends (...args: any[]) => any
+    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
+    : DeeplyMockedKeys<T[P]>;
+} &
+  T;
 
-import { REPO_ROOT } from '@kbn/dev-utils';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { CoreContext } from './core_context';
-import { Env, IConfigService } from './config';
-import { configServiceMock, getEnvOptions } from './config/mocks';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { ILoggingSystem } from './logging';
-
-function create({
-  env = Env.createDefault(REPO_ROOT, getEnvOptions()),
-  logger = loggingSystemMock.create(),
-  configService = configServiceMock.create(),
-}: {
-  env?: Env;
-  logger?: jest.Mocked<ILoggingSystem>;
-  configService?: jest.Mocked<IConfigService>;
-} = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
-}
-
-export const mockCoreContext = {
-  create,
-};
+export type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
