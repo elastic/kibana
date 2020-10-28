@@ -19,21 +19,16 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initShareToSpacesApi } from './share_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
-import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
-import { SecurityPluginSetup } from '../../../../../security/server';
 
 describe('share to space', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
-  const setup = async ({
-    authorization = null,
-  }: { authorization?: SecurityPluginSetup['authz'] | null } = {}) => {
+  const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
@@ -43,26 +38,13 @@ describe('share to space', () => {
     coreStart.savedObjects = savedObjects;
 
     const service = new SpacesService(log);
-    const spacesService = await service.setup({
+    const spacesService = service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}, {}],
-      authorization,
-      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
-    spacesService.scopedClient = jest.fn((req: any) => {
-      return Promise.resolve(
-        new SpacesClient(
-          null as any,
-          () => null,
-          null,
-          savedObjectsRepositoryMock,
-          spacesConfig,
-          savedObjectsRepositoryMock,
-          req
-        )
-      );
+    spacesService.scopedClient = jest.fn(() => {
+      return new SpacesClient(() => null, spacesConfig, savedObjectsRepositoryMock);
     });
 
     initShareToSpacesApi({
@@ -71,15 +53,12 @@ describe('share to space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
-      authorization,
     });
 
     const [
       [shareAdd, ctsRouteHandler],
       [shareRemove, resolveRouteHandler],
     ] = router.post.mock.calls;
-
-    const [[, permissionsRouteHandler]] = router.get.mock.calls;
 
     return {
       coreStart,
@@ -92,75 +71,9 @@ describe('share to space', () => {
         routeValidation: shareRemove.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: resolveRouteHandler,
       },
-      sharePermissions: {
-        routeHandler: permissionsRouteHandler,
-      },
       savedObjectsRepositoryMock,
     };
   };
-
-  describe('GET /internal/spaces/_share_saved_object_permissions', () => {
-    it('returns true when security is not enabled', async () => {
-      const { sharePermissions } = await setup();
-
-      const request = httpServerMock.createKibanaRequest({ query: { type: 'foo' }, method: 'get' });
-      const response = await sharePermissions.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status, payload } = response;
-      expect(status).toEqual(200);
-      expect(payload).toEqual({ shareToAllSpaces: true });
-    });
-
-    it('returns false when the user is not authorized globally', async () => {
-      const authorization = securityMock.createSetup().authz;
-      const globalPrivilegesCheck = jest.fn().mockResolvedValue({ hasAllRequested: false });
-      authorization.checkPrivilegesWithRequest.mockReturnValue({
-        globally: globalPrivilegesCheck,
-      });
-      const { sharePermissions } = await setup({ authorization });
-
-      const request = httpServerMock.createKibanaRequest({ query: { type: 'foo' }, method: 'get' });
-      const response = await sharePermissions.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status, payload } = response;
-      expect(status).toEqual(200);
-      expect(payload).toEqual({ shareToAllSpaces: false });
-
-      expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalledTimes(1);
-      expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-    });
-
-    it('returns true when the user is authorized globally', async () => {
-      const authorization = securityMock.createSetup().authz;
-      const globalPrivilegesCheck = jest.fn().mockResolvedValue({ hasAllRequested: true });
-      authorization.checkPrivilegesWithRequest.mockReturnValue({
-        globally: globalPrivilegesCheck,
-      });
-      const { sharePermissions } = await setup({ authorization });
-
-      const request = httpServerMock.createKibanaRequest({ query: { type: 'foo' }, method: 'get' });
-      const response = await sharePermissions.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status, payload } = response;
-      expect(status).toEqual(200);
-      expect(payload).toEqual({ shareToAllSpaces: true });
-
-      expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalledTimes(1);
-      expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-    });
-  });
 
   describe('POST /api/spaces/_share_saved_object_add', () => {
     const object = { id: 'foo', type: 'bar' };

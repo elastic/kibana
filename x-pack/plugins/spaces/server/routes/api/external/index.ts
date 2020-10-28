@@ -5,7 +5,6 @@
  */
 
 import { Logger, IRouter, CoreSetup } from 'src/core/server';
-import { SecurityPluginSetup } from '../../../../../security/server';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
@@ -21,7 +20,6 @@ export interface ExternalRouteDeps {
   getImportExportObjectLimit: () => number;
   spacesService: SpacesServiceSetup;
   log: Logger;
-  authorization: SecurityPluginSetup['authz'] | null;
 }
 
 export function initExternalSpacesApi(deps: ExternalRouteDeps) {

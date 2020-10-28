@@ -24,6 +24,10 @@ describe('Spaces Plugin', () => {
       expect(spacesSetup).toMatchInlineSnapshot(`
         Object {
           "spacesService": Object {
+            "clientService": Object {
+              "registerClientWrapper": [Function],
+              "setRepositoryFactory": [Function],
+            },
             "getActiveSpace": [Function],
             "getBasePath": [Function],
             "getSpaceId": [Function],

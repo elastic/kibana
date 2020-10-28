@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesClient } from './spaces_client';
+export { SpacesClient, ISpacesClient } from './spaces_client';
+export {
+  SpacesClientService,
+  SpacesClientServiceSetup,
+  SpacesClientServiceStart,
+} from './spaces_client_service';

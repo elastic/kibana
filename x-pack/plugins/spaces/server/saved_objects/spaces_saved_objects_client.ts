@@ -24,7 +24,7 @@ import {
 import { ALL_SPACES_ID } from '../../common/constants';
 import { SpacesServiceSetup } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import { SpacesClient } from '../lib/spaces_client';
+import { ISpacesClient } from '../lib/spaces_client';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
@@ -51,14 +51,14 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
   private readonly types: string[];
-  private readonly getSpacesClient: Promise<SpacesClient>;
+  private readonly spacesClient: ISpacesClient;
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, spacesService, typeRegistry } = options;
 
     this.client = baseClient;
-    this.getSpacesClient = spacesService.scopedClient(request);
+    this.spacesClient = spacesService.scopedClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
     this.errors = baseClient.errors;
@@ -167,10 +167,8 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     let namespaces = options.namespaces;
     if (namespaces) {
-      const spacesClient = await this.getSpacesClient;
-
       try {
-        const availableSpaces = await spacesClient.getAll({ purpose: 'findSavedObjects' });
+        const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
         if (namespaces.includes(ALL_SPACES_ID)) {
           namespaces = availableSpaces.map((space) => space.id);
         } else {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SpacesAuditLogger } from './audit_logger';
+import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const createMockAuditLogger = () => {
   return {
@@ -14,7 +14,7 @@ const createMockAuditLogger = () => {
 describe(`#savedObjectsAuthorizationFailure`, () => {
   test('logs auth failure with spaceIds via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SpacesAuditLogger(auditLogger);
+    const securityAuditLogger = new LegacySpacesAuditLogger(auditLogger);
     const username = 'foo-user';
     const action = 'foo-action';
     const spaceIds = ['foo-space-1', 'foo-space-2'];
@@ -34,7 +34,7 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
 
   test('logs auth failure without spaceIds via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SpacesAuditLogger(auditLogger);
+    const securityAuditLogger = new LegacySpacesAuditLogger(auditLogger);
     const username = 'foo-user';
     const action = 'foo-action';
 
@@ -54,7 +54,7 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
 describe(`#savedObjectsAuthorizationSuccess`, () => {
   test('logs auth success with spaceIds via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SpacesAuditLogger(auditLogger);
+    const securityAuditLogger = new LegacySpacesAuditLogger(auditLogger);
     const username = 'foo-user';
     const action = 'foo-action';
     const spaceIds = ['foo-space-1', 'foo-space-2'];
@@ -74,7 +74,7 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
 
   test('logs auth success without spaceIds via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SpacesAuditLogger(auditLogger);
+    const securityAuditLogger = new LegacySpacesAuditLogger(auditLogger);
     const username = 'foo-user';
     const action = 'foo-action';
 

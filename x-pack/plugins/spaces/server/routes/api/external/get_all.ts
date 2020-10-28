@@ -39,7 +39,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
 
       const { purpose, include_authorized_purposes: includeAuthorizedPurposes } = request.query;
 
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = spacesService.scopedClient(request);
 
       let spaces: Space[];
 

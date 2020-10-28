@@ -12,3 +12,5 @@ function createSetupMock() {
 export const spacesMock = {
   createSetup: createSetupMock,
 };
+
+export { spacesClientMock } from './lib/spaces_client/spaces_client.mock';

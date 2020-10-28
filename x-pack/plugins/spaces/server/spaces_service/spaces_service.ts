@@ -4,57 +4,63 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, take } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import { Legacy } from 'kibana';
-import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
-import { SecurityPluginSetup } from '../../../security/server';
-import { SpacesClient } from '../lib/spaces_client';
+import { Logger, KibanaRequest, CoreSetup, CoreStart } from '../../../../../src/core/server';
+import {
+  ISpacesClient,
+  SpacesClientService,
+  SpacesClientServiceSetup,
+  SpacesClientServiceStart,
+} from '../lib/spaces_client';
 import { ConfigType } from '../config';
 import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
-import { Space } from '../../common/model/space';
-import { SpacesAuditLogger } from '../lib/audit_logger';
+import { Space } from '..';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
 export interface SpacesServiceSetup {
-  scopedClient(request: RequestFacade): Promise<SpacesClient>;
+  scopedClient(request: RequestFacade): ISpacesClient;
 
   getSpaceId(request: RequestFacade): string;
 
-  getBasePath(spaceId: string): string;
-
   isInDefaultSpace(request: RequestFacade): boolean;
+
+  getActiveSpace(request: RequestFacade): Promise<Space>;
+
+  getBasePath(spaceId: string): string;
 
   spaceIdToNamespace(spaceId: string): string | undefined;
 
   namespaceToSpaceId(namespace: string | undefined): string;
 
-  getActiveSpace(request: RequestFacade): Promise<Space>;
+  clientService: SpacesClientServiceSetup;
 }
+
+export type SpacesServiceStart = SpacesClientServiceStart;
 
 interface SpacesServiceDeps {
   http: CoreSetup['http'];
-  getStartServices: CoreSetup['getStartServices'];
-  authorization: SecurityPluginSetup['authz'] | null;
   config$: Observable<ConfigType>;
-  auditLogger: SpacesAuditLogger;
 }
 
 export class SpacesService {
   private configSubscription$?: Subscription;
 
+  private spacesClientService?: SpacesClientService;
+
+  private spacesClientServiceStart?: ReturnType<SpacesClientService['start']>;
+
   constructor(private readonly log: Logger) {}
 
-  public async setup({
-    http,
-    getStartServices,
-    authorization,
-    config$,
-    auditLogger,
-  }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
+  public setup({ http, config$ }: SpacesServiceDeps): SpacesServiceSetup {
+    this.spacesClientService = new SpacesClientService(
+      (message: string) => this.log.debug(message),
+      config$
+    );
+
     const getSpaceId = (request: RequestFacade) => {
       // Currently utilized by reporting
       const isFakeRequest = typeof (request as any).getBasePath === 'function';
@@ -68,41 +74,22 @@ export class SpacesService {
       return spaceId;
     };
 
-    const internalRepositoryPromise = getStartServices().then(([coreStart]) =>
-      coreStart.savedObjects.createInternalRepository(['space'])
-    );
-
-    const getScopedClient = async (request: KibanaRequest) => {
-      const [coreStart] = await getStartServices();
-      const internalRepository = await internalRepositoryPromise;
-
-      return config$
-        .pipe(
-          take(1),
-          map((config) => {
-            const callWithRequestRepository = coreStart.savedObjects.createScopedRepository(
-              request,
-              ['space']
-            );
-
-            return new SpacesClient(
-              auditLogger,
-              (message: string) => {
-                this.log.debug(message);
-              },
-              authorization,
-              callWithRequestRepository,
-              config,
-              internalRepository,
-              request
-            );
-          })
-        )
-        .toPromise();
+    const getScopedClient = (request: RequestFacade) => {
+      if (!this.spacesClientServiceStart) {
+        throw new Error('Spaces Service has not been started yet!');
+      }
+      return this.spacesClientServiceStart?.createSpacesClient(
+        request instanceof KibanaRequest ? request : KibanaRequest.from(request)
+      );
     };
 
     return {
+      scopedClient: getScopedClient,
       getSpaceId,
+      getActiveSpace: (request: RequestFacade) => {
+        const spaceId = getSpaceId(request);
+        return getScopedClient(request).get(spaceId);
+      },
       getBasePath: (spaceId: string) => {
         if (!spaceId) {
           throw new TypeError(`spaceId is required to retrieve base path`);
@@ -116,14 +103,16 @@ export class SpacesService {
       },
       spaceIdToNamespace,
       namespaceToSpaceId,
-      scopedClient: getScopedClient,
-      getActiveSpace: async (request: RequestFacade) => {
-        const spaceId = getSpaceId(request);
-        const spacesClient = await getScopedClient(
-          request instanceof KibanaRequest ? request : KibanaRequest.from(request)
-        );
-        return spacesClient.get(spaceId);
-      },
+      clientService: this.spacesClientService!.setup(),
+    };
+  }
+
+  public start(coreStart: CoreStart) {
+    this.spacesClientServiceStart = this.spacesClientService!.start(coreStart);
+
+    return {
+      createSpacesClient: (request: KibanaRequest) =>
+        this.spacesClientServiceStart!.createSpacesClient(request),
     };
   }
 

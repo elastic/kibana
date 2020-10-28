@@ -22,7 +22,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = spacesService.scopedClient(request);
 
       const space = request.body;
 

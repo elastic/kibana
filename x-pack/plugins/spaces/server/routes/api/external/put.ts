@@ -26,7 +26,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = spacesService.scopedClient(request);
 
       const space = request.body;
       const id = request.params.id;

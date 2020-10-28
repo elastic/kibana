@@ -43,7 +43,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot) {
       try {
-        const spacesClient = await spacesService.scopedClient(request);
+        const spacesClient = spacesService.scopedClient(request);
         const spaces = await spacesClient.getAll();
 
         if (spaces.length === 1) {
@@ -76,7 +76,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
       try {
         log.debug(`Verifying access to space "${spaceId}"`);
 
-        const spacesClient = await spacesService.scopedClient(request);
+        const spacesClient = spacesService.scopedClient(request);
         space = await spacesClient.get(spaceId);
       } catch (error) {
         const wrappedError = wrapError(error);

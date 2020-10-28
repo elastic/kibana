@@ -116,7 +116,7 @@ describe('SpacesManager', () => {
       const result = await spacesManager.getShareSavedObjectPermissions('foo');
       expect(coreStart.http.get).toHaveBeenCalledTimes(2);
       expect(coreStart.http.get).toHaveBeenLastCalledWith(
-        '/internal/spaces/_share_saved_object_permissions',
+        '/internal/security/_share_saved_object_permissions',
         {
           query: { type: 'foo' },
         }

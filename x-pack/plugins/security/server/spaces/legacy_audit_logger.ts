@@ -4,14 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAuditLogger } from '../../../security/server';
+import { LegacyAuditLogger } from '../audit';
 
-export class SpacesAuditLogger {
+/**
+ * @deprecated will be removed in 8.0
+ */
+export class LegacySpacesAuditLogger {
   private readonly auditLogger: LegacyAuditLogger;
 
+  /**
+   * @deprecated will be removed in 8.0
+   */
   constructor(auditLogger: LegacyAuditLogger = { log() {} }) {
     this.auditLogger = auditLogger;
   }
+
+  /**
+   * @deprecated will be removed in 8.0
+   */
   public spacesAuthorizationFailure(username: string, action: string, spaceIds?: string[]) {
     this.auditLogger.log(
       'spaces_authorization_failure',
@@ -24,6 +34,9 @@ export class SpacesAuditLogger {
     );
   }
 
+  /**
+   * @deprecated will be removed in 8.0
+   */
   public spacesAuthorizationSuccess(username: string, action: string, spaceIds?: string[]) {
     this.auditLogger.log(
       'spaces_authorization_success',

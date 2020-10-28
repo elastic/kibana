@@ -22,12 +22,10 @@ import {
 } from '../../../../../../src/core/server/mocks';
 import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
 import { SpacesService } from '../../spaces_service';
-import { SpacesAuditLogger } from '../audit_logger';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { KibanaFeature } from '../../../../features/server';
 import { spacesConfig } from '../__fixtures__';
-import { securityMock } from '../../../../security/server/mocks';
 import { featuresPluginMock } from '../../../../features/server/mocks';
 
 // FLAKY: https://github.com/elastic/kibana/issues/55953
@@ -168,15 +166,12 @@ describe.skip('onPostAuthInterceptor', () => {
 
     const service = new SpacesService(loggingMock);
 
-    const spacesService = await service.setup({
+    const spacesService = service.setup({
       http: (http as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}, {}],
-      authorization: securityMock.createSetup().authz,
-      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
-    spacesService.scopedClient = jest.fn().mockResolvedValue({
+    spacesService.scopedClient = jest.fn().mockReturnValue({
       getAll() {
         if (testOptions.simulateGetSpacesFailure) {
           throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');

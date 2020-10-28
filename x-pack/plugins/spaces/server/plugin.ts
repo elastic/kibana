@@ -7,17 +7,20 @@
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { CoreSetup, Logger, PluginInitializerContext } from '../../../../src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  PluginInitializerContext,
+} from '../../../../src/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { registerSpacesUsageCollector } from './usage_collection';
-import { SpacesService } from './spaces_service';
+import { SpacesService, SpacesServiceStart } from './spaces_service';
 import { SpacesServiceSetup } from './spaces_service';
 import { ConfigType } from './config';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
@@ -32,7 +35,6 @@ import { SpacesLicenseService } from '../common/licensing';
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
-  security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
@@ -45,9 +47,11 @@ export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
 }
 
-export class Plugin {
-  private readonly pluginId = 'spaces';
+export interface SpacesPluginStart {
+  spacesService: SpacesServiceStart;
+}
 
+export class Plugin {
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
@@ -58,30 +62,33 @@ export class Plugin {
 
   private defaultSpaceService?: DefaultSpaceService;
 
+  private spacesService?: SpacesService;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
     this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
   }
 
-  public async start() {}
+  public start(core: CoreStart) {
+    return {
+      spacesService: this.spacesService!.start(core),
+    };
+  }
 
   public async setup(
     core: CoreSetup<PluginsStart>,
     plugins: PluginsSetup
   ): Promise<SpacesPluginSetup> {
-    const service = new SpacesService(this.log);
+    this.spacesService = new SpacesService(this.log);
 
-    const spacesService = await service.setup({
+    const spacesServiceSetup = this.spacesService.setup({
       http: core.http,
-      getStartServices: core.getStartServices,
-      authorization: plugins.security ? plugins.security.authz : null,
-      auditLogger: new SpacesAuditLogger(plugins.security?.audit.getLogger(this.pluginId)),
       config$: this.config$,
     });
 
     const savedObjectsService = new SpacesSavedObjectsService();
-    savedObjectsService.setup({ core, spacesService });
+    savedObjectsService.setup({ core, spacesService: spacesServiceSetup });
 
     const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
 
@@ -106,24 +113,23 @@ export class Plugin {
       log: this.log,
       getStartServices: core.getStartServices,
       getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
-      spacesService,
-      authorization: plugins.security ? plugins.security.authz : null,
+      spacesService: spacesServiceSetup,
     });
 
     const internalRouter = core.http.createRouter();
     initInternalSpacesApi({
       internalRouter,
-      spacesService,
+      spacesService: spacesServiceSetup,
     });
 
     initSpacesRequestInterceptors({
       http: core.http,
       log: this.log,
-      spacesService,
+      spacesService: spacesServiceSetup,
       features: plugins.features,
     });
 
-    setupCapabilities(core, spacesService, this.log);
+    setupCapabilities(core, spacesServiceSetup, this.log);
 
     if (plugins.usageCollection) {
       registerSpacesUsageCollector(plugins.usageCollection, {
@@ -133,18 +139,14 @@ export class Plugin {
       });
     }
 
-    if (plugins.security) {
-      plugins.security.registerSpacesService(spacesService);
-    }
-
     if (plugins.home) {
       plugins.home.tutorials.addScopedTutorialContextFactory(
-        createSpacesTutorialContextFactory(spacesService)
+        createSpacesTutorialContextFactory(spacesServiceSetup)
       );
     }
 
     return {
-      spacesService,
+      spacesService: spacesServiceSetup,
     };
   }
 

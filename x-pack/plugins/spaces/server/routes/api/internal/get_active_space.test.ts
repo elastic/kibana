@@ -6,9 +6,8 @@
 import * as Rx from 'rxjs';
 import { mockRouteContextWithInvalidLicense } from '../__fixtures__';
 import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
-import { httpServiceMock, httpServerMock, coreMock } from 'src/core/server/mocks';
+import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { initGetActiveSpaceApi } from './get_active_space';
 
@@ -17,14 +16,9 @@ describe('GET /internal/spaces/_active_space', () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpServiceMock.createRouter();
 
-    const coreStart = coreMock.createStart();
-
     const service = new SpacesService(null as any);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}, {}],
-      authorization: null,
-      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 

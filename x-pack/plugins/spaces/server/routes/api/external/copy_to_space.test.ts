@@ -22,11 +22,9 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
-import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
 jest.mock('../../../../../../../src/core/server', () => {
   return {
@@ -77,24 +75,11 @@ describe('copy to space', () => {
     const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}, {}],
-      authorization: securityMock.createSetup().authz,
-      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
-    spacesService.scopedClient = jest.fn((req: any) => {
-      return Promise.resolve(
-        new SpacesClient(
-          null as any,
-          () => null,
-          null,
-          savedObjectsRepositoryMock,
-          spacesConfig,
-          savedObjectsRepositoryMock,
-          req
-        )
-      );
+    spacesService.scopedClient = jest.fn(() => {
+      return new SpacesClient(() => null, spacesConfig, savedObjectsRepositoryMock);
     });
 
     initCopyToSpacesApi({
@@ -103,7 +88,6 @@ describe('copy to space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
-      authorization: null, // not needed for this route
     });
 
     const [

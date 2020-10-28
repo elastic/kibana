@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+export { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
