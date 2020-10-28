@@ -24,7 +24,7 @@ import {
 } from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
-import { LoadMapAndRender } from './routes/maps_app/load_map_and_render';
+import { MapApp } from './routes/map_app';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -43,29 +43,6 @@ export async function renderApp({
     ...withNotifyOnErrors(getToasts()),
   });
 
-  render(
-    <App
-      history={history}
-      appBasePath={appBasePath}
-      onAppLeave={onAppLeave}
-      setHeaderActionMenu={setHeaderActionMenu}
-    />,
-    element
-  );
-
-  return () => {
-    unmountComponentAtNode(element);
-  };
-}
-
-interface Props {
-  history: AppMountParameters['history'] | RouteComponentProps['history'];
-  appBasePath: AppMountParameters['appBasePath'];
-  onAppLeave: AppMountParameters['onAppLeave'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-}
-
-const App: React.FC<Props> = ({ history, appBasePath, onAppLeave, setHeaderActionMenu }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
@@ -88,7 +65,7 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave, setHeaderActio
     });
   }
 
-  return (
+  render(
     <I18nContext>
       <Provider store={store}>
         <Router history={history}>
@@ -96,7 +73,7 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave, setHeaderActio
             <Route
               path={`/map/:savedMapId`}
               render={(props) => (
-                <LoadMapAndRender
+                <MapApp
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
                   setHeaderActionMenu={setHeaderActionMenu}
@@ -109,7 +86,7 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave, setHeaderActio
               exact
               path={`/map`}
               render={() => (
-                <LoadMapAndRender
+                <MapApp
                   onAppLeave={onAppLeave}
                   setHeaderActionMenu={setHeaderActionMenu}
                   stateTransfer={stateTransfer}
@@ -135,6 +112,11 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave, setHeaderActio
           </Switch>
         </Router>
       </Provider>
-    </I18nContext>
+    </I18nContext>,
+    element
   );
-};
+
+  return () => {
+    unmountComponentAtNode(element);
+  };
+}
