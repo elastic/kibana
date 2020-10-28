@@ -61,7 +61,7 @@ export const LONGEST_LONG_TASK = i18n.translate(
 );
 
 export const LONGEST_LONG_TASK_TOOLTIP = i18n.translate(
-  'xpack.apm.rum.uxMetrics.longestLongTasks',
+  'xpack.apm.rum.uxMetrics.longestLongTasksTooltip',
   {
     defaultMessage:
       'The duration of the longest long task, a long task is defined as any user activity or browser task that monopolizes the UI thread for extended periods (greater than 50 milliseconds) and blocks other critical tasks (frame rate or input latency) from being executed.',
@@ -76,7 +76,7 @@ export const SUM_LONG_TASKS = i18n.translate(
 );
 
 export const SUM_LONG_TASKS_TOOLTIP = i18n.translate(
-  'xpack.apm.rum.uxMetrics.sumLongTasks',
+  'xpack.apm.rum.uxMetrics.sumLongTasksTooltip',
   {
     defaultMessage:
       'The total duration of long tasks, a long task is defined as any user activity or browser task that monopolizes the UI thread for extended periods (greater than 50 milliseconds) and blocks other critical tasks (frame rate or input latency) from being executed.',
