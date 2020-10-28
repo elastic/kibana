@@ -25,6 +25,7 @@ import {
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
 } from '../types';
+import { SavedObjectDecorator } from './decorators';
 
 import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
@@ -146,9 +147,24 @@ describe('Saved Object', () => {
 
       expect(decorA.decorateConfig).toHaveBeenCalledTimes(1);
       expect(decorA.decorateObject).toHaveBeenCalledTimes(1);
+    });
 
-      expect(decorB.decorateConfig).toHaveBeenCalledTimes(1);
-      expect(decorB.decorateObject).toHaveBeenCalledTimes(1);
+    it('calls the decorators in correct order', () => {
+      const decorA = {
+        getId: () => 'A',
+        decorateConfig: jest.fn(),
+        decorateObject: jest.fn(),
+      };
+      const decorB = {
+        getId: () => 'B',
+        decorateConfig: jest.fn(),
+        decorateObject: jest.fn(),
+      };
+
+      decoratorRegistry.getOrderedDecorators.mockReturnValue([decorA, decorB]);
+
+      initSavedObjectClass();
+      createInitializedSavedObject();
 
       expect(decorA.decorateConfig.mock.invocationCallOrder[0]).toBeLessThan(
         decorB.decorateConfig.mock.invocationCallOrder[0]
@@ -156,6 +172,40 @@ describe('Saved Object', () => {
       expect(decorA.decorateObject.mock.invocationCallOrder[0]).toBeLessThan(
         decorB.decorateObject.mock.invocationCallOrder[0]
       );
+    });
+
+    it('passes the mutated config and object down the decorator chain', () => {
+      expect.assertions(2);
+
+      const newMappingValue = 'string';
+      const newObjectMethod = jest.fn();
+
+      const decorA: SavedObjectDecorator = {
+        getId: () => 'A',
+        decorateConfig: (config) => {
+          config.mapping = {
+            ...config.mapping,
+            addedFromA: newMappingValue,
+          };
+        },
+        decorateObject: (object) => {
+          (object as any).newMethod = newObjectMethod;
+        },
+      };
+      const decorB: SavedObjectDecorator = {
+        getId: () => 'B',
+        decorateConfig: (config) => {
+          expect(config.mapping!.addedFromA).toBe(newMappingValue);
+        },
+        decorateObject: (object) => {
+          expect((object as any).newMethod).toBe(newObjectMethod);
+        },
+      };
+
+      decoratorRegistry.getOrderedDecorators.mockReturnValue([decorA, decorB]);
+
+      initSavedObjectClass();
+      createInitializedSavedObject();
     });
   });
 
