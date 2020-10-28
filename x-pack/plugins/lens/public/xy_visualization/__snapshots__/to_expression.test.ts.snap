@@ -145,6 +145,22 @@ Object {
         "title": Array [
           "",
         ],
+        "valueLabels": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "mode": Array [
+                    "hide",
+                  ],
+                },
+                "function": "lens_xy_valueLabelsConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "xTitle": Array [
           "",
         ],

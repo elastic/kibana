@@ -439,10 +439,6 @@ export function XYChart({
     ? chartTheme
     : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels?.mode || 'hide', shouldRotate);
 
-  if (!isSuggestionPreview) {
-    console.log({ shouldShowValueLabels, valueLabels });
-  }
-
   return (
     <Chart>
       <Settings

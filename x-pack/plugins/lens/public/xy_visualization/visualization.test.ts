@@ -14,6 +14,7 @@ import { LensIconChartBar } from '../assets/chart_bar';
 function exampleState(): State {
   return {
     legend: { position: Position.Bottom, isVisible: true },
+    valueLabels: { mode: 'hide' },
     preferredSeriesType: 'bar',
     layers: [
       {
@@ -145,6 +146,9 @@ describe('xy_visualization', () => {
           },
           "preferredSeriesType": "bar_stacked",
           "title": "Empty XY chart",
+          "valueLabels": Object {
+            "mode": "hide",
+          },
         }
       `);
     });

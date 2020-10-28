@@ -21,6 +21,7 @@ describe('XY Config panels', () => {
   function testState(): State {
     return {
       legend: { isVisible: true, position: Position.Right },
+      valueLabels: { mode: 'hide' },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -115,7 +116,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
     });
 
-    it('should disable the popover if there is no area or line series', () => {
+    it('should disable the popover if there is no area, line, bar or bar_horizontal series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -123,13 +124,76 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar' }],
+            layers: [{ ...state.layers[0], seriesType: 'bar_stacked' }],
             fittingFunction: 'Carry',
           }}
         />
       );
 
       expect(component.find(ToolbarPopover).at(0).prop('isDisabled')).toEqual(true);
+    });
+
+    it('should show the popover for bar and horizontal_bar series', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+            fittingFunction: 'Carry',
+          }}
+        />
+      );
+
+      expect(component.find(ToolbarPopover).at(0).prop('isDisabled')).toEqual(false);
+    });
+
+    it('should disable the fitting option for bar series', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+            fittingFunction: 'Carry',
+          }}
+        />
+      );
+
+      expect(
+        component
+          .find(ToolbarPopover)
+          .at(0)
+          .find('[data-test-subj="lnsMissingValuesSelect"]')
+          .prop('disabled')
+      ).toEqual(true);
+    });
+
+    it('should disable the display option for area and line series', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'area' }],
+            fittingFunction: 'Carry',
+          }}
+        />
+      );
+
+      expect(
+        component
+          .find(ToolbarPopover)
+          .at(0)
+          .find('[data-test-subj="lnsValueLabelsDisplay"]')
+          .prop('isDisabled')
+      ).toEqual(true);
     });
 
     it('should disable the popover if there is no right axis', () => {

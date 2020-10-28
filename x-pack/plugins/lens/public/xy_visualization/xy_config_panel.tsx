@@ -38,7 +38,6 @@ import { getAxesConfiguration } from './axes_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
-type DisplayValueVisibilityModes = typeof valueLabelsOptions[number]['value'];
 
 function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
   const newLayers = [...state.layers];
@@ -237,12 +236,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const tooltipContentValueLabels = !IsBarNotStacked
     ? valueTooltipContentDisabled.stacked
     : valueTooltipContentDisabled.histogram;
-  // console.log({
-  //   legendMode,
-  //   legend: state?.legend,
-  //   valueLabels: state?.valueLabels,
-  //   valueLabelsVisibilityMode,
-  // });
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
@@ -272,6 +265,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                   legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
                     defaultMessage: 'Display',
                   })}
+                  isDisabled={hasNonBarSeries}
                   data-test-subj="lnsValueLabelsDisplay"
                   name="valueLabelsDisplay"
                   buttonSize="compressed"
