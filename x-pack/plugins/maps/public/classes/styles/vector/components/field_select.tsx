@@ -39,9 +39,9 @@ function groupFieldsByOrigin(fields: StyleField[]) {
   const fieldsByOriginMap = new Map<FIELD_ORIGIN, StyleField[]>();
   fields.forEach((field) => {
     if (fieldsByOriginMap.has(field.origin)) {
-      const fieldsList = fieldsByOriginMap.get(field.origin);
-      fieldsList!.push(field);
-      fieldsByOriginMap.set(field.origin, fieldsList!);
+      const fieldsList = fieldsByOriginMap.get(field.origin)!;
+      fieldsList.push(field);
+      fieldsByOriginMap.set(field.origin, fieldsList);
     } else {
       fieldsByOriginMap.set(field.origin, [field]);
     }
@@ -60,8 +60,8 @@ function groupFieldsByOrigin(fields: StyleField[]) {
   if (fieldsByOriginMap.size === 1) {
     // do not show origin group if all fields are from same origin
     const onlyOriginKey = fieldsByOriginMap.keys().next().value;
-    const fieldsList = fieldsByOriginMap.get(onlyOriginKey);
-    return fieldsListToOptions(fieldsList!);
+    const fieldsList = fieldsByOriginMap.get(onlyOriginKey)!;
+    return fieldsListToOptions(fieldsList);
   }
 
   const optionGroups: Array<{
