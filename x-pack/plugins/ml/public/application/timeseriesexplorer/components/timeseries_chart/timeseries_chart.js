@@ -977,6 +977,9 @@ class TimeseriesChartIntl extends Component {
     } = this.props;
     const data = contextChartData;
 
+    const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
+    const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
+
     this.contextXScale = d3.time
       .scale()
       .range([0, cxtWidth])
@@ -1111,6 +1114,10 @@ class TimeseriesChartIntl extends Component {
       .append('rect')
       .attr('rx', 2)
       .attr('ry', 2)
+      .on('mouseover', function (d) {
+        showFocusChartTooltip(d, this);
+      })
+      .on('mouseout', () => hideFocusChartTooltip())
       .classed('mlContextAnnotationRect', true);
 
     ctxAnnotationRects
@@ -1130,12 +1137,12 @@ class TimeseriesChartIntl extends Component {
       .attr('y', cxtChartHeight + swlHeight + 2)
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
       .attr('width', (d) => {
-        const s = this.contextXScale(moment(d.timestamp)) + 1;
-        const e =
+        const start = this.contextXScale(moment(d.timestamp)) + 1;
+        const end =
           typeof d.end_timestamp !== 'undefined'
             ? this.contextXScale(moment(d.end_timestamp)) - 1
-            : s + ANNOTATION_MIN_WIDTH;
-        const width = Math.max(ANNOTATION_MIN_WIDTH, e - s);
+            : start + ANNOTATION_MIN_WIDTH;
+        const width = Math.max(ANNOTATION_MIN_WIDTH, end - start);
         return width;
       });
 
@@ -1197,7 +1204,7 @@ class TimeseriesChartIntl extends Component {
       .call(brush)
       .selectAll('rect')
       .attr('y', -1)
-      .attr('height', contextChartHeight + swimlaneHeight + annotationHeight + 1);
+      .attr('height', contextChartHeight + swimlaneHeight + 1);
 
     // move the left and right resize areas over to
     // be under the handles
