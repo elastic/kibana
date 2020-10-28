@@ -5,6 +5,7 @@
  */
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockAgentService,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
@@ -102,6 +103,7 @@ describe('test policy response handler', () => {
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
+      mockAgentService = createMockAgentService();
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
         ...{ agentService: mockAgentService },
