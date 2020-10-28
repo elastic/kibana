@@ -374,6 +374,7 @@ export class TimeSeriesExplorer extends React.Component {
       tableInterval,
       tableSeverity,
     } = this.props;
+    const { actualPlotFunction } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
@@ -387,7 +388,10 @@ export class TimeSeriesExplorer extends React.Component {
         earliestMs,
         latestMs,
         dateFormatTz,
-        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+        undefined,
+        undefined,
+        actualPlotFunction
       )
       .pipe(
         map((resp) => {
@@ -1254,7 +1258,7 @@ export class TimeSeriesExplorer extends React.Component {
               );
             })}
             {actualPlotFunction && (
-              <EuiFlexItem style={{ textAlign: 'right' }}>
+              <EuiFlexItem style={{ textAlign: 'right' }} grow={false}>
                 <EuiFormRow
                   label={i18n.translate('xpack.ml.timeSeriesExplorer.metricPlotByOption', {
                     defaultMessage: 'Function',

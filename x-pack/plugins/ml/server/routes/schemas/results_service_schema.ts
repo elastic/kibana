@@ -26,6 +26,7 @@ export const anomaliesTableDataSchema = schema.object({
   maxRecords: schema.number(),
   maxExamples: schema.maybe(schema.number()),
   influencersFilterQuery: schema.maybe(schema.any()),
+  actualPlotFunction: schema.maybe(schema.nullable(schema.string())),
 });
 
 export const categoryDefinitionSchema = schema.object({
