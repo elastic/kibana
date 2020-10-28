@@ -44,107 +44,107 @@ export default function ({ getService }: FtrProviderContext) {
       expect(logItem.fields).to.eql([
         {
           field: '@timestamp',
-          value: '2018-10-17T19:42:22.000Z',
+          value: ['2018-10-17T19:42:22.000Z'],
         },
         {
           field: '_id',
-          value: 'yT2Mg2YBh-opCxJv8Vqj',
+          value: ['yT2Mg2YBh-opCxJv8Vqj'],
         },
         {
           field: '_index',
-          value: 'filebeat-7.0.0-alpha1-2018.10.17',
+          value: ['filebeat-7.0.0-alpha1-2018.10.17'],
         },
         {
           field: 'apache2.access.body_sent.bytes',
-          value: '1336',
+          value: ['1336'],
         },
         {
           field: 'apache2.access.http_version',
-          value: '1.1',
+          value: ['1.1'],
         },
         {
           field: 'apache2.access.method',
-          value: 'GET',
+          value: ['GET'],
         },
         {
           field: 'apache2.access.referrer',
-          value: '-',
+          value: ['-'],
         },
         {
           field: 'apache2.access.remote_ip',
-          value: '10.128.0.11',
+          value: ['10.128.0.11'],
         },
         {
           field: 'apache2.access.response_code',
-          value: '200',
+          value: ['200'],
         },
         {
           field: 'apache2.access.url',
-          value: '/a-fresh-start-will-put-you-on-your-way',
+          value: ['/a-fresh-start-will-put-you-on-your-way'],
         },
         {
           field: 'apache2.access.user_agent.device',
-          value: 'Other',
+          value: ['Other'],
         },
         {
           field: 'apache2.access.user_agent.name',
-          value: 'Other',
+          value: ['Other'],
         },
         {
           field: 'apache2.access.user_agent.os',
-          value: 'Other',
+          value: ['Other'],
         },
         {
           field: 'apache2.access.user_agent.os_name',
-          value: 'Other',
+          value: ['Other'],
         },
         {
           field: 'apache2.access.user_name',
-          value: '-',
+          value: ['-'],
         },
         {
           field: 'beat.hostname',
-          value: 'demo-stack-apache-01',
+          value: ['demo-stack-apache-01'],
         },
         {
           field: 'beat.name',
-          value: 'demo-stack-apache-01',
+          value: ['demo-stack-apache-01'],
         },
         {
           field: 'beat.version',
-          value: '7.0.0-alpha1',
+          value: ['7.0.0-alpha1'],
         },
         {
           field: 'fileset.module',
-          value: 'apache2',
+          value: ['apache2'],
         },
         {
           field: 'fileset.name',
-          value: 'access',
+          value: ['access'],
         },
         {
           field: 'host.name',
-          value: 'demo-stack-apache-01',
+          value: ['demo-stack-apache-01'],
         },
         {
           field: 'input.type',
-          value: 'log',
+          value: ['log'],
         },
         {
           field: 'offset',
-          value: '5497614',
+          value: ['5497614'],
         },
         {
           field: 'prospector.type',
-          value: 'log',
+          value: ['log'],
         },
         {
           field: 'read_timestamp',
-          value: '2018-10-17T19:42:23.160Z',
+          value: ['2018-10-17T19:42:23.160Z'],
         },
         {
           field: 'source',
-          value: '/var/log/apache2/access.log',
+          value: ['/var/log/apache2/access.log'],
         },
       ]);
     });
