@@ -5054,7 +5054,6 @@
     "xpack.apm.rum.jsErrors.errorRate": "错误率",
     "xpack.apm.rum.jsErrors.impactedPageLoads": "受影响的页面加载",
     "xpack.apm.rum.jsErrors.totalErrors": "错误总数",
-    "xpack.apm.rum.userExperienceMetrics": "用户体验指标",
     "xpack.apm.rum.uxMetrics.longestLongTasks": "长期任务最长持续时间",
     "xpack.apm.rum.uxMetrics.noOfLongTasks": "长期任务数目",
     "xpack.apm.rum.uxMetrics.sumLongTasks": "长期任务总持续时间",
