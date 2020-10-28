@@ -112,7 +112,7 @@ You can even choose which features to enable within each space. Don’t need
 Machine learning in your “Executive” space? Simply turn it off.
 
 [role="screenshot"]
-image::images/intro-spaces.jpg[]
+image::images/intro-spaces.png[Space selector screen]
 
 You can take this all one step further with Kibana’s security features, and
 control which users have access to each space. {kib} allows for fine-grained

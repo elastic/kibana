@@ -84,12 +84,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       {
         field: 'name',
         sortable: true,
-        name: i18n.translate(
-          'xpack.ingestManager.policyDetails.packagePoliciesTable.nameColumnTitle',
-          {
-            defaultMessage: 'Name',
-          }
-        ),
+        name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
+          defaultMessage: 'Name',
+        }),
         render: (value: string) => (
           <span className="eui-textTruncate" title={value}>
             {value}
@@ -99,7 +96,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       {
         field: 'description',
         name: i18n.translate(
-          'xpack.ingestManager.policyDetails.packagePoliciesTable.descriptionColumnTitle',
+          'xpack.fleet.policyDetails.packagePoliciesTable.descriptionColumnTitle',
           {
             defaultMessage: 'Description',
           }
@@ -114,7 +111,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         field: 'packageTitle',
         sortable: true,
         name: i18n.translate(
-          'xpack.ingestManager.policyDetails.packagePoliciesTable.packageNameColumnTitle',
+          'xpack.fleet.policyDetails.packagePoliciesTable.packageNameColumnTitle',
           {
             defaultMessage: 'Integration',
           }
@@ -140,7 +137,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       {
         field: 'namespace',
         name: i18n.translate(
-          'xpack.ingestManager.policyDetails.packagePoliciesTable.namespaceColumnTitle',
+          'xpack.fleet.policyDetails.packagePoliciesTable.namespaceColumnTitle',
           {
             defaultMessage: 'Namespace',
           }
@@ -150,12 +147,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         },
       },
       {
-        name: i18n.translate(
-          'xpack.ingestManager.policyDetails.packagePoliciesTable.actionsColumnTitle',
-          {
-            defaultMessage: 'Actions',
-          }
-        ),
+        name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => (
@@ -169,7 +163,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   //   key="packagePolicyView"
                   // >
                   //   <FormattedMessage
-                  //     id="xpack.ingestManager.policyDetails.packagePoliciesTable.viewActionTitle"
+                  //     id="xpack.fleet.policyDetails.packagePoliciesTable.viewActionTitle"
                   //     defaultMessage="View integration"
                   //   />
                   // </EuiContextMenuItem>,
@@ -183,14 +177,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     key="packagePolicyEdit"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.policyDetails.packagePoliciesTable.editActionTitle"
+                      id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
                       defaultMessage="Edit integration"
                     />
                   </EuiContextMenuItem>,
                   // FIXME: implement Copy package policy action
                   // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
                   //   <FormattedMessage
-                  //     id="xpack.ingestManager.policyDetails.packagePoliciesTable.copyActionTitle"
+                  //     id="xpack.fleet.policyDetails.packagePoliciesTable.copyActionTitle"
                   //     defaultMessage="Copy integration"
                   //   />
                   // </EuiContextMenuItem>,
@@ -205,7 +199,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                           }}
                         >
                           <FormattedMessage
-                            id="xpack.ingestManager.policyDetails.packagePoliciesTable.deleteActionTitle"
+                            id="xpack.fleet.policyDetails.packagePoliciesTable.deleteActionTitle"
                             defaultMessage="Delete integration"
                           />
                         </DangerEuiContextMenuItem>
@@ -243,7 +237,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
           >
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.addPackagePolicyButtonText"
+              id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
               defaultMessage="Add integration"
             />
           </EuiButton>,

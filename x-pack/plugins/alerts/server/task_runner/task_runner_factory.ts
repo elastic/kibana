@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest, ISavedObjectsRepository } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';

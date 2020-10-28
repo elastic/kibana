@@ -56,6 +56,8 @@ import {
 } from './queries/mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from './task_type_dictionary';
 
+import { ESSearchResponse, ESSearchBody } from '../../apm/typings/elasticsearch';
+
 export interface StoreOpts {
   esClient: ElasticsearchClient;
   index: string;
@@ -73,6 +75,9 @@ export interface SearchOpts {
   seq_no_primary_term?: boolean;
   search_after?: unknown[];
 }
+
+export type AggregationOpts = Pick<Required<ESSearchBody>, 'aggs'> &
+  Pick<ESSearchBody, 'query' | 'size'>;
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
   script?: object;
@@ -494,6 +499,25 @@ export class TaskStore {
     }
   }
 
+  public async aggregate<TSearchRequest extends AggregationOpts>({
+    aggs,
+    query,
+    size = 0,
+  }: TSearchRequest): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
+    const { body } = await this.esClient.search<
+      ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>
+    >({
+      index: this.index,
+      ignore_unavailable: true,
+      body: ensureAggregationOnlyReturnsTaskObjects({
+        query,
+        aggs,
+        size,
+      }),
+    });
+    return body;
+  }
+
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -573,6 +597,22 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
     ? { bool: { must: [queryOnlyTasks, originalQuery] } }
     : queryOnlyTasks;
 
+  return {
+    ...opts,
+    query,
+  };
+}
+
+function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): AggregationOpts {
+  const originalQuery = opts.query;
+  const filterToOnlyTasks = {
+    bool: {
+      filter: [{ term: { type: 'task' } }],
+    },
+  };
+  const query = originalQuery
+    ? { bool: { must: [filterToOnlyTasks, originalQuery] } }
+    : filterToOnlyTasks;
   return {
     ...opts,
     query,
