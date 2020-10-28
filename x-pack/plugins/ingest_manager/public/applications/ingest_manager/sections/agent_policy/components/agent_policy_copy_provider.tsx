@@ -37,13 +37,10 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
     setIsModalOpen(true);
     setAgentPolicy(agentPolicyToCopy);
     setNewAgentPolicy({
-      name: i18n.translate(
-        'xpack.ingestManager.copyAgentPolicy.confirmModal.defaultNewPolicyName',
-        {
-          defaultMessage: '{name} (copy)',
-          values: { name: agentPolicyToCopy.name },
-        }
-      ),
+      name: i18n.translate('xpack.fleet.copyAgentPolicy.confirmModal.defaultNewPolicyName', {
+        defaultMessage: '{name} (copy)',
+        values: { name: agentPolicyToCopy.name },
+      }),
       description: agentPolicyToCopy.description,
     });
     onSuccessCallback.current = onSuccess;
@@ -63,7 +60,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
 
       if (data) {
         notifications.toasts.addSuccess(
-          i18n.translate('xpack.ingestManager.copyAgentPolicy.successNotificationTitle', {
+          i18n.translate('xpack.fleet.copyAgentPolicy.successNotificationTitle', {
             defaultMessage: 'Agent policy copied',
           })
         );
@@ -72,7 +69,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
         }
       } else {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.copyAgentPolicy.failureNotificationTitle', {
+          i18n.translate('xpack.fleet.copyAgentPolicy.failureNotificationTitle', {
             defaultMessage: "Error copying agent policy '{id}'",
             values: { id: agentPolicy!.id },
           })
@@ -80,7 +77,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
       }
     } catch (e) {
       notifications.toasts.addDanger(
-        i18n.translate('xpack.ingestManager.copyAgentPolicy.fatalErrorNotificationTitle', {
+        i18n.translate('xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle', {
           defaultMessage: 'Error copying agent policy',
         })
       );
@@ -99,7 +96,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           title={
             <span className="eui-textBreakWord">
               <FormattedMessage
-                id="xpack.ingestManager.copyAgentPolicy.confirmModal.copyPolicyTitle"
+                id="xpack.fleet.copyAgentPolicy.confirmModal.copyPolicyTitle"
                 defaultMessage="Copy '{name}' agent policy"
                 values={{
                   name: agentPolicy.name,
@@ -111,13 +108,13 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           onConfirm={copyAgentPolicy}
           cancelButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.copyAgentPolicy.confirmModal.cancelButtonLabel"
+              id="xpack.fleet.copyAgentPolicy.confirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.copyAgentPolicy.confirmModal.confirmButtonLabel"
+              id="xpack.fleet.copyAgentPolicy.confirmModal.confirmButtonLabel"
               defaultMessage="Copy policy"
             />
           }
@@ -125,14 +122,14 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
         >
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.copyAgentPolicy.confirmModal.copyPolicyPrompt"
+              id="xpack.fleet.copyAgentPolicy.confirmModal.copyPolicyPrompt"
               defaultMessage="Choose a name and description for your new agent policy."
             />
           </p>
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ingestManager.copyAgentPolicy.confirmModal.newNameLabel"
+                id="xpack.fleet.copyAgentPolicy.confirmModal.newNameLabel"
                 defaultMessage="New policy name"
               />
             }
@@ -147,7 +144,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ingestManager.copyAgentPolicy.confirmModal.newDescriptionLabel"
+                id="xpack.fleet.copyAgentPolicy.confirmModal.newDescriptionLabel"
                 defaultMessage="Description"
               />
             }
