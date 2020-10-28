@@ -17,26 +17,34 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { CoreContext } from './core_context';
-import { Env, IConfigService } from './config';
-import { configServiceMock, getEnvOptions } from './config/mocks';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { ILoggingSystem } from './logging';
+import { expectAssignable, expectNotAssignable } from 'tsd';
+import { PublicMethodsOf } from '../index';
 
-function create({
-  env = Env.createDefault(REPO_ROOT, getEnvOptions()),
-  logger = loggingSystemMock.create(),
-  configService = configServiceMock.create(),
-}: {
-  env?: Env;
-  logger?: jest.Mocked<ILoggingSystem>;
-  configService?: jest.Mocked<IConfigService>;
-} = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
+class Test {
+  public name: string = '';
+  getName() {
+    return this.name;
+  }
+  // @ts-ignore
+  private getDoubleName() {
+    return this.name.repeat(2);
+  }
 }
 
-export const mockCoreContext = {
-  create,
-};
+expectAssignable<PublicMethodsOf<Test>>({
+  getName() {
+    return '';
+  },
+});
+
+expectNotAssignable<PublicMethodsOf<Test>>({
+  getName() {
+    return 1;
+  },
+});
+
+expectNotAssignable<PublicMethodsOf<Test>>({
+  getDoubleName() {
+    return 1;
+  },
+});
