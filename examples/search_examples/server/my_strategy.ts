@@ -33,9 +33,9 @@ export const mySearchStrategyProvider = (
           cool: request.get_cool ? 'YES' : 'NOPE',
         }))
       ),
-    cancel: (id, options, deps) => {
+    cancel: async (id, options, deps) => {
       if (es.cancel) {
-        return es.cancel(id, options, deps);
+        await es.cancel(id, options, deps);
       }
     },
   };
