@@ -55,6 +55,8 @@ import {
 } from '../common/schemas';
 import {
   threat_index,
+  number_of_items_per_search,
+  concurrent_searches,
   threat_query,
   threat_filters,
   threat_mapping,
@@ -149,6 +151,8 @@ export const importRulesSchema = t.intersection([
       threat_query, // defaults to "undefined" if not set during decode
       threat_index, // defaults to "undefined" if not set during decode
       threat_language, // defaults "undefined" if not set during decode
+      concurrent_searches, // defaults to "undefined" if not set during decode
+      number_of_items_per_search, // defaults to "undefined" if not set during decode
     })
   ),
 ]);

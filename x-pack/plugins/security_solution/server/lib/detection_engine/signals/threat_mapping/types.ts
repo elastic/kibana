@@ -61,6 +61,8 @@ export interface CreateThreatSignalsOptions {
   threatIndex: ThreatIndex;
   threatLanguage: ThreatLanguageOrUndefined;
   name: string;
+  concurrentSearches: number; // TODO: Should this be from the io-ts schema?
+  numberOfItemsPerSearch: number; // TODO: Should this be from the io-ts schema?
 }
 
 export interface CreateThreatSignalOptions {

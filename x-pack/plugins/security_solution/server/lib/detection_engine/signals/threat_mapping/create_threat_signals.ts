@@ -47,12 +47,10 @@ export const createThreatSignals = async ({
   buildRuleMessage,
   threatIndex,
   name,
+  concurrentSearches,
+  numberOfItemsPerSearch,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   logger.debug(buildRuleMessage('Starting threat matching'));
-
-  // TODO: Bubble these up to the UI
-  const concurrentSearches = 100;
-  const numberOfItemsPerSearch = 10;
   const perPage = concurrentSearches * numberOfItemsPerSearch;
 
   let results: SearchAfterAndBulkCreateReturnType = {
@@ -87,7 +85,7 @@ export const createThreatSignals = async ({
     sortOrder: undefined,
     logger,
     buildRuleMessage,
-    perPage: concurrentSearches * numberOfItemsPerSearch,
+    perPage,
   });
 
   const chunks = chunk(numberOfItemsPerSearch, threatList.hits.hits);

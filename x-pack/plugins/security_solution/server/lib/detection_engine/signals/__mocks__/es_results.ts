@@ -68,6 +68,8 @@ export const sampleRuleAlertParams = (
   threat: undefined,
   version: 1,
   exceptionsList: getListArrayMock(),
+  concurrentSearches: undefined,
+  numberOfItemsPerSearch: undefined,
 });
 
 export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {

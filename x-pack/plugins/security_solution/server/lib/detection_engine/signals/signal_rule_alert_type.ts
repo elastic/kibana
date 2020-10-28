@@ -119,6 +119,8 @@ export const signalRulesAlertType = ({
         timestampOverride,
         type,
         exceptionsList,
+        concurrentSearches,
+        numberOfItemsPerSearch,
       } = params;
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
@@ -402,6 +404,8 @@ export const signalRulesAlertType = ({
             threatLanguage,
             buildRuleMessage,
             threatIndex,
+            concurrentSearches: concurrentSearches ?? 1,
+            numberOfItemsPerSearch: numberOfItemsPerSearch ?? 9000,
           });
         } else if (type === 'query' || type === 'saved_query') {
           const inputIndex = await getInputIndex(services, version, index);

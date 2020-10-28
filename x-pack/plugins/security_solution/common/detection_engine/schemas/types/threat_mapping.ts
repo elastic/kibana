@@ -55,3 +55,11 @@ export const threat_language = t.union([language, t.undefined]);
 export type ThreatLanguage = t.TypeOf<typeof threat_language>;
 export const threatLanguageOrUndefined = t.union([threat_language, t.undefined]);
 export type ThreatLanguageOrUndefined = t.TypeOf<typeof threatLanguageOrUndefined>;
+
+export const concurrent_searches = t.number;
+export const concurrentSearchesOrUndefined = t.union([concurrent_searches, t.undefined]);
+export type ConcurrentSearchesOrUndefined = t.TypeOf<typeof concurrentSearchesOrUndefined>;
+
+export const number_of_items_per_search = t.number;
+export const numberOfItemsPerSearchOrUndefined = t.union([number_of_items_per_search, t.undefined]);
+export type NumberOfItemsPerSearchOrUndefined = t.TypeOf<typeof numberOfItemsPerSearchOrUndefined>;
