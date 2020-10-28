@@ -88,7 +88,7 @@ export function WebCoreVitalsTitle({
                 id="xpack.observability.ux.dashboard.webCoreVitals.traffic"
                 defaultMessage="{trafficPerc}% of the traffic represented"
                 values={{
-                  trafficPerc: ((coreVitalPages || 0 / totalPageViews) * 100).toFixed(0),
+                  trafficPerc: (((coreVitalPages || 0) / totalPageViews) * 100).toFixed(0),
                 }}
               />
 
