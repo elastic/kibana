@@ -59,7 +59,6 @@ import {
 import { PersistableState, SerializableState } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
-import { ErrorEmbeddableFactory } from './lib/embeddables/error_embeddable_factory';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;
@@ -126,9 +125,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
+  public async setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
     bootstrap(uiActions);
 
+    const { ErrorEmbeddableFactory } = await import('./lib/embeddables/error_embeddable_factory');
     const errorFactory = new ErrorEmbeddableFactory();
     this.registerEmbeddableFactory(errorFactory.type, errorFactory);
 

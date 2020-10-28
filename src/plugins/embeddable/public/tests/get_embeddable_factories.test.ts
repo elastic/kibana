@@ -30,7 +30,9 @@ test('returns empty list if there are no embeddable factories', () => {
   const { doStart } = testPlugin();
   const start = doStart();
   const list = [...start.getEmbeddableFactories()];
-  expect(list).toEqual([]);
+
+  // The embeddable plugin comes with one embeddable factory
+  expect(list.length).toEqual(1);
 });
 
 test('returns existing embeddable factories', () => {
