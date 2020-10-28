@@ -12,11 +12,12 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { OVERVIEW_URL } from '../urls/navigation';
 import { esArchiverUnload, esArchiverLoad } from '../tasks/es_archiver';
 
-describe.skip('Overview Page', () => {
+describe('Overview Page', () => {
   before(() => {
     cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
     cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
     loginAndWaitForPage(OVERVIEW_URL);
+    cy.reload();
   });
 
   it('Host stats render with correct values', () => {
@@ -35,7 +36,7 @@ describe.skip('Overview Page', () => {
     });
   });
 
-  describe.skip('with no data', () => {
+  describe('with no data', () => {
     before(() => {
       esArchiverUnload('auditbeat');
       loginAndWaitForPage(OVERVIEW_URL);
