@@ -85,7 +85,11 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={numeral(longTaskData?.noOfLongTasks || 0).format('0,0')}
+          title={
+            longTaskData?.noOfLongTasks
+              ? numeral(longTaskData.noOfLongTasks).format('0,0')
+              : DATA_UNDEFINED_LABEL
+          }
           description={NO_OF_LONG_TASK}
           isLoading={status !== 'success'}
         />

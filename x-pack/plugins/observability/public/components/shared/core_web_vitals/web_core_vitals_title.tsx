@@ -32,7 +32,7 @@ const BROWSER_CORE_WEB_VITALS = i18n.translate(
 export function WebCoreVitalsTitle({
   loading,
   coreVitalPages,
-  totalPageViews,
+  totalPageViews = 0,
   displayTrafficMetric,
 }: {
   loading: boolean;
@@ -78,7 +78,7 @@ export function WebCoreVitalsTitle({
           </h3>
         </EuiTitle>
       </EuiFlexItem>
-      {displayTrafficMetric && totalPageViews && (
+      {displayTrafficMetric && totalPageViews > 0 && (
         <EuiFlexItem grow={false}>
           {loading ? (
             <EuiLoadingSpinner />
