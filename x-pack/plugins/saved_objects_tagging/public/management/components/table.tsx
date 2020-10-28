@@ -43,7 +43,6 @@ export const TagTable: FC<TagTableProps> = ({
   loading,
   capabilities,
   tags,
-  onSelectionChange,
   selectedTags,
   onEdit,
   onDelete,
@@ -168,10 +167,6 @@ export const TagTable: FC<TagTableProps> = ({
       columns={columns}
       items={tags}
       pagination={tablePagination}
-      selection={{
-        initialSelected: selectedTags,
-        onSelectionChange,
-      }}
       sorting={sorting}
       search={{
         box: {
