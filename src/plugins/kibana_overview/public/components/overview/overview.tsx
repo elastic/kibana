@@ -226,6 +226,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                               title={title}
                               titleElement="h3"
                               titleSize="xs"
+                              onClick={() => {
+                                trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
+                              }}
                             />
                           </RedirectAppLinks>
                         </EuiFlexItem>
