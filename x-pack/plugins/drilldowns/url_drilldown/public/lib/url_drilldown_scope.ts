@@ -173,13 +173,24 @@ function getEventScopeFromValueClickTriggerContext(
 }
 
 function getEventScopeFromRowClickTriggerContext({
+  embeddable,
   data,
 }: RowClickContext): RowClickTriggerEventScope {
+  const columns = data.columns || data.table.columns.map(({ id }) => id);
   const values: Primitive[] = [];
   const keys: string[] = [];
-  // for (const column of data.table.columns) {
-  //   values.push(column.name);
-  // }
+
+  for (const columnId of columns) {
+    const column = data.table.columns.find(({ id }) => id === columnId);
+    if (!column) {
+      // This should never happe, but in case it does we log data necessary for debugging.
+      // eslint-disable-next-line no-console
+      console.error(data, embeddable ? `Embeddable [${embeddable.getTitle()}]` : null);
+      throw new Error('Could not find a datatable column.');
+    }
+    values.push(column.name);
+  }
+
   return {
     rowIndex: data.rowIndex,
     values,

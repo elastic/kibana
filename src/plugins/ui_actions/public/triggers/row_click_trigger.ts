@@ -37,7 +37,17 @@ export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'> = {
 export interface RowClickContext {
   embeddable?: IEmbeddable;
   data: {
+    /**
+     * Row index, starting from 0, where user clicked.
+     */
     rowIndex: number;
+
     table: Datatable;
+
+    /**
+     * Sorted list column IDs that were visible to the user. Useful when only
+     * a subset of datatable columns should be used.
+     */
+    columns?: string[];
   };
 }
