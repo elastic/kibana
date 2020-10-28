@@ -8,6 +8,7 @@ jest.mock('./api_keys');
 jest.mock('./authenticator');
 
 import Boom from 'boom';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   loggingSystemMock,
