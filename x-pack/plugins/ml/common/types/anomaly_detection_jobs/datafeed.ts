@@ -19,7 +19,9 @@ export interface Datafeed {
   job_id: JobId;
   query: object;
   query_delay?: string;
-  script_fields?: object;
+  script_fields?: {
+    [key: string]: any;
+  };
   scroll_size?: number;
   delayed_data_check_config?: object;
   indices_options?: IndicesOptions;
@@ -31,7 +33,7 @@ export interface ChunkingConfig {
 }
 
 export interface Aggregation {
-  buckets: {
+  [key: string]: {
     date_histogram: {
       field: string;
       fixed_interval: string;

@@ -177,7 +177,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           const accessor = Object.keys(aggFields)[0];
           const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
           if (tempAggs.hasOwnProperty(metricFieldName)) {
-            tempAggs.metric = aggFields[accessor].aggs[metricFieldName];
+            tempAggs.metric = tempAggs[metricFieldName];
             delete tempAggs[metricFieldName];
           }
           body.aggs.byTime.aggs = tempAggs;

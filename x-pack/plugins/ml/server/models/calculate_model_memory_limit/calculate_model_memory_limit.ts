@@ -47,7 +47,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    datafeedConfig: DatafeedOverride
+    datafeedConfig?: DatafeedOverride
   ): Promise<{
     overallCardinality: { [key: string]: number };
     maxBucketCardinality: { [key: string]: number };
@@ -142,7 +142,7 @@ export function calculateModelMemoryLimitProvider(client: IScopedClusterClient) 
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    datafeedConfig: DatafeedOverride,
+    datafeedConfig?: DatafeedOverride,
     allowMMLGreaterThanMax = false
   ): Promise<ModelMemoryEstimationResult> {
     const { body: info } = await asInternalUser.ml.info<MlInfoResponse>();

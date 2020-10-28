@@ -19,6 +19,7 @@ import {
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';
+import { DatafeedOverride } from '../../common/types/modules';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
@@ -47,7 +48,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       timeFieldName,
       earliestMs,
       latestMs,
-      datafeedConfig
+      datafeedConfig as DatafeedOverride
     );
   }
 

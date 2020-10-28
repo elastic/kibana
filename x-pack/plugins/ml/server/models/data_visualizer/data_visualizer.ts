@@ -15,6 +15,7 @@ import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../lib/query_utils';
+import { AggCardinality } from '../../../common/types/fields';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -118,12 +119,6 @@ interface AggHistogram {
   histogram: {
     field: string;
     interval: number;
-  };
-}
-
-interface AggCardinality {
-  cardinality: {
-    field: string;
   };
 }
 
@@ -614,12 +609,14 @@ export class DataVisualizer {
         filter: { exists: { field } },
       };
 
-      let cardinalField = {
-        cardinality: { field },
-      };
+      let cardinalField: AggCardinality;
       if (datafeedHasScriptFields && datafeedConfig?.script_fields.hasOwnProperty(field)) {
         cardinalField = aggs[`${safeFieldName}_cardinality`] = {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
+        };
+      } else {
+        cardinalField = {
+          cardinality: { field },
         };
       }
 

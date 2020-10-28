@@ -10,6 +10,7 @@ import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { DatafeedOverride } from '../../../common/types/modules';
+import { AggCardinality } from '../../../common/types/fields';
 
 /**
  * Service for carrying out queries to obtain data
@@ -37,7 +38,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   async function getAggregatableFields(
     index: string | string[],
     fieldNames: string[],
-    datafeedConfig: DatafeedOverride
+    datafeedConfig?: DatafeedOverride
   ): Promise<string[]> {
     const { body } = await asCurrentUser.fieldCaps({
       index,
@@ -76,7 +77,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    datafeedConfig: DatafeedOverride
+    datafeedConfig?: DatafeedOverride
   ): Promise<{ [key: string]: number }> {
     const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
@@ -122,17 +123,22 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       mustCriteria.push(query);
     }
 
-    const aggs = fieldsToAgg.reduce((obj, field) => {
-      if (
-        typeof datafeedConfig?.script_fields === 'object' &&
-        datafeedConfig.script_fields.hasOwnProperty(field)
-      ) {
-        obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
-      } else {
-        obj[field] = { cardinality: { field } };
+    const aggs = fieldsToAgg.reduce(
+      (obj, field) => {
+        if (
+          typeof datafeedConfig?.script_fields === 'object' &&
+          datafeedConfig.script_fields.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
+        } else {
+          obj[field] = { cardinality: { field } };
+        }
+        return obj;
+      },
+      {} as {
+        [field: string]: AggCardinality;
       }
-      return obj;
-    }, {} as { [field: string]: { cardinality: { field: string } } });
+    );
 
     const body = {
       query: {
