@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { Plugin } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { UiComponent } from 'src/plugins/kibana_utils/public';

@@ -12,7 +12,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { OVERVIEW_URL } from '../urls/navigation';
 import { esArchiverUnload, esArchiverLoad } from '../tasks/es_archiver';
 
-describe('Overview Page', () => {
+describe.skip('Overview Page', () => {
   before(() => {
     cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
     cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
@@ -35,7 +35,7 @@ describe('Overview Page', () => {
     });
   });
 
-  describe('with no data', () => {
+  describe.skip('with no data', () => {
     before(() => {
       esArchiverUnload('auditbeat');
       loginAndWaitForPage(OVERVIEW_URL);
