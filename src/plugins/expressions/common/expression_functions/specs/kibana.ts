@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { ExpressionValueSearchContext } from '../../expression_types';
-import { MigrateFunction } from '../../../../kibana_utils/common/persistable_state';
 
 const toArray = <T>(query: undefined | T | T[]): T[] =>
   !query ? [] : Array.isArray(query) ? query : [query];
@@ -33,23 +32,6 @@ export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
   ExpressionValueSearchContext
 >;
 
-type MYSTATE_7_10_0 = {
-  name: 'kibana';
-  args: {};
-};
-
-type MYSTATE_7_10_1 = {
-  name: 'kibana_input';
-  args: {};
-};
-
-const MIGRATE7_10_1: MigrateFunction<MYSTATE_7_10_0, MYSTATE_7_10_1> = (state) => {
-  return {
-    name: 'kibana_input',
-    args: state.args,
-  };
-};
-
 export const kibana: ExpressionFunctionKibana = {
   name: 'kibana',
   type: 'kibana_context',
@@ -61,10 +43,6 @@ export const kibana: ExpressionFunctionKibana = {
   }),
 
   args: {},
-
-  migrations: {
-    '7.10.1': (MIGRATE7_10_1 as any) as MigrateFunction,
-  },
 
   fn(input, _, { getSearchContext }) {
     const output: ExpressionValueSearchContext = {

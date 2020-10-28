@@ -304,20 +304,20 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
   };
 
   /**
-   * Injects saved object references into expression AST
+   * Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1)
    * @param state expression AST to update
-   * @param references array of saved object references
-   * @returns new expression AST with references injected
+   * @param version defines which migration version to run
+   * @returns new migrated expression AST
    */
   public readonly migrate = (state: SerializableState, version: string) => {
     return this.executor.migrate(state, version);
   };
 
   /**
-   * Injects saved object references into expression AST
+   * Migrates expression to the latest version
    * @param state expression AST to update
-   * @param references array of saved object references
-   * @returns new expression AST with references injected
+   * @param version the version of kibana in which expression was created
+   * @returns migrated expression AST
    */
   public readonly migrateToLatest = (state: unknown, version: string) => {
     return this.executor.migrateToLatest(state, version);

@@ -90,8 +90,11 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 
 const semverGte = (semver1: string, semver2: string) => {
   const regex = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/;
-  const [major1, minor1, patch1] = semver1.match(regex) as RegExpMatchArray;
-  const [major2, minor2, patch2] = semver2.match(regex) as RegExpMatchArray;
+  const matches1 = regex.exec(semver1) as RegExpMatchArray;
+  const matches2 = regex.exec(semver2) as RegExpMatchArray;
+
+  const [, major1, minor1, patch1] = matches1;
+  const [, major2, minor2, patch2] = matches2;
 
   return (
     major1 > major2 ||
@@ -260,17 +263,22 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return telemetryData;
   }
 
-  migrate(ast: SerializableState, version: string) {
+  public migrate(ast: SerializableState, version: string) {
     return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
-      link = fn.migrations[version](link) as ExpressionAstFunction;
+      if (!fn.migrations[version]) return link;
+      const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;
+      link.arguments = updatedAst.arguments;
+      link.type = updatedAst.type;
     });
   }
 
-  migrateToLatest(ast: unknown, version: string) {
+  public migrateToLatest(ast: unknown, version: string) {
     return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
-      for (const key in Object.keys(fn.migrations)) {
+      for (const key of Object.keys(fn.migrations)) {
         if (semverGte(key, version)) {
-          link = fn.migrations[key](link) as ExpressionAstFunction;
+          const updatedAst = fn.migrations[key](link) as ExpressionAstFunction;
+          link.arguments = updatedAst.arguments;
+          link.type = updatedAst.type;
         }
       }
     });
