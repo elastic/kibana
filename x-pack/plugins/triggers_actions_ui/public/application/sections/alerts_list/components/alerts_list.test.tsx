@@ -18,6 +18,7 @@ import { chartPluginMock } from '../../../../../../../../src/plugins/charts/publ
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import { featuresPluginMock } from '../../../../../../features/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -96,6 +97,9 @@ describe('alerts_list component empty', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
+
     const deps = {
       chrome,
       docLinks,
@@ -111,6 +115,7 @@ describe('alerts_list component empty', () => {
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
+      kibanaFeatures,
     };
 
     wrapper = mountWithIntl(
@@ -265,6 +270,7 @@ describe('alerts_list component with items', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
     const deps = {
       chrome,
       docLinks,
@@ -280,6 +286,7 @@ describe('alerts_list component with items', () => {
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
+      kibanaFeatures,
     };
 
     alertTypeRegistry.has.mockReturnValue(true);
@@ -346,6 +353,7 @@ describe('alerts_list component empty with show only capability', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
     const deps = {
       chrome,
       docLinks,
@@ -365,6 +373,7 @@ describe('alerts_list component empty with show only capability', () => {
         },
       } as any,
       alertTypeRegistry: {} as any,
+      kibanaFeatures,
     };
 
     wrapper = mountWithIntl(
@@ -465,6 +474,7 @@ describe('alerts_list with show only capability', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
     const deps = {
       chrome,
       docLinks,
@@ -480,6 +490,7 @@ describe('alerts_list with show only capability', () => {
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
+      kibanaFeatures,
     };
 
     alertTypeRegistry.has.mockReturnValue(false);
