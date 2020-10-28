@@ -128,7 +128,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         viewRelations: true,
       },
     });
-
-    //
   });
 }

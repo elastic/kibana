@@ -124,7 +124,18 @@ export const TagTable: FC<TagTableProps> = ({
         if (relationCount < 1) {
           return undefined;
         }
-        return (
+
+        const columnText = (
+          <span data-test-subj="tagsTableRowConnectionsText">
+            <FormattedMessage
+              id="xpack.savedObjectsTagging.management.table.content.connectionCount"
+              defaultMessage="{relationCount, plural, one {1 app object} other {# app objects}}"
+              values={{ relationCount }}
+            />
+          </span>
+        );
+
+        return capabilities.viewConnections ? (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink
             data-test-subj="tagsTableRowConnectionsLink"
@@ -136,12 +147,10 @@ export const TagTable: FC<TagTableProps> = ({
               }
             }}
           >
-            <FormattedMessage
-              id="xpack.savedObjectsTagging.management.table.content.connectionCount"
-              defaultMessage="{relationCount, plural, one {1 app object} other {# app objects}}"
-              values={{ relationCount }}
-            />
+            {columnText}
           </EuiLink>
+        ) : (
+          columnText
         );
       },
     },

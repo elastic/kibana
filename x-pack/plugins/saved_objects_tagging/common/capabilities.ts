@@ -16,15 +16,17 @@ export interface TagsCapabilities {
   edit: boolean;
   delete: boolean;
   assign: boolean;
+  viewConnections: boolean;
 }
 
 export const getTagsCapabilities = (capabilities: Capabilities): TagsCapabilities => {
-  const rawCapabilities = capabilities[tagFeatureId];
+  const rawTagCapabilities = capabilities[tagFeatureId];
   return {
-    view: (rawCapabilities?.view as boolean) ?? false,
-    create: (rawCapabilities?.create as boolean) ?? false,
-    edit: (rawCapabilities?.edit as boolean) ?? false,
-    delete: (rawCapabilities?.delete as boolean) ?? false,
-    assign: (rawCapabilities?.assign as boolean) ?? false,
+    view: (rawTagCapabilities?.view as boolean) ?? false,
+    create: (rawTagCapabilities?.create as boolean) ?? false,
+    edit: (rawTagCapabilities?.edit as boolean) ?? false,
+    delete: (rawTagCapabilities?.delete as boolean) ?? false,
+    assign: (rawTagCapabilities?.assign as boolean) ?? false,
+    viewConnections: (capabilities.savedObjectsManagement?.read as boolean) ?? false,
   };
 };

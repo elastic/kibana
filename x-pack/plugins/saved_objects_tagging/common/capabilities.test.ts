@@ -33,6 +33,7 @@ describe('getTagsCapabilities', () => {
       edit: false,
       delete: false,
       assign: true,
+      viewConnections: false,
     });
   });
 
@@ -43,6 +44,24 @@ describe('getTagsCapabilities', () => {
       edit: false,
       delete: false,
       assign: false,
+      viewConnections: false,
     });
+  });
+
+  it('populates `viewConnections` from the so management capabilities', () => {
+    expect(
+      getTagsCapabilities({
+        ...createCapabilities(undefined),
+        ...{
+          savedObjectsManagement: {
+            read: true,
+          },
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        viewConnections: true,
+      })
+    );
   });
 });
