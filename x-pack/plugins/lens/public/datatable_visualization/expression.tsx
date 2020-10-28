@@ -321,17 +321,18 @@ export function DatatableComponent(props: DatatableRenderProps) {
                 }),
                 type: 'icon',
                 icon: 'boxesVertical',
-                onClick: () => {
+                onClick: ({ rowIndex }) => {
                   onRowContextMenuClick({
-                    rowIndex: 0,
+                    rowIndex,
                     table: firstTable,
+                    columns: props.args.columns.columnIds,
                   });
                 },
               },
             ],
           },
         ]}
-        items={firstTable ? firstTable.rows : []}
+        items={firstTable ? firstTable.rows.map((row, rowIndex) => ({ ...row, rowIndex })) : []}
       />
     </VisualizationContainer>
   );
