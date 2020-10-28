@@ -120,4 +120,16 @@ describe('convertRequestToMetricsAPIOptions', () => {
       metrics: [],
     });
   });
+
+  it('should work with empty field', () => {
+    expect(
+      convertRequestToMetricsAPIOptions({
+        ...BASE_REQUEST,
+        metrics: [{ aggregation: 'avg' }],
+      })
+    ).toEqual({
+      ...BASE_METRICS_UI_OPTIONS,
+      metrics: [],
+    });
+  });
 });
