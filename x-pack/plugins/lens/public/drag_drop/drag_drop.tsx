@@ -323,6 +323,8 @@ const getKeyboardReorderMessageLifted = (position: number) =>
     },
   });
 
+const lnsLayerPanelDimensionMargin = 4;
+
 export const ReorderableDragDrop = ({
   draggingProps,
   dropProps,
@@ -355,15 +357,16 @@ export const ReorderableDragDrop = ({
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
 
+  const { isKeyboardReorderOn, reorderedItems, draggingHeight, direction } = reorderState;
+
   const groupLength = itemsInGroup.length;
 
   const currentIndex = itemsInGroup.indexOf(id);
 
   const draggingClasses = classNames(
     draggingProps.className,
-    reorderState && {
-      [reorderState.className]: reorderState.reorderedItems.includes(id),
-      'lnsDragDrop-isKeyboardModeActive': reorderState.isKeyboardReorderOn,
+    {
+      'lnsDragDrop-isKeyboardModeActive': isKeyboardReorderOn,
     },
     {
       'lnsDragDrop-isReorderable': draggingProps.isReorderDragging,
@@ -389,8 +392,8 @@ export const ReorderableDragDrop = ({
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
               setReorderState({
                 ...reorderState,
-                isKeyboardReorderOn: !reorderState.isKeyboardReorderOn,
-                keyboardReorderMessage: reorderState.isKeyboardReorderOn
+                isKeyboardReorderOn: !isKeyboardReorderOn,
+                keyboardReorderMessage: isKeyboardReorderOn
                   ? ''
                   : getKeyboardReorderMessageLifted(currentIndex),
               });
@@ -401,7 +404,7 @@ export const ReorderableDragDrop = ({
                 keyboardReorderMessage: '',
               });
             }
-            if (reorderState.isKeyboardReorderOn) {
+            if (isKeyboardReorderOn) {
               e.stopPropagation();
               e.preventDefault();
 
@@ -438,11 +441,17 @@ export const ReorderableDragDrop = ({
         onDragStart: (e: DroppableEvent) => {
           setReorderState({
             ...reorderState,
+            draggingHeight: e.currentTarget.offsetHeight + lnsLayerPanelDimensionMargin,
           });
           draggingProps.onDragStart(e);
         },
         ['data-test-subj']: draggingProps.dataTestSubj,
         className: draggingClasses,
+        style: reorderedItems.includes(id)
+          ? {
+              transform: `translateY(${direction}${draggingHeight}px)`,
+            }
+          : {},
       })}
       <div
         data-test-subj="lnsDragDrop-reorderableDrop"
@@ -479,12 +488,12 @@ export const ReorderableDragDrop = ({
                 ? {
                     ...reorderState,
                     reorderedItems: itemsInGroup.slice(draggingIndex + 1, droppingIndex + 1),
-                    className: 'lnsDragDrop-isReorderable--up',
+                    direction: '-',
                   }
                 : {
                     ...reorderState,
                     reorderedItems: itemsInGroup.slice(droppingIndex, draggingIndex),
-                    className: 'lnsDragDrop-isReorderable--down',
+                    direction: '+',
                   }
             );
           }

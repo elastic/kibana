@@ -100,9 +100,13 @@ interface ReorderState {
   reorderedItems: string[];
 
   /**
-   * Class responsible for transform (translation)
+   * Direction of the move of dragged element in the reordered list
    */
-  className: 'lnsDragDrop-isReorderable--down' | 'lnsDragDrop-isReorderable--up';
+  direction: '-' | '+';
+  /**
+   * height of the dragged element
+   */
+  draggingHeight: number;
   /**
    * indicates that user is in keyboard mode
    */
@@ -121,7 +125,8 @@ export interface ReorderContextState {
 export const ReorderContext = React.createContext<ReorderContextState>({
   reorderState: {
     reorderedItems: [],
-    className: 'lnsDragDrop-isReorderable--down',
+    direction: '-',
+    draggingHeight: 40,
     isKeyboardReorderOn: false,
     keyboardReorderMessage: '',
   },
@@ -130,9 +135,10 @@ export const ReorderContext = React.createContext<ReorderContextState>({
 
 export function ReorderProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
-    isKeyboardReorderOn: false,
     reorderedItems: [],
-    className: 'lnsDragDrop-isReorderable--down',
+    direction: '-',
+    draggingHeight: 40,
+    isKeyboardReorderOn: false,
     keyboardReorderMessage: '',
   });
   const setReorderState = useMemo(() => (reorderState: ReorderState) => setState(reorderState), [

@@ -300,23 +300,17 @@ describe('DragDrop', () => {
       jest.runAllTimers();
 
       component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragover');
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(0).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
-      );
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable--up lnsDragDrop-isReorderable'
-      );
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable--up lnsDragDrop-isReorderable'
-      );
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(0).prop('style')).toEqual({});
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('style')).toEqual({
+        transform: 'translateY(-4px)',
+      });
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('style')).toEqual({
+        transform: 'translateY(-4px)',
+      });
 
       component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragleave');
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
-      );
-      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('className')).toEqual(
-        'lnsDragDrop lnsDragDrop-isDraggable lnsDragDrop-isReorderable'
-      );
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('style')).toEqual({});
+      expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('style')).toEqual({});
     });
     test(`Dropping an item runs onDrop function`, () => {
       const preventDefault = jest.fn();
