@@ -5051,7 +5051,6 @@
     "xpack.apm.rum.jsErrors.errorRateValue": "{errorRate} %",
     "xpack.apm.rum.jsErrors.impactedPageLoads": "影響を受けるページ読み込み数",
     "xpack.apm.rum.jsErrors.totalErrors": "合計エラー数",
-    "xpack.apm.rum.userExperienceMetrics": "ユーザーエクスペリエンスメトリック",
     "xpack.apm.rum.uxMetrics.longestLongTasks": "最長タスク時間",
     "xpack.apm.rum.uxMetrics.noOfLongTasks": "時間がかかるタスク数",
     "xpack.apm.rum.uxMetrics.sumLongTasks": "時間がかかるタスクの合計時間",
