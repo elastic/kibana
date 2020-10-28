@@ -31,6 +31,7 @@ describe('KeyUXMetrics', () => {
           lcpRanks: [69, 17, 14],
           fidRanks: [83, 6, 11],
           clsRanks: [90, 7, 3],
+          coreVitalPages: 1000,
         }}
       />
     );
