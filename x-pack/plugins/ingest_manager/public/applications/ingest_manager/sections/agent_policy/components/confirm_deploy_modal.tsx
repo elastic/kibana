@@ -21,7 +21,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       <EuiConfirmModal
         title={
           <FormattedMessage
-            id="xpack.ingestManager.agentPolicy.confirmModalTitle"
+            id="xpack.fleet.agentPolicy.confirmModalTitle"
             defaultMessage="Save and deploy changes"
           />
         }
@@ -29,13 +29,13 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
         onConfirm={onConfirm}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.agentPolicy.confirmModalCancelButtonLabel"
+            id="xpack.fleet.agentPolicy.confirmModalCancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
         confirmButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.agentPolicy.confirmModalConfirmButtonLabel"
+            id="xpack.fleet.agentPolicy.confirmModalConfirmButtonLabel"
             defaultMessage="Save and deploy changes"
           />
         }
@@ -43,7 +43,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       >
         <EuiCallOut
           iconType="iInCircle"
-          title={i18n.translate('xpack.ingestManager.agentPolicy.confirmModalCalloutTitle', {
+          title={i18n.translate('xpack.fleet.agentPolicy.confirmModalCalloutTitle', {
             defaultMessage:
               'This action will update {agentCount, plural, one {# agent} other {# agents}}',
             values: {
@@ -53,7 +53,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
         >
           <div className="eui-textBreakWord">
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicy.confirmModalCalloutDescription"
+              id="xpack.fleet.agentPolicy.confirmModalCalloutDescription"
               defaultMessage="Fleet has detected that the selected agent policy, {policyName}, is already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
             that use this policy."
@@ -65,7 +65,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
         </EuiCallOut>
         <EuiSpacer size="l" />
         <FormattedMessage
-          id="xpack.ingestManager.agentPolicy.confirmModalDescription"
+          id="xpack.fleet.agentPolicy.confirmModalDescription"
           defaultMessage="This action can not be undone. Are you sure you wish to continue?"
         />
       </EuiConfirmModal>
