@@ -11,7 +11,7 @@
       "jest"
     ]
   },
-  "include": ["index.ts", "test/**/*", "test-d/**/*"],
+  "include": ["index.ts", "jest/**/*", "test-d/**/*"],
   "exclude": [
     "target"
   ]

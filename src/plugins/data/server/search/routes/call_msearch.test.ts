@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { DeeplyMockedKeys } from '@kbn/utility-types/test';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { Observable } from 'rxjs';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 

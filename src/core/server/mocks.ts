@@ -19,7 +19,7 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { MockedKeys } from '@kbn/utility-types/test';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
