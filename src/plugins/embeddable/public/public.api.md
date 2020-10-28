@@ -693,6 +693,11 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
     updateInput(changes: Partial<I>): void;
 }
 
+// Warning: (ae-missing-release-tag) "isContextMenuTriggerContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isContextMenuTriggerContext: (context: unknown) => context is EmbeddableContext;
+
 // Warning: (ae-missing-release-tag) "isErrorEmbeddable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -882,7 +887,7 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 // src/plugins/embeddable/common/types.ts:59:3 - (ae-forgotten-export) The symbol "TimeRange" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/common/types.ts:64:3 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/common/types.ts:69:3 - (ae-forgotten-export) The symbol "Filter" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/public/lib/triggers/triggers.ts:45:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/public/lib/triggers/triggers.ts:46:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
