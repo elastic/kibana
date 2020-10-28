@@ -13,6 +13,7 @@ $visLegendLineHeight: $euiSize;
   left: 0;
   display: flex;
   padding: $euiSizeXS;
+  margin: $euiSizeS;
   background-color: $euiColorEmptyShade;
   transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance, background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
