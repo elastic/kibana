@@ -36,11 +36,6 @@ export interface ISearchOptions {
    * A session ID, grouping multiple search requests into a single session.
    */
   sessionId?: string;
-
-  /**
-   *  If this option is true, the stream will be completed only upon receiving is_partial = false and is_running = false
-   */
-  waitForCompletion?: boolean;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {

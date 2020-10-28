@@ -90,9 +90,7 @@ describe('AbstractSearchStrategy', () => {
         },
         indexType: undefined,
       },
-      {
-        waitForCompletion: true,
-      },
+      {},
       {}
     );
   });

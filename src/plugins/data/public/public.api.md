@@ -1400,7 +1400,6 @@ export interface ISearchOptions {
     abortSignal?: AbortSignal;
     sessionId?: string;
     strategy?: string;
-    waitForCompletion?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

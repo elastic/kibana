@@ -131,15 +131,7 @@ export default new Datasource('es', {
 
     const deps = (await tlConfig.getStartServices())[1];
 
-    const resp = await deps.data.search
-      .search(
-        body,
-        {
-          waitForCompletion: true,
-        },
-        tlConfig.context
-      )
-      .toPromise();
+    const resp = await deps.data.search.search(body, {}, tlConfig.context).toPromise();
     if (!resp.rawResponse._shards.total) {
       throw new Error(
         i18n.translate('timelion.serverSideErrors.esFunction.indexNotFoundErrorMessage', {

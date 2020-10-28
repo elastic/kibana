@@ -68,7 +68,6 @@ export class AbstractSearchStrategy {
               indexType: this.indexType,
             },
             {
-              waitForCompletion: true,
               ...options,
             },
             req.requestContext

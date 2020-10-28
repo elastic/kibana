@@ -81,7 +81,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       isCompleteResponse,
       (response) => response.id,
       id,
-      { pollInterval, waitForCompletion: true }
+      { pollInterval }
     ).pipe(
       tap((r) => {
         // If the response indicates of an error, stop polling and complete the observable

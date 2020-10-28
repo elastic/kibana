@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interval, of, merge } from 'rxjs';
-import { concatMap, takeWhile } from 'rxjs/operators';
+import { of, merge, timer } from 'rxjs';
+import { takeWhile, switchMap, expand, mergeMap } from 'rxjs/operators';
 
-import { doSearch, IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
-import { IAsyncSearchOptions } from '../../../common/search/types';
+import { doSearch } from '../../../../../../src/plugins/data/common';
+import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
+import type { IAsyncSearchOptions } from '../../../common/search/types';
 
 const DEFAULT_POLLING_INTERVAL = 1000;
 
@@ -18,24 +19,24 @@ export const doPartialSearch = <SearchResponse = any>(
   isCompleted: (response: SearchResponse) => boolean,
   getId: (response: SearchResponse) => IKibanaSearchRequest['id'],
   requestId: IKibanaSearchRequest['id'],
-  { abortSignal, pollInterval, waitForCompletion }: IAsyncSearchOptions
+  { abortSignal, pollInterval }: IAsyncSearchOptions
 ) => {
   const partialSearch = (id: IKibanaSearchRequest['id']) => {
-    if (waitForCompletion) {
-      return interval(pollInterval ?? DEFAULT_POLLING_INTERVAL).pipe(
-        concatMap(() => doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal)),
-        takeWhile((response) => !isCompleted(response), true)
-      );
-    } else {
-      return doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal);
-    }
+    return doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal).pipe(
+      expand(() =>
+        timer(pollInterval ?? DEFAULT_POLLING_INTERVAL).pipe(
+          switchMap(() => partialSearchMethod(id))
+        )
+      ),
+      takeWhile((response) => !isCompleted(response), true)
+    );
   };
 
   return requestId
     ? partialSearch(requestId)
     : doSearch<SearchResponse>(searchMethod, abortSignal).pipe(
-        concatMap((response) =>
-          waitForCompletion && !isCompleted(response)
+        mergeMap((response) =>
+          !isCompleted(response)
             ? merge(of(response), partialSearch(getId(response)))
             : of(response)
         )

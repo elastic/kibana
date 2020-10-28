@@ -56,17 +56,7 @@ export function validateEsRoute(router: IRouter, core: CoreSetup) {
 
       let resp;
       try {
-        resp = (
-          await deps.data.search
-            .search(
-              body,
-              {
-                waitForCompletion: true,
-              },
-              context
-            )
-            .toPromise()
-        ).rawResponse;
+        resp = (await deps.data.search.search(body, {}, context).toPromise()).rawResponse;
       } catch (errResp) {
         resp = errResp;
       }
