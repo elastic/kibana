@@ -23,10 +23,11 @@
   "severity": "medium",
   "tags": [
     "Elastic",
+    "Cloud",
     "Azure",
-    "SecOps",
     "Continuous Monitoring",
-    "Network"
+    "SecOps",
+    "Network Security"
   ],
   "threat": [
     {
