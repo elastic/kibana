@@ -102,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(action.type).to.be('POLICY_CHANGE');
         const agentPolicy = action.data.policy;
         expect(agentPolicy.id).to.be(policyId);
-        // should have system inputes
+        // should have system inputs
         expect(agentPolicy.inputs).length(2);
         // should have default output
         expect(agentPolicy.outputs.default).not.empty();
