@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AuthenticatedUser } from '../../../common/model';
 
@@ -31,23 +36,19 @@ export const PersonalInfo = (props: Props) => {
         />
       }
     >
-      <EuiFormRow fullWidth>
-        <EuiText size="s">
-          <dl>
-            <dt title="username" data-test-subj="username">
-              {props.user.username}
-            </dt>
-            <dd title="email" data-test-subj="email">
-              {props.user.email || (
-                <FormattedMessage
-                  id="xpack.security.account.noEmailMessage"
-                  defaultMessage="no email address"
-                />
-              )}
-            </dd>
-          </dl>
-        </EuiText>
-      </EuiFormRow>
+      <EuiDescriptionList>
+        <EuiDescriptionListTitle title="username" data-test-subj="username">
+          {props.user.username}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription title="email" data-test-subj="email">
+          {props.user.email || (
+            <FormattedMessage
+              id="xpack.security.account.noEmailMessage"
+              defaultMessage="No email address"
+            />
+          )}
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
     </EuiDescribedFormGroup>
   );
 };

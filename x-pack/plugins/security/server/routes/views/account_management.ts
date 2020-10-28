@@ -13,4 +13,12 @@ export function defineAccountManagementRoutes({ httpResources }: RouteDefinition
   httpResources.register({ path: '/security/account', validate: false }, (context, req, res) =>
     res.renderCoreApp()
   );
+  httpResources.register(
+    { path: '/security/account/api-keys', validate: false },
+    (context, req, res) => res.renderCoreApp()
+  );
+  httpResources.register(
+    { path: '/security/account/api-keys/create', validate: false },
+    (context, req, res) => res.renderCoreApp()
+  );
 }

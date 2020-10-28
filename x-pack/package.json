@@ -228,7 +228,7 @@
     "react-syntax-highlighter": "^5.7.0",
     "react-test-renderer": "^16.12.0",
     "react-tiny-virtual-list": "^2.2.0",
-    "react-use": "^13.27.0",
+    "react-use": "^15.3.4",
     "react-virtualized": "^9.21.2",
     "react-vis": "^1.8.1",
     "react-visibility-sensor": "^5.1.1",
