@@ -186,3 +186,28 @@ export const createDataStreamPayload = (name: string): DataStream => ({
   storageSize: '1b',
   maxTimeStamp: 420,
 });
+
+export const createDataStreamBackingIndex = (indexName: string, dataStreamName: string) => ({
+  health: '',
+  status: '',
+  primary: '',
+  replica: '',
+  documents: '',
+  documents_deleted: '',
+  size: '',
+  primary_size: '',
+  name: indexName,
+  data_stream: dataStreamName,
+});
+
+export const createNonDataStreamIndex = (name: string) => ({
+  health: 'green',
+  status: 'open',
+  primary: 1,
+  replica: 1,
+  documents: 10000,
+  documents_deleted: 100,
+  size: '156kb',
+  primary_size: '156kb',
+  name,
+});

@@ -17,5 +17,16 @@
  * under the License.
  */
 
-export { extractQueryParams } from './extract_query_params';
-export { attemptToURIDecode } from './attempt_to_uri_decode';
+/*
+ * Use this function with any match params coming from react router to safely decode values.
+ * https://github.com/elastic/kibana/pull/81664
+ */
+export const attemptToURIDecode = (value: string) => {
+  let result = value;
+  try {
+    result = decodeURIComponent(value);
+  } catch (e) {
+    // do nothing
+  }
+  return result;
+};
