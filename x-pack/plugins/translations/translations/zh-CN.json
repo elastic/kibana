@@ -5044,7 +5044,6 @@
     "xpack.apm.rum.filters.url.noResults": "没有可用结果",
     "xpack.apm.rum.jsErrors.errorMessage": "错误消息",
     "xpack.apm.rum.jsErrors.errorRate": "错误率",
-    "xpack.apm.rum.jsErrors.errorRateValue": "{errorRate}%",
     "xpack.apm.rum.jsErrors.impactedPageLoads": "受影响的页面加载",
     "xpack.apm.rum.jsErrors.totalErrors": "错误总数",
     "xpack.apm.rum.uxMetrics.longestLongTasks": "长期任务最长持续时间",
