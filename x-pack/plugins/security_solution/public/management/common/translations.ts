@@ -29,7 +29,7 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
     defaultMessage: 'Windows',
   }),
   macos: i18n.translate('xpack.securitySolution.administration.os.macos', {
-    defaultMessage: 'Mac OS',
+    defaultMessage: 'Mac',
   }),
   linux: i18n.translate('xpack.securitySolution.administration.os.linux', {
     defaultMessage: 'Linux',
