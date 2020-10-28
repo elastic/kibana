@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ColdPhase, DeletePhase, LegacyPolicy, PolicyFromES } from '../../../../common/types';
-import { validateColdPhase } from './cold_phase';
+import { DeletePhase, LegacyPolicy, PolicyFromES } from '../../../../common/types';
 import { validateDeletePhase } from './delete_phase';
 
 export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
@@ -82,7 +81,6 @@ export type PhaseValidationErrors<T> = {
 };
 
 export interface ValidationErrors {
-  cold: PhaseValidationErrors<ColdPhase>;
   delete: PhaseValidationErrors<DeletePhase>;
   policyName: string[];
 }
@@ -120,17 +118,12 @@ export const validatePolicy = (
     }
   }
 
-  const coldPhaseErrors = validateColdPhase(policy.phases.cold);
   const deletePhaseErrors = validateDeletePhase(policy.phases.delete);
-  const isValid =
-    policyNameErrors.length === 0 &&
-    Object.keys(coldPhaseErrors).length === 0 &&
-    Object.keys(deletePhaseErrors).length === 0;
+  const isValid = policyNameErrors.length === 0 && Object.keys(deletePhaseErrors).length === 0;
   return [
     isValid,
     {
       policyName: [...policyNameErrors],
-      cold: coldPhaseErrors,
       delete: deletePhaseErrors,
     },
   ];
@@ -145,9 +138,6 @@ export const findFirstError = (errors?: ValidationErrors): string | undefined =>
     return propertyof<ValidationErrors>('policyName');
   }
 
-  if (Object.keys(errors.cold).length > 0) {
-    return `${propertyof<ValidationErrors>('cold')}.${Object.keys(errors.cold)[0]}`;
-  }
   if (Object.keys(errors.delete).length > 0) {
     return `${propertyof<ValidationErrors>('delete')}.${Object.keys(errors.delete)[0]}`;
   }

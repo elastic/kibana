@@ -60,13 +60,13 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
         iconType="cheer"
         title={
           <FormattedMessage
-            id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle"
+            id="xpack.fleet.homeIntegration.tutorialDirectory.noticeTitle"
             defaultMessage="{newPrefix} Elastic Agent and Fleet Beta"
             values={{
               newPrefix: (
                 <strong>
                   <FormattedMessage
-                    id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle.newPrefix"
+                    id="xpack.fleet.homeIntegration.tutorialDirectory.noticeTitle.newPrefix"
                     defaultMessage="New:"
                   />
                 </strong>
@@ -77,7 +77,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
       >
         <p>
           <FormattedMessage
-            id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText"
+            id="xpack.fleet.homeIntegration.tutorialDirectory.noticeText"
             defaultMessage="The Elastic Agent provides a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts.
                 You no longer need to install multiple Beats and other agents, which makes it easier and faster to deploy policies across your infrastructure.
                 For more information, read our {blogPostLink}."
@@ -85,7 +85,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
               blogPostLink: (
                 <EuiLink href="https://ela.st/ingest-manager-announcement" external target="_blank">
                   <FormattedMessage
-                    id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText.blogPostLink"
+                    id="xpack.fleet.homeIntegration.tutorialDirectory.noticeText.blogPostLink"
                     defaultMessage="announcement blog post"
                   />
                 </EuiLink>
@@ -98,7 +98,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
             <div>
               <EuiButton size="s" href={getHref('overview')}>
                 <FormattedMessage
-                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.fleetAppButtonText"
+                  id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
                   defaultMessage="Try Fleet Beta"
                 />
               </EuiButton>
@@ -113,7 +113,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.dismissNoticeButtonText"
+                  id="xpack.fleet.homeIntegration.tutorialDirectory.dismissNoticeButtonText"
                   defaultMessage="Dismiss message"
                 />
               </EuiButtonEmpty>
