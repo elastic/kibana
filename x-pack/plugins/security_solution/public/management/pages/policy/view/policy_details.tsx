@@ -36,6 +36,7 @@ import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
 import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
+import { RegisteredAV } from './policy_forms/registered_av';
 import { useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
@@ -240,6 +241,8 @@ export const PolicyDetails = React.memo(() => {
         </EuiText>
 
         <EuiSpacer size="xs" />
+        <RegisteredAV />
+        <EuiSpacer size="l" />
         <WindowsEvents />
         <EuiSpacer size="l" />
         <MacEvents />

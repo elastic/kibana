@@ -36,10 +36,9 @@ export const ConfigForm: FC<{
    * Types of supported operating systems.
    */
   supportedOss: OperatingSystem[];
-  children: React.ReactNode;
-  dataTestSubj: string;
+  dataTestSubj?: string;
   /** React Node to be put on the right corner of the card */
-  rightCorner: ReactNode;
+  rightCorner?: ReactNode;
 }> = memo(({ type, supportedOss, children, dataTestSubj, rightCorner }) => {
   const typeTitle = useMemo(() => {
     return (
