@@ -100,16 +100,7 @@ describe('TaskManagerPlugin', () => {
         .pipe(take(1), bufferCount(1))
         .toPromise();
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
 
       expect(await availability).toEqual([true]);
     });
@@ -121,16 +112,7 @@ describe('TaskManagerPlugin', () => {
         .pipe(take(1), bufferCount(1))
         .toPromise();
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
 
       expect(await availability).toEqual([false]);
     });
@@ -142,16 +124,7 @@ describe('TaskManagerPlugin', () => {
         .pipe(take(1), bufferCount(1))
         .toPromise();
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
 
       expect(await availability).toEqual([false]);
     });
@@ -163,38 +136,11 @@ describe('TaskManagerPlugin', () => {
         .pipe(take(3), bufferCount(3))
         .toPromise();
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
 
       expect(await availability).toEqual([false, true, false]);
     });
@@ -206,64 +152,38 @@ describe('TaskManagerPlugin', () => {
         .pipe(take(3), bufferCount(3))
         .toPromise();
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
 
       // still false, so shouldn't emit a second time
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: true }));
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
 
       // shouldn't emit as already true
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.available,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
 
-      core$.next({
-        elasticsearch: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-        savedObjects: {
-          level: ServiceStatusLevels.unavailable,
-          summary: '',
-        },
-      });
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
 
       expect(await availability).toEqual([false, true, false]);
     });
   });
 });
+
+function mockCoreStatusAvailability({
+  elasticsearch,
+  savedObjects,
+}: {
+  elasticsearch: boolean;
+  savedObjects: boolean;
+}) {
+  return {
+    elasticsearch: {
+      level: elasticsearch ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
+      summary: '',
+    },
+    savedObjects: {
+      level: savedObjects ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
+      summary: '',
+    },
+  };
+}
