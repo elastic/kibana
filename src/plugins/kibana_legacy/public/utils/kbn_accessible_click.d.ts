@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { IServiceProvider } from 'angular';
+import { Injectable, IDirectiveFactory, IScope, IAttributes, IController } from 'angular';
 
-export type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
-
-export function PrivateProvider(): IServiceProvider;
+export const KbnAccessibleClickProvider: Injectable<IDirectiveFactory<
+  IScope,
+  JQLite,
+  IAttributes,
+  IController
+>>;
