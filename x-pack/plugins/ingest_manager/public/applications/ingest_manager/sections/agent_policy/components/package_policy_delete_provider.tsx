@@ -95,40 +95,28 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         if (successfulResults.length) {
           const hasMultipleSuccesses = successfulResults.length > 1;
           const successMessage = hasMultipleSuccesses
-            ? i18n.translate(
-                'xpack.ingestManager.deletePackagePolicy.successMultipleNotificationTitle',
-                {
-                  defaultMessage: 'Deleted {count} integrations',
-                  values: { count: successfulResults.length },
-                }
-              )
-            : i18n.translate(
-                'xpack.ingestManager.deletePackagePolicy.successSingleNotificationTitle',
-                {
-                  defaultMessage: "Deleted integration '{id}'",
-                  values: { id: successfulResults[0].name || successfulResults[0].id },
-                }
-              );
+            ? i18n.translate('xpack.fleet.deletePackagePolicy.successMultipleNotificationTitle', {
+                defaultMessage: 'Deleted {count} integrations',
+                values: { count: successfulResults.length },
+              })
+            : i18n.translate('xpack.fleet.deletePackagePolicy.successSingleNotificationTitle', {
+                defaultMessage: "Deleted integration '{id}'",
+                values: { id: successfulResults[0].name || successfulResults[0].id },
+              });
           notifications.toasts.addSuccess(successMessage);
         }
 
         if (failedResults.length) {
           const hasMultipleFailures = failedResults.length > 1;
           const failureMessage = hasMultipleFailures
-            ? i18n.translate(
-                'xpack.ingestManager.deletePackagePolicy.failureMultipleNotificationTitle',
-                {
-                  defaultMessage: 'Error deleting {count} integrations',
-                  values: { count: failedResults.length },
-                }
-              )
-            : i18n.translate(
-                'xpack.ingestManager.deletePackagePolicy.failureSingleNotificationTitle',
-                {
-                  defaultMessage: "Error deleting integration '{id}'",
-                  values: { id: failedResults[0].id },
-                }
-              );
+            ? i18n.translate('xpack.fleet.deletePackagePolicy.failureMultipleNotificationTitle', {
+                defaultMessage: 'Error deleting {count} integrations',
+                values: { count: failedResults.length },
+              })
+            : i18n.translate('xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle', {
+                defaultMessage: "Error deleting integration '{id}'",
+                values: { id: failedResults[0].id },
+              });
           notifications.toasts.addDanger(failureMessage);
         }
 
@@ -137,7 +125,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         }
       } catch (e) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.deletePackagePolicy.fatalErrorNotificationTitle', {
+          i18n.translate('xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle', {
             defaultMessage: 'Error deleting integration',
           })
         );
@@ -157,7 +145,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         <EuiConfirmModal
           title={
             <FormattedMessage
-              id="xpack.ingestManager.deletePackagePolicy.confirmModal.deleteMultipleTitle"
+              id="xpack.fleet.deletePackagePolicy.confirmModal.deleteMultipleTitle"
               defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
               values={{ count: packagePolicies.length }}
             />
@@ -166,19 +154,19 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           onConfirm={deletePackagePolicies}
           cancelButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.deletePackagePolicy.confirmModal.cancelButtonLabel"
+              id="xpack.fleet.deletePackagePolicy.confirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             isLoading || isLoadingAgentsCount ? (
               <FormattedMessage
-                id="xpack.ingestManager.deletePackagePolicy.confirmModal.loadingButtonLabel"
+                id="xpack.fleet.deletePackagePolicy.confirmModal.loadingButtonLabel"
                 defaultMessage="Loading…"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.deletePackagePolicy.confirmModal.confirmButtonLabel"
+                id="xpack.fleet.deletePackagePolicy.confirmModal.confirmButtonLabel"
                 defaultMessage="Delete {agentPoliciesCount, plural, one {integration} other {integrations}}"
                 values={{
                   agentPoliciesCount: packagePolicies.length,
@@ -191,7 +179,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         >
           {isLoadingAgentsCount ? (
             <FormattedMessage
-              id="xpack.ingestManager.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
+              id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
               defaultMessage="Checking affected agents…"
             />
           ) : agentsCount ? (
@@ -200,14 +188,14 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 color="danger"
                 title={
                   <FormattedMessage
-                    id="xpack.ingestManager.deletePackagePolicy.confirmModal.affectedAgentsTitle"
+                    id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsTitle"
                     defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
                     values={{ agentsCount }}
                   />
                 }
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
                   defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
                   values={{
                     agentPolicyName: <strong>{agentPolicy.name}</strong>,
@@ -219,7 +207,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           ) : null}
           {!isLoadingAgentsCount && (
             <FormattedMessage
-              id="xpack.ingestManager.deletePackagePolicy.confirmModal.generalMessage"
+              id="xpack.fleet.deletePackagePolicy.confirmModal.generalMessage"
               defaultMessage="This action can not be undone. Are you sure you wish to continue?"
             />
           )}
