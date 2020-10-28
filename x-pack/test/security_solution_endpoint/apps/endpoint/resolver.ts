@@ -273,6 +273,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.library'
         );
+        # This lines will move the resolver view for clear visability of the related events.
         for (let i = 0; i < 7; i++) {
           await (await testSubjects.find('resolver:graph-controls:west-button')).click();
         }
