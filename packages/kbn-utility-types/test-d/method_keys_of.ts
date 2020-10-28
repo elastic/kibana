@@ -17,26 +17,18 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { CoreContext } from './core_context';
-import { Env, IConfigService } from './config';
-import { configServiceMock, getEnvOptions } from './config/mocks';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { ILoggingSystem } from './logging';
+import { expectType } from 'tsd';
+import { MethodKeysOf } from '../index';
 
-function create({
-  env = Env.createDefault(REPO_ROOT, getEnvOptions()),
-  logger = loggingSystemMock.create(),
-  configService = configServiceMock.create(),
-}: {
-  env?: Env;
-  logger?: jest.Mocked<ILoggingSystem>;
-  configService?: jest.Mocked<IConfigService>;
-} = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
+class Test {
+  public name: string = '';
+  getName() {
+    return this.name;
+  }
+  // @ts-ignore
+  private getDoubleName() {
+    return this.name.repeat(2);
+  }
 }
 
-export const mockCoreContext = {
-  create,
-};
+expectType<MethodKeysOf<Test>>('getName');
