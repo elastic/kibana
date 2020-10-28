@@ -52,5 +52,6 @@ export interface DeletePackagePoliciesRequest {
 
 export type DeletePackagePoliciesResponse = Array<{
   id: string;
+  name?: string;
   success: boolean;
 }>;

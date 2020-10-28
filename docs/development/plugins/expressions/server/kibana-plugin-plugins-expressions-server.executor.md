@@ -29,7 +29,7 @@ export declare class Executor<Context extends Record<string, unknown> = Record<s
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [createExecution(ast, context, { debug })](./kibana-plugin-plugins-expressions-server.executor.createexecution.md) |  |  |
+|  [createExecution(ast, params)](./kibana-plugin-plugins-expressions-server.executor.createexecution.md) |  |  |
 |  [createWithDefaults(state)](./kibana-plugin-plugins-expressions-server.executor.createwithdefaults.md) | <code>static</code> |  |
 |  [extendContext(extraContext)](./kibana-plugin-plugins-expressions-server.executor.extendcontext.md) |  |  |
 |  [extract(ast)](./kibana-plugin-plugins-expressions-server.executor.extract.md) |  |  |
@@ -43,6 +43,6 @@ export declare class Executor<Context extends Record<string, unknown> = Record<s
 |  [migrateToLatest(ast, version)](./kibana-plugin-plugins-expressions-server.executor.migratetolatest.md) |  |  |
 |  [registerFunction(functionDefinition)](./kibana-plugin-plugins-expressions-server.executor.registerfunction.md) |  |  |
 |  [registerType(typeDefinition)](./kibana-plugin-plugins-expressions-server.executor.registertype.md) |  |  |
-|  [run(ast, input, context, options)](./kibana-plugin-plugins-expressions-server.executor.run.md) |  | Execute expression and return result. |
+|  [run(ast, input, params)](./kibana-plugin-plugins-expressions-server.executor.run.md) |  | Execute expression and return result. |
 |  [telemetry(ast, telemetryData)](./kibana-plugin-plugins-expressions-server.executor.telemetry.md) |  |  |
 

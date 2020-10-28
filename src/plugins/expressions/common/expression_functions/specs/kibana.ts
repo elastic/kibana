@@ -66,15 +66,15 @@ export const kibana: ExpressionFunctionKibana = {
     '7.10.1': (MIGRATE7_10_1 as any) as MigrateFunction,
   },
 
-  fn(input, _, { search = {} }) {
+  fn(input, _, { getSearchContext }) {
     const output: ExpressionValueSearchContext = {
       // TODO: This spread is left here for legacy reasons, possibly Lens uses it.
       // TODO: But it shouldn't be need.
       ...input,
       type: 'kibana_context',
-      query: [...toArray(search.query), ...toArray((input || {}).query)],
-      filters: [...(search.filters || []), ...((input || {}).filters || [])],
-      timeRange: search.timeRange || (input ? input.timeRange : undefined),
+      query: [...toArray(getSearchContext().query), ...toArray((input || {}).query)],
+      filters: [...(getSearchContext().filters || []), ...((input || {}).filters || [])],
+      timeRange: getSearchContext().timeRange || (input ? input.timeRange : undefined),
     };
 
     return output;

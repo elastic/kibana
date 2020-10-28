@@ -90,32 +90,31 @@ export type DatatableColumnType = '_source' | 'attachment' | 'boolean' | 'date' 
 export type DatatableRow = Record<string, any>;
 
 // Warning: (ae-forgotten-export) The symbol "Adapters" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ExpressionExecutionParams" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DefaultInspectorAdapters" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "Execution" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class Execution<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown, InspectorAdapters extends Adapters = ExtraContext['inspectorAdapters'] extends object ? ExtraContext['inspectorAdapters'] : DefaultInspectorAdapters> {
-    constructor(params: ExecutionParams<ExtraContext>);
+export class Execution<Input = unknown, Output = unknown, InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object ? ExpressionExecutionParams['inspectorAdapters'] : DefaultInspectorAdapters> {
+    constructor(execution: ExecutionParams);
     cancel(): void;
     // (undocumented)
     cast(value: any, toTypeNames?: string[]): any;
-    readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
-    readonly contract: ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>;
+    readonly context: ExecutionContext<InspectorAdapters>;
+    readonly contract: ExecutionContract<Input, Output, InspectorAdapters>;
+    // (undocumented)
+    readonly execution: ExecutionParams;
     // (undocumented)
     readonly expression: string;
     input: Input;
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
-    // Warning: (ae-forgotten-export) The symbol "ExpressionExecOptions" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T, options?: ExpressionExecOptions): Promise<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown>;
     // (undocumented)
     invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any>;
     // (undocumented)
     invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Promise<any>;
-    // (undocumented)
-    readonly params: ExecutionParams<ExtraContext>;
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<any>;
     // (undocumented)
@@ -134,15 +133,15 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // Warning: (ae-missing-release-tag) "ExecutionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ExecutionContext<Input = unknown, InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
     abortSignal: AbortSignal;
-    getInitialInput: () => Input;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
     getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;
-    inspectorAdapters: InspectorAdapters;
     // Warning: (ae-forgotten-export) The symbol "ExecutionContextSearch" needs to be exported by the entry point index.d.ts
-    search?: ExecutionContextSearch;
+    getSearchContext: () => ExecutionContextSearch;
+    getSearchSessionId: () => string | undefined;
+    inspectorAdapters: InspectorAdapters;
     types: Record<string, ExpressionType>;
     variables: Record<string, unknown>;
 }
@@ -150,11 +149,11 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters extends Ada
 // Warning: (ae-missing-release-tag) "ExecutionContract" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export class ExecutionContract<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown, InspectorAdapters = unknown> {
-    constructor(execution: Execution<ExtraContext, Input, Output, InspectorAdapters>);
+export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
+    constructor(execution: Execution<Input, Output, InspectorAdapters>);
     cancel: () => void;
     // (undocumented)
-    protected readonly execution: Execution<ExtraContext, Input, Output, InspectorAdapters>;
+    protected readonly execution: Execution<Input, Output, InspectorAdapters>;
     getAst: () => ExpressionAstExpression;
     getData: () => Promise<Output | ExpressionValueError>;
     getExpression: () => string;
@@ -166,16 +165,15 @@ export class ExecutionContract<ExtraContext extends Record<string, unknown> = Re
 // Warning: (ae-missing-release-tag) "ExecutionParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface ExecutionParams<ExtraContext extends Record<string, unknown> = Record<string, unknown>> {
+export interface ExecutionParams {
     // (undocumented)
     ast?: ExpressionAstExpression;
-    // (undocumented)
-    context?: ExtraContext;
-    debug?: boolean;
     // (undocumented)
     executor: Executor<any>;
     // (undocumented)
     expression?: string;
+    // (undocumented)
+    params: ExpressionExecutionParams;
 }
 
 // Warning: (ae-missing-release-tag) "ExecutionState" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -198,7 +196,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     // (undocumented)
     get context(): Record<string, unknown>;
     // (undocumented)
-    createExecution<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, context?: ExtraContext, { debug }?: ExpressionExecOptions): Execution<Context & ExtraContext, Input, Output>;
+    createExecution<Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, params?: ExpressionExecutionParams): Execution<Input, Output>;
     // (undocumented)
     static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(state?: ExecutorState<Ctx>): Executor<Ctx>;
     // (undocumented)
@@ -234,7 +232,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions): Promise<Output>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Promise<Output>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -625,12 +623,12 @@ export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | '
 //
 // @public
 export interface ExpressionsServiceStart {
-    execute: <Input = unknown, Output = unknown, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions) => ExecutionContract<ExtraContext, Input, Output>;
+    execute: <Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => ExecutionContract<Input, Output>;
     fork: () => ExpressionsService;
     getFunction: (name: string) => ReturnType<Executor['getFunction']>;
     getRenderer: (name: string) => ReturnType<ExpressionRendererRegistry['get']>;
     getType: (name: string) => ReturnType<Executor['getType']>;
-    run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions) => Promise<Output>;
+    run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Promise<Output>;
 }
 
 // Warning: (ae-missing-release-tag) "ExpressionsSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -905,6 +903,8 @@ export interface IExpressionLoaderParams {
     onRenderError?: RenderErrorHandlerFnType;
     // (undocumented)
     searchContext?: ExecutionContextSearch;
+    // (undocumented)
+    searchSessionId?: string;
     // (undocumented)
     uiState?: unknown;
     // (undocumented)

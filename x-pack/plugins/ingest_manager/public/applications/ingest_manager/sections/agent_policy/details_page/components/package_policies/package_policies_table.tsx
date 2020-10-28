@@ -22,7 +22,6 @@ import { useCapabilities, useLink } from '../../../../../hooks';
 import { useAgentPolicyRefresh } from '../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
-  inputTypes: string[];
   packageName?: string;
   packageTitle?: string;
   packageVersion?: string;
@@ -56,11 +55,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
   // the list of options that will be used in the filters dropdowns
-  const [packagePolicies, namespaces, inputTypes] = useMemo((): [
-    InMemoryPackagePolicy[],
-    FilterOption[],
-    FilterOption[]
-  ] => {
+  const [packagePolicies, namespaces] = useMemo((): [InMemoryPackagePolicy[], FilterOption[]] => {
     const namespacesValues: string[] = [];
     const inputTypesValues: string[] = [];
     const mappedPackagePolicies = originalPackagePolicies.map<InMemoryPackagePolicy>(
@@ -69,13 +64,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           namespacesValues.push(packagePolicy.namespace);
         }
 
-        const dsInputTypes: string[] = [];
-
-        dsInputTypes.sort(stringSortAscending);
-
         return {
           ...packagePolicy,
-          inputTypes: dsInputTypes,
           packageName: packagePolicy.package?.name ?? '',
           packageTitle: packagePolicy.package?.title ?? '',
           packageVersion: packagePolicy.package?.version ?? '',
@@ -86,11 +76,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     namespacesValues.sort(stringSortAscending);
     inputTypesValues.sort(stringSortAscending);
 
-    return [
-      mappedPackagePolicies,
-      namespacesValues.map(toFilterOption),
-      inputTypesValues.map(toFilterOption),
-    ];
+    return [mappedPackagePolicies, namespacesValues.map(toFilterOption)];
   }, [originalPackagePolicies]);
 
   const columns = useMemo(
@@ -273,13 +259,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             name: 'Namespace',
             options: namespaces,
             multiSelect: 'or',
-          },
-          {
-            type: 'field_value_selection',
-            field: 'inputTypes',
-            name: 'Input types',
-            options: inputTypes,
-            multiSelect: 'or',
+            operator: 'exact',
           },
         ],
       }}

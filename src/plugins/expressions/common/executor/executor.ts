@@ -33,6 +33,7 @@ import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
 import { PersistableState, SerializableState } from '../../../kibana_utils/common';
+import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
   /**
@@ -177,43 +178,34 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    * @param context Extra global context object that will be merged into the
    *    expression global context object that is provided to each function to allow side-effects.
    */
-  public async run<
-    Input,
-    Output,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
-  >(
+  public async run<Input, Output>(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext,
-    options?: ExpressionExecOptions
+    params: ExpressionExecutionParams = {}
   ) {
-    const execution = this.createExecution(ast, context, options);
+    const execution = this.createExecution(ast, params);
     execution.start(input);
     return (await execution.result) as Output;
   }
 
-  public createExecution<
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
-    Input = unknown,
-    Output = unknown
-  >(
+  public createExecution<Input = unknown, Output = unknown>(
     ast: string | ExpressionAstExpression,
-    context: ExtraContext = {} as ExtraContext,
-    { debug }: ExpressionExecOptions = {} as ExpressionExecOptions
-  ): Execution<Context & ExtraContext, Input, Output> {
-    const params: ExecutionParams<Context & ExtraContext> = {
+    params: ExpressionExecutionParams = {}
+  ): Execution<Input, Output> {
+    const executionParams: ExecutionParams = {
       executor: this,
-      context: {
-        ...this.context,
-        ...context,
-      } as Context & ExtraContext,
-      debug,
+      params: {
+        ...params,
+        // for canvas we are passing this in,
+        // canvas should be refactored to not pass any extra context in
+        extraContext: this.context,
+      } as any,
     };
 
-    if (typeof ast === 'string') params.expression = ast;
-    else params.ast = ast;
+    if (typeof ast === 'string') executionParams.expression = ast;
+    else executionParams.ast = ast;
 
-    const execution = new Execution<Context & ExtraContext, Input, Output>(params);
+    const execution = new Execution<Input, Output>(executionParams);
 
     return execution;
   }

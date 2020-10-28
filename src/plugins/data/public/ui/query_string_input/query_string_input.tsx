@@ -111,6 +111,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
+  private fetchIndexPatternsAbortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
@@ -119,7 +120,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     return toUser(this.props.query.query);
   };
 
-  private fetchIndexPatterns = async () => {
+  private fetchIndexPatterns = debounce(async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
     ) as string[];
@@ -127,16 +128,26 @@ export default class QueryStringInputUI extends Component<Props, State> {
       (indexPattern) => typeof indexPattern !== 'string'
     ) as IIndexPattern[];
 
+    // abort the previous fetch to avoid overriding with outdated data
+    // issue https://github.com/elastic/kibana/issues/80831
+    if (this.fetchIndexPatternsAbortController) this.fetchIndexPatternsAbortController.abort();
+    this.fetchIndexPatternsAbortController = new AbortController();
+    const currentAbortController = this.fetchIndexPatternsAbortController;
+
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.services.savedObjects!.client,
       stringPatterns,
       this.services.uiSettings!
     )) as IIndexPattern[];
 
-    this.setState({
-      indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
-    });
-  };
+    if (!currentAbortController.signal.aborted) {
+      this.setState({
+        indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+      });
+
+      this.updateSuggestions();
+    }
+  }, 200);
 
   private getSuggestions = async () => {
     if (!this.inputRef) {
@@ -506,7 +517,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.fetchIndexPatterns();
     this.handleListUpdate();
 
     window.addEventListener('resize', this.handleAutoHeight);
@@ -525,7 +536,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.initPersistedLog();
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
-      this.fetchIndexPatterns().then(this.updateSuggestions);
+      this.fetchIndexPatterns();
     } else if (!isEqual(prevProps.query, this.props.query)) {
       this.updateSuggestions();
     }
