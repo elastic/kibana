@@ -14,12 +14,15 @@ import { esArchiverUnload, esArchiverLoad } from '../tasks/es_archiver';
 
 describe('Overview Page', () => {
   before(() => {
+    loginAndWaitForPage(OVERVIEW_URL);
     cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
     cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
-    loginAndWaitForPage(OVERVIEW_URL);
   });
 
   it('Host stats render with correct values', () => {
+    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
+    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
+    cy.reload();
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
@@ -28,6 +31,9 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
+    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
+    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
+    cy.reload();
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
