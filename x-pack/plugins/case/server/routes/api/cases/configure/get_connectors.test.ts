@@ -29,7 +29,7 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })
@@ -106,7 +106,7 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })

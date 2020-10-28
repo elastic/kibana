@@ -25,6 +25,7 @@ export {
   MakeSchemaFrom,
   SchemaField,
   CollectorOptions,
+  UsageCollectorOptions,
   Collector,
   CollectorFetchContext,
 } from './collector';

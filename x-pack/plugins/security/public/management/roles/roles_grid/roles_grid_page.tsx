@@ -59,7 +59,7 @@ interface State {
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
-  return `/${action}${roleName ? `/${roleName}` : ''}`;
+  return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
 export class RolesGridPage extends Component<Props, State> {
