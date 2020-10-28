@@ -5,19 +5,19 @@
  */
 
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { componentsMock } from './components.mock';
+import { taggingApiMock } from '../../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
 import { tagsCacheMock } from '../tags/tags_cache.mock';
 import { createTagReference, createSavedObject, createTag } from '../../common/test_utils';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
 
 describe('getTableColumnDefinition', () => {
   let cache: ReturnType<typeof tagsCacheMock.create>;
-  let components: ReturnType<typeof componentsMock.create>;
+  let components: ReturnType<typeof taggingApiMock.createComponents>;
   let getTableColumnDefinition: SavedObjectsTaggingApiUi['getTableColumnDefinition'];
 
   beforeEach(() => {
     cache = tagsCacheMock.create();
-    components = componentsMock.create();
+    components = taggingApiMock.createComponents();
 
     getTableColumnDefinition = buildGetTableColumnDefinition({
       cache,

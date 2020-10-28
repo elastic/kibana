@@ -17,30 +17,25 @@
  * under the License.
  */
 
-import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+import { SavedObjectsFindOptionsReference } from 'kibana/server';
+import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
-const createSetupMock = (): jest.Mocked<SavedObjectTaggingOssPluginSetup> => {
-  const mock = {
-    registerTaggingApi: jest.fn(),
-  };
-
-  return mock;
-};
-
-const createStartMock = (): jest.Mocked<SavedObjectTaggingOssPluginStart> => {
-  const mock = {
-    isTaggingAvailable: jest.fn(),
-    getTaggingApi: jest.fn(),
-  };
-
-  mock.isTaggingAvailable.mockReturnValue(false);
-
-  return mock;
-};
-
-export { taggingApiMock } from './api.mock';
-
-export const savedObjectTaggingOssPluginMock = {
-  createSetup: createSetupMock,
-  createStart: createStartMock,
+export const getTagFindReferences = ({
+  selectedTags,
+  taggingApi,
+}: {
+  selectedTags?: string[];
+  taggingApi?: SavedObjectsTaggingApi;
+}): SavedObjectsFindOptionsReference[] | undefined => {
+  if (taggingApi && selectedTags) {
+    const references: SavedObjectsFindOptionsReference[] = [];
+    selectedTags.forEach((tagName) => {
+      const ref = taggingApi.ui.convertNameToReference(tagName);
+      if (ref) {
+        references.push(ref);
+      }
+    });
+    return references;
+  }
+  return undefined;
 };

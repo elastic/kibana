@@ -54,7 +54,6 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-  SavedObjectsFindOptionsReference,
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
@@ -70,6 +69,7 @@ import {
   findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
+  getTagFindReferences,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -175,22 +175,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
 
-    const references: SavedObjectsFindOptionsReference[] = [];
-    if (taggingApi && selectedTags) {
-      selectedTags.forEach((tagName) => {
-        const ref = taggingApi.ui.convertNameToReference(tagName);
-        if (ref) {
-          references.push(ref);
-        }
-      });
-    }
+    const references = getTagFindReferences({ selectedTags, taggingApi });
 
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts({
       http: this.props.http,
       typesToInclude: selectedTypes,
       searchString: queryText,
-      references: references.length ? references : undefined,
+      references,
     });
 
     const exportAllOptions: ExportAllOption[] = Object.entries(filteredSavedObjectCounts).map(
@@ -250,17 +242,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       findOptions.sortField = 'type';
     }
 
-    if (taggingApi && selectedTags) {
-      const references: SavedObjectsFindOptionsReference[] = [];
-      selectedTags.forEach((tagName) => {
-        const ref = taggingApi.ui.convertNameToReference(tagName);
-        if (ref) {
-          references.push(ref);
-        }
-      });
-      findOptions.hasReference = references;
-      findOptions.hasReferenceOperator = 'OR';
-    }
+    findOptions.hasReference = getTagFindReferences({ selectedTags, taggingApi });
 
     try {
       const resp = await findObjects(http, findOptions);
@@ -419,15 +401,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return accum;
     }, [] as string[]);
 
-    const references: SavedObjectsFindOptionsReference[] = [];
-    if (taggingApi && selectedTags) {
-      selectedTags.forEach((tagName) => {
-        const ref = taggingApi.ui.convertNameToReference(tagName);
-        if (ref) {
-          references.push(ref);
-        }
-      });
-    }
+    const references = getTagFindReferences({ selectedTags, taggingApi });
 
     let blob;
     try {
@@ -435,7 +409,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         http,
         search: queryText ? `${queryText}*` : undefined,
         types: exportTypes,
-        references: references.length ? references : undefined,
+        references,
         includeReferencesDeep: isIncludeReferencesDeepChecked,
       });
     } catch (e) {
