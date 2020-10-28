@@ -17,5 +17,16 @@
  * under the License.
  */
 
-export { extractQueryParams } from './extract_query_params';
-export { attemptToURIDecode } from './attempt_to_uri_decode';
+import { attemptToURIDecode } from './attempt_to_uri_decode';
+
+test('decodes an encoded string', () => {
+  const encodedString = 'test%3F';
+  expect(attemptToURIDecode(encodedString)).toBe('test?');
+});
+
+// react router partially decodes %25 sequence to % in match params
+// https://github.com/elastic/kibana/pull/81664
+test('ignores the error if a string is already decoded', () => {
+  const decodedString = 'test%';
+  expect(attemptToURIDecode(decodedString)).toBe(decodedString);
+});
