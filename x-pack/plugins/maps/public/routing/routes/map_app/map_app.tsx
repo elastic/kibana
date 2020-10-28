@@ -376,7 +376,7 @@ export class MapApp extends React.Component<Props, State> {
     this._setBreadcrumbs(savedMap.title);
     getCoreChrome().docTitle.change(savedMap.title);
     if (this.props.savedMapId) {
-      getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap!.id);
+      getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id!);
     }
 
     this._initMapAndLayerSettings(savedMap);
