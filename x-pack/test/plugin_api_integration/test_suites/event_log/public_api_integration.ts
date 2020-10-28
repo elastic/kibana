@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge, omit, chunk, isEmpty, pick } from 'lodash';
+import { merge, omit, chunk, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import expect from '@kbn/expect/expect.js';
 import moment from 'moment';
