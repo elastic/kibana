@@ -19,8 +19,19 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
+import dedent from 'dedent';
+import type { SavedObjectsImportError } from 'src/core/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+const createConflictError = (
+  object: Omit<SavedObjectsImportError, 'error'>
+): SavedObjectsImportError => ({
+  ...object,
+  title: object.meta.title,
+  error: { type: 'conflict' },
+});
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -41,11 +52,6 @@ export default function ({ getService }) {
       id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
       meta: { title: 'Requests', icon: 'dashboardApp' },
     };
-    const createError = (object, type) => ({
-      ...object,
-      title: object.meta.title,
-      error: { type },
-    });
 
     describe('with kibana index', () => {
       describe('with basic data existing', () => {
@@ -75,9 +81,9 @@ export default function ({ getService }) {
                 success: false,
                 successCount: 0,
                 errors: [
-                  createError(indexPattern, 'conflict'),
-                  createError(visualization, 'conflict'),
-                  createError(dashboard, 'conflict'),
+                  createConflictError(indexPattern),
+                  createConflictError(visualization),
+                  createConflictError(dashboard),
                 ],
               });
             });
@@ -126,6 +132,43 @@ export default function ({ getService }) {
                 ],
               });
             });
+        });
+
+        it('should return 200 when importing SO with circular refs', async () => {
+          const fileBuffer = Buffer.from(
+            dedent`
+              {"attributes":{"title":"dashboard-b"},"id":"dashboard-b","references":[{"id":"dashboard-a","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}
+              {"attributes":{"title":"dashboard-a"},"id":"dashboard-a","references":[{"id":"dashboard-b","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}
+            `,
+            'utf8'
+          );
+          const resp = await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', fileBuffer, 'export.ndjson')
+            .expect(200);
+
+          expect(resp.body).to.eql({
+            success: true,
+            successCount: 2,
+            successResults: [
+              {
+                id: 'dashboard-b',
+                meta: {
+                  icon: 'dashboardApp',
+                  title: 'dashboard-b',
+                },
+                type: 'dashboard',
+              },
+              {
+                id: 'dashboard-a',
+                meta: {
+                  icon: 'dashboardApp',
+                  title: 'dashboard-a',
+                },
+                type: 'dashboard',
+              },
+            ],
+          });
         });
 
         it('should return 400 when trying to import more than 10,000 objects', async () => {

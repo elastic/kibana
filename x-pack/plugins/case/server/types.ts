@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { attemptToURIDecode } from './attempt_to_uri_decode';
+import { CaseClient } from './client';
+
+export interface CaseRequestContext {
+  getCaseClient: () => CaseClient;
+}
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    case?: CaseRequestContext;
+  }
+}

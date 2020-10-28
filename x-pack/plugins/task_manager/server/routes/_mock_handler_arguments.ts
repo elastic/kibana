@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { MethodKeysOf } from '@kbn/utility-types';
 import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import { httpServerMock } from '../../../../../src/core/server/mocks';

@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('management', function () {
