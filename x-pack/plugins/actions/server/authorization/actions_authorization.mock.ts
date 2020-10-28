@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsAuthorization } from './actions_authorization';
 
 export type ActionsAuthorizationMock = jest.Mocked<PublicMethodsOf<ActionsAuthorization>>;

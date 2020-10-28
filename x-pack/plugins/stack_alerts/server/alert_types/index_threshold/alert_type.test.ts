@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
 import { Params } from './alert_type_params';
