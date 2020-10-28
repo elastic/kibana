@@ -17,11 +17,13 @@
  * under the License.
  */
 
-type DeeplyMockedKeys<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => any
-    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
-    : DeeplyMockedKeys<T[P]>;
-} &
-  T;
+import { expectAssignable } from 'tsd';
+import { Writable } from '../index';
 
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+type WritableArray = Writable<readonly string[]>;
+expectAssignable<WritableArray>(['1']);
+
+type WritableObject = Writable<{
+  readonly name: string;
+}>;
+expectAssignable<WritableObject>({ name: '1' });
