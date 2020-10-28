@@ -139,6 +139,7 @@ export class TaskManagerPlugin
     createMonitoringStats(
       this.taskPollingLifecycle,
       taskStore,
+      this.elasticsearchAndSOAvailability$!,
       this.config!,
       managedConfiguration,
       this.logger
