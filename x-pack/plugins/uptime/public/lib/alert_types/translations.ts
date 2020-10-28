@@ -35,7 +35,7 @@ Aging Certificates: {agingCommonNameAndDate}
   name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
     defaultMessage: 'Uptime TLS',
   }),
-  description: i18n.translate('xpack.uptime.alerts.tls.clientName', {
+  description: i18n.translate('xpack.uptime.alerts.tls.description', {
     defaultMessage: 'Alert when the TLS certificate of an Uptime monitor is about to expire.',
   }),
 };
