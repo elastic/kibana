@@ -76,7 +76,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           props: { iconType: 'arrowDown', iconSide: 'right' },
           children: (
             <FormattedMessage
-              id="xpack.ingestManager.agentDetails.actionsButton"
+              id="xpack.fleet.agentDetails.actionsButton"
               defaultMessage="Actions"
             />
           ),
@@ -91,7 +91,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             key="reassignPolicy"
           >
             <FormattedMessage
-              id="xpack.ingestManager.agentList.reassignActionText"
+              id="xpack.fleet.agentList.reassignActionText"
               defaultMessage="Assign to new policy"
             />
           </EuiContextMenuItem>,
@@ -104,12 +104,12 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           >
             {isUnenrolling ? (
               <FormattedMessage
-                id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                id="xpack.fleet.agentList.forceUnenrollOneButton"
                 defaultMessage="Force unenroll"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.agentList.unenrollOneButton"
+                id="xpack.fleet.agentList.unenrollOneButton"
                 defaultMessage="Unenroll agent"
               />
             )}
@@ -122,7 +122,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             }}
           >
             <FormattedMessage
-              id="xpack.ingestManager.agentList.upgradeOneButton"
+              id="xpack.fleet.agentList.upgradeOneButton"
               defaultMessage="Upgrade agent"
             />
           </EuiContextMenuItem>,

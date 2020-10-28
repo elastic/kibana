@@ -22,11 +22,12 @@
   "rule_id": "e02bd3ea-72c6-4181-ac2b-0f83d17ad969",
   "severity": "low",
   "tags": [
-    "Azure",
     "Elastic",
-    "SecOps",
+    "Cloud",
+    "Azure",
     "Continuous Monitoring",
-    "Network"
+    "SecOps",
+    "Network Security"
   ],
   "threat": [
     {
