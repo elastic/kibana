@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
@@ -384,8 +385,9 @@ export const InnerVisualizationWrapper = ({
         <EuiFlexItem>{localState.configurationValidationError[0].shortMessage}</EuiFlexItem>
         <EuiFlexItem className="eui-textBreakAll">
           {localState.configurationValidationError[0].longMessage}
+          <EuiSpacer />
           {localState.configurationValidationError.length > 1
-            ? i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
+            ? i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
                 defaultMessage: ` + {errors} {errors, plural, one {error} other {errors}}`,
                 values: { errors: localState.configurationValidationError.length - 1 },
               })
