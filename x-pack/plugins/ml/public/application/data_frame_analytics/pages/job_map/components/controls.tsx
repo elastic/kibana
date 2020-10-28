@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CytoscapeContext } from './cytoscape';
-import { JOB_MAP_NODE_TYPES } from '../common';
+import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 import { DeleteButton } from './delete_button';
 
 interface Props {

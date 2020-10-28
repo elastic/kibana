@@ -27,6 +27,8 @@ import {
   getPredictedFieldName,
 } from '../../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
+
+export { getAnalysisType } from '../../../../common/util/analytics_utils';
 export type IndexPattern = string;
 
 export enum ANALYSIS_ADVANCED_FIELDS {
@@ -158,18 +160,6 @@ interface LoadEvaluateResult {
   eval: RegressionEvaluateResponse | ClassificationEvaluateResponse | null;
   error: string | null;
 }
-
-export const getAnalysisType = (
-  analysis: AnalysisConfig
-): DataFrameAnalysisConfigType | 'unknown' => {
-  const keys = Object.keys(analysis || {});
-
-  if (keys.length === 1) {
-    return keys[0] as DataFrameAnalysisConfigType;
-  }
-
-  return 'unknown';
-};
 
 export const getTrainingPercent = (
   analysis: AnalysisConfig

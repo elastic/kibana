@@ -10,3 +10,10 @@ export const ANALYSIS_CONFIG_TYPE = {
   CLASSIFICATION: 'classification',
 } as const;
 export const DEFAULT_RESULTS_FIELD = 'ml';
+
+export enum JOB_MAP_NODE_TYPES {
+  ANALYTICS = 'analytics',
+  TRANSFORM = 'transform',
+  INDEX_PATTERN = 'index-pattern',
+  INFERENCE_MODEL = 'inferenceModel',
+}

@@ -6,8 +6,8 @@
 
 import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
-import { JOB_MAP_NODE_TYPES } from '../../../public/application/data_frame_analytics/pages/job_map/common'; // eslint-disable-line
-import { getAnalysisType } from '../../../public/application/data_frame_analytics/common/analytics'; // eslint-disable-line
+import { JOB_MAP_NODE_TYPES } from '../../../common/constants/data_frame_analytics';
+import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   AnalyticsMapEdgeElement,
   AnalyticsMapReturnType,
@@ -58,7 +58,7 @@ export class AnalyticsManager {
     });
     return isDuplicate;
   }
-  // @ts-ignore
+  // @ts-ignore // TODO: is this needed?
   private async getAnalyticsModelData(modelId: string) {
     const resp = await this._client.ml.getTrainedModels({
       model_id: modelId,

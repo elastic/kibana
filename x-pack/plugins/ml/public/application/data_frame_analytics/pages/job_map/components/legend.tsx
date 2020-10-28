@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { JOB_MAP_NODE_TYPES } from '../common';
+import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 
 export const JobMapLegend: FC = () => (
   <EuiFlexGroup className="mlJobMapLegend__container" alignItems="center">

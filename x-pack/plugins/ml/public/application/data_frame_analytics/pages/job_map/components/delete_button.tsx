@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../util/dependency_cache';
-import { JOB_MAP_NODE_TYPES } from '../common';
+import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 
 interface Props {
   id: string;
