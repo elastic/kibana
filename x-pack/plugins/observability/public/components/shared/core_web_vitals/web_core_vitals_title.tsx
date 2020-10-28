@@ -86,9 +86,11 @@ export function WebCoreVitalsTitle({
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.observability.ux.dashboard.webCoreVitals.traffic"
-                defaultMessage="{trafficPerc}% of the traffic represented"
+                defaultMessage="{trafficPerc} of the traffic represented"
                 values={{
-                  trafficPerc: (((coreVitalPages || 0) / totalPageViews) * 100).toFixed(0),
+                  trafficPerc: (
+                    <strong> {(((coreVitalPages || 0) / totalPageViews) * 100).toFixed(0)}%</strong>
+                  ),
                 }}
               />
 
