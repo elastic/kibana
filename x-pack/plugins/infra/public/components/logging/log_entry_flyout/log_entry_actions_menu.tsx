@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rt from 'io-ts';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
@@ -12,7 +11,6 @@ import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { getTraceUrl } from '../../../../../apm/public';
 import { LogEntriesItem } from '../../../../common/http_api';
 import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
@@ -97,12 +95,7 @@ const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
     .reduce<string[]>((acc, fieldItem) => {
       const { field, value } = fieldItem;
-      try {
-        const parsedValue = decodeOrThrow(rt.array(rt.string))(JSON.parse(value));
-        return acc.concat(parsedValue.map((val) => `${field}:${val}`));
-      } catch (e) {
-        return acc.concat([`${field}:${value}`]);
-      }
+      return acc.concat(value.map((val) => `${field}:${val}`));
     }, []);
 
   if (searchExpressions.length === 0) {
@@ -119,7 +112,7 @@ const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
 
 const getAPMLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
   const traceIdEntry = logItem.fields.find(
-    ({ field, value }) => value != null && field === 'trace.id'
+    ({ field, value }) => value[0] != null && field === 'trace.id'
   );
 
   if (!traceIdEntry) {
@@ -127,7 +120,7 @@ const getAPMLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
   }
 
   const timestampField = logItem.fields.find(({ field }) => field === '@timestamp');
-  const timestamp = timestampField ? timestampField.value : null;
+  const timestamp = timestampField ? timestampField.value[0] : null;
   const { rangeFrom, rangeTo } = timestamp
     ? (() => {
         const from = new Date(timestamp);
@@ -142,6 +135,6 @@ const getAPMLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
 
   return {
     app: 'apm',
-    hash: getTraceUrl({ traceId: traceIdEntry.value, rangeFrom, rangeTo }),
+    hash: getTraceUrl({ traceId: traceIdEntry.value[0], rangeFrom, rangeTo }),
   };
 };
