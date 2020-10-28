@@ -105,7 +105,7 @@ export interface HttpRequestParams {
 }
 
 export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
-  const { pathname, search } = request.url;
+  const { pathname, search } = request.rewrittenUrl ?? request.url;
 
   return {
     message: `User is requesting [${pathname}] endpoint`,

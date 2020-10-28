@@ -20,10 +20,14 @@
 import expect from '@kbn/expect';
 import path from 'path';
 import { keyBy } from 'lodash';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+function uniq<T>(input: T[]): T[] {
+  return [...new Set(input)];
+}
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
@@ -65,6 +69,24 @@ export default function ({ getService, getPageObjects }) {
         expect(flyout['Shared-Item Visualization AreaChart'].relationship).to.eql('Parent');
         log.debug("check that 'Log Agents' shows 'logstash-*' as it's Parent");
         expect(flyout['Log Agents'].relationship).to.eql('Parent');
+      });
+
+      it('should import saved objects with circular refs', async function () {
+        await PageObjects.savedObjects.importFile(
+          path.join(__dirname, 'exports', '_import_objects_circular_refs.ndjson')
+        );
+        await PageObjects.savedObjects.checkImportSucceeded();
+        await PageObjects.savedObjects.clickImportDone();
+
+        await PageObjects.savedObjects.clickRelationshipsByTitle('dashboard-a');
+
+        const flyoutContent = await PageObjects.savedObjects.getRelationshipFlyout();
+
+        expect(uniq(flyoutContent.map(({ relationship }) => relationship).sort())).to.eql([
+          'Child',
+          'Parent',
+        ]);
+        expect(uniq(flyoutContent.map(({ title }) => title))).to.eql(['dashboard-b']);
       });
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
