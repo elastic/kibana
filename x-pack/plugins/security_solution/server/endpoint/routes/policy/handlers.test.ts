@@ -27,6 +27,7 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent } from '../../../../../ingest_manager/common/types/models';
 import { AgentService } from '../../../../../ingest_manager/server/services';
+import { body } from '../../schemas/artifacts';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -156,6 +157,9 @@ describe('test policy response handler', () => {
         mockResponse
       );
       expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
+        versions_count: { package: 'endpoint', summary: { '8.0.0': 1 } },
+      });
     });
 
     it('should return the summary of all the policies', async () => {
@@ -202,6 +206,9 @@ describe('test policy response handler', () => {
         mockResponse
       );
       expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
+        versions_count: { package: 'endpoint', summary: { '8.0.0': 1 } },
+      });
     });
   });
 });
