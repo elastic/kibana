@@ -282,12 +282,19 @@ export function setRefreshConfig({ isPaused, interval }: MapRefreshConfig) {
 }
 
 export function triggerRefreshTimer() {
-  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: TRIGGER_REFRESH_TIMER,
     });
 
-    await dispatch(syncDataForAllLayers());
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch(autoFitToBounds());
+    } else {
+      await dispatch(syncDataForAllLayers());
+    }
   };
 }
 
