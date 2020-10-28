@@ -76,9 +76,6 @@ export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefin
         visData,
         visConfig,
         visType,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },

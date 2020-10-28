@@ -29,15 +29,11 @@ import { BasicVislibParams } from './types';
  * TODO: replace this with vis.data.aggs!.toExpressionAst();
  * @param vis
  */
-export function getEsaggsFn(
-  vis:
-    | Vis<PieVisParams & { showPartialRows?: any }>
-    | Vis<BasicVislibParams & { showPartialRows?: any }>
-) {
+export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.params.showPartialRows ?? false,
+    partialRows: false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
     includeFormatHints: false,
   });

@@ -70,9 +70,6 @@ export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition =
         visData,
         visConfig,
         visType: 'pie',
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },

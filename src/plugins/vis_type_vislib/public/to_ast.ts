@@ -73,12 +73,10 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];
-    const seriesParam = (visConfig.seriesParams || []).find(
-      (param: any) => param.data.id === yAgg.id
-    );
+    const seriesParam = (visConfig.seriesParams || []).find((param) => param.data.id === yAgg.id);
     if (seriesParam) {
       const usedValueAxis = (visConfig.valueAxes || []).find(
-        (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
+        (valueAxis) => valueAxis.id === seriesParam.valueAxis
       );
       if (get(usedValueAxis, 'scale.mode') === 'percentage') {
         yDimension.format = { id: 'percent' };

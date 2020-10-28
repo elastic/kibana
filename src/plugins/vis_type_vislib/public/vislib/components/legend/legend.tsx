@@ -56,7 +56,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     super(props);
 
     // TODO: Check when this bwc can safely be removed
-    const bwcLegendStateDefault = props.addLegend == null ? true : props.addLegend;
+    const bwcLegendStateDefault = props.addLegend ?? true;
     const open = props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
 
     this.state = {
