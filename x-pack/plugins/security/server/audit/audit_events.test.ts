@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { URL } from 'url';
 import {
   EventOutcome,
   SavedObjectAction,
@@ -211,12 +212,7 @@ describe('#httpRequestEvent', () => {
           kibanaRequestState: {
             requestId: '123',
             requestUuid: '123e4567-e89b-12d3-a456-426614174000',
-            rewrittenUrl: {
-              path: '/original/path',
-              pathname: '/original/path',
-              query: 'query=param',
-              search: '?query=param',
-            },
+            rewrittenUrl: new URL('http://localhost/original/path?query=param'),
           },
         }),
       })
@@ -234,11 +230,11 @@ describe('#httpRequestEvent', () => {
         },
         "message": "User is requesting [/original/path] endpoint",
         "url": Object {
-          "domain": undefined,
+          "domain": "localhost",
           "path": "/original/path",
           "port": undefined,
           "query": "query=param",
-          "scheme": undefined,
+          "scheme": "http:",
         },
       }
     `);
