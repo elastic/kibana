@@ -284,6 +284,7 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
+            defaultValue: '0' as any,
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,

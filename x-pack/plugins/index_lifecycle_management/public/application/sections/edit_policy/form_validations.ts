@@ -22,7 +22,7 @@ const createIfNumberExistsValidator = ({
   return (arg) => {
     if (arg.value) {
       return numberGreaterThanField({
-        than: 0,
+        than,
         message,
       })({
         ...arg,
