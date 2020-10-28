@@ -42,7 +42,7 @@ export class ClusterHealthAlert extends BaseAlert {
   public label = i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
     defaultMessage: 'Cluster health',
   });
-  public description = i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
+  public description = i18n.translate('xpack.monitoring.alerts.clusterHealth.description', {
     defaultMessage: 'Alert when the health of the cluster changes.',
   });
   public isLegacy = true;
