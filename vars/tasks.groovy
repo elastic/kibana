@@ -83,26 +83,10 @@ def functionalXpack(Map params = [:]) {
   task {
     kibanaPipeline.buildXpack(10)
 
-    // if (config.ciGroups) {
-    //   def ciGroups = 1..10
-    //   tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it) })
-    // }
-
-    // if (config.firefox) {
-    //   task(kibanaPipeline.functionalTestProcess('xpack-firefox', './test/scripts/jenkins_xpack_firefox_smoke.sh'))
-    // }
-
-    // if (config.accessibility) {
-    //   task(kibanaPipeline.functionalTestProcess('xpack-accessibility', './test/scripts/jenkins_xpack_accessibility.sh'))
-    // }
-
-    // if (config.visualRegression) {
-    //   task(kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh'))
-    // }
-
-    // if (config.savedObjectsFieldMetrics) {
-    //   task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
-    // }
+    if (config.ciGroups) {
+      def ciGroups = 1..10
+      tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it) })
+    }
 
     whenChanged([
       'x-pack/plugins/security_solution/',
