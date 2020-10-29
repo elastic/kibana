@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
-import { goToSpecifiedPath } from '../../maps_router';
+import { goToSpecifiedPath } from '../../render_app';
 import { getAppTitle } from '../../../../common/i18n_getters';
 
 export const unsavedChangesWarning = i18n.translate(
