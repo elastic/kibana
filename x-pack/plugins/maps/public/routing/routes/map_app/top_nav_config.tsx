@@ -21,7 +21,7 @@ import {
   showSaveModal,
 } from '../../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { goToSpecifiedPath } from '../../maps_router';
+import { goToSpecifiedPath } from '../../render_app';
 import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 import { EmbeddableStateTransfer } from '../../../../../../../src/plugins/embeddable/public';
 
@@ -43,7 +43,7 @@ export function getTopNavConfig({
   enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
-  setBreadcrumbs: () => void;
+  setBreadcrumbs: (title: string) => void;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
   cutOriginatingAppConnection: () => void;
@@ -104,7 +104,7 @@ export function getTopNavConfig({
     });
 
     getCoreChrome().docTitle.change(savedMap.title);
-    setBreadcrumbs();
+    setBreadcrumbs(savedMap.title);
     goToSpecifiedPath(`/map/${savedObjectId}${window.location.hash}`);
 
     const newlyCreated = newCopyOnSave || isNewMap;
