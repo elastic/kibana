@@ -145,6 +145,12 @@ test('executes the task by calling the executor with proper parameters', async (
           url: '/',
         },
       },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
+        },
+      },
     },
   });
 });
@@ -271,6 +277,12 @@ test('uses API key when provided', async () => {
           url: '/',
         },
       },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
+        },
+      },
     },
   });
 });
@@ -308,6 +320,12 @@ test(`doesn't use API key when not provided`, async () => {
       raw: {
         req: {
           url: '/',
+        },
+      },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
         },
       },
     },

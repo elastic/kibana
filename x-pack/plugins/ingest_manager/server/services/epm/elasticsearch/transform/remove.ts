@@ -24,6 +24,8 @@ export const deleteTransforms = async (
   callCluster: CallESAsCurrentUser,
   transformIds: string[]
 ) => {
+  const logger = appContextService.getLogger();
+  logger.info(`Deleting currently installed transform ids ${transformIds}`);
   await Promise.all(
     transformIds.map(async (transformId) => {
       // get the index the transform
@@ -47,7 +49,7 @@ export const deleteTransforms = async (
         path: `/_transform/${transformId}`,
         ignore: [404],
       });
-
+      logger.info(`Deleted: ${transformId}`);
       if (transformResponse?.transforms) {
         // expect this to be 1
         for (const transform of transformResponse.transforms) {
@@ -58,7 +60,7 @@ export const deleteTransforms = async (
           });
         }
       } else {
-        appContextService.getLogger().warn(`cannot find transform for ${transformId}`);
+        logger.warn(`cannot find transform for ${transformId}`);
       }
     })
   );
