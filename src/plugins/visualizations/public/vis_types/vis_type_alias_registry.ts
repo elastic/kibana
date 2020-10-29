@@ -42,6 +42,11 @@ export interface VisualizationsAppExtension {
   }) => VisualizationListItem;
 }
 
+export interface VisTypeAliasPromoTooltip {
+  description: string;
+  link: string;
+}
+
 export interface VisTypeAlias {
   aliasPath: string;
   aliasApp: string;
@@ -49,9 +54,9 @@ export interface VisTypeAlias {
   title: string;
   icon: string;
   promotion?: boolean;
+  promoTooltip?: VisTypeAliasPromoTooltip;
   description: string;
   note?: string;
-  groupTitle?: string;
   disabled?: boolean;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   stage: 'experimental' | 'beta' | 'production';

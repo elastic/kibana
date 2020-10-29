@@ -38,3 +38,20 @@ $modalHeight: $euiSizeL * 29;
   background-color: transparent;
   box-shadow: none;
 }
+
+.visNewVisDialog__groupsCardWrapper {
+  position: relative;
+
+  .visNewVisDialog__groupsCardLink {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: - $euiSizeM;
+  }
+
+  // overrides EuiBetaBadge specificity
+  .visNewVisDialog__groupsCardBetaBadge {
+    background: $euiColorEmptyShade;
+    cursor: pointer;
+  }
+}

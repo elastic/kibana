@@ -35,4 +35,13 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
   icon: APP_ICON,
   stage: 'production',
   disabled: true,
+  note: i18n.translate('lensOss.visTypeAlias.note', {
+    defaultMessage: 'Recommended for most users.',
+  }),
+  promoTooltip: {
+    description: i18n.translate('lensOss.visTypeAlias.promoTooltip.description', {
+      defaultMessage: 'Try Lens for free with Elastic. Learn more.',
+    }),
+    link: 'https://www.elastic.co/what-is/kibana-lens',
+  },
 });

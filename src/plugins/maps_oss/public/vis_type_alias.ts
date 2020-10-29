@@ -34,4 +34,10 @@ export const getMapsAliasConfig = (): VisTypeAlias => ({
   icon: APP_ICON,
   stage: 'production',
   disabled: true,
+  promoTooltip: {
+    description: i18n.translate('lensOss.visTypeAlias.promoTooltip.description', {
+      defaultMessage: 'Try maps for free with Elastic. Learn more.',
+    }),
+    link: 'https://www.elastic.co/maps',
+  },
 });

@@ -192,28 +192,37 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
-  const shouldDisplayBadge = isVisTypeAlias(visType) && visType.disabled;
+  const shouldDisableCard = isVisTypeAlias(visType) && visType.disabled;
+  const betaBadgeContent =
+    shouldDisableCard && 'promoTooltip' in visType ? (
+      <EuiLink
+        href={visType?.promoTooltip?.link}
+        target="_blank"
+        color="text"
+        className="visNewVisDialog__groupsCardLink"
+      >
+        <EuiBetaBadge
+          data-test-subj="visTypeBadge"
+          className="visNewVisDialog__groupsCardBetaBadge"
+          label={i18n.translate('visualizations.newVisWizard.basicTitle', {
+            defaultMessage: 'Basic',
+          })}
+          tooltipContent={visType?.promoTooltip?.description}
+        />
+      </EuiLink>
+    ) : undefined;
   return (
-    <EuiFlexItem>
+    <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
+      {betaBadgeContent}
       <EuiCard
         titleSize="xs"
-        title={<span data-test-subj="visTypeTitle">{visType.groupTitle || visType.title}</span>}
+        title={
+          <span data-test-subj="visTypeTitle">
+            {'groupTitle' in visType && visType.groupTitle ? visType.groupTitle : visType.title}
+          </span>
+        }
         onClick={onClick}
-        isDisabled={shouldDisplayBadge}
-        betaBadgeLabel={
-          shouldDisplayBadge
-            ? i18n.translate('visualizations.newVisWizard.basicTitle', {
-                defaultMessage: 'Basic',
-              })
-            : undefined
-        }
-        betaBadgeTooltipContent={
-          shouldDisplayBadge
-            ? i18n.translate('visualizations.newVisWizard.basicLicenseRequired', {
-                defaultMessage: 'This feature requires a Basic License',
-              })
-            : undefined
-        }
+        isDisabled={shouldDisableCard}
         data-test-subj={`visType-${visType.name}`}
         data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
         aria-label={`visType-${visType.name}`}
@@ -248,7 +257,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
-              {visType.groupTitle || visType.title}
+              {'groupTitle' in visType && visType.groupTitle ? visType.groupTitle : visType.title}
             </EuiLink>
           </EuiFlexItem>
           {visType.stage === 'experimental' && (

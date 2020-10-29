@@ -57,6 +57,10 @@ describe('GroupSelection', () => {
       aliasApp: 'aliasApp',
       aliasPath: '#/aliasApp',
       disabled: true,
+      promoTooltip: {
+        description: 'Learn More',
+        link: '#/anotherUrl',
+      },
       description: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
@@ -257,6 +261,22 @@ describe('GroupSelection', () => {
         .at(1)
         .hasClass('euiCard-isDisabled')
     ).toBe(true);
+  });
+
+  it('should render a basic badge with link for disabled aliases with promoTooltip', () => {
+    const wrapper = mountWithIntl(
+      <GroupSelection
+        visTypesRegistry={visTypesRegistry(_visTypes as VisType[])}
+        docLinks={docLinks as DocLinksStart}
+        toggleGroups={jest.fn()}
+        onVisTypeSelected={jest.fn()}
+        showExperimental={true}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="visTypeBadge"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="visTypeBadge"]').at(0).prop('tooltipContent')).toBe(
+      'Learn More'
+    );
   });
 
   it('should not show tools experimental visualizations if showExperimentalis false', () => {
