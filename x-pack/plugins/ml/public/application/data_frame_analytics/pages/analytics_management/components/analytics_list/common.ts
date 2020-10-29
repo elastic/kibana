@@ -132,10 +132,6 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
   return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
-export function getJobMapUrl(jobId: string) {
-  return `#/data_frame_analytics/map?_g=(ml:(jobId:${jobId}))`;
-}
-
 // The single Action type is not exported as is
 // from EUI so we use that code to get the single
 // Action type from the array of actions.

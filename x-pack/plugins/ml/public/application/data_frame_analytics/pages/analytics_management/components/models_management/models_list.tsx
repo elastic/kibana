@@ -28,9 +28,14 @@ import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { ModelsTableToConfigMapping } from './index';
 import { DeleteModelsModal } from './delete_models_modal';
-import { useMlKibana, useMlUrlGenerator, useNotifications } from '../../../../../contexts/kibana';
+import {
+  useMlKibana,
+  useMlUrlGenerator,
+  useNavigateToPath,
+  useNotifications,
+} from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
-import { getJobMapUrl } from '../analytics_list/common';
+
 import {
   TrainedModelConfigResponse,
   ModelPipelines,
@@ -80,6 +85,9 @@ export const ModelsList: FC = () => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+
+  const mlUrlGenerator = useMlUrlGenerator();
+  const navigateToPath = useNavigateToPath();
 
   const updateFilteredItems = (queryClauses: any) => {
     if (queryClauses.length) {
@@ -311,8 +319,12 @@ export const ModelsList: FC = () => {
       isPrimary: true,
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
-        // TODO: update to use new navigation?
-        await navigateToUrl(getJobMapUrl(item.metadata?.analytics_config.id));
+        const path = await mlUrlGenerator.createUrl({
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+          pageState: { jobId: item.metadata?.analytics_config.id },
+        });
+
+        await navigateToPath(path, false);
       },
     },
     {

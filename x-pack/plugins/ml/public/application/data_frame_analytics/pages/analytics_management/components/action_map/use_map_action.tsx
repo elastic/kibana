@@ -19,7 +19,6 @@ export const useMapAction = () => {
 
   const clickHandler = useCallback(async (item: DataFrameAnalyticsListRow) => {
     const path = await mlUrlGenerator.createUrl({
-      // @ts-ignore
       page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
       pageState: { jobId: item.id },
     });
