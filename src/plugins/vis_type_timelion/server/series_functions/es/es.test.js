@@ -33,14 +33,7 @@ import { UI_SETTINGS } from '../../../../data/server';
 
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
-    getStartServices: sinon
-      .stub()
-      .returns(
-        Promise.resolve([
-          {},
-          { data: { search: { search: () => from(Promise.resolve(response)) } } },
-        ])
-      ),
+    context: { search: { search: () => from(Promise.resolve(response)) } },
     savedObjectsClient: {
       find: function () {
         return Promise.resolve({
