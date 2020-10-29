@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import type { IKibanaSearchResponse } from '..';
+import type { IKibanaSearchResponse } from '../types';
 
 /**
  * @returns true if response had an error while executing in ES

@@ -20,14 +20,11 @@
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { UI_SETTINGS } from '../../../common';
 import { GetConfigFn } from '../../types';
-import {
-  AggConfigs,
-  AggTypesRegistry,
-  getAggTypes,
-  getAggTypesFunctions,
-  getCalculateAutoTimeExpression,
-} from './';
-import { AggsCommonSetup, AggsCommonStart } from './types';
+import { getAggTypes, getAggTypesFunctions } from './agg_types';
+import { getCalculateAutoTimeExpression } from './utils/calculate_auto_time_expression';
+import { AggTypesRegistry } from './agg_types_registry';
+import { AggConfigs } from './agg_configs';
+import type { AggsCommonSetup, AggsCommonStart } from './types';
 
 /** @internal */
 export const aggsRequiredUiSettings = [

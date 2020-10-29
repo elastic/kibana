@@ -23,12 +23,8 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
-import {
-  MsearchRequestBody,
-  MsearchResponse,
-  toSnakeCase,
-  shimAbortSignal,
-} from '../../../common/search';
+import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
+import { toSnakeCase, shimAbortSignal } from '../../../common/search/es_search';
 import { shimHitsTotal } from './shim_hits_total';
 import { getShardTimeout, getDefaultSearchParams } from '..';
 
