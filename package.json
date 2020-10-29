@@ -414,7 +414,6 @@
     "@types/color": "^3.0.0",
     "@types/compression-webpack-plugin": "^2.0.2",
     "@types/console-stamp": "^0.2.32",
-    "@types/cpy": "^5.1.0",
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
     "@types/cytoscape": "^3.14.0",
     "@types/d3": "^3.5.43",

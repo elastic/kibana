@@ -5,6 +5,7 @@
   "private": true,
   "license": "Elastic-License",
   "scripts": {
+    "github-checks-reporter": "../node_modules/.bin/github-checks-reporter",
     "kbn": "node ../scripts/kbn",
     "kbn:bootstrap": "node plugins/canvas/scripts/storybook --clean",
     "start": "node ../scripts/kibana --dev",
