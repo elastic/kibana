@@ -195,7 +195,7 @@ export function LayerPanel(
               }
             >
               <>
-                <ReorderProvider>
+                <ReorderProvider id={group.groupId}>
                   {group.accessors.map((accessor) => {
                     const { dragging } = dragDropContext;
                     const dragType =

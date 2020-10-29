@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export type Dragging =
@@ -115,6 +115,10 @@ interface ReorderState {
    * aria-live message for changes in reordering
    */
   keyboardReorderMessage: string;
+  /**
+   * reorder group needed for screen reader aria-described-by attribute
+   */
+  groupId: string;
 }
 
 export interface ReorderContextState {
@@ -129,17 +133,19 @@ export const ReorderContext = React.createContext<ReorderContextState>({
     draggingHeight: 40,
     isKeyboardReorderOn: false,
     keyboardReorderMessage: '',
+    groupId: '',
   },
   setReorderState: () => {},
 });
 
-export function ReorderProvider({ children }: { children: React.ReactNode }) {
+export function ReorderProvider({ id, children }: { id: string; children: React.ReactNode }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
     reorderedItems: [],
     direction: '-',
     draggingHeight: 40,
     isKeyboardReorderOn: false,
     keyboardReorderMessage: '',
+    groupId: id,
   });
   const setReorderState = useMemo(() => (reorderState: ReorderState) => setState(reorderState), [
     setState,
@@ -150,16 +156,20 @@ export function ReorderProvider({ children }: { children: React.ReactNode }) {
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
         {children}
       </ReorderContext.Provider>
-      <EuiScreenReaderOnly>
-        <p aria-live="assertive">{state.keyboardReorderMessage}</p>
-      </EuiScreenReaderOnly>
-      <EuiScreenReaderOnly>
-        <p id="lnsDragDrop-reorderInstructions">
-          {i18n.translate('xpack.lens.dragDrop.reorderInstructions', {
-            defaultMessage: `Press space bar to start a drag. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
-          })}
-        </p>
-      </EuiScreenReaderOnly>
+      <EuiPortal>
+        <EuiScreenReaderOnly>
+          <>
+            <p id="lnsDragDrop-reorderAnnouncement" aria-live="assertive">
+              {state.keyboardReorderMessage}
+            </p>
+            <p id={`lnsDragDrop-reorderInstructions-${id}`}>
+              {i18n.translate('xpack.lens.dragDrop.reorderInstructions', {
+                defaultMessage: `Press space bar to start a drag. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
+              })}
+            </p>
+          </>
+        </EuiScreenReaderOnly>
+      </EuiPortal>
     </>
   );
 }

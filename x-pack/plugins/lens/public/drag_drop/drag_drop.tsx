@@ -357,7 +357,7 @@ export const ReorderableDragDrop = ({
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
 
-  const { isKeyboardReorderOn, reorderedItems, draggingHeight, direction } = reorderState;
+  const { isKeyboardReorderOn, reorderedItems, draggingHeight, direction, groupId } = reorderState;
 
   const groupLength = itemsInGroup.length;
 
@@ -378,7 +378,7 @@ export const ReorderableDragDrop = ({
       <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={`Grab ${label}`}
-          aria-describedby="lnsDragDrop-reorderInstructions"
+          aria-describedby={`$lnsDragDrop-reorderInstructions-${groupId}`}
           className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
@@ -395,7 +395,7 @@ export const ReorderableDragDrop = ({
                 isKeyboardReorderOn: !isKeyboardReorderOn,
                 keyboardReorderMessage: isKeyboardReorderOn
                   ? ''
-                  : getKeyboardReorderMessageLifted(currentIndex),
+                  : getKeyboardReorderMessageLifted(currentIndex + 1),
               });
             } else if (e.key === keys.ESCAPE) {
               setReorderState({
@@ -424,8 +424,8 @@ export const ReorderableDragDrop = ({
                   setReorderState({
                     ...reorderState,
                     keyboardReorderMessage: getKeyboardReorderMessageMoved(
-                      currentIndex + 1,
-                      currentIndex
+                      currentIndex,
+                      currentIndex + 1
                     ),
                   });
                   dropTo(itemsInGroup[currentIndex - 1]);

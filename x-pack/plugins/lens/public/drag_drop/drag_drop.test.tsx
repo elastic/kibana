@@ -207,7 +207,7 @@ describe('DragDrop', () => {
             dragging = { id: '1' };
           }}
         >
-          <ReorderProvider>
+          <ReorderProvider id="groupId">
             <DragDrop
               label="1"
               draggable
@@ -263,7 +263,7 @@ describe('DragDrop', () => {
             dragging = { id: '1' };
           }}
         >
-          <ReorderProvider>
+          <ReorderProvider id="groupId">
             <DragDrop
               label="1"
               draggable

@@ -71,7 +71,7 @@ return (
 To create a reordering group, surround the elements from the same group with a `ReorderProvider`:
 
 ```js
-<ReorderProvider>
+<ReorderProvider id="groupId">
   ... elements from one group here ...
 </ReorderProvider>
 ```
@@ -79,7 +79,7 @@ To create a reordering group, surround the elements from the same group with a `
 The children `DragDrop` components must have props defined as in the example:
 
 ```js
-<ReorderProvider>
+<ReorderProvider id="groupId">
   <div className="field-list">
     {fields.map((f) => (
       <DragDrop
