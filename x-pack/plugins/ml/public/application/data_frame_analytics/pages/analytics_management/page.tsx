@@ -8,6 +8,8 @@ import React, { FC, Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { parse } from 'query-string';
+import { decode } from 'rison-node';
 
 import {
   EuiBetaBadge,
@@ -33,15 +35,29 @@ import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
 import { JobMap } from '../job_map';
 
-export const Page: FC<{
-  jobId?: string;
-}> = ({ jobId }) => {
+export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
 
   useRefreshInterval(setBlockRefresh);
 
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
+  const mapJobId = useMemo(() => {
+    const { _g }: Record<string, any> = parse(location.search, { sort: false });
+    let jobId: string | undefined;
+
+    if (_g !== undefined) {
+      let globalState: any = null;
+      try {
+        globalState = decode(_g);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Could not parse global state');
+      }
+      jobId = globalState.ml?.jobId;
+    }
+    return jobId;
+  }, [location]);
 
   return (
     <Fragment>
@@ -90,8 +106,8 @@ export const Page: FC<{
           <UpgradeWarning />
 
           <EuiPageContent>
-            <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={jobId} />
-            {selectedTabId === 'map' && jobId && <JobMap analyticsId={jobId} />}
+            <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={mapJobId} />
+            {selectedTabId === 'map' && mapJobId && <JobMap analyticsId={mapJobId} />}
             {selectedTabId === 'data_frame_analytics' && (
               <DataFrameAnalyticsList blockRefresh={blockRefresh} />
             )}

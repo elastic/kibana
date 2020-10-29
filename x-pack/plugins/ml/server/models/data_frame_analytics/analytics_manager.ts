@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { JOB_MAP_NODE_TYPES } from '../../../common/constants/data_frame_analytics';
+import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   AnalyticsMapEdgeElement,
@@ -239,7 +240,7 @@ export class AnalyticsManager {
           }
 
           // Check meta data
-          if (link.meta === undefined) {
+          if (link.meta === undefined || link.meta?.created_by === INDEX_META_DATA_CREATED_BY) {
             rootIndexPattern = nextLinkId;
             complete = true;
             break;

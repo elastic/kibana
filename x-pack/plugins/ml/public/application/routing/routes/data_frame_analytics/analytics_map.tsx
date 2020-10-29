@@ -6,8 +6,6 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { parse } from 'query-string';
-import { decode } from 'rison-node';
 
 import { NavigateToPath } from '../../../contexts/kibana';
 
@@ -35,26 +33,12 @@ export const analyticsMapRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver('', undefined, deps.config, basicResolvers(deps));
-  const { _g }: Record<string, any> = parse(location.search, { sort: false });
-  let jobId;
-
-  if (_g !== undefined) {
-    let globalState: any = null;
-    try {
-      globalState = decode(_g);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Could not parse global state');
-      window.location.href = '#data_frame_analytics';
-    }
-    jobId = globalState.ml?.jobId;
-  }
 
   return (
     <PageLoader context={context}>
-      <Page jobId={jobId} />
+      <Page />
     </PageLoader>
   );
 };
