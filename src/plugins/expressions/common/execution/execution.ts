@@ -189,14 +189,18 @@ export class Execution<
       else reject(error);
     });
 
-    this.firstResultFuture.promise.then(
-      (result) => {
-        this.state.transitions.setResult(result);
-      },
-      (error) => {
-        this.state.transitions.setError(error);
-      }
-    );
+    this.firstResultFuture.promise
+      .then(
+        (result) => {
+          this.state.transitions.setResult(result);
+        },
+        (error) => {
+          this.state.transitions.setError(error);
+        }
+      )
+      .finally(() => {
+        this.abortRejection.cleanup();
+      });
   }
 
   async invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any> {
