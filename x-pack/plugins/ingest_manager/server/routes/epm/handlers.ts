@@ -8,7 +8,6 @@ import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
   GetInfoResponse,
   InstallPackageResponse,
-  MessageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
@@ -35,14 +34,16 @@ import {
   getFile,
   getPackageInfo,
   handleInstallPackageFailure,
-  installPackage,
   isBulkInstallError,
+  installPackageFromRegistry,
+  installPackageByUpload,
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
+import { licenseService } from '../../services';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -148,7 +149,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   try {
-    const res = await installPackage({
+    const res = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       callCluster,
@@ -212,10 +213,30 @@ export const installPackageByUploadHandler: RequestHandler<
   undefined,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
-  const body: MessageResponse = {
-    response: 'package upload was received ok, but not installed (not implemented yet)',
-  };
-  return response.ok({ body });
+  if (!licenseService.isEnterprise()) {
+    return response.customError({
+      statusCode: 403,
+      body: { message: 'Requires Enterprise license' },
+    });
+  }
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
+  const archiveBuffer = Buffer.from(request.body);
+  try {
+    const res = await installPackageByUpload({
+      savedObjectsClient,
+      callCluster,
+      archiveBuffer,
+      contentType,
+    });
+    const body: InstallPackageResponse = {
+      response: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
 };
 
 export const deletePackageHandler: RequestHandler<TypeOf<

@@ -39,14 +39,14 @@ export interface SchemaConfig {
 
 export interface Schemas {
   metric: SchemaConfig[];
-  bucket?: any[];
+  bucket?: SchemaConfig[];
   geo_centroid?: any[];
   group?: any[];
   params?: any[];
   radius?: any[];
   segment?: any[];
-  split_column?: any[];
-  split_row?: any[];
+  split_column?: SchemaConfig[];
+  split_row?: SchemaConfig[];
   width?: any[];
   // catch all for schema name
   [key: string]: any[] | undefined;
@@ -86,7 +86,10 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-export const getSchemas = (vis: Vis, { timeRange, timefilter }: BuildPipelineParams): Schemas => {
+export const getSchemas = <TVisParams>(
+  vis: Vis<TVisParams>,
+  { timeRange, timefilter }: BuildPipelineParams
+): Schemas => {
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
@@ -155,7 +158,8 @@ export const getSchemas = (vis: Vis, { timeRange, timefilter }: BuildPipelinePar
       }
     }
     if (schemaName === 'split') {
-      schemaName = `split_${vis.params.row ? 'row' : 'column'}`;
+      // TODO: We should check if there's a better way then casting to `any` here
+      schemaName = `split_${(vis.params as any).row ? 'row' : 'column'}`;
       skipMetrics = responseAggs.length - metrics.length > 1;
     }
     if (!schemas[schemaName]) {
@@ -250,9 +254,6 @@ const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): vo
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  vega: (params) => {
-    return `vega ${prepareString('spec', params.spec)}`;
-  },
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
@@ -262,18 +263,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 
     const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
     return `tsvb ${paramsArray.join(' ')}`;
-  },
-  timelion: (params) => {
-    const expression = prepareString('expression', params.expression);
-    const interval = prepareString('interval', params.interval);
-    return `timelion_vis ${expression}${interval}`;
-  },
-  table: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.table(schemas, params),
-    };
-    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   region_map: (params, schemas) => {
     const visConfig = {
@@ -299,26 +288,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: (schemas, visParams = {}) => {
-    const visConfig = {} as any;
-    const metrics = schemas.metric;
-    const buckets = schemas.bucket || [];
-    visConfig.dimensions = {
-      metrics,
-      buckets,
-      splitRow: schemas.split_row,
-      splitColumn: schemas.split_column,
-    };
-
-    if (visParams.showMetricsAtAllLevels === false && visParams.showPartialRows === true) {
-      // Handle case where user wants to see partial rows but not metrics at all levels.
-      // This requires calculating how many metrics will come back in the tabified response,
-      // and removing all metrics from the dimensions except the last set.
-      const metricsPerBucket = metrics.length / buckets.length;
-      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
-    }
-    return visConfig;
-  },
   region_map: (schemas) => {
     const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
@@ -415,7 +384,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       pipeline += `esaggs
     ${prepareString('index', indexPattern!.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
+    partialRows=${vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
     }
 
@@ -438,7 +407,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
+    partialRows=${vis.params.showPartialRows || false} `;
       if (indexPattern) {
         pipeline += `${prepareString('index', indexPattern.id)} `;
         if (vis.data.aggs) {

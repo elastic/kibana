@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: false,
           });
 
-          await PageObjects.error.expectNotFound();
+          await PageObjects.error.expectForbidden();
         });
 
         it('should not display the ML file data vis link on the Kibana home page', async () => {

@@ -23,7 +23,6 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { IInitialAppData } from '../common/types';
-import { externalUrl } from './applications/shared/enterprise_search_url';
 
 export interface ClientConfigType {
   host?: string;
@@ -101,20 +100,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
-        const { renderApp, renderHeaderActions } = await import('./applications');
+        const { renderApp } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
-
-        const { WorkplaceSearchHeaderActions } = await import(
-          './applications/workplace_search/components/layout'
-        );
-        params.setHeaderActionMenu((element) =>
-          renderHeaderActions(WorkplaceSearchHeaderActions, element)
-        );
 
         return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
       },
@@ -126,7 +118,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
         subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
-        descriptions: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTIONS,
+        description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
+        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
       });
 
@@ -175,10 +168,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     try {
       this.data = await http.get('/api/enterprise_search/config_data');
       this.hasInitialized = true;
-
-      // TODO: This is a temporary workaround to keep the WorkplaceSearchHeaderActions working.
-      // We'll solve this shortly by ensuring the main app store loads before the header actions.
-      externalUrl.enterpriseSearchUrl = this.data.publicUrl || this.config.host;
     } catch {
       this.data.errorConnecting = true;
     }

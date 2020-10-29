@@ -12,11 +12,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getTransactionSampleForGroup({
   serviceName,
@@ -25,9 +21,9 @@ export async function getTransactionSampleForGroup({
 }: {
   serviceName: string;
   transactionName: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { apmEventClient, start, end, uiFiltersES } = setup;
+  const { apmEventClient, start, end, esFilter } = setup;
 
   const filter = [
     {
@@ -43,7 +39,7 @@ export async function getTransactionSampleForGroup({
         [TRANSACTION_NAME]: transactionName,
       },
     },
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   const getSampledTransaction = async () => {

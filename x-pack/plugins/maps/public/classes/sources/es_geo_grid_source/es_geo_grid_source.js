@@ -24,12 +24,14 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   GEOTILE_GRID_AGG_NAME,
   GEOCENTROID_AGG_NAME,
+  ES_GEO_FIELD_TYPE,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import rison from 'rison-node';
 import { getHttp } from '../../../kibana_services';
@@ -398,6 +400,13 @@ export class ESGeoGridSource extends AbstractESAggSource {
     }
 
     return [VECTOR_SHAPE_TYPE.POINT];
+  }
+
+  async getLicensedFeatures() {
+    const geoField = await this._getGeoField();
+    return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+      ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]
+      : [];
   }
 }
 

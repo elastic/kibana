@@ -7,9 +7,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import moment from 'moment';
 
 import { toLocaleString } from '../../../../util/string_utils';

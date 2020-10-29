@@ -61,6 +61,7 @@ export const useNetworkTopNFlow = ({
   filterQuery,
   flowTarget,
   indexNames,
+  ip,
   skip,
   startDate,
   type,
@@ -74,26 +75,41 @@ export const useNetworkTopNFlow = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkTopNFlowRequest, setTopNFlowRequest] = useState<NetworkTopNFlowRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.topNFlow,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [
+    networkTopNFlowRequest,
+    setTopNFlowRequest,
+  ] = useState<NetworkTopNFlowRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.topNFlow,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          id: `${ID}-${flowTarget}`,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setTopNFlowRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setTopNFlowRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -117,7 +133,11 @@ export const useNetworkTopNFlow = ({
   });
 
   const networkTopNFlowSearch = useCallback(
-    (request: NetworkTopNFlowRequestOptions) => {
+    (request: NetworkTopNFlowRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -176,9 +196,13 @@ export const useNetworkTopNFlow = ({
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.topNFlow,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
+        id: `${ID}-${flowTarget}`,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -192,7 +216,7 @@ export const useNetworkTopNFlow = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, skip, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

@@ -235,6 +235,11 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
         defaultMessage: 'Change element data source',
       }),
+    getExpressionArgDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.expressionArgDescription', {
+        defaultMessage:
+          'The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.',
+      }),
     getPreviewButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
         defaultMessage: 'Preview data',

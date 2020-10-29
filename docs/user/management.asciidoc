@@ -6,6 +6,10 @@
 *Stack Management* is home to UIs for managing all things Elastic Stack&mdash;
 indices, clusters, licenses, UI settings, index patterns, spaces, and more.
 
+
+Access to individual features is governed by {es} and {kib} privileges.
+Consult your administrator if you do not have the appropriate access.
+
 [float]
 [[manage-ingest]]
 == Ingest
@@ -40,7 +44,7 @@ a| <<managing-indices, Index Management>>
 flushing, and clearing the cache. Practicing good index management ensures
 that your data is stored cost effectively.
 
-| <<index-lifecycle-policies, Index Lifecycle Policies>>
+| {ref}/index-lifecycle-management.html[Index Lifecycle Policies]
 |Create a policy for defining the lifecycle of an index as it ages
 through the hot, warm, cold, and delete phases.
 Such policies help you control operation costs
@@ -179,14 +183,6 @@ include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
 include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
-
-include::{kib-repo-dir}/management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
-
-include::{kib-repo-dir}/management/index-lifecycle-policies/create-policy.asciidoc[]
-
-include::{kib-repo-dir}/management/index-lifecycle-policies/manage-policy.asciidoc[]
-
-include::{kib-repo-dir}/management/index-lifecycle-policies/add-policy-to-index.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-indices.asciidoc[]
 

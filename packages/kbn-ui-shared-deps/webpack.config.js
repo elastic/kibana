@@ -77,6 +77,25 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           },
         ],
       },
+      {
+        test: !dev ? /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/ : () => false,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              plugins: [
+                [
+                  require.resolve('babel-plugin-transform-react-remove-prop-types'),
+                  {
+                    mode: 'remove',
+                    removeImport: true,
+                  },
+                ],
+              ],
+            },
+          },
+        ],
+      },
     ],
   },
 

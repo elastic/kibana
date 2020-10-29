@@ -22,6 +22,50 @@ import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/serv
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
+const testMigrateMatchAllQuery = (migrate: Function) => {
+  it('should migrate obsolete match_all query', () => {
+    const migratedDoc = migrate({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            query: {
+              match_all: {},
+            },
+          }),
+        },
+      },
+    });
+
+    const migratedSearchSource = JSON.parse(
+      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+
+    expect(migratedSearchSource).toEqual({
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  });
+
+  it('should return original doc if searchSourceJSON cannot be parsed', () => {
+    const migratedDoc = migrate({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+
+    expect(migratedDoc).toEqual({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+  });
+};
+
 describe('migration visualization', () => {
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
@@ -30,6 +74,10 @@ describe('migration visualization', () => {
         savedObjectMigrationContext
       );
     let doc: any;
+
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrate);
+    });
 
     describe('date histogram time zone removal', () => {
       beforeEach(() => {
@@ -149,32 +197,6 @@ describe('migration visualization', () => {
         expect(aggs[0]).toHaveProperty('params.time_zone');
         expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
         expect(aggs[2]).not.toHaveProperty('params.time_zone');
-      });
-
-      it('should migrate obsolete match_all query', () => {
-        const migratedDoc = migrate({
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({
-                query: {
-                  match_all: {},
-                },
-              }),
-            },
-          },
-        });
-        const migratedSearchSource = JSON.parse(
-          migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
-        );
-
-        expect(migratedSearchSource).toEqual({
-          query: {
-            query: '',
-            language: 'kuery',
-          },
-        });
       });
     });
   });
@@ -1484,6 +1506,18 @@ describe('migration visualization', () => {
 
       expect(actual.aggs.filter((agg: any) => 'row' in agg.params)).toEqual([]);
       expect(actual.params.row).toBeTruthy();
+    });
+  });
+
+  describe('7.9.3', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.9.3'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrate);
     });
   });
 

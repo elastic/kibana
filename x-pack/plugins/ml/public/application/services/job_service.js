@@ -4,21 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import cloneDeep from 'lodash/cloneDeep';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import each from 'lodash/each';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import find from 'lodash/find';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isNumber from 'lodash/isNumber';
+import { cloneDeep, each, find, get, isNumber } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
@@ -29,7 +15,7 @@ import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { validateTimeRange } from '../util/date_utils';
+import { validateTimeRange } from '../../../common/util/date_utils';
 
 let jobs = [];
 let datafeedIds = {};
@@ -523,10 +509,10 @@ class JobService {
                 fields[job.data_description.time_field] = {};
               }
 
-              // console.log('fields: ', fields);
               const fieldsList = Object.keys(fields);
               if (fieldsList.length) {
-                body._source = fieldsList;
+                body.fields = fieldsList;
+                body._source = false;
               }
             }
 
@@ -819,7 +805,7 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   }
 
   path += `?_g=(ml:(jobIds:!(${idString}))`;
-  path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
+  path += `,refreshInterval:(display:Off,pause:!t,value:0),time:(from:'${from}'`;
   path += `,to:'${to}'`;
   if (mode === 'invalid') {
     path += `,mode:invalid`;

@@ -71,6 +71,8 @@ interface BackOptions {
 
 export interface HeaderPageProps extends HeaderProps {
   backOptions?: BackOptions;
+  /** A component to be displayed as the back button. Used only if `backOption` is not defined */
+  backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
@@ -83,6 +85,7 @@ export interface HeaderPageProps extends HeaderProps {
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   backOptions,
+  backComponent,
   badgeOptions,
   border,
   children,
@@ -122,6 +125,8 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
               </LinkIcon>
             </LinkBack>
           )}
+
+          {!backOptions && backComponent && <>{backComponent}</>}
 
           {titleNode || (
             <Title

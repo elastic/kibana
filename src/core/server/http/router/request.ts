@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Url } from 'url';
+import { URL } from 'url';
 import uuid from 'uuid';
 import { Request, RouteOptionsApp, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
@@ -45,6 +45,7 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
 export interface KibanaRequestState extends ApplicationState {
   requestId: string;
   requestUuid: string;
+  rewrittenUrl?: URL;
 }
 
 /**
@@ -162,7 +163,7 @@ export class KibanaRequest<
    */
   public readonly uuid: string;
   /** a WHATWG URL standard object. */
-  public readonly url: Url;
+  public readonly url: URL;
   /** matched route details */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
   /**
@@ -186,6 +187,11 @@ export class KibanaRequest<
     isAuthenticated: boolean;
   };
 
+  /**
+   * URL rewritten in onPreRouting request interceptor.
+   */
+  public readonly rewrittenUrl?: URL;
+
   /** @internal */
   protected readonly [requestSymbol]: Request;
 
@@ -199,12 +205,15 @@ export class KibanaRequest<
     private readonly withoutSecretHeaders: boolean
   ) {
     // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
-    // KibanaRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
+    // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
-    this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? uuid.v4();
-    this.uuid = (request.app as KibanaRequestState | undefined)?.requestUuid ?? uuid.v4();
+    const appState = request.app as KibanaRequestState | undefined;
+    this.id = appState?.requestId ?? uuid.v4();
+    this.uuid = appState?.requestUuid ?? uuid.v4();
+    this.rewrittenUrl = appState?.rewrittenUrl;
 
-    this.url = request.url;
+    // @ts-expect-error request._core isn't supposed to be accessed - remove once we upgrade to hapi v18
+    this.url = new URL(request.url.href!, request._core.info.uri);
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest =
       request.headers['kbn-system-request'] === 'true' ||
@@ -296,8 +305,8 @@ export class KibanaRequest<
     if (authOptions === false) return false;
     throw new Error(
       `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
-        this.url.href
-      }`
+        this.url.pathname
+      }${this.url.search}`
     );
   }
 }

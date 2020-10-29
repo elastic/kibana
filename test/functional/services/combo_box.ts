@@ -59,6 +59,17 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     /**
+     * Finds combobox element options
+     *
+     * @param comboBoxSelector data-test-subj selector
+     */
+    public async getOptions(comboBoxSelector: string) {
+      const comboBoxElement = await testSubjects.find(comboBoxSelector);
+      await this.openOptionsList(comboBoxElement);
+      return await find.allByCssSelector('.euiFilterSelectItem', WAIT_FOR_EXISTS_TIME);
+    }
+
+    /**
      * Sets value for specified combobox element
      *
      * @param comboBoxElement element that wraps up EuiComboBox

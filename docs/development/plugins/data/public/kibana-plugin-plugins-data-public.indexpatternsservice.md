@@ -43,5 +43,5 @@ export declare class IndexPatternsService
 |  [createAndSave(spec, override, skipFetchFields)](./kibana-plugin-plugins-data-public.indexpatternsservice.createandsave.md) |  | Create a new index pattern and save it right away |
 |  [createSavedObject(indexPattern, override)](./kibana-plugin-plugins-data-public.indexpatternsservice.createsavedobject.md) |  | Save a new index pattern |
 |  [delete(indexPatternId)](./kibana-plugin-plugins-data-public.indexpatternsservice.delete.md) |  | Deletes an index pattern from .kibana index |
-|  [updateSavedObject(indexPattern, saveAttempts)](./kibana-plugin-plugins-data-public.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
+|  [updateSavedObject(indexPattern, saveAttempts, ignoreErrors)](./kibana-plugin-plugins-data-public.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
 

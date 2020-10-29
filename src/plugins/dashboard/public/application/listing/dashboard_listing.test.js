@@ -20,7 +20,7 @@
 jest.mock(
   'lodash',
   () => ({
-    ...require.requireActual('lodash'),
+    ...jest.requireActual('lodash'),
     // mock debounce to fire immediately with no internal timer
     debounce: (func) => {
       function debounced(...args) {

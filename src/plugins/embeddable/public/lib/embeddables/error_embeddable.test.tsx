@@ -17,12 +17,9 @@
  * under the License.
  */
 import React from 'react';
-import { wait } from '@testing-library/dom';
-import { cleanup, render } from '@testing-library/react/pure';
+import { wait, render } from '@testing-library/react';
 import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
-
-afterEach(cleanup);
 
 test('ErrorEmbeddable renders an embeddable', async () => {
   const embeddable = new ErrorEmbeddable('some error occurred', { id: '123', title: 'Error' });

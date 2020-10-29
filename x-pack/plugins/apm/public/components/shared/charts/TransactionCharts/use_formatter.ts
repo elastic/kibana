@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import {
   getDurationFormatter,
   TimeFormatter,
-} from '../../../../utils/formatters';
+} from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
 import { getMaxY } from './helper';
 

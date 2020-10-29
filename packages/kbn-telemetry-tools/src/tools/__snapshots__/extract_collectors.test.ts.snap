@@ -143,6 +143,53 @@ Array [
     },
   ],
   Array [
+    "src/fixtures/telemetry_collectors/schema_defined_with_spreads_collector.ts",
+    Object {
+      "collectorName": "schema_defined_with_spreads",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "flat": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+          "my_objects": Object {
+            "total": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+            "type": Object {
+              "kind": 131,
+              "type": "BooleanKeyword",
+            },
+          },
+          "my_str": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "flat": Object {
+            "type": "keyword",
+          },
+          "my_objects": Object {
+            "total": Object {
+              "type": "number",
+            },
+            "type": Object {
+              "type": "boolean",
+            },
+          },
+          "my_str": Object {
+            "type": "text",
+          },
+        },
+      },
+    },
+  ],
+  Array [
     "src/fixtures/telemetry_collectors/working_collector.ts",
     Object {
       "collectorName": "my_working_collector",

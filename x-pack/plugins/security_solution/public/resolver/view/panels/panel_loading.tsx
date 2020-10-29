@@ -6,15 +6,20 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiSpacer } from '@elastic/eui';
 import { Breadcrumbs } from './breadcrumbs';
 import { useLinkProps } from '../use_link_props';
+
+const StyledSpinnerFlexItem = styled.span`
+  margin-right: 5px;
+`;
 
 export function PanelLoading() {
   const waitingString = i18n.translate(
     'xpack.securitySolution.endpoint.resolver.panel.relatedDetail.wait',
     {
-      defaultMessage: 'Waiting For Events...',
+      defaultMessage: 'Loading Events...',
     }
   );
   const eventsString = i18n.translate(
@@ -38,9 +43,14 @@ export function PanelLoading() {
     <>
       <Breadcrumbs breadcrumbs={waitCrumbs} />
       <EuiSpacer size="l" />
-      <EuiTitle>
-        <h4>{waitingString}</h4>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
+        <StyledSpinnerFlexItem>
+          <EuiLoadingSpinner size="m" />
+        </StyledSpinnerFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText data-test-subj="resolver:panel:loading">{waitingString}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

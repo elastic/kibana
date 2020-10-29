@@ -33,7 +33,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
             size="xxl"
             type="logoElastic"
           >
-            <div
+            <span
               data-euiicon-type="logoElastic"
               size="xxl"
             />

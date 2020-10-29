@@ -9,10 +9,13 @@
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
+  "kibana": {
+    "devOnly": true
+  },
   "dependencies": {
-    "@babel/core": "^7.11.1",
+    "@babel/core": "^7.11.6",
     "@kbn/utils": "1.0.0",
-    "axios": "^0.19.0",
+    "axios": "^0.19.2",
     "chalk": "^4.1.0",
     "cheerio": "0.22.0",
     "dedent": "^0.7.0",

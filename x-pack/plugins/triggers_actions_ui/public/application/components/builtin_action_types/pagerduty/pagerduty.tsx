@@ -7,11 +7,20 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { PagerDutyActionParams, PagerDutyActionConnector } from '.././types';
+import {
+  PagerDutyActionConnector,
+  PagerDutyConfig,
+  PagerDutySecrets,
+  PagerDutyActionParams,
+} from '.././types';
 import pagerDutySvg from './pagerduty.svg';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
-export function getActionType(): ActionTypeModel {
+export function getActionType(): ActionTypeModel<
+  PagerDutyConfig,
+  PagerDutySecrets,
+  PagerDutyActionParams
+> {
   return {
     id: '.pagerduty',
     iconClass: pagerDutySvg,
@@ -33,6 +42,7 @@ export function getActionType(): ActionTypeModel {
         routingKey: new Array<string>(),
       };
       validationResult.errors = errors;
+
       if (!action.secrets.routingKey) {
         errors.routingKey.push(
           i18n.translate(

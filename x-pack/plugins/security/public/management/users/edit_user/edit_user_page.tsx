@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart, ScopedHistory } from 'src/core/public';
 import { User, EditUser, Role, isRoleDeprecated } from '../../../../common/model';
 import { AuthenticationServiceSetup } from '../../../authentication';
@@ -536,7 +537,7 @@ export class EditUserPage extends Component<Props, State> {
 
               {isNewUser || showChangePasswordForm ? null : (
                 <EuiFormRow label="Password">
-                  <EuiLink onClick={this.toggleChangePasswordForm}>
+                  <EuiLink data-test-subj="changePassword" onClick={this.toggleChangePasswordForm}>
                     <FormattedMessage
                       id="xpack.security.management.users.editUser.changePasswordButtonLabel"
                       defaultMessage="Change password"

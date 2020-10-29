@@ -135,25 +135,25 @@ const convertSchemaToHash = (schema, beatFields) => {
   }, beatFields);
 };
 
-const manageZipFields = async (beat, filePath, beatFields) =>
-  new Promise((resolve, reject) => {
-    extract(filePath, { dir: beat.outputDir }, (err) => {
-      if (err) {
-        return reject(new Error(err));
-      }
-      console.log('building fields', beat.index);
-      const obj = yaml.load(
-        fs.readFileSync(`${beat.outputDir}/winlogbeat-7.9.0-windows-x86_64/fields.yml`, {
-          encoding: 'utf-8',
-        })
-      );
-      const eBeatFields = convertSchemaToHash(obj, beatFields);
-      console.log('deleting files', beat.index);
-      rimraf.sync(`${beat.outputDir}/winlogbeat-7.9.0-windows-x86_64`);
-      rimraf.sync(beat.filePath);
-      resolve(eBeatFields);
-    });
-  });
+const manageZipFields = async (beat, filePath, beatFields) => {
+  try {
+    await extract(filePath, { dir: beat.outputDir });
+    console.log('building fields', beat.index);
+    const obj = yaml.load(
+      fs.readFileSync(`${beat.outputDir}/winlogbeat-7.9.0-windows-x86_64/fields.yml`, {
+        encoding: 'utf-8',
+      })
+    );
+    const eBeatFields = convertSchemaToHash(obj, beatFields);
+    console.log('deleting files', beat.index);
+    rimraf.sync(`${beat.outputDir}/winlogbeat-7.9.0-windows-x86_64`);
+    rimraf.sync(beat.filePath);
+
+    return eBeatFields;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
 
 const manageTarFields = async (beat, filePath, beatFields) =>
   new Promise((resolve, reject) => {

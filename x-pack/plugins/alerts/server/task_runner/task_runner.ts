@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -11,7 +11,13 @@ import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
-import { validateAlertTypeParams } from '../lib';
+import {
+  validateAlertTypeParams,
+  executionStatusFromState,
+  executionStatusFromError,
+  alertExecutionStatusToRaw,
+  ErrorWithReason,
+} from '../lib';
 import {
   AlertType,
   RawAlert,
@@ -22,6 +28,7 @@ import {
   Alert,
   AlertExecutorOptions,
   SanitizedAlert,
+  AlertExecutionStatus,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -29,6 +36,7 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
+import { partiallyUpdateAlert } from '../saved_objects';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
@@ -91,6 +99,12 @@ export class TaskRunner {
       raw: {
         req: {
           url: '/',
+        },
+      },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
         },
       },
     } as unknown) as KibanaRequest;
@@ -204,7 +218,7 @@ export class TaskRunner {
       event.event = event.event || {};
       event.event.outcome = 'failure';
       eventLogger.logEvent(event);
-      throw err;
+      throw new ErrorWithReason('execute', err);
     }
 
     eventLogger.stopTiming(event);
@@ -278,15 +292,22 @@ export class TaskRunner {
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
+    let apiKey: string | null;
+    try {
+      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+    } catch (err) {
+      throw new ErrorWithReason('decrypt', err);
+    }
+    const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
-    const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
-    const [services, alertsClient] = await this.getServicesWithSpaceLevelPermissions(
-      spaceId,
-      apiKey
-    );
+    let alert: SanitizedAlert;
 
     // Ensure API key is still valid and user has access
-    const alert = await alertsClient.get({ id: alertId });
+    try {
+      alert = await alertsClient.get({ id: alertId });
+    } catch (err) {
+      throw new ErrorWithReason('read', err);
+    }
 
     return {
       state: await promiseResult<AlertTaskState, Error>(
@@ -306,12 +327,38 @@ export class TaskRunner {
 
   async run(): Promise<AlertTaskRunResult> {
     const {
-      params: { alertId },
-      startedAt: previousStartedAt,
+      params: { alertId, spaceId },
+      startedAt,
       state: originalState,
     } = this.taskInstance;
 
     const { state, runAt } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
+    const namespace = spaceId === 'default' ? undefined : spaceId;
+
+    const executionStatus: AlertExecutionStatus = map(
+      state,
+      (alertTaskState: AlertTaskState) => executionStatusFromState(alertTaskState),
+      (err: Error) => executionStatusFromError(err)
+    );
+    this.logger.debug(
+      `alertExecutionStatus for ${this.alertType.id}:${alertId}: ${JSON.stringify(executionStatus)}`
+    );
+
+    const client = this.context.internalSavedObjectsRepository;
+    const attributes = {
+      executionStatus: alertExecutionStatusToRaw(executionStatus),
+    };
+
+    try {
+      await partiallyUpdateAlert(client, alertId, attributes, {
+        ignore404: true,
+        namespace,
+      });
+    } catch (err) {
+      this.logger.error(
+        `error updating alert execution status for ${this.alertType.id}:${alertId} ${err.message}`
+      );
+    }
 
     return {
       state: map<AlertTaskState, Error, AlertTaskState>(
@@ -319,7 +366,7 @@ export class TaskRunner {
         (stateUpdates: AlertTaskState) => {
           return {
             ...stateUpdates,
-            previousStartedAt,
+            previousStartedAt: startedAt,
           };
         },
         (err: Error) => {
@@ -329,10 +376,7 @@ export class TaskRunner {
           } else {
             this.logger.error(message);
           }
-          return {
-            ...originalState,
-            previousStartedAt,
-          };
+          return originalState;
         }
       ),
       runAt: resolveErr<Date | undefined, Error>(runAt, (err) => {

@@ -10,8 +10,8 @@ import React from 'react';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionGroup } from '../../../../server/lib/transaction_groups/fetcher';
+import { asMillisecondDuration } from '../../../../common/utils/formatters';
 import { fontSizes, truncate } from '../../../style/variables';
-import { asMillisecondDuration } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';

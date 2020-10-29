@@ -19,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
+  const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'testing' }));
 
   describe('Transaction charts', () => {
     describe('when data is not loaded ', () => {
@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct data', () => {
         expectSnapshot(response.body.apmTimeseries.overallAvgDuration).toMatchInline(
-          `600255.707964602`
+          `600888.274678112`
         );
         expectSnapshot(response.body.apmTimeseries.responseTimes.avg.length).toMatchInline(`61`);
         expectSnapshot(response.body.apmTimeseries.tpmBuckets.length).toMatchInline(`3`);

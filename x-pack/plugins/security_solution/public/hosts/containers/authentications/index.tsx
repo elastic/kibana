@@ -37,7 +37,7 @@ import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
 
-const ID = 'authenticationQuery';
+const ID = 'hostsAuthenticationsQuery';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
@@ -78,25 +78,35 @@ export const useAuthentications = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [authenticationsRequest, setAuthenticationsRequest] = useState<
-    HostAuthenticationsRequestOptions
-  >({
-    defaultIndex: indexNames,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: HostsQueries.authentications,
-    filterQuery: createFilter(filterQuery),
-    pagination: generateTablePaginationOptions(activePage, limit),
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-    sort: {} as SortField,
-  });
+  const [
+    authenticationsRequest,
+    setAuthenticationsRequest,
+  ] = useState<HostAuthenticationsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: HostsQueries.authentications,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          sort: {} as SortField,
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
       setAuthenticationsRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
         return {
           ...prevRequest,
           pagination: generateTablePaginationOptions(newActivePage, limit),
@@ -126,7 +136,11 @@ export const useAuthentications = ({
   });
 
   const authenticationsSearch = useCallback(
-    (request: HostAuthenticationsRequestOptions) => {
+    (request: HostAuthenticationsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -184,16 +198,19 @@ export const useAuthentications = ({
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: HostsQueries.authentications,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+        sort: {} as SortField,
       };
       if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;

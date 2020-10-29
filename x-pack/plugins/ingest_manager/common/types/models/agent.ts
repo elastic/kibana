@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { FullAgentPolicy } from './agent_policy';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
 export type AgentType =
@@ -19,10 +19,16 @@ export type AgentStatus =
   | 'warning'
   | 'enrolling'
   | 'unenrolling'
-  | 'upgrading'
+  | 'updating'
   | 'degraded';
 
-export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL' | 'UPGRADE';
+export type AgentActionType =
+  | 'POLICY_CHANGE'
+  | 'UNENROLL'
+  | 'UPGRADE'
+  // INTERNAL* actions are mean to interupt long polling calls these actions will not be distributed to the agent
+  | 'INTERNAL_POLICY_REASSIGN';
+
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
@@ -42,12 +48,23 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentPolicyAction extends NewAgentAction {
   id: string;
   type: AgentActionType;
-  data?: any;
+  data: {
+    policy: FullAgentPolicy;
+  };
   policy_id: string;
   policy_revision: number;
   created_at: string;
   ack_data?: any;
 }
+
+// Make policy change action renaming BWC with agent version <= 7.9
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type AgentPolicyActionV7_9 = Omit<AgentPolicyAction, 'type' | 'data'> & {
+  type: 'CONFIG_CHANGE';
+  data: {
+    config: FullAgentPolicy;
+  };
+};
 
 interface CommonAgentActionSOAttributes {
   type: AgentActionType;
@@ -78,6 +95,7 @@ export interface NewAgentEvent {
     | 'STOPPING'
     | 'STOPPED'
     | 'DEGRADED'
+    | 'UPDATING'
     // Action results
     | 'DATA_DUMP'
     // Actions
@@ -98,10 +116,8 @@ export interface AgentEvent extends NewAgentEvent {
 
 export type AgentEventSOAttributes = NewAgentEvent;
 
-type MetadataValue = string | AgentMetadata;
-
 export interface AgentMetadata {
-  [x: string]: MetadataValue;
+  [x: string]: any;
 }
 interface AgentBase {
   type: AgentType;
@@ -118,7 +134,7 @@ interface AgentBase {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
 }

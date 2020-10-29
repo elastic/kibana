@@ -7,15 +7,9 @@
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export const MICRO_TO_SEC = 1000000;
-
-const NUMBER_OF_PLD_STEPS = 100;
 
 export function microToSec(val: number) {
   return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
@@ -24,15 +18,31 @@ export function microToSec(val: number) {
 export const getPLDChartSteps = ({
   maxDuration,
   minDuration,
+  initStepValue,
 }: {
   maxDuration: number;
   minDuration: number;
+  initStepValue?: number;
 }) => {
-  const stepValue = (maxDuration - minDuration) / NUMBER_OF_PLD_STEPS;
-  const stepValues = [];
-  for (let i = 1; i < NUMBER_OF_PLD_STEPS + 1; i++) {
-    stepValues.push((stepValue * i + minDuration).toFixed(2));
+  let stepValue = 0.5;
+  // if diff is too low, let's lower
+  // down the steps value to increase steps
+  if (maxDuration - minDuration <= 5 * MICRO_TO_SEC) {
+    stepValue = 0.1;
   }
+
+  if (initStepValue) {
+    stepValue = initStepValue;
+  }
+
+  let initValue = minDuration;
+  const stepValues = [initValue];
+
+  while (initValue < maxDuration) {
+    initValue += stepValue * MICRO_TO_SEC;
+    stepValues.push(initValue);
+  }
+
   return stepValues;
 };
 
@@ -42,7 +52,7 @@ export async function getPageLoadDistribution({
   maxPercentile,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   minPercentile?: string;
   maxPercentile?: string;
   urlQuery?: string;
@@ -52,20 +62,35 @@ export async function getPageLoadDistribution({
     urlQuery,
   });
 
+  // we will first get 100 steps using 0sec and 50sec duration,
+  // most web apps will cover this use case
+  // if 99th percentile is greater than 50sec,
+  // we will fetch additional 5 steps beyond 99th percentile
+  let maxDuration = (maxPercentile ? +maxPercentile : 50) * MICRO_TO_SEC;
+  const minDuration = minPercentile ? +minPercentile * MICRO_TO_SEC : 0;
+  const stepValues = getPLDChartSteps({
+    maxDuration,
+    minDuration,
+  });
+
   const params = mergeProjection(projection, {
     body: {
       size: 0,
       aggs: {
-        minDuration: {
-          min: {
-            field: TRANSACTION_DURATION,
-            missing: 0,
-          },
-        },
         durPercentiles: {
           percentiles: {
             field: TRANSACTION_DURATION,
             percents: [50, 75, 90, 95, 99],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
+          },
+        },
+        loadDistribution: {
+          percentile_ranks: {
+            field: TRANSACTION_DURATION,
+            values: stepValues,
+            keyed: false,
             hdr: {
               number_of_significant_value_digits: 3,
             },
@@ -86,21 +111,39 @@ export async function getPageLoadDistribution({
     return null;
   }
 
-  const { durPercentiles, minDuration } = aggregations ?? {};
+  const { durPercentiles, loadDistribution } = aggregations ?? {};
 
-  const minPerc = minPercentile
-    ? +minPercentile * MICRO_TO_SEC
-    : minDuration?.value ?? 0;
+  let pageDistVals = loadDistribution?.values ?? [];
 
-  const maxPercQuery = durPercentiles?.values['99.0'] ?? 10000;
+  const maxPercQuery = durPercentiles?.values['99.0'] ?? 0;
 
-  const maxPerc = maxPercentile ? +maxPercentile * MICRO_TO_SEC : maxPercQuery;
+  // we assumed that page load will never exceed 50secs, if 99th percentile is
+  // greater then let's fetch additional 10 steps, to cover that on the chart
+  if (maxPercQuery > maxDuration && !maxPercentile) {
+    const additionalStepsPageVals = await getPercentilesDistribution({
+      setup,
+      maxDuration: maxPercQuery,
+      // we pass 50sec as min to get next steps
+      minDuration: maxDuration,
+    });
 
-  const pageDist = await getPercentilesDistribution({
-    setup,
-    minDuration: minPerc,
-    maxDuration: maxPerc,
+    pageDistVals = pageDistVals.concat(additionalStepsPageVals);
+    maxDuration = maxPercQuery;
+  }
+
+  // calculate the diff to get actual page load on specific duration value
+  const pageDist = pageDistVals.map(({ key, value }, index: number, arr) => {
+    return {
+      x: microToSec(key),
+      y: index === 0 ? value : value - arr[index - 1].value,
+    };
   });
+
+  if (pageDist.length > 0) {
+    while (pageDist[pageDist.length - 1].y === 0) {
+      pageDist.pop();
+    }
+  }
 
   Object.entries(durPercentiles?.values ?? {}).forEach(([key, val]) => {
     if (durPercentiles?.values?.[key]) {
@@ -111,8 +154,8 @@ export async function getPageLoadDistribution({
   return {
     pageLoadDistribution: pageDist,
     percentiles: durPercentiles?.values,
-    minDuration: microToSec(minPerc),
-    maxDuration: microToSec(maxPerc),
+    minDuration: microToSec(minDuration),
+    maxDuration: microToSec(maxDuration),
   };
 }
 
@@ -121,11 +164,15 @@ const getPercentilesDistribution = async ({
   minDuration,
   maxDuration,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   minDuration: number;
   maxDuration: number;
 }) => {
-  const stepValues = getPLDChartSteps({ maxDuration, minDuration });
+  const stepValues = getPLDChartSteps({
+    minDuration: minDuration + 0.5 * MICRO_TO_SEC,
+    maxDuration,
+    initStepValue: 0.5,
+  });
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,
@@ -153,12 +200,5 @@ const getPercentilesDistribution = async ({
 
   const { aggregations } = await apmEventClient.search(params);
 
-  const pageDist = aggregations?.loadDistribution.values ?? [];
-
-  return pageDist.map(({ key, value }, index: number, arr) => {
-    return {
-      x: microToSec(key),
-      y: index === 0 ? value : value - arr[index - 1].value,
-    };
-  });
+  return aggregations?.loadDistribution.values ?? [];
 };

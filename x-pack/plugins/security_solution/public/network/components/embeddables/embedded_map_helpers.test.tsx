@@ -12,9 +12,12 @@ import {
   mockAPMRegexIndexPattern,
   mockAPMTransactionIndexPattern,
   mockAuditbeatIndexPattern,
+  mockCCSGlobIndexPattern,
+  mockCommaFilebeatAuditbeatCCSGlobIndexPattern,
+  mockCommaFilebeatAuditbeatGlobIndexPattern,
+  mockCommaFilebeatExclusionGlobIndexPattern,
   mockFilebeatIndexPattern,
   mockGlobIndexPattern,
-  mockCCSGlobIndexPattern,
 } from './__mocks__/mock';
 
 const mockEmbeddable = embeddablePluginMock.createStartContract();
@@ -121,6 +124,45 @@ describe('embedded_map_helpers', () => {
         siemDefaultIndices,
       });
       expect(matchingIndexPatterns).toEqual([mockFilebeatIndexPattern]);
+    });
+
+    test('matches on comma separated Kibana index pattern', () => {
+      const matchingIndexPatterns = findMatchingIndexPatterns({
+        kibanaIndexPatterns: [
+          mockCommaFilebeatAuditbeatGlobIndexPattern,
+          mockAuditbeatIndexPattern,
+        ],
+        siemDefaultIndices,
+      });
+      expect(matchingIndexPatterns).toEqual([
+        mockCommaFilebeatAuditbeatGlobIndexPattern,
+        mockAuditbeatIndexPattern,
+      ]);
+    });
+
+    test('matches on excluded comma separated Kibana index pattern', () => {
+      const matchingIndexPatterns = findMatchingIndexPatterns({
+        kibanaIndexPatterns: [
+          mockCommaFilebeatExclusionGlobIndexPattern,
+          mockAuditbeatIndexPattern,
+        ],
+        siemDefaultIndices,
+      });
+      expect(matchingIndexPatterns).toEqual([
+        mockCommaFilebeatExclusionGlobIndexPattern,
+        mockAuditbeatIndexPattern,
+      ]);
+    });
+
+    test('matches on CCS comma separated Kibana index pattern', () => {
+      const matchingIndexPatterns = findMatchingIndexPatterns({
+        kibanaIndexPatterns: [
+          mockCommaFilebeatAuditbeatCCSGlobIndexPattern,
+          mockAuditbeatIndexPattern,
+        ],
+        siemDefaultIndices: ['cluster2:filebeat-*', 'cluster1:auditbeat-*'],
+      });
+      expect(matchingIndexPatterns).toEqual([mockCommaFilebeatAuditbeatCCSGlobIndexPattern]);
     });
   });
 });

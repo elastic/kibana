@@ -66,7 +66,8 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiButtonHeight": "40px",
         "euiButtonHeightSmall": "32px",
         "euiButtonIconTypes": Object {
-          "danger": "#ff6666",
+          "accent": "#f990c0",
+          "danger": "#ff7575",
           "disabled": "#4c4e51",
           "ghost": "#ffffff",
           "primary": "#1ba9f5",
@@ -217,7 +218,7 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiDataGridColumnResizerWidth": "3px",
         "euiDataGridPopoverMaxHeight": "400px",
         "euiDataGridPrefix": ".euiDataGrid--",
-        "euiDataGridStyles": "'bordersAll', 'bordersNone', 'bordersHorizontal', 'paddingSmall', 'paddingMedium', 'paddingLarge', 'stripes', 'rowHoverNone', 'rowHoverHighlight', 'headerShade', 'headerUnderline', 'fontSizeSmall', 'fontSizeLarge', 'noControls'",
+        "euiDataGridStyles": "'bordersAll', 'bordersNone', 'bordersHorizontal', 'paddingSmall', 'paddingMedium', 'paddingLarge', 'stripes', 'rowHoverNone', 'rowHoverHighlight', 'headerShade', 'headerUnderline', 'footerShade', 'footerOverline', 'fontSizeSmall', 'fontSizeLarge', 'noControls', 'stickyFooter'",
         "euiDataGridVerticalBorder": "solid 1px #24272e",
         "euiDatePickerCalendarWidth": "284px",
         "euiDragAndDropSpacing": Object {
@@ -292,9 +293,15 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiHeaderChildSize": "48px",
         "euiHeaderHeight": "48px",
         "euiHeaderHeightCompensation": "49px",
+        "euiHeaderLinksGutterSizes": Object {
+          "gutterL": "24px",
+          "gutterM": "12px",
+          "gutterS": "8px",
+          "gutterXS": "4px",
+        },
         "euiIconColors": Object {
           "accent": "#f990c0",
-          "danger": "#ff7575",
+          "danger": "#ff6666",
           "ghost": "#ffffff",
           "primary": "#1ba9f5",
           "secondary": "#7de2d1",

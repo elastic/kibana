@@ -5,12 +5,7 @@
  */
 
 import _ from 'lodash';
-import {
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { ISavedObjectsRepository, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { IFieldType, IndexPatternAttributes } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
@@ -25,10 +20,13 @@ import {
   ESSearchSourceDescriptor,
   LayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSavedObject } from '../../common/map_saved_object_type';
-// @ts-ignore
+import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
+
+interface Settings {
+  showMapVisualizationTypes: boolean;
+}
 
 interface IStats {
   [key: string]: {
@@ -40,6 +38,30 @@ interface IStats {
 
 interface ILayerTypeCount {
   [key: string]: number;
+}
+
+export interface MapsUsage {
+  settings: Settings;
+  indexPatternsWithGeoFieldCount: number;
+  indexPatternsWithGeoPointFieldCount: number;
+  indexPatternsWithGeoShapeFieldCount: number;
+  geoShapeAggLayersCount: number;
+  mapsTotalCount: number;
+  timeCaptured: string;
+  attributesPerMap: {
+    dataSourcesCount: {
+      min: number;
+      max: number;
+      avg: number;
+    };
+    layersCount: {
+      min: number;
+      max: number;
+      avg: number;
+    };
+    layerTypesCount: IStats;
+    emsVectorLayersCount: IStats;
+  };
 }
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
@@ -213,8 +235,8 @@ export function buildMapsTelemetry({
 }: {
   mapSavedObjects: MapSavedObject[];
   indexPatternSavedObjects: Array<SavedObject<IndexPatternAttributes>>;
-  settings: SavedObjectAttribute;
-}): SavedObjectAttributes {
+  settings: Settings;
+}): MapsUsage {
   const layerLists: LayerDescriptor[][] = getLayerLists(mapSavedObjects);
   const mapsCount = layerLists.length;
 
@@ -256,14 +278,14 @@ export function buildMapsTelemetry({
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
-        min: dataSourcesCount.length ? _.min(dataSourcesCount) : 0,
-        max: dataSourcesCount.length ? _.max(dataSourcesCount) : 0,
+        min: dataSourcesCount.length ? _.min(dataSourcesCount)! : 0,
+        max: dataSourcesCount.length ? _.max(dataSourcesCount)! : 0,
         avg: dataSourcesCountSum ? layersCountSum / mapsCount : 0,
       },
       // Total count of layers per map
       layersCount: {
-        min: layersCount.length ? _.min(layersCount) : 0,
-        max: layersCount.length ? _.max(layersCount) : 0,
+        min: layersCount.length ? _.min(layersCount)! : 0,
+        max: layersCount.length ? _.max(layersCount)! : 0,
         avg: layersCountSum ? layersCountSum / mapsCount : 0,
       },
       // Count of layers by type
@@ -277,27 +299,29 @@ export function buildMapsTelemetry({
     },
   };
 }
-async function getMapSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
-  const mapsSavedObjects = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE });
-  return _.get(mapsSavedObjects, 'saved_objects', []);
+async function getMapSavedObjects(
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
+) {
+  const mapsSavedObjects = await savedObjectsClient.find<MapSavedObjectAttributes>({
+    type: MAP_SAVED_OBJECT_TYPE,
+  });
+  return mapsSavedObjects.saved_objects;
 }
 
-async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
-  const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
-  return _.get(indexPatternSavedObjects, 'saved_objects', []);
+async function getIndexPatternSavedObjects(
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
+) {
+  const indexPatternSavedObjects = await savedObjectsClient.find<IndexPatternAttributes>({
+    type: 'index-pattern',
+  });
+  return indexPatternSavedObjects.saved_objects;
 }
 
 export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
-  // @ts-ignore
-  const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: Array<SavedObject<
-    IndexPatternAttributes
-  >> = (await getIndexPatternSavedObjects(
-    // @ts-ignore
-    savedObjectsClient
-  )) as Array<SavedObject<IndexPatternAttributes>>;
-  const settings: SavedObjectAttribute = {
+  const mapSavedObjects = await getMapSavedObjects(savedObjectsClient);
+  const indexPatternSavedObjects = await getIndexPatternSavedObjects(savedObjectsClient);
+  const settings = {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
   };
   return buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });

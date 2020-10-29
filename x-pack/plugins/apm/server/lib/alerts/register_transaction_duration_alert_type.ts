@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { getDurationFormatter } from '../../../common/utils/formatters';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import { ESSearchResponse } from '../../../typings/elasticsearch';
@@ -15,6 +16,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_DURATION,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -62,6 +64,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.interval,
       ],
     },
     producer: 'apm',
@@ -106,6 +109,11 @@ export function registerTransactionDurationAlertType({
                       ],
                     },
                   },
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+              },
+            },
           },
         },
       };
@@ -119,7 +127,7 @@ export function registerTransactionDurationAlertType({
         return;
       }
 
-      const { agg } = response.aggregations;
+      const { agg, environments } = response.aggregations;
 
       const transactionDuration =
         'values' in agg ? Object.values(agg.values)[0] : agg?.value;
@@ -127,15 +135,25 @@ export function registerTransactionDurationAlertType({
       const threshold = alertParams.threshold * 1000;
 
       if (transactionDuration && transactionDuration > threshold) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionDuration
-        );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          transactionType: alertParams.transactionType,
-          serviceName: alertParams.serviceName,
-          environment: alertParams.environment,
-          threshold,
-          triggerValue: transactionDuration,
+        const durationFormatter = getDurationFormatter(transactionDuration);
+        const transactionDurationFormatted = durationFormatter(
+          transactionDuration
+        ).formatted;
+
+        environments.buckets.map((bucket) => {
+          const environment = bucket.key;
+          const alertInstance = services.alertInstanceFactory(
+            `${AlertType.TransactionDuration}_${environment}`
+          );
+
+          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            transactionType: alertParams.transactionType,
+            serviceName: alertParams.serviceName,
+            environment,
+            threshold,
+            triggerValue: transactionDurationFormatted,
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+          });
         });
       }
     },

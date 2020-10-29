@@ -78,6 +78,29 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
     [timelineId, header.id]
   );
 
+  const DraggableContent = useCallback(
+    (dragProvided) => (
+      <EventsTh
+        data-test-subj="draggable-header"
+        {...dragProvided.draggableProps}
+        {...dragProvided.dragHandleProps}
+        ref={dragProvided.innerRef}
+      >
+        <EventsThContent>
+          <Header
+            timelineId={timelineId}
+            header={header}
+            onColumnRemoved={onColumnRemoved}
+            onColumnSorted={onColumnSorted}
+            onFilterChange={onFilterChange}
+            sort={sort}
+          />
+        </EventsThContent>
+      </EventsTh>
+    ),
+    [header, onColumnRemoved, onColumnSorted, onFilterChange, sort, timelineId]
+  );
+
   return (
     <Resizable
       enable={RESIZABLE_ENABLE}
@@ -94,25 +117,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         index={draggableIndex}
         key={header.id}
       >
-        {(dragProvided) => (
-          <EventsTh
-            data-test-subj="draggable-header"
-            {...dragProvided.draggableProps}
-            {...dragProvided.dragHandleProps}
-            ref={dragProvided.innerRef}
-          >
-            <EventsThContent>
-              <Header
-                timelineId={timelineId}
-                header={header}
-                onColumnRemoved={onColumnRemoved}
-                onColumnSorted={onColumnSorted}
-                onFilterChange={onFilterChange}
-                sort={sort}
-              />
-            </EventsThContent>
-          </EventsTh>
-        )}
+        {DraggableContent}
       </Draggable>
     </Resizable>
   );

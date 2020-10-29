@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 
 import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
-import { paginationCursorRT, anomalyTypeRT, sortRT, paginationRT } from './common';
+import { paginationCursorRT, anomalyTypeRT, sortRT, paginationRT, metricRT } from './common';
 
 export const INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH =
   '/api/infra/infra_ml/results/metrics_k8s_anomalies';
@@ -18,6 +18,7 @@ const metricsK8sAnomalyCommonFieldsRT = rt.type({
   typical: rt.number,
   actual: rt.number,
   type: anomalyTypeRT,
+  influencers: rt.array(rt.string),
   duration: rt.number,
   startTime: rt.number,
   jobId: rt.string,
@@ -64,6 +65,7 @@ export const getMetricsK8sAnomaliesRequestPayloadRT = rt.type({
       timeRange: timeRangeRT,
     }),
     rt.partial({
+      metric: metricRT,
       // Pagination properties
       pagination: paginationRT,
       // Sort properties

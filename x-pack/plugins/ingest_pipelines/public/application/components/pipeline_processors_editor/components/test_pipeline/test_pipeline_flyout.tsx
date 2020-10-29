@@ -19,7 +19,8 @@ import {
 import { FormHook } from '../../../../../shared_imports';
 import { Document } from '../../types';
 
-import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_flyout_tabs';
+import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
+import { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
 
 export interface Props {
   onClose: () => void;
@@ -31,11 +32,12 @@ export interface Props {
   cachedVerbose?: boolean;
   cachedDocuments?: Document[];
   testOutput?: any;
-  form: FormHook;
+  form: FormHook<TestPipelineFlyoutForm>;
   validateAndTestPipeline: () => Promise<void>;
   selectedTab: TestPipelineFlyoutTab;
   setSelectedTab: (selectedTa: TestPipelineFlyoutTab) => void;
   testingError: any;
+  resetTestOutput: () => void;
 }
 
 export interface TestPipelineConfig {
@@ -45,6 +47,7 @@ export interface TestPipelineConfig {
 
 export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   handleTestPipeline,
+  resetTestOutput,
   isRunningTest,
   cachedVerbose,
   cachedDocuments,
@@ -75,6 +78,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         form={form}
         validateAndTestPipeline={validateAndTestPipeline}
         isRunningTest={isRunningTest}
+        resetTestOutput={resetTestOutput}
       />
     );
   }

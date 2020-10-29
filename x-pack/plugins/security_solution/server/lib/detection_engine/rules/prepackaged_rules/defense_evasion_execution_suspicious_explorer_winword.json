@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an instance of a Windows trusted program that is known to be vulnerable to DLL Search Order Hijacking starting after being renamed or from a non-standard path. This is uncommon behavior and may indicate an attempt to evade defenses via side loading a malicious DLL within the memory space of one of those processes.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Potential DLL SideLoading via Trusted Microsoft Programs",
+  "query": "event.category:process and event.type:(start or process_started) and (process.pe.original_file_name:(WinWord.exe or EXPLORER.EXE or w3wp.exe or DISM.EXE) or winlog.event_data.OriginalFileName:(WinWord.exe or EXPLORER.EXE or w3wp.exe or DISM.EXE)) and not (process.name:(winword.exe or WINWORD.EXE or explorer.exe or w3wp.exe or Dism.exe) or process.executable:(\"C:\\Windows\\explorer.exe\" or C\\:\\\\Program?Files\\\\Microsoft?Office\\\\root\\\\Office*\\\\WINWORD.EXE or C\\:\\\\Program?Files?\\(x86\\)\\\\Microsoft?Office\\\\root\\\\Office*\\\\WINWORD.EXE or \"C:\\Windows\\System32\\Dism.exe\" or \"C:\\Windows\\SysWOW64\\Dism.exe\" or \"C:\\Windows\\System32\\inetsrv\\w3wp.exe\"))",
+  "risk_score": 73,
+  "rule_id": "1160dcdb-0a0a-4a79-91d8-9b84616edebd",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

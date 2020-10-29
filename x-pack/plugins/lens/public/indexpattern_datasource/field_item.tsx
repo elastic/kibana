@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './field_item.scss';
+
 import React, { useState } from 'react';
 import DateMath from '@elastic/datemath';
 import {
@@ -31,6 +33,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EuiHighlight } from '@elastic/eui';
 import {
   Query,
   KBN_FIELD_TYPES,
@@ -99,22 +102,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const [state, setState] = useState<State>({
     isLoading: false,
   });
-
-  const wrappableName = wrapOnDot(field.displayName)!;
-  const wrappableHighlight = wrapOnDot(highlight);
-  const highlightIndex = wrappableHighlight
-    ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
-    : -1;
-  const wrappableHighlightableFieldName =
-    highlightIndex < 0 ? (
-      wrappableName
-    ) : (
-      <span>
-        <span>{wrappableName.substr(0, highlightIndex)}</span>
-        <strong>{wrappableName.substr(highlightIndex, wrappableHighlight.length)}</strong>
-        <span>{wrappableName.substr(highlightIndex + wrappableHighlight.length)}</span>
-      </span>
-    );
 
   function fetchData() {
     if (state.isLoading) {
@@ -198,22 +185,20 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       ownFocus
       className="lnsFieldItem__popoverAnchor"
       display="block"
+      data-test-subj="lnsFieldListPanelField"
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
           label={field.displayName}
           value={value}
-          data-test-subj="lnsFieldListPanelField"
+          data-test-subj={`lnsFieldListPanelField-${field.name}`}
           draggable
-          className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
-            exists ? 'exists' : 'missing'
-          }`}
         >
           <FieldButton
-            className="lnsFieldItem__info"
-            isDraggable
+            className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
+              exists ? 'exists' : 'missing'
+            }`}
             isActive={infoIsOpen}
-            data-test-subj={`lnsFieldListPanelField-${field.name}`}
             onClick={togglePopover}
             aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
               defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
@@ -223,7 +208,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               },
             })}
             fieldIcon={lensFieldIcon}
-            fieldName={wrappableHighlightableFieldName}
+            fieldName={
+              <EuiHighlight search={wrapOnDot(highlight)}>
+                {wrapOnDot(field.displayName)}
+              </EuiHighlight>
+            }
             fieldInfoIcon={lensInfoIcon}
           />
         </DragDrop>
@@ -525,7 +514,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false} className="eui-textTruncate">
-                <EuiText size="s" color="subdued">
+                <EuiText size="xs" color="subdued">
                   {Math.round((otherCount / props.sampledValues!) * 100)}%
                 </EuiText>
               </EuiFlexItem>

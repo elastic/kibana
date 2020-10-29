@@ -62,9 +62,7 @@ export interface FullAgentPolicy {
     };
   };
   fleet?: {
-    kibana: {
-      hosts: string[];
-    };
+    kibana: FullAgentPolicyKibanaConfig;
   };
   inputs: FullAgentPolicyInput[];
   revision?: number;
@@ -76,4 +74,10 @@ export interface FullAgentPolicy {
       logs: boolean;
     };
   };
+}
+
+export interface FullAgentPolicyKibanaConfig {
+  hosts: string[];
+  protocol: string;
+  path?: string;
 }

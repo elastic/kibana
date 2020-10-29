@@ -22,7 +22,9 @@ export function PageViewsTrend() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      const { serviceName } = uiFilters;
+
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-view-trends',
           params: {

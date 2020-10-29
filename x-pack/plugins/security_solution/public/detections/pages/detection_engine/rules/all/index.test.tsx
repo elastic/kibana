@@ -12,6 +12,7 @@ import '../../../../../common/mock/formatted_relative';
 import { TestProviders } from '../../../../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { AllRules } from './index';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -25,6 +26,9 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../../../common/components/link_to');
+jest.mock('../../../../../common/lib/kibana');
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('./reducer', () => {
   return {
@@ -160,6 +164,14 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('AllRules', () => {
+  beforeEach(() => {
+    useKibanaMock().services.application.capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      actions: { show: true },
+    };
+  });
   it('renders correctly', () => {
     const wrapper = shallow(
       <AllRules
@@ -179,27 +191,29 @@ describe('AllRules', () => {
     expect(wrapper.find('[title="All rules"]')).toHaveLength(1);
   });
 
-  it('renders rules tab', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
+  describe('rules tab', () => {
+    it('renders correctly', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasNoPermissions={false}
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
 
-    await waitFor(() => {
-      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
-      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+      await waitFor(() => {
+        expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
+        expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+      });
     });
   });
 

@@ -704,7 +704,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                         size="m"
                         type="plusInCircle"
                       >
-                        <div
+                        <span
                           className="euiButtonContent__icon"
                           data-euiicon-type="plusInCircle"
                           size="m"

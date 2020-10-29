@@ -37,13 +37,16 @@ export const renderApp = (
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
   resetContext({ createStore: true });
-  const store = getContext().store as Store;
+  const store = getContext().store;
 
   const unmountKibanaLogic = mountKibanaLogic({
     config,
+    history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
     setDocTitle: core.chrome.docTitle.change,
+    renderHeaderActions: (HeaderActions) =>
+      params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),
   });
   const unmountLicensingLogic = mountLicensingLogic({
     license$: plugins.licensing.license$,
@@ -53,9 +56,7 @@ export const renderApp = (
     errorConnecting,
     readOnlyMode: initialData.readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic({
-    history: params.history,
-  });
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
   ReactDOM.render(
     <I18nProvider>
@@ -83,7 +84,16 @@ export const renderApp = (
  * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
-export const renderHeaderActions = (HeaderActions: React.FC, kibanaHeaderEl: HTMLElement) => {
-  ReactDOM.render(<HeaderActions />, kibanaHeaderEl);
+export const renderHeaderActions = (
+  HeaderActions: React.FC,
+  store: Store,
+  kibanaHeaderEl: HTMLElement
+) => {
+  ReactDOM.render(
+    <Provider store={store}>
+      <HeaderActions />
+    </Provider>,
+    kibanaHeaderEl
+  );
   return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
 };

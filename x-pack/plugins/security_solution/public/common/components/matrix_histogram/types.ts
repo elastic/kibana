@@ -70,6 +70,8 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
+  threshold?: { field: string | undefined; value: number } | undefined;
+  skip?: boolean;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

@@ -335,6 +335,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
+          repositionOnScroll
         >
           <PopoverContent>
             <EuiPopoverTitle>

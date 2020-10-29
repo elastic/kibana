@@ -41,6 +41,7 @@ export function BarSeriesDecorator({
   sortIndex,
   y1AccessorFormat,
   y0AccessorFormat,
+  tickFormat,
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
@@ -66,6 +67,7 @@ export function BarSeriesDecorator({
     enableHistogramMode,
     useDefaultGroupDomain,
     sortIndex,
+    tickFormat,
     ...barSeriesStyle,
   };
 

@@ -14,19 +14,20 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiListGroupItemProps,
+  EuiFormLabel,
 } from '@elastic/eui';
-import { EuiFormLabel } from '@elastic/eui';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import { OperationSupportMatrix } from './operation_support';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
-import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
 import {
   operationDefinitionMap,
   getOperationDisplay,
   buildColumn,
   changeField,
 } from '../operations';
-import { deleteColumn, changeColumn, updateColumnParam } from '../state_helpers';
+import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
-import { hasField } from '../utils';
+import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
@@ -38,19 +39,6 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: IndexPatternColumn;
   operationSupportMatrix: OperationSupportMatrix;
   currentIndexPattern: IndexPattern;
-}
-
-function asOperationOptions(operationTypes: OperationType[], compatibleWithCurrentField: boolean) {
-  return [...operationTypes]
-    .sort((opType1, opType2) => {
-      return operationPanels[opType1].displayName.localeCompare(
-        operationPanels[opType2].displayName
-      );
-    })
-    .map((operationType) => ({
-      operationType,
-      compatibleWithCurrentField,
-    }));
 }
 
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
@@ -98,7 +86,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentIndexPattern,
     hideGrouping,
   } = props;
-  const { operationByField, fieldByOperation } = operationSupportMatrix;
+  const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
   const [
     incompatibleSelectedOperationType,
     setInvalidOperationType,
@@ -117,30 +105,44 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return fields;
   }, [currentIndexPattern]);
 
-  function getOperationTypes() {
-    const possibleOperationTypes = Object.keys(fieldByOperation) as OperationType[];
-    const validOperationTypes: OperationType[] = [];
+  const possibleOperations = useMemo(() => {
+    return Object.values(operationDefinitionMap)
+      .sort((op1, op2) => {
+        return op1.displayName.localeCompare(op2.displayName);
+      })
+      .map((def) => def.type)
+      .filter(
+        (type) => fieldByOperation[type]?.length || operationWithoutField.indexOf(type) !== -1
+      );
+  }, [fieldByOperation, operationWithoutField]);
 
-    if (!selectedColumn) {
-      validOperationTypes.push(...(Object.keys(fieldByOperation) as OperationType[]));
-    } else if (hasField(selectedColumn) && operationByField[selectedColumn.sourceField]) {
-      validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
-    }
+  // Operations are compatible if they match inputs. They are always compatible in
+  // the empty state. Field-based operations are not compatible with field-less operations.
+  const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
+    const definition = operationDefinitionMap[operationType];
 
-    return _.uniqBy(
-      [
-        ...asOperationOptions(validOperationTypes, true),
-        ...asOperationOptions(possibleOperationTypes, false),
-        ...asOperationOptions(
-          operationSupportMatrix.operationWithoutField,
-          !selectedColumn || !hasField(selectedColumn)
-        ),
-      ],
-      'operationType'
-    );
-  }
+    return {
+      operationType,
+      compatibleWithCurrentField:
+        !selectedColumn ||
+        (selectedColumn &&
+          hasField(selectedColumn) &&
+          definition.input === 'field' &&
+          fieldByOperation[operationType]?.indexOf(selectedColumn.sourceField) !== -1) ||
+        (selectedColumn && !hasField(selectedColumn) && definition.input !== 'field'),
+    };
+  });
 
-  const sideNavItems: EuiListGroupItemProps[] = getOperationTypes().map(
+  const selectedColumnSourceField =
+    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
+
+  const currentFieldIsInvalid = useMemo(
+    () =>
+      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
+    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
+  );
+
+  const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField }) => {
       const isActive = Boolean(
         incompatibleSelectedOperationType === operationType ||
@@ -256,14 +258,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-            defaultMessage: 'Choose a function',
+            defaultMessage: 'Select a function',
           })}
         </EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiListGroup
           className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
           gutterSize="none"
-          listItems={sideNavItems}
+          listItems={
+            // add a padding item containing a non breakable space if the number of operations is not even
+            // otherwise the column layout will break within an element
+            sideNavItems.length % 2 === 1 ? [...sideNavItems, { label: '\u00a0' }] : sideNavItems
+          }
           maxWidth={false}
         />
       </div>
@@ -276,23 +282,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <EuiFormRow
             data-test-subj="indexPattern-field-selection-row"
             label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-              defaultMessage: 'Choose a field',
+              defaultMessage: 'Select a field',
             })}
             fullWidth
-            isInvalid={Boolean(incompatibleSelectedOperationType)}
-            error={
-              selectedColumn && incompatibleSelectedOperationType
-                ? selectedOperationDefinition?.input === 'field'
-                  ? i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                      defaultMessage: 'To use this function, select a different field.',
-                    })
-                  : i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
-                      defaultMessage: 'To use this function, select a field.',
-                    })
-                : undefined
-            }
+            isInvalid={Boolean(incompatibleSelectedOperationType || currentFieldIsInvalid)}
+            error={getErrorMessage(
+              selectedColumn,
+              Boolean(incompatibleSelectedOperationType),
+              selectedOperationDefinition?.input,
+              currentFieldIsInvalid
+            )}
           >
             <FieldSelect
+              fieldIsInvalid={currentFieldIsInvalid}
               currentIndexPattern={currentIndexPattern}
               existingFields={state.existingFields}
               fieldMap={fieldMap}
@@ -363,90 +365,117 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiFormRow>
         ) : null}
 
-        {!incompatibleSelectedOperationType && selectedColumn && ParamEditor && (
-          <>
-            <ParamEditor
-              state={state}
-              setState={setState}
-              columnId={columnId}
-              currentColumn={state.layers[layerId].columns[columnId]}
-              storage={props.storage}
-              uiSettings={props.uiSettings}
-              savedObjectsClient={props.savedObjectsClient}
-              layerId={layerId}
-              http={props.http}
-              dateRange={props.dateRange}
-              data={props.data}
-            />
-          </>
-        )}
+        {!currentFieldIsInvalid &&
+          !incompatibleSelectedOperationType &&
+          selectedColumn &&
+          ParamEditor && (
+            <>
+              <ParamEditor
+                state={state}
+                setState={setState}
+                columnId={columnId}
+                currentColumn={state.layers[layerId].columns[columnId]}
+                storage={props.storage}
+                uiSettings={props.uiSettings}
+                savedObjectsClient={props.savedObjectsClient}
+                layerId={layerId}
+                http={props.http}
+                dateRange={props.dateRange}
+                data={props.data}
+              />
+            </>
+          )}
       </div>
 
       <EuiSpacer size="s" />
 
-      <div className="lnsIndexPatternDimensionEditor__section">
-        {!incompatibleSelectedOperationType && selectedColumn && (
-          <LabelInput
-            value={selectedColumn.label}
-            onChange={(value) => {
-              setState({
-                ...state,
-                layers: {
-                  ...state.layers,
-                  [layerId]: {
-                    ...state.layers[layerId],
-                    columns: {
-                      ...state.layers[layerId].columns,
-                      [columnId]: {
-                        ...selectedColumn,
-                        label: value,
-                        customLabel: true,
+      {!currentFieldIsInvalid && (
+        <div className="lnsIndexPatternDimensionEditor__section">
+          {!incompatibleSelectedOperationType && selectedColumn && (
+            <LabelInput
+              value={selectedColumn.label}
+              onChange={(value) => {
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: {
+                      columns: {
+                        ...state.layers[layerId].columns,
+                        [columnId]: {
+                          ...selectedColumn,
+                          label: value,
+                          customLabel: true,
+                        },
                       },
                     },
-                  },
-                },
-              });
-            }}
-          />
-        )}
+                  })
+                );
+              }}
+            />
+          )}
 
-        {!hideGrouping && (
-          <BucketNestingEditor
-            fieldMap={fieldMap}
-            layer={state.layers[props.layerId]}
-            columnId={props.columnId}
-            setColumns={(columnOrder) => {
-              setState({
-                ...state,
-                layers: {
-                  ...state.layers,
-                  [props.layerId]: {
-                    ...state.layers[props.layerId],
-                    columnOrder,
+          {!incompatibleSelectedOperationType && !hideGrouping && (
+            <BucketNestingEditor
+              fieldMap={fieldMap}
+              layer={state.layers[props.layerId]}
+              columnId={props.columnId}
+              setColumns={(columnOrder) => {
+                setState({
+                  ...state,
+                  layers: {
+                    ...state.layers,
+                    [props.layerId]: {
+                      ...state.layers[props.layerId],
+                      columnOrder,
+                    },
                   },
-                },
-              });
-            }}
-          />
-        )}
+                });
+              }}
+            />
+          )}
 
-        {selectedColumn && selectedColumn.dataType === 'number' ? (
-          <FormatSelector
-            selectedColumn={selectedColumn}
-            onChange={(newFormat) => {
-              setState(
-                updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn: selectedColumn,
-                  paramName: 'format',
-                  value: newFormat,
-                })
-              );
-            }}
-          />
-        ) : null}
-      </div>
+          {selectedColumn &&
+          (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
+            <FormatSelector
+              selectedColumn={selectedColumn}
+              onChange={(newFormat) => {
+                setState(
+                  updateColumnParam({
+                    state,
+                    layerId,
+                    currentColumn: selectedColumn,
+                    paramName: 'format',
+                    value: newFormat,
+                  })
+                );
+              }}
+            />
+          ) : null}
+        </div>
+      )}
     </div>
   );
+}
+function getErrorMessage(
+  selectedColumn: IndexPatternColumn | undefined,
+  incompatibleSelectedOperationType: boolean,
+  input: 'none' | 'field' | undefined,
+  fieldInvalid: boolean
+) {
+  if (selectedColumn && incompatibleSelectedOperationType) {
+    if (input === 'field') {
+      return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
+        defaultMessage: 'To use this function, select a different field.',
+      });
+    }
+    return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
+      defaultMessage: 'To use this function, select a field.',
+    });
+  }
+  if (fieldInvalid) {
+    return i18n.translate('xpack.lens.indexPattern.invalidFieldLabel', {
+      defaultMessage: 'Invalid field. Check your index pattern or pick another field.',
+    });
+  }
 }

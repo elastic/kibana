@@ -20,6 +20,7 @@ export interface SendEmailOptions {
   content: Content;
   proxySettings?: ProxySettings;
   rejectUnauthorized?: boolean;
+  hasAuth: boolean;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -46,14 +47,14 @@ export interface Content {
 
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content, proxySettings, rejectUnauthorized } = options;
+  const { transport, routing, content, proxySettings, rejectUnauthorized, hasAuth } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
   const transportConfig: Record<string, unknown> = {};
 
-  if (user != null && password != null) {
+  if (hasAuth && user != null && password != null) {
     transportConfig.auth = {
       user,
       pass: password,

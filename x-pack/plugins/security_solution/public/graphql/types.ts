@@ -274,6 +274,11 @@ export enum HostPolicyResponseActionStatus {
   warning = 'warning',
 }
 
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
+}
+
 export enum DataProviderType {
   default = 'default',
   template = 'template',
@@ -299,11 +304,6 @@ export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
   immutable = 'immutable',
-}
-
-export enum TimelineType {
-  default = 'default',
-  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -490,6 +490,8 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
+  agent?: Maybe<AgentFields>;
+
   cloud?: Maybe<CloudFields>;
 
   endpoint?: Maybe<EndpointFields>;
@@ -501,22 +503,26 @@ export interface HostItem {
   lastSeen?: Maybe<string>;
 }
 
+export interface AgentFields {
+  id?: Maybe<string>;
+}
+
 export interface CloudFields {
   instance?: Maybe<CloudInstance>;
 
   machine?: Maybe<CloudMachine>;
 
-  provider?: Maybe<(Maybe<string>)[]>;
+  provider?: Maybe<Maybe<string>[]>;
 
-  region?: Maybe<(Maybe<string>)[]>;
+  region?: Maybe<Maybe<string>[]>;
 }
 
 export interface CloudInstance {
-  id?: Maybe<(Maybe<string>)[]>;
+  id?: Maybe<Maybe<string>[]>;
 }
 
 export interface CloudMachine {
-  type?: Maybe<(Maybe<string>)[]>;
+  type?: Maybe<Maybe<string>[]>;
 }
 
 export interface EndpointFields {
@@ -776,7 +782,7 @@ export interface SortTimelineResult {
 }
 
 export interface ResponseTimelines {
-  timeline: (Maybe<TimelineResult>)[];
+  timeline: Maybe<TimelineResult>[];
 
   totalCount?: Maybe<number>;
 
@@ -1527,9 +1533,9 @@ export interface HostFields {
 
   id?: Maybe<string>;
 
-  ip?: Maybe<(Maybe<string>)[]>;
+  ip?: Maybe<Maybe<string>[]>;
 
-  mac?: Maybe<(Maybe<string>)[]>;
+  mac?: Maybe<Maybe<string>[]>;
 
   name?: Maybe<string>;
 
@@ -1545,7 +1551,7 @@ export interface IndexField {
   /** Example of field's value */
   example?: Maybe<string>;
   /** whether the field's belong to an alias index */
-  indexes: (Maybe<string>)[];
+  indexes: Maybe<string>[];
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
@@ -1599,6 +1605,8 @@ export interface SourceQueryArgs {
 }
 export interface GetOneTimelineQueryArgs {
   id: string;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface GetAllTimelineQueryArgs {
   pageInfo: PageInfoTimeline;
@@ -1726,6 +1734,8 @@ export namespace GetHostOverviewQuery {
 
     _id: Maybe<string>;
 
+    agent: Maybe<Agent>;
+
     host: Maybe<Host>;
 
     cloud: Maybe<Cloud>;
@@ -1734,6 +1744,12 @@ export namespace GetHostOverviewQuery {
 
     endpoint: Maybe<Endpoint>;
   };
+
+  export type Agent = {
+    __typename?: 'AgentFields';
+
+    id: Maybe<string>;
+  }
 
   export type Host = {
     __typename?: 'HostEcsFields';
@@ -1772,21 +1788,21 @@ export namespace GetHostOverviewQuery {
 
     machine: Maybe<Machine>;
 
-    provider: Maybe<(Maybe<string>)[]>;
+    provider: Maybe<Maybe<string>[]>;
 
-    region: Maybe<(Maybe<string>)[]>;
+    region: Maybe<Maybe<string>[]>;
   };
 
   export type Instance = {
     __typename?: 'CloudInstance';
 
-    id: Maybe<(Maybe<string>)[]>;
+    id: Maybe<Maybe<string>[]>;
   };
 
   export type Machine = {
     __typename?: 'CloudMachine';
 
-    type: Maybe<(Maybe<string>)[]>;
+    type: Maybe<Maybe<string>[]>;
   };
 
   export type Inspect = {
@@ -1969,7 +1985,7 @@ export namespace GetAllTimeline {
 
     favoriteCount: Maybe<number>;
 
-    timeline: (Maybe<Timeline>)[];
+    timeline: Maybe<Timeline>[];
   };
 
   export type Timeline = {
@@ -2166,6 +2182,7 @@ export namespace PersistTimelineNoteMutation {
 export namespace GetOneTimeline {
   export type Variables = {
     id: string;
+    timelineType?: Maybe<TimelineType>;
   };
 
   export type Query = {

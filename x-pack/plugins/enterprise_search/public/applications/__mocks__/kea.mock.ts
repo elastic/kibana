@@ -48,8 +48,11 @@ jest.mock('kea', () => ({
  *   setMockValues({ someValue: 'hello' });
  * });
  */
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 export const setMockValues = (values: object) => {
   (useValues as jest.Mock).mockImplementation(() => ({ ...mockAllValues, ...values }));
+};
+export const setMockActions = (actions: object) => {
+  (useActions as jest.Mock).mockImplementation(() => ({ ...mockAllActions, ...actions }));
 };

@@ -150,6 +150,7 @@ export const transformAlertToRule = (
     threat_index: alert.params.threatIndex,
     threat_query: alert.params.threatQuery,
     threat_mapping: alert.params.threatMapping,
+    threat_language: alert.params.threatLanguage,
     throttle: ruleActions?.ruleThrottle || 'no_actions',
     timestamp_override: alert.params.timestampOverride,
     note: alert.params.note,

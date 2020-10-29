@@ -158,6 +158,7 @@ describe('Alerts', () => {
         });
     });
   });
+
   context('Opening alerts', () => {
     beforeEach(() => {
       esArchiverLoad('closed_alerts');
@@ -204,6 +205,7 @@ describe('Alerts', () => {
         });
     });
   });
+
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');

@@ -28,8 +28,9 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import { AlertsStatus } from '../../../alerts/status';
 
-function getColumns(setupMode) {
+function getColumns(alerts, setupMode) {
   return [
     {
       name: i18n.translate('xpack.monitoring.apm.instances.nameTitle', {
@@ -68,6 +69,29 @@ function getColumns(setupMode) {
             </EuiLink>
             {setupModeStatus}
           </Fragment>
+        );
+      },
+    },
+    {
+      name: i18n.translate('xpack.monitoring.beats.instances.alertsColumnTitle', {
+        defaultMessage: 'Alerts',
+      }),
+      field: 'alerts',
+      width: '175px',
+      sortable: true,
+      render: (_field, beat) => {
+        return (
+          <AlertsStatus
+            showBadge={true}
+            alerts={alerts}
+            stateFilter={(state) => state.stackProductUuid === beat.uuid}
+            nextStepsFilter={(nextStep) => {
+              if (nextStep.text.includes('APM servers')) {
+                return false;
+              }
+              return true;
+            }}
+          />
         );
       },
     },
@@ -127,7 +151,7 @@ function getColumns(setupMode) {
   ];
 }
 
-export function ApmServerInstances({ apms, setupMode }) {
+export function ApmServerInstances({ apms, alerts, setupMode }) {
   const { pagination, sorting, onTableChange, data } = apms;
 
   let setupModeCallout = null;
@@ -157,7 +181,7 @@ export function ApmServerInstances({ apms, setupMode }) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <Status stats={data.stats} />
+          <Status stats={data.stats} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPageContent>
@@ -165,7 +189,7 @@ export function ApmServerInstances({ apms, setupMode }) {
           <EuiMonitoringTable
             className="apmInstancesTable"
             rows={data.apms}
-            columns={getColumns(setupMode)}
+            columns={getColumns(alerts, setupMode)}
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}

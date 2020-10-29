@@ -29,6 +29,7 @@ export const createLegacyUrlForwardApp = (
   id: 'kibana',
   chromeless: true,
   title: 'Legacy URL migration',
+  appRoute: '/app/kibana#/',
   navLinkStatus: AppNavLinkStatus.hidden,
   async mount(params: AppMountParameters) {
     const hash = params.history.location.hash.substr(1);

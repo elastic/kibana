@@ -6,16 +6,13 @@
 
 import expect from '@kbn/expect';
 
-import { DEFAULT_INDEX_PATTERN } from '../../../../plugins/security_solution/common/constants';
-// @ts-expect-error
-import { overviewHostQuery } from '../../../../plugins/security_solution/public/overview/containers//overview_host/index.gql_query';
-// @ts-expect-error
-import { GetOverviewHostQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { HostsQueries } from '../../../../plugins/security_solution/common/search_strategy';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
+  const supertest = getService('supertest');
+
   describe('Overview Host', () => {
     describe('With auditbeat', () => {
       before(() => esArchiver.load('auditbeat/overview'));
@@ -39,30 +36,36 @@ export default function ({ getService }: FtrProviderContext) {
         endgameSecurity: 4,
         filebeatSystemModule: 0,
         winlogbeatSecurity: 0,
-        winlogbeatMWSysmonOperational: 0,
-        __typename: 'OverviewHostData',
+        winlogbeatMWSysmonOperational: null,
       };
 
-      it('Make sure that we get OverviewHost data', () => {
-        return client
-          .query<GetOverviewHostQuery.Query>({
-            query: overviewHostQuery,
-            variables: {
-              sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: DEFAULT_INDEX_PATTERN,
-              docValueFields: [],
-              inspect: false,
+      it('Make sure that we get OverviewHost data', async () => {
+        const {
+          body: { overviewHost },
+        } = await supertest
+          .post('/internal/search/securitySolutionSearchStrategy/')
+          .set('kbn-xsrf', 'true')
+          .send({
+            defaultIndex: [
+              'apm-*-transaction*',
+              'auditbeat-*',
+              'endgame-*',
+              'filebeat-*',
+              'logs-*',
+              'packetbeat-*',
+              'winlogbeat-*',
+            ],
+            factoryQueryType: HostsQueries.overview,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
             },
+            docValueFields: [],
+            inspect: false,
           })
-          .then((resp) => {
-            const overviewHost = resp.data.source.OverviewHost;
-            expect(overviewHost).to.eql(expectedResult);
-          });
+          .expect(200);
+        expect(overviewHost).to.eql(expectedResult);
       });
     });
   });

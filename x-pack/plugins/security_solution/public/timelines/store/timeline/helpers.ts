@@ -1209,17 +1209,20 @@ export const updateTimelinePerPageOptions = ({
 
 const removeAndProvider = (andProviderId: string, providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
-  const providerAndIndex = timeline.dataProviders[providerIndex].and.findIndex(
+  const providerAndIndex = timeline.dataProviders[providerIndex]?.and.findIndex(
     (p) => p.id === andProviderId
   );
+
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
     {
       ...timeline.dataProviders[providerIndex],
-      and: [
-        ...timeline.dataProviders[providerIndex].and.slice(0, providerAndIndex),
-        ...timeline.dataProviders[providerIndex].and.slice(providerAndIndex + 1),
-      ],
+      and: timeline.dataProviders[providerIndex]?.and
+        ? [
+            ...timeline.dataProviders[providerIndex]?.and.slice(0, providerAndIndex),
+            ...timeline.dataProviders[providerIndex]?.and.slice(providerAndIndex + 1),
+          ]
+        : [],
     },
     ...timeline.dataProviders.slice(providerIndex + 1),
   ];
@@ -1229,7 +1232,7 @@ const removeProvider = (providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
-    ...(timeline.dataProviders[providerIndex].and.length
+    ...(timeline.dataProviders[providerIndex]?.and.length
       ? [
           {
             ...timeline.dataProviders[providerIndex].and.slice(0, 1)[0],

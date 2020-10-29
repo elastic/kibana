@@ -5,11 +5,7 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
 import {
   ERROR_EXC_MESSAGE,
@@ -22,13 +18,16 @@ export async function getJSErrors({
   setup,
   pageSize,
   pageIndex,
+  urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   pageSize: number;
   pageIndex: number;
+  urlQuery?: string;
 }) {
   const projection = getRumErrorsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
@@ -87,9 +86,10 @@ export async function getJSErrors({
     totalErrorPages: totalErrorPages?.value ?? 0,
     totalErrors: response.hits.total.value ?? 0,
     totalErrorGroups: totalErrorGroups?.value ?? 0,
-    items: errors?.buckets.map(({ sample, doc_count: count }) => {
+    items: errors?.buckets.map(({ sample, doc_count: count, key }) => {
       return {
         count,
+        errorGroupId: key,
         errorMessage: (sample.hits.hits[0]._source as {
           error: { exception: Array<{ message: string }> };
         }).error.exception?.[0].message,

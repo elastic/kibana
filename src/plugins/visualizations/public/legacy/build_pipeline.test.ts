@@ -94,14 +94,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       uiState = {};
     });
 
-    it('handles vega function', () => {
-      const vis = {
-        params: { spec: 'this is a test' },
-      };
-      const actual = buildPipelineVisFunction.vega(vis.params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     it('handles input_control_vis function', () => {
       const params = {
         some: 'nested',
@@ -115,90 +107,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const params = { foo: 'bar' };
       const actual = buildPipelineVisFunction.metrics(params, schemasDef, uiState);
       expect(actual).toMatchSnapshot();
-    });
-
-    it('handles timelion function', () => {
-      const params = { expression: 'foo', interval: 'bar' };
-      const actual = buildPipelineVisFunction.timelion(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
-    describe('handles table function', () => {
-      it('without splits or buckets', () => {
-        const params = { foo: 'bar' };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with splits', () => {
-        const params = { foo: 'bar' };
-        const schemas = {
-          ...schemasDef,
-          split_row: [1, 2],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with splits and buckets', () => {
-        const params = { foo: 'bar' };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-          split_row: [2, 4],
-          bucket: [3],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with showPartialRows=true and showMetricsAtAllLevels=true', () => {
-        const params = {
-          showMetricsAtAllLevels: true,
-          showPartialRows: true,
-        };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 1 },
-            { ...schemaConfig, accessor: 2 },
-            { ...schemaConfig, accessor: 4 },
-            { ...schemaConfig, accessor: 5 },
-          ],
-          bucket: [0, 3],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with showPartialRows=true and showMetricsAtAllLevels=false', () => {
-        const params = {
-          showMetricsAtAllLevels: false,
-          showPartialRows: true,
-        };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 1 },
-            { ...schemaConfig, accessor: 2 },
-            { ...schemaConfig, accessor: 4 },
-            { ...schemaConfig, accessor: 5 },
-          ],
-          bucket: [0, 3],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
     });
 
     describe('handles region_map function', () => {

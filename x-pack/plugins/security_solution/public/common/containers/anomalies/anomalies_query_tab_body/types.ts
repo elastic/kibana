@@ -32,4 +32,5 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   updateDateRange?: UpdateDateRange;
   hideHistogramIfEmpty?: boolean;
   ip?: string;
+  hostName?: string;
 };

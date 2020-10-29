@@ -6,6 +6,7 @@
 
 import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
+import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import {
   DataState,
   Vector2,
@@ -15,11 +16,12 @@ import {
   AABB,
   VisibleEntites,
   TreeFetcherParameters,
+  IsometricTaxiLayout,
 } from '../../types';
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as eventModel from '../../../../common/endpoint/models/event';
-
+import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
   ResolverTree,
   ResolverNodeStats,
@@ -183,6 +185,27 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
 }
 
 /**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns the loading state of the current related event data for the `event_detail` view
+ */
+export function isCurrentRelatedEventLoading(state: DataState) {
+  return state.currentRelatedEvent.loading;
+}
+
+/**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns {(SafeResolverEvent | null)} the current related event data for the `event_detail` view
+ */
+export function currentRelatedEventData(state: DataState): SafeResolverEvent | null {
+  return state.currentRelatedEvent.data;
+}
+/**
  * Get an event (from memory) by its `event.id`.
  * @deprecated Use the API to find events by ID
  */
@@ -265,15 +288,15 @@ export const relatedEventsByCategory: (
   }
 );
 
-export const relatedEventCountByType: (
+export const relatedEventCountByCategory: (
   state: DataState
-) => (nodeID: string, eventType: string) => number | undefined = createSelector(
+) => (nodeID: string, eventCategory: string) => number | undefined = createSelector(
   relatedEventsStats,
   (statsMap) => {
-    return (nodeID: string, eventType: string): number | undefined => {
+    return (nodeID: string, eventCategory: string): number | undefined => {
       const stats = statsMap(nodeID);
       if (stats) {
-        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventType);
+        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventCategory);
         if (typeof value === 'number' && Number.isFinite(value)) {
           return value;
         }
@@ -324,7 +347,7 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
-export const layout = createSelector(
+export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
   function processNodePositionsAndEdgeLineSegments(
@@ -350,7 +373,7 @@ export const layout = createSelector(
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically
-    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originNode);
+    const originPosition = isometricTaxiLayoutModel.processPosition(taxiLayout, originNode);
     // adjust the position of everything so that the origin node is at `(0, 0)`
 
     if (originPosition === undefined) {
@@ -585,5 +608,132 @@ export const relatedEventTotalForProcess: (
       }
       return stats.events.total;
     };
+  }
+);
+
+/**
+ * Total count of events related to `node`.
+ * Based on `ResolverNodeStats`
+ */
+export const totalRelatedEventCountForNode: (
+  state: DataState
+) => (nodeID: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string) => {
+    const nodeStats = stats(nodeID);
+    return nodeStats === undefined ? undefined : nodeStats.events.total;
+  }
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ */
+export const relatedEventCountOfTypeForNode: (
+  state: DataState
+) => (nodeID: string, category: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (stats) => (nodeID: string, category: string) => {
+    const nodeStats = stats(nodeID);
+    if (!nodeStats) {
+      return undefined;
+    } else {
+      return nodeStats.events.byCategory[category];
+    }
+  }
+);
+
+/**
+ * Which view should show in the panel, as well as what parameters should be used.
+ * Calculated using the query string
+ */
+export const panelViewAndParameters = createSelector(
+  (state: DataState) => state.locationSearch,
+  resolverComponentInstanceID,
+  /* eslint-disable-next-line no-shadow */
+  (locationSearch, resolverComponentInstanceID) => {
+    return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
+      locationSearch,
+      resolverComponentInstanceID,
+    });
+  }
+);
+
+/**
+ * Events related to the panel node that are in the panel category.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been requested or if data failed to load.
+ */
+export const nodeEventsInCategory = (state: DataState) => {
+  return state.nodeEventsInCategory?.events ?? [];
+};
+
+export const lastRelatedEventResponseContainsCursor = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory.cursor !== null;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const hadErrorLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory && nodeEventsInCategory.error === true;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const isLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    const { panelView } = panelViewAndParameters;
+    return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
+  }
+);
+
+export const isLoadingMoreNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return (
+        nodeEventsInCategory &&
+        nodeEventsInCategory.lastCursorRequested !== null &&
+        nodeEventsInCategory.cursor === nodeEventsInCategory.lastCursorRequested
+      );
+    } else {
+      return false;
+    }
   }
 );

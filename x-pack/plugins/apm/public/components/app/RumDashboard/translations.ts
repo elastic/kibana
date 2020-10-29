@@ -7,6 +7,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const I18LABELS = {
+  dataMissing: i18n.translate('xpack.apm.rum.dashboard.dataMissing', {
+    defaultMessage: 'N/A',
+  }),
   backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
     defaultMessage: 'Backend',
   }),
@@ -14,7 +17,7 @@ export const I18LABELS = {
     defaultMessage: 'Frontend',
   }),
   pageViews: i18n.translate('xpack.apm.rum.dashboard.pageViews', {
-    defaultMessage: 'Page views',
+    defaultMessage: 'Total page views',
   }),
   percPageLoaded: i18n.translate('xpack.apm.rum.dashboard.pagesLoaded.label', {
     defaultMessage: 'Pages loaded',
@@ -76,8 +79,11 @@ export const I18LABELS = {
       defaultMessage: 'Operating system',
     }
   ),
-  userExperienceMetrics: i18n.translate('xpack.apm.rum.userExperienceMetrics', {
-    defaultMessage: 'User experience metrics',
+  metrics: i18n.translate('xpack.apm.ux.metrics', {
+    defaultMessage: 'Metrics',
+  }),
+  median: i18n.translate('xpack.apm.ux.median', {
+    defaultMessage: 'median',
   }),
   avgPageLoadDuration: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',
@@ -88,11 +94,11 @@ export const I18LABELS = {
   pageLoadDurationByRegion: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.pageLoadDurationByRegion',
     {
-      defaultMessage: 'Page load duration by region',
+      defaultMessage: 'Page load duration by region (avg.)',
     }
   ),
   searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
-    defaultMessage: 'Search by url',
+    defaultMessage: 'Search by URL',
   }),
   getSearchResultsLabel: (total: number) =>
     i18n.translate('xpack.apm.rum.filters.searchResults', {
@@ -107,9 +113,6 @@ export const I18LABELS = {
   }),
   url: i18n.translate('xpack.apm.rum.filters.url', {
     defaultMessage: 'Url',
-  }),
-  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
-    defaultMessage: 'Match this query',
   }),
   loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
     defaultMessage: 'Loading results',
@@ -132,6 +135,27 @@ export const I18LABELS = {
       defaultMessage: 'Impacted page loads',
     }
   ),
+  percentile: i18n.translate('xpack.apm.ux.percentile.label', {
+    defaultMessage: 'Percentile',
+  }),
+  percentile50thMedian: i18n.translate('xpack.apm.ux.percentile.50thMedian', {
+    defaultMessage: '50th (Median)',
+  }),
+  percentile75th: i18n.translate('xpack.apm.ux.percentile.75th', {
+    defaultMessage: '75th',
+  }),
+  percentile90th: i18n.translate('xpack.apm.ux.percentile.90th', {
+    defaultMessage: '90th',
+  }),
+  percentile95th: i18n.translate('xpack.apm.ux.percentile.95th', {
+    defaultMessage: '95th',
+  }),
+  percentile99th: i18n.translate('xpack.apm.ux.percentile.99th', {
+    defaultMessage: '99th',
+  }),
+  noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
+    defaultMessage: 'No data.',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

@@ -88,17 +88,17 @@ export function PageLoadDistChart({
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
+  const euiChartTheme = darkMode
+    ? EUI_CHARTS_THEME_DARK
+    : EUI_CHARTS_THEME_LIGHT;
+
   return (
     <ChartWrapper loading={loading || breakdownLoading} height="250px">
       {(!loading || data) && (
         <PageLoadChart>
           <Settings
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-            theme={
-              darkMode
-                ? EUI_CHARTS_THEME_DARK.theme
-                : EUI_CHARTS_THEME_LIGHT.theme
-            }
+            theme={euiChartTheme.theme}
             onBrushEnd={onBrushEnd}
             tooltip={tooltipProps}
             showLegend
@@ -113,9 +113,10 @@ export function PageLoadDistChart({
             id="left"
             title={I18LABELS.percPageLoaded}
             position={Position.Left}
-            tickFormat={(d) => numeral(d).format('0.0') + '%'}
+            labelFormat={(d) => d + ' %'}
           />
           <LineSeries
+            sortIndex={0}
             fit={Fit.Linear}
             id={'PagesPercentage'}
             name={I18LABELS.overall}
@@ -123,7 +124,12 @@ export function PageLoadDistChart({
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
             curve={CurveType.CURVE_CATMULL_ROM}
-            lineSeriesStyle={{ point: { visible: false } }}
+            lineSeriesStyle={{
+              point: { visible: false },
+              line: { strokeWidth: 3 },
+            }}
+            color={euiChartTheme.theme.colors?.vizColors?.[1]}
+            tickFormat={(d) => numeral(d).format('0.0') + ' %'}
           />
           {breakdown && (
             <BreakdownSeries

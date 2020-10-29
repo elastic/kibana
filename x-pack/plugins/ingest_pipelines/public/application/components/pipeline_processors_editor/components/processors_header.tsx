@@ -55,7 +55,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson, hasProc
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.processorsTreeDescription"
-            defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
+            defaultMessage="Use processors to transform data before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink

@@ -20,7 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -33,7 +36,7 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
         }
       ]
@@ -48,12 +51,12 @@
       "technique": [
         {
           "id": "T1105",
-          "name": "Remote File Copy",
+          "name": "Ingress Tool Transfer",
           "reference": "https://attack.mitre.org/techniques/T1105/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

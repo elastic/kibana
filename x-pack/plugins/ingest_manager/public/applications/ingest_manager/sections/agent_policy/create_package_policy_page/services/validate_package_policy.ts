@@ -50,35 +50,26 @@ export const validatePackagePolicy = (
     namespace: null,
     inputs: {},
   };
+  const namespaceValidation = isValidNamespace(packagePolicy.namespace);
 
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
-      i18n.translate('xpack.ingestManager.packagePolicyValidation.nameRequiredErrorMessage', {
+      i18n.translate('xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage', {
         defaultMessage: 'Name is required',
       }),
     ];
   }
 
-  if (!packagePolicy.namespace.trim()) {
-    validationResults.namespace = [
-      i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceRequiredErrorMessage', {
-        defaultMessage: 'Namespace is required',
-      }),
-    ];
-  } else if (!isValidNamespace(packagePolicy.namespace)) {
-    validationResults.namespace = [
-      i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceInvalidErrorMessage', {
-        defaultMessage: 'Namespace contains invalid characters',
-      }),
-    ];
+  if (!namespaceValidation.valid && namespaceValidation.error) {
+    validationResults.namespace = [namespaceValidation.error];
   }
 
   if (
-    !packageInfo.config_templates ||
-    packageInfo.config_templates.length === 0 ||
-    !packageInfo.config_templates[0] ||
-    !packageInfo.config_templates[0].inputs ||
-    packageInfo.config_templates[0].inputs.length === 0
+    !packageInfo.policy_templates ||
+    packageInfo.policy_templates.length === 0 ||
+    !packageInfo.policy_templates[0] ||
+    !packageInfo.policy_templates[0].inputs ||
+    packageInfo.policy_templates[0].inputs.length === 0
   ) {
     validationResults.inputs = null;
     return validationResults;
@@ -87,16 +78,16 @@ export const validatePackagePolicy = (
   const registryInputsByType: Record<
     string,
     RegistryInput
-  > = packageInfo.config_templates[0].inputs.reduce((inputs, registryInput) => {
+  > = packageInfo.policy_templates[0].inputs.reduce((inputs, registryInput) => {
     inputs[registryInput.type] = registryInput;
     return inputs;
   }, {} as Record<string, RegistryInput>);
 
   const registryStreamsByDataset: Record<string, RegistryStream[]> = (
-    packageInfo.datasets || []
-  ).reduce((datasets, registryDataset) => {
-    datasets[registryDataset.name] = registryDataset.streams || [];
-    return datasets;
+    packageInfo.data_streams || []
+  ).reduce((dataStreams, registryDataStream) => {
+    dataStreams[registryDataStream.dataset] = registryDataStream.streams || [];
+    return dataStreams;
   }, {} as Record<string, RegistryStream[]>);
 
   // Validate each package policy input with either its own config fields or streams
@@ -192,7 +183,7 @@ export const validatePackagePolicyConfig = (
   if (varDef.required) {
     if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packagePolicyValidation.requiredErrorMessage', {
+        i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,
@@ -207,12 +198,9 @@ export const validatePackagePolicyConfig = (
       parsedValue = safeLoad(value);
     } catch (e) {
       errors.push(
-        i18n.translate(
-          'xpack.ingestManager.packagePolicyValidation.invalidYamlFormatErrorMessage',
-          {
-            defaultMessage: 'Invalid YAML format',
-          }
-        )
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {
+          defaultMessage: 'Invalid YAML format',
+        })
       );
     }
   }
@@ -220,7 +208,7 @@ export const validatePackagePolicyConfig = (
   if (varDef.multi) {
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packagePolicyValidation.invalidArrayErrorMessage', {
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage', {
           defaultMessage: 'Invalid format',
         })
       );
@@ -230,7 +218,7 @@ export const validatePackagePolicyConfig = (
       (!parsedValue || (Array.isArray(parsedValue) && parsedValue.length === 0))
     ) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packagePolicyValidation.requiredErrorMessage', {
+        i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,

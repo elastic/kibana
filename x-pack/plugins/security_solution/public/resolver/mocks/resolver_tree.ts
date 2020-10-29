@@ -8,6 +8,47 @@ import { mockEndpointEvent } from './endpoint_event';
 import { ResolverTree, SafeResolverEvent } from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
 
+export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
+  originID,
+}: {
+  originID: string;
+}): ResolverTree {
+  const originEvent: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: undefined,
+    timestamp: 1600863932318,
+  });
+  const events = [];
+  // page size is currently 25
+  const eventsToGenerate = 30;
+  for (let i = 0; i < eventsToGenerate; i++) {
+    const newEvent = mockEndpointEvent({
+      entityID: originID,
+      eventID: `test-${i}`,
+      eventType: 'access',
+      eventCategory: 'registry',
+      timestamp: 1600863932318,
+    });
+    events.push(newEvent);
+  }
+  return {
+    entityID: originID,
+    children: {
+      childNodes: [],
+      nextChild: null,
+    },
+    ancestry: {
+      nextAncestor: null,
+      ancestors: [],
+    },
+    lifecycle: [originEvent],
+    relatedEvents: { events, nextEvent: null },
+    relatedAlerts: { alerts: [], nextAlert: null },
+    stats: { events: { total: eventsToGenerate, byCategory: {} }, totalAlerts: 0 },
+  };
+}
+
 export function mockTreeWith2AncestorsAndNoChildren({
   originID,
   firstAncestorID,
@@ -307,6 +348,15 @@ export function mockTreeWithNoProcessEvents(): ResolverTree {
   };
 }
 
+/**
+ * first ID (to check in the mock data access layer)
+ */
+export const firstRelatedEventID = 'id of first related event';
+/**
+ * second ID (to check in the mock data access layer)
+ */
+export const secondRelatedEventID = 'id of second related event';
+
 export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
   originID,
   firstChildID,
@@ -326,14 +376,14 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
     mockEndpointEvent({
       entityID: originID,
       parentEntityID,
-      eventID: 'first related event',
+      eventID: firstRelatedEventID,
       eventType: 'access',
       eventCategory: 'registry',
     }),
     mockEndpointEvent({
       entityID: originID,
       parentEntityID,
-      eventID: 'second related event',
+      eventID: secondRelatedEventID,
       eventType: 'access',
       eventCategory: 'registry',
     }),

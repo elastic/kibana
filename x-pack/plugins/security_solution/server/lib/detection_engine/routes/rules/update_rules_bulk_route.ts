@@ -50,7 +50,6 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
       if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
-
       const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
@@ -91,6 +90,11 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             type,
             threat,
             threshold,
+            threat_filters: threatFilters,
+            threat_index: threatIndex,
+            threat_query: threatQuery,
+            threat_mapping: threatMapping,
+            threat_language: threatLanguage,
             throttle,
             timestamp_override: timestampOverride,
             references,
@@ -158,6 +162,11 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               type,
               threat,
               threshold,
+              threatFilters,
+              threatIndex,
+              threatQuery,
+              threatMapping,
+              threatLanguage,
               timestampOverride,
               references,
               note,
@@ -182,12 +191,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleActions,
-                ruleStatuses.saved_objects[0]
-              );
+              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

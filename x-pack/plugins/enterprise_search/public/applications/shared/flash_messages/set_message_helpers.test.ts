@@ -5,6 +5,9 @@
  */
 
 import { mockHistory } from '../../__mocks__';
+jest.mock('../kibana', () => ({
+  KibanaLogic: { values: { history: mockHistory } },
+}));
 
 import {
   FlashMessagesLogic,
@@ -18,7 +21,7 @@ describe('Flash Message Helpers', () => {
   const message = 'I am a message';
 
   beforeEach(() => {
-    mountFlashMessagesLogic({ history: mockHistory as any });
+    mountFlashMessagesLogic();
   });
 
   it('setSuccessMessage()', () => {

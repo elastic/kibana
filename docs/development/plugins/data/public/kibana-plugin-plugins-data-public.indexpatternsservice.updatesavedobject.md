@@ -9,7 +9,7 @@ Save existing index pattern. Will attempt to merge differences if there are conf
 <b>Signature:</b>
 
 ```typescript
-updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number): Promise<void | Error>;
+updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean): Promise<void | Error>;
 ```
 
 ## Parameters
@@ -18,6 +18,7 @@ updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number): Promise<vo
 |  --- | --- | --- |
 |  indexPattern | <code>IndexPattern</code> |  |
 |  saveAttempts | <code>number</code> |  |
+|  ignoreErrors | <code>boolean</code> |  |
 
 <b>Returns:</b>
 

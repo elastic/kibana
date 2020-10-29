@@ -158,17 +158,7 @@ export class UiActionsServiceEnhancements
 
   private registerFeatureUsage = (definition: ActionFactoryDefinition<any, any, any>): void => {
     if (!definition.minimalLicense || !definition.licenseFeatureName) return;
-
-    // Intentionally don't wait for response because
-    // happens in setup phase and has to be sync
-    this.deps.featureUsageSetup
-      .register(definition.licenseFeatureName, definition.minimalLicense)
-      .catch(() => {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `ActionFactory [actionFactory.id = ${definition.id}] fail to register feature for featureUsage.`
-        );
-      });
+    this.deps.featureUsageSetup.register(definition.licenseFeatureName, definition.minimalLicense);
   };
 
   public readonly telemetry = (state: DynamicActionsState, telemetry: Record<string, any> = {}) => {

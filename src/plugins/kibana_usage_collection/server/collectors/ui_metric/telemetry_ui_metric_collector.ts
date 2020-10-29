@@ -23,10 +23,18 @@ import {
   SavedObjectsServiceSetup,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { uiMetricSchema } from './schema';
 
 interface UIMetricsSavedObjects extends SavedObjectAttributes {
   count: number;
 }
+
+interface UIMetricElement {
+  key: string;
+  value: number;
+}
+
+export type UIMetricUsage = Record<string, UIMetricElement[]>;
 
 export function registerUiMetricUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -46,8 +54,9 @@ export function registerUiMetricUsageCollector(
     },
   });
 
-  const collector = usageCollection.makeUsageCollector({
+  const collector = usageCollection.makeUsageCollector<UIMetricUsage | undefined>({
     type: 'ui_metric',
+    schema: uiMetricSchema,
     fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient();
       if (typeof savedObjectsClient === 'undefined') {
@@ -73,7 +82,7 @@ export function registerUiMetricUsageCollector(
           ...accum,
           [appName]: [...(accum[appName] || []), pair],
         };
-      }, {} as Record<string, Array<{ key: string; value: number }>>);
+      }, {} as UIMetricUsage);
 
       return uiMetricsByAppName;
     },

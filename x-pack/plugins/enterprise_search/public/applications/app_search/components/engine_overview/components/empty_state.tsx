@@ -36,7 +36,7 @@ export const EmptyState: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <EngineOverviewHeader />
       <EuiPageContent className="emptyState">
         <EuiEmptyPrompt

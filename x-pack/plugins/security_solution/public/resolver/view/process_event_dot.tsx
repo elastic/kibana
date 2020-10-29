@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NodeSubMenu } from './submenu';
+import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
@@ -62,6 +62,7 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   text-align: left;
   text-transform: uppercase;
   width: fit-content;
+  z-index: 45;
 `;
 
 const StyledOuterGroup = styled.g`
@@ -311,6 +312,7 @@ const UnstyledProcessEventDot = React.memo(
             outline: 'transparent',
             border: 'none',
             pointerEvents: 'none',
+            zIndex: 30,
           }}
         >
           <StyledOuterGroup>
@@ -382,7 +384,7 @@ const UnstyledProcessEventDot = React.memo(
             />
           </StyledDescriptionText>
           <div
-            className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+            className={'euiButton euiButton--small'}
             id={labelHTMLID}
             onClick={handleClick}
             onFocus={handleFocus}
@@ -391,6 +393,7 @@ const UnstyledProcessEventDot = React.memo(
               backgroundColor: colorMap.resolverBackground,
               alignSelf: 'flex-start',
               padding: 0,
+              zIndex: 45,
             }}
           >
             <EuiButton
@@ -450,11 +453,11 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   border-radius: 10%;
   white-space: nowrap;
   will-change: left, top, width, height;
-  contain: layout;
   min-width: 280px;
   min-height: 90px;
   overflow-y: visible;
   pointer-events: none;
+  z-index: auto;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.

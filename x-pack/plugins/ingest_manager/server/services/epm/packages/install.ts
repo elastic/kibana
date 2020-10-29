@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import Boom from 'boom';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { BulkInstallPackageInfo } from '../../../../common';
+import { BulkInstallPackageInfo, InstallSource } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -18,10 +18,8 @@ import {
   AssetType,
   KibanaAssetReference,
   EsAssetReference,
-  ElasticsearchAssetType,
   InstallType,
 } from '../../../types';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import {
   getInstallation,
@@ -30,22 +28,17 @@ import {
   bulkInstallPackages,
   isBulkInstallError,
 } from './index';
-import { installTemplates } from '../elasticsearch/template/install';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
-import { installILMPolicy } from '../elasticsearch/ilm/install';
+import { toAssetReference, ArchiveAsset } from '../kibana/assets/install';
+import { removeInstallation } from './remove';
 import {
-  installKibanaAssets,
-  getKibanaAssets,
-  toAssetReference,
-  ArchiveAsset,
-} from '../kibana/assets/install';
-import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
-import { IngestManagerError, PackageOutdatedError } from '../../../errors';
+  IngestManagerError,
+  PackageOperationNotSupportedError,
+  PackageOutdatedError,
+} from '../../../errors';
 import { getPackageSavedObjects } from './get';
-import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
+import { loadArchivePackage } from '../archive';
+import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -59,7 +52,7 @@ export async function installLatestPackage(options: {
       name: latestPackage.name,
       version: latestPackage.version,
     });
-    return installPackage({ savedObjectsClient, pkgkey, callCluster });
+    return installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
     throw err;
   }
@@ -155,7 +148,7 @@ export async function handleInstallPackageFailure({
       }
       const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
       logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
-      await installPackage({
+      await installPackageFromRegistry({
         savedObjectsClient,
         pkgkey: prevVersion,
         callCluster,
@@ -193,7 +186,7 @@ export async function upgradePackage({
     });
 
     try {
-      const assets = await installPackage({ savedObjectsClient, pkgkey, callCluster });
+      const assets = await installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster });
       return {
         name: pkgToUpgrade,
         newVersion: latestPkg.version,
@@ -232,7 +225,7 @@ interface InstallPackageParams {
   force?: boolean;
 }
 
-export async function installPackage({
+export async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
   callCluster,
@@ -254,123 +247,71 @@ export async function installPackage({
   if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
-  const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
-  const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+
+  const { paths, registryPackageInfo } = await Registry.loadRegistryPackage(pkgName, pkgVersion);
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
+  const installSource = 'registry';
 
-  // add the package installation to the saved object.
-  // if some installation already exists, just update install info
-  if (!installedPkg) {
-    await createInstallation({
-      savedObjectsClient,
-      pkgName,
-      pkgVersion,
-      internal,
-      removable,
-      installed_kibana: [],
-      installed_es: [],
-      toSaveESIndexPatterns,
-    });
-  } else {
-    await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-      install_version: pkgVersion,
-      install_status: 'installing',
-      install_started_at: new Date().toISOString(),
-    });
-  }
-  const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
-  const kibanaAssets = await getKibanaAssets(paths);
-  if (installedPkg)
-    await deleteKibanaSavedObjectsAssets(
-      savedObjectsClient,
-      installedPkg.attributes.installed_kibana
-    );
-  // save new kibana refs before installing the assets
-  const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
+  return _installPackage({
     savedObjectsClient,
+    callCluster,
     pkgName,
-    kibanaAssets
-  );
-  const installKibanaAssetsPromise = installKibanaAssets({
-    savedObjectsClient,
-    pkgName,
-    kibanaAssets,
+    pkgVersion,
+    installedPkg,
+    paths,
+    removable,
+    internal,
+    packageInfo: registryPackageInfo,
+    installType,
+    installSource,
   });
-
-  // the rest of the installation must happen in sequential order
-
-  // currently only the base package has an ILM policy
-  // at some point ILM policies can be installed/modified
-  // per dataset and we should then save them
-  await installILMPolicy(paths, callCluster);
-
-  // installs versionized pipelines without removing currently installed ones
-  const installedPipelines = await installPipelines(
-    registryPackageInfo,
-    paths,
-    callCluster,
-    savedObjectsClient
-  );
-  // install or update the templates referencing the newly installed pipelines
-  const installedTemplates = await installTemplates(
-    registryPackageInfo,
-    callCluster,
-    paths,
-    savedObjectsClient
-  );
-
-  // update current backing indices of each data stream
-  await updateCurrentWriteIndices(callCluster, installedTemplates);
-
-  const installedTransforms = await installTransformForDataset(
-    registryPackageInfo,
-    paths,
-    callCluster,
-    savedObjectsClient
-  );
-
-  // if this is an update or retrying an update, delete the previous version's pipelines
-  if ((installType === 'update' || installType === 'reupdate') && installedPkg) {
-    await deletePreviousPipelines(
-      callCluster,
-      savedObjectsClient,
-      pkgName,
-      installedPkg.attributes.version
-    );
-  }
-  // pipelines from a different version may have installed during a failed update
-  if (installType === 'rollback' && installedPkg) {
-    await deletePreviousPipelines(
-      callCluster,
-      savedObjectsClient,
-      pkgName,
-      installedPkg.attributes.install_version
-    );
-  }
-  const installedTemplateRefs = installedTemplates.map((template) => ({
-    id: template.templateName,
-    type: ElasticsearchAssetType.indexTemplate,
-  }));
-  await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
-
-  // update to newly installed version when all assets are successfully installed
-  if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
-  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    install_version: pkgVersion,
-    install_status: 'installed',
-  });
-  return [
-    ...installedKibanaAssetsRefs,
-    ...installedPipelines,
-    ...installedTemplateRefs,
-    ...installedTransforms,
-  ];
 }
 
-const updateVersion = async (
+export async function installPackageByUpload({
+  savedObjectsClient,
+  callCluster,
+  archiveBuffer,
+  contentType,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  callCluster: CallESAsCurrentUser;
+  archiveBuffer: Buffer;
+  contentType: string;
+}): Promise<AssetReference[]> {
+  const { paths, archivePackageInfo } = await loadArchivePackage({ archiveBuffer, contentType });
+  const installedPkg = await getInstallationObject({
+    savedObjectsClient,
+    pkgName: archivePackageInfo.name,
+  });
+  const installType = getInstallType({ pkgVersion: archivePackageInfo.version, installedPkg });
+  if (installType !== 'install') {
+    throw new PackageOperationNotSupportedError(
+      `Package upload only supports fresh installations. Package ${archivePackageInfo.name} is already installed, please uninstall first.`
+    );
+  }
+
+  const removable = !isRequiredPackage(archivePackageInfo.name);
+  const { internal = false } = archivePackageInfo;
+  const installSource = 'upload';
+
+  return _installPackage({
+    savedObjectsClient,
+    callCluster,
+    pkgName: archivePackageInfo.name,
+    pkgVersion: archivePackageInfo.version,
+    installedPkg,
+    paths,
+    removable,
+    internal,
+    packageInfo: archivePackageInfo,
+    installType,
+    installSource,
+  });
+}
+
+export const updateVersion = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string
@@ -388,6 +329,7 @@ export async function createInstallation(options: {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   toSaveESIndexPatterns: Record<string, string>;
+  installSource: InstallSource;
 }) {
   const {
     savedObjectsClient,
@@ -398,6 +340,7 @@ export async function createInstallation(options: {
     installed_kibana: installedKibana,
     installed_es: installedEs,
     toSaveESIndexPatterns,
+    installSource,
   } = options;
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
@@ -412,6 +355,7 @@ export async function createInstallation(options: {
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
+      install_source: installSource,
     },
     { id: pkgName, overwrite: true }
   );
@@ -477,7 +421,7 @@ export async function ensurePackagesCompletedInstall(
     const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
     // reinstall package
     if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
-      acc.push(installPackage({ savedObjectsClient, pkgkey, callCluster }));
+      acc.push(installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster }));
     }
     return acc;
   }, []);

@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { CoreStart, AppMountParameters } from 'src/core/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
 import {
   IngestManagerSetupDeps,
@@ -30,12 +31,12 @@ import {
   sendSetup,
   sendGetPermissionsCheck,
   licenseService,
+  KibanaVersionContext,
 } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
-import { FleetStatusProvider } from './hooks/use_fleet_status';
-import './index.scss';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { FleetStatusProvider, useBreadcrumbs } from './hooks';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
+import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -66,7 +67,9 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
 
 const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
   ({ history, ...rest }) => {
-    const { fleet } = useConfig();
+    useBreadcrumbs('base');
+    const { agents } = useConfig();
+
     const { notifications } = useCore();
 
     const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
@@ -112,16 +115,13 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
             <Error
               title={
                 <FormattedMessage
-                  id="xpack.ingestManager.permissionsRequestErrorMessageTitle"
+                  id="xpack.fleet.permissionsRequestErrorMessageTitle"
                   defaultMessage="Unable to check permissions"
                 />
               }
-              error={i18n.translate(
-                'xpack.ingestManager.permissionsRequestErrorMessageDescription',
-                {
-                  defaultMessage: 'There was a problem checking Ingest Manager permissions',
-                }
-              )}
+              error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
+                defaultMessage: 'There was a problem checking Fleet permissions',
+              })}
             />
           ) : (
             <Panel>
@@ -131,12 +131,12 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
                   <h2>
                     {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
                       <FormattedMessage
-                        id="xpack.ingestManager.permissionDeniedErrorTitle"
+                        id="xpack.fleet.permissionDeniedErrorTitle"
                         defaultMessage="Permission denied"
                       />
                     ) : (
                       <FormattedMessage
-                        id="xpack.ingestManager.securityRequiredErrorTitle"
+                        id="xpack.fleet.securityRequiredErrorTitle"
                         defaultMessage="Security is not enabled"
                       />
                     )}
@@ -146,14 +146,14 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
                   <p>
                     {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
                       <FormattedMessage
-                        id="xpack.ingestManager.permissionDeniedErrorMessage"
-                        defaultMessage="You are not authorized to access Ingest Manager. Ingest Manager requires {roleName} privileges."
+                        id="xpack.fleet.permissionDeniedErrorMessage"
+                        defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
                         values={{ roleName: <EuiCode>superuser</EuiCode> }}
                       />
                     ) : (
                       <FormattedMessage
-                        id="xpack.ingestManager.securityRequiredErrorMessage"
-                        defaultMessage="You must enable security in Kibana and Elasticsearch to use Ingest Manager."
+                        id="xpack.fleet.securityRequiredErrorMessage"
+                        defaultMessage="You must enable security in Kibana and Elasticsearch to use Fleet."
                       />
                     )}
                   </p>
@@ -172,8 +172,8 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
             <Error
               title={
                 <FormattedMessage
-                  id="xpack.ingestManager.initializationErrorMessageTitle"
-                  defaultMessage="Unable to initialize Ingest Manager"
+                  id="xpack.fleet.initializationErrorMessageTitle"
+                  defaultMessage="Unable to initialize Fleet"
                 />
               }
               error={initializationError}
@@ -207,7 +207,7 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
                       <DataStreamApp />
                     </DefaultLayout>
                   </Route>
-                  <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={fleet.enabled}>
+                  <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={agents.enabled}>
                     <DefaultLayout section="fleet">
                       <FleetApp />
                     </DefaultLayout>
@@ -235,6 +235,7 @@ const IngestManagerApp = ({
   startDeps,
   config,
   history,
+  kibanaVersion,
 }: {
   basepath: string;
   coreStart: CoreStart;
@@ -242,6 +243,7 @@ const IngestManagerApp = ({
   startDeps: IngestManagerStartDeps;
   config: IngestManagerConfigType;
   history: AppMountParameters['history'];
+  kibanaVersion: string;
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
@@ -249,9 +251,11 @@ const IngestManagerApp = ({
       <KibanaContextProvider services={{ ...coreStart }}>
         <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
           <ConfigContext.Provider value={config}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <IngestManagerRoutes history={history} basepath={basepath} />
-            </EuiThemeProvider>
+            <KibanaVersionContext.Provider value={kibanaVersion}>
+              <EuiThemeProvider darkMode={isDarkMode}>
+                <IngestManagerRoutes history={history} basepath={basepath} />
+              </EuiThemeProvider>
+            </KibanaVersionContext.Provider>
           </ConfigContext.Provider>
         </DepsContext.Provider>
       </KibanaContextProvider>
@@ -264,7 +268,8 @@ export function renderApp(
   { element, appBasePath, history }: AppMountParameters,
   setupDeps: IngestManagerSetupDeps,
   startDeps: IngestManagerStartDeps,
-  config: IngestManagerConfigType
+  config: IngestManagerConfigType,
+  kibanaVersion: string
 ) {
   ReactDOM.render(
     <IngestManagerApp
@@ -274,6 +279,7 @@ export function renderApp(
       startDeps={startDeps}
       config={config}
       history={history}
+      kibanaVersion={kibanaVersion}
     />,
     element
   );

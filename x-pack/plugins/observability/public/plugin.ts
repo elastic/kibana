@@ -6,6 +6,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -25,6 +26,7 @@ export interface ObservabilityPluginSetup {
 
 export interface ObservabilityPluginSetupDeps {
   home?: HomePublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export type ObservabilityPluginStart = void;
@@ -63,7 +65,11 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         subtitle: i18n.translate('xpack.observability.featureCatalogueSubtitle', {
           defaultMessage: 'Centralize & monitor',
         }),
-        descriptions: [
+        description: i18n.translate('xpack.observability.featureCatalogueDescription', {
+          defaultMessage:
+            'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
+        }),
+        appDescriptions: [
           i18n.translate('xpack.observability.featureCatalogueDescription1', {
             defaultMessage: 'Monitor infrastructure metrics.',
           }),
@@ -75,7 +81,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
           }),
         ],
         icon: 'logoObservability',
-        path: '/app/observability',
+        path: '/app/observability/',
         order: 200,
       });
     }

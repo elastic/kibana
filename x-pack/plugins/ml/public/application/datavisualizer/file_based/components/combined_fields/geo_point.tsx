@@ -5,9 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import debounce from 'lodash/debounce';
+import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 

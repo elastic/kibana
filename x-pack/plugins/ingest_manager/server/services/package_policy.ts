@@ -286,15 +286,15 @@ class PackagePolicyService {
 
     for (const id of ids) {
       try {
-        const oldPackagePolicy = await this.get(soClient, id);
-        if (!oldPackagePolicy) {
+        const packagePolicy = await this.get(soClient, id);
+        if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
-            oldPackagePolicy.policy_id,
-            [oldPackagePolicy.id],
+            packagePolicy.policy_id,
+            [packagePolicy.id],
             {
               user: options?.user,
             }
@@ -303,6 +303,7 @@ class PackagePolicyService {
         await soClient.delete(SAVED_OBJECT_TYPE, id);
         result.push({
           id,
+          name: packagePolicy.name,
           success: true,
         });
       } catch (e) {
@@ -375,19 +376,19 @@ async function _assignPackageStreamToStream(
     return { ...stream, compiled_stream: undefined };
   }
   const datasetPath = getDataset(stream.data_stream.dataset);
-  const packageDatasets = pkgInfo.datasets;
-  if (!packageDatasets) {
-    throw new Error('Stream template not found, no datasets');
+  const packageDataStreams = pkgInfo.data_streams;
+  if (!packageDataStreams) {
+    throw new Error('Stream template not found, no data streams');
   }
 
-  const packageDataset = packageDatasets.find(
-    (pkgDataset) => pkgDataset.name === stream.data_stream.dataset
+  const packageDataStream = packageDataStreams.find(
+    (pkgDataStream) => pkgDataStream.dataset === stream.data_stream.dataset
   );
-  if (!packageDataset) {
+  if (!packageDataStream) {
     throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);
   }
 
-  const streamFromPkg = (packageDataset.streams || []).find(
+  const streamFromPkg = (packageDataStream.streams || []).find(
     (pkgStream) => pkgStream.input === input.type
   );
   if (!streamFromPkg) {

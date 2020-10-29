@@ -125,3 +125,14 @@ export function isRelativeUrl(candidatePath: string) {
   }
   return true;
 }
+
+/**
+ * Returns the origin (protocol + host + port) from given `url` if `url` is a valid absolute url, or null otherwise
+ */
+export function getUrlOrigin(url: string): string | null {
+  const obj = parseUrl(url);
+  if (!obj.protocol && !obj.hostname) {
+    return null;
+  }
+  return `${obj.protocol}//${obj.hostname}${obj.port ? `:${obj.port}` : ''}`;
+}

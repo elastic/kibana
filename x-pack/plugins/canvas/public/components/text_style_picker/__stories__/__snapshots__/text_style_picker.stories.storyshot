@@ -59,7 +59,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -188,7 +188,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               <span
                 className="euiFormControlLayoutCustomIcon"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="arrowDown"
@@ -215,7 +215,6 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
       >
         <div
           className="euiPopover euiPopover--anchorDownCenter"
-          container={null}
           id="color-picker-popover"
           onKeyDown={[Function]}
           onMouseDown={[Function]}
@@ -281,7 +280,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorBold"
                     size="m"
@@ -314,7 +313,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorItalic"
                     size="m"
@@ -347,7 +346,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorUnderline"
                     size="m"
@@ -392,7 +391,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignLeft"
                     size="m"
@@ -425,7 +424,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignCenter"
                     size="m"
@@ -458,7 +457,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignRight"
                     size="m"
@@ -538,7 +537,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   <span
                     className="euiFormControlLayoutCustomIcon"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
@@ -667,7 +666,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               <span
                 className="euiFormControlLayoutCustomIcon"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="arrowDown"
@@ -694,7 +693,6 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
       >
         <div
           className="euiPopover euiPopover--anchorDownCenter"
-          container={null}
           id="color-picker-popover"
           onKeyDown={[Function]}
           onMouseDown={[Function]}
@@ -760,7 +758,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorBold"
                     size="m"
@@ -793,7 +791,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorItalic"
                     size="m"
@@ -826,7 +824,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorUnderline"
                     size="m"
@@ -871,7 +869,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignLeft"
                     size="m"
@@ -904,7 +902,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignCenter"
                     size="m"
@@ -937,7 +935,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <span
                   className="euiButtonContent euiButton__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignRight"
                     size="m"

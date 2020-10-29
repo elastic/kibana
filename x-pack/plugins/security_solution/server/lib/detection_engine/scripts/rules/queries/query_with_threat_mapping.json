@@ -1,5 +1,5 @@
 {
-  "name": "Query with a threat mapping",
+  "name": "Query with a indicator mapping",
   "description": "Query with a threat mapping",
   "rule_id": "threat-mapping",
   "risk_score": 1,
@@ -7,7 +7,7 @@
   "type": "threat_match",
   "query": "*:*",
   "tags": ["tag_1", "tag_2"],
-  "threat_index": "mock-threat-list",
+  "threat_index": ["mock-threat-list"],
   "threat_query": "*:*",
   "threat_mapping": [
     {

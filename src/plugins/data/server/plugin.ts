@@ -111,13 +111,15 @@ export class DataServerPlugin
 
   public start(core: CoreStart) {
     const fieldFormats = this.fieldFormats.start();
-    return {
-      search: this.searchService.start(core, { fieldFormats }),
+    const indexPatterns = this.indexPatterns.start(core, {
       fieldFormats,
-      indexPatterns: this.indexPatterns.start(core, {
-        fieldFormats,
-        logger: this.logger.get('indexPatterns'),
-      }),
+      logger: this.logger.get('indexPatterns'),
+    });
+
+    return {
+      fieldFormats,
+      indexPatterns,
+      search: this.searchService.start(core, { fieldFormats, indexPatterns }),
     };
   }
 

@@ -28,7 +28,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostDetailsQuery';
+const ID = 'hostsDetailsQuery';
 
 export interface HostDetailsArgs {
   id: string;
@@ -60,16 +60,21 @@ export const useHostDetails = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions>({
-    defaultIndex: indexNames,
-    hostName,
-    factoryQueryType: HostsQueries.details,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          hostName,
+          id,
+          factoryQueryType: HostsQueries.details,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
     endDate,
@@ -84,7 +89,11 @@ export const useHostDetails = ({
   });
 
   const hostDetailsSearch = useCallback(
-    (request: HostDetailsRequestOptions) => {
+    (request: HostDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -141,9 +150,11 @@ export const useHostDetails = ({
   useEffect(() => {
     setHostDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.details,
         hostName,
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

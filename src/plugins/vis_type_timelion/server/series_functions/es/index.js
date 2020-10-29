@@ -132,9 +132,15 @@ export default new Datasource('es', {
 
     const deps = (await tlConfig.getStartServices())[1];
 
-    const resp = await deps.data.search.search(tlConfig.context, body, {
-      strategy: ES_SEARCH_STRATEGY,
-    });
+    const resp = await deps.data.search
+      .search(
+        body,
+        {
+          strategy: ES_SEARCH_STRATEGY,
+        },
+        tlConfig.context
+      )
+      .toPromise();
 
     if (!resp.rawResponse._shards.total) {
       throw new Error(

@@ -21,7 +21,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
-import { SuggestionsComponent } from './suggestions_component';
+import SuggestionsComponent from './suggestions_component';
 
 const noop = () => {
   return;

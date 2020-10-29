@@ -8,6 +8,7 @@ import { sortBy } from 'lodash/fp';
 
 import { formatIndexFields, formatFirstFields, formatSecondFields, createFieldItem } from './index';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
+import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields';
 
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {
@@ -16,6 +17,7 @@ describe('Index Fields', () => {
         sortBy(
           'name',
           await formatIndexFields(
+            beatFields,
             [mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField],
             ['auditbeat', 'filebeat', 'packetbeat']
           )
@@ -167,6 +169,7 @@ describe('Index Fields', () => {
   describe('formatFirstFields', () => {
     test('Basic functionality', async () => {
       const fields = await formatFirstFields(
+        beatFields,
         [mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField],
         ['auditbeat', 'filebeat', 'packetbeat']
       );
@@ -749,6 +752,7 @@ describe('Index Fields', () => {
   describe('createFieldItem', () => {
     test('Basic functionality', () => {
       const item = createFieldItem(
+        beatFields,
         ['auditbeat'],
         {
           name: '_id',

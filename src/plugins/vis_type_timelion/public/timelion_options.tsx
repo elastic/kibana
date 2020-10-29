@@ -21,30 +21,45 @@ import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { VisParams } from './timelion_vis_fn';
+import { KibanaContextProvider } from '../../kibana_react/public';
+
+import { TimelionVisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
+import { TimelionVisDependencies } from './plugin';
 
-export type TimelionOptionsProps = VisOptionsProps<VisParams>;
+export type TimelionOptionsProps = VisOptionsProps<TimelionVisParams>;
 
-function TimelionOptions({ stateParams, setValue, setValidity }: TimelionOptionsProps) {
-  const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
-    setValue,
-  ]);
+function TimelionOptions({
+  services,
+  stateParams,
+  setValue,
+  setValidity,
+}: TimelionOptionsProps & {
+  services: TimelionVisDependencies;
+}) {
+  const setInterval = useCallback(
+    (value: TimelionVisParams['interval']) => setValue('interval', value),
+    [setValue]
+  );
   const setExpressionInput = useCallback(
-    (value: VisParams['expression']) => setValue('expression', value),
+    (value: TimelionVisParams['expression']) => setValue('expression', value),
     [setValue]
   );
 
   return (
-    <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
-      <TimelionInterval
-        value={stateParams.interval}
-        setValue={setInterval}
-        setValidity={setValidity}
-      />
-      <TimelionExpressionInput value={stateParams.expression} setValue={setExpressionInput} />
-    </EuiPanel>
+    <KibanaContextProvider services={services}>
+      <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
+        <TimelionInterval
+          value={stateParams.interval}
+          setValue={setInterval}
+          setValidity={setValidity}
+        />
+        <TimelionExpressionInput value={stateParams.expression} setValue={setExpressionInput} />
+      </EuiPanel>
+    </KibanaContextProvider>
   );
 }
 
-export { TimelionOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TimelionOptions as default };

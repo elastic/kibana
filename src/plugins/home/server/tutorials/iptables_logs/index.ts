@@ -31,37 +31,39 @@ import {
 
 export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'iptables';
-  const platforms = ['DEB', 'RPM'] as const;
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'iptablesLogs',
     name: i18n.translate('home.tutorials.iptablesLogs.nameTitle', {
-      defaultMessage: 'Iptables / Ubiquiti',
+      defaultMessage: 'Iptables logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.iptablesLogs.shortDescription', {
-      defaultMessage: 'Collect and parse iptables and ip6tables logs or from Ubiqiti firewalls.',
+      defaultMessage: 'Collect iptables and ip6tables logs.',
     }),
     longDescription: i18n.translate('home.tutorials.iptablesLogs.longDescription', {
       defaultMessage:
-        'This is a module for iptables and ip6tables logs. It parses logs \
-received over the network via syslog or from a file. Also, it understands the \
-prefix added by some Ubiquiti firewalls, which includes the rule set name, rule \
-number and the action performed on the traffic (allow/deny).. \
-[Learn more]({learnMoreLink}).',
+        'This is a module for iptables and ip6tables logs. It parses logs received \
+        over the network via syslog or from a file. Also, it understands the prefix \
+        added by some Ubiquiti firewalls, which includes the rule set name, rule \
+        number and the action performed on the traffic (allow/deny). \
+        [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iptables.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/ubiquiti.svg',
+    euiIconType: '/plugins/home/assets/logos/linux.svg',
     artifacts: {
-      dashboards: [],
-      application: {
-        path: '/app/security',
-        label: i18n.translate('home.tutorials.iptablesLogs.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'Security App',
-        }),
-      },
+      dashboards: [
+        {
+          id: 'ceefb9e0-1f51-11e9-93ed-f7e068f4aebb-ecs',
+          linkLabel: i18n.translate('home.tutorials.iptablesLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Iptables Overview',
+          }),
+          isOverview: true,
+        },
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.filebeat}/exported-fields-iptables.html',
       },

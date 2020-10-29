@@ -35,14 +35,16 @@ import {
   useLink,
   useBreadcrumbs,
   useLicense,
+  useKibanaVersion,
 } from '../../../hooks';
 import { SearchBar, ContextMenuActions } from '../../../components';
-import { AgentStatusKueryHelper } from '../../../services';
+import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AgentReassignAgentPolicyFlyout,
   AgentHealth,
   AgentUnenrollAgentModal,
+  AgentUpgradeAgentModal,
 } from '../components';
 import { AgentBulkActions, SelectionMode } from './components/bulk_actions';
 
@@ -51,21 +53,27 @@ const REFRESH_INTERVAL_MS = 5000;
 const statusFilters = [
   {
     status: 'online',
-    label: i18n.translate('xpack.ingestManager.agentList.statusOnlineFilterText', {
+    label: i18n.translate('xpack.fleet.agentList.statusOnlineFilterText', {
       defaultMessage: 'Online',
     }),
   },
   {
     status: 'offline',
-    label: i18n.translate('xpack.ingestManager.agentList.statusOfflineFilterText', {
+    label: i18n.translate('xpack.fleet.agentList.statusOfflineFilterText', {
       defaultMessage: 'Offline',
     }),
   },
   ,
   {
     status: 'error',
-    label: i18n.translate('xpack.ingestManager.agentList.statusErrorFilterText', {
+    label: i18n.translate('xpack.fleet.agentList.statusErrorFilterText', {
       defaultMessage: 'Error',
+    }),
+  },
+  {
+    status: 'updating',
+    label: i18n.translate('xpack.fleet.agentList.statusUpdatingFilterText', {
+      defaultMessage: 'Updating',
     }),
   },
 ] as Array<{ label: string; status: string }>;
@@ -75,11 +83,13 @@ const RowActions = React.memo<{
   refresh: () => void;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
-}>(({ agent, refresh, onReassignClick, onUnenrollClick }) => {
+  onUpgradeClick: () => void;
+}>(({ agent, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
 
   const isUnenrolling = agent.status === 'unenrolling';
+  const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <ContextMenuActions
@@ -91,10 +101,7 @@ const RowActions = React.memo<{
           href={getHref('fleet_agent_details', { agentId: agent.id })}
           key="viewAgent"
         >
-          <FormattedMessage
-            id="xpack.ingestManager.agentList.viewActionText"
-            defaultMessage="View agent"
-          />
+          <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           icon="pencil"
@@ -105,7 +112,7 @@ const RowActions = React.memo<{
           key="reassignPolicy"
         >
           <FormattedMessage
-            id="xpack.ingestManager.agentList.reassignActionText"
+            id="xpack.fleet.agentList.reassignActionText"
             defaultMessage="Assign to new policy"
           />
         </EuiContextMenuItem>,
@@ -118,15 +125,27 @@ const RowActions = React.memo<{
         >
           {isUnenrolling ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+              id="xpack.fleet.agentList.forceUnenrollOneButton"
               defaultMessage="Force unenroll"
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.unenrollOneButton"
+              id="xpack.fleet.agentList.unenrollOneButton"
               defaultMessage="Unenroll agent"
             />
           )}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          icon="refresh"
+          disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+          onClick={() => {
+            onUpgradeClick();
+          }}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.upgradeOneButton"
+            defaultMessage="Upgrade agent"
+          />
         </EuiContextMenuItem>,
       ]}
     />
@@ -146,9 +165,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
   const isGoldPlus = useLicense().isGoldPlus();
+  const kibanaVersion = useKibanaVersion();
 
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
+  const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
 
   // Table and search states
   const [search, setSearch] = useState<string>(defaultKuery);
@@ -165,11 +186,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [isStatusFilterOpen, setIsStatutsFilterOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
+  const isUsingFilter =
+    search.trim() ||
+    selectedAgentPolicies.length ||
+    selectedStatus.length ||
+    showInactive ||
+    showUpgradeable;
+
   const clearFilters = useCallback(() => {
     setSearch('');
     setSelectedAgentPolicies([]);
     setSelectedStatus([]);
-  }, [setSearch, setSelectedAgentPolicies, setSelectedStatus]);
+    setShowInactive(false);
+    setShowUpgradeable(false);
+  }, [setSearch, setSelectedAgentPolicies, setSelectedStatus, setShowInactive, setShowUpgradeable]);
 
   // Add a agent policy id to current search
   const addAgentPolicyFilter = (policyId: string) => {
@@ -189,6 +219,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
 
   let kuery = search.trim();
   if (selectedAgentPolicies.length) {
@@ -199,7 +230,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       .map((agentPolicy) => `"${agentPolicy}"`)
       .join(' or ')})`;
   }
-
   if (selectedStatus.length) {
     const kueryStatus = selectedStatus
       .map((status) => {
@@ -208,6 +238,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             return AgentStatusKueryHelper.buildKueryForOnlineAgents();
           case 'offline':
             return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+          case 'updating':
+            return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
           case 'error':
             return AgentStatusKueryHelper.buildKueryForErrorAgents();
         }
@@ -229,6 +261,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       perPage: pagination.pageSize,
       kuery: kuery && kuery !== '' ? kuery : undefined,
       showInactive,
+      showUpgradeable,
     },
     {
       pollIntervalMs: REFRESH_INTERVAL_MS,
@@ -258,7 +291,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const columns = [
     {
       field: 'local_metadata.host.hostname',
-      name: i18n.translate('xpack.ingestManager.agentList.hostColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
@@ -270,14 +303,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'active',
       width: '120px',
-      name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
       field: 'policy_id',
-      name: i18n.translate('xpack.ingestManager.agentList.policyColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string, agent: Agent) => {
@@ -297,7 +330,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               <EuiFlexItem grow={false}>
                 <EuiText color="default" size="xs" className="eui-textNoWrap">
                   <FormattedMessage
-                    id="xpack.ingestManager.agentList.revisionNumber"
+                    id="xpack.fleet.agentList.revisionNumber"
                     defaultMessage="rev. {revNumber}"
                     values={{ revNumber: agent.policy_revision }}
                   />
@@ -315,7 +348,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     {true && (
                       <>
                         <FormattedMessage
-                          id="xpack.ingestManager.agentList.outOfDateLabel"
+                          id="xpack.fleet.agentList.outOfDateLabel"
                           defaultMessage="Out-of-date"
                         />
                       </>
@@ -329,22 +362,40 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'local_metadata.elastic.agent.version',
-      width: '100px',
-      name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
+      width: '200px',
+      name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
-      render: (version: string, agent: Agent) => safeMetadata(version),
+      render: (version: string, agent: Agent) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+          <EuiFlexItem grow={false} className="eui-textNoWrap">
+            {safeMetadata(version)}
+          </EuiFlexItem>
+          {isAgentUpgradeable(agent, kibanaVersion) ? (
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                <EuiIcon size="m" type="alert" color="warning" />
+                &nbsp;
+                <FormattedMessage
+                  id="xpack.fleet.agentList.agentUpgradeLabel"
+                  defaultMessage="Upgrade available"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      ),
     },
     {
       field: 'last_checkin',
-      name: i18n.translate('xpack.ingestManager.agentList.lastCheckinTitle', {
+      name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
       render: (lastCheckin: string, agent: any) =>
         lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
     },
     {
-      name: i18n.translate('xpack.ingestManager.agentList.actionsColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.actionsColumnTitle', {
         defaultMessage: 'Actions',
       }),
       actions: [
@@ -356,6 +407,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 refresh={() => agentsRequest.resendRequest()}
                 onReassignClick={() => setAgentToReassign(agent)}
                 onUnenrollClick={() => setAgentToUnenroll(agent)}
+                onUpgradeClick={() => setAgentToUpgrade(agent)}
               />
             );
           },
@@ -370,7 +422,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.ingestManager.agentList.noAgentsPrompt"
+            id="xpack.fleet.agentList.noAgentsPrompt"
             defaultMessage="No agents enrolled"
           />
         </h2>
@@ -378,10 +430,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       actions={
         hasWriteCapabilites ? (
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
-            <FormattedMessage
-              id="xpack.ingestManager.agentList.addButton"
-              defaultMessage="Add agent"
-            />
+            <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
           </EuiButton>
         ) : null
       }
@@ -421,6 +470,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </EuiPortal>
       )}
 
+      {agentToUpgrade && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            agents={[agentToUpgrade]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToUpgrade(undefined);
+              agentsRequest.resendRequest();
+            }}
+            version={kibanaVersion}
+          />
+        </EuiPortal>
+      )}
+
       {/* Search and filter bar */}
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={4}>
@@ -452,7 +515,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                       disabled={isAgentPoliciesLoading}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.agentList.statusFilterText"
+                        id="xpack.fleet.agentList.statusFilterText"
                         defaultMessage="Status"
                       />
                     </EuiFilterButton>
@@ -492,7 +555,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                       disabled={isAgentPoliciesLoading}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.agentList.policyFilterText"
+                        id="xpack.fleet.agentList.policyFilterText"
                         defaultMessage="Agent policy"
                       />
                     </EuiFilterButton>
@@ -520,12 +583,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   </div>
                 </EuiPopover>
                 <EuiFilterButton
+                  hasActiveFilters={showUpgradeable}
+                  onClick={() => {
+                    setShowUpgradeable(!showUpgradeable);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.showUpgradeableFilterLabel"
+                    defaultMessage="Upgrade available"
+                  />
+                </EuiFilterButton>
+                <EuiFilterButton
                   hasActiveFilters={showInactive}
                   onClick={() => setShowInactive(!showInactive)}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.agentList.showInactiveSwitchLabel"
-                    defaultMessage="Show inactive"
+                    id="xpack.fleet.agentList.showInactiveSwitchLabel"
+                    defaultMessage="Inactive"
                   />
                 </EuiFilterButton>
               </EuiFilterGroup>
@@ -565,18 +639,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         noItemsMessage={
           isLoading && agentsRequest.isInitialRequest ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.loadingAgentsMessage"
+              id="xpack.fleet.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"
             />
-          ) : search.trim() || selectedAgentPolicies.length || selectedStatus.length ? (
+          ) : isUsingFilter ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.noFilteredAgentsPrompt"
+              id="xpack.fleet.agentList.noFilteredAgentsPrompt"
               defaultMessage="No agents found. {clearFiltersLink}"
               values={{
                 clearFiltersLink: (
                   <EuiLink onClick={() => clearFilters()}>
                     <FormattedMessage
-                      id="xpack.ingestManager.agentList.clearFiltersLinkText"
+                      id="xpack.fleet.agentList.clearFiltersLinkText"
                       defaultMessage="Clear filters"
                     />
                   </EuiLink>

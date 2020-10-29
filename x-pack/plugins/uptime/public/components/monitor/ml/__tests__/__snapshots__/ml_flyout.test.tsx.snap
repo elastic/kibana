@@ -95,7 +95,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
       data-test-subj="euiFlyoutCloseButton"
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         class="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -129,7 +129,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
             <div
               class="euiCallOutHeader"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiCallOutHeader__icon"
                 data-euiicon-type="help"

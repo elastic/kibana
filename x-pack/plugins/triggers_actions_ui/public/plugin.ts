@@ -5,10 +5,10 @@
  */
 
 import {
-  CoreStart,
   CoreSetup,
-  PluginInitializerContext,
+  CoreStart,
   Plugin as CorePlugin,
+  PluginInitializerContext,
 } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
@@ -17,13 +17,20 @@ import { registerBuiltInAlertTypes } from './application/components/builtin_aler
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
-  ManagementSetup,
   ManagementAppMountParams,
+  ManagementSetup,
 } from '../../../../src/plugins/management/public';
-import { boot } from './application/boot';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
+export interface TriggersActionsUiConfigType {
+  enableGeoTrackingThresholdAlert: boolean;
+}
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -37,6 +44,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
 
 interface PluginsSetup {
   management: ManagementSetup;
+  home?: HomePublicPluginSetup;
 }
 
 interface PluginsStart {
@@ -56,24 +64,45 @@ export class Plugin
     > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  private initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    this.actionTypeRegistry = actionTypeRegistry;
+    this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
 
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    this.alertTypeRegistry = alertTypeRegistry;
+    this.alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+
+    this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const alertTypeRegistry = this.alertTypeRegistry;
 
+    const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
+      defaultMessage: 'Alerts and Actions',
+    });
+    const featureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.displayDescription',
+      {
+        defaultMessage: 'Detect conditions using alerts, and take actions using connectors.',
+      }
+    );
+
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register({
+        id: 'triggersActions',
+        title: featureTitle,
+        description: featureDescription,
+        icon: 'watchesApp',
+        path: '/app/management/insightsAndAlerting/triggersActions',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
+
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: 'triggersActions',
-      title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-        defaultMessage: 'Alerts and Actions',
-      }),
+      title: featureTitle,
       order: 0,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -81,7 +110,10 @@ export class Plugin
           PluginsStart,
           unknown
         ];
-        boot({
+
+        const { boot } = await import('./application/boot');
+
+        return boot({
           dataPlugin: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
@@ -100,7 +132,6 @@ export class Plugin
           actionTypeRegistry,
           alertTypeRegistry,
         });
-        return () => {};
       },
     });
 
@@ -110,6 +141,7 @@ export class Plugin
 
     registerBuiltInAlertTypes({
       alertTypeRegistry: this.alertTypeRegistry,
+      triggerActionsUiConfig: this.initializerContext.config.get<TriggersActionsUiConfigType>(),
     });
 
     return {

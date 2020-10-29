@@ -9,7 +9,7 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { buildRiskScoreFromMapping } from './mappings/build_risk_score_from_mapping';
-import { SignalSourceHit, RuleAlertAttributes } from './types';
+import { SignalSourceHit, RuleAlertAttributes, SignalSource } from './types';
 import { buildSeverityFromMapping } from './mappings/build_severity_from_mapping';
 import { buildRuleNameFromMapping } from './mappings/build_rule_name_from_mapping';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
@@ -46,19 +46,19 @@ export const buildRule = ({
   throttle,
 }: BuildRuleParams): RulesSchema => {
   const { riskScore, riskScoreMeta } = buildRiskScoreFromMapping({
-    doc,
+    eventSource: doc._source,
     riskScore: ruleParams.riskScore,
     riskScoreMapping: ruleParams.riskScoreMapping,
   });
 
   const { severity, severityMeta } = buildSeverityFromMapping({
-    doc,
+    eventSource: doc._source,
     severity: ruleParams.severity,
     severityMapping: ruleParams.severityMapping,
   });
 
   const { ruleName, ruleNameMeta } = buildRuleNameFromMapping({
-    doc,
+    eventSource: doc._source,
     ruleName: name,
     ruleNameMapping: ruleParams.ruleNameOverride,
   });
@@ -102,7 +102,7 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threat: ruleParams.threat ?? [],
-    timestamp_override: ruleParams.timestampOverride, // TODO: Timestamp Override via timestamp_override
+    timestamp_override: ruleParams.timestampOverride,
     throttle,
     version: ruleParams.version,
     created_at: createdAt,
@@ -132,7 +132,7 @@ export const buildRuleWithoutOverrides = (
     meta: ruleParams.meta,
     max_signals: ruleParams.maxSignals,
     risk_score: ruleParams.riskScore,
-    risk_score_mapping: ruleParams.riskScoreMapping ?? [],
+    risk_score_mapping: [],
     output_index: ruleParams.outputIndex,
     description: ruleParams.description,
     note: ruleParams.note,
@@ -145,9 +145,8 @@ export const buildRuleWithoutOverrides = (
     name: ruleSO.attributes.name,
     query: ruleParams.query,
     references: ruleParams.references,
-    rule_name_override: ruleParams.ruleNameOverride,
     severity: ruleParams.severity,
-    severity_mapping: ruleParams.severityMapping ?? [],
+    severity_mapping: [],
     tags: ruleSO.attributes.tags,
     type: ruleParams.type,
     to: ruleParams.to,
@@ -156,7 +155,7 @@ export const buildRuleWithoutOverrides = (
     created_by: ruleSO.attributes.createdBy,
     updated_by: ruleSO.attributes.updatedBy,
     threat: ruleParams.threat ?? [],
-    timestamp_override: ruleParams.timestampOverride, // TODO: Timestamp Override via timestamp_override
+    timestamp_override: ruleParams.timestampOverride,
     throttle: ruleSO.attributes.throttle,
     version: ruleParams.version,
     created_at: ruleSO.attributes.createdAt,
@@ -169,6 +168,7 @@ export const buildRuleWithoutOverrides = (
     threat_index: ruleParams.threatIndex,
     threat_query: ruleParams.threatQuery,
     threat_mapping: ruleParams.threatMapping,
+    threat_language: ruleParams.threatLanguage,
   };
   return removeInternalTagsFromRule(rule);
 };
@@ -183,4 +183,48 @@ export const removeInternalTagsFromRule = (rule: RulesSchema): RulesSchema => {
     };
     return ruleWithoutInternalTags;
   }
+};
+
+export const buildRuleWithOverrides = (
+  ruleSO: SavedObject<RuleAlertAttributes>,
+  eventSource: SignalSource
+): RulesSchema => {
+  const ruleWithoutOverrides = buildRuleWithoutOverrides(ruleSO);
+  return applyRuleOverrides(ruleWithoutOverrides, eventSource, ruleSO.attributes.params);
+};
+
+export const applyRuleOverrides = (
+  rule: RulesSchema,
+  eventSource: SignalSource,
+  ruleParams: RuleTypeParams
+): RulesSchema => {
+  const { riskScore, riskScoreMeta } = buildRiskScoreFromMapping({
+    eventSource,
+    riskScore: ruleParams.riskScore,
+    riskScoreMapping: ruleParams.riskScoreMapping,
+  });
+
+  const { severity, severityMeta } = buildSeverityFromMapping({
+    eventSource,
+    severity: ruleParams.severity,
+    severityMapping: ruleParams.severityMapping,
+  });
+
+  const { ruleName, ruleNameMeta } = buildRuleNameFromMapping({
+    eventSource,
+    ruleName: rule.name,
+    ruleNameMapping: ruleParams.ruleNameOverride,
+  });
+
+  const meta = { ...ruleParams.meta, ...riskScoreMeta, ...severityMeta, ...ruleNameMeta };
+  return {
+    ...rule,
+    risk_score: riskScore,
+    risk_score_mapping: ruleParams.riskScoreMapping ?? [],
+    severity,
+    severity_mapping: ruleParams.severityMapping ?? [],
+    name: ruleName,
+    rule_name_override: ruleParams.ruleNameOverride,
+    meta: Object.keys(meta).length > 0 ? meta : undefined,
+  };
 };

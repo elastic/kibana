@@ -13,3 +13,4 @@ export { decodeCloudId } from './decode_cloud_id';
 export { isValidNamespace } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
+export { isAgentUpgradeable } from './is_agent_upgradeable';

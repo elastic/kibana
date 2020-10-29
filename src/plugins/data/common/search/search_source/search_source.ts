@@ -71,22 +71,16 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
-import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { ISearchGeneric } from '../..';
-import { SearchSourceOptions, SearchSourceFields } from './types';
+import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../..';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
+import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
-import {
-  getEsQueryConfig,
-  buildEsQuery,
-  Filter,
-  UI_SETTINGS,
-  ISearchOptions,
-} from '../../../common';
+import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
@@ -108,7 +102,15 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
-  search: ISearchGeneric;
+  // Types are nearly identical to ISearchGeneric, except we are making
+  // search options required here and returning a promise instead of observable.
+  search: <
+    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  >(
+    request: SearchStrategyRequest,
+    options: ISearchOptions
+  ) => Promise<SearchStrategyResponse>;
 }
 
 /** @public **/
@@ -264,7 +266,7 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
-      response = await this.fetch$(searchRequest, options).toPromise();
+      response = await this.fetchSearch(searchRequest, options);
     }
 
     // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
@@ -308,17 +310,17 @@ export class SearchSource {
 
   /**
    * Run a search using the search service
-   * @return {Observable<SearchResponse<unknown>>}
+   * @return {Promise<SearchResponse<unknown>>}
    */
-  private fetch$(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
-      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
+    return search({ params, indexType: searchRequest.indexType }, options).then(({ rawResponse }) =>
+      onResponse(searchRequest, rawResponse)
     );
   }
 
@@ -558,9 +560,3 @@ export class SearchSource {
     return [filterField];
   }
 }
-
-/**
- * search source interface
- * @public
- */
-export type ISearchSource = Pick<SearchSource, keyof SearchSource>;

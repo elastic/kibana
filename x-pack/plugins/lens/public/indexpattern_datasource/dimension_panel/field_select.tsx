@@ -20,7 +20,7 @@ import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
-import { OperationSupportMatrix } from './dimension_panel';
+import { OperationSupportMatrix } from './operation_support';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
@@ -41,6 +41,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  fieldIsInvalid: boolean;
 }
 
 export function FieldSelect({
@@ -53,6 +54,7 @@ export function FieldSelect({
   onChoose,
   onDeleteColumn,
   existingFields,
+  fieldIsInvalid,
   ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationSupportMatrix;
@@ -171,12 +173,14 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType || fieldIsInvalid)}
       selectedOptions={
         ((selectedColumnOperationType && selectedColumnSourceField
           ? [
               {
-                label: fieldMap[selectedColumnSourceField].displayName,
+                label: fieldIsInvalid
+                  ? selectedColumnSourceField
+                  : fieldMap[selectedColumnSourceField]?.displayName,
                 value: { type: 'field', field: selectedColumnSourceField },
               },
             ]

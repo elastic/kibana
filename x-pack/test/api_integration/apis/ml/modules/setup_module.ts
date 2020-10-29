@@ -481,9 +481,9 @@ export default ({ getService }: FtrProviderContext) => {
         startDatafeed: false,
       },
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
-        message: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
+        message: 'Forbidden',
       },
     },
   ];

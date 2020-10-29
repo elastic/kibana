@@ -41,8 +41,7 @@ function registerAlertingTelemetryTask(
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: 'Alerting telemetry fetch task',
-      type: TELEMETRY_TASK_TYPE,
+      title: 'Alerting usage fetch task',
       timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },

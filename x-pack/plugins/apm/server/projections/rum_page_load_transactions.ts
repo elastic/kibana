@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../server/lib/helpers/setup_request';
-import {
-  SPAN_TYPE,
   AGENT_NAME,
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
@@ -22,23 +17,29 @@ import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 export function getRumPageLoadTransactionsProjection({
   setup,
   urlQuery,
+  checkFetchStartFieldExists = true,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
+  checkFetchStartFieldExists?: boolean;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-      {
-        // Adding this filter to cater for some inconsistent rum data
-        // not available on aggregated transactions
-        exists: {
-          field: 'transaction.marks.navigationTiming.fetchStart',
-        },
-      },
+      ...(checkFetchStartFieldExists
+        ? [
+            {
+              // Adding this filter to cater for some inconsistent rum data
+              // not available on aggregated transactions
+              exists: {
+                field: 'transaction.marks.navigationTiming.fetchStart',
+              },
+            },
+          ]
+        : []),
       ...(urlQuery
         ? [
             {
@@ -50,7 +51,7 @@ export function getRumPageLoadTransactionsProjection({
             },
           ]
         : []),
-      ...uiFiltersES,
+      ...esFilter,
     ],
   };
 
@@ -66,51 +67,36 @@ export function getRumPageLoadTransactionsProjection({
   };
 }
 
-export function getRumLongTasksProjection({
-  setup,
-}: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
-}) {
-  const { start, end, uiFiltersES } = setup;
-
-  const bool = {
-    filter: [
-      { range: rangeFilter(start, end) },
-      { term: { [SPAN_TYPE]: 'longtask' } },
-      ...uiFiltersES,
-    ],
-  };
-
-  return {
-    apm: {
-      events: [ProcessorEvent.span],
-    },
-    body: {
-      query: {
-        bool,
-      },
-    },
-  };
-}
-
 export function getRumErrorsProjection({
   setup,
+  urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
+  urlQuery?: string;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter: esFilter } = setup;
 
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [AGENT_NAME]: 'rum-js' } },
-      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
       {
         term: {
           [SERVICE_LANGUAGE_NAME]: 'javascript',
         },
       },
-      ...uiFiltersES,
+      ...esFilter,
+      ...(urlQuery
+        ? [
+            {
+              wildcard: {
+                'url.full': {
+                  value: `*${urlQuery}*`,
+                },
+              },
+            },
+          ]
+        : []),
     ],
   };
 

@@ -75,8 +75,6 @@ export class VegaParser {
   mapConfig?: object;
   vlspec?: VegaSpec;
   useResize?: boolean;
-  paddingWidth?: number;
-  paddingHeight?: number;
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
@@ -157,9 +155,9 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._parseControlPlacement();
     if (this.useMap) {
       this.mapConfig = this._parseMapConfig();
-    } else if (this.spec && this.spec.autosize === undefined) {
-      // Default autosize should be fit, unless it's a map (leaflet-vega handles that)
-      this.spec.autosize = { type: 'fit', contains: 'padding' };
+      this.useResize = false;
+    } else if (this.spec) {
+      this._compileWithAutosize();
     }
 
     await this._resolveDataUrls();
@@ -167,15 +165,86 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     if (this.isVegaLite) {
       this._compileVegaLite();
     }
+  }
 
-    this._calcSizing();
+  /**
+   * Ensure that Vega and Vega-Lite will take the full width of the container unless
+   * the user has explicitly disabled this setting by setting it to "none".
+   * Also sets the default width to include the padding. This creates the least configuration
+   * needed for most cases, with the option to do more.
+   */
+  private _compileWithAutosize() {
+    const defaultAutosize = {
+      type: 'fit',
+      contains: 'padding',
+    };
+
+    let autosize = this.spec.autosize;
+    let useResize = true;
+
+    if (!this.isVegaLite && autosize && typeof autosize === 'object' && 'signal' in autosize) {
+      // Vega supports dynamic autosize information, so we ignore it
+      return;
+    }
+
+    if (!autosize && typeof autosize !== 'undefined') {
+      this._onWarning(
+        i18n.translate('visTypeVega.vegaParser.autoSizeDoesNotAllowFalse', {
+          defaultMessage:
+            '{autoSizeParam} is enabled, it can only be disabled by setting {autoSizeParam} to {noneParam}',
+          values: {
+            autoSizeParam: '"autosize"',
+            noneParam: '"none"',
+          },
+        })
+      );
+    }
+
+    if (typeof autosize === 'string') {
+      useResize = autosize !== 'none';
+      autosize = { ...defaultAutosize, type: autosize };
+    } else if (typeof autosize === 'object') {
+      autosize = { ...defaultAutosize, ...autosize } as {
+        type: string;
+        contains: string;
+      };
+      useResize = Boolean(autosize?.type && autosize?.type !== 'none');
+    } else {
+      autosize = defaultAutosize;
+    }
+
+    if (
+      useResize &&
+      ((this.spec.width && this.spec.width !== 'container') ||
+        (this.spec.height && this.spec.height !== 'container'))
+    ) {
+      this._onWarning(
+        i18n.translate('visTypeVega.vegaParser.widthAndHeightParamsAreIgnored', {
+          defaultMessage:
+            '{widthParam} and {heightParam} params are ignored because {autoSizeParam} is enabled. Set {autoSizeParam}: {noneParam} to disable',
+          values: {
+            widthParam: '"width"',
+            heightParam: '"height"',
+            autoSizeParam: '"autosize"',
+            noneParam: '"none"',
+          },
+        })
+      );
+    }
+
+    if (useResize) {
+      this.spec.width = 'container';
+      this.spec.height = 'container';
+    }
+
+    this.spec.autosize = autosize;
+    this.useResize = useResize;
   }
 
   /**
    * Convert VegaLite to Vega spec
-   * @private
    */
-  _compileVegaLite() {
+  private _compileVegaLite() {
     this.vlspec = this.spec;
     const logger = vega.logger(vega.Warn); // note: eslint has a false positive here
     logger.warn = this._onWarning.bind(this);
@@ -222,62 +291,6 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         (this.vlspec.config === undefined || (hasConfig && !this.vlspec.config.autosize))
       ) {
         delete this.spec.autosize;
-      }
-    }
-  }
-
-  /**
-   * Process graph size and padding
-   * @private
-   */
-  _calcSizing() {
-    this.useResize = false;
-
-    // Padding is not included in the width/height by default
-    this.paddingWidth = 0;
-    this.paddingHeight = 0;
-    if (this.spec) {
-      if (!this.useMap) {
-        // when useResize is true, vega's canvas size will be set based on the size of the container,
-        // and will be automatically updated on resize events.
-        // We delete width & height if the autosize is set to "fit"
-        // We also set useResize=true in case autosize=none, and width & height are not set
-        const autosize = this.spec.autosize?.type || this.spec.autosize;
-        if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
-          this.useResize = true;
-        }
-      }
-
-      if (this.useResize && this.spec.padding && this.spec.autosize?.contains !== 'padding') {
-        if (typeof this.spec.padding === 'object') {
-          this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
-          this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
-        } else {
-          this.paddingWidth += 2 * (+this.spec.padding || 0);
-          this.paddingHeight += 2 * (+this.spec.padding || 0);
-        }
-      }
-
-      if (this.useResize && (this.spec.width || this.spec.height)) {
-        if (this.isVegaLite) {
-          delete this.spec.width;
-          delete this.spec.height;
-        } else {
-          this._onWarning(
-            i18n.translate(
-              'visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage',
-              {
-                defaultMessage:
-                  'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
-                values: {
-                  autosizeParam: 'autosize=fit',
-                  widthParam: '"width"',
-                  heightParam: '"height"',
-                },
-              }
-            )
-          );
-        }
       }
     }
   }
@@ -392,6 +405,17 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         i18n.translate('visTypeVega.vegaParser.paddingConfigValueTypeErrorMessage', {
           defaultMessage: '{configName} is expected to be a number',
           values: { configName: 'config.kibana.result.padding' },
+        })
+      );
+    }
+
+    if (result.textTruncate === undefined) {
+      result.textTruncate = false;
+    } else if (typeof result.textTruncate !== 'boolean') {
+      throw new Error(
+        i18n.translate('visTypeVega.vegaParser.textTruncateConfigValueTypeErrorMessage', {
+          defaultMessage: '{configName} is expected to be a boolean',
+          values: { configName: 'textTruncate' },
         })
       );
     }

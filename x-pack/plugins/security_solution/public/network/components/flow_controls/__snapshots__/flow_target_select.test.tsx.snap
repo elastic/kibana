@@ -7,21 +7,7 @@ exports[`FlowTargetSelect Component rendering it renders the FlowTargetSelect 1`
   hasDividers={false}
   isInvalid={false}
   isLoading={false}
-  onChange={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          "destination",
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
+  onChange={[MockFunction]}
   options={
     Array [
       Object {

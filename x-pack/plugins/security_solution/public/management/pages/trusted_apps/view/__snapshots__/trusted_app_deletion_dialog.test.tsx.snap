@@ -26,7 +26,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
             data-euiicon-type="cross"
@@ -85,7 +85,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
               </span>
             </button>
             <button
-              class="euiButton euiButton--primary euiButton--fill"
+              class="euiButton euiButton--danger euiButton--fill"
               data-test-subj="trustedAppDeletionConfirm"
               type="button"
             >
@@ -127,7 +127,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
             data-euiicon-type="cross"
@@ -187,7 +187,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
               </span>
             </button>
             <button
-              class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+              class="euiButton euiButton--danger euiButton--fill euiButton-isDisabled"
               data-test-subj="trustedAppDeletionConfirm"
               disabled=""
               type="button"
@@ -233,7 +233,7 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
             data-euiicon-type="cross"
@@ -292,7 +292,7 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
               </span>
             </button>
             <button
-              class="euiButton euiButton--primary euiButton--fill"
+              class="euiButton euiButton--danger euiButton--fill"
               data-test-subj="trustedAppDeletionConfirm"
               type="button"
             >

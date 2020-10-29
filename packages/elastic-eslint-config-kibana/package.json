@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/elastic/kibana.git"
   },
+  "kibana": {
+    "devOnly": true
+  },
   "keywords": [],
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
@@ -24,7 +27,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.19.1",
-    "eslint-plugin-jest": "^23.10.0",
+    "eslint-plugin-jest": "^24.0.2",
     "eslint-plugin-mocha": "^6.2.2",
     "eslint-plugin-no-unsanitized": "^3.0.2",
     "eslint-plugin-prefer-object-spread": "^1.2.1",

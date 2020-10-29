@@ -46,7 +46,7 @@ const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.ingestManager.agentPolicyList.pageTitle"
+                id="xpack.fleet.agentPolicyList.pageTitle"
                 defaultMessage="Agent policies"
               />
             </h1>
@@ -56,7 +56,7 @@ const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (
           <EuiText color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.ingestManager.agentPolicyList.pageSubtitle"
+                id="xpack.fleet.agentPolicyList.pageSubtitle"
                 defaultMessage="Use agent policies to manage your agents and the data they collect."
               />
             </p>
@@ -74,7 +74,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
 
   // Table and search states
@@ -124,7 +124,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'name',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.agentPolicyList.nameColumnTitle', {
+        name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
         width: '20%',
@@ -142,7 +142,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             <EuiFlexItem grow={true}>
               <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
                 <FormattedMessage
-                  id="xpack.ingestManager.agentPolicyList.revisionNumber"
+                  id="xpack.fleet.agentPolicyList.revisionNumber"
                   defaultMessage="rev. {revNumber}"
                   values={{ revNumber: agentPolicy.revision }}
                 />
@@ -153,7 +153,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       },
       {
         field: 'description',
-        name: i18n.translate('xpack.ingestManager.agentPolicyList.descriptionColumnTitle', {
+        name: i18n.translate('xpack.fleet.agentPolicyList.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
         width: '35%',
@@ -166,7 +166,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'updated_at',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.agentPolicyList.updatedOnColumnTitle', {
+        name: i18n.translate('xpack.fleet.agentPolicyList.updatedOnColumnTitle', {
           defaultMessage: 'Last updated on',
         }),
         render: (date: AgentPolicy['updated_at']) => (
@@ -175,7 +175,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       },
       {
         field: 'agents',
-        name: i18n.translate('xpack.ingestManager.agentPolicyList.agentsColumnTitle', {
+        name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
         dataType: 'number',
@@ -185,18 +185,15 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       },
       {
         field: 'package_policies',
-        name: i18n.translate(
-          'xpack.ingestManager.agentPolicyList.packagePoliciesCountColumnTitle',
-          {
-            defaultMessage: 'Integrations',
-          }
-        ),
+        name: i18n.translate('xpack.fleet.agentPolicyList.packagePoliciesCountColumnTitle', {
+          defaultMessage: 'Integrations',
+        }),
         dataType: 'number',
         render: (packagePolicies: AgentPolicy['package_policies']) =>
           packagePolicies ? packagePolicies.length : 0,
       },
       {
-        name: i18n.translate('xpack.ingestManager.agentPolicyList.actionsColumnTitle', {
+        name: i18n.translate('xpack.fleet.agentPolicyList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
         actions: [
@@ -229,7 +226,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
       >
         <FormattedMessage
-          id="xpack.ingestManager.agentPolicyList.addButton"
+          id="xpack.fleet.agentPolicyList.addButton"
           defaultMessage="Create agent policy"
         />
       </EuiButton>
@@ -243,7 +240,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicyList.noAgentPoliciesPrompt"
+              id="xpack.fleet.agentPolicyList.noAgentPoliciesPrompt"
               defaultMessage="No agent policies"
             />
           </h2>
@@ -291,7 +288,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem grow={false}>
           <EuiButton color="primary" iconType="refresh" onClick={() => resendRequest()}>
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicyList.reloadAgentPoliciesButtonText"
+              id="xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText"
               defaultMessage="Reload"
             />
           </EuiButton>
@@ -306,20 +303,20 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicyList.loadingAgentPoliciesMessage"
+              id="xpack.fleet.agentPolicyList.loadingAgentPoliciesMessage"
               defaultMessage="Loading agent policies…"
             />
           ) : !search.trim() && (agentPolicyData?.total ?? 0) === 0 ? (
             emptyPrompt
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicyList.noFilteredAgentPoliciesPrompt"
+              id="xpack.fleet.agentPolicyList.noFilteredAgentPoliciesPrompt"
               defaultMessage="No agent policies found. {clearFiltersLink}"
               values={{
                 clearFiltersLink: (
                   <EuiLink onClick={() => setSearch('')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.agentPolicyList.clearFiltersLinkText"
+                      id="xpack.fleet.agentPolicyList.clearFiltersLinkText"
                       defaultMessage="Clear filters"
                     />
                   </EuiLink>

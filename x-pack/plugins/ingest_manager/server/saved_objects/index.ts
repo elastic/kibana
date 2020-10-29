@@ -6,6 +6,7 @@
 
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import { migratePackagePolicyToV7110 } from '../../../security_solution/common';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -24,6 +25,7 @@ import {
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
+  migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
 
 /*
@@ -32,7 +34,9 @@ import {
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const savedObjectTypes: { [key: string]: SavedObjectsType } = {
+const getSavedObjectTypes = (
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+): { [key: string]: SavedObjectsType } => ({
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -108,6 +112,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
+    },
+    migrations: {
+      '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
     },
   },
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
@@ -201,6 +208,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         fleet_enroll_username: { type: 'binary' },
         fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
+        config_yaml: { type: 'text' },
       },
     },
   },
@@ -261,6 +269,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
+      '7.11.0': migratePackagePolicyToV7110,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -297,12 +306,17 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
+        install_source: { type: 'keyword' },
       },
     },
   },
-};
+});
 
-export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
+export function registerSavedObjects(
+  savedObjects: SavedObjectsServiceSetup,
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+) {
+  const savedObjectTypes = getSavedObjectTypes(encryptedSavedObjects);
   Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });
@@ -336,6 +350,7 @@ export function registerEncryptedSavedObjects(
       'hosts',
       'ca_sha256',
       'config',
+      'config_yaml',
     ]),
   });
   encryptedSavedObjects.registerType({
@@ -360,6 +375,8 @@ export function registerEncryptedSavedObjects(
       'unenrolled_at',
       'unenrollment_started_at',
       'packages',
+      'upgraded_at',
+      'upgrade_started_at',
     ]),
   });
   encryptedSavedObjects.registerType({

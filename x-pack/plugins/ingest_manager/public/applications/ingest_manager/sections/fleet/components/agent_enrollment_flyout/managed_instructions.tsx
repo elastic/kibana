@@ -45,7 +45,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     DownloadStep(),
     AgentPolicySelectionStep({ agentPolicies, setSelectedAPIKeyId }),
     {
-      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepEnrollAndRunAgentTitle', {
+      title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
         defaultMessage: 'Enroll and start the Elastic Agent',
       }),
       children: apiKey.data && (
@@ -62,7 +62,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
     <>
       <EuiText>
         <FormattedMessage
-          id="xpack.ingestManager.agentEnrollment.managedDescription"
+          id="xpack.fleet.agentEnrollment.managedDescription"
           defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
         />
       </EuiText>
@@ -74,14 +74,14 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
       ) : (
         <>
           <FormattedMessage
-            id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
+            id="xpack.fleet.agentEnrollment.agentsNotInitializedText"
             defaultMessage="Before enrolling agents, {link}."
             values={{
               link: (
                 <EuiLink href={getHref('fleet')}>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.setUpFleetLink"
-                    defaultMessage="set up Fleet"
+                    id="xpack.fleet.agentEnrollment.setUpAgentsLink"
+                    defaultMessage="set up central management for Elastic Agents"
                   />
                 </EuiLink>
               ),

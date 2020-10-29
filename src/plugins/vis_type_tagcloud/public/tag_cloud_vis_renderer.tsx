@@ -25,7 +25,6 @@ import { ExpressionRenderDefinition } from '../../expressions/common/expression_
 import { TagCloudVisDependencies } from './plugin';
 import { TagCloudVisRenderValue } from './tag_cloud_fn';
 
-// @ts-ignore
 const TagCloudChart = lazy(() => import('./components/tag_cloud_chart'));
 
 export const getTagCloudVisRenderer: (
@@ -40,7 +39,7 @@ export const getTagCloudVisRenderer: (
     });
 
     render(
-      <VisualizationContainer>
+      <VisualizationContainer handlers={handlers}>
         <TagCloudChart
           {...config}
           colors={colors}

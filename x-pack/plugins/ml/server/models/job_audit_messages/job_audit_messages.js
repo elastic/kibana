@@ -102,7 +102,6 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
-      rest_total_hits_as_int: true,
       size: SIZE,
       body: {
         sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
@@ -111,7 +110,7 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
     });
 
     let messages = [];
-    if (body.hits.total !== 0) {
+    if (body.hits.total.value > 0) {
       messages = body.hits.hits.map((hit) => hit._source);
     }
     return messages;
@@ -153,7 +152,6 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
-      rest_total_hits_as_int: true,
       size: 0,
       body: {
         query,
@@ -196,7 +194,7 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
     let messagesPerJob = [];
     const jobMessages = [];
     if (
-      body.hits.total !== 0 &&
+      body.hits.total.value > 0 &&
       body.aggregations &&
       body.aggregations.levelsPerJob &&
       body.aggregations.levelsPerJob.buckets &&

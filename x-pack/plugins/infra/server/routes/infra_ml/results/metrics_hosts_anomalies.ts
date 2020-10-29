@@ -36,6 +36,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
+          metric,
         },
       } = request.body;
 
@@ -54,11 +55,10 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           sourceId,
           startTime,
           endTime,
+          metric,
           sort,
           pagination
         );
-
-        // console.log('---- anomalies', anomalies);
 
         return response.ok({
           body: getMetricsHostsAnomaliesSuccessReponsePayloadRT.encode({

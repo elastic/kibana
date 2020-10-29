@@ -184,8 +184,8 @@ describe('editor_frame', () => {
           />
         );
       });
-      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, []);
-      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, []);
+      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined);
+      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined);
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 
@@ -972,6 +972,32 @@ describe('editor_frame', () => {
   });
 
   describe('suggestions', () => {
+    it('should fetch suggestions of currently active datasource when initializes from visualization trigger', async () => {
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            initialContext={{
+              indexPatternId: '1',
+              fieldName: 'test',
+            }}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      expect(mockDatasource.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalled();
+    });
+
     it('should fetch suggestions of currently active datasource', async () => {
       await act(async () => {
         mount(
@@ -1208,6 +1234,7 @@ describe('editor_frame', () => {
                 ...mockDatasource,
                 getDatasourceSuggestionsForField: () => [generateSuggestion()],
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
               },
             }}
             initialDatasourceId="testDatasource"
@@ -1274,6 +1301,7 @@ describe('editor_frame', () => {
                 ...mockDatasource,
                 getDatasourceSuggestionsForField: () => [generateSuggestion()],
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (dragging !== 'draggedField') {
                     setDragging('draggedField');
@@ -1370,6 +1398,7 @@ describe('editor_frame', () => {
                 ...mockDatasource,
                 getDatasourceSuggestionsForField: () => [generateSuggestion()],
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (dragging !== 'draggedField') {
                     setDragging('draggedField');

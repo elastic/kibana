@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useTestPipelineContext, usePipelineProcessorsContext } from '../../context';
 import { DocumentsDropdown } from './documents_dropdown';
-import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 import { AddDocumentsButton } from './add_documents_button';
 import { TestOutputButton } from './test_output_button';
 import { TestPipelineFlyout } from './test_pipeline_flyout.container';
@@ -24,7 +24,7 @@ const i18nTexts = {
 };
 
 export const TestPipelineActions: FunctionComponent = () => {
-  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
 
   const {
     state: { processors },
@@ -39,7 +39,7 @@ export const TestPipelineActions: FunctionComponent = () => {
   const [activeFlyoutTab, setActiveFlyoutTab] = useState<TestPipelineFlyoutTab>('documents');
 
   const updateSelectedDocument = (index: number) => {
-    setCurrentTestPipelineData({
+    testPipelineDataDispatch({
       type: 'updateActiveDocument',
       payload: {
         config: {
@@ -88,6 +88,7 @@ export const TestPipelineActions: FunctionComponent = () => {
       {openTestPipelineFlyout && (
         <TestPipelineFlyout
           activeTab={activeFlyoutTab}
+          setActiveTab={setActiveFlyoutTab}
           processors={{
             processors: processors.state.processors,
             onFailure: processors.state.onFailure,

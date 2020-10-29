@@ -29,7 +29,8 @@ import {
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
 
-interface Props {
+// @internal
+export interface SuggestionsComponentProps {
   index: number | null;
   onClick: (suggestion: QuerySuggestion) => void;
   onMouseEnter: (index: number) => void;
@@ -42,7 +43,9 @@ interface Props {
 
 export type SuggestionsListSize = 's' | 'l';
 
-export class SuggestionsComponent extends Component<Props> {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class SuggestionsComponent extends Component<SuggestionsComponentProps> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
 
@@ -107,7 +110,7 @@ export class SuggestionsComponent extends Component<Props> {
     );
   }
 
-  public componentDidUpdate(prevProps: Props) {
+  public componentDidUpdate(prevProps: SuggestionsComponentProps) {
     if (prevProps.index !== this.props.index) {
       this.scrollIntoView();
     }

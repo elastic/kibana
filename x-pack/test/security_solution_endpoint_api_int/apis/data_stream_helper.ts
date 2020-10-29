@@ -51,10 +51,6 @@ export async function deleteMetadataStream(getService: (serviceName: 'es') => Cl
   await deleteDataStream(getService, metadataIndexPattern);
 }
 
-export async function deleteMetadataCurrentStream(getService: (serviceName: 'es') => Client) {
-  await deleteDataStream(getService, metadataCurrentIndexPattern);
-}
-
 export async function deleteAllDocsFromMetadataIndex(getService: (serviceName: 'es') => Client) {
   await deleteAllDocsFromIndex(getService, metadataIndexPattern);
 }

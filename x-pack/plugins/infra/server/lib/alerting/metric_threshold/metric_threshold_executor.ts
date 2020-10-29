@@ -131,11 +131,24 @@ const formatAlertResult = <AlertResult>(
   } & AlertResult
 ) => {
   const { metric, currentValue, threshold } = alertResult;
-  if (!metric.endsWith('.pct')) return alertResult;
+  const noDataValue = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
+    {
+      defaultMessage: '[NO DATA]',
+    }
+  );
+  if (!metric.endsWith('.pct'))
+    return {
+      ...alertResult,
+      currentValue: currentValue ?? noDataValue,
+    };
   const formatter = createFormatter('percent');
   return {
     ...alertResult,
-    currentValue: formatter(currentValue),
+    currentValue:
+      currentValue !== null && typeof currentValue !== 'undefined'
+        ? formatter(currentValue)
+        : noDataValue,
     threshold: Array.isArray(threshold) ? threshold.map((v: number) => formatter(v)) : threshold,
   };
 };

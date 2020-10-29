@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async function () {
       const { body: agentPolicyResponse } = await supertest
-        .post(`/api/ingest_manager/agent_policies`)
+        .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy',
@@ -31,10 +31,17 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
+    after(async function () {
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId });
+    });
+
     it('should work with valid values', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
@@ -59,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 400 with an empty namespace', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
@@ -84,12 +91,31 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 400 with an invalid namespace', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
             description: '',
             namespace: 'InvalidNamespace',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace:
+              'testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀',
             policy_id: agentPolicyId,
             enabled: true,
             output_id: '',
@@ -109,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should not allow multiple limited packages on the same agent policy', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'endpoint-1',
@@ -127,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'endpoint-2',
@@ -152,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 500 if there is another package policy with the same name', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'same-name-test-1',
@@ -170,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'same-name-test-1',

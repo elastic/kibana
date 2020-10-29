@@ -14,8 +14,7 @@ import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export const CreateAlert = ({
   http,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  triggers_actions_ui,
+  triggersActionsUi,
   charts,
   uiSettings,
   docLinks,
@@ -39,8 +38,8 @@ export const CreateAlert = ({
         <AlertsContextProvider
           value={{
             http,
-            actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-            alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
+            actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+            alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
             toastNotifications,
             uiSettings,
             docLinks,
