@@ -176,9 +176,11 @@ function getEventScopeFromRowClickTriggerContext({
   embeddable,
   data,
 }: RowClickContext): RowClickTriggerEventScope {
+  const { rowIndex } = data;
   const columns = data.columns || data.table.columns.map(({ id }) => id);
   const values: Primitive[] = [];
   const keys: string[] = [];
+  const row = data.table.rows[rowIndex];
 
   for (const columnId of columns) {
     const column = data.table.columns.find(({ id }) => id === columnId);
@@ -188,14 +190,17 @@ function getEventScopeFromRowClickTriggerContext({
       console.error(data, embeddable ? `Embeddable [${embeddable.getTitle()}]` : null);
       throw new Error('Could not find a datatable column.');
     }
-    values.push(column.name);
+    values.push(row[column.id]);
+    keys.push(column.name);
   }
 
-  return {
-    rowIndex: data.rowIndex,
+  const scope: RowClickTriggerEventScope = {
+    rowIndex,
     values,
     keys,
   };
+
+  return scope;
 }
 
 /**
