@@ -86,11 +86,12 @@ export function ServiceInventory() {
     }
   }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
 
-  // Tracking both of these to keep our data backwards compatible
+  // The page is called "service inventory" to avoid confusion with the
+  // "service overview", but this is tracked in some dashboards because it's the
+  // initial landing page for APM, so it stays as "services_overview" (plural.)
+  // for backward compatibility.
   useTrackPageview({ app: 'apm', path: 'services_overview' });
-  useTrackPageview({ app: 'apm', path: 'service_inventory' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
-  useTrackPageview({ app: 'apm', path: 'service_inventory', delay: 15000 });
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
