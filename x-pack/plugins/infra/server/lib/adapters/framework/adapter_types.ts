@@ -19,6 +19,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../pl
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
 import { MlPluginSetup } from '../../../../../ml/server';
+import { JsonArray, JsonValue } from '../../../../common/typed_json';
 
 export interface InfraServerPluginSetupDeps {
   data: DataPluginSetup;
@@ -120,7 +121,10 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface SortedSearchHit extends SearchHit {
   sort: any[];
   _source: {
-    [field: string]: any;
+    [field: string]: JsonValue;
+  };
+  fields: {
+    [field: string]: JsonArray;
   };
 }
 

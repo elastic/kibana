@@ -24,3 +24,8 @@ The *Alerts and Actions* UI only shows alerts and connectors for the current spa
 can be managed through the <<watcher-ui, Watcher UI>>. See
 <<alerting-concepts-differences>> for more information.
 ============================================================================
+
+[float]
+=== Required permissions
+
+Access to alerts and actions is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
