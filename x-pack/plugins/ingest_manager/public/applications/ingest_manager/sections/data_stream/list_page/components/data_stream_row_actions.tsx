@@ -16,18 +16,18 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
   const panels = [];
   const actionNameSingular = (
     <FormattedMessage
-      id="xpack.ingestManager.dataStreamList.viewDashboardActionText"
+      id="xpack.fleet.dataStreamList.viewDashboardActionText"
       defaultMessage="View dashboard"
     />
   );
   const actionNamePlural = (
     <FormattedMessage
-      id="xpack.ingestManager.dataStreamList.viewDashboardsActionText"
+      id="xpack.fleet.dataStreamList.viewDashboardsActionText"
       defaultMessage="View dashboards"
     />
   );
 
-  const panelTitle = i18n.translate('xpack.ingestManager.dataStreamList.viewDashboardsPanelTitle', {
+  const panelTitle = i18n.translate('xpack.fleet.dataStreamList.viewDashboardsPanelTitle', {
     defaultMessage: 'View dashboards',
   });
 
