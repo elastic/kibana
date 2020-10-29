@@ -50,14 +50,4 @@ export function createExtentFilter(
   geoFieldType: ES_GEO_FIELD_TYPE
 ): ESPolygonFilter | ESGeoBoundingBoxFilter;
 
-export function makeESBbox({
-  maxLat,
-  maxLon,
-  minLat,
-  minLon,
-}: {
-  maxLat: number;
-  maxLon: number;
-  minLat: number;
-  minLon: number;
-}): ESBBox;
+export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBox;

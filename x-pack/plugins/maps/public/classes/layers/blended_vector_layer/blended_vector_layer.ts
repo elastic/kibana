@@ -25,7 +25,6 @@ import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_so
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { IVectorLayer } from '../vector_layer/vector_layer';
 import { IESSource } from '../../sources/es_source';
-import { IESAggSource } from '../../sources/es_agg_source';
 import { ISource } from '../../sources/source';
 import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -77,7 +76,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
 
 function getClusterStyleDescriptor(
   documentStyle: IVectorStyle,
-  clusterSource: IESAggSource
+  clusterSource: ESGeoGridSource
 ): VectorStyleDescriptor {
   const defaultDynamicProperties = getDefaultDynamicProperties();
   const clusterStyleDescriptor: VectorStyleDescriptor = {

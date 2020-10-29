@@ -55,7 +55,7 @@ export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
 };
 
 export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
-  requestType?: RENDER_AS;
+  requestType: RENDER_AS;
   resolution?: GRID_RESOLUTION;
 };
 
