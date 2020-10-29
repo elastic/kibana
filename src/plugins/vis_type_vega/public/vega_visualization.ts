@@ -17,28 +17,34 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { VegaParser } from './data_model/vega_parser';
+import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData, getSavedObjects } from './services';
+import type { VegaView } from './vega_view/vega_view';
 
-export const createVegaVisualization = ({ getServiceSettings }) =>
+export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizationDependencies) =>
   class VegaVisualization {
-    constructor(el, vis) {
-      this._el = el;
-      this._vis = vis;
+    private readonly dataPlugin = getData();
+    private readonly savedObjectsClient = getSavedObjects();
+    private vegaView: InstanceType<typeof VegaView> | null = null;
 
-      this.savedObjectsClient = getSavedObjects();
-      this.dataPlugin = getData();
-    }
+    constructor(
+      private el: HTMLDivElement,
+      private fireEvent: IInterpreterRenderHandlers['event']
+    ) {}
 
     /**
      * Find index pattern by its title, of if not given, gets default
      * @param {string} [index]
      * @returns {Promise<string>} index id
      */
-    async findIndex(index) {
+    async findIndex(index: string) {
       const { indexPatterns } = this.dataPlugin;
       let idxObj;
 
       if (index) {
+        // @ts-expect-error
         idxObj = indexPatterns.findByTitle(this.savedObjectsClient, index);
         if (!idxObj) {
           throw new Error(
@@ -61,16 +67,10 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
       return idxObj.id;
     }
 
-    /**
-     *
-     * @param {VegaParser} visData
-     * @param {*} status
-     * @returns {Promise<void>}
-     */
-    async render(visData) {
+    async render(visData: VegaParser) {
       const { toasts } = getNotifications();
 
-      if (!visData && !this._vegaView) {
+      if (!visData && !this.vegaView) {
         toasts.addWarning(
           i18n.translate('visTypeVega.visualization.unableToRenderWithoutDataWarningMessage', {
             defaultMessage: 'Unable to render without data',
@@ -82,8 +82,8 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
       try {
         await this._render(visData);
       } catch (error) {
-        if (this._vegaView) {
-          this._vegaView.onError(error);
+        if (this.vegaView) {
+          this.vegaView.onError(error);
         } else {
           toasts.addError(error, {
             title: i18n.translate('visTypeVega.visualization.renderErrorTitle', {
@@ -94,20 +94,20 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
       }
     }
 
-    async _render(vegaParser) {
+    async _render(vegaParser: VegaParser) {
       if (vegaParser) {
         // New data received, rebuild the graph
-        if (this._vegaView) {
-          await this._vegaView.destroy();
-          this._vegaView = null;
+        if (this.vegaView) {
+          await this.vegaView.destroy();
+          this.vegaView = null;
         }
 
         const serviceSettings = await getServiceSettings();
         const { filterManager } = this.dataPlugin.query;
         const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
-          parentEl: this._el,
-          applyFilter: this._vis.API.events.applyFilter,
+          parentEl: this.el,
+          fireEvent: this.fireEvent,
           vegaParser,
           serviceSettings,
           filterManager,
@@ -116,18 +116,17 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
         };
 
         if (vegaParser.useMap) {
-          const services = { toastService: getNotifications().toasts };
           const { VegaMapView } = await import('./vega_view/vega_map_view');
-          this._vegaView = new VegaMapView(vegaViewParams, services);
+          this.vegaView = new VegaMapView(vegaViewParams);
         } else {
-          const { VegaView } = await import('./vega_view/vega_view');
-          this._vegaView = new VegaView(vegaViewParams);
+          const { VegaView: VegaViewClass } = await import('./vega_view/vega_view');
+          this.vegaView = new VegaViewClass(vegaViewParams);
         }
-        await this._vegaView.init();
+        await this.vegaView?.init();
       }
     }
 
     destroy() {
-      return this._vegaView && this._vegaView.destroy();
+      this.vegaView?.destroy();
     }
   };

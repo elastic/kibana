@@ -1039,7 +1039,7 @@ export interface Range {
 // Warning: (ae-missing-release-tag) "ReactExpressionRenderer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const ReactExpressionRenderer: ({ className, dataAttrs, padding, renderError, expression, onEvent, reload$, ...expressionLoaderOptions }: ReactExpressionRendererProps) => JSX.Element;
+export const ReactExpressionRenderer: ({ className, dataAttrs, padding, renderError, expression, onEvent, reload$, debounce, ...expressionLoaderOptions }: ReactExpressionRendererProps) => JSX.Element;
 
 // Warning: (ae-missing-release-tag) "ReactExpressionRendererProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1049,6 +1049,8 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
     className?: string;
     // (undocumented)
     dataAttrs?: string[];
+    // (undocumented)
+    debounce?: number;
     // (undocumented)
     expression: string | ExpressionAstExpression;
     // (undocumented)
