@@ -29,6 +29,7 @@ export const config = {
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
+      maxServiceEnvironments: schema.number({ defaultValue: 100 }),
       maxTraceItems: schema.number({ defaultValue: 1000 }),
     }),
     searchAggregatedTransactions: schema.oneOf(
@@ -74,6 +75,7 @@ export function mergeConfigs(
     'xpack.apm.serviceMapMaxTracesPerRequest':
       apmConfig.serviceMapMaxTracesPerRequest,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
+    'xpack.apm.ui.maxServiceEnvironments': apmConfig.ui.maxServiceEnvironments,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,

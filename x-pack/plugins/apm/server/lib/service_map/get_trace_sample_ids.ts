@@ -58,6 +58,8 @@ export async function getTraceSampleIds({
     ? config['xpack.apm.serviceMapTraceIdBucketSize']
     : config['xpack.apm.serviceMapTraceIdGlobalBucketSize'];
 
+  const maxServiceEnvironments = config['xpack.apm.ui.maxServiceEnvironments'];
+
   const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
@@ -90,6 +92,7 @@ export async function getTraceSampleIds({
                   terms: {
                     field: SERVICE_ENVIRONMENT,
                     missing_bucket: true,
+                    size: maxServiceEnvironments,
                   },
                 },
               },

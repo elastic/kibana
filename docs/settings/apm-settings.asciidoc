@@ -49,6 +49,9 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.ui.transactionGroupBucketSize`
   | Number of top transaction groups displayed in the APM app. Defaults to `1000`.
 
+| `xpack.apm.ui.maxServiceEnvironments`
+  | Maximum number of unique service environments recognized by the UI. Defaults to `100`.
+
 | `xpack.apm.ui.maxTraceItems` {ess-icon}
   | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
 
