@@ -86,7 +86,7 @@ index pattern with both raw and rolled up data, use the standard notation:
 ```ts
 rollup_logstash,kibana_sample_data_logs
 ```
-See <<rollup-data-tutorial,Create and visualize rolled up data>> for an example.
+For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
 
 [float]
 [[management-cross-cluster-search]]
