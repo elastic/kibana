@@ -50,11 +50,11 @@ The user will see a "Reindex" button they can click which will apply this script
 reindex.
   * Reindexing is an atomic process in Upgrade Assistant, so that ingestion is never disrupted.
     It works like this:
-    * Create a new index with a "reindexed-" prefix (#30114)[https://github.com/elastic/kibana/pull/30114].
+    * Create a new index with a "reindexed-" prefix ([#30114](https://github.com/elastic/kibana/pull/30114)).
     * Create an index alias pointing from the original index name to the prefixed index name.
     * Reindex from the original index into the prefixed index.
     * Delete the old index and rename the prefixed index.
-  * Some apps might require custom scripts, as was the case with APM (#29845)[https://github.com/elastic/kibana/pull/29845].
+  * Some apps might require custom scripts, as was the case with APM ([#29845](https://github.com/elastic/kibana/pull/29845)).
     In that case the migration performed a reindex with a Painless script (covered by automated tests)
     that made the required changes to the data.
 * **Update index settings.** Some index settings will need to be updated, which doesn't require a
@@ -64,4 +64,4 @@ reindex. An example of this is the "Fix" button that was added for metricbeat an
 will follow these docs to address the problem and make these warnings or errors disappear in the
 Upgrade Assistant.
 * **Stopping/restarting tasks and jobs.** Users had to stop watches and ML jobs and restart them as
-soon as reindexing was complete (#29663)[https://github.com/elastic/kibana/pull/29663].
+soon as reindexing was complete ([#29663](https://github.com/elastic/kibana/pull/29663)).
