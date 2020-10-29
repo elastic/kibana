@@ -49,7 +49,7 @@ image::images/add-data-fleet.png[Add data using Fleet]
 experimental[] If your data is in a CSV, JSON, or log file, you can upload it using the File
 Data Visualizer. You can upload a file up to 100 MB. This value is configurable up to 1 GB in
 <<kibana-ml-settings, Advanced Settings>>. To upload a file with geospatial data,
-see <<import-geospatial-data, Import geospatial data>>.
+refer to <<import-geospatial-data, Import geospatial data>>.
 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
