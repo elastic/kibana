@@ -49,10 +49,7 @@ export function Screenshots(props: ScreenshotProps) {
     <Fragment>
       <EuiTitle size="s">
         <h3>
-          <FormattedMessage
-            id="xpack.ingestManager.epm.screenshotsTitle"
-            defaultMessage="Screenshots"
-          />
+          <FormattedMessage id="xpack.fleet.epm.screenshotsTitle" defaultMessage="Screenshots" />
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />

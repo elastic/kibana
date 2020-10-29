@@ -30,7 +30,7 @@ export function EPMHomePage() {
         ([
           {
             id: 'all_packages',
-            name: i18n.translate('xpack.ingestManager.epmList.allTabText', {
+            name: i18n.translate('xpack.fleet.epmList.allTabText', {
               defaultMessage: 'All integrations',
             }),
             href: getHref('integrations_all'),
@@ -38,7 +38,7 @@ export function EPMHomePage() {
           },
           {
             id: 'installed_packages',
-            name: i18n.translate('xpack.ingestManager.epmList.installedTabText', {
+            name: i18n.translate('xpack.fleet.epmList.installedTabText', {
               defaultMessage: 'Installed integrations',
             }),
             href: getHref('integrations_installed'),
@@ -66,7 +66,7 @@ function InstalledPackages() {
   });
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
+  const title = i18n.translate('xpack.fleet.epmList.installedTitle', {
     defaultMessage: 'Installed integrations',
   });
 
@@ -82,14 +82,14 @@ function InstalledPackages() {
   const categories = [
     {
       id: '',
-      title: i18n.translate('xpack.ingestManager.epmList.allFilterLinkText', {
+      title: i18n.translate('xpack.fleet.epmList.allFilterLinkText', {
         defaultMessage: 'All',
       }),
       count: allInstalledPackages.length,
     },
     {
       id: 'updates_available',
-      title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
+      title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
         defaultMessage: 'Updates available',
       }),
       count: updatablePackages.length,
@@ -128,14 +128,14 @@ function AvailablePackages() {
   const packages =
     categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
-  const title = i18n.translate('xpack.ingestManager.epmList.allTitle', {
+  const title = i18n.translate('xpack.fleet.epmList.allTitle', {
     defaultMessage: 'Browse by category',
   });
 
   const categories = [
     {
       id: '',
-      title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
+      title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
         defaultMessage: 'All',
       }),
       count: allPackagesRes?.response?.length || 0,
