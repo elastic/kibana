@@ -17,19 +17,24 @@
  * under the License.
  */
 
+import { EsError } from './es_error';
 import { IEsError } from './types';
 
-export function getFailedShards(err: IEsError) {
-  const failedShards =
-    err.body?.attributes?.error?.failed_shards ||
-    err.body?.attributes?.error?.caused_by?.failed_shards;
-  return failedShards ? failedShards[0] : undefined;
-}
+describe('EsError', () => {
+  it('contains the same body as the wrapped error', () => {
+    const error = {
+      body: {
+        attributes: {
+          error: {
+            type: 'top_level_exception_type',
+            reason: 'top-level reason',
+          },
+        },
+      },
+    } as IEsError;
+    const esError = new EsError(error);
 
-export function getTopLevelCause(err: IEsError) {
-  return err.body?.attributes?.error;
-}
-
-export function getRootCause(err: IEsError) {
-  return getFailedShards(err)?.reason;
-}
+    expect(typeof esError.body).toEqual('object');
+    expect(esError.body).toEqual(error.body);
+  });
+});
