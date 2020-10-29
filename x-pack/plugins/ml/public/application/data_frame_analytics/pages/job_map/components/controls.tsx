@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { CytoscapeContext } from './cytoscape';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-import { DeleteButton } from './delete_button';
+// import { DeleteButton } from './delete_button';
 
 interface Props {
   analyticsId: string;
@@ -140,9 +140,9 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>{nodeDataButton}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            {/* <EuiFlexItem grow={false}>
               <DeleteButton id={nodeLabel} type={nodeType} />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
