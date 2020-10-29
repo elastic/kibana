@@ -2,8 +2,8 @@
 set -e
 
 # source the default env file
-if [ -f "-<%= envFile %>" ]; then
-    . "envFile}"
+if [ -f "<%= envFile %>" ]; then
+    . "<%= envFile %>"
 fi
 
 export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
