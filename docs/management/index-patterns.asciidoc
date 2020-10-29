@@ -32,7 +32,7 @@ see <<xpack-security-authorization,Granting access to {kib}>>.
 === Create an index pattern
 
 If you collected data using one of the {kib} <<connect-to-elasticsearch,ingest options>>, uploaded a file, or added sample data,
-you get an index pattern for free, and are good to start exploring your data.
+you get an index pattern for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create an index pattern.
 
 . Go to *Stack Management > Index Patterns*.
