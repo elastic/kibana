@@ -66,7 +66,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleModal}>
       {isInstalling ? (
         <FormattedMessage
-          id="xpack.ingestManager.integrations.installPackage.installingPackageButtonLabel"
+          id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"
           defaultMessage="Installing {title} assets"
           values={{
             title,
@@ -74,7 +74,7 @@ export function InstallationButton(props: InstallationButtonProps) {
         />
       ) : (
         <FormattedMessage
-          id="xpack.ingestManager.integrations.installPackage.installPackageButtonLabel"
+          id="xpack.fleet.integrations.installPackage.installPackageButtonLabel"
           defaultMessage="Install {title} assets"
           values={{
             title,
@@ -87,7 +87,7 @@ export function InstallationButton(props: InstallationButtonProps) {
   const updateButton = (
     <EuiButton iconType={'refresh'} isLoading={isInstalling} onClick={handleClickUpdate}>
       <FormattedMessage
-        id="xpack.ingestManager.integrations.updatePackage.updatePackageButtonLabel"
+        id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
         defaultMessage="Update to latest version"
       />
     </EuiButton>
@@ -103,7 +103,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     >
       {isRemoving ? (
         <FormattedMessage
-          id="xpack.ingestManager.integrations.uninstallPackage.uninstallingPackageButtonLabel"
+          id="xpack.fleet.integrations.uninstallPackage.uninstallingPackageButtonLabel"
           defaultMessage="Uninstalling {title}"
           values={{
             title,
@@ -111,7 +111,7 @@ export function InstallationButton(props: InstallationButtonProps) {
         />
       ) : (
         <FormattedMessage
-          id="xpack.ingestManager.integrations.uninstallPackage.uninstallPackageButtonLabel"
+          id="xpack.fleet.integrations.uninstallPackage.uninstallPackageButtonLabel"
           defaultMessage="Uninstall {title}"
           values={{
             title,

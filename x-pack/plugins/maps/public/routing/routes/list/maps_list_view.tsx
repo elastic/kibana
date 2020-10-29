@@ -30,7 +30,7 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui';
-import { goToSpecifiedPath } from '../../maps_router';
+import { goToSpecifiedPath } from '../../render_app';
 // @ts-expect-error
 import { addHelpMenuToAppChrome } from '../../../help_menu_util';
 import { APP_ID, MAP_PATH } from '../../../../common/constants';

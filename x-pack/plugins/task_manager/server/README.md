@@ -48,6 +48,10 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 - `override_num_workers`: An object of `taskType: number` that overrides the `num_workers` for tasks
   - For example: `task_manager.override_num_workers.reporting: 2` would override the number of workers occupied by tasks of type `reporting`
   - This allows sysadmins to tweak the operational performance of Kibana, allowing more or fewer tasks of a specific type to run simultaneously
+- `monitored_aggregated_stats_refresh_rate` - Dictates how often we refresh the "Cold" metrics. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_stats_running_average_window`- Dictates the size of the window used to calculate the running average of various "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_stats_required_freshness` - Dictates the _required freshness_ of critical "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_task_execution_thresholds`- Dictates the threshold of failed task executions. Learn More: [./MONITORING](./MONITORING.MD)
 
 ## Task definitions
 
@@ -460,3 +464,9 @@ The task manager's public API is create / delete / list. Updates aren't directly
    node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.ts
    node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts
    ```
+
+## Monitoring
+
+Task Manager exposes runtime statistics which enable basic observability into its inner workings and makes it possible to monitor the system from external services.
+
+Learn More: [./MONITORING](./MONITORING.MD)
