@@ -46,7 +46,7 @@ const EmptyPackagePolicy: CustomConfigurePackagePolicyContent = () => (
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.ingestManager.createPackagePolicy.stepConfigure.noPolicyOptionsMessage"
+            id="xpack.fleet.createPackagePolicy.stepConfigure.noPolicyOptionsMessage"
             defaultMessage="Nothing to configure"
           />
         </p>

@@ -18,8 +18,12 @@
  */
 
 import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+function ndjsonToObject(input: string) {
+  return input.split('\n').map((str) => JSON.parse(str));
+}
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -38,7 +42,7 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              const objects = resp.text.split('\n').map(JSON.parse);
+              const objects = ndjsonToObject(resp.text);
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
@@ -61,7 +65,7 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              const objects = resp.text.split('\n').map(JSON.parse);
+              const objects = ndjsonToObject(resp.text);
               expect(objects).to.have.length(3);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
@@ -86,7 +90,7 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              const objects = resp.text.split('\n').map(JSON.parse);
+              const objects = ndjsonToObject(resp.text);
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
@@ -109,7 +113,7 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              const objects = resp.text.split('\n').map(JSON.parse);
+              const objects = resp.text.split('\n').map((str) => JSON.parse(str));
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
@@ -133,7 +137,7 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              const objects = resp.text.split('\n').map(JSON.parse);
+              const objects = ndjsonToObject(resp.text);
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
@@ -217,6 +221,51 @@ export default function ({ getService }) {
               });
             });
         });
+
+        it('should export object with circular refs', async () => {
+          const soWithCycliRefs = [
+            {
+              type: 'dashboard',
+              id: 'dashboard-a',
+              attributes: {
+                title: 'dashboard-a',
+              },
+              references: [
+                {
+                  name: 'circular-dashboard-ref',
+                  id: 'dashboard-b',
+                  type: 'dashboard',
+                },
+              ],
+            },
+            {
+              type: 'dashboard',
+              id: 'dashboard-b',
+              attributes: {
+                title: 'dashboard-b',
+              },
+              references: [
+                {
+                  name: 'circular-dashboard-ref',
+                  id: 'dashboard-a',
+                  type: 'dashboard',
+                },
+              ],
+            },
+          ];
+          await supertest.post('/api/saved_objects/_bulk_create').send(soWithCycliRefs).expect(200);
+          const resp = await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              includeReferencesDeep: true,
+              type: ['dashboard'],
+            })
+            .expect(200);
+
+          const objects = ndjsonToObject(resp.text);
+          expect(objects.find((o) => o.id === 'dashboard-a')).to.be.ok();
+          expect(objects.find((o) => o.id === 'dashboard-b')).to.be.ok();
+        });
       });
 
       describe('10,000 objects', () => {
@@ -245,11 +294,11 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql(
+              expect(resp.header['content-disposition']).to.eql(
                 'attachment; filename="export.ndjson"'
               );
-              expect(resp.headers['content-type']).to.eql('application/ndjson');
-              const objects = resp.text.split('\n').map(JSON.parse);
+              expect(resp.header['content-type']).to.eql('application/ndjson');
+              const objects = ndjsonToObject(resp.text);
               expect(objects).to.eql([
                 {
                   attributes: {
@@ -304,11 +353,11 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql(
+              expect(resp.header['content-disposition']).to.eql(
                 'attachment; filename="export.ndjson"'
               );
-              expect(resp.headers['content-type']).to.eql('application/ndjson');
-              const objects = resp.text.split('\n').map(JSON.parse);
+              expect(resp.header['content-type']).to.eql('application/ndjson');
+              const objects = ndjsonToObject(resp.text);
               expect(objects).to.eql([
                 {
                   attributes: {
@@ -368,11 +417,11 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql(
+              expect(resp.header['content-disposition']).to.eql(
                 'attachment; filename="export.ndjson"'
               );
-              expect(resp.headers['content-type']).to.eql('application/ndjson');
-              const objects = resp.text.split('\n').map(JSON.parse);
+              expect(resp.header['content-type']).to.eql('application/ndjson');
+              const objects = ndjsonToObject(resp.text);
               expect(objects).to.eql([
                 {
                   attributes: {
@@ -443,7 +492,7 @@ export default function ({ getService }) {
       });
 
       describe('10,001 objects', () => {
-        let customVisId;
+        let customVisId: string;
         before(async () => {
           await esArchiver.load('saved_objects/10k');
           await supertest
