@@ -10,7 +10,6 @@ import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
-import { getNextRunAt } from './get_next_run_at';
 import {
   validateAlertTypeParams,
   executionStatusFromState,
@@ -38,7 +37,7 @@ import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 
-const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
+const FALLBACK_RETRY_INTERVAL = '5m';
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
@@ -316,6 +315,7 @@ export class TaskRunner {
       params: { alertId, spaceId },
       startedAt: previousStartedAt,
       state: originalState,
+      schedule: taskSchedule,
     } = this.taskInstance;
 
     const { state, schedule } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
@@ -368,8 +368,10 @@ export class TaskRunner {
           };
         }
       ),
-      schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (err) => {
-        return isAlertSavedObjectNotFoundError(err, alertId) ? undefined : FALLBACK_RETRY_INTERVAL;
+      schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
+        return isAlertSavedObjectNotFoundError(error, alertId)
+          ? undefined
+          : { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
       }),
     };
   }

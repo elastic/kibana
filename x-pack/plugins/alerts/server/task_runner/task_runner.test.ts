@@ -22,6 +22,7 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert } from '../../common';
+import { omit } from 'lodash';
 const alertType = {
   id: 'test',
   name: 'My test alert',
@@ -43,6 +44,7 @@ describe('Task Runner', () => {
       status: TaskStatus.Running,
       version: '123',
       runAt: new Date(),
+      schedule: { interval: '10s' },
       scheduledAt: new Date(),
       startedAt: new Date(),
       retryAt: new Date(Date.now() + 5 * 60 * 1000),
@@ -145,15 +147,17 @@ describe('Task Runner', () => {
     });
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toMatchInlineSnapshot(`
-                                  Object {
-                                    "runAt": 1970-01-01T00:00:10.000Z,
-                                    "state": Object {
-                                      "alertInstances": Object {},
-                                      "alertTypeState": undefined,
-                                      "previousStartedAt": 1970-01-01T00:00:00.000Z,
-                                    },
-                                  }
-                  `);
+      Object {
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "state": Object {
+          "alertInstances": Object {},
+          "alertTypeState": undefined,
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+        },
+      }
+    `);
     expect(alertType.executor).toHaveBeenCalledTimes(1);
     const call = alertType.executor.mock.calls[0][0];
     expect(call.params).toMatchInlineSnapshot(`
@@ -620,7 +624,9 @@ describe('Task Runner', () => {
     });
     expect(await taskRunner.run()).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:00:10.000Z,
+        "schedule": Object {
+          "interval": "10s",
+        },
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
@@ -726,7 +732,9 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:00:10.000Z,
+        "schedule": Object {
+          "interval": "10s",
+        },
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
@@ -780,7 +788,9 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:05:00.000Z,
+        "schedule": Object {
+          "interval": "10s",
+        },
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
@@ -813,7 +823,9 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:05:00.000Z,
+        "schedule": Object {
+          "interval": "10s",
+        },
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
@@ -845,7 +857,47 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": 1970-01-01T00:05:00.000Z,
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+        },
+      }
+    `);
+  });
+
+  test('recovers gracefully when the Runner of a legacy Alert task which has no schedule throws an exception when fetching attributes', async () => {
+    alertsClient.get.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    // legacy alerts used to run by returning a new `runAt` instead of using a schedule
+    // ensure we return a fallback schedule when this happens, otherwise the task might be deleted
+    const legacyTaskInstance = omit(mockedTaskInstance, 'schedule');
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      legacyTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "schedule": Object {
+          "interval": "5m",
+        },
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
@@ -877,7 +929,7 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
-        "runAt": undefined,
+        "schedule": undefined,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
