@@ -435,7 +435,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {selectedColumn && selectedColumn.dataType === 'number' ? (
+          {selectedColumn &&
+          (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
             <FormatSelector
               selectedColumn={selectedColumn}
               onChange={(newFormat) => {

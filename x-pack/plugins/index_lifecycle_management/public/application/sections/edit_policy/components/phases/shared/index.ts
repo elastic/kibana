@@ -11,3 +11,5 @@ export { DataTierAllocationField } from './data_tier_allocation_field';
 export { Forcemerge } from './forcemerge_field';
 
 export { SetPriorityInput } from './set_priority_input';
+
+export { MinAgeInputField } from './min_age_input_field';

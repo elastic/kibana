@@ -94,7 +94,7 @@ export const LogEntryFlyout = ({
                 onClick={createFilterHandler(item)}
               />
             </EuiToolTip>
-            {item.value}
+            {formatValue(item.value)}
           </span>
         ),
       },
@@ -147,3 +147,7 @@ export const InfraFlyoutLoadingPanel = euiStyled.div`
   bottom: 0;
   left: 0;
 `;
+
+function formatValue(value: string[]) {
+  return value.length > 1 ? value.join(', ') : value[0];
+}
