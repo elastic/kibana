@@ -247,7 +247,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
 
       // Data validation below
       if (
-        sortedColumns &&
+        sortedColumns?.length &&
         sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length ===
           0
       ) {
