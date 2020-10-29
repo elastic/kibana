@@ -172,7 +172,9 @@ export function WorkspacePanel({
             framePublicAPI
           );
           const defaultMessage = {
-            shortMessage: 'One error occurred in the expression',
+            shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+              defaultMessage: 'An unexpected error occurred while preparing the chart',
+            }),
             longMessage: e.toString(),
           };
           // Most likely an error in the expression provided by a datasource or visualization
