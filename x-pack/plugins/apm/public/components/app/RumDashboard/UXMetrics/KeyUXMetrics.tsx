@@ -37,8 +37,9 @@ interface Props {
   loading: boolean;
 }
 
-function formatTitle(unit: string, value?: number) {
-  if (typeof value === 'undefined') return DATA_UNDEFINED_LABEL;
+function formatTitle(unit: string, value?: number | null) {
+  if (typeof value === 'undefined' || value === null)
+    return DATA_UNDEFINED_LABEL;
   return formatToSec(value, unit);
 }
 
@@ -85,8 +86,8 @@ export function KeyUXMetrics({ data, loading }: Props) {
         <EuiStat
           titleSize="s"
           title={
-            longTaskData?.noOfLongTasks
-              ? numeral(longTaskData.noOfLongTasks).format('0,0')
+            longTaskData?.noOfLongTasks !== undefined
+              ? numeral(longTaskData?.noOfLongTasks).format('0,0')
               : DATA_UNDEFINED_LABEL
           }
           description={NO_OF_LONG_TASK}

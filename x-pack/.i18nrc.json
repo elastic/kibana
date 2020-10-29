@@ -27,7 +27,7 @@
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "plugins/infra",
-    "xpack.ingestManager": "plugins/ingest_manager",
+    "xpack.fleet": "plugins/ingest_manager",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
     "xpack.lens": "plugins/lens",
     "xpack.licenseMgmt": "plugins/license_management",
@@ -57,9 +57,7 @@
     "xpack.watcher": "plugins/watcher",
     "xpack.observability": "plugins/observability"
   },
-  "exclude": [
-    "examples"
-  ],
+  "exclude": ["examples"],
   "translations": [
     "plugins/translations/translations/zh-CN.json",
     "plugins/translations/translations/ja-JP.json"
