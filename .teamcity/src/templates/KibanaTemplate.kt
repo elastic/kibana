@@ -4,7 +4,9 @@ import vcs.Kibana
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
 import jetbrains.buildServer.configs.kotlin.v2019_2.Template
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.perfmon
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -26,6 +28,16 @@ object KibanaTemplate : Template({
 
   features {
     perfmon {  }
+    pullRequests {
+      vcsRootExtId = "${Kibana.id}"
+      provider = github {
+        authType = token {
+          token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
+        }
+        filterTargetBranch = "refs/heads/master_teamcity"
+        filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
+      }
+    }
   }
 
   failureConditions {

@@ -8,8 +8,4 @@ object Kibana : GitVcsRoot({
   name = "kibana / master"
   url = "https://github.com/elastic/kibana.git"
   branch = "refs/heads/master_teamcity"
-  branchSpec = """
-    +:refs/pull/*
-    +:refs/feature/*
-  """.trimIndent()
 })
