@@ -94,14 +94,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       uiState = {};
     });
 
-    it('handles vega function', () => {
-      const vis = {
-        params: { spec: 'this is a test' },
-      };
-      const actual = buildPipelineVisFunction.vega(vis.params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     it('handles input_control_vis function', () => {
       const params = {
         some: 'nested',
