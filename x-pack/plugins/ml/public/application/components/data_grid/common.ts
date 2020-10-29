@@ -184,13 +184,17 @@ export const getFeatureImportance = (
 
   // return object structure for classification job
   if (classNames !== undefined && classImportance !== undefined) {
+    const overallClassNames = classNames?.slice(0, classNames.length / featureNames.length);
+
     return featureNames.map((fName, index) => {
-      const offset = featureNames.length * index;
-      const featureClassNames = classNames.slice(offset, offset + featureNames.length);
-      const featureClassImportance = classImportance.slice(offset, offset + featureNames.length);
+      const offset = overallClassNames.length * index;
+      const featureClassImportance = classImportance.slice(
+        offset,
+        offset + overallClassNames.length
+      );
       return {
         feature_name: fName,
-        classes: featureClassNames.map((fClassName, fIndex) => {
+        classes: overallClassNames.map((fClassName, fIndex) => {
           return { class_name: fClassName, importance: featureClassImportance[fIndex] };
         }),
       };
