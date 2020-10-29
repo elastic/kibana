@@ -85,6 +85,7 @@ import {
 import { EMPTY_FIELD_VALUE_LABEL } from './components/entity_control/entity_control';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 
+const UNKNOWN_METRIC_PLOT_FUNCTION = 'unknown';
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
 // obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
@@ -447,7 +448,9 @@ export class TimeSeriesExplorer extends React.Component {
     if (detectors && detectors[selectedDetectorIndex]?.function) {
       if (detectors[selectedDetectorIndex]?.function === 'metric') {
         if (this.state.actualPlotFunction === undefined) {
-          this.setState({ actualPlotFunction: 'avg' });
+          // here we just know the detector is a metric function, but we don't know what to plot yet
+          // need to find the highest scoring anomaly record in order to pick the default view
+          this.setState({ actualPlotFunction: UNKNOWN_METRIC_PLOT_FUNCTION });
         }
       } else {
         this.setState({ actualPlotFunction: undefined });
@@ -529,7 +532,12 @@ export class TimeSeriesExplorer extends React.Component {
 
     const currentSelectedJob = mlJobService.getJob(selectedJobId);
 
-    if (currentSelectedJob === undefined) {
+    if (
+      currentSelectedJob === undefined ||
+      // prevent unnecessary call to elasticsearch
+      // because we know this is a metric function, but we don't know the actual function we should plot yet
+      functionToPlotByIfMetric === UNKNOWN_METRIC_PLOT_FUNCTION
+    ) {
       return;
     }
 
@@ -690,7 +698,8 @@ export class TimeSeriesExplorer extends React.Component {
             this.getCriteriaFields(detectorIndex, entityControls),
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.asMilliseconds()
+            stateUpdate.contextAggregationInterval.asMilliseconds(),
+            functionToPlotByIfMetric
           )
           .then((resp) => {
             const fullRangeRecordScoreData = processRecordScoreResults(resp.results);

@@ -110,7 +110,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     if (actualPlotFunction !== undefined) {
       boolCriteria.push({
         term: {
-          function_description: actualPlotFunction,
+          function_description: actualPlotFunction === 'avg' ? 'mean' : actualPlotFunction,
         },
       });
     }

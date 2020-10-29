@@ -1272,7 +1272,14 @@ export function resultsServiceProvider(mlApiServices) {
     // criteria, time range, and aggregation interval.
     // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
     // 'fieldValue' properties.
-    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, intervalMs) {
+    getRecordMaxScoreByTime(
+      jobId,
+      criteriaFields,
+      earliestMs,
+      latestMs,
+      intervalMs,
+      actualPlotFunctionIfMetric
+    ) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -1300,6 +1307,14 @@ export function resultsServiceProvider(mlApiServices) {
             },
           });
         });
+        if (actualPlotFunctionIfMetric !== undefined && actualPlotFunctionIfMetric !== 'unknown') {
+          mustCriteria.push({
+            term: {
+              function_description:
+                actualPlotFunctionIfMetric === 'avg' ? 'mean' : actualPlotFunctionIfMetric,
+            },
+          });
+        }
 
         mlApiServices.results
           .anomalySearch({
