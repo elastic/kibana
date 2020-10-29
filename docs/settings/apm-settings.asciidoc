@@ -43,14 +43,14 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.enabled`
   | Set to `false` to disable the APM app. Defaults to `true`.
 
+| `xpack.apm.maxServiceEnvironments`
+  | Maximum number of unique service environments recognized by the UI. Defaults to `100`.
+
 | `xpack.apm.ui.enabled` {ess-icon}
   | Set to `false` to hide the APM app from the main menu. Defaults to `true`.
 
 | `xpack.apm.ui.transactionGroupBucketSize`
   | Number of top transaction groups displayed in the APM app. Defaults to `1000`.
-
-| `xpack.apm.ui.maxServiceEnvironments`
-  | Maximum number of unique service environments recognized by the UI. Defaults to `100`.
 
 | `xpack.apm.ui.maxTraceItems` {ess-icon}
   | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
