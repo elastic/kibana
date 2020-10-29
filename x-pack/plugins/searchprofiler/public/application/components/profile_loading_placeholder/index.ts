@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Main } from './main';
-export { ProfileQueryEditor } from './profile_query_editor';
+export { ProfileLoadingPlaceholder } from './profile_loading_placeholder';

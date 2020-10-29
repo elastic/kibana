@@ -5,4 +5,3 @@
  */
 
 export { EmptyTreePlaceHolder } from './empty_tree_placeholder';
-export { ProfileLoadingPlaceholder } from './profile_loading_placeholder';

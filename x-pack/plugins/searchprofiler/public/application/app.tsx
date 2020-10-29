@@ -16,24 +16,22 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { ProfileQueryEditor } from '../';
 
 import {
   SearchProfilerTabs,
   ProfileTree,
   HighlightDetailsFlyout,
   LicenseWarningNotice,
-} from '../../components';
+  ProfileLoadingPlaceholder,
+  EmptyTreePlaceHolder,
+  ProfileQueryEditor,
+} from './components';
 
-import { useAppContext } from '../../contexts/app_context';
+import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
+import { hasAggregations, hasSearch } from './utils';
+import { Targets } from './types';
 
-import { EmptyTreePlaceHolder, ProfileLoadingPlaceholder } from './components';
-import { Targets } from '../../types';
-import { useProfilerActionContext, useProfilerReadContext } from '../../contexts/profiler_context';
-
-import { hasAggregations, hasSearch } from '../../utils';
-
-export const Main = () => {
+export const App = () => {
   const { getLicenseStatus, notifications } = useAppContext();
 
   const {
