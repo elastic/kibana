@@ -36,11 +36,7 @@ import {
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 
-import {
-  configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
-} from '../../kibana_legacy/public';
+import { configureAppAngularModule } from '../../kibana_legacy/public';
 import { TimelionPluginStartDependencies } from './plugin';
 import { DataPublicPluginStart } from '../../data/public';
 // @ts-ignore
@@ -120,11 +116,9 @@ function mountTimelionApp(appBasePath: string, element: HTMLElement, deps: Rende
 function createLocalAngularModule(deps: RenderDeps) {
   createLocalI18nModule();
   createLocalIconModule();
-  createLocalTopNavModule(deps.plugins.navigation);
 
   const dashboardAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
-    'app/timelion/TopNav',
     'app/timelion/I18n',
     'app/timelion/icon',
   ]);
@@ -135,13 +129,6 @@ function createLocalIconModule() {
   angular
     .module('app/timelion/icon', ['react'])
     .directive('icon', (reactDirective) => reactDirective(EuiIcon));
-}
-
-function createLocalTopNavModule(navigation: TimelionPluginStartDependencies['navigation']) {
-  angular
-    .module('app/timelion/TopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

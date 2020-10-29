@@ -35,7 +35,13 @@ export default ({ getService }: FtrProviderContext) => {
           groups: [],
           analysis_config: {
             bucket_span: '15m',
-            detectors: [{ function: 'mean', field_name: 'products.discount_amount' }],
+            detectors: [
+              {
+                function: 'mean',
+                field_name: 'products.discount_amount',
+                exclude_frequent: 'none',
+              },
+            ],
             influencers: [],
             summary_count_field_name: 'doc_count',
           },

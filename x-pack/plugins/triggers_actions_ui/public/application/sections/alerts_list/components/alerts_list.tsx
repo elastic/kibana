@@ -437,15 +437,14 @@ export const AlertsList: React.FunctionComponent = () => {
               title={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
-                  defaultMessage="Error found in {totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}}."
+                  defaultMessage="Error found in {totalStausesError, plural, one {# alert} other {# alerts}}."
                   values={{
                     totalStausesError: alertsStatusesTotal.error,
-                    singleTitle: 'alert',
-                    multipleTitle: 'alerts',
                   }}
                 />
               }
               iconType="alert"
+              data-test-subj="alertsErrorBanner"
             >
               <EuiButton
                 type="primary"
@@ -471,7 +470,7 @@ export const AlertsList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
+          <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalItemsCountDescription"
               defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
@@ -483,11 +482,10 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="primary">
+          <EuiHealth color="primary" data-test-subj="totalActiveAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
               defaultMessage="Active: {totalStausesActive}"
-              data-test-subj="totalStausesActive"
               values={{
                 totalStausesActive: alertsStatusesTotal.active,
               }}
@@ -495,30 +493,27 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="danger">
+          <EuiHealth color="danger" data-test-subj="totalErrorAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
-              data-test-subj="totalStausesError"
               defaultMessage="Error: {totalStausesError}"
               values={{ totalStausesError: alertsStatusesTotal.error }}
             />
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued">
+          <EuiHealth color="subdued" data-test-subj="totalOkAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
-              data-test-subj="totalStausesOk"
               defaultMessage="Ok: {totalStausesOk}"
               values={{ totalStausesOk: alertsStatusesTotal.ok }}
             />
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="success">
+          <EuiHealth color="success" data-test-subj="totalPendingAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesPendingDescription"
-              data-test-subj="totalStausesPending"
               defaultMessage="Pending: {totalStausesPending}"
               values={{
                 totalStausesPending: alertsStatusesTotal.pending,
@@ -527,10 +522,9 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="warning">
+          <EuiHealth color="warning" data-test-subj="totalUnknownAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesUnknownDescription"
-              data-test-subj="totalStausesUnknown"
               defaultMessage="Unknown: {totalStausesUnknown}"
               values={{
                 totalStausesUnknown: alertsStatusesTotal.unknown,

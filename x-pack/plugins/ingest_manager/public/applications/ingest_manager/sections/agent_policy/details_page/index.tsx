@@ -74,7 +74,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             size="xs"
           >
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.viewAgentListTitle"
+              id="xpack.fleet.policyDetails.viewAgentListTitle"
               defaultMessage="View all agent policies"
             />
           </EuiButtonEmpty>
@@ -87,7 +87,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
               ) : (
                 (agentPolicy && agentPolicy.name) || (
                   <FormattedMessage
-                    id="xpack.ingestManager.policyDetails.policyDetailsTitle"
+                    id="xpack.fleet.policyDetails.policyDetailsTitle"
                     defaultMessage="Policy '{id}'"
                     values={{
                       id: policyId,
@@ -118,14 +118,14 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
           {[
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.revision', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.revision', {
                 defaultMessage: 'Revision',
               }),
               content: agentPolicy?.revision ?? 0,
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.integrations', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.integrations', {
                 defaultMessage: 'Integrations',
               }),
               content: (
@@ -141,7 +141,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.usedBy', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.usedBy', {
                 defaultMessage: 'Used by',
               }),
               content: (
@@ -153,7 +153,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.lastUpdated', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.lastUpdated', {
                 defaultMessage: 'Last updated on',
               }),
               content:
@@ -217,7 +217,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     return [
       {
         id: 'integrations',
-        name: i18n.translate('xpack.ingestManager.policyDetails.subTabs.packagePoliciesTabText', {
+        name: i18n.translate('xpack.fleet.policyDetails.subTabs.packagePoliciesTabText', {
           defaultMessage: 'Integrations',
         }),
         href: getHref('policy_details', { policyId, tabId: 'integrations' }),
@@ -225,7 +225,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
       },
       {
         id: 'settings',
-        name: i18n.translate('xpack.ingestManager.policyDetails.subTabs.settingsTabText', {
+        name: i18n.translate('xpack.fleet.policyDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
         href: getHref('policy_details', { policyId, tabId: 'settings' }),
@@ -248,7 +248,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.unexceptedErrorTitle"
+              id="xpack.fleet.policyDetails.unexceptedErrorTitle"
               defaultMessage="An error happened while loading the agent policy"
             />
           }
@@ -262,11 +262,11 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.unexceptedErrorTitle"
+              id="xpack.fleet.policyDetails.unexceptedErrorTitle"
               defaultMessage="An error happened while loading the agent policy"
             />
           }
-          error={i18n.translate('xpack.ingestManager.policyDetails.policyNotFoundErrorTitle', {
+          error={i18n.translate('xpack.fleet.policyDetails.policyNotFoundErrorTitle', {
             defaultMessage: "Policy '{id}' not found",
             values: {
               id: policyId,

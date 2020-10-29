@@ -22,6 +22,7 @@ interface CloudSetupDependencies {
 
 export interface CloudSetup {
   cloudId?: string;
+  cloudDeploymentUrl?: string;
   isCloudEnabled: boolean;
 }
 
@@ -33,7 +34,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public async setup(core: CoreSetup, { home }: CloudSetupDependencies) {
-    const { id, resetPasswordUrl } = this.config;
+    const { id, resetPasswordUrl, deploymentUrl } = this.config;
     const isCloudEnabled = getIsCloudEnabled(id);
 
     if (home) {
@@ -45,6 +46,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       cloudId: id,
+      cloudDeploymentUrl: deploymentUrl,
       isCloudEnabled,
     };
   }

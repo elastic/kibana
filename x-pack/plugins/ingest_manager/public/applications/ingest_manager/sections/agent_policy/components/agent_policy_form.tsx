@@ -46,7 +46,7 @@ export const agentPolicyFormValidation = (
   if (!agentPolicy.name?.trim()) {
     errors.name = [
       <FormattedMessage
-        id="xpack.ingestManager.agentPolicyForm.nameRequiredErrorMessage"
+        id="xpack.fleet.agentPolicyForm.nameRequiredErrorMessage"
         defaultMessage="Agent policy name is required"
       />,
     ];
@@ -88,12 +88,9 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
       {
         name: 'name',
         label: (
-          <FormattedMessage
-            id="xpack.ingestManager.agentPolicyForm.nameFieldLabel"
-            defaultMessage="Name"
-          />
+          <FormattedMessage id="xpack.fleet.agentPolicyForm.nameFieldLabel" defaultMessage="Name" />
         ),
-        placeholder: i18n.translate('xpack.ingestManager.agentPolicyForm.nameFieldPlaceholder', {
+        placeholder: i18n.translate('xpack.fleet.agentPolicyForm.nameFieldPlaceholder', {
           defaultMessage: 'Choose a name',
         }),
       },
@@ -101,16 +98,13 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         name: 'description',
         label: (
           <FormattedMessage
-            id="xpack.ingestManager.agentPolicyForm.descriptionFieldLabel"
+            id="xpack.fleet.agentPolicyForm.descriptionFieldLabel"
             defaultMessage="Description"
           />
         ),
-        placeholder: i18n.translate(
-          'xpack.ingestManager.agentPolicyForm.descriptionFieldPlaceholder',
-          {
-            defaultMessage: 'How will this policy be used?',
-          }
-        ),
+        placeholder: i18n.translate('xpack.fleet.agentPolicyForm.descriptionFieldPlaceholder', {
+          defaultMessage: 'How will this policy be used?',
+        }),
       },
     ];
   }, []);
@@ -120,14 +114,14 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
       title={
         <h4>
           <FormattedMessage
-            id="xpack.ingestManager.policyForm.generalSettingsGroupTitle"
+            id="xpack.fleet.policyForm.generalSettingsGroupTitle"
             defaultMessage="General settings"
           />
         </h4>
       }
       description={
         <FormattedMessage
-          id="xpack.ingestManager.policyForm.generalSettingsGroupDescription"
+          id="xpack.fleet.policyForm.generalSettingsGroupDescription"
           defaultMessage="Choose a name and description for your agent policy."
         />
       }
@@ -163,14 +157,14 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         title={
           <h4>
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicyForm.namespaceFieldLabel"
+              id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.ingestManager.agentPolicyForm.namespaceFieldDescription"
+            id="xpack.fleet.agentPolicyForm.namespaceFieldDescription"
             defaultMessage="Apply a default namespace to integrations that use this policy. Integrations can specify their own namespaces."
           />
         }
@@ -202,14 +196,14 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         title={
           <h4>
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicyForm.monitoringLabel"
+              id="xpack.fleet.agentPolicyForm.monitoringLabel"
               defaultMessage="Agent monitoring"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.ingestManager.agentPolicyForm.monitoringDescription"
+            id="xpack.fleet.agentPolicyForm.monitoringDescription"
             defaultMessage="Collect data about your agents for debugging and tracking performance."
           />
         }
@@ -221,12 +215,12 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               label: (
                 <>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentPolicyForm.monitoringLogsFieldLabel"
+                    id="xpack.fleet.agentPolicyForm.monitoringLogsFieldLabel"
                     defaultMessage="Collect agent logs"
                   />{' '}
                   <EuiIconTip
                     content={i18n.translate(
-                      'xpack.ingestManager.agentPolicyForm.monitoringLogsTooltipText',
+                      'xpack.fleet.agentPolicyForm.monitoringLogsTooltipText',
                       {
                         defaultMessage: 'Collect logs from Elastic Agents that use this policy.',
                       }
@@ -243,12 +237,12 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               label: (
                 <>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentPolicyForm.monitoringMetricsFieldLabel"
+                    id="xpack.fleet.agentPolicyForm.monitoringMetricsFieldLabel"
                     defaultMessage="Collect agent metrics"
                   />{' '}
                   <EuiIconTip
                     content={i18n.translate(
-                      'xpack.ingestManager.agentPolicyForm.monitoringMetricsTooltipText',
+                      'xpack.fleet.agentPolicyForm.monitoringMetricsTooltipText',
                       {
                         defaultMessage: 'Collect metrics from Elastic Agents that use this policy.',
                       }
@@ -290,7 +284,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           title={
             <h4>
               <FormattedMessage
-                id="xpack.ingestManager.policyForm.deletePolicyGroupTitle"
+                id="xpack.fleet.policyForm.deletePolicyGroupTitle"
                 defaultMessage="Delete policy"
               />
             </h4>
@@ -298,7 +292,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           description={
             <>
               <FormattedMessage
-                id="xpack.ingestManager.policyForm.deletePolicyGroupDescription"
+                id="xpack.fleet.policyForm.deletePolicyGroupDescription"
                 defaultMessage="Existing data will not be deleted."
               />
               <EuiSpacer size="s" />
@@ -311,7 +305,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                       onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.policyForm.deletePolicyActionText"
+                        id="xpack.fleet.policyForm.deletePolicyActionText"
                         defaultMessage="Delete policy"
                       />
                     </EuiButton>
@@ -323,7 +317,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                   <EuiSpacer size="xs" />
                   <EuiText color="subdued" size="xs">
                     <FormattedMessage
-                      id="xpack.ingestManager.policyForm.unableToDeleteDefaultPolicyText"
+                      id="xpack.fleet.policyForm.unableToDeleteDefaultPolicyText"
                       defaultMessage="Default policy cannot be deleted"
                     />
                   </EuiText>
@@ -343,7 +337,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.ingestManager.agentPolicyForm.systemMonitoringFieldLabel"
+              id="xpack.fleet.agentPolicyForm.systemMonitoringFieldLabel"
               defaultMessage="System monitoring"
             />
           }
@@ -353,12 +347,12 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             label={
               <>
                 <FormattedMessage
-                  id="xpack.ingestManager.agentPolicyForm.systemMonitoringText"
+                  id="xpack.fleet.agentPolicyForm.systemMonitoringText"
                   defaultMessage="Collect system metrics"
                 />{' '}
                 <EuiIconTip
                   content={i18n.translate(
-                    'xpack.ingestManager.agentPolicyForm.systemMonitoringTooltipText',
+                    'xpack.fleet.agentPolicyForm.systemMonitoringTooltipText',
                     {
                       defaultMessage:
                         'Enable this option to bootstrap your policy with an integration that collects system metrics and information.',
@@ -385,7 +379,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             id="advancedOptions"
             buttonContent={
               <FormattedMessage
-                id="xpack.ingestManager.agentPolicyForm.advancedOptionsToggleLabel"
+                id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
                 defaultMessage="Advanced options"
               />
             }

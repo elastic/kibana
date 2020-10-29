@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance } from '../types';
-import { Document, DOC_TYPE } from '../persistence';
+import { Document } from '../persistence';
+import { DOC_TYPE } from '../../common';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -695,6 +696,9 @@ describe('Lens App', () => {
           undefined
         );
         expect(props.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          "Saved 'hello there'"
+        );
       });
 
       it('adds to the recently accessed list on save', async () => {
@@ -729,6 +733,9 @@ describe('Lens App', () => {
           component.setProps({ initialInput: { savedObjectId: 'aaa' } });
         });
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledTimes(1);
+        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          "Saved 'hello there'"
+        );
       });
 
       it('saves existing docs', async () => {
@@ -750,6 +757,9 @@ describe('Lens App', () => {
           component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
         expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
+        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          "Saved 'hello there'"
+        );
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
