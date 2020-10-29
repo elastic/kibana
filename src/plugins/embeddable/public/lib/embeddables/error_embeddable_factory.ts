@@ -26,7 +26,7 @@ export class ErrorEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = ERROR_EMBEDDABLE_TYPE;
 
   getDisplayName() {
-    return i18n.translate('embeddable.errorFactory.displayName', {
+    return i18n.translate('embeddableApi.errorFactory.displayName', {
       defaultMessage: 'Error',
     });
   }
