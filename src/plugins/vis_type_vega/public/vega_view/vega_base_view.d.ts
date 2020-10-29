@@ -17,4 +17,24 @@
  * under the License.
  */
 
-export { VegaVisEditor } from './vega_vis_editor';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IServiceSettings } from 'src/plugins/maps_legacy/public';
+import { VegaParser } from '../data_model/vega_parser';
+
+interface VegaViewParams {
+  parentEl: HTMLDivElement;
+  fireEvent: IInterpreterRenderHandlers['event'];
+  vegaParser: VegaParser;
+  serviceSettings: IServiceSettings;
+  filterManager: DataPublicPluginStart['query']['filterManager'];
+  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
+  // findIndex: (index: string) => Promise<...>;
+}
+
+export class VegaBaseView {
+  constructor(params: VegaViewParams);
+  init(): Promise<void>;
+  onError(error: any): void;
+  destroy(): Promise<void>;
+}
