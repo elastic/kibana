@@ -19,8 +19,8 @@
 
 import { ISavedObjectDecoratorRegistry } from './registry';
 
-const createRegistryMock = (): jest.Mocked<ISavedObjectDecoratorRegistry> => {
-  const mock = {
+const createRegistryMock = () => {
+  const mock: jest.Mocked<ISavedObjectDecoratorRegistry> = {
     register: jest.fn(),
     getOrderedDecorators: jest.fn(),
   };

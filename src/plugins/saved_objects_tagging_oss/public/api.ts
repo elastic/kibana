@@ -140,7 +140,7 @@ export interface SavedObjectsTaggingApiUi {
 }
 
 /**
- * UI components to be used to display the tagging feature in any application.
+ * React UI components to be used to display the tagging feature in any application.
  *
  * @public
  */

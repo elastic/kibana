@@ -6,8 +6,8 @@
 
 import { ITagsClient } from '../../common/types';
 
-const createClientMock = (): jest.Mocked<ITagsClient> => {
-  const mock = {
+const createClientMock = () => {
+  const mock: jest.Mocked<ITagsClient> = {
     create: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn(),

@@ -10,8 +10,8 @@ import { TagsCache } from './tags_cache';
 
 type TagsCacheMock = jest.Mocked<PublicMethodsOf<TagsCache>>;
 
-const createTagsCacheMock = (): TagsCacheMock => {
-  const mock = {
+const createTagsCacheMock = () => {
+  const mock: TagsCacheMock = {
     getState: jest.fn(),
     getState$: jest.fn(),
     initialize: jest.fn(),
