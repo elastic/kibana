@@ -355,7 +355,7 @@ export const ReorderableDragDrop = ({
   dropTo: DropToHandler;
 }) => {
   const { itemsInGroup, dragging, id, droppable } = dropProps;
-  const { reorderState, setReorderState, currentElementPosition } = useContext(ReorderContext);
+  const { reorderState, setReorderState } = useContext(ReorderContext);
 
   const { isKeyboardReorderOn, reorderedItems, draggingHeight, direction } = reorderState;
 
@@ -441,13 +441,9 @@ export const ReorderableDragDrop = ({
         onDragStart: (e: DroppableEvent) => {
           setReorderState({
             ...reorderState,
-            draggedElementOriginalPosition: (e.target as HTMLElement).getBoundingClientRect(),
             draggingHeight: e.currentTarget.offsetHeight + lnsLayerPanelDimensionMargin,
           });
           draggingProps.onDragStart(e);
-        },
-        onDrag: (e: DragEvent) => {
-          currentElementPosition.current = e.clientY;
         },
         ['data-test-subj']: draggingProps.dataTestSubj,
         className: draggingClasses,
@@ -502,8 +498,12 @@ export const ReorderableDragDrop = ({
             );
           }
         }}
-        onDragLeaveCapture={() => {
+        onDragLeave={() => {
           dropProps.onDragLeave();
+          setReorderState({
+            ...reorderState,
+            reorderedItems: [],
+          });
         }}
       />
     </div>
