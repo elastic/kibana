@@ -51,7 +51,7 @@ import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
 import { setupSavedObjects } from './saved_objects';
-import { RouteGuard } from './routes/route_guard';
+import { RouteGuard } from './lib/route_guard';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
