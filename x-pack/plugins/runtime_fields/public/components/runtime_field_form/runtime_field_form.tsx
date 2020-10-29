@@ -18,8 +18,9 @@ import {
 import { useForm, Form, FormHook, UseField, TextField, CodeEditor } from '../../shared_imports';
 import { RuntimeField } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
-
 import { schema } from './schema';
+
+import './runtime_field_form.scss';
 
 export interface FormState {
   isValid: boolean | undefined;
@@ -46,7 +47,7 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
   }, [onChange, isFormValid, isSubmitted, submit]);
 
   return (
-    <Form form={form}>
+    <Form form={form} className="runtimeFieldEditor_form">
       <EuiFlexGroup>
         {/* Name */}
         <EuiFlexItem>
