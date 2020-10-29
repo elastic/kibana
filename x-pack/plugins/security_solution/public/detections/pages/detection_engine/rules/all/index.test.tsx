@@ -6,13 +6,14 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
+import { waitFor, act } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
 import { TestProviders } from '../../../../../common/mock';
-import { waitFor } from '@testing-library/react';
 import { AllRules } from './index';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useRules, useRulesStatuses } from '../../../../containers/detection_engine/rules';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -27,6 +28,7 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../containers/detection_engine/rules');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -84,9 +86,22 @@ jest.mock('./reducer', () => {
   };
 });
 
-jest.mock('../../../../containers/detection_engine/rules', () => {
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+
   return {
-    useRules: jest.fn().mockReturnValue([
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
+
+describe('AllRules', () => {
+  const mockRefetchRulesData = jest.fn();
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+
+    (useRules as jest.Mock).mockReturnValue([
       false,
       {
         page: 1,
@@ -126,8 +141,10 @@ jest.mock('../../../../containers/detection_engine/rules', () => {
           },
         ],
       },
-    ]),
-    useRulesStatuses: jest.fn().mockReturnValue({
+      mockRefetchRulesData,
+    ]);
+
+    (useRulesStatuses as jest.Mock).mockReturnValue({
       loading: false,
       rulesStatuses: [
         {
@@ -150,21 +167,8 @@ jest.mock('../../../../containers/detection_engine/rules', () => {
           name: 'Test rule',
         },
       ],
-    }),
-  };
-});
+    });
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-
-  return {
-    ...originalModule,
-    useHistory: jest.fn(),
-  };
-});
-
-describe('AllRules', () => {
-  beforeEach(() => {
     useKibanaMock().services.application.capabilities = {
       navLinks: {},
       management: {},
@@ -172,6 +176,11 @@ describe('AllRules', () => {
       actions: { show: true },
     };
   });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
   it('renders correctly', () => {
     const wrapper = shallow(
       <AllRules
@@ -192,6 +201,37 @@ describe('AllRules', () => {
   });
 
   describe('rules tab', () => {
+    it('it refreshes rule data every 30 seconds', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AllRules
+              createPrePackagedRules={jest.fn()}
+              hasNoPermissions={false}
+              loading={false}
+              loadingCreatePrePackagedRules={false}
+              refetchPrePackagedRulesStatus={jest.fn()}
+              rulesCustomInstalled={1}
+              rulesInstalled={0}
+              rulesNotInstalled={0}
+              rulesNotUpdated={0}
+              setRefreshRulesData={jest.fn()}
+            />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          jest.advanceTimersByTime(30000);
+
+          expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
+          jest.advanceTimersByTime(15000);
+          expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
+          jest.advanceTimersByTime(15000);
+          expect(mockRefetchRulesData).toHaveBeenCalledTimes(2);
+        });
+      });
+    });
+
     it('renders correctly', async () => {
       const wrapper = mount(
         <TestProviders>
@@ -234,10 +274,11 @@ describe('AllRules', () => {
         />
       </TestProviders>
     );
-    const monitoringTab = wrapper.find('[data-test-subj="allRulesTableTab-monitoring"] button');
-    monitoringTab.simulate('click');
 
     await waitFor(() => {
+      const monitoringTab = wrapper.find('[data-test-subj="allRulesTableTab-monitoring"] button');
+      monitoringTab.simulate('click');
+
       wrapper.update();
       expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeTruthy();
       expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();

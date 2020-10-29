@@ -6,11 +6,11 @@
 
 import {
   EuiBasicTable,
-  EuiContextMenuPanel,
   EuiLoadingContent,
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiProgress,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -27,13 +27,6 @@ import {
   RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../../common/components/header_section';
-import {
-  UtilityBar,
-  UtilityBarAction,
-  UtilityBarGroup,
-  UtilityBarSection,
-  UtilityBarText,
-} from '../../../../../common/components/utility_bar';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
@@ -55,6 +48,8 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { isBoolean } from '../../../../../common/utils/privileges';
+import { AllRulesUtilityBar } from './utility_bar';
+import { LastUpdatedAt } from '../../../../../common/components/last_updated';
 
 const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -128,6 +123,7 @@ export const AllRules = React.memo<AllRulesProps>(
     setRefreshRulesData,
   }) => {
     const [initLoading, setInitLoading] = useState(true);
+    const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
     const tableRef = useRef<EuiBasicTable>();
     const [
       {
@@ -194,21 +190,19 @@ export const AllRules = React.memo<AllRulesProps>(
     ]);
 
     const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel
-          items={getBatchItems({
-            closePopover,
-            dispatch,
-            dispatchToaster,
-            hasMlPermissions,
-            hasActionsPrivileges,
-            loadingRuleIds,
-            selectedRuleIds,
-            reFetchRules: reFetchRulesData,
-            rules,
-          })}
-        />
-      ),
+      (closePopover: () => void): JSX.Element[] => {
+        return getBatchItems({
+          closePopover,
+          dispatch,
+          dispatchToaster,
+          hasMlPermissions,
+          hasActionsPrivileges,
+          loadingRuleIds,
+          selectedRuleIds,
+          reFetchRules: reFetchRulesData,
+          rules,
+        });
+      },
       [
         dispatch,
         dispatchToaster,
@@ -306,7 +300,7 @@ export const AllRules = React.memo<AllRulesProps>(
       [loadingRuleIds]
     );
 
-    const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+    const handleFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
       dispatch({
         type: 'updateFilterOptions',
         filterOptions: {
@@ -328,13 +322,35 @@ export const AllRules = React.memo<AllRulesProps>(
       return false;
     }, [loadingRuleIds, loadingRulesAction]);
 
+    const handleAllRulesTabClick = useCallback(
+      (tabId: AllRulesTabs) => () => {
+        setAllRulesTab(tabId);
+      },
+      []
+    );
+
+    const handleRefreshData = useCallback((): void => {
+      if (reFetchRulesData != null && !isLoadingAnActionOnRule) {
+        reFetchRulesData(true);
+        setLastUpdated(Date.now());
+      }
+    }, [reFetchRulesData, isLoadingAnActionOnRule]);
+
+    useEffect(() => {
+      const refreshTimerId = window.setInterval(() => handleRefreshData(), 30000);
+
+      return () => {
+        clearInterval(refreshTimerId);
+      };
+    }, [handleRefreshData]);
+
     const tabs = useMemo(
       () => (
         <EuiTabs>
           {allRulesTabs.map((tab) => (
             <EuiTab
               data-test-subj={`allRulesTableTab-${tab.id}`}
-              onClick={() => setAllRulesTab(tab.id)}
+              onClick={handleAllRulesTabClick(tab.id)}
               isSelected={tab.id === allRulesTab}
               disabled={tab.disabled}
               key={tab.id}
@@ -346,6 +362,20 @@ export const AllRules = React.memo<AllRulesProps>(
       ),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [allRulesTabs, allRulesTab, setAllRulesTab]
+    );
+
+    const shouldShowRulesTable = useMemo(
+      (): boolean => showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading,
+      [initLoading, rulesCustomInstalled, rulesInstalled]
+    );
+
+    const shouldShowPrepackagedRulesPrompt = useMemo(
+      (): boolean =>
+        rulesCustomInstalled != null &&
+        rulesCustomInstalled === 0 &&
+        prePackagedRuleStatus === 'ruleNotInstalled' &&
+        !initLoading,
+      [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
 
     return (
@@ -373,63 +403,53 @@ export const AllRules = React.memo<AllRulesProps>(
 
         <Panel loading={loading || isLoadingRules || isLoadingRulesStatuses}>
           <>
-            <HeaderSection split title={i18n.ALL_RULES}>
+            {(isLoadingRules || isLoadingRulesStatuses) && (
+              <EuiProgress
+                data-test-subj="initialLoadingPanelMatrixOverTime"
+                size="xs"
+                position="absolute"
+                color="accent"
+              />
+            )}
+            <HeaderSection
+              split
+              title={i18n.ALL_RULES}
+              subtitle={
+                <LastUpdatedAt
+                  showUpdating={loading || isLoadingRules || isLoadingRulesStatuses}
+                  updatedAt={lastUpdated}
+                />
+              }
+            >
               <RulesTableFilters
-                onFilterChanged={onFilterChangedCallback}
+                onFilterChanged={handleFilterChangedCallback}
                 rulesCustomInstalled={rulesCustomInstalled}
                 rulesInstalled={rulesInstalled}
               />
             </HeaderSection>
 
-            {(loading || isLoadingRules || isLoadingAnActionOnRule || isLoadingRulesStatuses) &&
-              !initLoading && (
-                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-              )}
-            {rulesCustomInstalled != null &&
-              rulesCustomInstalled === 0 &&
-              prePackagedRuleStatus === 'ruleNotInstalled' &&
-              !initLoading && (
-                <PrePackagedRulesPrompt
-                  createPrePackagedRules={handleCreatePrePackagedRules}
-                  loading={loadingCreatePrePackagedRules}
-                  userHasNoPermissions={hasNoPermissions}
-                />
-              )}
+            {isLoadingAnActionOnRule && !initLoading && (
+              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+            )}
+            {shouldShowPrepackagedRulesPrompt && (
+              <PrePackagedRulesPrompt
+                createPrePackagedRules={handleCreatePrePackagedRules}
+                loading={loadingCreatePrePackagedRules}
+                userHasNoPermissions={hasNoPermissions}
+              />
+            )}
             {initLoading && (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             )}
-            {showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading && (
+            {shouldShowRulesTable && (
               <>
-                <UtilityBar>
-                  <UtilityBarSection>
-                    <UtilityBarGroup>
-                      <UtilityBarText dataTestSubj="showingRules">
-                        {i18n.SHOWING_RULES(pagination.total ?? 0)}
-                      </UtilityBarText>
-                    </UtilityBarGroup>
-
-                    <UtilityBarGroup>
-                      <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
-                      {!hasNoPermissions && (
-                        <UtilityBarAction
-                          dataTestSubj="bulkActions"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          popoverContent={getBatchItemsPopoverContent}
-                        >
-                          {i18n.BATCH_ACTIONS}
-                        </UtilityBarAction>
-                      )}
-                      <UtilityBarAction
-                        iconSide="left"
-                        iconType="refresh"
-                        onClick={() => reFetchRulesData(true)}
-                      >
-                        {i18n.REFRESH}
-                      </UtilityBarAction>
-                    </UtilityBarGroup>
-                  </UtilityBarSection>
-                </UtilityBar>
+                <AllRulesUtilityBar
+                  userHasNoPermissions={hasNoPermissions}
+                  paginationTotal={pagination.total ?? 0}
+                  numberSelectedRules={selectedRuleIds.length}
+                  onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
+                  onRefresh={handleRefreshData}
+                />
                 <AllRulesTables
                   selectedTab={allRulesTab}
                   euiBasicTableSelectionProps={euiBasicTableSelectionProps}
