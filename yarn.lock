@@ -5555,10 +5555,10 @@
   resolved "https://registry.yarnpkg.com/@types/write-pkg/-/write-pkg-3.1.0.tgz#f58767f4fb9a6a3ad8e95d3e9cd1f2d026ceab26"
   integrity sha512-JRGsPEPCrYqTXU0Cr+Yu7esPBE2yvH7ucOHr+JuBy0F59kglPvO5gkmtyEvf3P6dASSkScvy/XQ6SC1QEBFDuA==
 
-"@types/xml-crypto@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@types/xml-crypto/-/xml-crypto-1.4.0.tgz#b586e4819f6bdd0571a3faa9a8098049d5c3cc5a"
-  integrity sha512-F4bCSHdmXgrbLdbQn5kf77U94gb4Ifn8G6u+97BJ5wGzg3xK4uLlJUDFuOIKLf9pZrEGUSSAU/8/0d3GqVXnYQ==
+"@types/xml-crypto@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@types/xml-crypto/-/xml-crypto-1.4.1.tgz#30824290c0b867302269e7ff31fc62fb6494ce18"
+  integrity sha512-w7pI4Gq1buWinzLsDopd4du0sUzlSltT7QfHqknLu+hVuFWTXLzJnAOmYKuD20ncx3XCkYNwSRr2sKeYiwCvZw==
   dependencies:
     "@types/node" "*"
     xpath "0.0.27"
@@ -30683,10 +30683,10 @@ xhr@^2.0.1:
     parse-headers "^2.0.0"
     xtend "^4.0.0"
 
-xml-crypto@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-1.4.0.tgz#de1cec8cd31cbd689cd90d3d6e8a27d4ae807de7"
-  integrity sha512-K8FRdRxICVulK4WhiTUcJrRyAIJFPVOqxfurA3x/JlmXBTxy+SkEENF6GeRt7p/rB6WSOUS9g0gXNQw5n+407g==
+xml-crypto@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-2.0.0.tgz#54cd268ad9d31930afcf7092cbb664258ca9e826"
+  integrity sha512-/a04qr7RpONRZHOxROZ6iIHItdsQQjN3sj8lJkYDDss8tAkEaAs0VrFjb3tlhmS5snQru5lTs9/5ISSMdPDHlg==
   dependencies:
     xmldom "0.1.27"
     xpath "0.0.27"
