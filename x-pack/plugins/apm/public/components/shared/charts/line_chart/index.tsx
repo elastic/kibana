@@ -113,23 +113,20 @@ export function LineChart({
             showGridLines
           />
 
-          <Annotations />
-
-          {!isEmpty &&
-            timeseries.map((serie) => {
-              return (
-                <LineSeries
-                  key={serie.title}
-                  id={serie.title}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['y']}
-                  data={serie.data}
-                  color={serie.color}
-                />
-              );
-            })}
+          {timeseries.map((serie) => {
+            return (
+              <LineSeries
+                key={serie.title}
+                id={serie.title}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={isEmpty ? [] : serie.data}
+                color={serie.color}
+              />
+            );
+          })}
         </Chart>
       </ChartContainer>
     </div>
