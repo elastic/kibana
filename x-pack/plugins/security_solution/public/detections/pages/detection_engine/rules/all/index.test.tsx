@@ -201,7 +201,7 @@ describe('AllRules', () => {
   });
 
   describe('rules tab', () => {
-    it('it refreshes rule data every 30 seconds', async () => {
+    it('it refreshes rule data every minute', async () => {
       await act(async () => {
         mount(
           <TestProviders>
@@ -221,12 +221,12 @@ describe('AllRules', () => {
         );
 
         await waitFor(() => {
-          jest.advanceTimersByTime(30000);
+          jest.advanceTimersByTime(60000);
 
           expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
-          jest.advanceTimersByTime(15000);
+          jest.advanceTimersByTime(30000);
           expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
-          jest.advanceTimersByTime(15000);
+          jest.advanceTimersByTime(30000);
           expect(mockRefetchRulesData).toHaveBeenCalledTimes(2);
         });
       });

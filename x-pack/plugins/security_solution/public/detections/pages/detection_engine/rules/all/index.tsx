@@ -337,7 +337,7 @@ export const AllRules = React.memo<AllRulesProps>(
     }, [reFetchRulesData, isLoadingAnActionOnRule]);
 
     useEffect(() => {
-      const refreshTimerId = window.setInterval(() => handleRefreshData(), 30000);
+      const refreshTimerId = window.setInterval(() => handleRefreshData(), 60000);
 
       return () => {
         clearInterval(refreshTimerId);
