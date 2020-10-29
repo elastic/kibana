@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse as parseUrl } from 'url';
 import {
   OnPostAuthHandler,
   OnPostAuthToolkit,
@@ -45,7 +46,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
   test('should not redirects for not app/* requests', async () => {
     const request = ({
       url: {
-        path: 'api/test',
+        pathname: 'api/test',
       },
     } as unknown) as KibanaRequest;
 
@@ -57,7 +58,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
   test('should not redirects not authenticated users', async () => {
     const request = ({
       url: {
-        path: '/app/home',
+        pathname: '/app/home',
       },
     } as unknown) as KibanaRequest;
 
@@ -70,10 +71,9 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
     function testRedirectToDashboardModeApp(url: string) {
       describe(`requests to url:"${url}"`, () => {
         test('redirects to the dashboard_mode app instead', async () => {
+          const { pathname, search, hash } = parseUrl(url);
           const request = ({
-            url: {
-              path: url,
-            },
+            url: { pathname, search, hash },
             credentials: {
               roles: [DASHBOARD_ONLY_MODE_ROLE],
             },

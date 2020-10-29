@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiFlyoutBody,
   EuiPortal,
-  EuiBetaBadge,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
@@ -27,7 +26,6 @@ import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
-import { PLUGIN } from '../../constants/plugin';
 import { HealthContextProvider } from '../../context/health_context';
 
 interface AlertEditProps {
@@ -118,20 +116,6 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
               <FormattedMessage
                 defaultMessage="Edit alert"
                 id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
-              />
-              &emsp;
-              <EuiBetaBadge
-                label="Beta"
-                tooltipContent={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertEdit.betaBadgeTooltipContent',
-                  {
-                    defaultMessage:
-                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                    values: {
-                      pluginName: PLUGIN.getI18nName(i18n),
-                    },
-                  }
-                )}
               />
             </h3>
           </EuiTitle>
