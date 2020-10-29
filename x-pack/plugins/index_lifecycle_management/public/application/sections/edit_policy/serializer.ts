@@ -31,6 +31,11 @@ const serializeAllocateAction = (
             [name]: value,
           },
         };
+      } else {
+        // The form has been configured to use node attribute based allocation but no node attribute
+        // was selected. We fall back to what was originally selected in this case. This might be
+        // migrate.enabled: "false"
+        actions.migrate = originalActions.migrate;
       }
 
       // copy over the original include and exclude values until we can set them in the form.
@@ -126,6 +131,37 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
     if (_meta.warm.bestCompression && policy.phases.warm.actions?.forcemerge) {
       policy.phases.warm.actions.forcemerge.index_codec = 'best_compression';
+    }
+  }
+
+  /**
+   * COLD PHASE SERIALIZATION
+   */
+  if (policy.phases.cold) {
+    if (policy.phases.cold.min_age) {
+      policy.phases.cold.min_age = `${policy.phases.cold.min_age}${_meta.cold.minAgeUnit}`;
+    }
+
+    policy.phases.cold.actions = serializeAllocateAction(
+      _meta.cold,
+      policy.phases.cold.actions,
+      originalPolicy?.phases.cold?.actions
+    );
+
+    if (
+      policy.phases.cold.actions.allocate &&
+      !policy.phases.cold.actions.allocate.require &&
+      !isNumber(policy.phases.cold.actions.allocate.number_of_replicas) &&
+      isEmpty(policy.phases.cold.actions.allocate.include) &&
+      isEmpty(policy.phases.cold.actions.allocate.exclude)
+    ) {
+      // remove allocate action if it does not define require or number of nodes
+      // and both include and exclude are empty objects (ES will fail to parse if we don't)
+      delete policy.phases.cold.actions.allocate;
+    }
+
+    if (_meta.cold.freezeEnabled) {
+      policy.phases.cold.actions.freeze = {};
     }
   }
 
