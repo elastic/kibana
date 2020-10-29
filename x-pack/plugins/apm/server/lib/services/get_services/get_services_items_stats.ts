@@ -338,7 +338,7 @@ export const getEnvironments = async ({
   projection,
 }: AggregationParams) => {
   const { apmEventClient, config } = setup;
-  const maxServiceEnvironments = config['xpack.apm.ui.maxServiceEnvironments'];
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       body: {

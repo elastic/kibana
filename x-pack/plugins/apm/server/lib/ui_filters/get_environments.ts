@@ -34,7 +34,7 @@ export async function getEnvironments({
     });
   }
 
-  const maxServiceEnvironments = config['xpack.apm.ui.maxServiceEnvironments'];
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   const params = {
     apm: {

@@ -25,7 +25,7 @@ export async function getAllEnvironments({
   includeMissing?: boolean;
 }) {
   const { apmEventClient, config } = setup;
-  const maxServiceEnvironments = config['xpack.apm.ui.maxServiceEnvironments'];
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName

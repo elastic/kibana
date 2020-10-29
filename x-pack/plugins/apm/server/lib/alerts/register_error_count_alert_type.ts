@@ -66,8 +66,7 @@ export function registerErrorCountAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
-      const maxServiceEnvironments =
-        config['xpack.apm.ui.maxServiceEnvironments'];
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
