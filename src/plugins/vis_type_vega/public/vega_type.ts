@@ -45,7 +45,7 @@ export const createVegaTypeDefinition = (
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     note: i18n.translate('visTypeVega.type.vegaNote', {
-      defaultMessage: 'Requires programming knowledge.',
+      defaultMessage: 'Requires knowledge of Vega syntax.',
     }),
     icon: 'visVega',
     group: VisGroups.PROMOTED,
