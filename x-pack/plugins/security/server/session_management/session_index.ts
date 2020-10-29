@@ -276,7 +276,7 @@ export class SessionIndex {
     }
 
     const sessionIndexTemplateName = `${this.options.kibanaIndexName}_security_session_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
-    return (this.indexInitialization = new Promise(async (resolve) => {
+    return (this.indexInitialization = new Promise<void>(async (resolve, reject) => {
       // Check if required index template exists.
       let indexTemplateExists = false;
       try {
@@ -288,7 +288,7 @@ export class SessionIndex {
         this.options.logger.error(
           `Failed to check if session index template exists: ${err.message}`
         );
-        throw err;
+        return reject(err);
       }
 
       // Create index template if it doesn't exist.
@@ -303,7 +303,7 @@ export class SessionIndex {
           this.options.logger.debug('Successfully created session index template.');
         } catch (err) {
           this.options.logger.error(`Failed to create session index template: ${err.message}`);
-          throw err;
+          return reject(err);
         }
       }
 
@@ -316,7 +316,7 @@ export class SessionIndex {
         });
       } catch (err) {
         this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
-        throw err;
+        return reject(err);
       }
 
       // Create index if it doesn't exist.
@@ -334,13 +334,14 @@ export class SessionIndex {
             this.options.logger.debug('Session index already exists.');
           } else {
             this.options.logger.error(`Failed to create session index: ${err.message}`);
-            throw err;
+            return reject(err);
           }
         }
       }
 
       // Notify any consumers that are awaiting on this promise and immediately reset it.
       resolve();
+    }).finally(() => {
       this.indexInitialization = undefined;
     }));
   }
