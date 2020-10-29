@@ -24,6 +24,7 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../src/plugins/data/public';
 
+import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
 import { FeatureImportance, TopClasses } from '../../../../common/types/feature_importance';
 
@@ -250,6 +251,15 @@ export const useRenderCellValue = (
           // Try if the field name is available as is.
           if (item.hasOwnProperty(cId)) {
             return item[cId];
+          }
+
+          // For classification and regression results, we need to treat some fields with a custom transform.
+          if (cId === `${resultsField}.feature_importance`) {
+            return getFeatureImportance(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
+          }
+
+          if (cId === `${resultsField}.top_classes`) {
+            return getTopClasses(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
           }
 
           // Try if the field name is available as a nested field.
