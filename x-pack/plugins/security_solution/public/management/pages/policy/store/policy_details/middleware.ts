@@ -5,6 +5,7 @@
  */
 
 import { IHttpFetchError } from 'kibana/public';
+import { clone } from 'lodash';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
@@ -36,6 +37,14 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       try {
         policyItem = (await sendGetPackagePolicy(http, id)).item;
+        const policyItemDefault = clone(policyItem);
+        // sets default user notification message if policy config message is empty
+        if (policyItemDefault.inputs[0].config.policy.value.windows.popup.malware.message === '') {
+          policyItemDefault.inputs[0].config.policy.value.windows.popup.malware.message =
+            'Elastic Security { pathname } { file }';
+          policyItemDefault.inputs[0].config.policy.value.mac.popup.malware.message =
+            'Elastic Security { pathname } { file }';
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
