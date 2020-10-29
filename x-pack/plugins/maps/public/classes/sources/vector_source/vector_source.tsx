@@ -149,7 +149,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
    * @returns {IField}
    */
   getFieldByName(fieldName: string): IField | null {
-    return this.createField({ fieldName: name });
+    return this.createField({ fieldName });
   }
 
   isFilterByMapBounds() {

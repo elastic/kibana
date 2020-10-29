@@ -389,9 +389,11 @@ export class VectorLayer extends AbstractLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta {
+    const styleFieldNames =
+      style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : [];
     const fieldNames = [
       ...source.getFieldNames(),
-      ...(style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : []),
+      ...styleFieldNames,
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
