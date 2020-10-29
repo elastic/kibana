@@ -404,7 +404,7 @@ describe('xy_visualization', () => {
   });
 
   describe('#getErrorMessages', () => {
-    it("should not return an error when there's only one dimension", () => {
+    it("should not return an error when there's only one dimension (X or Y)", () => {
       expect(
         xyVisualization.getErrorMessages(
           {
@@ -446,6 +446,75 @@ describe('xy_visualization', () => {
         )
       ).not.toBeDefined();
     });
+    it('should not return an error when mixing different valid configurations in multiple layers', () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: ['a'],
+                splitAccessor: 'a',
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
+    it("should not return an error when there's only one splitAccessor dimension configured", () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
     it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
       expect(
         xyVisualization.getErrorMessages(
@@ -470,12 +539,8 @@ describe('xy_visualization', () => {
         )
       ).toEqual([
         {
-          shortMessage: 'Missing X-axis',
-          longMessage: 'Layer 2 requires a field for the X-axis',
-        },
-        {
-          shortMessage: 'Missing Y-axis',
-          longMessage: 'Layer 1 requires a field for the Y-axis',
+          shortMessage: 'Missing Vertical axis',
+          longMessage: 'Layer 1 requires a field for the Vertical axis',
         },
       ]);
     });
@@ -495,13 +560,15 @@ describe('xy_visualization', () => {
                 layerId: 'second',
                 seriesType: 'area',
                 xAccessor: undefined,
-                accessors: ['a'],
+                accessors: [],
+                splitAccessor: 'a',
               },
               {
                 layerId: 'third',
                 seriesType: 'area',
                 xAccessor: undefined,
-                accessors: ['a'],
+                accessors: [],
+                splitAccessor: 'a',
               },
             ],
           },
@@ -509,8 +576,12 @@ describe('xy_visualization', () => {
         )
       ).toEqual([
         {
-          shortMessage: 'Missing X-axis',
-          longMessage: 'Layers 2, 3 require a field for the X-axis',
+          shortMessage: 'Missing Vertical axis',
+          longMessage: 'Layers 2, 3 require a field for the Vertical axis',
+        },
+        {
+          shortMessage: 'Missing Horizontal axis',
+          longMessage: 'Layers 2, 3 require a field for the Horizontal axis',
         },
       ]);
     });
@@ -544,8 +615,8 @@ describe('xy_visualization', () => {
         )
       ).toEqual([
         {
-          shortMessage: 'Missing Y-axis',
-          longMessage: 'Layer 1 requires a field for the Y-axis',
+          shortMessage: 'Missing Vertical axis',
+          longMessage: 'Layer 1 requires a field for the Vertical axis',
         },
       ]);
     });

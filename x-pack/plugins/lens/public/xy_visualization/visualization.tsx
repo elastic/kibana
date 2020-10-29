@@ -156,8 +156,11 @@ export const xyVisualization: Visualization<State> = {
 
   getConfiguration(props) {
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
-    // Make it required only if there's a multi-layer inconsistency
-    const someLayersHaveXConfigured = props.state.layers.some((l) => l.xAccessor);
+    // Make it required only if there's a multi-layer inconsistency:
+    // Note that X-Axis is only required if there's an yAxis defined && there's no splitAccessor defined
+    const someLayersAreIncomplete = props.state.layers.every(
+      (l) => l.accessors.length === 0 && l.xAccessor == null && l.splitAccessor == null
+    );
     const isHorizontal = isHorizontalChart(props.state.layers);
     return {
       groups: [
@@ -174,7 +177,7 @@ export const xyVisualization: Visualization<State> = {
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: !layer.seriesType.includes('percentage') && someLayersHaveXConfigured,
+          required: !layer.seriesType.includes('percentage') && someLayersAreIncomplete,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
@@ -292,9 +295,12 @@ export const xyVisualization: Visualization<State> = {
 
   getErrorMessages(state, frame) {
     // Data error handling below here
-    const hasNoXAccessor = ({ xAccessor }: LayerConfig) => xAccessor == null;
+    const hasNoXAccessor = ({ xAccessor, accessors, splitAccessor }: LayerConfig) =>
+      // Notify about missing X Axis only if yAxis is missing as well
+      xAccessor == null && accessors.length === 0;
     const hasNoAccessors = ({ accessors }: LayerConfig) =>
       accessors == null || accessors.length === 0;
+    const hasNoSplitAccessor = ({ splitAccessor }: LayerConfig) => splitAccessor == null;
 
     const errors: Array<{
       shortMessage: string;
@@ -303,14 +309,18 @@ export const xyVisualization: Visualization<State> = {
 
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
+      // Order is important here: Y Axis is fundamental to exist to make it valid
       const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
-        ['X', hasNoXAccessor],
         ['Y', hasNoAccessors],
+        ['X', hasNoXAccessor],
       ];
 
       // filter those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        (layer) => !checks.every(([dimension, missingCriteria]) => missingCriteria(layer))
+        (layer) =>
+          !checks.every(([dimension, missingCriteria]) => missingCriteria(layer)) ||
+          // Do not discard layers with only breakdown/split Accessor
+          !hasNoSplitAccessor(layer)
       );
 
       for (const [dimension, criteria] of checks) {
@@ -356,20 +366,20 @@ function getMessageIdsForDimension(dimension: string, layers: number[]) {
     case 'X':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXShort', {
-          defaultMessage: `Missing X-axis`,
+          defaultMessage: `Missing Horizontal axis`,
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the X-axis`,
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the Horizontal axis`,
           values: { layers: layers.length, layersList },
         }),
       };
     case 'Y':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
-          defaultMessage: `Missing Y-axis`,
+          defaultMessage: `Missing Vertical axis`,
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the Y-axis`,
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the Vertical axis`,
           values: { layers: layers.length, layersList },
         }),
       };
