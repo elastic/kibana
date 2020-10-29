@@ -9,8 +9,7 @@ import { PipelineListItem } from './pipeline_list_item';
 describe('pipeline_list_item', () => {
   describe('PipelineListItem', () => {
     const upstreamJSON = {
-      _id: 'apache',
-      _source: {
+      apache: {
         description: 'this is an apache pipeline',
         last_modified: '2017-05-14T02:50:51.250Z',
         pipeline_metadata: {
@@ -20,24 +19,22 @@ describe('pipeline_list_item', () => {
         username: 'elastic',
         pipeline: 'input {} filter { grok {} }\n output {}',
       },
-      _index: 'index',
-      _type: 'type',
-      _score: 100,
     };
+    const upstreamId = 'apache';
 
     describe('fromUpstreamJSON factory method', () => {
       it('returns correct PipelineListItem instance', () => {
-        const pipelineListItem = PipelineListItem.fromUpstreamJSON(upstreamJSON);
-        expect(pipelineListItem.id).toBe(upstreamJSON._id);
-        expect(pipelineListItem.description).toBe(upstreamJSON._source.description);
-        expect(pipelineListItem.username).toBe(upstreamJSON._source.username);
-        expect(pipelineListItem.last_modified).toBe(upstreamJSON._source.last_modified);
+        const pipelineListItem = PipelineListItem.fromUpstreamJSON(upstreamId, upstreamJSON);
+        expect(pipelineListItem.id).toBe(upstreamId);
+        expect(pipelineListItem.description).toBe(upstreamJSON.apache.description);
+        expect(pipelineListItem.username).toBe(upstreamJSON.apache.username);
+        expect(pipelineListItem.last_modified).toBe(upstreamJSON.apache.last_modified);
       });
     });
 
     describe('downstreamJSON getter method', () => {
       it('returns the downstreamJSON JSON', () => {
-        const pipelineListItem = PipelineListItem.fromUpstreamJSON(upstreamJSON);
+        const pipelineListItem = PipelineListItem.fromUpstreamJSON(upstreamId, upstreamJSON);
         const expectedDownstreamJSON = {
           id: 'apache',
           description: 'this is an apache pipeline',
