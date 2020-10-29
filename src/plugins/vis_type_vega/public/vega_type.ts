@@ -49,7 +49,7 @@ export const createVegaTypeDefinition = (
     }),
     icon: 'visVega',
     group: VisGroups.PROMOTED,
-    groupTitle: i18n.translate('visTypeVega.type.vegaGroupTitle', {
+    titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
       defaultMessage: 'Custom visualization',
     }),
     visConfig: { defaults: { spec: getDefaultSpec() } },

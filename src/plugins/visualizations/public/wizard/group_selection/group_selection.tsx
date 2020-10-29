@@ -222,7 +222,9 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         titleSize="xs"
         title={
           <span data-test-subj="visTypeTitle">
-            {'groupTitle' in visType && visType.groupTitle ? visType.groupTitle : visType.title}
+            {'titleInWizard' in visType && visType.titleInWizard
+              ? visType.titleInWizard
+              : visType.title}
           </span>
         }
         onClick={onClick}
@@ -261,7 +263,9 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
-              {'groupTitle' in visType && visType.groupTitle ? visType.groupTitle : visType.title}
+              {'titleInWizard' in visType && visType.titleInWizard
+                ? visType.titleInWizard
+                : visType.title}
             </EuiLink>
           </EuiFlexItem>
           {visType.stage === 'experimental' && (

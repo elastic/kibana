@@ -47,7 +47,7 @@ interface CommonBaseVisTypeOptions<TVisParams>
       | 'useCustomNoDataScreen'
       | 'visConfig'
       | 'group'
-      | 'groupTitle'
+      | 'titleInWizard'
       | 'note'
     > {
   options?: Partial<VisType<TVisParams>['options']>;
@@ -85,7 +85,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly image;
   public readonly stage;
   public readonly group;
-  public readonly groupTitle;
+  public readonly titleInWizard;
   public readonly options;
   public readonly visualization;
   public readonly visConfig;
@@ -120,7 +120,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';
     this.group = opts.group ?? VisGroups.AGGBASED;
-    this.groupTitle = opts.groupTitle ?? '';
+    this.titleInWizard = opts.titleInWizard ?? '';
     this.hidden = opts.hidden ?? false;
     this.requestHandler = opts.requestHandler ?? 'courier';
     this.responseHandler = opts.responseHandler ?? 'none';

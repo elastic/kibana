@@ -89,7 +89,7 @@ export interface VisType<TVisParams = unknown> {
    * We use it because we want to differentiate the vis title from the
    * way it is presented on the wizard
    */
-  readonly groupTitle: string;
+  readonly titleInWizard: string;
   readonly requiresSearch: boolean;
   readonly useCustomNoDataScreen: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
