@@ -111,6 +111,8 @@ export async function runFpm(
     `pluginsDir=/usr/share/kibana/plugins`,
     '--template-value',
     `dataDir=/var/lib/kibana`,
+    '--template-value',
+    `logDir=/var/log/kibana`,
 
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
