@@ -3,6 +3,6 @@
 Enhances data access services from OSS data plugin.
 
 - Enhanced search strategies:
-  - Async search strategy
-  - EQL search strategy
+  - Async KQL search strategy
+  - ASYNC EQL search strategy
 - KQL autocomplete implementation
