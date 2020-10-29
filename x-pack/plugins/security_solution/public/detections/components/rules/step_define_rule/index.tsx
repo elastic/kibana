@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
@@ -53,7 +53,7 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { PreviewQuery } from '../query_preview';
+import { PreviewQuery, Threshold } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -209,6 +209,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
+
+  const thresholdFormValue = useMemo((): Threshold | undefined => {
+    return formThresholdValue != null && formThresholdField != null
+      ? { value: formThresholdValue, field: formThresholdField[0] }
+      : undefined;
+  }, [formThresholdField, formThresholdValue]);
 
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue }) => (
@@ -403,11 +409,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               index={index}
               query={formQuery}
               isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
-              threshold={
-                formThresholdValue != null && formThresholdField != null
-                  ? { value: formThresholdValue, field: formThresholdField[0] }
-                  : undefined
-              }
+              threshold={thresholdFormValue}
             />
           </>
         )}

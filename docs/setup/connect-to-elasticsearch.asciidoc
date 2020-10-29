@@ -20,14 +20,15 @@ to see all that you can do in {kib}.
 
 experimental[]
 
-To visualize data in a CSV, JSON, or log file, you can upload it using the File
-Data Visualizer. On the home page, click *Import a CSV, NDSON, or log file*, and
-then drag your file into the File Data Visualizer. Alternatively, you can open
-it by navigating to *Machine Learning* from the side navigation and selecting
+To visualize data in a CSV, JSON, or log file, you can upload it using the File 
+Data Visualizer. On the home page, click *Upload a file*, and 
+then drag your file onto the *File Data Visualizer*. Alternatively, you can open 
+it by navigating to *Machine Learning* from the side navigation and selecting 
+
 *Data Visualizer*.
 
 [role="screenshot"]
-image::images/data-viz-homepage.jpg[File Data Visualizer on the home page]
+image::images/ingest-data.png[File Data Visualizer on the home page]
 
 You can upload a file up to 100 MB. This value is configurable up to 1 GB in
 <<kibana-ml-settings, Advanced Settings>>.
@@ -78,7 +79,7 @@ create an index pattern that matches the names of the indices that you want to e
 When you add data with the File Data Visualizer, GeoJSON Upload feature,
 or built-in tutorial, an index pattern is created for you.
 
-. Go to *Stack Management*, and then click *Index Patterns*.
+. Open the main menu, then click *Stack Management > Index Patterns*.
 
 . Click *Create index pattern*.
 

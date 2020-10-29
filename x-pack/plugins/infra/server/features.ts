@@ -17,8 +17,6 @@ export const METRICS_FEATURE = {
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'metricsApp',
-  navLinkId: 'metrics',
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops', 'metrics'],
   management: {
@@ -68,8 +66,6 @@ export const LOGS_FEATURE = {
   }),
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'logsApp',
-  navLinkId: 'logs',
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging', 'logs'],
   management: {
