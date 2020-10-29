@@ -36,8 +36,13 @@ const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.Compl
       return monacoItemKind.Constructor;
     case 'property':
       return monacoItemKind.Property;
+    case 'keyword':
+      return monacoItemKind.Keyword;
+    case 'field':
+      return monacoItemKind.Field;
+    default:
+      return monacoItemKind.Text;
   }
-  return monacoItemKind.Property;
 };
 
 export class PainlessCompletionAdapter implements monaco.languages.CompletionItemProvider {
@@ -50,7 +55,7 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
   ) {}
 
   public get triggerCharacters(): string[] {
-    return ['.'];
+    return ['.', `'`];
   }
 
   provideCompletionItems(
@@ -66,11 +71,13 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
       endLineNumber: position.lineNumber,
       endColumn: position.column,
     });
+
     return this._worker(model.uri)
       .then((worker: PainlessWorker) => {
         return worker.provideAutocompleteSuggestions(
           currentLineChars,
-          this._contextService.workerContext
+          this._contextService.workerContext,
+          this._contextService.editorFields
         );
       })
       .then((completionInfo: PainlessCompletionResult) => {
@@ -83,13 +90,16 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
         };
 
         const suggestions = completionInfo.suggestions.map(
-          ({ label, insertText, documentation, kind }) => {
+          ({ label, insertText, documentation, kind, insertTextAsSnippet }) => {
             return {
               label,
               insertText,
               documentation,
               range: wordRange,
               kind: getCompletionKind(kind),
+              insertTextRules: insertTextAsSnippet
+                ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                : undefined,
             };
           }
         );

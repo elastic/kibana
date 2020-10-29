@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { PainlessContext } from './types';
+import { PainlessContext, Field } from './types';
 
 export class ContextService {
   context: PainlessContext = 'painless_test';
+  fields: Field[] = [];
 
   public get workerContext() {
     return this.context;
@@ -28,5 +29,13 @@ export class ContextService {
 
   public set workerContext(newContext: PainlessContext) {
     this.context = newContext;
+  }
+
+  public get editorFields() {
+    return this.fields;
+  }
+
+  public set editorFields(newFields: Field[]) {
+    this.fields = newFields;
   }
 }

@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { PainlessCompletionResult, PainlessCompletionItem, PainlessContext } from '../../types';
+import {
+  PainlessCompletionResult,
+  PainlessCompletionItem,
+  PainlessContext,
+  PainlessCompletionKind,
+  Field,
+} from '../../types';
+
 import {
   painless_test,
   score,
@@ -59,9 +66,20 @@ export class PainlessCompletionService {
       const { children, ...rootSuggestion } = suggestion;
       return rootSuggestion;
     });
+
     return {
       isIncomplete: false,
-      suggestions,
+      suggestions: [
+        ...suggestions,
+        {
+          label: 'doc',
+          kind: 'keyword',
+          // TODO i18n
+          documentation: `Access a field value from a script using the doc['field_name'] syntax`,
+          insertText: "doc[${1:'my_field'}]",
+          insertTextAsSnippet: true,
+        },
+      ],
     };
   }
 
@@ -77,6 +95,23 @@ export class PainlessCompletionService {
     return {
       isIncomplete: false,
       suggestions: painlessClass?.children || [],
+    };
+  }
+
+  getFieldSuggestions(fields: Field[]) {
+    const suggestions = fields.map(({ name }) => {
+      return {
+        label: name,
+        kind: 'field' as PainlessCompletionKind,
+        // TODO i18n
+        documentation: `Retrieve the value for field ${name}`,
+        insertText: `${name}'`,
+      };
+    });
+
+    return {
+      isIncomplete: false,
+      suggestions,
     };
   }
 }

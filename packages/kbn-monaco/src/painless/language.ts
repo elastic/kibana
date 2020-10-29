@@ -23,7 +23,7 @@ import { PainlessCompletionAdapter } from './painless_completion';
 import { WorkerProxyService } from './worker_proxy_service';
 import { ContextService } from './context_service';
 import { ID } from './constants';
-import { PainlessContext } from './types';
+import { PainlessContext, Field } from './types';
 import { PainlessWorker } from './worker';
 
 const workerProxyService = new WorkerProxyService();
@@ -39,7 +39,12 @@ monaco.languages.onLanguage(ID, async () => {
   workerProxyService.setup();
 });
 
-export const getSuggestionProvider = (context: PainlessContext) => {
+export const getSuggestionProvider = (context: PainlessContext, fields?: Field[]) => {
   contextService.workerContext = context;
+
+  if (fields) {
+    contextService.editorFields = fields;
+  }
+
   return new PainlessCompletionAdapter(worker, contextService);
 };

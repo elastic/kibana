@@ -17,7 +17,14 @@
  * under the License.
  */
 
-export type PainlessCompletionKind = 'type' | 'class' | 'method' | 'constructor' | 'property';
+export type PainlessCompletionKind =
+  | 'type'
+  | 'class'
+  | 'method'
+  | 'constructor'
+  | 'property'
+  | 'field'
+  | 'keyword';
 
 export type PainlessContext =
   | 'painless_test'
@@ -36,9 +43,15 @@ export interface PainlessCompletionItem {
   kind: PainlessCompletionKind;
   documentation: string;
   insertText: string;
+  insertTextAsSnippet?: boolean;
 }
 
 export interface PainlessCompletionResult {
   isIncomplete: boolean;
   suggestions: PainlessCompletionItem[];
+}
+
+export interface Field {
+  name: string;
+  type: string;
 }

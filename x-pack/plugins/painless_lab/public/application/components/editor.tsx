@@ -35,6 +35,9 @@ export function Editor({ code, onChange, context }: Props) {
         wordWrap: 'on',
         wrappingIndent: 'indent',
         automaticLayout: true,
+        suggest: {
+          snippetsPreventQuickSuggestions: false,
+        },
       }}
     />
   );

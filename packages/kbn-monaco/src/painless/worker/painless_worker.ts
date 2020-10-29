@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PainlessCompletionResult, PainlessContext } from '../types';
+import { PainlessCompletionResult, PainlessContext, Field } from '../types';
 
 import { PainlessCompletionService } from './services';
 
@@ -25,7 +25,7 @@ export class PainlessWorker {
   async provideAutocompleteSuggestions(
     currentLineChars: string,
     context: PainlessContext,
-    index?: string
+    fields?: Field[]
   ): Promise<PainlessCompletionResult> {
     const completionService = new PainlessCompletionService(context);
     // Array of the active line words, e.g., [boolean, isInCircle]
@@ -38,13 +38,16 @@ export class PainlessWorker {
     // If the preceding word is a type, e.g., "boolean", we assume the user is declaring a variable and skip autocomplete
     const hasDeclaredType =
       words.length === 2 && completionService.getPrimitives().includes(words[0]);
+    const isField = activeTyping === `doc['`;
 
     let autocompleteSuggestions: PainlessCompletionResult = {
       isIncomplete: false,
       suggestions: [],
     };
 
-    if (isProperty) {
+    if (fields && isField) {
+      autocompleteSuggestions = completionService.getFieldSuggestions(fields);
+    } else if (isProperty) {
       const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
       autocompleteSuggestions = completionService.getPainlessClassSuggestions(className);
     } else if (!hasDeclaredType) {
