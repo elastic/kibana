@@ -39,7 +39,6 @@ describe('attributeService', () => {
   let byValueInput: TestByValueInput;
   let byReferenceInput: { id: string; savedObjectId: string };
   const defaultSaveMethod = (
-    type: string,
     testAttributes: TestAttributes,
     savedObjectId?: string
   ): Promise<{ id: string }> => {
