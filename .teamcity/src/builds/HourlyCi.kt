@@ -18,6 +18,7 @@ object HourlyCi : BuildType({
         hours = "*"
         minutes = "0"
       }
+      branchFilter = "refs/heads/master_teamcity"
       triggerBuild = always()
       withPendingChangesOnly = true
     }

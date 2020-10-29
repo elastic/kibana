@@ -21,6 +21,7 @@ object BaselineCi : BuildType({
 
   triggers {
     vcs {
+      branchFilter = "refs/heads/master_teamcity"
 //      perCheckinTriggering = true // TODO re-enable this later, it wreaks havoc when I merge upstream
     }
   }
