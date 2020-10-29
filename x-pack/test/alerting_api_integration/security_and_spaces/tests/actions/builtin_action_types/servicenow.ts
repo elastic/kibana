@@ -310,7 +310,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 actionId: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Cannot read property 'Symbol(Symbol.iterator)' of undefined`,
+                message: `error validating action params: undefined is not iterable (cannot read property Symbol(Symbol.iterator))`,
               });
             });
         });
