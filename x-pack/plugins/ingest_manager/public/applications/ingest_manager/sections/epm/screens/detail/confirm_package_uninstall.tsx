@@ -20,7 +20,7 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
       <EuiConfirmModal
         title={
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmUninstallModal.uninstallTitle"
+            id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallTitle"
             defaultMessage="Uninstall {packageName}"
             values={{ packageName }}
           />
@@ -29,13 +29,13 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
         onConfirm={onConfirm}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmUninstallModal.cancelButtonLabel"
+            id="xpack.fleet.integrations.settings.confirmUninstallModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
         confirmButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmUninstallModal.uninstallButtonLabel"
+            id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallButtonLabel"
             defaultMessage="Uninstall {packageName}"
             values={{ packageName }}
           />
@@ -47,7 +47,7 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
           color="danger"
           title={
             <FormattedMessage
-              id="xpack.ingestManager.integrations.settings.confirmUninstallModal.uninstallCallout.title"
+              id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallCallout.title"
               defaultMessage="This action will remove {numOfAssets} assets"
               values={{ numOfAssets }}
             />
@@ -55,7 +55,7 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
         >
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.integrations.settings.confirmUninstallModal.uninstallCallout.description"
+              id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallCallout.description"
               defaultMessage="Kibana and Elasticsearch assets that were created by this integration will be removed. Agents policies and any data sent by your agents will not be effected."
             />
           </p>
@@ -63,7 +63,7 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
         <EuiSpacer size="l" />
         <p>
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmUninstallModal.uninstallDescription"
+            id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallDescription"
             defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
           />
         </p>

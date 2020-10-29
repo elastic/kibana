@@ -25,7 +25,7 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({ agent
     <>
       <EuiText>
         <FormattedMessage
-          id="xpack.ingestManager.agentReassignPolicy.policyDescription"
+          id="xpack.fleet.agentReassignPolicy.policyDescription"
           defaultMessage="The selected agent policy will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
           values={{
             count: agentPolicy.package_policies.length,
