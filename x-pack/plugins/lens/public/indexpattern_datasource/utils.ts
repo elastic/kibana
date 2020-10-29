@@ -5,7 +5,7 @@
  */
 
 import { DataType } from '../types';
-import { IndexPatternPrivateState, IndexPattern } from './types';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from './types';
 import { DraggedField } from './indexpattern';
 import {
   BaseIndexPatternColumn,
@@ -48,7 +48,7 @@ export function hasInvalidReference(state: IndexPatternPrivateState) {
 }
 
 export function getInvalidReferences(state: IndexPatternPrivateState) {
-  return Object.values(state.layers || {}).filter((layer) => {
+  return Object.values(state.layers).filter((layer) => {
     return layer.columnOrder.some((columnId) => {
       const column = layer.columns[columnId];
       return (
@@ -63,19 +63,39 @@ export function getInvalidReferences(state: IndexPatternPrivateState) {
   });
 }
 
+export function getInvalidFieldReferencesForLayer(
+  layers: IndexPatternLayer[],
+  indexPatternMap: Record<string, IndexPattern>
+) {
+  return layers.map((layer) => {
+    return layer.columnOrder.filter((columnId) => {
+      const column = layer.columns[columnId];
+      return (
+        hasField(column) &&
+        fieldIsInvalid(
+          column.sourceField,
+          column.operationType,
+          indexPatternMap[layer.indexPatternId]
+        )
+      );
+    });
+  });
+}
+
 export function fieldIsInvalid(
   sourceField: string | undefined,
   operationType: OperationType | undefined,
   indexPattern: IndexPattern
 ) {
   const operationDefinition = operationType && operationDefinitionMap[operationType];
+
   return Boolean(
     sourceField &&
       operationDefinition &&
       !indexPattern.fields.some(
         (field) =>
           field.name === sourceField &&
-          operationDefinition.input === 'field' &&
+          operationDefinition?.input === 'field' &&
           operationDefinition.getPossibleOperationForField(field) !== undefined
       )
   );

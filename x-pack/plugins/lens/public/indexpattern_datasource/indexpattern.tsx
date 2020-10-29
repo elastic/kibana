@@ -39,7 +39,12 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { getInvalidReferences, isDraggedField, normalizeOperationDataType } from './utils';
+import {
+  getInvalidFieldReferencesForLayer,
+  getInvalidReferences,
+  isDraggedField,
+  normalizeOperationDataType,
+} from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
 import {
@@ -54,6 +59,7 @@ import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/pub
 import { deleteColumn } from './state_helpers';
 import { Datasource, StateSetter } from '../index';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { FieldBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 export { OperationType, IndexPatternColumn } from './operations';
 
@@ -345,25 +351,52 @@ export function getIndexPatternDatasource({
     getErrorMessages(state) {
       if (state) {
         const invalidLayers = getInvalidReferences(state);
+
         if (invalidLayers.length > 0) {
           const realIndex = Object.values(state.layers)
             .map((layer, i) => {
-              if (invalidLayers.includes(layer)) {
-                return i + 1;
+              const filteredIndex = invalidLayers.indexOf(layer);
+              if (filteredIndex > -1) {
+                return [filteredIndex, i + 1];
               }
             })
-            .filter(Boolean) as number[];
-          return [
-            {
+            .filter(Boolean) as Array<[number, number]>;
+          const invalidFieldsPerLayer: string[][] = getInvalidFieldReferencesForLayer(
+            invalidLayers,
+            state.indexPatterns
+          );
+          const originalLayersList = Object.keys(state.layers);
+
+          return realIndex.map(([filteredIndex, layerIndex]) => {
+            const fieldsWithBrokenReferences: string[] = invalidFieldsPerLayer[filteredIndex].map(
+              (columnId) => {
+                const column = invalidLayers[filteredIndex].columns[
+                  columnId
+                ] as FieldBasedIndexPatternColumn;
+                return column.sourceField;
+              }
+            );
+            return {
               shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
-                defaultMessage: 'Invalid references',
+                defaultMessage:
+                  'Invalid {fields, plural, one {reference} other {references}} {hasMultipleLayers, plural, one {} other {on Layer {layer}}}',
+                values: {
+                  layer: layerIndex,
+                  fields: fieldsWithBrokenReferences.length,
+                  hasMultipleLayers: originalLayersList.length,
+                },
               }),
               longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
-                defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {has} other {have}} invalid reference`,
-                values: { layers: realIndex.length, layersList: realIndex.join(', ') },
+                defaultMessage: `{fieldsLength, plural, one {Field} other {Fields}} "{fields}" {fieldsLength, plural, one {has} other {have}} invalid reference`,
+                values: {
+                  layers: realIndex.length,
+                  fields: fieldsWithBrokenReferences.join('", "'),
+                  fieldsLength: fieldsWithBrokenReferences.length,
+                  hasMultipleLayers: originalLayersList.length,
+                },
               }),
-            },
-          ];
+            };
+          });
         }
       }
     },
