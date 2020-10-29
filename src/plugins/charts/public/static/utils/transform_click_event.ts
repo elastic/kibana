@@ -20,7 +20,7 @@
 import { XYChartSeriesIdentifier, GeometryValue, XYBrushArea } from '@elastic/charts';
 
 import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
-import { KibanaDatatable } from '../../../../expressions/common/expression_types/specs';
+import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
 export interface ClickTriggerEvent {
   name: 'filterBucket';
@@ -36,7 +36,7 @@ export interface BrushTriggerEvent {
  * Helper function to transform `@elastic/charts` click event into filter action event
  */
 export const getFilterFromChartClickEventFn = (
-  table: KibanaDatatable,
+  table: Datatable,
   xAccessor: string | number,
   negate: boolean = false
 ) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
@@ -82,7 +82,7 @@ export const getFilterFromChartClickEventFn = (
 /**
  * Helper function to get filter action event from series
  */
-export const getFilterFromSeriesFn = (table: KibanaDatatable) => (
+export const getFilterFromSeriesFn = (table: Datatable) => (
   { splitAccessors }: XYChartSeriesIdentifier,
   negate = false
 ): ClickTriggerEvent => {
@@ -113,10 +113,9 @@ export const getFilterFromSeriesFn = (table: KibanaDatatable) => (
 /**
  * Helper function to transform `@elastic/charts` brush event into brush action event
  */
-export const getBrushFromChartBrushEventFn = (
-  table: KibanaDatatable,
-  xAccessor: string | number
-) => ({ x: selectedRange }: XYBrushArea): BrushTriggerEvent => {
+export const getBrushFromChartBrushEventFn = (table: Datatable, xAccessor: string | number) => ({
+  x: selectedRange,
+}: XYBrushArea): BrushTriggerEvent => {
   const [start, end] = selectedRange ?? [0, 0];
   const range: [number, number] = [start, end];
   const column = table.columns.findIndex((c) => c.id === xAccessor);

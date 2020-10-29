@@ -17,35 +17,23 @@
  * under the License.
  */
 
-import { VisTypeXyPlugin as Plugin } from './plugin';
+import { Vis } from '../../visualizations/public';
+import { buildExpressionFunction } from '../../expressions/public';
+import { EsaggsExpressionFunctionDefinition } from '../../data/public';
 
-export { VisTypeXyPluginSetup } from './plugin';
+import { VisParams } from './types';
 
-// TODO: Remove when vis_type_vislib is removed
-export {
-  CategoryAxis,
-  ThresholdLine,
-  ValueAxis,
-  Grid,
-  SeriesParam,
-  Dimension,
-  Dimensions,
-  ScaleType,
-  AxisType,
-  HistogramParams,
-  DateHistogramParams,
-} from './types';
-export {
-  getPositions,
-  getScaleTypes,
-  TruncateLabelsOption,
-  ValidationVisOptionsProps,
-} from './editor';
-export { xyVisTypes } from './vis_types';
-
-// Export common types
-export * from '../common';
-
-export function plugin() {
-  return new Plugin();
+/**
+ * Get esaggs expressions function
+ * TODO: replace this with vis.data.aggs!.toExpressionAst();
+ * @param vis
+ */
+export function getEsaggsFn(vis: Vis<VisParams>) {
+  return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+    index: vis.data.indexPattern!.id!,
+    metricsAtAllLevels: vis.isHierarchical(),
+    partialRows: false,
+    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    includeFormatHints: false,
+  });
 }

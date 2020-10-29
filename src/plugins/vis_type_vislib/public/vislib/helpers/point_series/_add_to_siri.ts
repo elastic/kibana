@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import type { Dimension } from '../../../../../vis_type_xy/public';
+
 import { Point } from './_get_point';
-import { Dimension } from './point_series';
 
 export interface Serie {
   id: string;

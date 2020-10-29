@@ -21,7 +21,7 @@ import { compact } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaDatatableColumn } from '../../../expressions/public';
+import { DatatableColumn } from '../../../expressions/public';
 
 import { Aspect, Dimension, Aspects, Dimensions } from '../types';
 import { getFormatService } from '../services';
@@ -39,10 +39,7 @@ export function getEmptyAspect(): Aspect {
     },
   };
 }
-export function getAspects(
-  columns: KibanaDatatableColumn[],
-  { x, y, z, series }: Dimensions
-): Aspects {
+export function getAspects(columns: DatatableColumn[], { x, y, z, series }: Dimensions): Aspects {
   const seriesDimensions = Array.isArray(series) || series === undefined ? series : [series];
 
   return {
@@ -54,15 +51,15 @@ export function getAspects(
 }
 
 function getAspectsFromDimension(
-  columns: KibanaDatatableColumn[],
+  columns: DatatableColumn[],
   dimension?: Dimension | null
 ): Aspect | undefined;
 function getAspectsFromDimension(
-  columns: KibanaDatatableColumn[],
+  columns: DatatableColumn[],
   dimensions?: Dimension[] | null
 ): Aspect[] | undefined;
 function getAspectsFromDimension(
-  columns: KibanaDatatableColumn[],
+  columns: DatatableColumn[],
   dimensions?: Dimension | Dimension[] | null
 ): Aspect[] | Aspect | undefined {
   if (!dimensions) {
@@ -83,7 +80,7 @@ function getAspectsFromDimension(
 }
 
 const getAspect = (
-  { id: accessor, name: title }: KibanaDatatableColumn,
+  { id: accessor, name: title }: DatatableColumn,
   { accessor: column, format, params, aggType }: Dimension
 ): Aspect => ({
   accessor,

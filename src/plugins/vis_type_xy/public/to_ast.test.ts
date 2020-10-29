@@ -17,24 +17,44 @@
  * under the License.
  */
 
-import { Vis } from 'src/plugins/visualizations/public';
-import { TimelionVisParams } from './timelion_vis_fn';
-import { toExpressionAst } from './to_ast';
+import { Vis } from '../../visualizations/public';
+import { buildExpression } from '../../expressions/public';
+import { sampleAreaVis } from '../../vis_type_vislib/public/sample_vis.test.mocks';
 
-describe('timelion vis toExpressionAst function', () => {
-  let vis: Vis<TimelionVisParams>;
+import { toExpressionAst } from './to_ast';
+import { VisParams } from './types';
+
+jest.mock('../../expressions/public', () => ({
+  ...(jest.requireActual('../../expressions/public') as any),
+  buildExpression: jest.fn().mockImplementation(() => ({
+    toAst: () => ({
+      type: 'expression',
+      chain: [],
+    }),
+  })),
+}));
+
+jest.mock('./to_ast_esaggs', () => ({
+  getEsaggsFn: jest.fn(),
+}));
+
+describe('vislib vis toExpressionAst function', () => {
+  let vis: Vis<VisParams>;
+
+  const params = {
+    timefilter: {},
+    timeRange: {},
+    abortSignal: {},
+  } as any;
 
   beforeEach(() => {
-    vis = {
-      params: {
-        expression: '.es(*)',
-        interval: 'auto',
-      },
-    } as any;
+    vis = sampleAreaVis as any;
   });
 
   it('should match basic snapshot', () => {
-    const actual = toExpressionAst(vis);
-    expect(actual).toMatchSnapshot();
+    toExpressionAst(vis, params);
+    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls[0][0];
+
+    expect(builtExpression).toMatchSnapshot();
   });
 });

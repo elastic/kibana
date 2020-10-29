@@ -46,6 +46,7 @@ export const getVislibVisRenderer: (
   charts: ChartsPluginSetup
 ) => ExpressionRenderDefinition<VislibRenderValue> = (core, charts) => ({
   name: vislibVisName,
+  displayName: 'Visliib visualization',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(config.visData, config.visType);

@@ -21,14 +21,10 @@ import moment from 'moment';
 
 import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import type { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
 
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams } from './types';
-import {
-  DateHistogramParams,
-  Dimensions,
-  HistogramParams,
-} from './vislib/helpers/point_series/point_series';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis, params) => {
@@ -89,7 +85,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
   visConfig.dimensions = dimensions;
 
   const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
-  const visTypeXy = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
+  const visTypeVislib = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
     vislibVisName,
     {
       type: vis.type.name,
@@ -97,7 +93,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
     }
   );
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+  const ast = buildExpression([getEsaggsFn(vis), visTypeVislib]);
 
   return ast.toAst();
 };

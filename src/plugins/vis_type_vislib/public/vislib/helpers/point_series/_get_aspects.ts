@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import type { Dimensions } from '../../../../../vis_type_xy/public';
+
 import { makeFakeXAspect } from './_fake_x_aspect';
-import { Dimensions, Aspects } from './point_series';
+import { Aspects } from './point_series';
 import { Table } from '../../types';
 
 /**

@@ -26,20 +26,31 @@ import { VisualizationContainer } from '../../visualizations/public';
 import { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './xy_vis_fn';
 
+function shouldShowNoResultsMessage(visData: any, visType: string): boolean {
+  if (['goal', 'gauge'].includes(visType as string)) {
+    return false;
+  }
+
+  const rows: object[] | undefined = visData?.rows;
+  const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
+
+  return Boolean(isZeroHits);
+}
+
 // @ts-ignore
 const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));
 
 export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   name: visName,
-  displayName: 'Timelion visualization',
+  displayName: 'XY visualization',
   reuseDomNode: true,
-  render: (domNode, { visData, visConfig }, handlers) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+  render: (domNode, { visData, visConfig, visType }, handlers) => {
+    const showNoResult = shouldShowNoResultsMessage(visData, visType);
+
+    handlers.onDestroy(() => unmountComponentAtNode(domNode));
 
     render(
-      <VisualizationContainer>
+      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
         <VisComponent
           visParams={visConfig}
           visData={visData}

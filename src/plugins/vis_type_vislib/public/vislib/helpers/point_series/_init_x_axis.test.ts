@@ -18,16 +18,12 @@
  */
 
 import moment from 'moment';
+
+import type { DateHistogramParams, HistogramParams } from '../../../../../vis_type_xy/public';
+
 import { initXAxis } from './_init_x_axis';
 import { makeFakeXAspect } from './_fake_x_aspect';
-import {
-  Aspects,
-  Chart,
-  DateHistogramOrdered,
-  DateHistogramParams,
-  HistogramOrdered,
-  HistogramParams,
-} from './point_series';
+import { Aspects, Chart, DateHistogramOrdered, HistogramOrdered } from './point_series';
 import { Table, Column } from '../../types';
 
 describe('initXAxis', function () {
@@ -110,7 +106,7 @@ describe('initXAxis', function () {
 
   it('reads the date interval param from the x agg', function () {
     const dateHistogramParams = chart.aspects.x[0].params as DateHistogramParams;
-    dateHistogramParams.interval = 'P1D';
+    dateHistogramParams.interval = moment.duration(1, 'd').asMilliseconds();
     dateHistogramParams.intervalESValue = 1;
     dateHistogramParams.intervalESUnit = 'd';
     dateHistogramParams.date = true;

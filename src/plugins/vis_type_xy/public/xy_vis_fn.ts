@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 
 import { ChartType } from '../common';
 import { VisParams } from './types';
@@ -31,14 +31,14 @@ interface Arguments {
   visConfig: string;
 }
 export interface RenderValue {
-  visData: KibanaDatatable;
+  visData: Datatable;
   visType: string;
   visConfig: VisParams;
 }
 
 export type VisTypeXyExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof visName,
-  KibanaDatatable,
+  Datatable,
   Arguments,
   Render<RenderValue>
 >;
@@ -47,7 +47,7 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
   name: visName,
   type: 'render',
   context: {
-    types: ['kibana_datatable'],
+    types: ['datatable'],
   },
   help: i18n.translate('visTypeXy.functions.vislib.help', {
     defaultMessage: 'Vislib visualization',

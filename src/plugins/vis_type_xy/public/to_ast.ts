@@ -18,15 +18,14 @@
  */
 
 import moment from 'moment';
-import { get } from 'lodash';
 
-import { Vis, VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
-import { EsaggsExpressionFunctionDefinition } from '../../data/public';
+import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 
 import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
 import { ChartType } from '../common';
+import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -64,7 +63,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     }
   }
 
-  const visConfig = vis.params;
+  const visConfig = { ...vis.params };
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs[yDimension.accessor];
@@ -75,7 +74,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       const usedValueAxis = (visConfig.valueAxes || []).find(
         (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
       );
-      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+      if (usedValueAxis?.scale.mode === 'percentage') {
         yDimension.format = { id: 'percent' };
       }
     }
@@ -93,18 +92,3 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   return ast.toAst();
 };
-
-/**
- * Get esaggs expressions function
- * @param vis
- */
-function getEsaggsFn(vis: Vis<VisParams & { showPartialRows?: any }>) {
-  // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
-  return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.params.showPartialRows ?? false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
-  });
-}

@@ -37,7 +37,7 @@ import {
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
 } from '../../charts/public';
-import { KibanaDatatable, IInterpreterRenderHandlers } from '../../expressions/public';
+import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
 
 import { VisParams } from './types';
 import {
@@ -65,7 +65,7 @@ import './_chart.scss';
 
 export interface VisComponentProps {
   visParams: VisParams;
-  visData: KibanaDatatable;
+  visData: Datatable;
   uiState: IInterpreterRenderHandlers['uiState'];
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
@@ -95,9 +95,7 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const handleFilterClick = useCallback(
-    (visData: KibanaDatatable, xAccessor: string | number | null): ElementClickListener => (
-      elements
-    ) => {
+    (visData: Datatable, xAccessor: string | number | null): ElementClickListener => (elements) => {
       if (xAccessor !== null) {
         const event = getFilterFromChartClickEventFn(
           visData,
@@ -110,9 +108,7 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const handleBrush = useCallback(
-    (visData: KibanaDatatable, xAccessor: string | number | null): BrushEndListener => (
-      brushArea
-    ) => {
+    (visData: Datatable, xAccessor: string | number | null): BrushEndListener => (brushArea) => {
       if (xAccessor !== null) {
         const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
         props.fireEvent(event);
@@ -122,7 +118,7 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const getFilterEventData = useCallback(
-    (visData: KibanaDatatable, xAccessor: string | number | null) => (
+    (visData: Datatable, xAccessor: string | number | null) => (
       series: XYChartSeriesIdentifier
     ): ClickTriggerEvent | null => {
       if (xAccessor !== null) {

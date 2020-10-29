@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import type { Dimension, Dimensions } from '../../../../../vis_type_xy/public';
+
 import { getAspects } from './_get_aspects';
-import { Dimension, Dimensions, Aspect } from './point_series';
+import { Aspect } from './point_series';
 import { Table, Row } from '../../types';
 
 describe('getAspects', function () {

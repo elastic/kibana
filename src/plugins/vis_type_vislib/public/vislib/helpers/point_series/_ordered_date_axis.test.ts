@@ -19,8 +19,11 @@
 
 import moment from 'moment';
 import _ from 'lodash';
+
+import type { DateHistogramParams } from '../../../../../vis_type_xy/public/types';
+
 import { orderedDateAxis } from './_ordered_date_axis';
-import { DateHistogramParams, OrderedChart } from './point_series';
+import { OrderedChart } from './point_series';
 
 describe('orderedDateAxis', function () {
   const baseArgs = {

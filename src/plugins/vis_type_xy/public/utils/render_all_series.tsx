@@ -31,7 +31,7 @@ import {
 } from '@elastic/charts';
 import { Accessor } from '@elastic/charts/dist/utils/accessor';
 
-import { KibanaDatatableRow } from '../../../expressions/public';
+import { DatatableRow } from '../../../expressions/public';
 import { ChartType } from '../../common';
 import { SeriesParam, VisConfig, FakeParams, Aspect } from '../types';
 
@@ -83,7 +83,7 @@ const getXAccessor = (xAspect: Aspect): Accessor | AccessorFn => {
 export const renderAllSeries = (
   { aspects, yAxes, xAxis, showValueLabel, enableHistogramMode, fittingFunction }: VisConfig,
   seriesParams: SeriesParam[],
-  data: KibanaDatatableRow[],
+  data: DatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
   getSeriesColor: SeriesColorAccessorFn,
   timeZone: string

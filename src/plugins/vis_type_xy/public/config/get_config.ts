@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaDatatable } from '../../../expressions/public';
+import { Datatable } from '../../../expressions/public';
 
 import { DateHistogramParams, VisConfig, VisParams, XScaleType, YScaleType } from '../types';
 import { getThresholdLine } from './get_threshold_line';
@@ -27,7 +27,7 @@ import { getLegend } from './get_legend';
 import { getAxis } from './get_axis';
 import { getAspects } from './get_aspects';
 
-export function getConfig(table: KibanaDatatable, params: VisParams): VisConfig {
+export function getConfig(table: Datatable, params: VisParams): VisConfig {
   const {
     thresholdLine,
     orderBucketsBySum,
