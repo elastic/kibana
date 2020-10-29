@@ -7,8 +7,8 @@
     "devOnly": true
   },
   "scripts": {
-    "kbn:bootstrap": "tsc",
-    "kbn:watch": "tsc --watch"
+    "kbn:bootstrap": "../../node_modules/.bin/tsc",
+    "kbn:watch": "../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
     "@kbn/utils": "link:../kbn-utils",

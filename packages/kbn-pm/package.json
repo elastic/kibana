@@ -8,9 +8,9 @@
     "devOnly": true
   },
   "scripts": {
-    "build": "webpack",
-    "kbn:watch": "webpack --watch --progress",
-    "prettier": "prettier --write './src/**/*.ts'"
+    "build": "../../node_modules/.bin/webpack",
+    "kbn:watch": "../../node_modules/.bin/webpack --watch --progress",
+    "prettier": "../../node_modules/.bin/prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils"

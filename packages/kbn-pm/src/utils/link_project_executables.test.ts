@@ -119,8 +119,6 @@ describe('bin script points to a file', () => {
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
          debg Linking package executables,
-         debg [foo] 'node_modules/.bin' -> ../bar/node_modules/.bin,
-         debg [baz] 'node_modules/.bin' -> ../bar/node_modules/.bin,
       ]
     `);
   });

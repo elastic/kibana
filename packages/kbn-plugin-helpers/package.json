@@ -12,8 +12,8 @@
     "plugin-helpers": "bin/plugin-helpers.js"
   },
   "scripts": {
-    "kbn:bootstrap": "rm -rf target && tsc",
-    "kbn:watch": "tsc --watch"
+    "kbn:bootstrap": "../../node_modules/.bin/del target && ../../node_modules/.bin/tsc",
+    "kbn:watch": "../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils",

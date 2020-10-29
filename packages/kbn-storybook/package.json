@@ -8,7 +8,7 @@
     "devOnly": true
   },
   "scripts": {
-    "build": "tsc",
+    "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build",
     "watch": "yarn build --watch"
   },

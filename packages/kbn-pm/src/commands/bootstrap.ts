@@ -68,7 +68,8 @@ export const BootstrapCommand: ICommand = {
       await validateDependencies(kbn, yarnLock);
     }
 
-    // Create node_modules/bin for every project
+    // Assure all kbn projects with bin defined scripts
+    // copy those scripts into the top level node_modules folder
     await linkProjectExecutables(projects, projectGraph);
 
     /**

@@ -7,8 +7,8 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "jest",
-    "format": "prettier **/*.js --write"
+    "test": "../../node_modules/.bin/jest",
+    "format": "../../node_modules/.bin/prettier **/*.js --write"
   },
   "author": "",
   "license": "Apache-2.0",

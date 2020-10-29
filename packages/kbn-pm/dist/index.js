@@ -9012,7 +9012,8 @@ const BootstrapCommand = {
 
     if (options.validate) {
       await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_8__["validateDependencies"])(kbn, yarnLock);
-    } // Create node_modules/bin for every project
+    } // Assure all kbn projects with bin defined scripts
+    // copy those scripts into the top level node_modules folder
 
 
     await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph);
@@ -9100,17 +9101,11 @@ __webpack_require__.r(__webpack_exports__);
  * Yarn does not link the executables from dependencies that are installed
  * using `link:` https://github.com/yarnpkg/yarn/pull/5046
  *
- * Additionally while we have a single package.json being used to install dependencies
- * in the root project, we also want to be able to run npm scripts in the underlying projects.
- * We simulate this functionality by finding the root project and for the root project walking through each
- * dependency and manually link its executables if any defined.
- * Finally we walk through each other project (excluding the root) and we just symlink each project's
- * node_modules/.bin into the root node_modules/.bin
- *
+ * We simulate this functionality by walking through each project's project
+ * dependencies, and manually linking their executables if defined. The logic
+ * for linking was mostly adapted from lerna: https://github.com/lerna/lerna/blob/1d7eb9eeff65d5a7de64dea73613b1bf6bfa8d57/src/PackageUtilities.js#L348
  */
 async function linkProjectExecutables(projectsByName, projectGraph) {
-  var _projectsByName$get;
-
   _log__WEBPACK_IMPORTED_MODULE_2__["log"].debug(`Linking package executables`); // Find root and generate executables from dependencies for it
 
   let rootProject = null;
@@ -9152,33 +9147,6 @@ async function linkProjectExecutables(projectsByName, projectGraph) {
       await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["createSymlink"])(srcPath, dest, 'exec');
       await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["chmod"])(dest, '755');
     }
-  } // Assure roots bin dir exists
-
-
-  if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isDirectory"])(rootBinsDir))) {
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["mkdirp"])(rootBinsDir);
-  } // Create symlinks to rootProject/node_modules/.bin for every other project
-
-
-  const kibanaProjectPath = (_projectsByName$get = projectsByName.get('kibana')) === null || _projectsByName$get === void 0 ? void 0 : _projectsByName$get.path;
-
-  for (const [projectName] of projectGraph) {
-    const project = projectsByName.get(projectName);
-    const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${path__WEBPACK_IMPORTED_MODULE_0__["sep"]}plugins`);
-
-    if (project.isSinglePackageJsonProject || isExternalPlugin) {
-      continue;
-    }
-
-    const srcPath = rootBinsDir;
-    const dest = Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(project.nodeModulesLocation, '.bin'); // Get relative project path with normalized path separators.
-
-    const projectRelativePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["relative"])(project.path, srcPath).split(path__WEBPACK_IMPORTED_MODULE_0__["sep"]).join('/');
-    _log__WEBPACK_IMPORTED_MODULE_2__["log"].debug(`[${project.name}] 'node_modules/.bin' -> ${projectRelativePath}`);
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["rmdirp"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["dirname"])(dest));
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["mkdirp"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["dirname"])(dest));
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["createSymlink"])(srcPath, dest, 'dir');
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["chmod"])(dest, '755');
   }
 }
 

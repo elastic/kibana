@@ -6,6 +6,6 @@
   },
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
+    "build": "../../../../../node_modules/.bin/del './target' && ../../../../../node_modules/.bin/tsc"
   }
 }

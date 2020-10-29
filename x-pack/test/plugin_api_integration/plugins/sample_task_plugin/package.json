@@ -8,7 +8,7 @@
   "main": "target/test/plugin_api_integration/plugins/sample_task_plugin",
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
+    "build": "../../../../../node_modules/.bin/del './target' && ../../../../../node_modules/.bin/tsc"
   },
   "license": "Apache-2.0"
 }
