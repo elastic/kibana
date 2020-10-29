@@ -13,12 +13,9 @@ Environment=KBN_HOME=/usr/share/kibana
 Environment=KBN_PATH_CONF=/etc/kibana
 
 EnvironmentFile=-/etc/default/kibana
-<<<<<<< HEAD
-=======
 EnvironmentFile=-/etc/sysconfig/kibana
 
->>>>>>> master
-ExecStart=/usr/share/kibana/bin/kibana
+ExecStart=/usr/share/kibana/bin/kibana --logging.dest="/var/log/kibana/kibana.log"
 
 Restart=on-failure
 RestartSec=3
