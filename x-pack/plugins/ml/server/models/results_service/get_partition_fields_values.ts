@@ -39,7 +39,7 @@ function getFieldAgg(
   const fieldValueKey = `${fieldType}_value`;
 
   const sortByField =
-    fieldConfig?.sort?.by === 'name' || isModelPlotSearch ? '_key' : 'anomaly_score';
+    fieldConfig?.sort?.by === 'name' || isModelPlotSearch ? '_key' : 'maxRecordScore';
 
   return {
     [fieldNameKey]: {
@@ -89,17 +89,17 @@ function getFieldAgg(
                 }
               : {}),
           },
-          ...(fieldConfig?.sort?.by === 'anomaly_score'
-            ? {
+          ...(isModelPlotSearch
+            ? {}
+            : {
                 aggs: {
-                  [sortByField]: {
+                  maxRecordScore: {
                     max: {
                       field: 'record_score',
                     },
                   },
                 },
-              }
-            : {}),
+              }),
         },
       },
     },
@@ -119,7 +119,10 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
     ? {
         [fieldType]: {
           name: aggs[fieldNameKey].buckets[0].key,
-          values: aggs[fieldValueKey].values.buckets.map(({ key }: any) => key),
+          values: aggs[fieldValueKey].values.buckets.map(({ key, maxRecordScore }: any) => ({
+            value: key,
+            ...(maxRecordScore ? { maxRecordScore: maxRecordScore.value } : {}),
+          })),
         },
       }
     : {};

@@ -23,9 +23,12 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiRadioGroupOption,
+  EuiHealth,
+  EuiHighlight,
 } from '@elastic/eui';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { UiPartitionFieldConfig } from '../series_controls/series_controls';
+import { getSeverityColor } from '../../../../../common';
 
 export interface Entity {
   fieldName: string;
@@ -41,22 +44,27 @@ export interface FieldConfig {
   isAnomalousOnly: boolean;
 }
 
+export type ComboBoxOption = EuiComboBoxOptionOption<{
+  value: string | number;
+  maxRecordScore?: number;
+}>;
+
 export interface EntityControlProps {
   entity: Entity;
-  entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
+  entityFieldValueChanged: (entity: Entity, fieldValue: string | number | null) => void;
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   config: UiPartitionFieldConfig;
   onConfigChange: (fieldType: EntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
   forceSelection: boolean;
-  options: Array<EuiComboBoxOptionOption<string>>;
+  options: ComboBoxOption[];
   isModelPlotEnabled: boolean;
 }
 
 interface EntityControlState {
-  selectedOptions: Array<EuiComboBoxOptionOption<string>> | undefined;
+  selectedOptions: ComboBoxOption[] | undefined;
   isLoading: boolean;
-  options: Array<EuiComboBoxOptionOption<string>> | undefined;
+  options: ComboBoxOption[] | undefined;
   isEntityConfigPopoverOpen: boolean;
 }
 
@@ -83,7 +91,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
     const { fieldValue } = entity;
 
-    let selectedOptionsUpdate: Array<EuiComboBoxOptionOption<string>> | undefined = selectedOptions;
+    let selectedOptionsUpdate: ComboBoxOption[] | undefined = selectedOptions;
     if (
       (selectedOptions === undefined && fieldValue !== null) ||
       (Array.isArray(selectedOptions) &&
@@ -116,14 +124,16 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     }
   }
 
-  onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+  onChange = (selectedOptions: ComboBoxOption[]) => {
     const options = selectedOptions.length > 0 ? selectedOptions : undefined;
     this.setState({
       selectedOptions: options,
     });
 
     const fieldValue =
-      Array.isArray(options) && options[0].value !== null ? options[0].value : null;
+      Array.isArray(options) && options[0].value?.value !== null
+        ? options[0].value?.value ?? null
+        : null;
     this.props.entityFieldValueChanged(this.props.entity, fieldValue);
   };
 
@@ -132,9 +142,11 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     if (!normalizedSearchValue) {
       return;
     }
-    const manualInputValue: EuiComboBoxOptionOption<string> = {
+    const manualInputValue: ComboBoxOption = {
       label: inputValue,
-      value: inputValue,
+      value: {
+        value: inputValue,
+      },
     };
     this.setState({
       selectedOptions: [manualInputValue],
@@ -150,9 +162,15 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     this.props.onSearchChange(this.props.entity, searchValue);
   };
 
-  renderOption = (option: EuiComboBoxOptionOption) => {
-    const { label } = option;
-    return label === EMPTY_FIELD_VALUE_LABEL ? <i>{label}</i> : label;
+  renderOption = (option: ComboBoxOption, searchValue: string) => {
+    const highlightedLabel = <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>;
+    return option.value?.maxRecordScore ? (
+      <EuiHealth color={getSeverityColor(option.value.maxRecordScore)}>
+        {highlightedLabel}
+      </EuiHealth>
+    ) : (
+      highlightedLabel
+    );
   };
 
   getSortOptions = (): EuiRadioGroupOption[] => {

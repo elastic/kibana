@@ -13,7 +13,11 @@ import { mlJobService } from '../../../services/job_service';
 import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
-import { EMPTY_FIELD_VALUE_LABEL, EntityControlProps } from '../entity_control/entity_control';
+import {
+  ComboBoxOption,
+  EMPTY_FIELD_VALUE_LABEL,
+  EntityControlProps,
+} from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 // @ts-ignore
 import { getViewableDetectors } from '../../timeseriesexplorer';
@@ -24,14 +28,15 @@ import {
 } from '../../../../../common/types/storage';
 import { useStorage } from '../../../contexts/ml/use_storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
+import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 
-function getEntityControlOptions(fieldValues: any[]) {
+function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {
     return [];
   }
 
   return fieldValues.map((value) => {
-    return { label: value === '' ? EMPTY_FIELD_VALUE_LABEL : value, value };
+    return { label: value.value === '' ? EMPTY_FIELD_VALUE_LABEL : value.value, value };
   });
 }
 
@@ -84,7 +89,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
   const isModelPlotEnabled = !!selectedJob.model_plot_config?.enabled;
 
   const [entitiesLoading, setEntitiesLoading] = useState(false);
-  const [entityValues, setEntityValues] = useState<Record<string, any>>({});
+  const [entityValues, setEntityValues] = useState<Record<string, FieldDefinition['values']>>({});
 
   const detectors: Array<{
     index: number;
