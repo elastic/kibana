@@ -8,11 +8,17 @@ export interface ClassFeatureImportance {
   class_name: string | boolean;
   importance: number;
 }
-export interface FeatureImportance {
+
+interface FeatureImportanceClassification {
   feature_name: string;
-  importance?: number;
-  classes?: ClassFeatureImportance[];
+  classes: ClassFeatureImportance[];
 }
+
+interface FeatureImportanceRegression {
+  feature_name: string;
+  importance: number;
+}
+export type FeatureImportance = FeatureImportanceClassification | FeatureImportanceRegression;
 
 export interface TopClass {
   class_name: string;

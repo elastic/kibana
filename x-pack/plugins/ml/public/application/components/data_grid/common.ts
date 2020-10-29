@@ -167,22 +167,42 @@ export const getDataGridSchemaFromKibanaFieldType = (
  * @param mlResultsField - Data frame analytics results field
  * @returns nested object structure of feature importance values
  */
-export const getFeatureImportance = (row: any, mlResultsField: string): FeatureImportance[] => {
-  const featureNames: string[] = row[`${mlResultsField}.feature_importance.feature_name`];
-  const classNames: string[] = row[`${mlResultsField}.feature_importance.classes.class_name`];
-  const classImportance: number[] = row[`${mlResultsField}.feature_importance.classes.importance`];
+export const getFeatureImportance = (
+  row: Record<string, any>,
+  mlResultsField: string
+): FeatureImportance[] => {
+  const featureNames: string[] | undefined =
+    row[`${mlResultsField}.feature_importance.feature_name`];
+  const classNames: string[] | undefined =
+    row[`${mlResultsField}.feature_importance.classes.class_name`];
+  const classImportance: number[] | undefined =
+    row[`${mlResultsField}.feature_importance.classes.importance`];
 
-  return featureNames.map((fName, index) => {
-    const offset = featureNames.length * index;
-    const featureClassNames = classNames.slice(offset, offset + featureNames.length);
-    const featureClassImportance = classImportance.slice(offset, offset + featureNames.length);
-    return {
-      feature_name: fName,
-      classes: featureClassNames.map((fClassName, fIndex) => {
-        return { class_name: fClassName, importance: featureClassImportance[fIndex] };
-      }),
-    };
-  });
+  if (featureNames === undefined) {
+    return [];
+  }
+
+  // return object structure for classification job
+  if (classNames !== undefined && classImportance !== undefined) {
+    return featureNames.map((fName, index) => {
+      const offset = featureNames.length * index;
+      const featureClassNames = classNames.slice(offset, offset + featureNames.length);
+      const featureClassImportance = classImportance.slice(offset, offset + featureNames.length);
+      return {
+        feature_name: fName,
+        classes: featureClassNames.map((fClassName, fIndex) => {
+          return { class_name: fClassName, importance: featureClassImportance[fIndex] };
+        }),
+      };
+    });
+  }
+
+  // return object structure for regression job
+  const importance: number[] = row[`${mlResultsField}.feature_importance.importance`];
+  return featureNames.map((fName, index) => ({
+    feature_name: fName,
+    importance: importance[index],
+  }));
 };
 
 /**
@@ -192,10 +212,15 @@ export const getFeatureImportance = (row: any, mlResultsField: string): FeatureI
  * @param mlResultsField - Data frame analytics results field
  * @returns nested object structure of feature importance values
  */
-export const getTopClasses = (row: any, mlResultsField: string): TopClasses => {
-  const classNames: string[] = row[`${mlResultsField}.top_classes.class_name`];
-  const classProbabilities: number[] = row[`${mlResultsField}.top_classes.class_probability`];
-  const classScores: number[] = row[`${mlResultsField}.top_classes.class_score`];
+export const getTopClasses = (row: Record<string, any>, mlResultsField: string): TopClasses => {
+  const classNames: string[] | undefined = row[`${mlResultsField}.top_classes.class_name`];
+  const classProbabilities: number[] | undefined =
+    row[`${mlResultsField}.top_classes.class_probability`];
+  const classScores: number[] | undefined = row[`${mlResultsField}.top_classes.class_score`];
+
+  if (classNames === undefined || classProbabilities === undefined || classScores === undefined) {
+    return [];
+  }
 
   return classNames.map((className, index) => ({
     class_name: className,
