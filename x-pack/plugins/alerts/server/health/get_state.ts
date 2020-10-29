@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID } from './task';
+import { HealthStatus } from '../types';
 
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {
@@ -32,15 +33,20 @@ export const healthStatus$ = (
     switchMap(async () => {
       const doc = await getLatestTaskState(taskManager);
       const body = get(doc, 'state');
-      if (body?.isHealthy) {
+      if (body?.health_status === HealthStatus.OK) {
         return {
           level: ServiceStatusLevels.available,
           summary: 'Alerting framework is available',
         };
-      } else {
+      } else if (body?.health_status === HealthStatus.Warning) {
         return {
           level: ServiceStatusLevels.degraded,
           summary: 'Alerting framework is degraded',
+        };
+      } else {
+        return {
+          level: ServiceStatusLevels.unavailable,
+          summary: 'Alerting framework is unavailable',
         };
       }
     }),

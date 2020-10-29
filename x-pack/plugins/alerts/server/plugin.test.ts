@@ -13,11 +13,16 @@ import { eventLogServiceMock } from '../../event_log/server/event_log_service.mo
 import { KibanaRequest, CoreSetup } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
+import { AlertsConfig } from './config';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
     it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
-      const context = coreMock.createPluginInitializerContext();
+      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+      });
       const plugin = new AlertingPlugin(context);
 
       const coreSetup = coreMock.createSetup();
@@ -58,7 +63,11 @@ describe('Alerting Plugin', () => {
      */
     describe('getAlertsClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to true', async () => {
-        const context = coreMock.createPluginInitializerContext();
+        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+          healthCheck: {
+            interval: '5m',
+          },
+        });
         const plugin = new AlertingPlugin(context);
 
         const coreSetup = coreMock.createSetup();
@@ -101,7 +110,11 @@ describe('Alerting Plugin', () => {
       });
 
       it(`doesn't throw error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to false`, async () => {
-        const context = coreMock.createPluginInitializerContext();
+        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+          healthCheck: {
+            interval: '5m',
+          },
+        });
         const plugin = new AlertingPlugin(context);
 
         const coreSetup = coreMock.createSetup();

@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { healthStatus$ } from '.';
 import { TaskStatus } from '../../../task_manager/server';
+import { HealthStatus } from '../types';
 
 describe('healthStatus$()', () => {
-  const mockTaskManager = taskManagerMock.start();
+  const mockTaskManager = taskManagerMock.createStart();
 
   it('should return an object with the "unavailable" level and proper summary of "Alerting framework is unhealthy"', async () => {
     mockTaskManager.get.mockReturnValue(
@@ -24,7 +25,7 @@ describe('healthStatus$()', () => {
           retryAt: new Date(Date.now() + 5 * 60 * 1000),
           state: {
             runs: 1,
-            isHealthy: false,
+            health_status: HealthStatus.Warning,
           },
           taskType: 'alerting:alerting_health_check',
           params: {
@@ -55,7 +56,7 @@ describe('healthStatus$()', () => {
           retryAt: new Date(Date.now() + 5 * 60 * 1000),
           state: {
             runs: 1,
-            isHealthy: true,
+            health_status: HealthStatus.OK,
           },
           taskType: 'alerting:alerting_health_check',
           params: {

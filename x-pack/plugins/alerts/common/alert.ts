@@ -70,10 +70,23 @@ export interface Alert {
 
 export type SanitizedAlert = Omit<Alert, 'apiKey'>;
 
-export interface AlertingFrameworkHeath {
-  hasDecryptionErrors: boolean;
-  hasUnknownErrors: boolean;
-  hasExecutionErrors: boolean;
-  hasReadErrors: boolean;
-  hasActionExecutionErrors: boolean;
+export enum HealthStatus {
+  OK = 'ok',
+  Warning = 'warn',
+  Error = 'error',
+}
+
+export interface AlertsHealth {
+  decryptionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  executionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  readHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
 }

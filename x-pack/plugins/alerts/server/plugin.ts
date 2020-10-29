@@ -65,6 +65,7 @@ import { IEventLogger, IEventLogService, IEventLogClientService } from '../../ev
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 import { healthStatus$, scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
+import { AlertsConfig } from './config';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -103,6 +104,7 @@ export interface AlertingPluginsStart {
 }
 
 export class AlertingPlugin {
+  private readonly config: Promise<AlertsConfig>;
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
@@ -119,6 +121,7 @@ export class AlertingPlugin {
   private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
@@ -299,7 +302,7 @@ export class AlertingPlugin {
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
-    scheduleAlertingHealthCheck(this.logger, plugins.taskManager);
+    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),

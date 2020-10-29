@@ -5,14 +5,14 @@
  */
 
 import { Logger, KibanaRequest } from 'kibana/server';
-import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { AlertsClient } from '../alerts_client';
-import { GetBasePathFunction } from '../types';
+import { AlertsConfig } from '../config';
+import { GetBasePathFunction, HealthStatus } from '../types';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
@@ -34,10 +34,11 @@ export function initializeAlertingHealth(
 
 export function scheduleAlertingHealthCheck(
   logger: Logger,
+  config: Promise<AlertsConfig>,
   taskManager?: TaskManagerStartContract
 ) {
   if (taskManager) {
-    scheduleTasks(logger, taskManager);
+    scheduleTasks(logger, taskManager, config);
   }
 }
 
@@ -69,18 +70,24 @@ function registerAlertingHealthCheckTask(
   taskManager.registerTaskDefinitions({
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
-      type: HEALTH_TASK_TYPE,
-      timeout: '5m',
       createTaskRunner: healthCheckTaskRunner(logger, alertsClient),
     },
   });
 }
 
-async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContract) {
+async function scheduleTasks(
+  logger: Logger,
+  taskManager: TaskManagerStartContract,
+  config: Promise<AlertsConfig>
+) {
   try {
+    const interval = (await config).healthCheck.interval;
     await taskManager.ensureScheduled({
       id: HEALTH_TASK_ID,
       taskType: HEALTH_TASK_TYPE,
+      schedule: {
+        interval,
+      },
       state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
       params: {},
     });
@@ -104,25 +111,19 @@ export function healthCheckTaskRunner(
           return {
             state: {
               runs: (state.runs || 0) + 1,
-              isHealthy: alertingHealthStatus.hasDecryptionErrors,
+              health_status: alertingHealthStatus.decryptionHealth.status,
             },
-            runAt: getNextHour(),
           };
         } catch (errMsg) {
           logger.warn(`Error executing alerting health check task: ${errMsg}`);
           return {
             state: {
               runs: (state.runs || 0) + 1,
-              isHealthy: false,
+              health_status: HealthStatus.Error,
             },
-            runAt: getNextHour(),
           };
         }
       },
     };
   };
-}
-
-function getNextHour() {
-  return moment().add(1, 'h').toDate();
 }

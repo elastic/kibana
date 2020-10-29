@@ -28,8 +28,9 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
-  AlertingFrameworkHeath,
+  AlertsHealth,
   AlertExecutionStatusErrorReasons,
+  HealthStatus,
 } from '../types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
 import {
@@ -399,29 +400,70 @@ export class AlertsClient {
     };
   }
 
-  public async getHealth(): Promise<AlertingFrameworkHeath> {
+  public async getHealth(): Promise<AlertsHealth> {
     const { saved_objects: data } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       filter: 'alert.attributes.executionStatus.status:error',
       fields: ['executionStatus'],
       type: 'alert',
     });
+
+    let lastUpdateOkStatus: Date;
     const res = data.reduce(
-      (prevItem: Record<string, number>, item: SavedObjectsFindResult<RawAlert>) => {
+      (prevItem: AlertsHealth, item: SavedObjectsFindResult<RawAlert>) => {
+        const lastExecutionDate = new Date(item.attributes.executionStatus.lastExecutionDate);
         if (item.attributes.executionStatus.error) {
-          prevItem[item.attributes.executionStatus.error?.reason] =
-            (prevItem[item.attributes.executionStatus.error?.reason] || 0) + 1;
+          switch (item.attributes.executionStatus.error?.reason) {
+            case AlertExecutionStatusErrorReasons.Decrypt:
+              prevItem.decryptionHealth = {
+                status: HealthStatus.Warning,
+                timestamp: item.attributes.executionStatus.lastExecutionDate,
+              };
+              break;
+            case AlertExecutionStatusErrorReasons.Execute:
+              prevItem.executionHealth = {
+                status: HealthStatus.Warning,
+                timestamp: item.attributes.executionStatus.lastExecutionDate,
+              };
+              break;
+            case AlertExecutionStatusErrorReasons.Read:
+              prevItem.readHealth = {
+                status: HealthStatus.Warning,
+                timestamp: item.attributes.executionStatus.lastExecutionDate,
+              };
+              break;
+          }
+        } else {
+          lastUpdateOkStatus =
+            lastUpdateOkStatus && lastUpdateOkStatus > lastExecutionDate
+              ? lastUpdateOkStatus
+              : lastExecutionDate;
         }
         return prevItem;
       },
-      {}
+      {
+        decryptionHealth: {
+          status: HealthStatus.OK,
+          timestamp: '',
+        },
+        executionHealth: {
+          status: HealthStatus.OK,
+          timestamp: '',
+        },
+        readHealth: {
+          status: HealthStatus.OK,
+          timestamp: '',
+        },
+      }
     );
-    return {
-      hasDecryptionErrors: res[AlertExecutionStatusErrorReasons.Decrypt] > 0,
-      hasUnknownErrors: res[AlertExecutionStatusErrorReasons.Unknown] > 0,
-      hasExecutionErrors: res[AlertExecutionStatusErrorReasons.Execute] > 0,
-      hasReadErrors: res[AlertExecutionStatusErrorReasons.Read] > 0,
-      hasActionExecutionErrors: false, // TODO:
-    };
+
+    Object.entries(res).map(([healthType, statusItem]) => {
+      if (statusItem.status === HealthStatus.OK) {
+        statusItem.timestamp = lastUpdateOkStatus.toISOString();
+      }
+      return [healthType, statusItem];
+    });
+
+    return res;
   }
 
   public async delete({ id }: { id: string }) {

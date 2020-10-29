@@ -5,7 +5,6 @@
  */
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
@@ -13,9 +12,10 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
-import { AlertExecutionStatusErrorReasons } from '../../types';
+import { AlertExecutionStatusErrorReasons, HealthStatus } from '../../types';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 
-const taskManager = taskManagerMock.start();
+const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
@@ -61,6 +61,8 @@ describe('getHealth()', () => {
   });
 
   test('return true if some of alerts has a decryption error', async () => {
+    const lastExecutionDateError = new Date().toISOString();
+    const lastExecutionDate = new Date().toISOString();
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 2,
       per_page: 10,
@@ -87,7 +89,7 @@ describe('getHealth()', () => {
             ],
             executionStatus: {
               status: 'error',
-              lastExecutionDate: new Date().toISOString(),
+              lastExecutionDate: lastExecutionDateError,
               error: {
                 reason: AlertExecutionStatusErrorReasons.Decrypt,
                 message: 'Failed decrypt',
@@ -116,7 +118,7 @@ describe('getHealth()', () => {
             actions: [],
             executionStatus: {
               status: 'ok',
-              lastExecutionDate: new Date().toISOString(),
+              lastExecutionDate,
             },
           },
           score: 1,
@@ -127,16 +129,25 @@ describe('getHealth()', () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const result = await alertsClient.getHealth();
     expect(result).toStrictEqual({
-      hasActionExecutionErrors: false,
-      hasDecryptionErrors: true,
-      hasExecutionErrors: false,
-      hasReadErrors: false,
-      hasUnknownErrors: false,
+      executionHealth: {
+        status: HealthStatus.OK,
+        timestamp: lastExecutionDateError,
+      },
+      readHealth: {
+        status: HealthStatus.OK,
+        timestamp: lastExecutionDate,
+      },
+      decryptionHealth: {
+        status: HealthStatus.Warning,
+        timestamp: lastExecutionDate,
+      },
     });
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
   });
 
   test('return false if no alerts with a decryption error', async () => {
+    const lastExecutionDateError = new Date().toISOString();
+    const lastExecutionDate = new Date().toISOString();
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 2,
       per_page: 10,
@@ -163,9 +174,9 @@ describe('getHealth()', () => {
             ],
             executionStatus: {
               status: 'error',
-              lastExecutionDate: new Date().toISOString(),
+              lastExecutionDate: lastExecutionDateError,
               error: {
-                reason: AlertExecutionStatusErrorReasons.Unknown,
+                reason: AlertExecutionStatusErrorReasons.Execute,
                 message: 'Failed',
               },
             },
@@ -192,7 +203,7 @@ describe('getHealth()', () => {
             actions: [],
             executionStatus: {
               status: 'ok',
-              lastExecutionDate: new Date().toISOString(),
+              lastExecutionDate,
             },
           },
           score: 1,
@@ -203,11 +214,18 @@ describe('getHealth()', () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const result = await alertsClient.getHealth();
     expect(result).toStrictEqual({
-      hasActionExecutionErrors: false,
-      hasDecryptionErrors: false,
-      hasExecutionErrors: false,
-      hasReadErrors: false,
-      hasUnknownErrors: true,
+      executionHealth: {
+        status: HealthStatus.Warning,
+        timestamp: lastExecutionDate,
+      },
+      readHealth: {
+        status: HealthStatus.OK,
+        timestamp: lastExecutionDate,
+      },
+      decryptionHealth: {
+        status: HealthStatus.OK,
+        timestamp: lastExecutionDateError,
+      },
     });
   });
 });
