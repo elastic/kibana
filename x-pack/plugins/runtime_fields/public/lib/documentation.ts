@@ -8,9 +8,9 @@ import { DocLinksStart } from 'src/core/public';
 export const getLinks = (docLinks: DocLinksStart) => {
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
   const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
-  const esDocsBase = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
+  const painlessDocsBase = `${docsBase}/elasticsearch/painless/${DOC_LINK_VERSION}`;
 
   return {
-    painlessSyntax: `${esDocsBase}/to-be-defined.html`,
+    painlessSyntax: `${painlessDocsBase}/painless-lang-spec.html`,
   };
 };
