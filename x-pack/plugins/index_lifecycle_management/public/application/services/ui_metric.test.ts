@@ -9,7 +9,6 @@ import {
   UIM_CONFIG_WARM_PHASE,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_FREEZE_INDEX,
-  defaultNewColdPhase,
   defaultPhaseIndexPriority,
 } from '../constants/';
 
@@ -23,7 +22,7 @@ describe('getUiMetricsForPhases', () => {
           min_age: '0ms',
           actions: {
             set_priority: {
-              priority: parseInt(defaultNewColdPhase.phaseIndexPriority, 10),
+              priority: parseInt(defaultPhaseIndexPriority, 10),
             },
           },
         },
@@ -69,7 +68,7 @@ describe('getUiMetricsForPhases', () => {
           actions: {
             freeze: {},
             set_priority: {
-              priority: parseInt(defaultNewColdPhase.phaseIndexPriority, 10),
+              priority: parseInt(defaultPhaseIndexPriority, 10),
             },
           },
         },
