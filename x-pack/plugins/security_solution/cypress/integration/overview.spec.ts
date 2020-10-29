@@ -13,31 +13,31 @@ import { OVERVIEW_URL } from '../urls/navigation';
 import { esArchiverUnload, esArchiverLoad } from '../tasks/es_archiver';
 
 describe('Overview Page', () => {
-  before(() => {
-    loginAndWaitForPage(OVERVIEW_URL);
-    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
-    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
-  });
-
-  it('Host stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
-    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
-    cy.reload();
-    expandHostStats();
-
-    HOST_STATS.forEach((stat) => {
-      cy.get(stat.domId).invoke('text').should('eq', stat.value);
+  describe('with data', () => {
+    before(() => {
+      loginAndWaitForPage(OVERVIEW_URL);
     });
-  });
 
-  it('Network stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
-    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
-    cy.reload();
-    expandNetworkStats();
+    it('Host stats render with correct values', () => {
+      cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
+      cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
+      cy.reload();
+      expandHostStats();
 
-    NETWORK_STATS.forEach((stat) => {
-      cy.get(stat.domId).invoke('text').should('eq', stat.value);
+      HOST_STATS.forEach((stat) => {
+        cy.get(stat.domId).invoke('text').should('eq', stat.value);
+      });
+    });
+
+    it('Network stats render with correct values', () => {
+      cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
+      cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
+      cy.reload();
+      expandNetworkStats();
+
+      NETWORK_STATS.forEach((stat) => {
+        cy.get(stat.domId).invoke('text').should('eq', stat.value);
+      });
     });
   });
 
