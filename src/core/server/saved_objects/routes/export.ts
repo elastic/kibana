@@ -39,7 +39,9 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          references: schema.maybe(schema.arrayOf(referenceSchema)),
+          hasReference: schema.maybe(
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+          ),
           objects: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -59,7 +61,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       const savedObjectsClient = context.core.savedObjects.client;
       const {
         type,
-        references,
+        hasReference,
         objects,
         search,
         excludeExportDetails,
@@ -95,7 +97,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,
         types,
-        references,
+        hasReference: hasReference && !Array.isArray(hasReference) ? [hasReference] : hasReference,
         search,
         objects,
         exportSizeLimit: maxImportExportSize,

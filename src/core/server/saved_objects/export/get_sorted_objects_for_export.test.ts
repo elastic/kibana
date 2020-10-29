@@ -398,7 +398,7 @@ describe('getSortedObjectsForExport()', () => {
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
-      references: [
+      hasReference: [
         {
           id: '1',
           type: 'index-pattern',
@@ -945,7 +945,7 @@ describe('getSortedObjectsForExport()', () => {
       exportSizeLimit: 1,
       savedObjectsClient,
       objects: [{ type: 'index-pattern', id: '1' }],
-      references: [{ type: 'index-pattern', id: '1' }],
+      hasReference: [{ type: 'index-pattern', id: '1' }],
     };
 
     expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(

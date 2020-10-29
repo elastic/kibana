@@ -36,7 +36,7 @@ export async function fetchExportByTypeAndSearch({
     body: JSON.stringify({
       type: types,
       search,
-      references,
+      hasReference: references,
       includeReferencesDeep,
     }),
   });

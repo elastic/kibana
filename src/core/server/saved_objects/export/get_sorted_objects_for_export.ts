@@ -35,7 +35,7 @@ export interface SavedObjectsExportOptions {
   /** optional array of saved object types. */
   types?: string[];
   /** optional array of references to search object for when exporting by types */
-  references?: SavedObjectsFindOptionsReference[];
+  hasReference?: SavedObjectsFindOptionsReference[];
   /** optional array of objects to export. */
   objects?: Array<{
     /** the saved object id. */
@@ -77,7 +77,7 @@ export interface SavedObjectsExportResultDetails {
 
 async function fetchObjectsToExport({
   objects,
-  references,
+  hasReference,
   types,
   search,
   exportSizeLimit,
@@ -85,7 +85,7 @@ async function fetchObjectsToExport({
   namespace,
 }: {
   objects?: SavedObjectsExportOptions['objects'];
-  references?: SavedObjectsFindOptionsReference[];
+  hasReference?: SavedObjectsFindOptionsReference[];
   types?: string[];
   search?: string;
   exportSizeLimit: number;
@@ -102,7 +102,7 @@ async function fetchObjectsToExport({
     if (typeof search === 'string') {
       throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
-    if (references && references.length) {
+    if (hasReference && hasReference.length) {
       throw Boom.badRequest(
         `Can't specify both "references" and "objects" properties when exporting`
       );
@@ -121,8 +121,8 @@ async function fetchObjectsToExport({
   } else if (types && types.length > 0) {
     const findResponse = await savedObjectsClient.find({
       type: types,
-      hasReference: references,
-      hasReferenceOperator: references ? 'OR' : undefined,
+      hasReference,
+      hasReferenceOperator: hasReference ? 'OR' : undefined,
       search,
       perPage: exportSizeLimit,
       namespaces: namespace ? [namespace] : undefined,
@@ -151,7 +151,7 @@ async function fetchObjectsToExport({
  */
 export async function exportSavedObjectsToStream({
   types,
-  references,
+  hasReference,
   objects,
   search,
   savedObjectsClient,
@@ -162,7 +162,7 @@ export async function exportSavedObjectsToStream({
 }: SavedObjectsExportOptions) {
   const rootObjects = await fetchObjectsToExport({
     types,
-    references,
+    hasReference,
     objects,
     search,
     savedObjectsClient,
