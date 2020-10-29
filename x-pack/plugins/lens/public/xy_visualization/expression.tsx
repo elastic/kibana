@@ -230,7 +230,7 @@ function mergeThemeWithValueLabelsStyling(
       barSeriesStyle: {
         ...theme.barSeriesStyle,
         displayValue: {
-          fontSize: { min: 5, max: VALUE_LABELS_FONTSIZE },
+          fontSize: { min: 10, max: VALUE_LABELS_FONTSIZE },
           fill: { textInverted: true, textBorder: true },
           alignment: isHorizontal
             ? {
