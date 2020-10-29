@@ -35,7 +35,7 @@ export async function getMockedAppDependencies() {
     capabilities,
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
-    actionTypeRegistry: actionTypeRegistry as any,
-    alertTypeRegistry: alertTypeRegistry as any,
+    actionTypeRegistry,
+    alertTypeRegistry,
   };
 }
