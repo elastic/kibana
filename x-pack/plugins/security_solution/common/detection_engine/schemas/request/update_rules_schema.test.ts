@@ -125,6 +125,30 @@ describe('update rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('name cannot be an empty string', () => {
+    const payload: Partial<UpdateRulesSchema> = {
+      name: '',
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('description cannot be an empty string', () => {
+    const payload: Partial<UpdateRulesSchema> = {
+      description: '',
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "description"']);
+    expect(message.schema).toEqual({});
+  });
+
   test('[rule_id, description, from, to, name] does not validate', () => {
     const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
