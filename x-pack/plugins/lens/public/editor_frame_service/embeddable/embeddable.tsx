@@ -185,6 +185,7 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
+        searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode

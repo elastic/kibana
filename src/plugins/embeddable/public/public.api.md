@@ -17,6 +17,7 @@ import { CoreSetup as CoreSetup_2 } from 'src/core/public';
 import { CoreSetup as CoreSetup_3 } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'kibana/public';
 import * as CSS from 'csstype';
+import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
@@ -427,6 +428,7 @@ export type EmbeddableInput = {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
+    searchSessionId?: string;
 };
 
 // Warning: (ae-missing-release-tag) "EmbeddableInstanceConfiguration" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
