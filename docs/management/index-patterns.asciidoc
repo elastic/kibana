@@ -35,7 +35,7 @@ If you collected data using one of the {kib} <<connect-to-elasticsearch,ingest o
 you get an index pattern for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create an index pattern.
 
-. Go to *Stack Management > Index Patterns*.
+. Open the main menu, then click to *Stack Management > Index Patterns*.
 
 . Click *Create index pattern*.
 +
