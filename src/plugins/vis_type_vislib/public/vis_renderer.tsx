@@ -32,7 +32,7 @@ function shouldShowNoResultsMessage(visData: any, visType: string): boolean {
     return false;
   }
 
-  const rows = visData?.rows;
+  const rows: object[] | undefined = visData?.rows;
   const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
 
   return Boolean(isZeroHits);
