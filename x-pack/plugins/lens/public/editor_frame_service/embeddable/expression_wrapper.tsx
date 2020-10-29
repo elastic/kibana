@@ -48,7 +48,7 @@ export function ExpressionWrapper({
         <div className="lnsExpressionRenderer">
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
-            padding="m"
+            padding="s"
             expression={expression}
             searchContext={searchContext}
             renderError={(errorMessage, error) => (
