@@ -91,7 +91,7 @@ function getCategoryStoppedPartitions(mlClient: MlClient, payload: any) {
 /**
  * Routes for results service
  */
-export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization) {
+export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup ResultsService
    *
@@ -111,7 +111,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getAnomaliesTableData(mlClient, request.body);
 
@@ -143,7 +143,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getCategoryDefinition(mlClient, request.body);
 
@@ -175,7 +175,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getMaxAnomalyScore(mlClient, request.body);
 
@@ -207,7 +207,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getCategoryExamples(mlClient, request.body);
 
@@ -239,7 +239,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getPartitionFieldsValues(mlClient, request.body);
 
@@ -268,7 +268,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobIds, query } = request.body;
         const { body } = await mlClient.anomalySearch(query, jobIds);
@@ -301,7 +301,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getCategorizerStats(mlClient, request.params, request.query);
         return response.ok({
@@ -331,7 +331,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getCategoryStoppedPartitions(mlClient, request.body);
         return response.ok({

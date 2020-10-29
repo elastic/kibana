@@ -15,7 +15,7 @@ import {
 /**
  * Routes for job audit message routes
  */
-export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitialization) {
+export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobAuditMessages
    *
@@ -37,7 +37,7 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(
+    routeGuard.fullLicenseAPIGuard(
       async ({ client, mlClient, request, response, jobSavedObjectService }) => {
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
@@ -74,7 +74,7 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(
+    routeGuard.fullLicenseAPIGuard(
       async ({ client, mlClient, request, response, jobSavedObjectService }) => {
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);

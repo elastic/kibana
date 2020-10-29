@@ -50,7 +50,7 @@ function importData(
 /**
  * Routes for the file data visualizer.
  */
-export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
+export function fileDataVisualizerRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup FileDataVisualizer
    *
@@ -75,7 +75,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const result = await analyzeFiles(mlClient, request.body, request.query);
         return response.ok({ body: result });
@@ -110,7 +110,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;

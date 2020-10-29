@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import type { JobSavedObjectService } from './service';
+import type { JobObject, JobSavedObjectService } from './service';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 import { JobType } from '../../common/types/saved_objects';
 
@@ -193,11 +194,7 @@ export function checksFactory(
           const datafeedId = job.datafeedId;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.createAnomalyDetectionJob(jobId);
-              if (datafeedId !== undefined && datafeedId !== null) {
-                // add datafeed id after saved object has been created
-                await jobSavedObjectService.addDatafeed(datafeedId, jobId);
-              }
+              await jobSavedObjectService.createAnomalyDetectionJob(jobId, datafeedId ?? undefined);
               results.savedObjectsCreated[job.jobId] = { success: true };
             } catch (error) {
               results.savedObjectsCreated[job.jobId] = {
@@ -321,6 +318,46 @@ export function checksFactory(
     return results;
   }
 
+  async function initSavedObjects(simulate: boolean = false, namespaces: string[] = ['*']) {
+    const results: { jobs: Array<{ id: string; type: string }>; success: boolean; error?: any } = {
+      jobs: [],
+      success: true,
+    };
+    const status = await checkStatus();
+
+    const jobs: JobObject[] = [];
+    const types: JobType[] = ['anomaly-detector', 'data-frame-analytics'];
+
+    types.forEach((type) => {
+      status.jobs[type].forEach((job) => {
+        if (job.checks.savedObjectExits === false) {
+          if (simulate === true) {
+            results.jobs.push({ id: job.jobId, type });
+          } else {
+            jobs.push({
+              job_id: job.jobId,
+              datafeed_id: job.datafeedId ?? null,
+              type,
+            });
+          }
+        }
+      });
+    });
+    try {
+      const createResults = await jobSavedObjectService.bulkCreateJobs(jobs, namespaces);
+      createResults.saved_objects.forEach(({ attributes }) => {
+        results.jobs.push({
+          id: attributes.job_id,
+          type: attributes.type,
+        });
+      });
+    } catch (error) {
+      results.success = false;
+      results.error = Boom.boomify(error).output;
+    }
+    return results;
+  }
+
   async function _loadAllJobSavedObjects() {
     const { body } = await client.asInternalUser.search<SearchResponse<SavedObjectJob>>({
       index: '.kibana*',
@@ -351,5 +388,5 @@ export function checksFactory(
     });
   }
 
-  return { checkStatus, repairJobs };
+  return { checkStatus, repairJobs, initSavedObjects };
 }

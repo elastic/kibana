@@ -5,5 +5,5 @@
  */
 
 export { setupSavedObjects } from './saved_objects';
-export { JobSavedObjectService, jobSavedObjectServiceFactory } from './service';
+export { JobObject, JobSavedObjectService, jobSavedObjectServiceFactory } from './service';
 export { checksFactory } from './checks';

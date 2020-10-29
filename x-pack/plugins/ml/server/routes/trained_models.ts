@@ -14,7 +14,7 @@ import {
 import { modelsProvider } from '../models/data_frame_analytics';
 import { InferenceConfigResponse } from '../../common/types/trained_models';
 
-export function trainedModelsRoutes({ router, mlLicense }: RouteInitialization) {
+export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
@@ -33,7 +33,7 @@ export function trainedModelsRoutes({ router, mlLicense }: RouteInitialization) 
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
@@ -84,7 +84,7 @@ export function trainedModelsRoutes({ router, mlLicense }: RouteInitialization) 
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
         const { body } = await mlClient.getTrainedModelsStats({
@@ -116,7 +116,7 @@ export function trainedModelsRoutes({ router, mlLicense }: RouteInitialization) 
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { modelId } = request.params;
         const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
@@ -146,7 +146,7 @@ export function trainedModelsRoutes({ router, mlLicense }: RouteInitialization) 
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
         const { body } = await mlClient.deleteTrainedModel({

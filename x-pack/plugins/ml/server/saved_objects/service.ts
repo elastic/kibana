@@ -10,7 +10,7 @@ import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 import { JobType } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
 
-interface JobObject {
+export interface JobObject {
   job_id: string;
   datafeed_id: string | null;
   type: JobType;
@@ -51,7 +51,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     return jobs.saved_objects;
   }
 
-  async function _createJob(jobType: JobType, jobId: string) {
+  async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
     try {
       await _deleteJob(jobType, jobId);
     } catch (error) {
@@ -60,9 +60,19 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     }
     await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, {
       job_id: jobId,
-      datafeed_id: null,
+      datafeed_id: datafeedId ?? null,
       type: jobType,
     });
+  }
+
+  async function _bulkCreateJobs(jobs: JobObject[], namespaces?: string[]) {
+    return await savedObjectsClient.bulkCreate<JobObject>(
+      jobs.map((j) => ({
+        type: ML_SAVED_OBJECT_TYPE,
+        attributes: j,
+        initialNamespaces: namespaces,
+      }))
+    );
   }
 
   async function _deleteJob(jobType: JobType, jobId: string) {
@@ -75,8 +85,8 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id);
   }
 
-  async function createAnomalyDetectionJob(jobId: string) {
-    await _createJob('anomaly-detector', jobId);
+  async function createAnomalyDetectionJob(jobId: string, datafeedId?: string) {
+    await _createJob('anomaly-detector', jobId, datafeedId);
   }
 
   async function deleteAnomalyDetectionJob(jobId: string) {
@@ -89,6 +99,10 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
 
   async function deleteDataFrameAnalyticsJob(jobId: string) {
     await _deleteJob('data-frame-analytics', jobId);
+  }
+
+  async function bulkCreateJobs(jobs: JobObject[], namespaces?: string[]) {
+    return await _bulkCreateJobs(jobs, namespaces);
   }
 
   async function getAllJobObjects(jobType?: JobType, currentSpaceOnly: boolean = true) {
@@ -253,6 +267,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
     filterDatafeedIdsForSpace,
     assignJobsToSpaces,
     removeJobsFromSpaces,
+    bulkCreateJobs,
   };
 }
 

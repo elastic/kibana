@@ -12,7 +12,7 @@ import { jobsAndSpaces, repairJobObjects } from './schemas/saved_objects';
 /**
  * Routes for job saved object management
  */
-export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
+export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobSavedObjects
    *
@@ -29,7 +29,7 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, response, jobSavedObjectService }) => {
       try {
         const { checkStatus } = checksFactory(client, jobSavedObjectService);
         const status = await checkStatus();
@@ -64,11 +64,44 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
         const { repairJobs } = checksFactory(client, jobSavedObjectService);
         const savedObjects = await repairJobs(simulate);
+
+        return response.ok({
+          body: savedObjects,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {get} /api/ml/saved_objects/initialize Create job saved objects for all jobs
+   * @apiName RepairJobSavedObjects
+   * @apiDescription Create saved objects for jobs which are missing them.
+   *
+   */
+  router.get(
+    {
+      path: '/api/ml/saved_objects/initialize',
+      validate: {
+        query: repairJobObjects,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+      try {
+        const { simulate } = request.query;
+        const { initSavedObjects } = checksFactory(client, jobSavedObjectService);
+        const savedObjects = await initSavedObjects(simulate);
 
         return response.ok({
           body: savedObjects,
@@ -98,7 +131,7 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
       try {
         const { jobType, jobIds, spaces } = request.body;
 
@@ -132,7 +165,7 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
       try {
         const { jobType, jobIds, spaces } = request.body;
 
@@ -163,7 +196,7 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
       try {
         const { checkStatus } = checksFactory(client, jobSavedObjectService);
         const allStatuses = Object.values((await checkStatus()).savedObjects).flat();

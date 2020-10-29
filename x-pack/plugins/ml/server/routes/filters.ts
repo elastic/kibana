@@ -42,7 +42,7 @@ function deleteFilter(mlClient: MlClient, filterId: string) {
   return mgr.deleteFilter(filterId);
 }
 
-export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
+export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *
@@ -61,7 +61,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetFilters'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
         const resp = await getAllFilters(mlClient);
 
@@ -96,7 +96,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetFilters'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const resp = await getFilter(mlClient, request.params.filterId);
         return response.ok({
@@ -130,7 +130,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateFilter'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const body = request.body;
         const resp = await newFilter(mlClient, body);
@@ -168,7 +168,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateFilter'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { filterId } = request.params;
         const body = request.body;
@@ -202,7 +202,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteFilter'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { filterId } = request.params;
         const resp = await deleteFilter(mlClient, filterId);
@@ -235,7 +235,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetFilters'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
         const resp = await getAllFilterStats(mlClient);
 

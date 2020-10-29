@@ -94,7 +94,7 @@ function dataRecognizerJobsExist(
 /**
  * Recognizer routes.
  */
-export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
+export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Modules
    *
@@ -132,7 +132,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         const { indexPatternTitle } = request.params;
         const results = await recognize(
@@ -268,7 +268,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         let { moduleId } = request.params;
         if (moduleId === '') {
@@ -442,7 +442,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         const { moduleId } = request.params;
 
@@ -549,7 +549,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
         const { moduleId } = request.params;
         const result = await dataRecognizerJobsExist(

@@ -7,7 +7,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { RequestParams } from '@elastic/elasticsearch';
-import { MlServerLicense } from '../../lib/license';
+import { MlLicense } from '../../../common/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
@@ -32,7 +32,7 @@ export interface MlSystemProvider {
 
 export function getMlSystemProvider(
   getGuards: GetGuards,
-  mlLicense: MlServerLicense,
+  mlLicense: MlLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup | undefined,
   resolveMlCapabilities: ResolveMlCapabilities

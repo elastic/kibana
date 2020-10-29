@@ -9,7 +9,7 @@ import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from
 // when being used with instanceof
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from '../../.././../../src/core/server/http';
-import { MlServerLicense } from '../lib/license';
+import { MlLicense } from '../../common/license';
 
 import { SpacesPluginSetup } from '../../../spaces/server';
 import { CloudSetup } from '../../../cloud/server';
@@ -58,7 +58,7 @@ interface OkParams {
 type OkCallback = (okParams: OkParams) => any;
 
 export function createSharedServices(
-  mlLicense: MlServerLicense,
+  mlLicense: MlLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup,
   resolveMlCapabilities: ResolveMlCapabilities,

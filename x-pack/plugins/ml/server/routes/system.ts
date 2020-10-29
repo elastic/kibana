@@ -18,7 +18,7 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  * System routes
  */
 export function systemRoutes(
-  { router, mlLicense }: RouteInitialization,
+  { router, mlLicense, routeGuard }: RouteInitialization,
   { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   async function getNodeCount(client: IScopedClusterClient) {
@@ -57,7 +57,7 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
       try {
         const { asCurrentUser } = client;
         let upgradeInProgress = false;
@@ -115,7 +115,7 @@ export function systemRoutes(
       path: '/api/ml/ml_capabilities',
       validate: false,
     },
-    mlLicense.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
@@ -159,7 +159,7 @@ export function systemRoutes(
       },
     },
 
-    mlLicense.basicLicenseAPIGuard(async ({ client, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, response }) => {
       try {
         return response.ok({
           body: await getNodeCount(client),
@@ -185,7 +185,7 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ mlClient, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
         const { body } = await mlClient.info();
         const cloudId = cloud && cloud.cloudId;
@@ -216,7 +216,7 @@ export function systemRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { body } = await client.asCurrentUser.search(request.body);
         return response.ok({
@@ -244,7 +244,7 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { index } = request.body;
 
