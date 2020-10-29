@@ -672,7 +672,7 @@ export default function ({ getService }: FtrProviderContext) {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.status).to.eql('claiming');
-        expect(scheduledTask.attempts).to.eql(4);
+        expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
     });
   });

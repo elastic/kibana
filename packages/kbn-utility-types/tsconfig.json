@@ -7,10 +7,11 @@
     "stripInternal": true,
     "declarationMap": true,
     "types": [
-      "node"
+      "node",
+      "jest"
     ]
   },
-  "include": ["index.ts", "test-d/**/*"],
+  "include": ["index.ts", "jest/**/*", "test-d/**/*"],
   "exclude": [
     "target"
   ]

@@ -154,18 +154,20 @@ export const setup = async () => {
     component.update();
   };
 
-  const setSelectedNodeAttribute = (phase: string) =>
+  const setSelectedNodeAttribute = (phase: Phases) =>
     createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
-  const setReplicas = async (value: string) => {
-    await createFormToggleAction('warm-setReplicasSwitch')(true);
-    await createFormSetValueAction('warm-selectedReplicaCount')(value);
+  const setReplicas = (phase: Phases) => async (value: string) => {
+    await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
+    await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
   const setShrink = async (value: string) => {
     await createFormToggleAction('shrinkSwitch')(true);
     await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
   };
+
+  const setFreeze = createFormToggleAction('freezeSwitch');
 
   return {
     ...testBed,
@@ -189,12 +191,22 @@ export const setup = async () => {
         setMinAgeUnits: setMinAgeUnits('warm'),
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
-        setReplicas,
+        setReplicas: setReplicas('warm'),
         setShrink,
         toggleForceMerge: toggleForceMerge('warm'),
         setForcemergeSegments: setForcemergeSegmentsCount('warm'),
         setBestCompression: setBestCompression('warm'),
         setIndexPriority: setIndexPriority('warm'),
+      },
+      cold: {
+        enable: enable('cold'),
+        setMinAgeValue: setMinAgeValue('cold'),
+        setMinAgeUnits: setMinAgeUnits('cold'),
+        setDataAllocation: setDataAllocation('cold'),
+        setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
+        setReplicas: setReplicas('cold'),
+        setFreeze,
+        setIndexPriority: setIndexPriority('cold'),
       },
     },
   };
