@@ -92,6 +92,7 @@ const mergeAllSerializedPolicies = (
       ...legacySerializedPolicy.phases,
       hot: serializedPolicy.phases.hot,
       warm: serializedPolicy.phases.warm,
+      cold: serializedPolicy.phases.cold,
     },
   };
 };
@@ -195,10 +196,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     [setPolicy]
   );
 
-  const setColdPhaseData = useCallback(
-    (key: string, value: any) => setPhaseData('cold', key, value),
-    [setPhaseData]
-  );
   const setDeletePhaseData = useCallback(
     (key: string, value: any) => setPhaseData('delete', key, value),
     [setPhaseData]
@@ -342,14 +339,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
                 <EuiHorizontalRule />
 
-                <ColdPhase
-                  errors={errors?.cold}
-                  isShowingErrors={
-                    isShowingErrors && !!errors && Object.keys(errors.cold).length > 0
-                  }
-                  setPhaseData={setColdPhaseData}
-                  phaseData={policy.phases.cold}
-                />
+                <ColdPhase />
 
                 <EuiHorizontalRule />
 
