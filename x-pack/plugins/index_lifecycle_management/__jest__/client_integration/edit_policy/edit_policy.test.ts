@@ -14,6 +14,7 @@ import {
   DELETE_PHASE_POLICY,
   NEW_SNAPSHOT_POLICY_NAME,
   SNAPSHOT_POLICY_NAME,
+  POLICY_WITH_MIGRATE_OFF,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
   POLICY_WITH_NODE_ROLE_ALLOCATION,
 } from './constants';
@@ -142,6 +143,40 @@ describe('<EditPolicy />', () => {
   });
 
   describe('data allocation', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_MIGRATE_OFF]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    test('setting node_attr based allocation, but not selecting node attribute should leave allocation unchanged', async () => {
+      const { actions, find, component } = testBed;
+      act(() => {
+        find(`warm-dataTierAllocationControls.dataTierSelect`).simulate('click');
+      });
+      component.update();
+      await act(async () => {
+        find(`warm-dataTierAllocationControls.customDataAllocationOption`).simulate('click');
+      });
+      component.update();
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
+
+      expect(warmPhase.actions.migrate).toEqual({ enabled: false });
+    });
+
     describe('node roles', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_NODE_ROLE_ALLOCATION]);

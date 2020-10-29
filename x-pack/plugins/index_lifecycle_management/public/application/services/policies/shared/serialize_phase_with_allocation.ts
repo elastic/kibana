@@ -20,12 +20,15 @@ export const serializePhaseWithAllocation = (
 ): SerializedPhase['actions'] => {
   const esPhaseActions: SerializedPhase['actions'] = cloneDeep(originalPhaseActions);
 
-  if (phase.dataTierAllocationType === 'custom' && phase.selectedNodeAttrs) {
-    const [name, value] = phase.selectedNodeAttrs.split(':');
-    esPhaseActions.allocate = esPhaseActions.allocate || ({} as AllocateAction);
-    esPhaseActions.allocate.require = {
-      [name]: value,
-    };
+  if (phase.dataTierAllocationType === 'custom') {
+    if (phase.selectedNodeAttrs) {
+      const [name, value] = phase.selectedNodeAttrs.split(':');
+      esPhaseActions.allocate = esPhaseActions.allocate || ({} as AllocateAction);
+      esPhaseActions.allocate.require = {
+        [name]: value,
+      };
+    }
+    // else leave the policy configuration unchanged.
   } else if (phase.dataTierAllocationType === 'none') {
     esPhaseActions.migrate = { enabled: false };
     if (esPhaseActions.allocate) {
