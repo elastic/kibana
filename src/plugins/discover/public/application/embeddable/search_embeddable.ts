@@ -98,7 +98,6 @@ export class SearchEmbeddable
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
-  private prevSearchSessionId?: string;
 
   constructor(
     {
@@ -332,8 +331,7 @@ export class SearchEmbeddable
       !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort) ||
-      this.prevSearchSessionId !== this.input.searchSessionId;
+      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -350,7 +348,6 @@ export class SearchEmbeddable
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
-      this.prevSearchSessionId = this.input.searchSessionId;
     } else if (this.searchScope) {
       // trigger a digest cycle to make sure non-fetch relevant changes are propagated
       this.searchScope.$applyAsync();

@@ -84,7 +84,6 @@ export class Embeddable
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
-    searchSessionId?: string;
     lastReloadRequestTime?: number;
   } = {};
 
@@ -150,14 +149,12 @@ export class Embeddable
     if (
       !_.isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
       !_.isEqual(containerState.query, this.externalSearchContext.query) ||
-      !_.isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      containerState.searchSessionId !== this.externalSearchContext.searchSessionId
+      !_.isEqual(cleanedFilters, this.externalSearchContext.filters)
     ) {
       this.externalSearchContext = {
         timeRange: containerState.timeRange,
         query: containerState.query,
         lastReloadRequestTime: this.externalSearchContext.lastReloadRequestTime,
-        searchSessionId: containerState.searchSessionId,
         filters: cleanedFilters,
       };
 
@@ -180,7 +177,7 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
-        searchSessionId={this.externalSearchContext.searchSessionId}
+        searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode
