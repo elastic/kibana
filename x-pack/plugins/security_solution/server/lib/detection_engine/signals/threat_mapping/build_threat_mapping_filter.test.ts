@@ -108,6 +108,82 @@ describe('build_threat_mapping_filter', () => {
       });
       expect(threatListItem).toEqual(getThreatListItemMock());
     });
+
+    test('it should remove the entire "AND" clause if one of the pieces of data is missing from the list', () => {
+      const item = filterThreatMapping({
+        threatMapping: [
+          {
+            entries: [
+              {
+                field: 'host.name',
+                type: 'mapping',
+                value: 'host.name',
+              },
+              {
+                field: 'host.ip',
+                type: 'mapping',
+                value: 'host.ip',
+              },
+            ],
+          },
+        ],
+        threatListItem: {
+          '@timestamp': '2020-09-09T21:59:13Z',
+          host: {
+            name: 'host-1',
+            // since ip is missing this entire AND clause should be dropped
+          },
+        },
+      });
+      expect(item).toEqual([]);
+    });
+
+    test('it should remove 1 "AND" clause but keep the second one from the "OR" if the first "AND" has missing data element from the list', () => {
+      const item = filterThreatMapping({
+        threatMapping: [
+          {
+            entries: [
+              {
+                field: 'host.name',
+                type: 'mapping',
+                value: 'host.name',
+              },
+              {
+                field: 'host.ip', // Since host.ip is missing, this entire "AND" should be dropped
+                type: 'mapping',
+                value: 'host.ip',
+              },
+            ],
+          },
+          {
+            entries: [
+              {
+                field: 'host.name',
+                type: 'mapping',
+                value: 'host.name',
+              },
+            ],
+          },
+        ],
+        threatListItem: {
+          '@timestamp': '2020-09-09T21:59:13Z',
+          host: {
+            name: 'host-1',
+          },
+        },
+      });
+      expect(item).toEqual([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              type: 'mapping',
+              value: 'host.name',
+            },
+          ],
+        },
+      ]);
+    });
   });
 
   describe('createInnerAndClauses', () => {

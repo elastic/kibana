@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
-  describe('discover sidebar', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/80914
+  describe.skip('discover sidebar', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({

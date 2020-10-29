@@ -29,7 +29,6 @@ import {
   ThresholdLine,
   ValueAxis,
 } from '../../vis_type_xy/public';
-
 import { TimeMarker } from './vislib/visualizations/time_marker';
 
 /**
@@ -64,7 +63,9 @@ export type VislibChartType = $Values<typeof VislibChartType>;
 
 export interface CommonVislibParams {
   addTooltip: boolean;
+  addLegend: boolean;
   legendPosition: Position;
+  dimensions: Dimensions;
 }
 
 export interface BasicVislibParams extends CommonVislibParams {
@@ -77,8 +78,10 @@ export interface BasicVislibParams extends CommonVislibParams {
   thresholdLine: ThresholdLine;
   valueAxes: ValueAxis[];
   grid: Grid;
+  gauge?: {
+    percentageMode: boolean;
+  };
   seriesParams: SeriesParam[];
   times: TimeMarker[];
-  dimensions: Dimensions;
   radiusRatio: number;
 }

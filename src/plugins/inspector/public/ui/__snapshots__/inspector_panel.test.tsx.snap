@@ -279,7 +279,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                                   size="m"
                                   type="arrowDown"
                                 >
-                                  <div
+                                  <span
                                     className="euiButtonContent__icon"
                                     data-euiicon-type="arrowDown"
                                     size="m"

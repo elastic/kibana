@@ -34,7 +34,7 @@ import { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
   vislibVis: any;
-  visData: any;
+  visData: unknown;
   uiState?: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   addLegend: BasicVislibParams['addLegend'];
@@ -54,7 +54,10 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
   constructor(props: VisLegendProps) {
     super(props);
-    const open = props.uiState?.get('vis.legendOpen', true);
+
+    // TODO: Check when this bwc can safely be removed
+    const bwcLegendStateDefault = props.addLegend ?? true;
+    const open = props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
 
     this.state = {
       open,
@@ -69,12 +72,8 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   }
 
   toggleLegend = () => {
-    const bwcAddLegend = this.props.addLegend;
-    const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
-    const newOpen = !this.props.uiState?.get('vis.legendOpen', bwcLegendStateDefault);
-    this.setState({ open: newOpen });
-    // open should be applied on template before we update uiState
-    setTimeout(() => {
+    const newOpen = !this.state.open;
+    this.setState({ open: newOpen }, () => {
       this.props.uiState?.set('vis.legendOpen', newOpen);
     });
   };

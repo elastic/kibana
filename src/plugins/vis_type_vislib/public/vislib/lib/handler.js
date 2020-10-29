@@ -229,7 +229,7 @@ export class Handler {
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
       .attr('class', 'visError chart error')
-      .attr('data-test-subj', 'visLibVisualizeError');
+      .attr('data-test-subj', 'vislibVisualizeError');
 
     div.append('h4').text(markdownIt.renderInline(message));
 

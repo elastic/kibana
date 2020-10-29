@@ -338,7 +338,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
     public async expectError() {
       if (!this.isVisTypeXYChart()) {
-        await testSubjects.existOrFail('visLibVisualizeError');
+        await testSubjects.existOrFail('vislibVisualizeError');
       }
     }
 

@@ -19,8 +19,6 @@ export const createFeature = (
 ) => {
   const { excludeFromBaseAll, excludeFromBaseRead, privileges, category, ...rest } = config;
   return new KibanaFeature({
-    icon: 'discoverApp',
-    navLinkId: 'discover',
     app: [],
     category: category ?? { id: 'foo', label: 'foo' },
     catalogue: [],

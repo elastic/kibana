@@ -34,7 +34,12 @@ export {
   HistogramParams,
   DateHistogramParams,
 } from './types';
-export { getPositions, getScaleTypes, TruncateLabelsOption } from './editor';
+export {
+  getPositions,
+  getScaleTypes,
+  TruncateLabelsOption,
+  ValidationVisOptionsProps,
+} from './editor';
 export { xyVisTypes } from './vis_types';
 
 // Export common types

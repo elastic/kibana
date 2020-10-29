@@ -2,32 +2,40 @@
 [[managing-indices]]
 == Index Management
 
-*Index Management* enables you to view index settings,
-mappings, and statistics and perform index-level operations.
-These include refreshing, flushing, clearing the cache, force merging segments,
-freezing indices, and more. Practicing good index management helps ensure
-that your data is stored in the most cost-effective way possible.
+*Index Management* features are an easy, convenient way to manage your
+{es} cluster's indices, data streams, and index templates. Practicing good index
+management ensures your data is stored correctly and in the most cost-effective
+way possible.
 
-*Index Management* also helps you create index templates. A template reduces
-the amount of bookkeeping when working with indices. Instead of manually
-setting up your indices, you can create them automatically from a template,
-ensuring that your settings, mappings, and aliases are consistently defined.
+[float]
+=== What you'll learn
 
-To manage your indices, open the menu, then go to *Stack Management > Data > Index Management*.
+This page shows you how to use *Index Management* features to:
+
+To manage your indices, open the main menu, then click *Stack Management > Index Management*.
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
 
-If security is enabled,
-you must have the `monitor` cluster privilege and the `view_index_metadata`
+[float]
+=== Before you start
+
+Before using this feature, you should be familiar with index management
+operations. Refer to the {ref}/indices.html[index management APIs], the
+{ref}/indices-templates.html[index template APIs], and the
+{ref}/data-streams.html[data streams documentation].
+
+[float]
+=== Required permissions
+
+The minimum required permissions to access *Index Management* are
+the `monitor` cluster privilege and the `view_index_metadata`
 and `manage` index privileges to view the data.
 For index templates, you must have the `manage_index_templates` cluster privilege.
 See {ref}/security-privileges.html[Security privileges] for more
 information.
 
-Before using this feature, you should be familiar with index management
-operations. Refer to the {ref}/indices.html[index management APIs]
-and the {ref}/indices-templates.html[index template APIs].
+You can add these privileges in *Stack Management > Security > Roles*.
 
 [float]
 === View and edit indices
@@ -50,7 +58,7 @@ image::images/management_index_details.png[Index Management UI]
 [float]
 === Perform index-level operations
 
-Use the *Manage* menu to perform index-level operations.  This menu
+Use the *Manage* menu to perform index-level operations. This menu
 is available in the index details view, or when you select the checkbox of one or more
 indices on the overview page. The menu includes the following actions:
 
@@ -78,8 +86,29 @@ searchable, but queries take longer.
 
 * *Delete index*. Permanently removes the index and all of its documents.
 
-* *Add lifecycle policy*.  Specifies a policy for managing the lifecycle of the
+* *Add lifecycle policy*. Specifies a policy for managing the lifecycle of the
 index.
+
+[float]
+[[manage-data-streams]]
+=== Manage data streams
+
+A {ref}/data-streams.html[data stream] lets you store time series data across
+multiple backing indices while giving you a single named resource to use in
+requests. The *Data Streams* view lists your data streams and lets you examine
+or delete them.
+
+To view more information about a data stream, such as its generation or its
+current index lifecycle policy, click the stream's name.
+
+[role="screenshot"]
+image::images/management_index_data_stream_stats.png[Data stream details]
+
+To view information about the stream's backing indices, click the number in the
+*Indices* column.
+
+[role="screenshot"]
+image::images/management_index_data_stream_backing_index.png[Backing index]
 
 [float]
 [[manage-index-templates]]
@@ -87,7 +116,7 @@ index.
 
 An index template defines {ref}/index-modules.html#index-modules-settings[settings],
 {ref}/mapping.html[mappings], and {ref}/indices-add-alias.html[aliases]
-that you can automatically apply when creating a new index.  {es} applies a
+that you can automatically apply when creating a new index. {es} applies a
 template to a new index based on an index pattern that matches the index name.
 
 The *Index Templates* view lists your templates and enables you to examine, edit, clone, and
@@ -103,33 +132,56 @@ so you must create the
 template before you create the indices.
 
 [float]
-==== Example: Create an index template
+==== Try it: Create an index template
 
-In this example, you’ll create an index template for randomly generated log files.
+In this tutorial, you’ll create an index template for randomly generated log
+files. You'll then use the template to configure two new indices.
 
-Open the *Create template* wizard, and enter `logs_template` in the *Name*
-field.  Set *Index pattern* to `logstash*` so the template matches any index
-with that index pattern. The merge order and version are both optional,
-and you'll leave them blank in this example.
+*Step 1. Add a name and index pattern*
 
+. In the *Index Templates* view, open the *Create template* wizard.
++
 [role="screenshot"]
 image::images/management_index_create_wizard.png[Create wizard]
 
-The second step in the *Create template* wizard allows you to define index settings.
-These settings are optional, and this example skips this step.
+. In the *Name* field, enter `my-index-template`.
 
-The logs data set requires a
-mapping to label the latitude and longitude pairs as geographic locations
-by applying the geo_point type. In the third step of the wizard, define this mapping
-under the *Mapped fields* tab as follows:
+. Set *Index pattern* to `my-index-*` so the template matches any index
+with that index pattern.
 
+. Leave *Data Stream*, *Priority*, *Version*, and *_meta field* as-is or blank.
+
+. Click *Next*.
+
+*Step 2. Add settings, mappings, and index aliases*
+
+. Add component templates to your index template.
++
+{ref}/indices-component-template.html[Component templates] are pre-configured
+sets of mappings, index settings, and index aliases you can reuse across
+multiple index templates. Badges indicate whether a component template contains
+mappings (*M*), index settings (*S*), index aliases (*A*), or a combination of
+the three.
++
+Component templates are optional. For this tutorial, do not add any component
+templates.
++
+[role="screenshot"]
+image::images/management_index_component_template.png[Component templates page]
+
+. Define index settings. These are optional. For this tutorial, leave this
+section blank.
+
+. Define a mapping that contains an object field named `geo` with a child
+geo-point field named `coordinates`:
++
 [role="screenshot"]
 image::images/management-index-templates-mappings.png[Mapped fields page]
-
++
 Alternatively, you can click the *Load JSON* link and define the mapping as JSON:
-
++
 [source,js]
-----------------------------------
+----
 {
   "properties": {
     "geo": {
@@ -141,28 +193,33 @@ Alternatively, you can click the *Load JSON* link and define the mapping as JSON
     }
   }
 }
-----------------------------------
-
+----
++
 You can create additional mapping configurations in the *Dynamic templates* and
-*Advanced options* tabs. No additional mappings are required for this example.
+*Advanced options* tabs. No additional mappings are required for this tutorial.
 
-In the fourth step, define an alias named `logstash`.
-
+. Define an index alias named `my-index`:
++
 [source,js]
-----------------------------------
+----
 {
-  "logstash": {}
+  "my-index": {}
 }
-----------------------------------
+----
 
-A summary of the template is in step 5. If everything looks right, click *Create template*.
+. On the review page, check the summary. If everything looks right, click
+*Create template*.
 
-At this point, you’re ready to use the {es} index API to load the logs data.
-In the {kib} *Console*, index two documents:
+*Step 3. Create new indices*
 
+You’re now ready to load the logs data and create new indices using your index
+template.
+
+. In the {kib} *Console*, index the following documents:
++
 [source,js]
-----------------------------------
-POST /logstash-2019.05.18/_doc
+----
+POST /my-index-000001/_doc
 {
   "@timestamp": "2019-05-18T15:57:27.541Z",
   "ip": "225.44.217.191",
@@ -177,7 +234,7 @@ POST /logstash-2019.05.18/_doc
   "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/charles-fullerton.jpg"
 }
 
-POST /logstash-2019.05.20/_doc
+POST /my-index-000002/_doc
 {
   "@timestamp": "2019-05-20T03:44:20.844Z",
   "ip": "198.247.165.49",
@@ -192,7 +249,10 @@ POST /logstash-2019.05.20/_doc
   "memory": 241720,
   "url": "https://theacademyofperformingartsandscience.org/people/type:astronauts/name:laurel-b-clark/profile"
 }
-----------------------------------
+----
++
+These requests create two indices: `my-index-000001` and `my-index-000002`.
 
-The mappings and alias are configured automatically based on the template. To verify, you
-can view one of the newly created indices using the {ref}/indices-get-index.html#indices-get-index[index API].
+. Use the {es} {ref}/indices-get-index.html#indices-get-index[get index API] to
+view one of the newly created indices. The index's mappings and alias are
+configured automatically based on the template.

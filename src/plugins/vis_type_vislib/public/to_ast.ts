@@ -18,15 +18,18 @@
  */
 
 import moment from 'moment';
-import { get } from 'lodash';
 
-import { Vis, VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
+import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { EsaggsExpressionFunctionDefinition } from '../../data/public';
-import { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
 
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams } from './types';
+import {
+  DateHistogramParams,
+  Dimensions,
+  HistogramParams,
+} from './vislib/helpers/point_series/point_series';
+import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -40,13 +43,15 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
     splitColumn: schemas.split_column,
   };
 
-  const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
+  const responseAggs = vis.data.aggs?.getResponseAggs() ?? [];
 
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === 'date_histogram') {
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
+      (dimensions.x.params as DateHistogramParams).intervalESUnit = esUnit;
+      (dimensions.x.params as DateHistogramParams).intervalESValue = esValue;
       (dimensions.x.params as DateHistogramParams).interval = moment
         .duration(esValue, esUnit)
         .asMilliseconds();
@@ -63,22 +68,20 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
     }
   }
 
-  const visConfig = vis.params;
+  const visConfig = { ...vis.params };
 
   (dimensions.y || []).forEach((yDimension) => {
-    const yAgg = responseAggs[yDimension.accessor];
-    const seriesParam = (visConfig.seriesParams || []).find(
-      (param: any) => param.data.id === yAgg.id
-    );
+    const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];
+    const seriesParam = (visConfig.seriesParams || []).find((param) => param.data.id === yAgg.id);
     if (seriesParam) {
       const usedValueAxis = (visConfig.valueAxes || []).find(
-        (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
+        (valueAxis) => valueAxis.id === seriesParam.valueAxis
       );
-      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+      if (usedValueAxis?.scale.mode === 'percentage') {
         yDimension.format = { id: 'percent' };
       }
     }
-    if (get(visConfig, 'gauge.percentageMode') === true) {
+    if (visConfig?.gauge?.percentageMode === true) {
       yDimension.format = { id: 'percent' };
     }
   });
@@ -98,18 +101,3 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
 
   return ast.toAst();
 };
-
-/**
- * Get esaggs expressions function
- * @param vis
- */
-function getEsaggsFn(vis: Vis<BasicVislibParams & { showPartialRows?: any }>) {
-  // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
-  return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.params.showPartialRows ?? false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
-  });
-}

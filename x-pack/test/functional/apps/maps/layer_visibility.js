@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }) {
 
     afterEach(async () => {
       await inspector.close();
+      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
       await security.testUser.restoreDefaults();
     });
 

@@ -53,10 +53,10 @@ afterEach(function () {
   count = 0;
 });
 
-export function getVis(visLibParams, element) {
+export function getVis(vislibParams, element) {
   return new Vis(
     element || $visCanvas.new(),
-    _.defaults({}, visLibParams || {}, {
+    _.defaults({}, vislibParams || {}, {
       addTooltip: true,
       addLegend: true,
       defaultYExtents: false,

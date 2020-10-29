@@ -25,15 +25,12 @@ import { Schemas } from '../../vis_default_editor/public';
 import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 import { getPositions } from '../../vis_type_xy/public';
 
-import { Dimensions } from './vislib/helpers/hierarchical/build_hierarchical_data';
 import { CommonVislibParams } from './types';
 import { PieOptions } from './editor';
 import { toExpressionAst } from './to_ast_pie';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
-  addLegend: boolean;
-  dimensions: Dimensions;
   isDonut: boolean;
   labels: {
     show: boolean;

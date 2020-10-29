@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
@@ -31,22 +29,12 @@ import { NEW_CHART_UI } from '../../vis_type_xy/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
-  histogramVisTypeDefinition,
-  lineVisTypeDefinition,
+  convertedTypeDefinitions,
   pieVisTypeDefinition,
-  areaVisTypeDefinition,
-  heatmapVisTypeDefinition,
-  horizontalBarVisTypeDefinition,
-  gaugeVisTypeDefinition,
-  goalVisTypeDefinition,
+  visLibVisTypeDefinitions,
 } from './vis_type_vislib_vis_types';
 import { setFormatService, setDataActions } from './services';
 import { getVislibVisRenderer } from './vis_renderer';
-
-export interface VisTypeVislibDependencies {
-  core: VisTypeVislibCoreSetup;
-  charts: ChartsPluginSetup;
-}
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
@@ -75,23 +63,13 @@ export class VisTypeVislibPlugin
   ) {
     if (core.uiSettings.get(NEW_CHART_UI)) {
       // Register only non-replaced vis types
-      [heatmapVisTypeDefinition, gaugeVisTypeDefinition, goalVisTypeDefinition].forEach(
-        visualizations.createBaseVisualization
-      );
+      convertedTypeDefinitions.forEach(visualizations.createBaseVisualization);
       visualizations.createBaseVisualization(pieVisTypeDefinition);
       expressions.registerRenderer(getVislibVisRenderer(core, charts));
       [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
     } else {
       // Register all vis types
-      [
-        histogramVisTypeDefinition,
-        lineVisTypeDefinition,
-        areaVisTypeDefinition,
-        heatmapVisTypeDefinition,
-        horizontalBarVisTypeDefinition,
-        gaugeVisTypeDefinition,
-        goalVisTypeDefinition,
-      ].forEach(visualizations.createBaseVisualization);
+      visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
       visualizations.createBaseVisualization(pieVisTypeDefinition);
       expressions.registerRenderer(getVislibVisRenderer(core, charts));
       [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);

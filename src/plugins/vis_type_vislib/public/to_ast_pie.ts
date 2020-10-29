@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { Vis, VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
-import { EsaggsExpressionFunctionDefinition } from '../../data/public';
+import { getVisSchemas, VisToExpressionAst } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 
 import { PieVisParams } from './pie';
 import { vislibPieName, VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';
+import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -48,18 +48,3 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
 
   return ast.toAst();
 };
-
-/**
- * Get esaggs expressions function
- * @param vis
- */
-function getEsaggsFn(vis: Vis<PieVisParams & { showPartialRows?: any }>) {
-  // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
-  return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.params.showPartialRows ?? false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
-  });
-}

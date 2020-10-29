@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
@@ -35,12 +35,13 @@ interface Arguments {
 
 interface RenderValue {
   visType: Extract<VislibChartType, 'pie'>;
+  visData: unknown;
   visConfig: PieVisParams;
 }
 
 export type VisTypeVislibPieExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof vislibPieName,
-  KibanaDatatable,
+  Datatable,
   Arguments,
   Render<RenderValue>
 >;
@@ -48,7 +49,7 @@ export type VisTypeVislibPieExpressionFunctionDefinition = ExpressionFunctionDef
 export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition => ({
   name: vislibPieName,
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeVislib.functions.pie.help', {
     defaultMessage: 'Pie visualization',
   }),
@@ -70,9 +71,6 @@ export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition =
         visData,
         visConfig,
         visType: VislibChartType.Pie,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },

@@ -26,7 +26,7 @@ import { IAggConfig, IAggType } from 'src/plugins/data/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
-import { MetricsAxisOptions } from './index';
+import MetricsAxisOptions from './index';
 import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';

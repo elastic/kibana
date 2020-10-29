@@ -19,7 +19,7 @@
 
 import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
+import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
@@ -49,7 +49,6 @@ import {
   getSearchService,
 } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -66,6 +65,7 @@ export interface RequestHandlerParams {
   metricsAtAllLevels?: boolean;
   visParams?: any;
   abortSignal?: AbortSignal;
+  searchSessionId?: string;
 }
 
 const name = 'esaggs';
@@ -83,6 +83,7 @@ const handleCourierRequest = async ({
   inspectorAdapters,
   filterManager,
   abortSignal,
+  searchSessionId,
 }: RequestHandlerParams) => {
   // Create a new search source that inherits the original search source
   // but has the appropriate timeRange applied via a filter.
@@ -144,6 +145,7 @@ const handleCourierRequest = async ({
         defaultMessage:
           'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
+      searchSessionId,
     }
   );
   request.stats(getRequestInspectorStats(requestSearchSource));
@@ -151,6 +153,7 @@ const handleCourierRequest = async ({
   try {
     const response = await requestSearchSource.fetch({
       abortSignal,
+      sessionId: searchSessionId,
     });
 
     request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
@@ -195,11 +198,9 @@ const handleCourierRequest = async ({
       : undefined,
   };
 
-  (searchSource as any).tabifiedResponse = tabifyAggResponse(
-    aggs,
-    (searchSource as any).finalResponse,
-    tabifyParams
-  );
+  const response = tabifyAggResponse(aggs, (searchSource as any).finalResponse, tabifyParams);
+
+  (searchSource as any).tabifiedResponse = response;
 
   inspectorAdapters.data.setTabularLoader(
     () =>
@@ -210,12 +211,12 @@ const handleCourierRequest = async ({
     { returnsFormattedValues: true }
   );
 
-  return (searchSource as any).tabifiedResponse;
+  return response;
 };
 
 export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
   name,
-  type: 'kibana_datatable',
+  type: 'datatable',
   inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
@@ -251,7 +252,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       multi: true,
     },
   },
-  async fn(input, args, { inspectorAdapters, abortSignal }) {
+  async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
     const searchService = getSearchService();
@@ -279,20 +280,35 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
+      searchSessionId: getSearchSessionId(),
     });
 
-    const table: KibanaDatatable = {
-      type: 'kibana_datatable',
+    const table: Datatable = {
+      type: 'datatable',
       rows: response.rows,
-      columns: response.columns.map((column: any) => {
-        const cleanedColumn: KibanaDatatableColumn = {
+      columns: response.columns.map((column) => {
+        const cleanedColumn: DatatableColumn = {
           id: column.id,
           name: column.name,
-          meta: serializeAggConfig(column.aggConfig),
+          meta: {
+            type: column.aggConfig.params.field?.type || 'number',
+            field: column.aggConfig.params.field?.name,
+            index: indexPattern.title,
+            params: column.aggConfig.toSerializedFieldFormat(),
+            source: 'esaggs',
+            sourceParams: {
+              indexPatternId: indexPattern.id,
+              appliedTimeRange:
+                column.aggConfig.params.field?.name &&
+                input?.timeRange &&
+                args.timeFields &&
+                args.timeFields.includes(column.aggConfig.params.field?.name)
+                  ? { from: input.timeRange.from, to: input.timeRange.to }
+                  : undefined,
+              ...column.aggConfig.serialize(),
+            },
+          },
         };
-        if (args.includeFormatHints) {
-          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
-        }
         return cleanedColumn;
       }),
     };

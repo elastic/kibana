@@ -5,9 +5,6 @@ Object {
   "as": "vislib_vis",
   "type": "render",
   "value": Object {
-    "params": Object {
-      "listenOnChange": true,
-    },
     "visConfig": Object {
       "addLegend": true,
       "addTooltip": true,

@@ -56,6 +56,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -68,11 +69,11 @@ import {
   fillDefineThresholdRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectThresholdRuleType,
+  waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -91,6 +92,7 @@ describe('Detection rules, threshold', () => {
   });
 
   after(() => {
+    deleteRule();
     esArchiverUnload('timeline');
   });
 
@@ -162,14 +164,10 @@ describe('Detection rules, threshold', () => {
       );
     });
 
-    refreshPage();
     waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.below', 100);
-      });
+    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.below', 100);
     cy.get(ALERT_RULE_NAME).first().should('have.text', newThresholdRule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threshold');

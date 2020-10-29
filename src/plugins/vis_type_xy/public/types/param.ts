@@ -18,7 +18,7 @@
  */
 import { Fit, Position } from '@elastic/charts';
 
-import { ColorSchemas, Style, Labels } from '../../../charts/public';
+import { Style, Labels } from '../../../charts/public';
 import { SchemaConfig } from '../../../visualizations/public';
 
 import { ChartType } from '../../common';
@@ -30,16 +30,6 @@ import {
   ScaleType,
   ThresholdLineStyle,
 } from './constants';
-
-export interface CommonVislibParams {
-  addTooltip: boolean;
-  legendPosition: Position;
-}
-
-export interface ColorSchemaVislibParams {
-  colorSchema: ColorSchemas;
-  invertColors: boolean;
-}
 
 export interface Scale {
   boundsMargin?: number | '';

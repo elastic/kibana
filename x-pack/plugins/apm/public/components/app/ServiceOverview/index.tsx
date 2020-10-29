@@ -21,6 +21,7 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { MLCallout } from './ServiceList/MLCallout';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
+import { Correlations } from '../Correlations';
 
 const initialData = {
   items: [],
@@ -117,6 +118,9 @@ export function ServiceOverview() {
   return (
     <>
       <EuiSpacer />
+
+      <Correlations />
+
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localFiltersConfig} />

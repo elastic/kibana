@@ -16,7 +16,8 @@ import {
   EuiListGroupItemProps,
   EuiFormLabel,
 } from '@elastic/eui';
-import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import { OperationSupportMatrix } from './operation_support';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
@@ -24,7 +25,7 @@ import {
   buildColumn,
   changeField,
 } from '../operations';
-import { deleteColumn, changeColumn, updateColumnParam } from '../state_helpers';
+import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
@@ -394,12 +395,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
-                setState({
-                  ...state,
-                  layers: {
-                    ...state.layers,
-                    [layerId]: {
-                      ...state.layers[layerId],
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: {
                       columns: {
                         ...state.layers[layerId].columns,
                         [columnId]: {
@@ -409,8 +409,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         },
                       },
                     },
-                  },
-                });
+                  })
+                );
               }}
             />
           )}
@@ -435,7 +435,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {selectedColumn && selectedColumn.dataType === 'number' ? (
+          {selectedColumn &&
+          (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
             <FormatSelector
               selectedColumn={selectedColumn}
               onChange={(newFormat) => {

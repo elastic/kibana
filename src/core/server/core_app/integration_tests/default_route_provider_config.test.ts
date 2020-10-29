@@ -24,7 +24,8 @@ const { startES } = kbnTestServer.createTestServers({
 });
 let esServer: kbnTestServer.TestElasticsearchUtils;
 
-describe('default route provider', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/81072
+describe.skip('default route provider', () => {
   let root: Root;
 
   beforeAll(async () => {

@@ -17,14 +17,29 @@
  * under the License.
  */
 
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+
 import { ExpressionRenderDefinition } from '../../expressions/public';
+import { VisualizationContainer } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VislibRenderValue, vislibVisName } from './vis_type_vislib_vis_fn';
-import { VislibVisController } from './vis_controller';
+import { VislibChartType } from './types';
 
-const vislibVisRegistry = new Map<HTMLElement, VislibVisController>();
+function shouldShowNoResultsMessage(visData: any, visType: Omit<VislibChartType, 'pie'>): boolean {
+  if (['goal', 'gauge'].includes(visType as string)) {
+    return false;
+  }
+
+  const rows: object[] | undefined = visData?.rows;
+  const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
+
+  return Boolean(isZeroHits);
+}
+
+const VislibWrapper = lazy(() => import('./vis_wrapper'));
 
 export const getVislibVisRenderer: (
   core: VisTypeVislibCoreSetup,
@@ -33,22 +48,15 @@ export const getVislibVisRenderer: (
   name: vislibVisName,
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
-    let registeredController = vislibVisRegistry.get(domNode);
+    const showNoResult = shouldShowNoResultsMessage(config.visData, config.visType);
 
-    if (!registeredController) {
-      const { createVislibVisController } = await import('./vis_controller');
+    handlers.onDestroy(() => unmountComponentAtNode(domNode));
 
-      const Controller = createVislibVisController(core, charts);
-      registeredController = new Controller(domNode);
-      vislibVisRegistry.set(domNode, registeredController);
-
-      handlers.onDestroy(() => {
-        registeredController?.destroy();
-        vislibVisRegistry.delete(domNode);
-      });
-    }
-
-    await registeredController.render(config.visData, config.visConfig, handlers);
-    handlers.done();
+    render(
+      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+        <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
+      </VisualizationContainer>,
+      domNode
+    );
   },
 });
