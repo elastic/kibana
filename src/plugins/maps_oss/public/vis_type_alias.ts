@@ -35,7 +35,7 @@ export const getMapsAliasConfig = (): VisTypeAlias => ({
   stage: 'production',
   disabled: true,
   promoTooltip: {
-    description: i18n.translate('lensOss.visTypeAlias.promoTooltip.description', {
+    description: i18n.translate('mapsOss.visTypeAlias.promoTooltip.description', {
       defaultMessage: 'Try maps for free with Elastic. Learn more.',
     }),
     link: 'https://www.elastic.co/maps',

@@ -19,7 +19,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiPortal, EuiProgress } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   getHttp,
@@ -68,7 +68,13 @@ export function showNewVisModal({
   document.body.appendChild(container);
   const element = (
     <I18nProvider>
-      <Suspense fallback={<EuiLoadingSpinner />}>
+      <Suspense
+        fallback={
+          <EuiPortal>
+            <EuiProgress size="xs" position="fixed" />
+          </EuiPortal>
+        }
+      >
         <NewVisModal
           isOpen={true}
           onClose={handleClose}

@@ -80,7 +80,7 @@ export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
   add: (newVisTypeAlias) => {
     // if it exists on discardOnRegister array then we don't allow it to be registered
-    if (discardOnRegister.find((aliasName) => aliasName === newVisTypeAlias.name)) {
+    if (discardOnRegister.some((aliasName) => aliasName === newVisTypeAlias.name)) {
       discardOnRegister = discardOnRegister.filter(
         (aliasName) => aliasName === newVisTypeAlias.name
       );

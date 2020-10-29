@@ -92,10 +92,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
               {query && (
                 <FormattedMessage
                   id="visualizations.newVisWizard.resultsFound"
-                  defaultMessage="{resultCount} {resultCount, plural,
-                            one {type}
-                            other {types}
-                          } found"
+                  defaultMessage="{resultCount, plural, one {type} other {types}} found"
                   values={{
                     resultCount: visTypes.filter((type) => type.highlighted).length,
                   }}

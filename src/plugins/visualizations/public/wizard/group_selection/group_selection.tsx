@@ -18,7 +18,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,
@@ -65,13 +65,17 @@ function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
 
 function GroupSelection(props: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
-  const promotedVisGroups = orderBy(
-    [
-      ...props.visTypesRegistry.getAliases(),
-      ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
-    ],
-    ['promotion', 'title'],
-    ['asc', 'asc']
+  const promotedVisGroups = useMemo(
+    () =>
+      orderBy(
+        [
+          ...props.visTypesRegistry.getAliases(),
+          ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
+        ],
+        ['promotion', 'title'],
+        ['asc', 'asc']
+      ),
+    [props.visTypesRegistry]
   );
   return (
     <>
