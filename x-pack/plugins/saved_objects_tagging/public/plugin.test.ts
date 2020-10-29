@@ -5,15 +5,17 @@
  */
 
 import moment from 'moment';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { SavedObjectsTaggingClientConfigRawType } from './config';
 import { TagsCache } from './tags';
+import { tagsCacheMock } from './tags/tags_cache.mock';
 
 jest.mock('./tags/tags_cache');
-const MockedTagsCache = TagsCache as jest.Mock;
+const MockedTagsCache = (TagsCache as unknown) as jest.Mock<PublicMethodsOf<TagsCache>>;
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;
@@ -62,15 +64,17 @@ describe('SavedObjectTaggingPlugin', () => {
     beforeEach(() => {
       managementPluginSetup = managementPluginMock.createSetupContract();
       savedObjectsTaggingOssPluginSetup = savedObjectTaggingOssPluginMock.createSetup();
+      MockedTagsCache.mockImplementation(() => tagsCacheMock.create());
 
       plugin.setup(coreMock.createSetup(), {
         management: managementPluginSetup,
         savedObjectsTaggingOss: savedObjectsTaggingOssPluginSetup,
       });
-      plugin.start(coreMock.createStart());
     });
 
     it('creates its cache with correct parameters', () => {
+      plugin.start(coreMock.createStart());
+
       expect(MockedTagsCache).toHaveBeenCalledTimes(1);
       expect(MockedTagsCache).toHaveBeenCalledWith({
         refreshHandler: expect.any(Function),
@@ -81,6 +85,24 @@ describe('SavedObjectTaggingPlugin', () => {
 
       expect(moment.isDuration(refreshIntervalParam)).toBe(true);
       expect(refreshIntervalParam.toString()).toBe('PT15M');
+    });
+
+    it('initializes its cache if not on an anonymous page', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
+
+      plugin.start(coreStart);
+
+      expect(MockedTagsCache.mock.instances[0].initialize).not.toHaveBeenCalled();
+    });
+
+    it('does not initialize its cache if on an anonymous page', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+      plugin.start(coreStart);
+
+      expect(MockedTagsCache.mock.instances[0].initialize).not.toHaveBeenCalled();
     });
   });
 });

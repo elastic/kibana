@@ -67,8 +67,13 @@ export class SavedObjectTaggingPlugin
     });
     this.tagClient = new TagsClient({ http, changeListener: this.tagCache });
 
-    // we don't need to wait for this to resolve.
-    this.tagCache.initialize();
+    // do not fetch tags on anonymous page
+    if (!http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      // we don't need to wait for this to resolve.
+      this.tagCache.initialize().catch(() => {
+        // cache is resilient to initial load failure. We just need to catch to avoid unhandled promise rejection
+      });
+    }
 
     return {
       client: this.tagClient,

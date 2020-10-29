@@ -5,14 +5,17 @@
  */
 
 import { of } from 'rxjs';
-import { ITagsCache, ITagsChangeListener } from './tags_cache';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { TagsCache } from './tags_cache';
 
-type TagsCacheMock = jest.Mocked<ITagsCache & ITagsChangeListener>;
+type TagsCacheMock = jest.Mocked<PublicMethodsOf<TagsCache>>;
 
 const createTagsCacheMock = (): TagsCacheMock => {
   const mock = {
     getState: jest.fn(),
     getState$: jest.fn(),
+    initialize: jest.fn(),
+    stop: jest.fn(),
 
     onDelete: jest.fn(),
     onCreate: jest.fn(),
@@ -22,6 +25,7 @@ const createTagsCacheMock = (): TagsCacheMock => {
 
   mock.getState.mockReturnValue([]);
   mock.getState$.mockReturnValue(of([]));
+  mock.initialize.mockResolvedValue(undefined);
 
   return mock;
 };
