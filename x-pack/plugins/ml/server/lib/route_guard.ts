@@ -27,7 +27,7 @@ type Handler = (handlerParams: {
   mlClient: MlClient;
 }) => ReturnType<RequestHandler>;
 
-type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract;
+type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract | null;
 
 export class RouteGuard {
   private _mlLicense: MlLicense;
@@ -39,15 +39,9 @@ export class RouteGuard {
   }
 
   public fullLicenseAPIGuard(handler: Handler) {
-    if (this._getMlSavedObjectClient === null) {
-      throw new Error();
-    }
     return this._guard(() => this._mlLicense.isFullLicense(), handler);
   }
   public basicLicenseAPIGuard(handler: Handler) {
-    if (this._getMlSavedObjectClient === null) {
-      throw new Error();
-    }
     return this._guard(() => this._mlLicense.isMinimumLicense(), handler);
   }
 
@@ -62,6 +56,12 @@ export class RouteGuard {
       }
 
       const mlSavedObjectClient = this._getMlSavedObjectClient(request);
+      if (mlSavedObjectClient === null) {
+        return response.badRequest({
+          body: { message: 'saved object client has not been initialized' },
+        });
+      }
+
       const jobSavedObjectService = jobSavedObjectServiceFactory(mlSavedObjectClient);
       const client = context.core.elasticsearch.client;
 

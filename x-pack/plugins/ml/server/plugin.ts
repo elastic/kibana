@@ -120,9 +120,9 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
     setupSavedObjects(coreSetup.savedObjects);
 
-    const getMlSavedObjectsClient = (request: KibanaRequest): SavedObjectsClientContract => {
+    const getMlSavedObjectsClient = (request: KibanaRequest): SavedObjectsClientContract | null => {
       if (this.savedObjectsStart === null) {
-        throw new Error('saved object client has not been initialized');
+        return null;
       }
       return this.savedObjectsStart.getScopedClient(request, {
         includedHiddenTypes: ['ml-job'],
