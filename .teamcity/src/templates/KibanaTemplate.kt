@@ -28,16 +28,16 @@ object KibanaTemplate : Template({
 
   features {
     perfmon {  }
-    pullRequests {
-      vcsRootExtId = "${Kibana.id}"
-      provider = github {
-        authType = token {
-          token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
-        }
-        filterTargetBranch = "refs/heads/master_teamcity"
-        filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
-      }
-    }
+//    pullRequests {
+//      vcsRootExtId = "${Kibana.id}"
+//      provider = github {
+//        authType = token {
+//          token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
+//        }
+//        filterTargetBranch = "refs/heads/master_teamcity"
+//        filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
+//      }
+//    }
   }
 
   failureConditions {
