@@ -83,7 +83,7 @@ export function registerApmAlerts(
       'xpack.apm.alertTypes.transactionErrorRate.description',
       {
         defaultMessage:
-          'Alert when the rate of a specific transaction error in a service exceeds a defined threshold.',
+          'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
     iconClass: 'bell',
