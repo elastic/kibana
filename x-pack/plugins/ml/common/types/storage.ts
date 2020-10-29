@@ -6,7 +6,7 @@
 
 import { EntityFieldType } from './anomalies';
 
-export const ML_PARTITION_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
+export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
 
 export type PartitionFieldConfig =
   | {
@@ -23,5 +23,5 @@ export type PartitionFieldsConfig =
   | undefined;
 
 export type MlStorage = Partial<{
-  [ML_PARTITION_FIELDS_CONFIG]: PartitionFieldsConfig;
+  [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
 }> | null;

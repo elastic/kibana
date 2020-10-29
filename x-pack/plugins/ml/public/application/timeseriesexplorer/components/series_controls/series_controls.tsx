@@ -18,7 +18,7 @@ import { getControlsForDetector } from '../../get_controls_for_detector';
 // @ts-ignore
 import { getViewableDetectors } from '../../timeseriesexplorer';
 import {
-  ML_PARTITION_FIELDS_CONFIG,
+  ML_ENTITY_FIELDS_CONFIG,
   PartitionFieldConfig,
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
@@ -98,7 +98,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
   const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<PartitionFieldsConfig>(
-    ML_PARTITION_FIELDS_CONFIG
+    ML_ENTITY_FIELDS_CONFIG
   );
 
   // Merge the default config with the one from the local storage
