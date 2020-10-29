@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findAlertRoute } from './find';
+import { aggregateAlertRoute } from './aggregate';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
@@ -21,32 +21,33 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('findAlertRoute', () => {
-  it('finds alerts with proper parameters', async () => {
+describe('aggregateAlertRoute', () => {
+  it('aggregate alerts with proper parameters', async () => {
     const licenseState = mockLicenseState();
     const router = httpServiceMock.createRouter();
 
-    findAlertRoute(router, licenseState);
+    aggregateAlertRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_aggregate"`);
 
-    const findResult = {
-      page: 1,
-      perPage: 1,
-      total: 0,
-      data: [],
+    const aggregateResult = {
+      alertExecutionStatus: {
+        ok: 15,
+        error: 2,
+        active: 23,
+        pending: 1,
+        unknown: 0,
+      },
     };
-    alertsClient.find.mockResolvedValueOnce(findResult);
+    alertsClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
       {
         query: {
-          per_page: 1,
-          page: 1,
-          default_search_operator: 'OR',
+          default_search_operator: 'AND',
         },
       },
       ['ok']
@@ -55,53 +56,55 @@ describe('findAlertRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "data": Array [],
-          "page": 1,
-          "perPage": 1,
-          "total": 0,
+          "alertExecutionStatus": Object {
+            "active": 23,
+            "error": 2,
+            "ok": 15,
+            "pending": 1,
+            "unknown": 0,
+          },
         },
       }
     `);
 
-    expect(alertsClient.find).toHaveBeenCalledTimes(1);
-    expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.aggregate).toHaveBeenCalledTimes(1);
+    expect(alertsClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "options": Object {
-            "defaultSearchOperator": "OR",
-            "page": 1,
-            "perPage": 1,
+            "defaultSearchOperator": "AND",
           },
         },
       ]
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: findResult,
+      body: aggregateResult,
     });
   });
 
-  it('ensures the license allows finding alerts', async () => {
+  it('ensures the license allows aggregating alerts', async () => {
     const licenseState = mockLicenseState();
     const router = httpServiceMock.createRouter();
 
-    findAlertRoute(router, licenseState);
+    aggregateAlertRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.find.mockResolvedValueOnce({
-      page: 1,
-      perPage: 1,
-      total: 0,
-      data: [],
+    alertsClient.aggregate.mockResolvedValueOnce({
+      alertExecutionStatus: {
+        ok: 15,
+        error: 2,
+        active: 23,
+        pending: 1,
+        unknown: 0,
+      },
     });
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
       {
         query: {
-          per_page: 1,
-          page: 1,
           default_search_operator: 'OR',
         },
       }
@@ -112,7 +115,7 @@ describe('findAlertRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  it('ensures the license check prevents finding alerts', async () => {
+  it('ensures the license check prevents aggregating alerts', async () => {
     const licenseState = mockLicenseState();
     const router = httpServiceMock.createRouter();
 
@@ -120,18 +123,14 @@ describe('findAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    findAlertRoute(router, licenseState);
+    aggregateAlertRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
       {},
       {
-        query: {
-          per_page: 1,
-          page: 1,
-          default_search_operator: 'OR',
-        },
+        query: {},
       },
       ['ok']
     );

@@ -65,29 +65,15 @@ export async function loadAlertInstanceSummary({
   return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/_instance_summary`);
 }
 
-export async function loadAlerts({
-  http,
-  page,
-  searchText,
+export const mapFiltersToKql = ({
   typesFilter,
   actionTypesFilter,
   alertStatusesFilter,
-  getAggregations,
 }: {
-  http: HttpSetup;
-  page: { index: number; size: number };
-  searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
   alertStatusesFilter?: string[];
-  getAggregations?: boolean;
-}): Promise<{
-  page: number;
-  perPage: number;
-  total: number;
-  data: Alert[];
-  aggregations?: AlertAggregations;
-}> {
+}): string[] => {
   const filters = [];
   if (typesFilter && typesFilter.length) {
     filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
@@ -106,6 +92,30 @@ export async function loadAlerts({
   if (alertStatusesFilter && alertStatusesFilter.length) {
     filters.push(`alert.attributes.executionStatus.status:(${alertStatusesFilter.join(' or ')})`);
   }
+  return filters;
+};
+
+export async function loadAlerts({
+  http,
+  page,
+  searchText,
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
+  http: HttpSetup;
+  page: { index: number; size: number };
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+}): Promise<{
+  page: number;
+  perPage: number;
+  total: number;
+  data: Alert[];
+}> {
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
       page: page.index + 1,
@@ -116,7 +126,30 @@ export async function loadAlerts({
       default_search_operator: 'AND',
       sort_field: 'name.keyword',
       sort_order: 'asc',
-      get_aggregations: getAggregations,
+    },
+  });
+}
+
+export async function loadAlertAggregations({
+  http,
+  searchText,
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
+  http: HttpSetup;
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+}): Promise<AlertAggregations> {
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
+  return await http.get(`${BASE_ALERT_API_PATH}/_aggregate`, {
+    query: {
+      search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
+      search: searchText,
+      filter: filters.length ? filters.join(' and ') : undefined,
+      default_search_operator: 'AND',
     },
   });
 }

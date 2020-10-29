@@ -39,7 +39,12 @@ import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
-import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
+import {
+  loadAlerts,
+  loadAlertAggregations,
+  loadAlertTypes,
+  deleteAlerts,
+} from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
@@ -175,8 +180,8 @@ export const AlertsList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           alertStatusesFilter,
-          getAggregations: true,
         });
+        await loadAlertAggs();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -185,9 +190,6 @@ export const AlertsList: React.FunctionComponent = () => {
 
         if (!alertsResponse.data?.length && page.index > 0) {
           setPage({ ...page, index: 0 });
-        }
-        if (alertsResponse?.aggregations?.alertExecutionStatus) {
-          setAlertsStatusesTotal(alertsResponse.aggregations.alertExecutionStatus);
         }
       } catch (e) {
         toastNotifications.addDanger({
@@ -200,6 +202,30 @@ export const AlertsList: React.FunctionComponent = () => {
         });
         setAlertsState({ ...alertsState, isLoading: false });
       }
+    }
+  }
+
+  async function loadAlertAggs() {
+    try {
+      const alertsAggs = await loadAlertAggregations({
+        http,
+        searchText,
+        typesFilter,
+        actionTypesFilter,
+        alertStatusesFilter,
+      });
+      if (alertsAggs?.alertExecutionStatus) {
+        setAlertsStatusesTotal(alertsAggs.alertExecutionStatus);
+      }
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
+          {
+            defaultMessage: 'Unable to load alert statuses info',
+          }
+        ),
+      });
     }
   }
 

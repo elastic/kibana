@@ -47,7 +47,7 @@ export interface AlertAction {
 }
 
 export interface AlertAggregations {
-  alertExecutionStatus: { [key: string]: number };
+  alertExecutionStatus: { [status: string]: number };
 }
 
 export interface Alert {

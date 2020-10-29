@@ -20,15 +20,11 @@ import { FindOptions } from '../alerts_client';
 
 // config definition
 const querySchema = schema.object({
-  per_page: schema.number({ defaultValue: 10, min: 0 }),
-  page: schema.number({ defaultValue: 1, min: 1 }),
   search: schema.maybe(schema.string()),
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   }),
   search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
-  sort_field: schema.maybe(schema.string()),
-  sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   has_reference: schema.maybe(
     // use nullable as maybe is currently broken
     // in config-schema
@@ -39,14 +35,13 @@ const querySchema = schema.object({
       })
     )
   ),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
 });
 
-export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+export const aggregateAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: `${BASE_ALERT_API_PATH}/_find`,
+      path: `${BASE_ALERT_API_PATH}/_aggregate`,
       validate: {
         query: querySchema,
       },
@@ -65,13 +60,8 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
       const query = req.query;
       const renameMap = {
         default_search_operator: 'defaultSearchOperator',
-        fields: 'fields',
         has_reference: 'hasReference',
-        page: 'page',
-        per_page: 'perPage',
         search: 'search',
-        sort_field: 'sortField',
-        sort_order: 'sortOrder',
         filter: 'filter',
       };
 
@@ -83,9 +73,9 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
           : [query.search_fields];
       }
 
-      const findResult = await alertsClient.find({ options });
+      const aggregateResult = await alertsClient.aggregate({ options });
       return res.ok({
-        body: findResult,
+        body: aggregateResult,
       });
     })
   );

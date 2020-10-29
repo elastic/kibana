@@ -99,12 +99,23 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
+export interface AggregateOptions extends IndexType {
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  filter?: string;
+}
+
 interface IndexType {
   [key: string]: unknown;
 }
 
-interface FindAggregations {
-  alertExecutionStatus: { [key: string]: number };
+interface AggregateResult {
+  alertExecutionStatus: { [status: string]: number };
 }
 
 export interface FindResult {
@@ -112,7 +123,6 @@ export interface FindResult {
   perPage: number;
   total: number;
   data: SanitizedAlert[];
-  aggregations?: FindAggregations;
 }
 
 export interface CreateOptions {
@@ -357,10 +367,9 @@ export class AlertsClient {
     });
   }
 
-  public async find(
-    { options: { fields, ...options } = {} }: { options?: FindOptions } = {},
-    aggregate: boolean = false
-  ): Promise<FindResult> {
+  public async find({
+    options: { fields, ...options } = {},
+  }: { options?: FindOptions } = {}): Promise<FindResult> {
     const {
       filter: authorizationFilter,
       ensureAlertTypeIsAuthorized,
@@ -395,47 +404,50 @@ export class AlertsClient {
 
     logSuccessfulAuthorization();
 
-    const findResults: FindResult = {
+    return {
       page,
       perPage,
       total,
       data: authorizedData,
     };
-
-    // Replace this in the future when saved objects support aggregations
-    if (aggregate) {
-      findResults.aggregations = {
-        alertExecutionStatus: await this.getAlertExecutionStatusTotals({ options }),
-      };
-    }
-
-    return findResults;
   }
 
-  private async getAlertExecutionStatusTotals({
+  public async aggregate({
     options: { fields, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<{ [key: string]: number }> {
+  }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
+    // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
     const alertExecutionStatus = await Promise.all(
       AlertExecutionStatusValues.map(async (status: string) => {
-        const statusResults = await this.find({
-          options: {
-            ...options,
-            filter: options.filter
-              ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
-              : `alert.attributes.executionStatus.status:(${status})`,
-            page: 1,
-            perPage: 0,
-          },
+        const {
+          filter: authorizationFilter,
+          logSuccessfulAuthorization,
+        } = await this.authorization.getFindAuthorizationFilter();
+        const filter = options.filter
+          ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
+          : `alert.attributes.executionStatus.status:(${status})`;
+        const { total } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
+          ...options,
+          filter:
+            (authorizationFilter && filter
+              ? and([esKuery.fromKueryExpression(filter), authorizationFilter])
+              : authorizationFilter) ?? filter,
+          page: 1,
+          perPage: 0,
+          type: 'alert',
         });
 
-        return { [status]: statusResults.total };
+        logSuccessfulAuthorization();
+
+        return { [status]: total };
       })
     );
 
-    return alertExecutionStatus.reduce(
-      (acc, curr: { [key: string]: number }) => Object.assign(acc, curr),
-      {}
-    );
+    return {
+      alertExecutionStatus: alertExecutionStatus.reduce(
+        (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
+        {}
+      ),
+    };
   }
 
   public async delete({ id }: { id: string }) {
