@@ -12,8 +12,6 @@ export { SpaceAvatar, getSpaceColor, getSpaceImageUrl, getSpaceInitials } from '
 
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 
-export { SpacesManager } from './spaces_manager';
-
 export const plugin = () => {
   return new SpacesPlugin();
 };
