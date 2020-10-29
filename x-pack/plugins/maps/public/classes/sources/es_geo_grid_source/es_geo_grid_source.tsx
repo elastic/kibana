@@ -68,18 +68,18 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     if (typeof descriptor.indexPatternId !== 'string') {
       throw new Error('Cannot create ESGeoGridSource descriptor without indexPatternId');
     }
-    if (!descriptor.requestType) {
-      throw new Error('Cannot create ESGeoGridSourceDescriptor without requestType');
+    if (typeof descriptor.geoField !== 'string') {
+      throw new Error('Cannot create ESGeoGridSource descriptor without geoField');
     }
     return {
       ...descriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
       id: descriptor.id ? descriptor.id : uuid(),
       indexPatternId: descriptor.indexPatternId as string,
-      geoField: descriptor.geoField || '',
+      geoField: descriptor.geoField as string,
       metrics:
         descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
-      requestType: descriptor.requestType as RENDER_AS,
+      requestType: descriptor.requestType || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
     };
   }

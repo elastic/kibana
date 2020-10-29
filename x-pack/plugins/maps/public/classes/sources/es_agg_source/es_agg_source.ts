@@ -37,9 +37,16 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     descriptor: Partial<AbstractESAggSourceDescriptor>
   ): AbstractESAggSourceDescriptor {
     descriptor = AbstractESSource.createDescriptor(descriptor);
+
+    if (typeof descriptor.indexPatternId !== 'string') {
+      throw new Error(
+        'Cannot create AbstractESAggSourceDescriptor when indexPatternId is not provided'
+      );
+    }
+
     return {
       ...descriptor,
-      indexPatternId: descriptor.indexPatternId ? descriptor.indexPatternId : '',
+      indexPatternId: descriptor.indexPatternId as string,
       type: descriptor.type ? descriptor.type : '',
       metrics: descriptor.metrics ? descriptor.metrics : [],
     };

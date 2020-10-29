@@ -43,7 +43,6 @@ import {
 } from '../../util/mb_filter_expressions';
 
 import {
-  DataMeta,
   DynamicStylePropertyOptions,
   MapFilters,
   MapQuery,
@@ -327,7 +326,7 @@ export class VectorLayer extends AbstractLayer {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters: DataMeta = {
+    const searchFilters: VectorJoinSourceRequestMeta = {
       ...dataFilters,
       fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
