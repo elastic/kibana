@@ -27,7 +27,7 @@ image::images/add-data-tutorials.png[Add Data tutorials]
 [discrete]
 === Add Elastic Agent
 
-beta[] *Elastic Agent* is sneak peek at the next generation of
+beta[] *Elastic Agent* is a sneak peek at the next generation of
 data integration modules, offering
 a centralized way to set up your integrations.
 With *Fleet*, you can add
