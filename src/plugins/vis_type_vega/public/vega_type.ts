@@ -21,22 +21,20 @@ import { i18n } from '@kbn/i18n';
 import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
-import { VegaVisEditor } from './components';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-// @ts-expect-error
-import { createVegaVisualization } from './vega_visualization';
 import { getDefaultSpec } from './default_spec';
 import { createInspectorAdapters } from './vega_inspector';
 import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
-
+import { toExpressionAst } from './to_ast';
+import { VisParams } from './vega_fn';
 import { getInfoMessage } from './components/experimental_map_vis_info';
+import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
 
 export const createVegaTypeDefinition = (
   dependencies: VegaVisualizationDependencies
-): BaseVisTypeOptions => {
+): BaseVisTypeOptions<VisParams> => {
   const requestHandler = createVegaRequestHandler(dependencies);
-  const visualization = createVegaVisualization(dependencies);
 
   return {
     name: 'vega',
@@ -56,13 +54,12 @@ export const createVegaTypeDefinition = (
     }),
     visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
-      optionsTemplate: VegaVisEditor,
+      optionsTemplate: VegaVisEditorComponent,
       enableAutoApply: true,
       defaultSize: DefaultEditorSize.MEDIUM,
     },
-    visualization,
     requestHandler,
-    responseHandler: 'none',
+    toExpressionAst,
     options: {
       showIndexSelection: false,
       showQueryBar: true,
