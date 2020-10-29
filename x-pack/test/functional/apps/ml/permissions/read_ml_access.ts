@@ -185,16 +185,16 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobSelection.assertJobSelection([adJobId]);
 
             await ml.testExecution.logTestStep('should pre-fill the detector input');
-            await ml.singleMetricViewer.assertDetectorInputExsist();
+            await ml.singleMetricViewer.assertDetectorInputExist();
             await ml.singleMetricViewer.assertDetectorInputValue('0');
 
             await ml.testExecution.logTestStep('should input the airline entity value');
-            await ml.singleMetricViewer.assertEntityInputExsist('airline');
+            await ml.singleMetricViewer.assertEntityInputExist('airline');
             await ml.singleMetricViewer.assertEntityInputSelection('airline', []);
             await ml.singleMetricViewer.selectEntityValue('airline', 'AAL');
 
             await ml.testExecution.logTestStep('should display the chart');
-            await ml.singleMetricViewer.assertChartExsist();
+            await ml.singleMetricViewer.assertChartExist();
 
             await ml.testExecution.logTestStep('should display the annotations section');
             await ml.singleMetricViewer.assertAnnotationsExists('loaded');

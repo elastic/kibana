@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPopover,
-  EuiText,
   EuiRadioGroup,
   EuiHorizontalRule,
   EuiToolTip,
@@ -225,7 +224,9 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
               });
             }}
           >
-            <EuiText>
+            <div
+              data-test-subj={`mlSingleMetricViewerEntitySelectionConfigPopover_${entity.fieldName}`}
+            >
               <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
                 <EuiFlexItem grow={false}>
                   <EuiSwitch
@@ -322,7 +323,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
                   data-test-subj={`mlSingleMetricViewerEntitySelectionConfigOrder_${entity.fieldName}`}
                 />
               </EuiFormRow>
-            </EuiText>
+            </div>
           </EuiPopover>
         }
       />

@@ -34,7 +34,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       );
     },
 
-    async assertDetectorInputExsist() {
+    async assertDetectorInputExist() {
       await testSubjects.existOrFail(
         'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerDetectorSelect'
       );
@@ -59,7 +59,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       await this.assertDetectorInputValue(detectorOptionValue);
     },
 
-    async assertEntityInputExsist(entityFieldName: string) {
+    async assertEntityInputExist(entityFieldName: string) {
       await testSubjects.existOrFail(`mlSingleMetricViewerEntitySelection ${entityFieldName}`);
     },
 
@@ -81,7 +81,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       await this.assertEntityInputSelection(entityFieldName, [entityFieldValue]);
     },
 
-    async assertChartExsist() {
+    async assertChartExist() {
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
     },
 
@@ -116,6 +116,90 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
     async openAnomalyExplorer() {
       await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
       await testSubjects.existOrFail('mlPageAnomalyExplorer');
+    },
+
+    async openConfigForControl(entityFieldName: string) {
+      const isPopoverOpened = await testSubjects.exists(
+        `mlSingleMetricViewerEntitySelectionConfigPopover_${entityFieldName}`
+      );
+
+      if (isPopoverOpened) {
+        return;
+      }
+
+      await testSubjects.click(
+        `mlSingleMetricViewerEntitySelectionConfigButton_${entityFieldName}`
+      );
+      await testSubjects.existOrFail(
+        `mlSingleMetricViewerEntitySelectionConfigPopover_${entityFieldName}`
+      );
+    },
+
+    // TODO move to some common service for EUI components
+    async assertRadioGroupValue(testSubject: string, expectedValue: string) {
+      const sortByRadioGroup = await testSubjects.find(testSubject);
+      const input = await sortByRadioGroup.findByCssSelector('[checked]');
+      const selectedSortBy = await input.getAttribute('id');
+      expect(selectedSortBy).to.eql(
+        expectedValue,
+        `Expected the radio group value to equal "${expectedValue}"`
+      );
+    },
+
+    // TODO move to some common service for EUI components
+    async selectRadioGroupValue(testSubject: string, value: string) {
+      const sortByRadioGroup = await testSubjects.find(testSubject);
+      const label = await sortByRadioGroup.findByCssSelector(`label[for="${value}"]`);
+      await label.click();
+    },
+
+    async assertEntityConfig(
+      entityFieldName: string,
+      anomalousOnly: boolean,
+      sortBy: 'anomaly_score' | 'name',
+      order: 'asc' | 'desc'
+    ) {
+      await this.openConfigForControl(entityFieldName);
+      expect(
+        await testSubjects.isEuiSwitchChecked(
+          `mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entityFieldName}`
+        )
+      ).to.eql(
+        anomalousOnly,
+        `Expected the "Anomalous only" control for "${entityFieldName}" to be ${
+          anomalousOnly ? 'enabled' : 'disabled'
+        }`
+      );
+      await this.assertRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
+        sortBy
+      );
+      await this.assertRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
+        order
+      );
+    },
+
+    async setEntityConfig(
+      entityFieldName: string,
+      anomalousOnly: boolean,
+      sortBy: 'anomaly_score' | 'name',
+      order: 'asc' | 'desc'
+    ) {
+      await this.openConfigForControl(entityFieldName);
+      await testSubjects.setEuiSwitch(
+        `mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entityFieldName}`,
+        anomalousOnly ? 'check' : 'uncheck'
+      );
+      await this.selectRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
+        sortBy
+      );
+      await this.selectRadioGroupValue(
+        `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
+        order
+      );
+      await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
     },
   };
 }
