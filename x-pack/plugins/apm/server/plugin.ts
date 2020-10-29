@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { combineLatest, Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -36,6 +37,7 @@ import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_cust
 import { createApmApi } from './routes/create_apm_api';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
+import { uiSettings } from './ui_settings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -74,6 +76,8 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
+
+    core.uiSettings.register(uiSettings);
 
     if (plugins.actions && plugins.alerts) {
       registerApmAlerts({

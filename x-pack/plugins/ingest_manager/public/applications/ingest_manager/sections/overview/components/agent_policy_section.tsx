@@ -32,14 +32,14 @@ export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> =
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPagePoliciesPanelTitle', {
+        title={i18n.translate('xpack.fleet.overviewPagePoliciesPanelTitle', {
           defaultMessage: 'Agent policies',
         })}
-        tooltip={i18n.translate('xpack.ingestManager.overviewPagePoliciesPanelTooltip', {
+        tooltip={i18n.translate('xpack.fleet.overviewPagePoliciesPanelTooltip', {
           defaultMessage: 'Use agent policies to control the data that your agents collect.',
         })}
         linkTo={getHref('policies_list')}
-        linkToText={i18n.translate('xpack.ingestManager.overviewPagePoliciesPanelAction', {
+        linkToText={i18n.translate('xpack.fleet.overviewPagePoliciesPanelAction', {
           defaultMessage: 'View policies',
         })}
       >
@@ -50,7 +50,7 @@ export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> =
             <>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewPolicyTotalTitle"
+                  id="xpack.fleet.overviewPolicyTotalTitle"
                   defaultMessage="Total available"
                 />
               </EuiDescriptionListTitle>
@@ -59,7 +59,7 @@ export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> =
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewPackagePolicyTitle"
+                  id="xpack.fleet.overviewPackagePolicyTitle"
                   defaultMessage="Used integrations"
                 />
               </EuiDescriptionListTitle>
