@@ -34,9 +34,12 @@ export const I18LABELS = {
   pageLoadDuration: i18n.translate(
     'xpack.apm.rum.dashboard.pageLoadDuration.label',
     {
-      defaultMessage: 'Page load',
+      defaultMessage: 'Page load duration',
     }
   ),
+  pageLoad: i18n.translate('xpack.apm.rum.dashboard.pageLoad.label', {
+    defaultMessage: 'Page load',
+  }),
   pageLoadDistribution: i18n.translate(
     'xpack.apm.rum.dashboard.pageLoadDistribution.label',
     {
