@@ -34,7 +34,7 @@ import { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
   vislibVis: any;
-  visData: any;
+  visData: unknown;
   uiState?: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   addLegend: BasicVislibParams['addLegend'];

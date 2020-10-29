@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -33,8 +32,8 @@ function shouldShowNoResultsMessage(visData: any, visType: string): boolean {
     return false;
   }
 
-  const rows: object[] | undefined = get(visData, 'rows');
-  const isZeroHits = get(visData, 'hits') === 0 || (rows && !rows.length);
+  const rows: object[] = visData?.rows ?? [];
+  const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
 
   return Boolean(isZeroHits);
 }

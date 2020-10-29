@@ -134,7 +134,7 @@ export const createVislibVisController = (
     }
 
     mountLegend(
-      visData: any,
+      visData: unknown,
       { legendPosition, addLegend }: BasicVislibParams | PieVisParams,
       fireEvent: IInterpreterRenderHandlers['event'],
       uiState?: PersistedState

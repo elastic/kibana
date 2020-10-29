@@ -33,7 +33,7 @@ interface Arguments {
 }
 
 interface RenderValue {
-  visData: any;
+  visData: unknown;
   visType: string;
   visConfig: PieVisParams;
 }

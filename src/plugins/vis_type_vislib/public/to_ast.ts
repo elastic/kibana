@@ -18,7 +18,6 @@
  */
 
 import moment from 'moment';
-import { get } from 'lodash';
 
 import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
@@ -78,11 +77,11 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
       const usedValueAxis = (visConfig.valueAxes || []).find(
         (valueAxis) => valueAxis.id === seriesParam.valueAxis
       );
-      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+      if (usedValueAxis?.scale.mode === 'percentage') {
         yDimension.format = { id: 'percent' };
       }
     }
-    if (get(visConfig, 'gauge.percentageMode') === true) {
+    if (visConfig?.gauge.percentageMode === true) {
       yDimension.format = { id: 'percent' };
     }
   });
