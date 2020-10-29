@@ -62,13 +62,13 @@ import {
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
+import { getDashboardTitle } from './dashboard_strings';
 import {
   DashboardConstants,
   DashboardContainer,
   DashboardContainerInput,
   SavedDashboardPanel,
 } from '..';
-import { getDashboardTitle } from './dashboard_strings';
 
 // enum UrlParams {
 //   SHOW_TOP_MENU = 'show-top-menu',
@@ -130,9 +130,11 @@ const getChangesFromAppStateForContainerState = ({
 const getDashboardContainerInput = ({
   dashboardStateManager,
   query,
+  searchSessionId,
 }: {
   dashboardStateManager: DashboardStateManager;
   query: QueryStart;
+  searchSessionId: string;
 }): DashboardContainerInput => {
   const embeddablesMap: {
     [key: string]: DashboardPanelState;
@@ -164,6 +166,7 @@ const getDashboardContainerInput = ({
     filters: query.filterManager.getFilters(),
     hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
     query: query.queryString.getQuery(),
+    searchSessionId,
     timeRange: {
       ..._.cloneDeep(query.timefilter.timefilter.getTime()),
     },
@@ -289,7 +292,7 @@ const getFiltersSubscription = (props: {
   dashboardContainer: DashboardContainer;
   dashboardStateManager: DashboardStateManager;
 }) => {
-  const { dashboardContainer, dashboardStateManager, query } = props;
+  const { dashboardStateManager, query } = props;
   return merge(query.filterManager.getUpdates$(), query.queryString.getUpdates$())
     .pipe(debounceTime(100))
     .subscribe(() => {
@@ -297,12 +300,6 @@ const getFiltersSubscription = (props: {
         query.queryString.getQuery(),
         query.filterManager.getFilters()
       );
-
-      // TODO: Anton says we don't need this...
-      // dashboardContainer.updateInput({
-      //   filters: query.filterManager.getFilters(),
-      //   query: query.queryString.getQuery(),
-      // });
     });
 };
 
@@ -363,13 +360,14 @@ export function DashboardApp({
       appStateDashboardInput: getDashboardContainerInput({
         dashboardStateManager,
         query: data.query,
+        searchSessionId: data.search.session.start(),
       }),
       dashboardContainer,
     });
     if (changes && dashboardContainer) {
       dashboardContainer.updateInput(changes);
     }
-  }, [state, data.query]);
+  }, [state, data.query, data.search.session]);
 
   const initializeStateSyncing = useCallback(
     ({ savedDashboard }: { savedDashboard: DashboardSavedObject }) => {
@@ -457,9 +455,10 @@ export function DashboardApp({
 
   // Dashboard loading useEffect
   useEffect(() => {
-    if (state?.savedDashboard?.id === savedDashboardId && state.initialized) {
+    if (state.savedDashboard?.id === savedDashboardId && state.initialized) {
       return;
     }
+
     data.indexPatterns
       .ensureDefaultIndexPattern()
       ?.then(() => savedDashboards.get(savedDashboardId) as Promise<DashboardSavedObject>)
@@ -472,13 +471,11 @@ export function DashboardApp({
             savedDashboardId
           );
         }
-
         const {
           dashboardStateManager,
           stopSyncingQueryServiceStateWithUrl,
           stopSyncingAppFilters,
         } = initializeStateSyncing({ savedDashboard });
-
         chrome.setBreadcrumbs([
           {
             text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
@@ -495,7 +492,6 @@ export function DashboardApp({
             ),
           },
         ]);
-
         const dashboardFactory = embeddable.getEmbeddableFactory<
           DashboardContainerInput,
           ContainerOutput,
@@ -506,15 +502,20 @@ export function DashboardApp({
             'dashboard app requires dashboard embeddable factory'
           );
         }
-
         const subscriptions = new Subscription();
+        // const searchSessionId = data.search.session.start();
         dashboardFactory
-          .create(getDashboardContainerInput({ dashboardStateManager, query: data.query }))
+          .create(
+            getDashboardContainerInput({
+              dashboardStateManager,
+              query: data.query,
+              searchSessionId: data.search.session.start(),
+            })
+          )
           .then((dashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
             if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
               return;
             }
-
             subscriptions.add(
               getInputSubscription({
                 dashboardContainer,
@@ -541,29 +542,26 @@ export function DashboardApp({
                 dashboardStateManager,
               })
             );
-
             dashboardStateManager.registerChangeListener(() => {
               // we aren't checking dirty state because there are changes the container needs to know about
               // that won't make the dashboard "dirty" - like a view mode change.
               refreshDashboardContainer();
             });
-
             setState({
               dashboardContainer,
               dashboardStateManager,
               savedDashboard,
               initialized: true,
             });
-
             dashboardContainer.render(document.getElementById('dashboardViewport')!);
           });
-
         return () => {
           dashboardStateManager.destroy();
           state.dashboardContainer?.destroy();
           subscriptions.unsubscribe();
           stopSyncingQueryServiceStateWithUrl();
           stopSyncingAppFilters();
+          data.search.session.clear();
         };
       })
       .catch((error) => {
@@ -571,7 +569,6 @@ export function DashboardApp({
         // See https://github.com/elastic/kibana/issues/10951 for more context.
         if (error instanceof SavedObjectNotFound && savedDashboardId === 'create') {
           // Note preserve querystring part is necessary so the state is preserved through the redirect.
-
           // I am not sure that I need to do this anymore
           history.replace({
             ...history.location, // preserve query,
@@ -594,6 +591,9 @@ export function DashboardApp({
   }, [
     savedDashboardId,
     state.savedDashboard?.id,
+    state.initialized,
+    chrome,
+    data.search.session,
     refreshDashboardContainer,
     embeddable,
     data.query,

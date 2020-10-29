@@ -56,7 +56,7 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../kibana_react/public';
-import { createKbnUrlTracker, Storage } from '../../kibana_utils/public';
+import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
@@ -92,7 +92,6 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
-import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 
@@ -159,7 +158,6 @@ export class DashboardPlugin
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
-  private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
@@ -250,7 +248,6 @@ export class DashboardPlugin
       appMounted,
       appUnMounted,
       stop: stopUrlTracker,
-      getActiveUrl,
       restorePreviousUrl,
     } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
@@ -284,7 +281,6 @@ export class DashboardPlugin
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
-    this.getActiveUrl = getActiveUrl;
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -364,22 +360,22 @@ export class DashboardPlugin
     }
   }
 
-  private addEmbeddableToDashboard(
-    core: CoreStart,
-    { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
-  ) {
-    if (!this.getActiveUrl) {
-      throw new Error('dashboard is not ready yet.');
-    }
+  // private addEmbeddableToDashboard(
+  //   core: CoreStart,
+  //   { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
+  // ) {
+  //   if (!this.getActiveUrl) {
+  //     throw new Error('dashboard is not ready yet.');
+  //   }
 
-    const lastDashboardUrl = this.getActiveUrl();
-    const dashboardUrl = addEmbeddableToDashboardUrl(
-      lastDashboardUrl,
-      embeddableId,
-      embeddableType
-    );
-    core.application.navigateToApp('dashboards', { path: dashboardUrl });
-  }
+  //   const lastDashboardUrl = this.getActiveUrl();
+  //   const dashboardUrl = addEmbeddableToDashboardUrl(
+  //     lastDashboardUrl,
+  //     embeddableId,
+  //     embeddableType
+  //   );
+  //   core.application.navigateToApp('dashboards', { path: dashboardUrl });
+  // }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications } = core;

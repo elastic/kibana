@@ -185,24 +185,24 @@ function getCreateNewConfig(action: NavAction) {
   };
 }
 
-/**
- * @returns {kbnTopNavConfig}
- */
-function getShareConfig(action: NavAction | undefined) {
-  return {
-    id: 'share',
-    label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
-      defaultMessage: 'share',
-    }),
-    description: i18n.translate('dashboard.topNave.shareConfigDescription', {
-      defaultMessage: 'Share Dashboard',
-    }),
-    testId: 'shareTopNavButton',
-    run: action,
-    // disable the Share button if no action specified
-    disableButton: !action,
-  };
-}
+// /**
+//  * @returns {kbnTopNavConfig}
+//  */
+// function getShareConfig(action: NavAction | undefined) {
+//   return {
+//     id: 'share',
+//     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
+//       defaultMessage: 'share',
+//     }),
+//     description: i18n.translate('dashboard.topNave.shareConfigDescription', {
+//       defaultMessage: 'Share Dashboard',
+//     }),
+//     testId: 'shareTopNavButton',
+//     run: action,
+//     // disable the Share button if no action specified
+//     disableButton: !action,
+//   };
+// }
 
 /**
  * @returns {kbnTopNavConfig}
