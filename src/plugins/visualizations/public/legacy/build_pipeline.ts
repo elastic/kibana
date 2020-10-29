@@ -254,9 +254,6 @@ const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): vo
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  vega: (params) => {
-    return `vega ${prepareString('spec', params.spec)}`;
-  },
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
