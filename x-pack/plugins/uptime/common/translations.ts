@@ -33,6 +33,7 @@ export const MonitorStatusTranslations = {
     defaultMessage: 'Uptime monitor status',
   }),
   description: i18n.translate('xpack.uptime.alerts.monitorStatus.description', {
-    defaultMessage: 'Alert when the status of an Uptime monitor is down.',
+    defaultMessage:
+      'Alert when your synthetic monitor is down or its availability breaches an availability threshold.',
   }),
 };
