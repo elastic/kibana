@@ -20,6 +20,7 @@ import {
 import { colorFromValue } from '../../lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { NodeContextPopover } from '../node_details/overlay';
 
 const initialState = {
   isPopoverOpen: false,
@@ -53,47 +54,38 @@ export const Node = class extends React.PureComponent<Props, State> {
       values: { nodeName: node.name },
     });
     return (
-      <NodeContextMenu
-        node={node}
-        nodeType={nodeType}
-        isPopoverOpen={isPopoverOpen}
-        closePopover={this.closePopover}
-        options={options}
-        currentTime={currentTime}
-        popoverPosition="downCenter"
-      >
-        <ConditionalToolTip
-          currentTime={currentTime}
-          formatter={formatter}
-          hidden={isPopoverOpen}
-          node={node}
-          options={options}
-          nodeType={nodeType}
+      <>
+        <NodeContainer
+          data-test-subj="nodeContainer"
+          style={{ width: squareSize || 0, height: squareSize || 0 }}
+          onClick={this.togglePopover}
         >
-          <NodeContainer
-            data-test-subj="nodeContainer"
-            style={{ width: squareSize || 0, height: squareSize || 0 }}
-            onClick={this.togglePopover}
-          >
-            <SquareOuter color={color}>
-              <SquareInner color={color}>
-                {valueMode ? (
+          <SquareOuter color={color}>
+            <SquareInner color={color}>
+              {valueMode ? (
+                <ValueInner aria-label={nodeAriaLabel}>
+                  <Label color={color}>{node.name}</Label>
+                  <Value color={color}>{value}</Value>
+                </ValueInner>
+              ) : (
+                ellipsisMode && (
                   <ValueInner aria-label={nodeAriaLabel}>
-                    <Label color={color}>{node.name}</Label>
-                    <Value color={color}>{value}</Value>
+                    <Label color={color}>...</Label>
                   </ValueInner>
-                ) : (
-                  ellipsisMode && (
-                    <ValueInner aria-label={nodeAriaLabel}>
-                      <Label color={color}>...</Label>
-                    </ValueInner>
-                  )
-                )}
-              </SquareInner>
-            </SquareOuter>
-          </NodeContainer>
-        </ConditionalToolTip>
-      </NodeContextMenu>
+                )
+              )}
+            </SquareInner>
+          </SquareOuter>
+        </NodeContainer>
+        <NodeContextPopover
+          node={node}
+          nodeType={nodeType}
+          isOpen={isPopoverOpen}
+          options={options}
+          currentTime={currentTime}
+          onClose={this.closePopover}
+        />
+      </>
     );
   }
 
