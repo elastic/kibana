@@ -42,6 +42,7 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
             numActiveFilters={selectedValues.length}
             numFilters={selectedValues.length}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            data-test-subj="alertTypeFilterButton"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.typeFilterLabel"
@@ -63,6 +64,7 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
                 }
               }}
               checked={selectedValues.includes(item.value) ? 'on' : undefined}
+              data-test-subj={`alertType${item.value}FilterOption`}
             >
               {item.name}
             </EuiFilterSelectItem>
