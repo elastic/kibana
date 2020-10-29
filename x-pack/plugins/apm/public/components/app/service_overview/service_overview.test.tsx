@@ -5,13 +5,25 @@
  */
 
 import { render } from '@testing-library/react';
-import React from 'react';
+import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import { ServiceOverview } from './';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
+}
 
 describe('ServiceOverview', () => {
   it('renders', () => {
     expect(() =>
-      render(<ServiceOverview serviceName="test service name" />)
+      render(<ServiceOverview serviceName="test service name" />, {
+        wrapper: Wrapper,
+      })
     ).not.toThrowError();
   });
 });
