@@ -20,7 +20,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
       <EuiConfirmModal
         title={
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmInstallModal.installTitle"
+            id="xpack.fleet.integrations.settings.confirmInstallModal.installTitle"
             defaultMessage="Install {packageName}"
             values={{ packageName }}
           />
@@ -29,13 +29,13 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
         onConfirm={onConfirm}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmInstallModal.cancelButtonLabel"
+            id="xpack.fleet.integrations.settings.confirmInstallModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
         confirmButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmInstallModal.installButtonLabel"
+            id="xpack.fleet.integrations.settings.confirmInstallModal.installButtonLabel"
             defaultMessage="Install {packageName}"
             values={{ packageName }}
           />
@@ -46,7 +46,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
           iconType="iInCircle"
           title={
             <FormattedMessage
-              id="xpack.ingestManager.integrations.settings.confirmInstallModal.installCalloutTitle"
+              id="xpack.fleet.integrations.settings.confirmInstallModal.installCalloutTitle"
               defaultMessage="This action will install {numOfAssets} assets"
               values={{ numOfAssets }}
             />
@@ -55,7 +55,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
         <EuiSpacer size="l" />
         <p>
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.confirmInstallModal.installDescription"
+            id="xpack.fleet.integrations.settings.confirmInstallModal.installDescription"
             defaultMessage="Kibana assets will be installed in the current Space (Default) and will only be accessible to users who have permission to view this Space. Elasticsearch assets are installed globally and will be accessible to all Kibana users."
           />
         </p>
