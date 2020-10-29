@@ -129,7 +129,7 @@ export const TagTable: FC<TagTableProps> = ({
           <span data-test-subj="tagsTableRowConnectionsText">
             <FormattedMessage
               id="xpack.savedObjectsTagging.management.table.content.connectionCount"
-              defaultMessage="{relationCount, plural, one {1 app object} other {# app objects}}"
+              defaultMessage="{relationCount, plural, one {1 saved object} other {# saved objects}}"
               values={{ relationCount }}
             />
           </span>

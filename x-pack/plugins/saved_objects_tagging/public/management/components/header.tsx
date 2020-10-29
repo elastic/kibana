@@ -48,7 +48,7 @@ export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
             >
               <FormattedMessage
                 id="xpack.savedObjectsTagging.management.actions.createTag"
-                defaultMessage="Create tag..."
+                defaultMessage="Create tag"
               />
             </EuiButton>
           )}
