@@ -25,7 +25,6 @@ import { getQueryService } from '../../services';
 function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
   // Only cache results for a minute
   const ttl = Math.floor(Date.now() / 1000 / 60);
-
   return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
 }
 
@@ -62,6 +61,9 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
     const shouldSuggestValues = core!.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
     );
+    const ignoreTimeRange = core!.uiSettings.get<boolean>(
+      UI_SETTINGS.AUTOCOMPLETE_IGNORE_TIMERANGE
+    );
     const { title } = indexPattern;
 
     if (field.type === 'boolean') {
@@ -70,7 +72,9 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       return [];
     }
 
-    const timeFilter = getQueryService().timefilter.timefilter.createFilter(indexPattern);
+    const timeFilter = ignoreTimeRange
+      ? undefined
+      : getQueryService().timefilter.timefilter.createFilter(indexPattern);
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     return await requestSuggestions(title, field, query, filters, signal);
