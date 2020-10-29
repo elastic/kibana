@@ -108,7 +108,7 @@ describe('case connector', () => {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: 'normal' },
+            comment: { comment: 'a comment', type: 'user' },
           },
         };
 
@@ -316,6 +316,7 @@ describe('case connector', () => {
           comments: [
             {
               comment: 'a comment',
+              type: 'user' as const,
               created_at: '2020-10-23T21:54:48.952Z',
               created_by: {
                 email: 'd00d@awesome.com',
@@ -339,7 +340,7 @@ describe('case connector', () => {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: 'normal' },
+            comment: { comment: 'a comment', type: 'user' },
           },
         };
 
@@ -356,7 +357,7 @@ describe('case connector', () => {
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
           caseId: 'case-id',
-          comment: { comment: 'a comment', type: 'normal' },
+          comment: { comment: 'a comment', type: 'user' },
         });
       });
     });

@@ -126,3 +126,27 @@ export const userActionsMigrations = {
     };
   },
 };
+
+interface UnsanitizedComment {
+  comment: string;
+}
+
+interface SanitizedComment {
+  comment: string;
+  type: 'user' | 'alert';
+}
+
+export const commentsMigrations = {
+  '7.11.0': (
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+  ): SavedObjectSanitizedDoc<SanitizedComment> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        type: 'user',
+      },
+      references: doc.references || [],
+    };
+  },
+};

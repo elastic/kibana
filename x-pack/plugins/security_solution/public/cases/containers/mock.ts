@@ -42,6 +42,7 @@ export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
   comment: 'Solve this fast!',
+  type: 'user' as const,
   id: basicCommentId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,

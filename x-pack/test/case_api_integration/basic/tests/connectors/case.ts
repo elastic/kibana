@@ -348,7 +348,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const params = {
           subAction: 'update',
           subActionParams: {
-            comment: { comment: 'a comment' },
+            comment: { comment: 'a comment', type: 'user' },
           },
         };
 
@@ -401,6 +401,41 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should respond with a 400 Bad Request when adding a comment to a case without comment type', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'update',
+          subActionParams: {
+            caseId: '123',
+            comment: { comment: 'a comment' },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subActionParams.id]: expected value of type [string] but got [undefined]\n- [2.subAction]: expected value to equal [addComment]',
+          retry: false,
+        });
+      });
+
       it('should add a comment', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
@@ -424,7 +459,7 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseRes.body.id,
-            comment: { comment: 'a comment' },
+            comment: { comment: 'a comment', type: 'user' },
           },
         };
 

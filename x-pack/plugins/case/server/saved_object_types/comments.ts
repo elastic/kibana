@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { commentsMigrations } from './migrations';
 
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 
@@ -70,4 +71,5 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: commentsMigrations,
 };

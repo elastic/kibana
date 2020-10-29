@@ -10,7 +10,7 @@ export const CaseConfigurationSchema = schema.object({});
 
 const CommentProps = {
   comment: schema.string(),
-  type: schema.nullable(schema.oneOf([schema.literal('alert'), schema.literal('normal')])),
+  type: schema.oneOf([schema.literal('alert'), schema.literal('user')]),
 };
 
 const CaseBasicProps = {

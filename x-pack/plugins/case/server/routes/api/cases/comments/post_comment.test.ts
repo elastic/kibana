@@ -36,6 +36,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: 'user',
       },
     });
 
@@ -62,6 +63,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: 'user',
       },
     });
 
@@ -112,6 +114,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: 'user',
       },
     });
 
@@ -127,6 +130,7 @@ describe('POST comment', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1]).toEqual({
       comment: 'Wow, good luck catching that bad meanie!',
+      type: 'user',
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         email: null,
