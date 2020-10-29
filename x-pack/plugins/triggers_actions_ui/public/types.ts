@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ActionGroup } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
