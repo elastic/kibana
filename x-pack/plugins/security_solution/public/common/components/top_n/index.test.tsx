@@ -283,7 +283,7 @@ describe('StatefulTopN', () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.combinedQueries).toEqual(
-        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
+        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2020-04-14T03:46:09.047Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2020-04-15T03:46:09.047Z"}}}],"minimum_should_match":1}}]}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
       );
     });
 
