@@ -101,7 +101,7 @@ export const myCollector = makeUsageCollector<Usage>({
     my_str_array: { type: 'array', items: { type: 'keyword' } },
     my_index_signature_prop: {
       count: { type: 'long' },
-      avg: { type: 'long' },
+      avg: { type: 'float' },
       max: { type: 'long' },
       min: { type: 'long' },
     },

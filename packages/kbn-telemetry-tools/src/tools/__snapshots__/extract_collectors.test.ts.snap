@@ -258,7 +258,7 @@ Array [
           },
           "my_index_signature_prop": Object {
             "avg": Object {
-              "type": "long",
+              "type": "float",
             },
             "count": Object {
               "type": "long",

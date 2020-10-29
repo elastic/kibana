@@ -34,7 +34,7 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
         },
         my_index_signature_prop: {
           avg: {
-            type: 'long',
+            type: 'float',
           },
           count: {
             type: 'long',

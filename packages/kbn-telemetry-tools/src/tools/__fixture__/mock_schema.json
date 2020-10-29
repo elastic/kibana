@@ -8,7 +8,7 @@
         "my_index_signature_prop": {
           "properties": {
             "avg": {
-              "type": "long"
+              "type": "float"
             },
             "count": {
               "type": "long"

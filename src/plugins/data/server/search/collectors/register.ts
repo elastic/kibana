@@ -39,7 +39,7 @@ export async function registerUsageCollector(
       schema: {
         successCount: { type: 'long' },
         errorCount: { type: 'long' },
-        averageDuration: { type: 'long' },
+        averageDuration: { type: 'float' },
       },
     });
     usageCollection.registerCollector(collector);
