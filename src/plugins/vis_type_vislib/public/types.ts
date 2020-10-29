@@ -90,7 +90,7 @@ export interface BasicVislibParams extends CommonVislibParams {
   labels: Labels;
   thresholdLine: ThresholdLine;
   valueAxes: ValueAxis[];
-  gauge: {
+  gauge?: {
     percentageMode: boolean;
   };
   grid: {

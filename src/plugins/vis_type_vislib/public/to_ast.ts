@@ -81,7 +81,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
         yDimension.format = { id: 'percent' };
       }
     }
-    if (visConfig?.gauge.percentageMode === true) {
+    if (visConfig?.gauge?.percentageMode === true) {
       yDimension.format = { id: 'percent' };
     }
   });
