@@ -585,7 +585,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      const messages = indexPatternDatasource.getErrorMessages(state);
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
       expect(messages).toHaveLength(1);
       expect(messages![0]).toEqual({
         shortMessage: 'Invalid reference ',
@@ -623,7 +623,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      const messages = indexPatternDatasource.getErrorMessages(state);
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
       expect(messages).toHaveLength(1);
       expect(messages![0]).toEqual({
         shortMessage: 'Invalid references ',
@@ -674,7 +674,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      const messages = indexPatternDatasource.getErrorMessages(state);
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
       expect(messages).toHaveLength(2);
       expect(messages).toEqual([
         {
@@ -711,11 +711,13 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(indexPatternDatasource.getErrorMessages(state)).not.toBeDefined();
+      expect(
+        indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState)
+      ).not.toBeDefined();
     });
 
     it('should return no errors with layers with no columns', () => {
-      const state = {
+      const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
         existingFields: {},
         isFirstExistenceFetch: false,
