@@ -27,14 +27,14 @@ export const Expression: React.FC<Props> = (props) => {
     const details = paramDetails[alertParamName];
     const value = alertParams[alertParamName];
 
-    switch (details.type) {
+    switch (details?.type) {
       case AlertParamType.Duration:
         return (
           <AlertParamDuration
             key={alertParamName}
             name={alertParamName}
             duration={value}
-            label={details.label}
+            label={details?.label}
             errors={errors[alertParamName]}
             setAlertParams={setAlertParams}
           />
@@ -44,7 +44,7 @@ export const Expression: React.FC<Props> = (props) => {
           <AlertParamPercentage
             key={alertParamName}
             name={alertParamName}
-            label={details.label}
+            label={details?.label}
             percentage={value}
             errors={errors[alertParamName]}
             setAlertParams={setAlertParams}
@@ -55,7 +55,7 @@ export const Expression: React.FC<Props> = (props) => {
           <AlertParamNumber
             key={alertParamName}
             name={alertParamName}
-            label={details.label}
+            label={details?.label}
             value={value}
             errors={errors[alertParamName]}
             setAlertParams={setAlertParams}
