@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not display lens and maps cards', async function () {
       await PageObjects.visualize.navigateToNewVisualization();
-      const expectedChartTypes = ['Custom visualizations', 'TSVB'];
+      const expectedChartTypes = ['Custom visualization', 'TSVB'];
 
       // find all the chart types and make sure that maps and lens cards are not there
       const chartTypes = (await PageObjects.visualize.getPromotedVisTypes()).sort();
