@@ -17,4 +17,5 @@ export type TestSubjects =
   | 'hot-selectedMaxDocuments'
   | 'hot-selectedMaxAge'
   | 'hot-selectedMaxAgeUnits'
+  | 'freezeSwitch'
   | string;
