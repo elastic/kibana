@@ -14,7 +14,7 @@ export const ML_SAVED_OBJECT_TYPE = 'ml-job';
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
     name: ML_SAVED_OBJECT_TYPE,
-    hidden: true,
+    hidden: false,
     namespaceType: 'multiple',
     migrations,
     mappings: mappings.job,
