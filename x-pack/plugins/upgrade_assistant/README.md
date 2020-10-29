@@ -18,9 +18,9 @@ There are two sources of deprecation information:
 
 * [**Deprecation Info API.**](https://www.elastic.co/guide/en/elasticsearch/reference/master/migration-api-deprecation.html)
 This is information about cluster, node, and index level settings that use deprecated features that
-will be removed or changed in the next major version. These will be surfaced in the Upgrade
-Assistant, but only if the deprecation has been added by the ES backend engineers to the Deprecation
-Info API.
+will be removed or changed in the next major version. Currently, only cluster and index deprecations
+will be surfaced in the Upgrade Assistant. ES server engineers are responsible for adding
+deprecations to the Deprecation Info API.
 * [**Deprecation logs.**](https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging)
 These surface runtime deprecations, e.g. a Painless script that uses a deprecated accessor or a
 request to a deprecated API. These are also generally surfaced as deprecation headers within the
