@@ -33,7 +33,6 @@ import {
 
 import {
   FEATURE_IMPORTANCE,
-  FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
@@ -112,10 +111,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
         schema = NON_AGGREGATABLE;
     }
 
-    if (
-      field === `${resultsField}.${OUTLIER_SCORE}` ||
-      field.includes(`${resultsField}.${FEATURE_INFLUENCE}`)
-    ) {
+    if (field === `${resultsField}.${OUTLIER_SCORE}`) {
       schema = 'numeric';
     }
 
@@ -203,11 +199,6 @@ export const useRenderCellValue = (
       }
 
       function getCellValue(cId: string) {
-        if (cId.includes(`.${FEATURE_INFLUENCE}.`) && resultsField !== undefined) {
-          const results = getNestedProperty(tableItems[adjustedRowIndex], resultsField, null);
-          return results[cId.replace(`${resultsField}.`, '')];
-        }
-
         if (tableItems.hasOwnProperty(adjustedRowIndex)) {
           const item = tableItems[adjustedRowIndex];
 

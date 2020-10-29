@@ -52,7 +52,7 @@ describe('PreviewCustomQueryHistogram', () => {
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').at(0).prop('subtitle')
-    ).toEqual(i18n.PREVIEW_SUBTITLE_LOADING);
+    ).toEqual(i18n.QUERY_PREVIEW_SUBTITLE_LOADING);
   });
 
   test('it configures data and subtitle', () => {

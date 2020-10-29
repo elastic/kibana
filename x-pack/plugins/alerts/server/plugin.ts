@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
@@ -341,6 +341,7 @@ export class AlertingPlugin {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
+      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request);
       },

@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import {
+  DATA_UNDEFINED_LABEL,
   FCP_LABEL,
   LONGEST_LONG_TASK,
   NO_OF_LONG_TASK,
@@ -36,6 +37,12 @@ interface Props {
   loading: boolean;
 }
 
+function formatTitle(unit: string, value?: number | null) {
+  if (typeof value === 'undefined' || value === null)
+    return DATA_UNDEFINED_LABEL;
+  return formatToSec(value, unit);
+}
+
 export function KeyUXMetrics({ data, loading }: Props) {
   const uxQuery = useUxQuery();
 
@@ -62,7 +69,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(data?.fcp, 'ms')}
+          title={formatTitle('ms', data?.fcp)}
           description={FCP_LABEL}
           isLoading={loading}
         />
@@ -70,7 +77,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(data?.tbt, 'ms')}
+          title={formatTitle('ms', data?.tbt)}
           description={TBT_LABEL}
           isLoading={loading}
         />
@@ -78,7 +85,11 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={numeral(longTaskData?.noOfLongTasks ?? 0).format('0,0')}
+          title={
+            longTaskData?.noOfLongTasks !== undefined
+              ? numeral(longTaskData?.noOfLongTasks).format('0,0')
+              : DATA_UNDEFINED_LABEL
+          }
           description={NO_OF_LONG_TASK}
           isLoading={status !== 'success'}
         />
@@ -86,7 +97,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(longTaskData?.longestLongTask, 'ms')}
+          title={formatTitle('ms', longTaskData?.longestLongTask)}
           description={LONGEST_LONG_TASK}
           isLoading={status !== 'success'}
         />
@@ -94,7 +105,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(longTaskData?.sumOfLongTasks, 'ms')}
+          title={formatTitle('ms', longTaskData?.sumOfLongTasks)}
           description={SUM_LONG_TASKS}
           isLoading={status !== 'success'}
         />

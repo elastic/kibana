@@ -7,6 +7,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const I18LABELS = {
+  dataMissing: i18n.translate('xpack.apm.rum.dashboard.dataMissing', {
+    defaultMessage: 'N/A',
+  }),
   backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
     defaultMessage: 'Backend',
   }),
@@ -14,7 +17,7 @@ export const I18LABELS = {
     defaultMessage: 'Frontend',
   }),
   pageViews: i18n.translate('xpack.apm.rum.dashboard.pageViews', {
-    defaultMessage: 'Page views',
+    defaultMessage: 'Total page views',
   }),
   percPageLoaded: i18n.translate('xpack.apm.rum.dashboard.pagesLoaded.label', {
     defaultMessage: 'Pages loaded',
@@ -76,8 +79,11 @@ export const I18LABELS = {
       defaultMessage: 'Operating system',
     }
   ),
-  userExperienceMetrics: i18n.translate('xpack.apm.rum.userExperienceMetrics', {
-    defaultMessage: 'User experience metrics',
+  metrics: i18n.translate('xpack.apm.ux.metrics', {
+    defaultMessage: 'Metrics',
+  }),
+  median: i18n.translate('xpack.apm.ux.median', {
+    defaultMessage: 'median',
   }),
   avgPageLoadDuration: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',

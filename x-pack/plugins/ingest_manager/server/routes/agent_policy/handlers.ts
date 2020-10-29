@@ -132,6 +132,8 @@ export const createAgentPolicyHandler: RequestHandler<
       });
     }
 
+    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id);
+
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,
     };
@@ -185,6 +187,7 @@ export const copyAgentPolicyHandler: RequestHandler<
         user: user || undefined,
       }
     );
+
     const body: CopyAgentPolicyResponse = { item: agentPolicy };
     return response.ok({
       body,

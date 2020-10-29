@@ -38,7 +38,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
     <>
       <EuiText>
         <FormattedMessage
-          id="xpack.ingestManager.enrollmentInstructions.descriptionText"
+          id="xpack.fleet.enrollmentInstructions.descriptionText"
           defaultMessage="From the agent directory, run the appropriate command to install, enroll, and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
         />
       </EuiText>
@@ -46,7 +46,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
-            id="xpack.ingestManager.enrollmentInstructions.linuxMacOSTitle"
+            id="xpack.fleet.enrollmentInstructions.linuxMacOSTitle"
             defaultMessage="Linux, macOS"
           />
         </h4>
@@ -59,7 +59,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
-            id="xpack.ingestManager.enrollmentInstructions.windowsTitle"
+            id="xpack.fleet.enrollmentInstructions.windowsTitle"
             defaultMessage="Windows"
           />
         </h4>
@@ -71,7 +71,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       <EuiSpacer size="l" />
       <EuiText>
         <FormattedMessage
-          id="xpack.ingestManager.enrollmentInstructions.moreInstructionsText"
+          id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
           defaultMessage="See the {link} for more instructions and options."
           values={{
             link: (
@@ -81,7 +81,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
                 href="https://www.elastic.co/guide/en/ingest-management/current/elastic-agent-installation-configuration.html"
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.enrollmentInstructions.moreInstructionsLink"
+                  id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
                   defaultMessage="Elastic Agent docs"
                 />
               </EuiLink>

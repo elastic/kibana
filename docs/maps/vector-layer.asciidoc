@@ -16,10 +16,10 @@ The index must contain at least one field mapped as {ref}/geo-point.html[geo_poi
 
 *Documents*:: Points, lines, and polyons from Elasticsearch.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
-
++
 Results are limited to the `index.max_result_window` index setting, which defaults to 10000.
 Select the appropriate *Scaling* option for your use case.
-
++
 * *Limit results to 10000.* The layer displays features from the first `index.max_result_window` documents.
 Results exceeding `index.max_result_window` are not displayed.
 

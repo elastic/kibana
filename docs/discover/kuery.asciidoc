@@ -115,7 +115,7 @@ KQL supports `>`, `>=`, `<`, and `<=`. For example:
 
 [source,yaml]
 -------------------
-account_number:>=100 and items_sold:<=200
+account_number >= 100 and items_sold <= 200
 -------------------
 
 [discrete]
