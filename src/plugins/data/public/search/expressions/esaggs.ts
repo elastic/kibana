@@ -293,6 +293,13 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
             source: 'esaggs',
             sourceParams: {
               indexPatternId: indexPattern.id,
+              appliedTimeRange:
+                column.aggConfig.params.field?.name &&
+                input?.timeRange &&
+                args.timeFields &&
+                args.timeFields.includes(column.aggConfig.params.field?.name)
+                  ? { from: input.timeRange.from, to: input.timeRange.to }
+                  : undefined,
               ...column.aggConfig.serialize(),
             },
           },
