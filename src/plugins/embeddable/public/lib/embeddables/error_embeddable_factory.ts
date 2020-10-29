@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition } from '.';
 import { ErrorEmbeddableInput, ERROR_EMBEDDABLE_TYPE } from './error_embeddable';
 import { ErrorEmbeddable, IContainer } from '..';
@@ -25,7 +26,9 @@ export class ErrorEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = ERROR_EMBEDDABLE_TYPE;
 
   getDisplayName() {
-    return '';
+    return i18n.translate('embeddable.errorFactory.displayName', {
+      defaultMessage: 'Error',
+    });
   }
 
   async isEditable() {
