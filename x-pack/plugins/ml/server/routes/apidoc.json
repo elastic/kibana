@@ -143,6 +143,7 @@
     "JobSavedObjects",
     "SavedObjectsStatus",
     "RepairJobSavedObjects",
+    "InitializeJobSavedObjects",
     "AssignJobsToSpaces",
     "RemoveJobsFromSpaces",
     "JobsSpaces"

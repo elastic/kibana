@@ -83,7 +83,7 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
    * @apiGroup JobSavedObjects
    *
    * @api {get} /api/ml/saved_objects/initialize Create job saved objects for all jobs
-   * @apiName RepairJobSavedObjects
+   * @apiName InitializeJobSavedObjects
    * @apiDescription Create saved objects for jobs which are missing them.
    *
    */
