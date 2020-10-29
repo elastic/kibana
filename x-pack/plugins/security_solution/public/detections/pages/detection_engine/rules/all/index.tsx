@@ -143,6 +143,7 @@ export const AllRules = React.memo<AllRulesProps>(
     const mlCapabilities = useMlCapabilities();
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+    const refreshInterval = useRef<number | null>(null);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -329,6 +330,12 @@ export const AllRules = React.memo<AllRulesProps>(
       []
     );
 
+    const handleClearInterval = useCallback(() => {
+      if (refreshInterval.current != null) {
+        clearInterval(refreshInterval.current);
+      }
+    }, []);
+
     const handleRefreshData = useCallback((): void => {
       if (reFetchRulesData != null && !isLoadingAnActionOnRule) {
         reFetchRulesData(true);
@@ -336,13 +343,22 @@ export const AllRules = React.memo<AllRulesProps>(
       }
     }, [reFetchRulesData, isLoadingAnActionOnRule]);
 
-    useEffect(() => {
-      const refreshTimerId = window.setInterval(() => handleRefreshData(), 60000);
+    const handleRefreshDataInterval = useCallback(
+      (interval) => {
+        handleClearInterval();
 
+        if (interval > 0) {
+          refreshInterval.current = window.setInterval(() => handleRefreshData(), interval);
+        }
+      },
+      [handleRefreshData, handleClearInterval]
+    );
+
+    useEffect(() => {
       return () => {
-        clearInterval(refreshTimerId);
+        handleClearInterval();
       };
-    }, [handleRefreshData]);
+    }, [handleClearInterval]);
 
     const tabs = useMemo(
       () => (
@@ -413,6 +429,7 @@ export const AllRules = React.memo<AllRulesProps>(
             )}
             <HeaderSection
               split
+              growLeftSplit={false}
               title={i18n.ALL_RULES}
               subtitle={
                 <LastUpdatedAt
@@ -425,6 +442,9 @@ export const AllRules = React.memo<AllRulesProps>(
                 onFilterChanged={handleFilterChangedCallback}
                 rulesCustomInstalled={rulesCustomInstalled}
                 rulesInstalled={rulesInstalled}
+                isLoading={loading || isLoadingRules || isLoadingRulesStatuses}
+                onRefresh={handleRefreshData}
+                onIntervalChange={handleRefreshDataInterval}
               />
             </HeaderSection>
 

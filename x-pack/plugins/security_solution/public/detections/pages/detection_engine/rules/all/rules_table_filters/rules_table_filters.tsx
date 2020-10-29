@@ -12,8 +12,11 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSuperDatePicker,
+  OnRefreshChangeProps,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
+
 import * as i18n from '../../translations';
 
 import { FilterOptions } from '../../../../../containers/detection_engine/rules';
@@ -24,6 +27,9 @@ interface RulesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
+  isLoading: boolean;
+  onRefresh: () => void;
+  onIntervalChange: (arg: number) => void;
 }
 
 /**
@@ -36,12 +42,17 @@ const RulesTableFiltersComponent = ({
   onFilterChanged,
   rulesCustomInstalled,
   rulesInstalled,
+  isLoading,
+  onRefresh,
+  onIntervalChange,
 }: RulesTableFiltersProps) => {
   const [filter, setFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
   const [showElasticRules, setShowElasticRules] = useState<boolean>(false);
   const [isLoadingTags, tags, reFetchTags] = useTags();
+  const [isRefreshPaused, setIsPaused] = useState(true);
+  const [interval, setRefreshInterval] = useState(0);
 
   useEffect(() => {
     reFetchTags();
@@ -74,9 +85,22 @@ const RulesTableFiltersComponent = ({
     [selectedTags]
   );
 
+  const handleRefreshChange = useCallback(
+    ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
+      setIsPaused(isPaused);
+      setRefreshInterval(refreshInterval);
+      if (!isPaused) {
+        onIntervalChange(refreshInterval);
+      }
+    },
+    [onIntervalChange]
+  );
+
+  const NOOP = useCallback(() => {}, []);
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={false}>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_RULES}
           fullWidth
@@ -119,6 +143,17 @@ const RulesTableFiltersComponent = ({
             </>
           </EuiFilterButton>
         </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
+        <EuiSuperDatePicker
+          isLoading={isLoading}
+          isPaused={isRefreshPaused}
+          onTimeChange={NOOP}
+          onRefresh={onRefresh}
+          onRefreshChange={handleRefreshChange}
+          refreshInterval={interval}
+          isAutoRefreshOnly
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
