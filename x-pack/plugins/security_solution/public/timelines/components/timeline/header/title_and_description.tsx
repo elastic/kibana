@@ -151,7 +151,6 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             <EuiFormRow label={TIMELINE_TITLE}>
               <Name
                 autoFocus={true}
-                className="timeline-modal-title"
                 disableTooltip={true}
                 disableAutoSave={true}
                 disabled={isSaving}

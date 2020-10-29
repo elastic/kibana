@@ -18,7 +18,7 @@ import {
   EuiToolTip,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -200,7 +200,6 @@ Description.displayName = 'Description';
 
 interface NameProps {
   autoFocus?: boolean;
-  className?: string;
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
   disabled?: boolean;
@@ -215,7 +214,6 @@ interface NameProps {
 export const Name = React.memo<NameProps>(
   ({
     autoFocus = false,
-    className = TIMELINE_TITLE_CLASSNAME,
     disableAutoSave = false,
     disableTooltip = false,
     disabled = false,
@@ -226,23 +224,18 @@ export const Name = React.memo<NameProps>(
     width,
     marginRight,
   }) => {
+    const timelineNameRef = useRef<HTMLInputElement>(null);
+
     const handleChange = useCallback(
       (e) => updateTitle({ id: timelineId, title: e.target.value, disableAutoSave }),
       [timelineId, updateTitle, disableAutoSave]
     );
 
     useEffect(() => {
-      const focusInput = () => {
-        const elements = document.querySelector<HTMLElement>(`.${className}`);
-
-        if (elements != null) {
-          elements.focus();
-        }
-      };
-      if (autoFocus) {
-        focusInput();
+      if (autoFocus && timelineNameRef && timelineNameRef.current) {
+        timelineNameRef.current.focus();
       }
-    }, [autoFocus, className]);
+    }, [autoFocus]);
 
     const nameField = useMemo(
       () => (
@@ -258,10 +251,10 @@ export const Name = React.memo<NameProps>(
           value={title}
           width={width}
           marginRight={marginRight}
-          className={className}
+          inputRef={timelineNameRef}
         />
       ),
-      [handleChange, marginRight, timelineType, title, width, className, disabled]
+      [handleChange, marginRight, timelineType, title, width, disabled]
     );
 
     return (
