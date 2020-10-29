@@ -17,7 +17,7 @@ import { SecuritySolutionFactory } from './factory/types';
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy();
+  const es = data.search.getSearchStrategy('es');
 
   return {
     search: (request, options, deps) => {
