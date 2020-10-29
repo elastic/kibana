@@ -27,25 +27,25 @@ type Handler = (handlerParams: {
   mlClient: MlClient;
 }) => ReturnType<RequestHandler>;
 
-type GetSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract;
+type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract;
 
 export class RouteGuard {
   private _mlLicense: MlLicense;
-  private _getSavedObjectClient: GetSavedObjectClient;
+  private _getMlSavedObjectClient: GetMlSavedObjectClient;
 
-  constructor(mlLicense: MlLicense, getSavedObject: GetSavedObjectClient) {
+  constructor(mlLicense: MlLicense, getSavedObject: GetMlSavedObjectClient) {
     this._mlLicense = mlLicense;
-    this._getSavedObjectClient = getSavedObject;
+    this._getMlSavedObjectClient = getSavedObject;
   }
 
   public fullLicenseAPIGuard(handler: Handler) {
-    if (this._getSavedObjectClient === null) {
+    if (this._getMlSavedObjectClient === null) {
       throw new Error();
     }
     return this._guard(() => this._mlLicense.isFullLicense(), handler);
   }
   public basicLicenseAPIGuard(handler: Handler) {
-    if (this._getSavedObjectClient === null) {
+    if (this._getMlSavedObjectClient === null) {
       throw new Error();
     }
     return this._guard(() => this._mlLicense.isMinimumLicense(), handler);
@@ -61,8 +61,8 @@ export class RouteGuard {
         return response.forbidden();
       }
 
-      const savedObjectClient = this._getSavedObjectClient(request);
-      const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectClient);
+      const mlSavedObjectClient = this._getMlSavedObjectClient(request);
+      const jobSavedObjectService = jobSavedObjectServiceFactory(mlSavedObjectClient);
       const client = context.core.elasticsearch.client;
 
       return handler({

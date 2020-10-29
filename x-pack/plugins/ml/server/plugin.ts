@@ -120,7 +120,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
     setupSavedObjects(coreSetup.savedObjects);
 
-    const getMlSavedObjectsService = (request: KibanaRequest): SavedObjectsClientContract => {
+    const getMlSavedObjectsClient = (request: KibanaRequest): SavedObjectsClientContract => {
       if (this.savedObjectsStart === null) {
         throw new Error('saved object client has not been initialized');
       }
@@ -131,7 +131,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
-      routeGuard: new RouteGuard(this.mlLicense, getMlSavedObjectsService),
+      routeGuard: new RouteGuard(this.mlLicense, getMlSavedObjectsClient),
       mlLicense: this.mlLicense,
     };
 
