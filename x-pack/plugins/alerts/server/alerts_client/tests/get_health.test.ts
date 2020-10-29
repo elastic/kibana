@@ -63,7 +63,7 @@ describe('getHealth()', () => {
   test('return true if some of alerts has a decryption error', async () => {
     const lastExecutionDateError = new Date().toISOString();
     const lastExecutionDate = new Date().toISOString();
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,
       per_page: 10,
       page: 1,
@@ -148,7 +148,7 @@ describe('getHealth()', () => {
   test('return false if no alerts with a decryption error', async () => {
     const lastExecutionDateError = new Date().toISOString();
     const lastExecutionDate = new Date().toISOString();
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,
       per_page: 10,
       page: 1,

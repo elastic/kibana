@@ -407,36 +407,27 @@ export class AlertsClient {
       type: 'alert',
     });
 
-    let lastUpdateOkStatus: Date;
-    const res = data.reduce(
+    const healthStatuses = data.reduce(
       (prevItem: AlertsHealth, item: SavedObjectsFindResult<RawAlert>) => {
-        const lastExecutionDate = new Date(item.attributes.executionStatus.lastExecutionDate);
-        if (item.attributes.executionStatus.error) {
-          switch (item.attributes.executionStatus.error?.reason) {
-            case AlertExecutionStatusErrorReasons.Decrypt:
-              prevItem.decryptionHealth = {
-                status: HealthStatus.Warning,
-                timestamp: item.attributes.executionStatus.lastExecutionDate,
-              };
-              break;
-            case AlertExecutionStatusErrorReasons.Execute:
-              prevItem.executionHealth = {
-                status: HealthStatus.Warning,
-                timestamp: item.attributes.executionStatus.lastExecutionDate,
-              };
-              break;
-            case AlertExecutionStatusErrorReasons.Read:
-              prevItem.readHealth = {
-                status: HealthStatus.Warning,
-                timestamp: item.attributes.executionStatus.lastExecutionDate,
-              };
-              break;
-          }
-        } else {
-          lastUpdateOkStatus =
-            lastUpdateOkStatus && lastUpdateOkStatus > lastExecutionDate
-              ? lastUpdateOkStatus
-              : lastExecutionDate;
+        switch (item.attributes.executionStatus.error?.reason) {
+          case AlertExecutionStatusErrorReasons.Decrypt:
+            prevItem.decryptionHealth = {
+              status: HealthStatus.Warning,
+              timestamp: item.attributes.executionStatus.lastExecutionDate,
+            };
+            break;
+          case AlertExecutionStatusErrorReasons.Execute:
+            prevItem.executionHealth = {
+              status: HealthStatus.Warning,
+              timestamp: item.attributes.executionStatus.lastExecutionDate,
+            };
+            break;
+          case AlertExecutionStatusErrorReasons.Read:
+            prevItem.readHealth = {
+              status: HealthStatus.Warning,
+              timestamp: item.attributes.executionStatus.lastExecutionDate,
+            };
+            break;
         }
         return prevItem;
       },
@@ -456,14 +447,28 @@ export class AlertsClient {
       }
     );
 
-    Object.entries(res).map(([healthType, statusItem]) => {
+    const { saved_objects: noErrorData } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
+      filter:
+        'alert.attributes.executionStatus.status:ok or alert.attributes.executionStatus.status:active or alert.attributes.executionStatus.status:pending',
+      fields: ['executionStatus'],
+      type: 'alert',
+    });
+    const lastExecutionDate = noErrorData.reduce(
+      (prev: Date, item) =>
+        prev > new Date(item.attributes.executionStatus.lastExecutionDate)
+          ? prev
+          : new Date(item.attributes.executionStatus.lastExecutionDate),
+      new Date('0001/01/01')
+    );
+
+    Object.entries(healthStatuses).map(([healthType, statusItem]) => {
       if (statusItem.status === HealthStatus.OK) {
-        statusItem.timestamp = lastUpdateOkStatus.toISOString();
+        statusItem.timestamp = lastExecutionDate.toISOString();
       }
       return [healthType, statusItem];
     });
 
-    return res;
+    return healthStatuses;
   }
 
   public async delete({ id }: { id: string }) {
