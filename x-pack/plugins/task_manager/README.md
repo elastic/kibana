@@ -1,7 +1,8 @@
 # Kibana task manager
 
-The task manager is a generic system for running background tasks. It supports:
+The task manager is a generic system for running background tasks.
 
+It supports:
 - Single-run and recurring tasks
 - Scheduling tasks to run after a specified datetime
 - Basic retry logic
