@@ -28,12 +28,20 @@ export {
 export function createMonitoringStats(
   taskPollingLifecycle: TaskPollingLifecycle,
   taskStore: TaskStore,
+  elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
   logger: Logger
 ): Observable<MonitoringStats> {
   return createMonitoringStatsStream(
-    createAggregators(taskPollingLifecycle, taskStore, config, managedConfig, logger),
+    createAggregators(
+      taskPollingLifecycle,
+      taskStore,
+      elasticsearchAndSOAvailability$,
+      config,
+      managedConfig,
+      logger
+    ),
     config
   );
 }
