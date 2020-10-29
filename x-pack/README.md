@@ -18,7 +18,7 @@ By default, this will also set the password for native realm accounts to the pas
 ## Running specific tests
 | Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
 | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
+| Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                    | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
 | Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`<br>`x-pack/test/accessibility/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
 Examples:
@@ -53,8 +53,6 @@ yarn test:mocha
 
 #### Running functional tests
 
-For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
-
 The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.ts)), and *SAML API integration tests* ([specified by this config](test/security_api_integration/saml.config.ts)).
 
 The script runs all sets of tests sequentially like so:
@@ -69,6 +67,14 @@ To do all of this in a single command run:
 
 ```sh
 node scripts/functional_tests
+```
+
+#### Plugin functional and api integration tests (i.e. "x-pack" directory tests)'
+
+To quickly run a single functional or api-integration test or group of tests from the x-pack directory, try the following:
+```sh
+cd x-pack/ && node scripts/functional_tests_server.js
+node scripts/functional_test_runner.js --config x-pack/test/{api_integration,functional}/config --grep "my fancy test"
 ```
 
 #### Developing functional UI tests
