@@ -266,7 +266,7 @@ export class TaskManagerRunner implements TaskRunner {
               // and lets us set a proper "retryAt" value each time.
               error: new Error('Task timeout'),
               addDuration: this.definition.timeout,
-            }),
+            }) ?? null,
       });
 
       const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
@@ -352,20 +352,20 @@ export class TaskManagerRunner implements TaskRunner {
         ? { schedule: failureResult.schedule }
         : schedule
         ? { schedule }
-        : false;
+        : // when result.error is truthy, then we're retrying because it failed
+          {
+            runAt: this.getRetryDelay({
+              attempts,
+              error,
+            }),
+          };
 
-      if (reschedule) {
-        return asOk({ state, attempts, ...reschedule });
-      } else {
-        // when result.error is truthy, then we're retrying because it failed
-        const newRunAt = this.getRetryDelay({
+      if (reschedule.runAt || reschedule.schedule) {
+        return asOk({
+          state,
           attempts,
-          error,
+          ...reschedule,
         });
-
-        if (newRunAt) {
-          return asOk({ state, attempts, runAt: newRunAt });
-        }
       }
     }
     // scheduling a retry isn't possible,mark task as failed
@@ -472,14 +472,11 @@ export class TaskManagerRunner implements TaskRunner {
     error: Error;
     attempts: number;
     addDuration?: string;
-  }): Date | null {
-    let result = null;
-
+  }): Date | undefined {
     // Use custom retry logic, if any, otherwise we'll use the default logic
-    const retry: boolean | Date = this.definition.getRetry
-      ? this.definition.getRetry(attempts, error)
-      : true;
+    const retry: boolean | Date = this.definition.getRetry?.(attempts, error) ?? true;
 
+    let result;
     if (retry instanceof Date) {
       result = retry;
     } else if (retry === true) {

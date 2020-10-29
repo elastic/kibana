@@ -703,6 +703,41 @@ describe('Task Runner', () => {
     });
   });
 
+  test('rescheduled the Alert if the schedule has update during a task run', async () => {
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce({
+      ...mockedAlertTypeSavedObject,
+      schedule: { interval: '30s' },
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    expect(await taskRunner.run()).toMatchInlineSnapshot(`
+      Object {
+        "schedule": Object {
+          "interval": "30s",
+        },
+        "state": Object {
+          "alertInstances": Object {},
+          "alertTypeState": undefined,
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+        },
+      }
+    `);
+  });
+
   test('recovers gracefully when the AlertType executor throws an exception', async () => {
     alertType.executor.mockImplementation(
       ({ services: executorServices }: AlertExecutorOptions) => {
