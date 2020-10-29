@@ -134,8 +134,8 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/maps_legacy[mapsLegacy]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/maps_legacy/README.md[mapsLegacy]
+|Internal objects used by the Coordinate, Region, and Vega visualizations.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -147,8 +147,8 @@ It also provides a stateful version of it on the start contract.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/region_map[regionMap]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
+|Create choropleth maps. Display the results of a term-aggregation as e.g. countries, zip-codes, states.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects[savedObjects]
@@ -180,8 +180,8 @@ so they can properly protect the data within their clusters.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
-|{kib-repo}blob/{branch}/src/plugins/tile_map[tileMap]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/tile_map/README.md[tileMap]
+|Create a coordinate map. Display the results of a geohash_tile aggregation as bubbles, rectangles, or heatmap color blobs.
 
 
 |{kib-repo}blob/{branch}/src/plugins/timelion/README.md[timelion]
@@ -355,8 +355,8 @@ and actions.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/file_upload/README.md[fileUpload]
+|Backend and core front-end react-components for GeoJson file upload. Only supports the Maps plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
