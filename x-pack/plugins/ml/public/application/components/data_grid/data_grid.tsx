@@ -123,7 +123,6 @@ export const DataGrid: FC<Props> = memo(
               if (!row) return <div />;
               // if resultsField for some reason is not available then use ml
               const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
-              const parsedFIArray: FeatureImportance[] = getFeatureImportance(row, mlResultsField);
               let predictedValue: string | number | undefined;
               let topClasses: TopClasses = [];
               if (
@@ -134,6 +133,17 @@ export const DataGrid: FC<Props> = memo(
                 predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
                 topClasses = getTopClasses(row, mlResultsField);
               }
+
+              const isClassTypeBoolean = topClasses.reduce(
+                (p, c) => typeof c.class_name === 'boolean' || p,
+                false
+              );
+
+              const parsedFIArray: FeatureImportance[] = getFeatureImportance(
+                row,
+                mlResultsField,
+                isClassTypeBoolean
+              );
 
               return (
                 <DecisionPathPopover

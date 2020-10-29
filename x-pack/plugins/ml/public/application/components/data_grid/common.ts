@@ -160,6 +160,13 @@ export const getDataGridSchemaFromKibanaFieldType = (
   return schema;
 };
 
+const getClassName = (className: string, isClassTypeBoolean: boolean) => {
+  if (isClassTypeBoolean) {
+    return className === 'true';
+  }
+
+  return className;
+};
 /**
  * Helper to transform feature importance flattened fields with arrays back to object structure
  *
@@ -169,7 +176,8 @@ export const getDataGridSchemaFromKibanaFieldType = (
  */
 export const getFeatureImportance = (
   row: Record<string, any>,
-  mlResultsField: string
+  mlResultsField: string,
+  isClassTypeBoolean = false
 ): FeatureImportance[] => {
   const featureNames: string[] | undefined =
     row[`${mlResultsField}.feature_importance.feature_name`];
@@ -195,7 +203,10 @@ export const getFeatureImportance = (
       return {
         feature_name: fName,
         classes: overallClassNames.map((fClassName, fIndex) => {
-          return { class_name: fClassName, importance: featureClassImportance[fIndex] };
+          return {
+            class_name: getClassName(fClassName, isClassTypeBoolean),
+            importance: featureClassImportance[fIndex],
+          };
         }),
       };
     });
