@@ -142,7 +142,7 @@ describe('getHealth()', () => {
         timestamp: lastExecutionDateError,
       },
     });
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
   });
 
   test('return false if no alerts with a decryption error', async () => {
