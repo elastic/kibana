@@ -456,16 +456,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { id: string; force?: boolean | undefined } = {
+        const { body } = await client.asInternalUser.ml.stopDataFrameAnalytics({
           id: request.params.analyticsId,
-        };
-        // @ts-expect-error TODO: update types
-        if (request.url?.query?.force !== undefined) {
-          // @ts-expect-error TODO: update types
-          options.force = request.url.query.force;
-        }
-
-        const { body } = await client.asInternalUser.ml.stopDataFrameAnalytics(options);
+          force: request.query.force,
+        });
         return response.ok({
           body,
         });

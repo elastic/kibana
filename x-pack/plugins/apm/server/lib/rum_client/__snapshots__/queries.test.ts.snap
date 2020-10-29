@@ -9,31 +9,35 @@ Object {
   },
   "body": Object {
     "aggs": Object {
-      "backEnd": Object {
-        "percentiles": Object {
-          "field": "transaction.marks.agent.timeToFirstByte",
-          "hdr": Object {
-            "number_of_significant_value_digits": 3,
+      "hasFetchStartField": Object {
+        "aggs": Object {
+          "backEnd": Object {
+            "percentiles": Object {
+              "field": "transaction.marks.agent.timeToFirstByte",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
           },
-          "percents": Array [
-            50,
-          ],
-        },
-      },
-      "domInteractive": Object {
-        "percentiles": Object {
-          "field": "transaction.marks.agent.domInteractive",
-          "hdr": Object {
-            "number_of_significant_value_digits": 3,
+          "totalPageLoadDuration": Object {
+            "percentiles": Object {
+              "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
           },
-          "percents": Array [
-            50,
-          ],
         },
-      },
-      "pageViews": Object {
-        "value_count": Object {
-          "field": "transaction.duration.us",
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.marks.navigationTiming.fetchStart",
+          },
         },
       },
     },
@@ -55,11 +59,6 @@ Object {
             },
           },
           Object {
-            "exists": Object {
-              "field": "transaction.marks.navigationTiming.fetchStart",
-            },
-          },
-          Object {
             "term": Object {
               "service.environment": "test",
             },
@@ -68,6 +67,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": true,
   },
 }
 `;
@@ -137,11 +137,6 @@ Object {
           Object {
             "term": Object {
               "agent.name": "rum-js",
-            },
-          },
-          Object {
-            "term": Object {
-              "transaction.type": "page-load",
             },
           },
           Object {
@@ -546,11 +541,6 @@ Object {
             },
           },
           Object {
-            "exists": Object {
-              "field": "transaction.marks.navigationTiming.fetchStart",
-            },
-          },
-          Object {
             "term": Object {
               "service.environment": "test",
             },
@@ -588,6 +578,13 @@ Object {
             0.1,
             0.25,
           ],
+        },
+      },
+      "coreVitalPages": Object {
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.experience",
+          },
         },
       },
       "fcp": Object {
@@ -668,11 +665,6 @@ Object {
           Object {
             "term": Object {
               "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
-              "user_agent.name": "Chrome",
             },
           },
         ],
