@@ -97,24 +97,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('~waffleMap');
         });
 
-        describe('context menu', () => {
-          before(async () => {
-            await testSubjects.click('~nodeContainer');
-          });
-
-          it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewLogsContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-
-          it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-        });
-
         it(`doesn't show read-only badge`, async () => {
           await globalNav.badgeMissingOrFail();
         });
@@ -211,24 +193,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('~waffleMap');
-        });
-
-        describe('context menu', () => {
-          before(async () => {
-            await testSubjects.click('~nodeContainer');
-          });
-
-          it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewLogsContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-
-          it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
         });
 
         it(`shows read-only badge`, async () => {
