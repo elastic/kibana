@@ -71,38 +71,18 @@ exports.externals = {
   '@babel/runtime/helpers/assertThisInitialized':
     '__kbnSharedDeps__.BabelRuntime.assertThisInitialized',
   '@babel/runtime/helpers/asyncToGenerator': '__kbnSharedDeps__.BabelRuntime.asyncToGenerator',
-  '@babel/runtime/helpers/classCallCheck': '__kbnSharedDeps__.BabelRuntime.classCallCheck',
-  '@babel/runtime/helpers/construct': '__kbnSharedDeps__.BabelRuntime.construct',
-  '@babel/runtime/helpers/createClass': '__kbnSharedDeps__.BabelRuntime.createClass',
-  '@babel/runtime/helpers/createForOfIteratorHelper':
-    '__kbnSharedDeps__.BabelRuntime.createForOfIteratorHelper',
-  '@babel/runtime/helpers/createSuper': '__kbnSharedDeps__.BabelRuntime.createSuper',
   '@babel/runtime/helpers/defineProperty': '__kbnSharedDeps__.BabelRuntime.defineProperty',
   '@babel/runtime/helpers/extends': '__kbnSharedDeps__.BabelRuntime.extends',
-  '@babel/runtime/helpers/get': '__kbnSharedDeps__.BabelRuntime.get',
   '@babel/runtime/helpers/getPrototypeOf': '__kbnSharedDeps__.BabelRuntime.getPrototypeOf',
-  '@babel/runtime/helpers/inherits': '__kbnSharedDeps__.BabelRuntime.inherits',
   '@babel/runtime/helpers/inheritsLoose': '__kbnSharedDeps__.BabelRuntime.inheritsLoose',
   '@babel/runtime/helpers/interopRequireDefault':
     '__kbnSharedDeps__.BabelRuntime.interopRequireDefault',
   '@babel/runtime/helpers/interopRequireWildcard':
     '__kbnSharedDeps__.BabelRuntime.interopRequireWildcard',
-  '@babel/runtime/helpers/objectDestructuringEmpty':
-    '__kbnSharedDeps__.BabelRuntime.objectDestructuringEmpty',
-  '@babel/runtime/helpers/objectSpread2': '__kbnSharedDeps__.BabelRuntime.objectSpread2',
-  '@babel/runtime/helpers/objectWithoutProperties':
-    '__kbnSharedDeps__.BabelRuntime.objectWithoutProperties',
   '@babel/runtime/helpers/objectWithoutPropertiesLoose':
     '__kbnSharedDeps__.BabelRuntime.objectWithoutPropertiesLoose',
   '@babel/runtime/helpers/possibleConstructorReturn':
     '__kbnSharedDeps__.BabelRuntime.possibleConstructorReturn',
   '@babel/runtime/regenerator': '__kbnSharedDeps__.BabelRuntime.regenerator',
-  '@babel/runtime/helpers/slicedToArray': '__kbnSharedDeps__.BabelRuntime.slicedToArray',
-  '@babel/runtime/helpers/taggedTemplateLiteral':
-    '__kbnSharedDeps__.BabelRuntime.taggedTemplateLiteral',
-  '@babel/runtime/helpers/toArray': '__kbnSharedDeps__.BabelRuntime.toArray',
-  '@babel/runtime/helpers/toConsumableArray': '__kbnSharedDeps__.BabelRuntime.toConsumableArray',
-  '@babel/runtime/helpers/toPropertyKey': '__kbnSharedDeps__.BabelRuntime.toPropertyKey',
-  '@babel/runtime/helpers/wrapNativeSuper': '__kbnSharedDeps__.BabelRuntime.wrapNativeSuper',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');
