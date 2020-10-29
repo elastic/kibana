@@ -104,8 +104,6 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-  start,
-  end,
   isEventViewer,
 }: {
   config: EsQueryConfig;
@@ -115,33 +113,26 @@ export const combineQueries = ({
   filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
-  start: string;
-  end: string;
   isEventViewer?: boolean;
 }): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
-    kuery.query = `@timestamp >= "${start}" and @timestamp <= "${end}"`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    kuery.query = `@timestamp >= "${start}" and @timestamp <= "${end}"`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query}) and @timestamp >= "${start}" and @timestamp <= "${end}"`;
+    kuery.query = `(${kqlQuery.query})`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(
-      dataProviders,
-      browserFields
-    )}) and @timestamp >= "${start}" and @timestamp <= "${end}"`;
+    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
@@ -150,7 +141,7 @@ export const combineQueries = ({
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
-  )}) and @timestamp >= "${start}" and @timestamp <= "${end}"`;
+  )})`;
   return {
     filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
   };
