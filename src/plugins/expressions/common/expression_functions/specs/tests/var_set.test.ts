@@ -32,7 +32,8 @@ describe('expression_functions', () => {
     beforeEach(() => {
       input = { timeRange: { from: '0', to: '1' } };
       context = {
-        getInitialInput: () => input,
+        getSearchContext: () => input,
+        getSearchSessionId: () => undefined,
         types: {},
         variables: { test: 1 },
         abortSignal: {} as any,

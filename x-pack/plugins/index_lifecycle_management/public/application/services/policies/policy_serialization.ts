@@ -6,15 +6,8 @@
 
 import { LegacyPolicy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
-import {
-  defaultNewColdPhase,
-  defaultNewDeletePhase,
-  defaultNewWarmPhase,
-  serializedPhaseInitialization,
-} from '../../constants';
+import { defaultNewDeletePhase, serializedPhaseInitialization } from '../../constants';
 
-import { warmPhaseFromES, warmPhaseToES } from './warm_phase';
-import { coldPhaseFromES, coldPhaseToES } from './cold_phase';
 import { deletePhaseFromES, deletePhaseToES } from './delete_phase';
 
 export const splitSizeAndUnits = (field: string): { size: string; units: string } => {
@@ -48,8 +41,6 @@ export const initializeNewPolicy = (newPolicyName: string = ''): LegacyPolicy =>
   return {
     name: newPolicyName,
     phases: {
-      warm: { ...defaultNewWarmPhase },
-      cold: { ...defaultNewColdPhase },
       delete: { ...defaultNewDeletePhase },
     },
   };
@@ -64,8 +55,6 @@ export const deserializePolicy = (policy: PolicyFromES): LegacyPolicy => {
   return {
     name,
     phases: {
-      warm: warmPhaseFromES(phases.warm),
-      cold: coldPhaseFromES(phases.cold),
       delete: deletePhaseFromES(phases.delete),
     },
   };
@@ -82,13 +71,6 @@ export const legacySerializePolicy = (
     name: policy.name,
     phases: {},
   } as SerializedPolicy;
-  if (policy.phases.warm.phaseEnabled) {
-    serializedPolicy.phases.warm = warmPhaseToES(policy.phases.warm, originalEsPolicy.phases.warm);
-  }
-
-  if (policy.phases.cold.phaseEnabled) {
-    serializedPolicy.phases.cold = coldPhaseToES(policy.phases.cold, originalEsPolicy.phases.cold);
-  }
 
   if (policy.phases.delete.phaseEnabled) {
     serializedPolicy.phases.delete = deletePhaseToES(

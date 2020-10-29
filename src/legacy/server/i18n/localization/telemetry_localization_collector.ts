@@ -21,7 +21,6 @@ import { i18nLoader } from '@kbn/i18n';
 import { size } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getIntegrityHashes, Integrities } from './file_integrity';
-import { KIBANA_LOCALIZATION_STATS_TYPE } from '../constants';
 
 export interface UsageStats {
   locale: string;
@@ -63,14 +62,20 @@ export function createCollectorFetch({
   };
 }
 
+// TODO: Migrate out of the Legacy dir
 export function registerLocalizationUsageCollector(
   usageCollection: UsageCollectionSetup,
   helpers: LocalizationUsageCollectorHelpers
 ) {
-  const collector = usageCollection.makeUsageCollector({
-    type: KIBANA_LOCALIZATION_STATS_TYPE,
+  const collector = usageCollection.makeUsageCollector<UsageStats>({
+    type: 'localization',
     isReady: () => true,
     fetch: createCollectorFetch(helpers),
+    schema: {
+      locale: { type: 'keyword' },
+      integrities: { DYNAMIC_KEY: { type: 'text' } },
+      labelsCount: { type: 'long' },
+    },
   });
 
   usageCollection.registerCollector(collector);
