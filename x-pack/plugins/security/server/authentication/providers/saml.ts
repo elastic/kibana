@@ -193,7 +193,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
+    this.logger.debug(
+      `Trying to authenticate user request to ${request.url.pathname}${request.url.search}`
+    );
 
     if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
@@ -232,7 +234,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+    this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
     // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
     // and user will eventually be redirected to the home page to log in. But when SAML SLO is
@@ -631,7 +633,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       `${
         this.options.basePath.serverBasePath
       }/internal/security/capture-url?next=${encodeURIComponent(
-        `${this.options.basePath.get(request)}${request.url.path}`
+        `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
       )}&providerType=${encodeURIComponent(this.type)}&providerName=${encodeURIComponent(
         this.options.name
       )}`,

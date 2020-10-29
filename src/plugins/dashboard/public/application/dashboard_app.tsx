@@ -297,10 +297,12 @@ const getFiltersSubscription = (props: {
         query.queryString.getQuery(),
         query.filterManager.getFilters()
       );
-      dashboardContainer.updateInput({
-        filters: query.filterManager.getFilters(),
-        query: query.queryString.getQuery(),
-      });
+
+      // TODO: Anton says we don't need this...
+      // dashboardContainer.updateInput({
+      //   filters: query.filterManager.getFilters(),
+      //   query: query.queryString.getQuery(),
+      // });
     });
 };
 

@@ -78,6 +78,7 @@ export interface InheritedChildInput extends IndexSignature {
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   id: string;
+  searchSessionId?: string;
 }
 
 export interface DashboardContainerOptions {
@@ -228,7 +229,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
-    const { viewMode, refreshConfig, timeRange, query, hidePanelTitles, filters } = this.input;
+    const {
+      viewMode,
+      refreshConfig,
+      timeRange,
+      query,
+      hidePanelTitles,
+      filters,
+      searchSessionId,
+    } = this.input;
     return {
       filters,
       hidePanelTitles,
@@ -237,6 +246,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       refreshConfig,
       viewMode,
       id,
+      searchSessionId,
     };
   }
 }
