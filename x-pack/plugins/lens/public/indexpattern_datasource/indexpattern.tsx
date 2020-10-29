@@ -389,10 +389,8 @@ export function getIndexPatternDatasource({
               longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
                 defaultMessage: `{fieldsLength, plural, one {Field} other {Fields}} "{fields}" {fieldsLength, plural, one {has} other {have}} invalid reference`,
                 values: {
-                  layers: realIndex.length,
                   fields: fieldsWithBrokenReferences.join('", "'),
                   fieldsLength: fieldsWithBrokenReferences.length,
-                  hasMultipleLayers: originalLayersList.length,
                 },
               }),
             };
