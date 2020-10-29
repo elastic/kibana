@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PaletteService } from './service';
 import { PaletteDefinition, SeriesLayer } from './types';
 
