@@ -16,3 +16,4 @@ open class DefaultFunctionalBase(init: BuildType.() -> Unit = {}) : BuildType({
 
   addTestSettings()
 })
+

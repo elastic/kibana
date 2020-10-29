@@ -20,6 +20,7 @@ object PullRequestCi : BuildType({
     checkoutDir = "kibana"
 
     branchFilter = "+:pull/*"
+    excludeDefaultBranchChanges = true
   }
 
   val prAllowedList = listOf(

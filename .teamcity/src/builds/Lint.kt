@@ -13,10 +13,11 @@ object Lint : BuildType({
   steps {
     script {
       name = "Sasslint"
+
       scriptContent =
         """
-                #!/bin/bash
-                yarn run grunt run:sasslint
+          #!/bin/bash
+          yarn run grunt run:sasslint
         """.trimIndent()
     }
 
@@ -24,8 +25,8 @@ object Lint : BuildType({
       name = "ESLint"
       scriptContent =
         """
-                #!/bin/bash
-                yarn run grunt run:eslint
+          #!/bin/bash
+          yarn run grunt run:eslint
         """.trimIndent()
     }
   }
