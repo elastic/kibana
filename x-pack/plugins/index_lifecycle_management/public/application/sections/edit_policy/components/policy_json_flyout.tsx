@@ -58,6 +58,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
           ...legacyPolicy.phases,
           hot: p.phases.hot,
           warm: p.phases.warm,
+          cold: p.phases.cold,
         },
       });
     } else {
