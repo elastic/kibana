@@ -33,7 +33,7 @@ interface Stats {
 }
 
 export interface Series {
-  _global?: boolean;
+  _global?: Record<any, any>;
   _hide?: boolean;
   _id?: number;
   _title?: string;
@@ -44,6 +44,9 @@ export interface Series {
   split: string;
   stack?: boolean;
   type: string;
+  bars?: Record<any, any>;
+  lines?: Record<any, any>;
+  points?: Record<any, any>;
 }
 
 export interface Sheet {

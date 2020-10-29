@@ -26,14 +26,14 @@ export const getAreaStyles = ({
   lines = {},
   color,
 }: {
-  points: {
+  points?: {
     fill?: number;
     fillColor?: string;
     radius?: number;
     show?: boolean;
     lineWidth?: number;
   };
-  lines: {
+  lines?: {
     lineWidth?: number;
     fill?: number;
     steps?: number;

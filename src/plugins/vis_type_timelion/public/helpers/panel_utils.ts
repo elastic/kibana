@@ -43,6 +43,12 @@ export interface Axis {
   tickFormatter: ((val: number) => string) | ((val: number, axis: Axis) => string);
   tickGenerator?(axis: Axis): number[];
   units?: { type: string };
+  domain?: {
+    min?: number;
+    max?: number;
+  };
+  position: 'top' | 'bottom' | 'left' | 'right' | undefined;
+  axisLabel: string;
 }
 
 interface TimeRangeBounds {

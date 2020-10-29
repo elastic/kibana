@@ -33,7 +33,8 @@ import {
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { useKibana } from '../../../kibana_react/public';
 
-import { buildOptions, colors } from '../helpers/panel_utils';
+import { buildOptions, colors, Axis as IAxis } from '../helpers/panel_utils';
+import { tickFormatters } from '../helpers/tick_formatters';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
 import { getBarStyles, getAreaStyles } from '../helpers/series_styles';
@@ -70,8 +71,35 @@ function TimelionVisComponent1({
         const colorIndex = seriesIndex % colors.length;
         newSeries.color = colors[colorIndex];
       }
+
+      if (newSeries._global && newSeries._global.yaxes) {
+        newSeries._global.yaxes.forEach((yaxis: IAxis) => {
+          if (yaxis && yaxis.units) {
+            const formatters = tickFormatters();
+            yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
+          }
+
+          if (yaxis.max) {
+            yaxis.domain = {
+              max: yaxis.max,
+            };
+          }
+
+          if (yaxis.min) {
+            if (yaxis.domain) {
+              yaxis.domain.min = yaxis.min;
+            } else {
+              yaxis.domain = {
+                min: yaxis.min,
+              };
+            }
+          }
+        });
+      }
+
       return newSeries;
     });
+
     setChart(newChart);
   }, [seriesList.list]);
 
@@ -154,17 +182,19 @@ function TimelionVisComponent1({
           tickFormat={options.xaxis.tickFormatter}
         />
         {chart[0]._global && chart[0]._global.yaxes ? (
-          chart[0]._global.yaxes.map((axis: any, index: number) => {
+          chart[0]._global.yaxes.map((axis: IAxis, index: number) => {
             return (
               <Axis
-                key={axis.position + index}
+                key={index}
                 id={axis.position + axis.axisLabel}
                 title={axis.axisLabel}
                 position={axis.position}
+                tickFormat={axis.tickFormatter}
                 gridLine={{
                   stroke: 'rgba(125,125,125,0.3)',
                   visible: true,
                 }}
+                domain={axis.domain}
               />
             );
           })
