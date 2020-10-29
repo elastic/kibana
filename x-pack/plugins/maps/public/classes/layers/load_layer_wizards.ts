@@ -27,6 +27,7 @@ import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { SecurityLayerWizardConfig } from './solution_layers/security';
 import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
+import {vegaLayerWizardConfig} from "../sources/vega_source/vega_layer_wizard";
 
 let registered = false;
 export function registerLayerWizards() {
@@ -60,5 +61,6 @@ export function registerLayerWizards() {
   registerLayerWizard(wmsLayerWizardConfig);
 
   registerLayerWizard(mvtVectorSourceWizardConfig);
+  registerLayerWizard(vegaLayerWizardConfig);
   registered = true;
 }

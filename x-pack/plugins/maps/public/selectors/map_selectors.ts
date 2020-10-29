@@ -51,6 +51,7 @@ import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ILayer } from '../classes/layers/layer';
+import {VegaLayer} from "../classes/layers/vega_layer/vega_layer";
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
@@ -89,6 +90,8 @@ export function createLayerInstance(
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
       });
+    case VegaLayer.type:
+      return new VegaLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }

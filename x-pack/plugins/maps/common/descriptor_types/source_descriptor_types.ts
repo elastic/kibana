@@ -134,3 +134,8 @@ export type GeojsonFileSourceDescriptor = {
   name: string;
   type: string;
 };
+
+export type VegaSourceDescriptor = {
+  name: string;
+  type: string;
+};
