@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { ESAPICaller, UMElasticsearchQueryFn } from '../adapters';
+import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
+import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
 
@@ -18,8 +18,7 @@ export interface GetMonitorDetailsParams {
 }
 
 const getMonitorAlerts = async (
-  callES: ESAPICaller,
-  esClient: ElasticsearchClient,
+  callES: IScopedClusterClient,
   dynamicSettings: any,
   alertsClient: any,
   monitorId: string
@@ -70,13 +69,12 @@ const getMonitorAlerts = async (
     const parsedFilters = await formatFilterString(
       dynamicSettings,
       callES,
-      esClient,
       currAlert.params.filters,
       currAlert.params.search
     );
     esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters?.bool);
 
-    const result = await callES('search', esParams);
+    const { body: result } = await callES.asCurrentUser.search(esParams);
 
     if (result.hits.total.value > 0) {
       monitorAlerts.push(currAlert);
@@ -88,7 +86,7 @@ const getMonitorAlerts = async (
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ callES, esClient, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
+> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -132,19 +130,14 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await callES('search', params);
+  const { body: result } = await callES.asCurrentUser.search(params);
 
   const data = result.hits.hits[0]?._source;
 
   const monitorError: MonitorError | undefined = data?.error;
   const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts(
-    callES,
-    esClient,
-    dynamicSettings,
-    alertsClient,
-    monitorId
-  );
+  const monAlerts = await getMonitorAlerts(callES, dynamicSettings, alertsClient, monitorId);
+
   return {
     monitorId,
     error: monitorError,

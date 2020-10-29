@@ -26,7 +26,6 @@ import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 import { MonitorStatusTranslations } from '../../../common/translations';
-import { ESAPICaller } from '../adapters/framework';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs } from '../lib';
 
@@ -81,7 +80,6 @@ export const generateFilterDSL = async (
 
 export const formatFilterString = async (
   dynamicSettings: DynamicSettings,
-  callES: ESAPICaller,
   esClient: ElasticsearchClient,
   filters: StatusCheckFilters,
   search: string,
@@ -90,9 +88,8 @@ export const formatFilterString = async (
   await generateFilterDSL(
     () =>
       libs?.requests?.getIndexPattern
-        ? libs?.requests?.getIndexPattern({ callES, esClient, dynamicSettings })
+        ? libs?.requests?.getIndexPattern({ esClient, dynamicSettings })
         : getUptimeIndexPattern({
-            callES,
             esClient,
             dynamicSettings,
           }),
@@ -239,7 +236,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     },
     async executor(
       { params: rawParams, state, services: { alertInstanceFactory } },
-      callES,
       esClient,
       dynamicSettings
     ) {
@@ -258,7 +254,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
 
       const filterString = await formatFilterString(
         dynamicSettings,
-        callES,
         esClient,
         filters,
         search,

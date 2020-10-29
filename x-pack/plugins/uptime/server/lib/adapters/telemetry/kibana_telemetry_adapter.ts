@@ -5,10 +5,13 @@
  */
 
 import moment from 'moment';
-import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
+import {
+  ISavedObjectsRepository,
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
-import { ESAPICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
 
 interface UptimeTelemetryCollector {
@@ -69,10 +72,10 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-      fetch: async ({ callCluster }: CollectorFetchContext) => {
+      fetch: async ({ esClient }: CollectorFetchContext) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
+          await this.countNoOfUniqueMonitorAndLocations(esClient, savedObjectsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -125,7 +128,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: ESAPICaller,
+    callCluster: IScopedClusterClient,
     savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -187,7 +190,7 @@ export class KibanaTelemetryAdapter {
       },
     };
 
-    const result = await callCluster('search', params);
+    const result = await callCluster.asCurrentUser.search(params);
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
     const monitorNameStats: any = result?.aggregations?.monitor_name;
