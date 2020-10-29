@@ -4,6 +4,8 @@
 
 ## SavedObjectsRepository.removeReferencesTo() method
 
+Updates all objects containing a reference to the given {<!-- -->type, id<!-- -->} tuple to remove the said reference.
+
 <b>Signature:</b>
 
 ```typescript
@@ -21,4 +23,8 @@ removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferen
 <b>Returns:</b>
 
 `Promise<SavedObjectsRemoveReferencesToResponse>`
+
+## Remarks
+
+Will throw a conflict error if the `update_by_query` operation returns any failure. In that case some references might have been removed, and some were not. It is the caller's responsibility to handle and fix this situation if it was to happen.
 

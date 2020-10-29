@@ -1449,6 +1449,13 @@ export class SavedObjectsRepository {
     };
   }
 
+  /**
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   *
+   * @remarks Will throw a conflict error if the `update_by_query` operation returns any failure. In that case
+   *          some references might have been removed, and some were not. It is the caller's responsibility
+   *          to handle and fix this situation if it was to happen.
+   */
   async removeReferencesTo(
     type: string,
     id: string,
@@ -1493,6 +1500,10 @@ export class SavedObjectsRepository {
       },
       { ignore: [404] }
     );
+
+    if (body.failures?.length) {
+      throw SavedObjectsErrorHelpers.createConflictError(type, id);
+    }
 
     return {
       updated: body.updated,
