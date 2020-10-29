@@ -16,16 +16,24 @@ import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
+import { ServiceOverviewLink } from '../../shared/Links/apm/service_overview_link';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../TransactionOverview';
 
 interface Props {
   serviceName: string;
-  tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
+  tab:
+    | 'errors'
+    | 'metrics'
+    | 'nodes'
+    | 'overview'
+    | 'service-map'
+    | 'transactions';
 }
 
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
@@ -34,13 +42,13 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const overviewTab = {
     link: (
-      <a title="UNDER CONSTRUCTION" href="#">
+      <ServiceOverviewLink serviceName={serviceName}>
         {i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
           defaultMessage: 'Overview',
         })}
-      </a>
+      </ServiceOverviewLink>
     ),
-    render: () => <></>,
+    render: () => <ServiceOverview serviceName={serviceName} />,
     name: 'overview',
   };
 
