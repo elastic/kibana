@@ -561,7 +561,7 @@
     "@types/vinyl-fs": "^2.4.11",
     "@types/watchpack": "^1.1.5",
     "@types/webpack": "^4.41.3",
-    "@types/webpack-env": "^1.15.2",
+    "@types/webpack-env": "^1.15.3",
     "@types/webpack-merge": "^4.1.5",
     "@types/write-pkg": "^3.1.0",
     "@types/xml-crypto": "^1.4.1",
