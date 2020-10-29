@@ -53,6 +53,7 @@ export interface IExpressionLoaderParams {
   uiState?: unknown;
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
+  searchSessionId?: string;
 }
 
 export interface ExpressionRenderError extends Error {

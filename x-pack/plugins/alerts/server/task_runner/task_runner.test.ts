@@ -136,8 +136,8 @@ describe('Task Runner', () => {
       },
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -147,17 +147,17 @@ describe('Task Runner', () => {
     });
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toMatchInlineSnapshot(`
-      Object {
-        "schedule": Object {
-          "interval": "10s",
-        },
-        "state": Object {
-          "alertInstances": Object {},
-          "alertTypeState": undefined,
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
-      }
-    `);
+                                  Object {
+                                    "schedule": Object {
+                                      "interval": "10s",
+                                    },
+                                    "state": Object {
+                                      "alertInstances": Object {},
+                                      "alertTypeState": undefined,
+                                      "previousStartedAt": 1970-01-01T00:00:00.000Z,
+                                    },
+                                  }
+                  `);
     expect(alertType.executor).toHaveBeenCalledTimes(1);
     const call = alertType.executor.mock.calls[0][0];
     expect(call.params).toMatchInlineSnapshot(`
@@ -212,8 +212,8 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -340,7 +340,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -505,8 +505,8 @@ describe('Task Runner', () => {
       },
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -613,7 +613,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -627,9 +627,7 @@ describe('Task Runner', () => {
         "schedule": Object {
           "interval": "10s",
         },
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
@@ -643,7 +641,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -679,7 +677,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -718,7 +716,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -735,9 +733,7 @@ describe('Task Runner', () => {
         "schedule": Object {
           "interval": "10s",
         },
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
 
@@ -782,7 +778,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
 
     const runnerResult = await taskRunner.run();
 
@@ -791,9 +787,7 @@ describe('Task Runner', () => {
         "schedule": Object {
           "interval": "10s",
         },
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
   });
@@ -809,8 +803,8 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -826,9 +820,7 @@ describe('Task Runner', () => {
         "schedule": Object {
           "interval": "10s",
         },
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
   });
@@ -844,7 +836,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -860,9 +852,7 @@ describe('Task Runner', () => {
         "schedule": Object {
           "interval": "10s",
         },
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
   });
@@ -898,11 +888,46 @@ describe('Task Runner', () => {
         "schedule": Object {
           "interval": "5m",
         },
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
+  });
+
+  test(`doesn't change previousStartedAt when it fails to run`, async () => {
+    const originalAlertSate = {
+      previousStartedAt: '1970-01-05T00:00:00.000Z',
+    };
+
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        throw new Error('OMG');
+      }
+    );
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: originalAlertSate,
+      },
+      taskRunnerFactoryInitializerParams
+    );
+
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult.state.previousStartedAt).toEqual(
+      new Date(originalAlertSate.previousStartedAt)
+    );
   });
 
   test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
@@ -916,7 +941,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -930,9 +955,7 @@ describe('Task Runner', () => {
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
         "schedule": undefined,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
   });

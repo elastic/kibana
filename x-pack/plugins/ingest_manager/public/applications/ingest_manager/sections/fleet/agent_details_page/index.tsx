@@ -89,7 +89,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             size="xs"
           >
             <FormattedMessage
-              id="xpack.ingestManager.agentDetails.viewAgentListTitle"
+              id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"
             />
           </EuiButtonEmpty>
@@ -104,7 +104,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 agentData.item.local_metadata.host.hostname
               ) : (
                 <FormattedMessage
-                  id="xpack.ingestManager.agentDetails.agentDetailsTitle"
+                  id="xpack.fleet.agentDetails.agentDetailsTitle"
                   defaultMessage="Agent '{id}'"
                   values={{
                     id: agentId,
@@ -125,14 +125,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
           {[
             {
-              label: i18n.translate('xpack.ingestManager.agentDetails.statusLabel', {
+              label: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
                 defaultMessage: 'Status',
               }),
               content: <AgentHealth agent={agentData.item} />,
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.agentDetails.policyLabel', {
+              label: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
                 defaultMessage: 'Policy',
               }),
               content: isAgentPolicyLoading ? (
@@ -150,7 +150,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.agentDetails.agentVersionLabel', {
+              label: i18n.translate('xpack.fleet.agentDetails.agentVersionLabel', {
                 defaultMessage: 'Agent version',
               }),
               content:
@@ -165,7 +165,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
                           aria-label={i18n.translate(
-                            'xpack.ingestManager.agentDetails.upgradeAvailableTooltip',
+                            'xpack.fleet.agentDetails.upgradeAvailableTooltip',
                             {
                               defaultMessage: 'Upgrade available',
                             }
@@ -174,7 +174,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                           type="alert"
                           color="warning"
                           content={i18n.translate(
-                            'xpack.ingestManager.agentDetails.upgradeAvailableTooltip',
+                            'xpack.fleet.agentDetails.upgradeAvailableTooltip',
                             {
                               defaultMessage: 'Upgrade available',
                             }
@@ -225,7 +225,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     return [
       {
         id: 'activity_log',
-        name: i18n.translate('xpack.ingestManager.agentDetails.subTabs.activityLogTab', {
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.activityLogTab', {
           defaultMessage: 'Activity log',
         }),
         href: getHref('fleet_agent_details', { agentId, tabId: 'activity' }),
@@ -233,7 +233,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       },
       {
         id: 'details',
-        name: i18n.translate('xpack.ingestManager.agentDetails.subTabs.detailsTab', {
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
           defaultMessage: 'Agent details',
         }),
         href: getHref('fleet_agent_details', { agentId, tabId: 'details' }),
@@ -262,7 +262,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           <Error
             title={
               <FormattedMessage
-                id="xpack.ingestManager.agentDetails.unexceptedErrorTitle"
+                id="xpack.fleet.agentDetails.unexceptedErrorTitle"
                 defaultMessage="Error loading agent"
               />
             }
@@ -274,19 +274,16 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           <Error
             title={
               <FormattedMessage
-                id="xpack.ingestManager.agentDetails.agentNotFoundErrorTitle"
+                id="xpack.fleet.agentDetails.agentNotFoundErrorTitle"
                 defaultMessage="Agent not found"
               />
             }
-            error={i18n.translate(
-              'xpack.ingestManager.agentDetails.agentNotFoundErrorDescription',
-              {
-                defaultMessage: 'Cannot find agent ID {agentId}',
-                values: {
-                  agentId,
-                },
-              }
-            )}
+            error={i18n.translate('xpack.fleet.agentDetails.agentNotFoundErrorDescription', {
+              defaultMessage: 'Cannot find agent ID {agentId}',
+              values: {
+                agentId,
+              },
+            })}
           />
         )}
       </WithHeaderLayout>

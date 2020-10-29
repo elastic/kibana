@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -306,14 +306,14 @@ export class TaskRunner {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert)
       ),
-      schedule: asOk(alert.schedule),
+      schedule: asOk((await alertsClient.get({ id: alertId })).schedule),
     };
   }
 
   async run(): Promise<AlertTaskRunResult> {
     const {
       params: { alertId, spaceId },
-      startedAt: previousStartedAt,
+      startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
@@ -352,7 +352,7 @@ export class TaskRunner {
         (stateUpdates: AlertTaskState) => {
           return {
             ...stateUpdates,
-            previousStartedAt,
+            previousStartedAt: startedAt,
           };
         },
         (err: Error) => {
@@ -362,10 +362,7 @@ export class TaskRunner {
           } else {
             this.logger.error(message);
           }
-          return {
-            ...originalState,
-            previousStartedAt,
-          };
+          return originalState;
         }
       ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
