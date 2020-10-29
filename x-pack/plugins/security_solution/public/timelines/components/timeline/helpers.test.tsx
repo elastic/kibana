@@ -260,7 +260,8 @@ describe('Combined Queries', () => {
         isEventViewer,
       })
     ).toEqual({
-      filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+      filterQuery:
+        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
     });
   });
 
@@ -306,7 +307,7 @@ describe('Combined Queries', () => {
       })
     ).toEqual({
       filterQuery:
-        '{"bool":{"must":[],"filter":[{"match_all":{}},{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
+        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}},{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
     });
   });
 
@@ -324,7 +325,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -344,7 +345,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -364,7 +365,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -384,7 +385,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -404,7 +405,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -421,7 +422,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -439,7 +440,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -457,7 +458,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -477,7 +478,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -497,7 +498,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":"2018-03-23T18:49:23.132Z"}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":"2018-03-24T03:33:52.253Z"}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
