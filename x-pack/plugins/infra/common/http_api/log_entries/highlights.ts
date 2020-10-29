@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { logEntryCursorRT } from '../../log_entry';
 import {
   logEntriesBaseRequestRT,
   logEntriesBeforeRequestRT,
@@ -12,7 +13,6 @@ import {
   logEntriesCenteredRequestRT,
   logEntryRT,
 } from './entries';
-import { logEntriesCursorRT } from './common';
 
 export const LOG_ENTRIES_HIGHLIGHTS_PATH = '/api/log_entries/highlights';
 
@@ -58,8 +58,8 @@ export const logEntriesHighlightsResponseRT = rt.type({
         entries: rt.array(logEntryRT),
       }),
       rt.type({
-        topCursor: logEntriesCursorRT,
-        bottomCursor: logEntriesCursorRT,
+        topCursor: logEntryCursorRT,
+        bottomCursor: logEntryCursorRT,
         entries: rt.array(logEntryRT),
       }),
     ])

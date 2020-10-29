@@ -16,3 +16,8 @@ export const commonSearchSuccessResponseFieldsRT = rt.type({
   timed_out: rt.boolean,
   took: rt.number,
 });
+
+export const commonHitFieldsRT = rt.type({
+  _index: rt.string,
+  _id: rt.string,
+});

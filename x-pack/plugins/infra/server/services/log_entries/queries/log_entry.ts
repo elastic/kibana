@@ -7,6 +7,10 @@
 import type { RequestParams } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../../../common/typed_json';
+import {
+  commonHitFieldsRT,
+  commonSearchSuccessResponseFieldsRT,
+} from '../../../utils/elasticsearch_runtime_types';
 
 export const createGetLogEntryQuery = (
   logEntryIndex: string,
@@ -25,19 +29,32 @@ export const createGetLogEntryQuery = (
         values: [logEntryId],
       },
     },
-    fields: ['*', timestampField, tiebreakerField],
+    fields: [
+      '*',
+      {
+        field: timestampField,
+        format: 'epoch_millis',
+      },
+      tiebreakerField,
+    ],
     _source: false,
   },
 });
 
-export const logEntryHitRT = rt.type({
-  fields: rt.record(rt.string, jsonArrayRT),
-});
-
-export const getLogEntryResponseRT = rt.type({
-  hits: rt.type({
-    hits: rt.array(logEntryHitRT),
+export const logEntryHitRT = rt.intersection([
+  commonHitFieldsRT,
+  rt.type({
+    fields: rt.record(rt.string, jsonArrayRT),
   }),
-});
+]);
+
+export const getLogEntryResponseRT = rt.intersection([
+  commonSearchSuccessResponseFieldsRT,
+  rt.type({
+    hits: rt.type({
+      hits: rt.array(logEntryHitRT),
+    }),
+  }),
+]);
 
 export type GetLogEntryResponse = rt.TypeOf<typeof getLogEntryResponseRT>;

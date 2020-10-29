@@ -13,7 +13,6 @@ import {
   LogEntriesSummaryHighlightsBucket,
   LogEntry,
   LogEntriesItem,
-  LogEntriesCursor,
   LogColumn,
 } from '../../../../common/http_api';
 import {
@@ -37,20 +36,21 @@ import {
   CompositeDatasetKey,
   createLogEntryDatasetsQuery,
 } from './queries/log_entry_datasets';
+import { LogEntryCursor } from '../../../../common/log_entry';
 
 export interface LogEntriesParams {
   startTimestamp: number;
   endTimestamp: number;
   size?: number;
   query?: JsonObject;
-  cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
+  cursor?: { before: LogEntryCursor | 'last' } | { after: LogEntryCursor | 'first' };
   highlightTerm?: string;
 }
 export interface LogEntriesAroundParams {
   startTimestamp: number;
   endTimestamp: number;
   size?: number;
-  center: LogEntriesCursor;
+  center: LogEntryCursor;
   query?: JsonObject;
   highlightTerm?: string;
 }
@@ -347,14 +347,14 @@ export interface LogEntryDocument {
   id: string;
   fields: Fields;
   highlights: Highlights;
-  cursor: LogEntriesCursor;
+  cursor: LogEntryCursor;
 }
 
 export interface LogSummaryBucket {
   entriesCount: number;
   start: number;
   end: number;
-  topEntryKeys: LogEntriesCursor[];
+  topEntryKeys: LogEntryCursor[];
 }
 
 const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>

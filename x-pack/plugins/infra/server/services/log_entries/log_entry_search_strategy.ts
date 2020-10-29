@@ -5,9 +5,8 @@
  */
 
 import * as rt from 'io-ts';
-import { of } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { concat, defer, of } from 'rxjs';
+import { concatMap, filter, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import {
   IEsSearchRequest,
   IKibanaSearchRequest,
@@ -17,6 +16,8 @@ import {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
+import { getLogEntryCursorFromFields } from '../../../common/log_entry';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   LogEntrySearchRequestParams,
   logEntrySearchRequestParamsRT,
@@ -24,10 +25,28 @@ import {
   logEntrySearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entry';
 import type { InfraSources } from '../../lib/sources';
+import { jsonFromBase64StringRT } from '../../utils/typed_search_strategy';
 import { createGetLogEntryQuery, getLogEntryResponseRT } from './queries/log_entry';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;
+
+const logEntrySearchRequestStateRT = rt.string.pipe(jsonFromBase64StringRT).pipe(
+  rt.type({
+    esRequestId: rt.string,
+  })
+);
+
+const asyncGetRequestRT = rt.type({
+  id: logEntrySearchRequestStateRT,
+  params: logEntrySearchRequestParamsRT,
+});
+
+const asyncSubmitRequestRT = rt.type({
+  params: logEntrySearchRequestParamsRT,
+});
+
+const asyncRequestRT = rt.union([asyncGetRequestRT, asyncSubmitRequestRT]);
 
 export const logEntrySearchStrategyProvider = ({
   data,
@@ -39,54 +58,62 @@ export const logEntrySearchStrategyProvider = ({
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
   return {
-    search: (logEntrySearchRequest, options, context) =>
-      of(logEntrySearchRequest).pipe(
-        mergeMap(
-          async (request): Promise<IEsSearchRequest> => {
-            if (isGetRequest(request)) {
-              return { id: request.id };
-            } else if (isSubmitRequest(logEntrySearchRequestParamsRT)(request)) {
-              const sourceConfiguration = await sources.getSourceConfiguration(
-                context.core.savedObjects.client,
-                request.params.sourceId
-              );
+    search: (rawRequest, options, context) =>
+      defer(() => {
+        const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
-              return {
-                params: createGetLogEntryQuery(
-                  sourceConfiguration.configuration.logAlias,
-                  request.params.logEntryId,
-                  sourceConfiguration.configuration.fields.timestamp,
-                  sourceConfiguration.configuration.fields.tiebreaker
-                ),
-              };
-            } else {
-              throw new Error(); // TODO: throw correct error
-            }
-          }
-        ),
-        mergeMap((esRequest) => esSearchStrategy.search(esRequest, options, context)),
-        map((response) => {
-          // TODO: handle ES errors
-          const getLogEntryResponse = decodeOrThrow(getLogEntryResponseRT)(response.rawResponse);
-          const logEntrySearchResponsePayload = logEntrySearchResponsePayloadRT.encode({
-            data: {},
-          });
+        const sourceConfiguration$ = defer(() =>
+          sources.getSourceConfiguration(context.core.savedObjects.client, request.params.sourceId)
+        ).pipe(shareReplay(1));
 
-          return {
-            ...response,
-            rawResponse: logEntrySearchResponsePayload,
-          };
-        })
-      ),
+        const recoveredRequest$ = of(request).pipe(
+          filter(asyncGetRequestRT.is),
+          map(({ id: { esRequestId } }) => ({ id: esRequestId }))
+        );
+
+        const initialRequest$ = of(request).pipe(
+          filter(asyncSubmitRequestRT.is),
+          withLatestFrom(sourceConfiguration$),
+          map(
+            ([{ params }, { configuration }]): IEsSearchRequest => ({
+              params: createGetLogEntryQuery(
+                configuration.logAlias,
+                params.logEntryId,
+                configuration.fields.timestamp,
+                configuration.fields.tiebreaker
+              ),
+            })
+          )
+        );
+
+        return concat(recoveredRequest$, initialRequest$).pipe(
+          take(1),
+          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, context)),
+          map((esResponse) => ({
+            ...esResponse,
+            rawResponse: decodeOrThrow(getLogEntryResponseRT)(esResponse.rawResponse),
+          })),
+          withLatestFrom(sourceConfiguration$),
+          map(([esResponse, { configuration }]) => ({
+            ...esResponse,
+            rawResponse: logEntrySearchResponsePayloadRT.encode({
+              data:
+                esResponse.rawResponse.hits.hits.map((hit) => ({
+                  id: hit._id,
+                  index: hit._index,
+                  key: getLogEntryCursorFromFields(
+                    configuration.fields.timestamp,
+                    configuration.fields.tiebreaker
+                  )(hit.fields),
+                  fields: [],
+                }))[0] ?? null,
+            }),
+          }))
+        );
+      }),
     cancel: async (context, id) => {
-      return Promise.resolve(undefined);
+      const { esRequestId } = decodeOrThrow(logEntrySearchRequestStateRT)(id);
+      return await esSearchStrategy.cancel?.(context, esRequestId);
     },
   };
 };
-
-const isGetRequest = rt.type({ id: rt.string }).is;
-
-const isSubmitRequest = <ParamsCodec extends rt.Mixed>(params: ParamsCodec) =>
-  rt.type({
-    params,
-  }).is;

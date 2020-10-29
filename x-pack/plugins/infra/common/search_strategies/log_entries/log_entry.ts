@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntriesCursorRT } from '../../http_api/log_entries';
+import { logEntryCursorRT } from '../../log_entry';
 import { jsonArrayRT } from '../../typed_json';
 import { errorRT } from '../common/errors';
 
@@ -27,7 +27,7 @@ export const logEntryRT = rt.type({
   id: rt.string,
   index: rt.string,
   fields: rt.array(logEntryFieldRT),
-  key: logEntriesCursorRT,
+  key: logEntryCursorRT,
 });
 
 export type LogEntry = rt.TypeOf<typeof logEntryRT>;
