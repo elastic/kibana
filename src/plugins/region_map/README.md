@@ -1,0 +1,3 @@
+# Region map visualization
+
+Create choropleth maps. Display the results of a term-aggregation as countries, zip-codes, states, ...
