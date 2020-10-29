@@ -1,3 +1,11 @@
+.vgaVis__wrapper {
+  @include euiScrollBar;
+
+  display: flex;
+  flex: 1 1 0;
+  overflow: auto;
+}
+
 .vgaVis {
   display: flex;
   flex: 1 1 100%;
