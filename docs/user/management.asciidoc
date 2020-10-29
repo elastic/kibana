@@ -184,8 +184,6 @@ include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-indices.asciidoc[]
-
 include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
