@@ -70,4 +70,4 @@ After you add your data, you're required to create an <<index-patterns,index pat
 {kib} where to find the data.
 
 * To add data for Elastic Observability, see {observability-guide}/add-observability-data.html[Send data to Elasticsearch].
-* To add data for Elastic Security, see https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].
+* To add data for Elastic Security, refer to https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].
