@@ -13,7 +13,6 @@ import {
   UIM_CONFIG_FREEZE_INDEX,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
-  defaultNewColdPhase,
   defaultSetPriority,
   defaultPhaseIndexPriority,
 } from '../constants';
@@ -55,8 +54,7 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
         const isColdPhasePriorityChanged =
           phases.cold &&
           phases.cold.actions.set_priority &&
-          phases.cold.actions.set_priority.priority !==
-            parseInt(defaultNewColdPhase.phaseIndexPriority, 10);
+          phases.cold.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
         // If the priority is different than the default, we'll consider it a user interaction,
         // even if the user has set it to undefined.
         return (
