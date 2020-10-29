@@ -17,7 +17,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutBody,
-  EuiBetaBadge,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
@@ -31,7 +30,6 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import { PLUGIN } from '../../constants/plugin';
 
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
@@ -189,20 +187,6 @@ export const ConnectorAddFlyout = ({
                         actionTypeName: actionType.name,
                       }}
                     />
-                    &emsp;
-                    <EuiBetaBadge
-                      label="Beta"
-                      tooltipContent={i18n.translate(
-                        'xpack.triggersActionsUI.sections.addConnectorForm.betaBadgeTooltipContent',
-                        {
-                          defaultMessage:
-                            '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                          values: {
-                            pluginName: PLUGIN.getI18nName(i18n),
-                          },
-                        }
-                      )}
-                    />
                   </h3>
                 </EuiTitle>
                 <EuiText size="s" color="subdued">
@@ -215,20 +199,6 @@ export const ConnectorAddFlyout = ({
                   <FormattedMessage
                     defaultMessage="Select a connector"
                     id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
-                  />
-                  &emsp;
-                  <EuiBetaBadge
-                    label="Beta"
-                    tooltipContent={i18n.translate(
-                      'xpack.triggersActionsUI.sections.addFlyout.betaBadgeTooltipContent',
-                      {
-                        defaultMessage:
-                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                        values: {
-                          pluginName: PLUGIN.getI18nName(i18n),
-                        },
-                      }
-                    )}
                   />
                 </h3>
               </EuiTitle>
