@@ -48,10 +48,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       }
       setIsSubmitting(false);
       const successMessage = isSingleAgent
-        ? i18n.translate('xpack.ingestManager.upgradeAgents.successSingleNotificationTitle', {
+        ? i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
             defaultMessage: 'Upgrading agent',
           })
-        : i18n.translate('xpack.ingestManager.upgradeAgents.successMultiNotificationTitle', {
+        : i18n.translate('xpack.fleet.upgradeAgents.successMultiNotificationTitle', {
             defaultMessage: 'Upgrading agents',
           });
       notifications.toasts.addSuccess(successMessage);
@@ -59,7 +59,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     } catch (error) {
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.ingestManager.upgradeAgents.fatalErrorNotificationTitle', {
+        title: i18n.translate('xpack.fleet.upgradeAgents.fatalErrorNotificationTitle', {
           defaultMessage: 'Error upgrading {count, plural, one {agent} other {agents}}',
           values: { count: agentCount },
         }),
@@ -75,12 +75,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               {isSingleAgent ? (
                 <FormattedMessage
-                  id="xpack.ingestManager.upgradeAgents.deleteSingleTitle"
+                  id="xpack.fleet.upgradeAgents.deleteSingleTitle"
                   defaultMessage="Upgrade agent?"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.ingestManager.upgradeAgents.deleteMultipleTitle"
+                  id="xpack.fleet.upgradeAgents.deleteMultipleTitle"
                   defaultMessage="Upgrade {count} agents?"
                   values={{ count: agentCount }}
                 />
@@ -90,13 +90,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               <EuiBetaBadge
                 label={
                   <FormattedMessage
-                    id="xpack.ingestManager.upgradeAgents.experimentalLabel"
+                    id="xpack.fleet.upgradeAgents.experimentalLabel"
                     defaultMessage="Experimental"
                   />
                 }
                 tooltipContent={
                   <FormattedMessage
-                    id="xpack.ingestManager.upgradeAgents.experimentalLabelTooltip"
+                    id="xpack.fleet.upgradeAgents.experimentalLabelTooltip"
                     defaultMessage="Upgrade agent might change or be removed in a future release and is not subject to the support SLA."
                   />
                 }
@@ -108,7 +108,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         onConfirm={onSubmit}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.upgradeAgents.cancelButtonLabel"
+            id="xpack.fleet.upgradeAgents.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
@@ -116,12 +116,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         confirmButtonText={
           isSingleAgent ? (
             <FormattedMessage
-              id="xpack.ingestManager.upgradeAgents.confirmSingleButtonLabel"
+              id="xpack.fleet.upgradeAgents.confirmSingleButtonLabel"
               defaultMessage="Upgrade agent"
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.upgradeAgents.confirmMultipleButtonLabel"
+              id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
               defaultMessage="Upgrade {count} agents"
               values={{ count: agentCount }}
             />
@@ -131,7 +131,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         <p>
           {isSingleAgent ? (
             <FormattedMessage
-              id="xpack.ingestManager.upgradeAgents.upgradeSingleDescription"
+              id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
               defaultMessage="This action upgrades the agent running on '{hostName}' to version {version}. You can't undo this upgrade."
               values={{
                 hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
@@ -140,7 +140,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.upgradeAgents.upgradeMultipleDescription"
+              id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
               defaultMessage="This action upgrades multiple agents to version {version}. You can't undo this upgrade."
               values={{ version }}
             />

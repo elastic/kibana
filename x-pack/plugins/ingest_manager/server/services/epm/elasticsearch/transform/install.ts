@@ -17,6 +17,7 @@ import { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
+import { appContextService } from '../../../app_context';
 
 interface TransformInstallation {
   installationName: string;
@@ -29,6 +30,7 @@ export const installTransform = async (
   callCluster: CallESAsCurrentUser,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
+  const logger = appContextService.getLogger();
   const installation = await getInstallation({
     savedObjectsClient,
     pkgName: installablePackage.name,
@@ -37,6 +39,9 @@ export const installTransform = async (
   if (installation) {
     previousInstalledTransformEsAssets = installation.installed_es.filter(
       ({ type, id }) => type === ElasticsearchAssetType.transform
+    );
+    logger.info(
+      `Found previous transform references:\n ${JSON.stringify(previousInstalledTransformEsAssets)}`
     );
   }
 
