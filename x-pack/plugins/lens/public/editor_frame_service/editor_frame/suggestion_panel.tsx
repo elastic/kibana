@@ -32,7 +32,6 @@ import {
   ReactExpressionRendererType,
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
-import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
@@ -78,6 +77,7 @@ const PreviewRenderer = ({
         className="lnsSuggestionPanel__expressionRenderer"
         padding="s"
         expression={expression}
+        debounce={2000}
         renderError={() => {
           return (
             <div className="lnsSuggestionPanel__suggestionIcon">
@@ -99,8 +99,6 @@ const PreviewRenderer = ({
     </div>
   );
 };
-
-const DebouncedPreviewRenderer = debouncedComponent(PreviewRenderer, 2000);
 
 const SuggestionPreview = ({
   preview,
@@ -132,7 +130,7 @@ const SuggestionPreview = ({
           onClick={onSelect}
         >
           {preview.expression ? (
-            <DebouncedPreviewRenderer
+            <PreviewRenderer
               ExpressionRendererComponent={ExpressionRendererComponent}
               expression={toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}

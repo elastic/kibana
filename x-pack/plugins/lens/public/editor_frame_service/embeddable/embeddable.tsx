@@ -182,6 +182,7 @@ export class Embeddable
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
+        searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode

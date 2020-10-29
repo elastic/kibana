@@ -5,7 +5,6 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { DatatableColumn } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
 
 export interface SharedLayerState {
@@ -41,8 +40,3 @@ export interface PieExpressionProps {
   data: LensMultiTable;
   args: PieExpressionArgs;
 }
-
-export type ColumnGroups = Array<{
-  col: DatatableColumn;
-  metrics: DatatableColumn[];
-}>;
