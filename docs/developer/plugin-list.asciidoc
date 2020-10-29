@@ -323,8 +323,8 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |The deprecated dashboard only mode.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced[dataEnhanced]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
+|Enhances data access services from OSS data plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
