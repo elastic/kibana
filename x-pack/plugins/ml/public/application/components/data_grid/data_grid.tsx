@@ -27,10 +27,15 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_h
 
 import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
 
-import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
+import {
+  euiDataGridStyle,
+  euiDataGridToolbarSettings,
+  getFeatureImportance,
+  getTopClasses,
+} from './common';
 import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from './feature_importance/decision_path_popover';
-import { TopClasses } from '../../../../common/types/feature_importance';
+import { FeatureImportance, TopClasses } from '../../../../common/types/feature_importance';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
@@ -118,16 +123,16 @@ export const DataGrid: FC<Props> = memo(
               if (!row) return <div />;
               // if resultsField for some reason is not available then use ml
               const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
-              const parsedFIArray = row[mlResultsField].feature_importance;
+              const parsedFIArray: FeatureImportance[] = getFeatureImportance(row, mlResultsField);
               let predictedValue: string | number | undefined;
               let topClasses: TopClasses = [];
               if (
                 predictionFieldName !== undefined &&
                 row &&
-                row[mlResultsField][predictionFieldName] !== undefined
+                row[`${mlResultsField}.${predictionFieldName}`] !== undefined
               ) {
-                predictedValue = row[mlResultsField][predictionFieldName];
-                topClasses = row[mlResultsField].top_classes;
+                predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
+                topClasses = getTopClasses(row, mlResultsField);
               }
 
               return (

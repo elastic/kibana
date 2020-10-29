@@ -25,6 +25,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
+import { FeatureImportance, TopClasses } from '../../../../common/types/feature_importance';
 
 import {
   BASIC_NUMERICAL_TYPES,
@@ -156,6 +157,50 @@ export const getDataGridSchemaFromKibanaFieldType = (
   }
 
   return schema;
+};
+
+/**
+ * Helper to transform feature importance flattened fields with arrays back to object structure
+ *
+ * @param row - EUI data grid data row
+ * @param mlResultsField - Data frame analytics results field
+ * @returns nested object structure of feature importance values
+ */
+export const getFeatureImportance = (row: any, mlResultsField: string): FeatureImportance[] => {
+  const featureNames: string[] = row[`${mlResultsField}.feature_importance.feature_name`];
+  const classNames: string[] = row[`${mlResultsField}.feature_importance.classes.class_name`];
+  const classImportance: number[] = row[`${mlResultsField}.feature_importance.classes.importance`];
+
+  return featureNames.map((fName, index) => {
+    const offset = featureNames.length * index;
+    const featureClassNames = classNames.slice(offset, offset + featureNames.length);
+    const featureClassImportance = classImportance.slice(offset, offset + featureNames.length);
+    return {
+      feature_name: fName,
+      classes: featureClassNames.map((fClassName, fIndex) => {
+        return { class_name: fClassName, importance: featureClassImportance[fIndex] };
+      }),
+    };
+  });
+};
+
+/**
+ * Helper to transforms top classes flattened fields with arrays back to object structure
+ *
+ * @param row - EUI data grid data row
+ * @param mlResultsField - Data frame analytics results field
+ * @returns nested object structure of feature importance values
+ */
+export const getTopClasses = (row: any, mlResultsField: string): TopClasses => {
+  const classNames: string[] = row[`${mlResultsField}.top_classes.class_name`];
+  const classProbabilities: number[] = row[`${mlResultsField}.top_classes.class_probability`];
+  const classScores: number[] = row[`${mlResultsField}.top_classes.class_score`];
+
+  return classNames.map((className, index) => ({
+    class_name: className,
+    class_probability: classProbabilities[index],
+    class_score: classScores[index],
+  }));
 };
 
 export const useRenderCellValue = (
