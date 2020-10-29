@@ -13,20 +13,29 @@ export interface DataAllocationMetaFields {
   allocationNodeAttribute?: string;
 }
 
-interface HotPhaseMetaFields {
-  useRollover: boolean;
+export interface MinAgeField {
+  minAgeUnit?: string;
+}
+
+export interface ForcemergeFields {
   forceMergeEnabled: boolean;
   bestCompression: boolean;
+}
+
+interface HotPhaseMetaFields extends ForcemergeFields {
+  useRollover: boolean;
   maxStorageSizeUnit?: string;
   maxAgeUnit?: string;
 }
 
-interface WarmPhaseMetaFields extends DataAllocationMetaFields {
+interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
   enabled: boolean;
-  forceMergeEnabled: boolean;
-  bestCompression: boolean;
   warmPhaseOnRollover: boolean;
-  minAgeUnit?: string;
+}
+
+interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
+  enabled: boolean;
+  freezeEnabled: boolean;
 }
 
 /**
@@ -40,5 +49,6 @@ export interface FormInternal extends SerializedPolicy {
   _meta: {
     hot: HotPhaseMetaFields;
     warm: WarmPhaseMetaFields;
+    cold: ColdPhaseMetaFields;
   };
 }

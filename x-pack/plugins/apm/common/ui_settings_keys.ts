@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { serializePhaseWithAllocation } from './serialize_phase_with_allocation';
+export const enableCorrelations = 'apm:enableCorrelations';
+export const enableServiceOverview = 'apm:enableServiceOverview';

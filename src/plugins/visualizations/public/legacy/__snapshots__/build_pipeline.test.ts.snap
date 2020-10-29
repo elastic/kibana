@@ -13,5 +13,3 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function without buckets 1`] = `"regionmap visConfig='{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"geohash\\":1,\\"geocentroid\\":3}}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles vega function 1`] = `"vega spec='this is a test' "`;
