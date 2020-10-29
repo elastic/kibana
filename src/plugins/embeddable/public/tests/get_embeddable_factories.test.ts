@@ -32,7 +32,7 @@ test('returns empty list if there are no embeddable factories', () => {
   const list = [...start.getEmbeddableFactories()];
 
   // The embeddable plugin comes with one embeddable factory
-  expect(list.length).toEqual(1);
+  expect(list.length).toBe(1);
 });
 
 test('returns existing embeddable factories', () => {
@@ -46,7 +46,7 @@ test('returns existing embeddable factories', () => {
   const start = doStart();
 
   const list = [...start.getEmbeddableFactories()];
-  expect(list.length).toBe(2);
+  expect(list.length).toBe(3);
   expect(!!list.find(({ type }) => factory1.type === type)).toBe(true);
   expect(!!list.find(({ type }) => factory2.type === type)).toBe(true);
 });

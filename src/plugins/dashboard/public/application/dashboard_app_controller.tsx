@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import angular from 'angular';
 import deepEqual from 'fast-deep-equal';
 
-import { Observable, pipe, Subscription, merge, of } from 'rxjs';
+import { Observable, pipe, Subscription, merge, EMPTY } from 'rxjs';
 import {
   filter,
   map,
@@ -459,7 +459,7 @@ export class DashboardAppController {
                                 explicitInput: { error },
                               },
                             });
-                            return of({});
+                            return EMPTY;
                           })
                         )
                     )

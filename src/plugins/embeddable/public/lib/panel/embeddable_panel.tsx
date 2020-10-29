@@ -19,9 +19,8 @@
 import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { of, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { catchError } from 'rxjs/operators';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
@@ -258,15 +257,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.subscription.add(
-        this.props.embeddable
-          .getOutput$()
-          .pipe(catchError(() => of({})))
-          .subscribe((output: EmbeddableOutput) => {
+        this.props.embeddable.getOutput$().subscribe(
+          (output: EmbeddableOutput) => {
             this.setState({
               error: output.error,
               loading: output.loading,
             });
-          })
+          },
+          (error) => {}
+        )
       );
       this.props.embeddable.render(this.embeddableRoot.current);
     }
