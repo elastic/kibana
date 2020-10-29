@@ -1,3 +1,3 @@
 # Kibana Functional Testing
 
-See our [Functional Testing Guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html)
+See our [functional testing README.md](https://github.com/elastic/kibana/blob/master/x-pack/README.md#running-functional-tests) for more information.
