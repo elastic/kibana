@@ -114,12 +114,12 @@ export class AttributeService<
     } catch (error) {
       this.toasts.addDanger({
         title: i18n.translate('embeddableApi.attributeService.saveToLibraryError', {
-          defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
+          defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
           values: {
             errorMessage: error.message,
           },
         }),
-        'data-test-subj': 'saveDashboardFailure',
+        'data-test-subj': 'attributeServiceSaveFailure',
       });
       return Promise.reject({ error });
     }
