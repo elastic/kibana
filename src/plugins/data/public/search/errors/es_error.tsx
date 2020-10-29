@@ -25,7 +25,7 @@ import { IEsError } from './types';
 import { getRootCause, getTopLevelCause } from './utils';
 
 export class EsError extends KbnError {
-  protected readonly body: IEsError['body'];
+  readonly body: IEsError['body'];
 
   constructor(protected readonly err: IEsError) {
     super('EsError');
