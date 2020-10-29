@@ -144,6 +144,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
+  IEsRawSearchResponse,
 } from '../common';
 
 /**
@@ -232,14 +233,16 @@ import { trackSearchStatus } from './search';
 // Search namespace
 export const search = {
   esSearch: {
-    doSearch,
-    toSnakeCase,
-    shimAbortSignal,
-    trackSearchStatus,
-    includeTotalLoaded,
-    toKibanaSearchResponse,
-    // utils:
-    getTotalLoaded,
+    utils: {
+      doSearch,
+      shimAbortSignal,
+      trackSearchStatus,
+      includeTotalLoaded,
+      toKibanaSearchResponse,
+      // utils:
+      getTotalLoaded,
+      toSnakeCase,
+    },
   },
   aggs: {
     CidrMask,

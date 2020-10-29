@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ShardsResponse } from 'elasticsearch';
+import type { ShardsResponse } from 'elasticsearch';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is

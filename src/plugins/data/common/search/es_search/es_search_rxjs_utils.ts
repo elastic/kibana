@@ -21,10 +21,9 @@ import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { ShardsResponse } from 'elasticsearch';
-
 import type { Assign } from 'utility-types';
+import type { ApiResponse } from '@elastic/elasticsearch';
 
-import { ApiResponse } from '@elastic/elasticsearch';
 import { shimAbortSignal } from './shim_abort_signal';
 import { getTotalLoaded } from './get_total_loaded';
 

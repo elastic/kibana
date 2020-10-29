@@ -13,4 +13,5 @@ export {
   IAsyncSearchRequest,
   IEnhancedEsSearchRequest,
   IAsyncSearchOptions,
+  doPartialSearch,
 } from './search';

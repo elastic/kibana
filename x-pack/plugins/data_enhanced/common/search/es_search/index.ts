@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
-export * from './es_search';
+export * from './es_search_rxjs_utils';

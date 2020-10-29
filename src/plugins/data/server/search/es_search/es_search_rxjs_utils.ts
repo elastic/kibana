@@ -17,11 +17,15 @@
  * under the License.
  */
 import { Observable } from 'rxjs';
+import type { Logger } from 'kibana/server';
+import type { SearchUsage } from '../collectors';
+import type { IKibanaSearchResponse } from '../../../common/search';
 
-import { Logger } from 'kibana/server';
-import { SearchUsage } from '../collectors';
-import { IKibanaSearchResponse } from '../../../common/search';
-
+/**
+ * trackSearchStatus is a custom rxjs operator that can be used to track the progress of a search.
+ * @param Logger
+ * @param SearchUsage
+ */
 export const trackSearchStatus = <
   KibanaResponse extends IKibanaSearchResponse = IKibanaSearchResponse
 >(

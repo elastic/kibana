@@ -7,21 +7,22 @@
 import { throwError, from, Subscription } from 'rxjs';
 import { tap, takeUntil, finalize, catchError } from 'rxjs/operators';
 import {
+  isErrorResponse,
+  isCompleteResponse,
+  TimeoutErrorMode,
   IEsSearchResponse,
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
-import { isErrorResponse, isCompleteResponse } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
-import { TimeoutErrorMode } from '../../../../../src/plugins/data/public';
+
 import {
   IAsyncSearchRequest,
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
+  doPartialSearch,
 } from '../../common';
-
-import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;

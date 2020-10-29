@@ -30,7 +30,7 @@ const createSuccessTransportRequestPromise = (
 };
 
 describe('shimAbortSignal', () => {
-  it('aborts the promise if the signal is aborted', () => {
+  test('aborts the promise if the signal is aborted', () => {
     const promise = createSuccessTransportRequestPromise({
       success: true,
     });
@@ -41,7 +41,7 @@ describe('shimAbortSignal', () => {
     expect(promise.abort).toHaveBeenCalled();
   });
 
-  it('returns the original promise', async () => {
+  test('returns the original promise', async () => {
     const promise = createSuccessTransportRequestPromise({
       success: true,
     });
@@ -51,7 +51,7 @@ describe('shimAbortSignal', () => {
     expect(response).toEqual(expect.objectContaining({ body: { success: true } }));
   });
 
-  it('allows the promise to be aborted manually', () => {
+  test('allows the promise to be aborted manually', () => {
     const promise = createSuccessTransportRequestPromise({
       success: true,
     });

@@ -6,32 +6,32 @@
 
 import { from } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { SearchResponse } from 'elasticsearch';
+import type { ApiResponse } from '@elastic/elasticsearch';
+
 import { getShardTimeout, shimHitsTotal, search } from '../../../../../src/plugins/data/server';
 import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
 
-import type { ISearchStrategy, SearchUsage } from '../../../../../src/plugins/data/server';
-import type { IEnhancedEsSearchRequest } from '../../common';
-import {
-  IEsRawSearchResponse,
-  shimAbortSignal,
-  toSnakeCase,
-} from '../../../../../src/plugins/data/common/search';
-import type {
-  ISearchOptions,
-  IEsSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
 import type {
   SharedGlobalConfig,
   RequestHandlerContext,
   Logger,
 } from '../../../../../src/core/server';
 
-const { esSearch } = search;
+import type {
+  ISearchStrategy,
+  SearchUsage,
+  IEsRawSearchResponse,
+  ISearchOptions,
+  IEsSearchResponse,
+} from '../../../../../src/plugins/data/server';
+
+import type { IEnhancedEsSearchRequest } from '../../common';
+
+const { utils } = search.esSearch;
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -49,7 +49,7 @@ export const enhancedEsSearchStrategyProvider = (
     return doPartialSearch<ApiResponse<IEsRawSearchResponse>>(
       async () =>
         client.submit(
-          toSnakeCase({
+          utils.toSnakeCase({
             ...(await getDefaultSearchParams(context.core.uiSettings.client)),
             batchedReduceSize: 64,
             ...asyncOptions,
@@ -59,20 +59,20 @@ export const enhancedEsSearchStrategyProvider = (
       (id) =>
         client.get({
           id: id!,
-          ...toSnakeCase({ ...asyncOptions }),
+          ...utils.toSnakeCase({ ...asyncOptions }),
         }),
       (response) => !(response.body.is_partial && response.body.is_running),
       (response) => response.body.id,
       request.id,
       options
     ).pipe(
-      esSearch.toKibanaSearchResponse(),
+      utils.toKibanaSearchResponse(),
       map((response) => ({
         ...response,
         rawResponse: shimHitsTotal(response.rawResponse.response!),
       })),
-      esSearch.trackSearchStatus(logger, usage),
-      esSearch.includeTotalLoaded()
+      utils.trackSearchStatus(logger, usage),
+      utils.includeTotalLoaded()
     );
   }
 

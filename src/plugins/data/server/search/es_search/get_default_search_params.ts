@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SharedGlobalConfig, IUiSettingsClient } from '../../../../../core/server';
 import { UI_SETTINGS } from '../../../common/constants';
+import type { SharedGlobalConfig, IUiSettingsClient } from '../../../../../core/server';
 
 export function getShardTimeout(config: SharedGlobalConfig) {
   const timeout = config.elasticsearch.shardTimeout.asMilliseconds();

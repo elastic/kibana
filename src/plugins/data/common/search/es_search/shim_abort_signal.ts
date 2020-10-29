@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/**
+ * @internal
+ * TransportRequestPromise extends base Promise with an "abort" method
+ */
 export interface TransportRequestPromise<T> extends Promise<T> {
   abort?: () => void;
 }

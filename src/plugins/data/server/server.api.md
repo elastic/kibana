@@ -404,6 +404,20 @@ export type IAggConfigs = AggConfigs;
 // @public (undocumented)
 export type IAggType = AggType;
 
+// Warning: (ae-missing-release-tag) "IEsRawSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Source> {
+    // (undocumented)
+    id?: string;
+    // (undocumented)
+    is_partial?: boolean;
+    // (undocumented)
+    is_running?: boolean;
+    // (undocumented)
+    response?: SearchResponse<Source>;
+}
+
 // Warning: (ae-forgotten-export) The symbol "IKibanaSearchRequest" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ISearchRequestParams" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -944,13 +958,15 @@ export interface RefreshInterval {
 // @public (undocumented)
 export const search: {
     esSearch: {
-        doSearch: <SearchResponse = any>(searchMethod: () => Promise<SearchResponse>, abortSignal?: AbortSignal | undefined) => import("rxjs").Observable<SearchResponse>;
-        toSnakeCase: typeof toSnakeCase;
-        shimAbortSignal: <T extends import("../common").TransportRequestPromise<unknown>>(promise: T, signal: AbortSignal | undefined) => T;
-        trackSearchStatus: <KibanaResponse extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<any>>(logger: import("@kbn/logging/target/logger").Logger, usage?: import("./search").SearchUsage | undefined) => (source: import("rxjs").Observable<KibanaResponse>) => import("rxjs").Observable<KibanaResponse>;
-        includeTotalLoaded: () => import("rxjs").OperatorFunction<import("../common").IKibanaSearchResponse<any>, Pick<Pick<import("../common").IKibanaSearchResponse<any>, "id" | "rawResponse" | "loaded" | "isRunning" | "isPartial"> & Pick<import("elasticsearch").ShardsResponse, "total"> & Pick<import("elasticsearch").ShardsResponse, "failed" | "successful" | "skipped">, "failed" | "id" | "total" | "successful" | "skipped" | "rawResponse" | "loaded" | "isRunning" | "isPartial">>;
-        toKibanaSearchResponse: <SearchResponse_1 extends import("../common").IEsRawSearchResponse<any> = import("../common").IEsRawSearchResponse<any>, KibanaResponse_1 extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<SearchResponse_1>>() => import("rxjs").OperatorFunction<import("@elastic/elasticsearch").ApiResponse<SearchResponse_1, import("@elastic/elasticsearch/lib/Transport").Context>, KibanaResponse_1>;
-        getTotalLoaded: typeof getTotalLoaded;
+        utils: {
+            doSearch: <SearchResponse = any>(searchMethod: () => Promise<SearchResponse>, abortSignal?: AbortSignal | undefined) => import("rxjs").Observable<SearchResponse>;
+            shimAbortSignal: <T extends import("../common").TransportRequestPromise<unknown>>(promise: T, signal: AbortSignal | undefined) => T;
+            trackSearchStatus: <KibanaResponse extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<any>>(logger: import("@kbn/logging/target/logger").Logger, usage?: import("./search").SearchUsage | undefined) => (source: import("rxjs").Observable<KibanaResponse>) => import("rxjs").Observable<KibanaResponse>;
+            includeTotalLoaded: () => import("rxjs").OperatorFunction<import("../common").IKibanaSearchResponse<any>, Pick<Pick<import("../common").IKibanaSearchResponse<any>, "id" | "rawResponse" | "loaded" | "isRunning" | "isPartial"> & Pick<import("elasticsearch").ShardsResponse, "total"> & Pick<import("elasticsearch").ShardsResponse, "failed" | "successful" | "skipped">, "failed" | "id" | "total" | "successful" | "skipped" | "rawResponse" | "loaded" | "isRunning" | "isPartial">>;
+            toKibanaSearchResponse: <SearchResponse_1 extends import("../common").IEsRawSearchResponse<any> = import("../common").IEsRawSearchResponse<any>, KibanaResponse_1 extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<SearchResponse_1>>() => import("rxjs").OperatorFunction<import("@elastic/elasticsearch").ApiResponse<SearchResponse_1, import("@elastic/elasticsearch/lib/Transport").Context>, KibanaResponse_1>;
+            getTotalLoaded: typeof getTotalLoaded;
+            toSnakeCase: typeof toSnakeCase;
+        };
     };
     aggs: {
         CidrMask: typeof CidrMask;
@@ -1125,21 +1141,21 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:101:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:127:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:127:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:233:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:233:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:233:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:233:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:236:1 - (ae-forgotten-export) The symbol "toSnakeCase" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:241:1 - (ae-forgotten-export) The symbol "getTotalLoaded" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:244:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:245:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:254:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:255:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:256:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:260:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:261:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:265:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:268:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:234:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:234:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:234:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:234:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:242:5 - (ae-forgotten-export) The symbol "getTotalLoaded" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:243:5 - (ae-forgotten-export) The symbol "toSnakeCase" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:247:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:248:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:257:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:258:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:259:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:263:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:264:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:268:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:271:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index_patterns/index_patterns_service.ts:50:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:88:66 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/search/types.ts:91:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts

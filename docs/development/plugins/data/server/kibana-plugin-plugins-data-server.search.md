@@ -9,13 +9,15 @@
 ```typescript
 search: {
     esSearch: {
-        doSearch: <SearchResponse = any>(searchMethod: () => Promise<SearchResponse>, abortSignal?: AbortSignal | undefined) => import("rxjs").Observable<SearchResponse>;
-        toSnakeCase: typeof toSnakeCase;
-        shimAbortSignal: <T extends import("../common").TransportRequestPromise<unknown>>(promise: T, signal: AbortSignal | undefined) => T;
-        trackSearchStatus: <KibanaResponse extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<any>>(logger: import("@kbn/logging/target/logger").Logger, usage?: import("./search").SearchUsage | undefined) => (source: import("rxjs").Observable<KibanaResponse>) => import("rxjs").Observable<KibanaResponse>;
-        includeTotalLoaded: () => import("rxjs").OperatorFunction<import("../common").IKibanaSearchResponse<any>, Pick<Pick<import("../common").IKibanaSearchResponse<any>, "id" | "rawResponse" | "loaded" | "isRunning" | "isPartial"> & Pick<import("elasticsearch").ShardsResponse, "total"> & Pick<import("elasticsearch").ShardsResponse, "failed" | "successful" | "skipped">, "failed" | "id" | "total" | "successful" | "skipped" | "rawResponse" | "loaded" | "isRunning" | "isPartial">>;
-        toKibanaSearchResponse: <SearchResponse_1 extends import("../common").IEsRawSearchResponse<any> = import("../common").IEsRawSearchResponse<any>, KibanaResponse_1 extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<SearchResponse_1>>() => import("rxjs").OperatorFunction<import("@elastic/elasticsearch").ApiResponse<SearchResponse_1, import("@elastic/elasticsearch/lib/Transport").Context>, KibanaResponse_1>;
-        getTotalLoaded: typeof getTotalLoaded;
+        utils: {
+            doSearch: <SearchResponse = any>(searchMethod: () => Promise<SearchResponse>, abortSignal?: AbortSignal | undefined) => import("rxjs").Observable<SearchResponse>;
+            shimAbortSignal: <T extends import("../common").TransportRequestPromise<unknown>>(promise: T, signal: AbortSignal | undefined) => T;
+            trackSearchStatus: <KibanaResponse extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<any>>(logger: import("@kbn/logging/target/logger").Logger, usage?: import("./search").SearchUsage | undefined) => (source: import("rxjs").Observable<KibanaResponse>) => import("rxjs").Observable<KibanaResponse>;
+            includeTotalLoaded: () => import("rxjs").OperatorFunction<import("../common").IKibanaSearchResponse<any>, Pick<Pick<import("../common").IKibanaSearchResponse<any>, "id" | "rawResponse" | "loaded" | "isRunning" | "isPartial"> & Pick<import("elasticsearch").ShardsResponse, "total"> & Pick<import("elasticsearch").ShardsResponse, "failed" | "successful" | "skipped">, "failed" | "id" | "total" | "successful" | "skipped" | "rawResponse" | "loaded" | "isRunning" | "isPartial">>;
+            toKibanaSearchResponse: <SearchResponse_1 extends import("../common").IEsRawSearchResponse<any> = import("../common").IEsRawSearchResponse<any>, KibanaResponse_1 extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<SearchResponse_1>>() => import("rxjs").OperatorFunction<import("@elastic/elasticsearch").ApiResponse<SearchResponse_1, import("@elastic/elasticsearch/lib/Transport").Context>, KibanaResponse_1>;
+            getTotalLoaded: typeof getTotalLoaded;
+            toSnakeCase: typeof toSnakeCase;
+        };
     };
     aggs: {
         CidrMask: typeof CidrMask;

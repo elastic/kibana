@@ -44,6 +44,7 @@
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
+|  [IEsRawSearchResponse](./kibana-plugin-plugins-data-server.iesrawsearchresponse.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |

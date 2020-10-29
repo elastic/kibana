@@ -16,24 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Logger } from 'kibana/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { ApiResponse } from '@elastic/elasticsearch';
 
+import type { Logger } from 'kibana/server';
+import type { ApiResponse } from '@elastic/elasticsearch';
 import type { SharedGlobalConfig } from 'kibana/server';
 
-import { SearchUsage } from '../collectors/usage';
-import {
-  doSearch,
-  includeTotalLoaded,
-  toKibanaSearchResponse,
-} from '../../../common/search/es_search/es_search_rxjs_utils';
+import { doSearch, includeTotalLoaded, toKibanaSearchResponse, toSnakeCase } from '../../../common';
 import { trackSearchStatus } from './es_search_rxjs_utils';
+import { getDefaultSearchParams, getShardTimeout } from '../es_search';
 
-import { IEsRawSearchResponse, toSnakeCase } from '../../../common/search/es_search';
-import { getDefaultSearchParams, getShardTimeout } from '..';
-import type { ISearchStrategy } from '..';
+import type { ISearchStrategy } from '../types';
+import type { SearchUsage } from '../collectors/usage';
+import type { IEsRawSearchResponse } from '../../../common';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
