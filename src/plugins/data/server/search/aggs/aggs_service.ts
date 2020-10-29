@@ -74,7 +74,7 @@ export class AggsService {
         const getConfig = <T = any>(key: string): T => {
           return uiSettingsCache[key];
         };
-        const isDefaultTimezone = () => !uiSettingsClient.isOverridden('dateFormat:tz');
+        const isDefaultTimezone = () => getConfig('dateFormat:tz') === 'Browser';
 
         const {
           calculateAutoTimeExpression,
@@ -99,7 +99,7 @@ export class AggsService {
            * default timezone, but `isDefault` is not currently offered on the
            * server, so we need to manually check for the default value.
            */
-          isDefaultTimezone: () => getConfig('dateFormat:tz') === 'Browser',
+          isDefaultTimezone,
         };
 
         const typesRegistry = {

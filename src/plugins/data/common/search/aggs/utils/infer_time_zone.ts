@@ -37,7 +37,10 @@ export function inferTimeZone(
     // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
     const detectedTimezone = moment.tz.guess();
     const tzOffset = moment().format('Z');
-    tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
+    tz = isDefaultTimezone()
+      ? detectedTimezone || tzOffset
+      : // if timezone is not the default, this will always return a string
+        (getConfig('dateFormat:tz') as string);
   }
   return tz;
 }

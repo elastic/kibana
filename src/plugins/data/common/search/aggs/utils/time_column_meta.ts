@@ -38,7 +38,7 @@ export const getDateMetaByDatatableColumn = ({
   getConfig,
 }: DateMetaByColumnDeps) => async (
   column: DatatableColumn
-): Promise<undefined | { timeZone?: string; timeRange: TimeRange; interval?: string }> => {
+): Promise<undefined | { timeZone: string; timeRange: TimeRange; interval: string }> => {
   if (column.meta.source !== 'esaggs') return;
   if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) return;
   const params = column.meta.sourceParams.params as AggParamsDateHistogram;
@@ -51,11 +51,16 @@ export const getDateMetaByDatatableColumn = ({
     getConfig
   );
 
+  const interval =
+    params.interval === 'auto' ? calculateAutoTimeExpression(appliedTimeRange) : params.interval;
+
+  if (!interval) {
+    throw new Error('time interval could not be determined');
+  }
+
   return {
     timeZone: tz,
     timeRange: appliedTimeRange,
-    interval:
-      // TODO is it really possible interval is undefined?
-      params.interval === 'auto' ? calculateAutoTimeExpression(appliedTimeRange) : params.interval,
+    interval,
   };
 };
