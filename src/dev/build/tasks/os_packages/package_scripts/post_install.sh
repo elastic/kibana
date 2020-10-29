@@ -77,7 +77,7 @@ if [ "$IS_UPGRADE" = "true" ]; then
       systemctl daemon-reload
   fi
 
-  if ["$KBN_RESTART_ON_UPGRADE" = "true"]; then
+  if [ "$KBN_RESTART_ON_UPGRADE" = "true" ]; then
     echo -n "Restarting kibana service..."
     if command -v systemctl >/dev/null; then
         systemctl restart kibana.service || true
