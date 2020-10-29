@@ -117,7 +117,7 @@ export function registerApmAlerts(
       'xpack.apm.alertTypes.transactionDurationAnomaly.description',
       {
         defaultMessage:
-          'Alert when the duration of a specific transaction is considered anomalous.',
+          'Alert when the overall transaction duration of a service is considered anomalous.',
       }
     ),
     iconClass: 'bell',
