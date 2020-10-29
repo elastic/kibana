@@ -138,7 +138,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
     // TODO move to some common service for EUI components
     async assertRadioGroupValue(testSubject: string, expectedValue: string) {
       const sortByRadioGroup = await testSubjects.find(testSubject);
-      const input = await sortByRadioGroup.findByCssSelector('[checked]');
+      const input = await sortByRadioGroup.findByCssSelector(':checked');
       const selectedSortBy = await input.getAttribute('id');
       expect(selectedSortBy).to.eql(
         expectedValue,
