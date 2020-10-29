@@ -488,8 +488,8 @@ the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/task_manager[taskManager]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
+|The task manager is a generic system for running background tasks.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
