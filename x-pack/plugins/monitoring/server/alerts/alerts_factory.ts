@@ -35,7 +35,7 @@ import {
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
 
-export const BY_TYPE = {
+const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
   [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
   [ALERT_CPU_USAGE]: CpuUsageAlert,

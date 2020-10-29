@@ -73,7 +73,7 @@ export class ChartTarget extends React.Component {
   }
 
   filterData(data, seriesToShow) {
-    return filter(data, this.filterByShow(seriesToShow)).value();
+    return filter(data, this.filterByShow(seriesToShow));
   }
 
   async getOptions() {

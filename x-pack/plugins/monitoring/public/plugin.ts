@@ -22,11 +22,11 @@ import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ThreadPoolSearchRejectionsAlert } from '../server/alerts';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ThreadPoolWriteRejectionsAlert } from '../server/alerts';
+import {
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_DETAILS,
+} from '../common/constants';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -165,9 +165,17 @@ export class MonitoringPlugin
     alertTypeRegistry.register(createMemoryUsageAlertType());
     alertTypeRegistry.register(createMissingMonitoringDataAlertType());
     alertTypeRegistry.register(
-      createThreadPoolRejectionsAlertType(ThreadPoolSearchRejectionsAlert)
+      createThreadPoolRejectionsAlertType(
+        ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+        ALERT_DETAILS[ALERT_THREAD_POOL_SEARCH_REJECTIONS]
+      )
     );
-    alertTypeRegistry.register(createThreadPoolRejectionsAlertType(ThreadPoolWriteRejectionsAlert));
+    alertTypeRegistry.register(
+      createThreadPoolRejectionsAlertType(
+        ALERT_THREAD_POOL_WRITE_REJECTIONS,
+        ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
+      )
+    );
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);

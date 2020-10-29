@@ -13,55 +13,21 @@ import {
   AlertThreadPoolRejectionsState,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-} from './types';
+  CommonAlertFilter,
+  ThreadPoolRejectionsAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { Alert, RawAlertInstance } from '../../../alerts/common';
-import {
-  CommonAlertFilter,
-  ThreadPoolRejectionsAlertParams,
-  CommonAlertParamDetail,
-} from '../../common/types';
-import { AlertingDefaults, createLink } from './alerts_common';
+import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-
-interface ThreadpoolParamDetails {
-  threshold: CommonAlertParamDetail;
-  duration: CommonAlertParamDetail;
-  [key: string]: CommonAlertParamDetail;
-}
 
 type ActionVariables = Array<{ name: string; description: string }>;
 
 export class ThreadPoolRejectionsAlertBase extends BaseAlert {
-  protected static createParamDetails(type: string): ThreadpoolParamDetails {
-    return {
-      threshold: {
-        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.threshold.label', {
-          defaultMessage: `Notify when {type} rejection count is over`,
-          values: { type },
-        }),
-        type: AlertParamType.Number,
-      },
-      duration: {
-        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.duration.label', {
-          defaultMessage: `In the last`,
-        }),
-        type: AlertParamType.Duration,
-      },
-    };
-  }
-
-  protected static createLabel(type: string) {
-    return i18n.translate('xpack.monitoring.alerts.threadPoolRejections.label', {
-      defaultMessage: 'Thread pool {type} rejections',
-      values: { type },
-    });
-  }
-
   protected static createActionVariables(type: string) {
     return [
       {

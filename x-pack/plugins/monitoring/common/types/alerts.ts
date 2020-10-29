@@ -3,8 +3,60 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { AlertInstanceState as BaseAlertInstanceState } from '../../../alerts/server';
+
+import { Alert } from '../../../alerts/common';
+import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
+
+export interface CommonBaseAlert {
+  type: string;
+  label: string;
+  paramDetails: CommonAlertParamDetails;
+  rawAlert: Alert;
+  isLegacy: boolean;
+}
+
+export interface CommonAlertStatus {
+  exists: boolean;
+  enabled: boolean;
+  states: CommonAlertState[];
+  alert: CommonBaseAlert;
+}
+
+export interface CommonAlertState {
+  firing: boolean;
+  state: any;
+  meta: any;
+}
+
+export interface CommonAlertFilter {
+  nodeUuid?: string;
+}
+
+export interface CommonAlertNodeUuidFilter extends CommonAlertFilter {
+  nodeUuid: string;
+}
+
+export interface CommonAlertStackProductFilter extends CommonAlertFilter {
+  stackProduct: string;
+}
+
+export interface CommonAlertParamDetail {
+  label: string;
+  type?: AlertParamType;
+}
+
+export interface CommonAlertParamDetails {
+  [name: string]: CommonAlertParamDetail | undefined;
+}
+
+export interface CommonAlertParams {
+  [name: string]: string | number;
+}
+
+export interface ThreadPoolRejectionsAlertParams {
+  threshold: number;
+  duration: string;
+}
 
 export interface AlertEnableAction {
   id: string;

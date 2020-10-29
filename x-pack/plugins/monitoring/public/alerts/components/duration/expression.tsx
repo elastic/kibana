@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
-import { CommonAlertParamDetails } from '../../../../common/types';
+import { CommonAlertParamDetails } from '../../../../common/types/alerts';
 import { AlertParamDuration } from '../../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../../common/enums';
 import { AlertParamPercentage } from '../../flyout_expressions/alert_param_percentage';

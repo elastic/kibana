@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { CommonAlertParamDetail } from './types/alerts';
+import { AlertParamType } from './enums';
+
 /**
  * Helper string to add as a tag in every logging call
  */
@@ -216,15 +220,6 @@ export const REPORTING_SYSTEM_ID = 'reporting';
 export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
 
 /**
- * We want to slowly rollout the migration from watcher-based cluster alerts to
- * kibana alerts and we only want to enable the kibana alerts once all
- * watcher-based cluster alerts have been migrated so this flag will serve
- * as the only way to see the new UI and actually run Kibana alerts. It will
- * be false until all alerts have been migrated, then it will be removed
- */
-export const KIBANA_CLUSTER_ALERTS_ENABLED = false;
-
-/**
  * The prefix for all alert types used by monitoring
  */
 export const ALERT_PREFIX = 'monitoring_';
@@ -240,6 +235,166 @@ export const ALERT_MEMORY_USAGE = `${ALERT_PREFIX}alert_jvm_memory_usage`;
 export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monitoring_data`;
 export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_search_rejections`;
 export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
+
+/**
+ * Legacy alerts details/label for server and public use
+ */
+export const LEGACY_ALERT_DETAILS = {
+  [ALERT_CLUSTER_HEALTH]: {
+    label: i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
+      defaultMessage: 'Cluster health',
+    }),
+  },
+  [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: {
+    label: i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.label', {
+      defaultMessage: 'Elasticsearch version mismatch',
+    }),
+  },
+  [ALERT_KIBANA_VERSION_MISMATCH]: {
+    label: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.label', {
+      defaultMessage: 'Kibana version mismatch',
+    }),
+  },
+  [ALERT_LICENSE_EXPIRATION]: {
+    label: i18n.translate('xpack.monitoring.alerts.licenseExpiration.label', {
+      defaultMessage: 'License expiration',
+    }),
+  },
+  [ALERT_LOGSTASH_VERSION_MISMATCH]: {
+    label: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.label', {
+      defaultMessage: 'Logstash version mismatch',
+    }),
+  },
+  [ALERT_NODES_CHANGED]: {
+    label: i18n.translate('xpack.monitoring.alerts.nodesChanged.label', {
+      defaultMessage: 'Nodes changed',
+    }),
+  },
+};
+
+/**
+ * Alerts details/label for server and public use
+ */
+export const ALERT_DETAILS = {
+  [ALERT_CPU_USAGE]: {
+    label: i18n.translate('xpack.monitoring.alerts.cpuUsage.label', {
+      defaultMessage: 'CPU Usage',
+    }),
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.cpuUsage.paramDetails.threshold.label', {
+          defaultMessage: `Notify when CPU is over`,
+        }),
+        type: AlertParamType.Percentage,
+      } as CommonAlertParamDetail,
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.cpuUsage.paramDetails.duration.label', {
+          defaultMessage: `Look at the average over`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    },
+  },
+  [ALERT_DISK_USAGE]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.diskUsage.paramDetails.threshold.label', {
+          defaultMessage: `Notify when disk capacity is over`,
+        }),
+        type: AlertParamType.Percentage,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.diskUsage.paramDetails.duration.label', {
+          defaultMessage: `Look at the average over`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.diskUsage.label', {
+      defaultMessage: 'Disk Usage',
+    }),
+  },
+  [ALERT_MEMORY_USAGE]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.threshold.label', {
+          defaultMessage: `Notify when memory usage is over`,
+        }),
+        type: AlertParamType.Percentage,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.duration.label', {
+          defaultMessage: `Look at the average over`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.memoryUsage.label', {
+      defaultMessage: 'Memory Usage (JVM)',
+    }),
+  },
+  [ALERT_MISSING_MONITORING_DATA]: {
+    paramDetails: {
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
+          defaultMessage: `Notify if monitoring data is missing for the last`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+      limit: {
+        label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.limit.label', {
+          defaultMessage: `looking back`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    },
+    label: i18n.translate('xpack.monitoring.alerts.missingData.label', {
+      defaultMessage: 'Missing monitoring data',
+    }),
+  },
+  [ALERT_THREAD_POOL_SEARCH_REJECTIONS]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.threshold.label', {
+          defaultMessage: `Notify when {type} rejection count is over`,
+          values: { type: 'search' },
+        }),
+        type: AlertParamType.Number,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.duration.label', {
+          defaultMessage: `In the last`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.label', {
+      defaultMessage: 'Thread pool {type} rejections',
+      values: { type: 'search' },
+    }),
+  },
+  [ALERT_THREAD_POOL_WRITE_REJECTIONS]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.threshold.label', {
+          defaultMessage: `Notify when {type} rejection count is over`,
+          values: { type: 'write' },
+        }),
+        type: AlertParamType.Number,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.duration.label', {
+          defaultMessage: `In the last`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.label', {
+      defaultMessage: 'Thread pool {type} rejections',
+      values: { type: 'write' },
+    }),
+  },
+};
 
 /**
  * A listing of all alert types

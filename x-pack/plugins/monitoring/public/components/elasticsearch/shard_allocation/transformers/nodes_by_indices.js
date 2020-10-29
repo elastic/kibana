@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find, some, reduce, values } from 'lodash';
+import { find, some, reduce, values, sortBy } from 'lodash';
 import { hasPrimaryChildren } from '../lib/has_primary_children';
 import { decorateShards } from '../lib/decorate_shards';
 
@@ -61,17 +61,14 @@ export function nodesByIndices() {
     }
 
     data = reduce(decorateShards(shards, nodes), createIndexAddShard, data);
-
-    return values(data)
-      .sortBy(function (node) {
-        return [node.name !== 'Unassigned', !node.master, node.name];
-      })
-      .map(function (node) {
-        if (node.name === 'Unassigned') {
-          node.unassignedPrimaries = node.children.some(hasPrimaryChildren);
-        }
-        return node;
-      })
-      .value();
+    const dataValues = values(data);
+    return sortBy(dataValues, function (node) {
+      return [node.name !== 'Unassigned', !node.master, node.name];
+    }).map(function (node) {
+      if (node.name === 'Unassigned') {
+        node.unassignedPrimaries = node.children.some(hasPrimaryChildren);
+      }
+      return node;
+    });
   };
 }

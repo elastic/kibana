@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../alerts/types';
+import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;

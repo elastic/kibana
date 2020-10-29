@@ -5,18 +5,13 @@
  */
 
 import { ThreadPoolRejectionsAlertBase } from './thread_pool_rejections_alert_base';
-import { ALERT_THREAD_POOL_SEARCH_REJECTIONS } from '../../common/constants';
+import { ALERT_THREAD_POOL_SEARCH_REJECTIONS, ALERT_DETAILS } from '../../common/constants';
 import { Alert } from '../../../alerts/common';
 
 export class ThreadPoolSearchRejectionsAlert extends ThreadPoolRejectionsAlertBase {
-  public static TYPE = ALERT_THREAD_POOL_SEARCH_REJECTIONS;
-  public static THREAD_POOL_TYPE = 'search';
-  public static readonly PARAM_DETAILS = ThreadPoolRejectionsAlertBase.createParamDetails(
-    ThreadPoolSearchRejectionsAlert.THREAD_POOL_TYPE
-  );
-  public static readonly LABEL = ThreadPoolRejectionsAlertBase.createLabel(
-    ThreadPoolSearchRejectionsAlert.THREAD_POOL_TYPE
-  );
+  private static TYPE = ALERT_THREAD_POOL_SEARCH_REJECTIONS;
+  private static THREAD_POOL_TYPE = 'search';
+  private static readonly LABEL = ALERT_DETAILS[ALERT_THREAD_POOL_SEARCH_REJECTIONS].label;
   constructor(rawAlert?: Alert) {
     super(
       rawAlert,

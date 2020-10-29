@@ -28,14 +28,16 @@ import {
   AlertData,
   AlertInstanceState,
   AlertEnableAction,
-} from './types';
+  CommonAlertFilter,
+  CommonAlertParams,
+  CommonBaseAlert,
+} from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
-import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
 import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';

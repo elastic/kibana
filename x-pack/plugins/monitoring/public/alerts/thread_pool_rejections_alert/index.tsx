@@ -10,29 +10,29 @@ import { EuiSpacer } from '@elastic/eui';
 import { Expression, Props } from '../components/duration/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { CommonAlertParamDetails } from '../../../common/types';
+import { CommonAlertParamDetails } from '../../../common/types/alerts';
 
 interface ThreadPoolTypes {
   [key: string]: unknown;
 }
 
-interface ThreadPoolRejectionAlertClass {
-  TYPE: string;
-  LABEL: string;
-  PARAM_DETAILS: CommonAlertParamDetails;
+interface ThreadPoolRejectionAlertDetails {
+  label: string;
+  paramDetails: CommonAlertParamDetails;
 }
 
 export function createThreadPoolRejectionsAlertType(
-  threadPoolAlertClass: ThreadPoolRejectionAlertClass
+  alertType: string,
+  threadPoolAlertDetails: ThreadPoolRejectionAlertDetails
 ): AlertTypeModel {
   return {
-    id: threadPoolAlertClass.TYPE,
-    name: threadPoolAlertClass.LABEL,
+    id: alertType,
+    name: threadPoolAlertDetails.label,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
       <>
         <EuiSpacer />
-        <Expression {...props} paramDetails={threadPoolAlertClass.PARAM_DETAILS} />
+        <Expression {...props} paramDetails={threadPoolAlertDetails.paramDetails} />
       </>
     ),
     validate: (inputValues: ThreadPoolTypes) => {
