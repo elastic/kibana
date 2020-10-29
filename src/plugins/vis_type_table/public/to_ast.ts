@@ -27,14 +27,15 @@ const buildTableVisConfig = (
   schemas: ReturnType<typeof getVisSchemas>,
   visParams: TableVisParams
 ) => {
-  const visConfig = {} as any;
   const metrics = schemas.metric;
   const buckets = schemas.bucket || [];
-  visConfig.dimensions = {
-    metrics,
-    buckets,
-    splitRow: schemas.split_row,
-    splitColumn: schemas.split_column,
+  const visConfig = {
+    dimensions: {
+      metrics,
+      buckets,
+      splitRow: schemas.split_row,
+      splitColumn: schemas.split_column,
+    },
   };
 
   if (visParams.showPartialRows && !visParams.showMetricsAtAllLevels) {

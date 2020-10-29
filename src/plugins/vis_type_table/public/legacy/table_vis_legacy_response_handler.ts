@@ -20,6 +20,7 @@
 import { Required } from '@kbn/utility-types';
 
 import { getFormatService } from '../services';
+import { Dimensions } from '../types';
 import { Input } from './table_vis_legacy_fn';
 
 export interface TableContext {
@@ -44,7 +45,7 @@ export interface Table {
   rows: Input['rows'];
 }
 
-export function tableVisLegacyResponseHandler(table: Input, dimensions: any): TableContext {
+export function tableVisLegacyResponseHandler(table: Input, dimensions: Dimensions): TableContext {
   const converted: TableContext = {
     tables: [],
   };
@@ -56,14 +57,14 @@ export function tableVisLegacyResponseHandler(table: Input, dimensions: any): Ta
     const splitColumnIndex = split[0].accessor;
     const splitColumnFormatter = getFormatService().deserialize(split[0].format);
     const splitColumn = table.columns[splitColumnIndex];
-    const splitMap = {};
+    const splitMap: Record<string, number> = {};
     let splitIndex = 0;
 
     table.rows.forEach((row, rowIndex) => {
-      const splitValue: any = row[splitColumn.id];
+      const splitValue = row[splitColumn.id];
 
-      if (!splitMap.hasOwnProperty(splitValue as any)) {
-        (splitMap as any)[splitValue] = splitIndex++;
+      if (!splitMap.hasOwnProperty(splitValue)) {
+        splitMap[splitValue] = splitIndex++;
         const tableGroup: Required<TableGroup, 'tables'> = {
           $parent: converted,
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
@@ -84,8 +85,8 @@ export function tableVisLegacyResponseHandler(table: Input, dimensions: any): Ta
         converted.tables.push(tableGroup);
       }
 
-      const tableIndex = (splitMap as any)[splitValue];
-      (converted.tables[tableIndex] as any).tables[0].rows.push(row);
+      const tableIndex = splitMap[splitValue];
+      (converted.tables[tableIndex] as TableGroup).tables[0].rows.push(row);
     });
   } else {
     converted.tables.push({

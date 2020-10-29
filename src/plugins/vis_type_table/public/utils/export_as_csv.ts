@@ -89,5 +89,5 @@ const toCsv = (formatted: boolean, { cols, rows, table, splitRow, uiSettings }: 
 
 export const exportAsCsv = (formatted: boolean, data: ToCsvData) => {
   const csv = new Blob([toCsv(formatted, data)], { type: 'text/plain;charset=utf-8' });
-  saveAs(csv, `${data.filename || 'table'}.csv`);
+  saveAs(csv, `${data.filename || 'unsaved'}.csv`);
 };

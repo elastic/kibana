@@ -45,17 +45,9 @@ export const TableVisControls = memo((props: TableVisControlsProps) => {
     services: { uiSettings },
   } = useKibana<CoreStart>();
 
-  const onClickRawExport = useCallback(
-    () =>
-      exportAsCsv(false, {
-        ...props,
-        uiSettings,
-      }),
-    [props, uiSettings]
-  );
-  const onClickFormattedExport = useCallback(
-    () =>
-      exportAsCsv(true, {
+  const onClickExport = useCallback(
+    (formatted: boolean) =>
+      exportAsCsv(formatted, {
         ...props,
         uiSettings,
       }),
@@ -75,10 +67,10 @@ export const TableVisControls = memo((props: TableVisControlsProps) => {
   );
 
   const items = [
-    <EuiContextMenuItem key="rawCsv" onClick={onClickRawExport}>
+    <EuiContextMenuItem key="rawCsv" onClick={() => onClickExport(false)}>
       <FormattedMessage id="visTypeTable.vis.controls.rawCSVButtonLabel" defaultMessage="Raw" />
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="csv" onClick={onClickFormattedExport}>
+    <EuiContextMenuItem key="csv" onClick={() => onClickExport(true)}>
       <FormattedMessage
         id="visTypeTable.vis.controls.formattedCSVButtonLabel"
         defaultMessage="Formatted"

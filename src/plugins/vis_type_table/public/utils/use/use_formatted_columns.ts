@@ -74,14 +74,14 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
           formattedColumn.sumTotal = sumOfColumnValues;
 
           switch (visConfig.totalFunc) {
-            case 'sum': {
+            case AggTypes.SUM: {
               if (!isDate) {
                 formattedColumn.formattedTotal = formatter?.convert(sumOfColumnValues);
                 formattedColumn.total = sumOfColumnValues;
               }
               break;
             }
-            case 'avg': {
+            case AggTypes.AVG: {
               if (!isDate) {
                 const total = sumOfColumnValues / table.rows.length;
                 formattedColumn.formattedTotal = formatter?.convert(total);
@@ -89,19 +89,19 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
               }
               break;
             }
-            case 'min': {
+            case AggTypes.MIN: {
               const total = chain(table.rows).map(col.id).min().value() as number;
               formattedColumn.formattedTotal = formatter?.convert(total);
               formattedColumn.total = total;
               break;
             }
-            case 'max': {
+            case AggTypes.MAX: {
               const total = chain(table.rows).map(col.id).max().value() as number;
               formattedColumn.formattedTotal = formatter?.convert(total);
               formattedColumn.total = total;
               break;
             }
-            case 'count': {
+            case AggTypes.COUNT: {
               const total = table.rows.length;
               formattedColumn.formattedTotal = total;
               formattedColumn.total = total;

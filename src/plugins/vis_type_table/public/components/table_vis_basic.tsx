@@ -19,6 +19,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDataGrid, EuiDataGridSorting } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
@@ -56,30 +57,16 @@ export const TableVisBasic = memo(
       [columns, sort]
     );
     const onSort = useCallback(
-      (sortingCols: EuiDataGridSorting['columns']) => {
+      (sortingCols: EuiDataGridSorting['columns'] | []) => {
         // data table vis sorting now only handles one column sorting
         // if data grid provides more columns to sort, pick only the next column to sort
-        if (sortingCols.length <= 1) {
-          const [newSortValue] = sortingCols;
-          setSort(
-            newSortValue
-              ? {
-                  columnIndex: columns.findIndex((c) => c.id === newSortValue.id),
-                  direction: newSortValue.direction,
-                }
-              : undefined
-          );
-        } else {
-          const [, newSortValue] = sortingCols;
-          setSort(
-            newSortValue
-              ? {
-                  columnIndex: columns.findIndex((c) => c.id === newSortValue.id),
-                  direction: newSortValue.direction,
-                }
-              : undefined
-          );
-        }
+        const newSortValue = sortingCols.length <= 1 ? sortingCols[0] : sortingCols[1];
+        setSort(
+          newSortValue && {
+            columnIndex: columns.findIndex((c) => c.id === newSortValue.id),
+            direction: newSortValue.direction,
+          }
+        );
       },
       [columns, setSort]
     );
@@ -95,6 +82,16 @@ export const TableVisBasic = memo(
             showHide: false,
             showMoveLeft: false,
             showMoveRight: false,
+            showSortAsc: {
+              label: i18n.translate('visTypeTable.sort.ascLabel', {
+                defaultMessage: 'Sort asc',
+              }),
+            },
+            showSortDesc: {
+              label: i18n.translate('visTypeTable.sort.descLabel', {
+                defaultMessage: 'Sort desc',
+              }),
+            },
           },
         }))}
         gridStyle={{
