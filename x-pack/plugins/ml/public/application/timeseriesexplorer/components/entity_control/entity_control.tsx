@@ -127,6 +127,21 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     this.props.entityFieldValueChanged(this.props.entity, fieldValue);
   };
 
+  onManualInput = (inputValue: string) => {
+    const normalizedSearchValue = inputValue.trim().toLowerCase();
+    if (!normalizedSearchValue) {
+      return;
+    }
+    const manualInputValue: EuiComboBoxOptionOption<string> = {
+      label: inputValue,
+      value: inputValue,
+    };
+    this.setState({
+      selectedOptions: [manualInputValue],
+    });
+    this.props.entityFieldValueChanged(this.props.entity, inputValue);
+  };
+
   onSearchChange = (searchValue: string) => {
     this.setState({
       isLoading: true,
@@ -191,6 +206,11 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
           defaultMessage: 'Enter value',
         })}
         singleSelection={{ asPlainText: true }}
+        onCreateOption={this.onManualInput}
+        customOptionText={i18n.translate('xpack.ml.timeSeriesExplorer.setManualInputHelperText', {
+          defaultMessage:
+            'No records found. You can still proceed with any value from the source index to view the single metric.',
+        })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={this.onChange}
