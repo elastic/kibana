@@ -61,7 +61,7 @@ export const enhancedEsSearchStrategyProvider = (
           id: id!,
           ...utils.toSnakeCase({ ...asyncOptions }),
         }),
-      (response) => !(response.body.is_partial && response.body.is_running),
+      (response) => !response.body.is_running,
       (response) => response.body.id,
       request.id,
       options
@@ -87,7 +87,7 @@ export const enhancedEsSearchStrategyProvider = (
     const { body, index, ...params } = request.params!;
     const method = 'POST';
     const path = encodeURI(`/${index}/_rollup_search`);
-    const querystring = esSearch.toSnakeCase({
+    const querystring = utils.toSnakeCase({
       ...getShardTimeout(config),
       ...(await getDefaultSearchParams(uiSettingsClient)),
       ...params,
@@ -100,12 +100,12 @@ export const enhancedEsSearchStrategyProvider = (
       querystring,
     });
 
-    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
+    const esResponse = await utils.shimAbortSignal(promise, options?.abortSignal);
 
     const response = esResponse.body as SearchResponse<any>;
     return {
       rawResponse: response,
-      ...esSearch.getTotalLoaded(response._shards),
+      ...utils.getTotalLoaded(response._shards),
     };
   };
 

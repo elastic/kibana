@@ -60,7 +60,7 @@ export const eqlSearchStrategyProvider = (
             },
             requestOptions
           ),
-        (response) => !(response.body.is_partial && response.body.is_running),
+        (response) => !response.body.is_running,
         (response) => response.body.id,
         request.id,
         options

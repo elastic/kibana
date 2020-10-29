@@ -7,8 +7,6 @@
 import { throwError, from, Subscription } from 'rxjs';
 import { tap, takeUntil, finalize, catchError } from 'rxjs/operators';
 import {
-  isErrorResponse,
-  isCompleteResponse,
   TimeoutErrorMode,
   IEsSearchResponse,
   SearchInterceptor,
@@ -22,6 +20,7 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
   doPartialSearch,
+  throwOnEsError,
 } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
@@ -65,7 +64,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     request: IAsyncSearchRequest,
     { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
   ) {
-    const { id } = request;
+    let { id } = request;
 
     const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
@@ -79,25 +78,21 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     return doPartialSearch<IEsSearchResponse>(
       () => this.runSearch(request, combinedSignal, strategy),
       (requestId) => this.runSearch({ ...request, id: requestId }, combinedSignal, strategy),
-      isCompleteResponse,
+      (r) => !r.isRunning,
       (response) => response.id,
       id,
       { pollInterval }
     ).pipe(
       tap((r) => {
-        // If the response indicates of an error, stop polling and complete the observable
-        if (isErrorResponse(r)) {
-          return throwError(new AbortError());
-        }
+        id = r.id ?? id;
       }),
+      throwOnEsError(),
       takeUntil(aborted$),
-      catchError((e: any) => {
-        // If we haven't received the response to the initial request, including the ID, then
-        // we don't need to send a follow-up request to delete this search. Otherwise, we
-        // send the follow-up request to delete this search, then throw an abort error.
-        if (id !== undefined) {
+      catchError((e: AbortError) => {
+        if (id) {
           this.deps.http.delete(`/internal/search/${strategy}/${id}`);
         }
+
         return throwError(this.handleSearchError(e, request, timeoutSignal, options));
       }),
       finalize(() => {

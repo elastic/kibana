@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { of, merge, timer } from 'rxjs';
+import { of, merge, timer, throwError } from 'rxjs';
 import { takeWhile, switchMap, expand, mergeMap } from 'rxjs/operators';
 
-import { doSearch } from '../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  doSearch,
+  IKibanaSearchResponse,
+  isErrorResponse,
+} from '../../../../../../src/plugins/data/common';
 import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
 import type { IAsyncSearchOptions } from '../../../common/search/types';
 
@@ -21,8 +26,8 @@ export const doPartialSearch = <SearchResponse = any>(
   requestId: IKibanaSearchRequest['id'],
   { abortSignal, pollInterval }: IAsyncSearchOptions
 ) => {
-  const partialSearch = (id: IKibanaSearchRequest['id']) => {
-    return doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal).pipe(
+  const partialSearch = (id: IKibanaSearchRequest['id']) =>
+    doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal).pipe(
       expand(() =>
         timer(pollInterval ?? DEFAULT_POLLING_INTERVAL).pipe(
           switchMap(() => partialSearchMethod(id))
@@ -30,7 +35,6 @@ export const doPartialSearch = <SearchResponse = any>(
       ),
       takeWhile((response) => !isCompleted(response), true)
     );
-  };
 
   return requestId
     ? partialSearch(requestId)
@@ -42,3 +46,8 @@ export const doPartialSearch = <SearchResponse = any>(
         )
       );
 };
+
+export const throwOnEsError = () =>
+  mergeMap((r: IKibanaSearchResponse) =>
+    isErrorResponse(r) ? merge(of(r), throwError(new AbortError())) : of(r)
+  );

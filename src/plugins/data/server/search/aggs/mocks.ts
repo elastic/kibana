@@ -22,9 +22,9 @@ import {
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   AggsCommonStart,
+  getCalculateAutoTimeExpression,
 } from '../../../common';
 
-import { getCalculateAutoTimeExpression } from '../../../common/search/aggs/utils/calculate_auto_time_expression';
 import { AggsSetup, AggsStart } from './types';
 
 import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';

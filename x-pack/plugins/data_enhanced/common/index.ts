@@ -14,4 +14,5 @@ export {
   IEnhancedEsSearchRequest,
   IAsyncSearchOptions,
   doPartialSearch,
+  throwOnEsError,
 } from './search';
