@@ -20,7 +20,7 @@ In this document, you’ll learn how to:
 === Before you begin
 
 * To access *Index Patterns*, you must have the {kib} privilege
-`Index Pattern Management`.  To add the privilege, go to *Stack Management > Roles*.
+`Index Pattern Management`.  To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges
 to create or save index patterns. The buttons to create new index patterns or
