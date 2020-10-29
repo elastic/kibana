@@ -23,6 +23,10 @@ export const CALL_OUT_IMMUTABLE = i18n.translate(
   }
 );
 
+export const EDIT = i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.button', {
+  defaultMessage: 'edit',
+});
+
 export const SAVE_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.header',
   {

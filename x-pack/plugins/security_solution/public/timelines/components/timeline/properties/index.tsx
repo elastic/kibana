@@ -81,7 +81,6 @@ export const Properties = React.memo<Props>(
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [showTimelineModal, setShowTimelineModal] = useState(false);
-    const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState(false);
 
     const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
     const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
@@ -93,10 +92,7 @@ export const Properties = React.memo<Props>(
       setShowTimelineModal(true);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const onToggleSaveTimeline = useCallback(
-      () => setShowSaveTimelineOverlay(!showSaveTimelineOverlay),
-      [setShowSaveTimelineOverlay, showSaveTimelineOverlay]
-    );
+
     const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 
     const datePickerWidth = useMemo(
@@ -124,12 +120,10 @@ export const Properties = React.memo<Props>(
           isFavorite={isFavorite}
           noteIds={noteIds}
           onToggleShowNotes={onToggleShowNotes}
-          onToggleSaveTimeline={onToggleSaveTimeline}
           status={status}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
-          showSaveTimelineOverlay={showSaveTimelineOverlay}
           timelineId={timelineId}
           timelineType={timelineType}
           title={title}

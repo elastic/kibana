@@ -37,7 +37,6 @@ interface Props {
   status: TimelineStatusLiteral;
   associateNote: AssociateNote;
   showNotesFromWidth: boolean;
-  showSaveTimelineOverlay: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   onToggleShowNotes: () => void;
   noteIds: string[];
@@ -45,7 +44,6 @@ interface Props {
   isDatepickerLocked: boolean;
   toggleLock: () => void;
   datePickerWidth: number;
-  onToggleSaveTimeline: () => void;
 }
 
 export const PropertiesLeftStyle = styled(EuiFlexGroup)`
@@ -84,7 +82,6 @@ export const PropertiesLeft = React.memo<Props>(
     updateIsFavorite,
     showDescription,
     description,
-    onToggleSaveTimeline,
     title,
     timelineType,
     updateTitle,
@@ -92,7 +89,6 @@ export const PropertiesLeft = React.memo<Props>(
     status,
     showNotes,
     showNotesFromWidth,
-    showSaveTimelineOverlay,
     associateNote,
     getNotesByIds,
     noteIds,
@@ -128,15 +124,7 @@ export const PropertiesLeft = React.memo<Props>(
         </EuiFlexItem>
       ) : null}
 
-      {ENABLE_NEW_TIMELINE && (
-        <SaveTimelineButton
-          timelineId={timelineId}
-          showOverlay={showSaveTimelineOverlay}
-          toggleSaveTimeline={onToggleSaveTimeline}
-          updateTitle={updateTitle}
-          updateDescription={updateDescription}
-        />
-      )}
+      {ENABLE_NEW_TIMELINE && <SaveTimelineButton timelineId={timelineId} />}
 
       {showNotesFromWidth ? (
         <EuiFlexItem grow={false}>
