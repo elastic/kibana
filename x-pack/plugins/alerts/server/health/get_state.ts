@@ -29,7 +29,7 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 export const healthStatus$ = (
   taskManager: TaskManagerStartContract
 ): Observable<ServiceStatus<unknown>> => {
-  return interval(1000).pipe(
+  return interval(60000 * 5).pipe(
     switchMap(async () => {
       const doc = await getLatestTaskState(taskManager);
       const body = get(doc, 'state');
