@@ -9,16 +9,13 @@ export interface ClassFeatureImportance {
   importance: number;
 }
 
-interface FeatureImportanceClassification {
+// TODO We should separate the interface because classes/importance
+// isn't both optional but either/or.
+export interface FeatureImportance {
   feature_name: string;
-  classes: ClassFeatureImportance[];
+  classes?: ClassFeatureImportance[];
+  importance?: number;
 }
-
-interface FeatureImportanceRegression {
-  feature_name: string;
-  importance: number;
-}
-export type FeatureImportance = FeatureImportanceClassification | FeatureImportanceRegression;
 
 export interface TopClass {
   class_name: string;
