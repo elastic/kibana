@@ -15,7 +15,7 @@ import { GetAllSpacesPurpose, GetSpaceResult } from '../../../common/model/types
 
 interface GetAllSpacesOptions {
   purpose?: GetAllSpacesPurpose;
-  allowPartialAuthorization?: boolean;
+  includeAuthorizedPurposes?: boolean;
 }
 
 const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
@@ -34,13 +34,18 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   copySavedObjectsIntoSpace: (authorization) => [
     authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
   ],
-  findSavedObjects: (authorization) => {
-    return [authorization.actions.savedObject.get('config', 'find')];
-  },
+  findSavedObjects: (authorization) => [
+    authorization.actions.login,
+    authorization.actions.savedObject.get('config', 'find'),
+  ],
   shareSavedObjectsIntoSpace: (authorization) => [
     authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
   ],
 };
+
+function filterUnauthorizesSpaceResults(value: GetSpaceResult | null): value is GetSpaceResult {
+  return value !== null;
+}
 
 export class SpacesClient {
   constructor(
@@ -54,9 +59,13 @@ export class SpacesClient {
   ) {}
 
   public async getAll(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
-    const { purpose = DEFAULT_PURPOSE, allowPartialAuthorization = false } = options;
+    const { purpose = DEFAULT_PURPOSE, includeAuthorizedPurposes = false } = options;
     if (!SUPPORTED_GET_SPACE_PURPOSES.includes(purpose)) {
       throw Boom.badRequest(`unsupported space purpose: ${purpose}`);
+    }
+
+    if (options.purpose && includeAuthorizedPurposes) {
+      throw Boom.badRequest(`'purpose' cannot be supplied with 'includeAuthorizedPurposes'`);
     }
 
     if (this.useRbac()) {
@@ -70,26 +79,62 @@ export class SpacesClient {
 
       this.debugLogger(`SpacesClient.getAll(), using RBAC. Found ${saved_objects.length} spaces`);
 
-      let spaces: GetSpaceResult[] = saved_objects.map(this.transformSavedObjectToSpace);
-      const authorizedSpacesResult = await this.getAuthorizedSpaces(spaces, purpose);
-      const { username } = authorizedSpacesResult;
-      let required = authorizedSpacesResult.authorized;
+      const spaces: GetSpaceResult[] = saved_objects.map(this.transformSavedObjectToSpace);
+      const spaceIds = spaces.map((space: Space) => space.id);
 
-      if (allowPartialAuthorization && purpose !== DEFAULT_PURPOSE) {
-        // the default purpose 'any' has the least restrictive authorization checks;
-        // if we allow partial authorization, make an additional less-restrictive authorization check and modify the results accordingly
-        const { authorized } = await this.getAuthorizedSpaces(spaces, DEFAULT_PURPOSE);
-        const optional = required;
-        required = authorized;
-        spaces = spaces.map((space) => {
-          if (!optional.includes(space.id)) {
-            return { ...space, isPartiallyAuthorized: true };
+      const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
+
+      // Collect all privileges which need to be checked
+      const allPrivileges = Object.entries(PURPOSE_PRIVILEGE_MAP).reduce(
+        (acc, [getSpacesPurpose, privilegeFactory]) =>
+          !includeAuthorizedPurposes && getSpacesPurpose !== purpose
+            ? acc
+            : { ...acc, [getSpacesPurpose]: privilegeFactory(this.authorization!) },
+        {} as Record<GetAllSpacesPurpose, string[]>
+      );
+
+      // Check all privileges against all spaces
+      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, {
+        kibana: Object.values(allPrivileges).flat(),
+      });
+
+      // Determine which purposes the user is authorized for within each space.
+      // Remove any spaces for which user is fully unauthorized.
+      const checkHasAllRequired = (space: Space, actions: string[]) =>
+        actions.every((action) =>
+          privileges.kibana.some(
+            ({ resource, privilege, authorized }) =>
+              resource === space.id && privilege === action && authorized
+          )
+        );
+      const authorizedSpaces = spaces
+        .map((space: Space) => {
+          if (!includeAuthorizedPurposes) {
+            // Check if the user is authorized for a single purpose
+            const requiredActions = PURPOSE_PRIVILEGE_MAP[purpose](this.authorization!);
+            return checkHasAllRequired(space, requiredActions) ? space : null;
           }
-          return space;
-        });
-      }
 
-      if (required.length === 0) {
+          // Check if the user is authorized for each purpose
+          let hasAnyAuthorization = false;
+          const authorizedPurposes = Object.entries(PURPOSE_PRIVILEGE_MAP).reduce(
+            (acc, [purposeKey, privilegeFactory]) => {
+              const requiredActions = privilegeFactory(this.authorization!);
+              const hasAllRequired = checkHasAllRequired(space, requiredActions);
+              hasAnyAuthorization = hasAnyAuthorization || hasAllRequired;
+              return { ...acc, [purposeKey]: hasAllRequired };
+            },
+            {} as Record<GetAllSpacesPurpose, boolean>
+          );
+
+          if (!hasAnyAuthorization) {
+            return null;
+          }
+          return { ...space, authorizedPurposes };
+        })
+        .filter(filterUnauthorizesSpaceResults);
+
+      if (authorizedSpaces.length === 0) {
         this.debugLogger(
           `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces for ${purpose} purpose.`
         );
@@ -97,14 +142,12 @@ export class SpacesClient {
         throw Boom.forbidden(); // Note: there is a catch for this in `SpacesSavedObjectsClient.find`; if we get rid of this error, remove that too
       }
 
-      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', required);
-      const filteredSpaces = spaces.filter((space: GetSpaceResult) => required.includes(space.id));
+      const authorizedSpaceIds = authorizedSpaces.map((s) => s.id);
+      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorizedSpaceIds);
       this.debugLogger(
-        `SpacesClient.getAll(), using RBAC. returning spaces: ${filteredSpaces
-          .map((s) => s.id)
-          .join(',')}`
+        `SpacesClient.getAll(), using RBAC. returning spaces: ${authorizedSpaceIds.join(',')}`
       );
-      return filteredSpaces;
+      return authorizedSpaces;
     } else {
       this.debugLogger(`SpacesClient.getAll(), NOT USING RBAC. querying all spaces`);
 
@@ -222,28 +265,6 @@ export class SpacesClient {
 
   private useRbac(): boolean {
     return this.authorization != null && this.authorization.mode.useRbacForRequest(this.request);
-  }
-
-  private async getAuthorizedSpaces(spaces: Space[], purpose: GetAllSpacesPurpose) {
-    const privilegeFactory = PURPOSE_PRIVILEGE_MAP[purpose];
-    const spaceIds = spaces.map((space: Space) => space.id);
-    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-    const privilege = privilegeFactory(this.authorization!);
-
-    const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, {
-      kibana: privilege,
-    });
-    const authorized = privileges.kibana
-      .filter((x) => x.authorized)
-      .map((x) => x.resource as string);
-
-    this.debugLogger(
-      `SpacesClient.getAll(), authorized for ${
-        authorized.length
-      } spaces, derived from ES privilege check: ${JSON.stringify(privileges)}`
-    );
-
-    return { username, authorized };
   }
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {

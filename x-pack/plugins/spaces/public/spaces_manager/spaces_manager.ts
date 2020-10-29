@@ -12,6 +12,10 @@ import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
+interface GetAllSpacesOptions {
+  purpose?: GetAllSpacesPurpose;
+  includeAuthorizedPurposes?: boolean;
+}
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
@@ -30,13 +34,10 @@ export class SpacesManager {
     this.refreshActiveSpace();
   }
 
-  public async getSpaces(
-    purpose?: GetAllSpacesPurpose,
-    allowPartialAuthorization?: boolean
-  ): Promise<GetSpaceResult[]> {
-    return await this.http.get('/api/spaces/space', {
-      query: { purpose, allowPartialAuthorization },
-    });
+  public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
+    const { purpose, includeAuthorizedPurposes } = options;
+    const query = { purpose, includeAuthorizedPurposes };
+    return await this.http.get('/api/spaces/space', { query });
   }
 
   public async getSpace(id: string): Promise<Space> {

@@ -53,7 +53,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     spaces: SpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('shareSavedObjectsIntoSpace', true);
+    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
     const getActiveSpace = spacesManager.getActiveSpace();
     const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObject.type);
     Promise.all([getSpaces, getActiveSpace, getPermissions])
@@ -65,6 +65,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
         const createSpaceTarget = (space: GetSpaceResult): SpaceTarget => ({
           ...space,
           isActiveSpace: space.id === activeSpace.id,
+          isPartiallyAuthorized: space?.authorizedPurposes?.shareSavedObjectsIntoSpace === false,
         });
         setSpacesState({
           isLoading: false,

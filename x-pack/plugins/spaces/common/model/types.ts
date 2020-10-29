@@ -13,5 +13,5 @@ export type GetAllSpacesPurpose =
   | 'shareSavedObjectsIntoSpace';
 
 export interface GetSpaceResult extends Space {
-  isPartiallyAuthorized?: boolean;
+  authorizedPurposes?: Record<GetAllSpacesPurpose, boolean>;
 }

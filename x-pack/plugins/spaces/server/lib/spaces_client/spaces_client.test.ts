@@ -30,6 +30,16 @@ const createMockAuthorization = () => {
     atSpace: mockCheckPrivilegesAtSpace,
     globally: mockCheckPrivilegesGlobally,
   }));
+  (mockAuthorization.actions.savedObject.get as jest.MockedFunction<
+    typeof mockAuthorization.actions.savedObject.get
+  >).mockImplementation((featureId, ...uiCapabilityParts) => {
+    return `mockSavedObjectAction:${featureId}/${uiCapabilityParts.join('/')}`;
+  });
+  (mockAuthorization.actions.ui.get as jest.MockedFunction<
+    typeof mockAuthorization.actions.ui.get
+  >).mockImplementation((featureId, ...uiCapabilityParts) => {
+    return `mockUiAction:${featureId}/${uiCapabilityParts.join('/')}`;
+  });
 
   return {
     mockCheckPrivilegesAtSpaces,
@@ -210,28 +220,30 @@ describe('#getAll', () => {
     [
       {
         purpose: undefined,
-        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
+        expectedPrivileges: (mockAuthorization: SecurityPluginSetup['authz']) => [
           mockAuthorization.actions.login,
+        ],
       },
       {
         purpose: 'any' as GetAllSpacesPurpose,
-        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
+        expectedPrivileges: (mockAuthorization: SecurityPluginSetup['authz']) => [
           mockAuthorization.actions.login,
+        ],
       },
       {
         purpose: 'copySavedObjectsIntoSpace' as GetAllSpacesPurpose,
-        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
-          mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
+        expectedPrivileges: () => [`mockUiAction:savedObjectsManagement/copyIntoSpace`],
       },
       {
         purpose: 'findSavedObjects' as GetAllSpacesPurpose,
-        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
-          mockAuthorization.actions.savedObject.get('config', 'find'),
+        expectedPrivileges: (mockAuthorization: SecurityPluginSetup['authz']) => [
+          mockAuthorization.actions.login,
+          `mockSavedObjectAction:config/find`,
+        ],
       },
       {
         purpose: 'shareSavedObjectsIntoSpace' as GetAllSpacesPurpose,
-        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
-          mockAuthorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
+        expectedPrivileges: () => [`mockUiAction:savedObjectsManagement/shareIntoSpace`],
       },
     ].forEach((scenario) => {
       const { purpose } = scenario;
@@ -247,15 +259,17 @@ describe('#getAll', () => {
             client,
           } = setup(true);
           const username = Symbol();
-          const privilege = scenario.expectedPrivilege(mockAuthorization);
+          const privileges = scenario.expectedPrivileges(mockAuthorization);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
             privileges: {
-              kibana: [
-                { resource: savedObjects[0].id, privilege, authorized: false },
-                { resource: savedObjects[1].id, privilege, authorized: false },
-                { resource: savedObjects[2].id, privilege, authorized: false },
-              ],
+              kibana: privileges
+                .map((privilege) => [
+                  { resource: savedObjects[0].id, privilege, authorized: false },
+                  { resource: savedObjects[1].id, privilege, authorized: false },
+                  { resource: savedObjects[2].id, privilege, authorized: false },
+                ])
+                .flat(),
             },
           });
           await expect(client.getAll({ purpose })).rejects.toThrowError('Forbidden');
@@ -271,7 +285,7 @@ describe('#getAll', () => {
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledTimes(1);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
             savedObjects.map((savedObject) => savedObject.id),
-            { kibana: [privilege] }
+            { kibana: privileges }
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
             username,
@@ -291,16 +305,18 @@ describe('#getAll', () => {
             client,
           } = setup(true);
           const username = Symbol();
-          const privilege = scenario.expectedPrivilege(mockAuthorization);
+          const privileges = scenario.expectedPrivileges(mockAuthorization);
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
             privileges: {
-              kibana: [
-                { resource: savedObjects[0].id, privilege, authorized: true },
-                { resource: savedObjects[1].id, privilege, authorized: false },
-                { resource: savedObjects[2].id, privilege, authorized: false },
-              ],
+              kibana: privileges
+                .map((privilege) => [
+                  { resource: savedObjects[0].id, privilege, authorized: true },
+                  { resource: savedObjects[1].id, privilege, authorized: false },
+                  { resource: savedObjects[2].id, privilege, authorized: false },
+                ])
+                .flat(),
             },
           });
           const actualSpaces = await client.getAll({ purpose });
@@ -317,7 +333,7 @@ describe('#getAll', () => {
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledTimes(1);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
             savedObjects.map((savedObject) => savedObject.id),
-            { kibana: [privilege] }
+            { kibana: privileges }
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
           expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(
@@ -326,58 +342,76 @@ describe('#getAll', () => {
             [savedObjects[0].id]
           );
         });
+      });
+    });
+  });
 
-        if (purpose === undefined || purpose === 'any') {
-          test(`does not return partially authorized spaces`, async () => {
-            const {
-              mockAuditLogger,
-              mockAuthorization,
-              mockCheckPrivilegesAtSpaces,
-              mockConfig,
-              mockInternalRepository,
-              request,
-              client,
-            } = setup(true);
-            const username = Symbol();
-            const privilege = scenario.expectedPrivilege(mockAuthorization);
-            mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
-            mockCheckPrivilegesAtSpaces.mockReturnValueOnce({
-              username,
-              privileges: {
-                kibana: [
-                  { resource: savedObjects[0].id, privilege, authorized: true },
-                  { resource: savedObjects[1].id, privilege, authorized: false },
-                  { resource: savedObjects[2].id, privilege, authorized: false },
-                ],
-              },
-            });
-            const actualSpaces = await client.getAll({ purpose, allowPartialAuthorization: true });
+  describe('includeAuthorizedPurposes is true', () => {
+    const includeAuthorizedPurposes = true;
 
-            expect(actualSpaces).toEqual([expectedSpaces[0]]);
-            expect(mockInternalRepository.find).toHaveBeenCalledWith({
-              type: 'space',
-              page: 1,
-              perPage: mockConfig.maxSpaces,
-              sortField: 'name.keyword',
-            });
-            expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
-            expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-            expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledTimes(1); // only called once -- primary assertion of this test case
-            expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
-              savedObjects.map((savedObject) => savedObject.id),
-              { kibana: [privilege] }
-            );
-            expect(mockAuditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
-            expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(
-              username,
-              'getAll',
-              [savedObjects[0].id]
-            );
+    ([
+      'any',
+      'copySavedObjectsIntoSpace',
+      'findSavedObjects',
+      'shareSavedObjectsIntoSpace',
+    ] as GetAllSpacesPurpose[]).forEach((purpose) => {
+      describe(`with purpose='${purpose}'`, () => {
+        test('throws error', async () => {
+          const { client } = setup(null);
+          expect(client.getAll({ purpose, includeAuthorizedPurposes })).rejects.toThrowError(
+            `'purpose' cannot be supplied with 'includeAuthorizedPurposes'`
+          );
+        });
+      });
+    });
+
+    describe('with purpose=undefined', () => {
+      describe('authorization is null', () => {
+        test(`finds spaces using callWithRequestRepository and returns unaugmented results`, async () => {
+          const { mockAuditLogger, mockCallWithRequestRepository, mockConfig, client } = setup(
+            null
+          );
+          const actualSpaces = await client.getAll({ includeAuthorizedPurposes });
+
+          expect(actualSpaces).toEqual(expectedSpaces);
+          expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+            type: 'space',
+            page: 1,
+            perPage: mockConfig.maxSpaces,
+            sortField: 'name.keyword',
           });
-          return;
-        }
+          expect(mockAuditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
+          expect(mockAuditLogger.spacesAuthorizationSuccess).not.toHaveBeenCalled();
+        });
+      });
 
-        test(`returns partially authorized spaces`, async () => {
+      describe(`authorization.mode.useRbacForRequest returns false`, () => {
+        test(`finds spaces using callWithRequestRepository and returns unaugmented results`, async () => {
+          const {
+            mockAuditLogger,
+            mockAuthorization,
+            mockCallWithRequestRepository,
+            mockConfig,
+            request,
+            client,
+          } = setup(false);
+          const actualSpaces = await client.getAll({ includeAuthorizedPurposes });
+
+          expect(actualSpaces).toEqual(expectedSpaces);
+          expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+            type: 'space',
+            page: 1,
+            perPage: mockConfig.maxSpaces,
+            sortField: 'name.keyword',
+          });
+          expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+          expect(mockAuditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
+          expect(mockAuditLogger.spacesAuthorizationSuccess).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('useRbacForRequest is true', () => {
+        test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
           const {
             mockAuditLogger,
             mockAuthorization,
@@ -388,33 +422,127 @@ describe('#getAll', () => {
             client,
           } = setup(true);
           const username = Symbol();
-          const privilege = scenario.expectedPrivilege(mockAuthorization);
-          mockCheckPrivilegesAtSpaces.mockReturnValueOnce({
+          const privileges = [
+            mockAuthorization.actions.login,
+            `mockUiAction:savedObjectsManagement/copyIntoSpace`,
+            `mockSavedObjectAction:config/find`,
+            `mockUiAction:savedObjectsManagement/shareIntoSpace`,
+          ];
+          mockCheckPrivilegesAtSpaces.mockReturnValue({
+            username,
+            privileges: {
+              kibana: privileges
+                .map((privilege) => [
+                  { resource: savedObjects[0].id, privilege, authorized: false },
+                  { resource: savedObjects[1].id, privilege, authorized: false },
+                  { resource: savedObjects[2].id, privilege, authorized: false },
+                ])
+                .flat(),
+            },
+          });
+          await expect(client.getAll({ includeAuthorizedPurposes })).rejects.toThrowError(
+            'Forbidden'
+          );
+
+          expect(mockInternalRepository.find).toHaveBeenCalledWith({
+            type: 'space',
+            page: 1,
+            perPage: mockConfig.maxSpaces,
+            sortField: 'name.keyword',
+          });
+          expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+          expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+          expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledTimes(1);
+          expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
+            savedObjects.map((savedObject) => savedObject.id),
+            {
+              kibana: [
+                mockAuthorization.actions.login,
+                `mockUiAction:savedObjectsManagement/copyIntoSpace`,
+                mockAuthorization.actions.login, // the actual privilege check deduplicates this -- we mimicked that behavior in our mock result
+                `mockSavedObjectAction:config/find`,
+                `mockUiAction:savedObjectsManagement/shareIntoSpace`,
+              ],
+            }
+          );
+          expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
+            username,
+            'getAll'
+          );
+          expect(mockAuditLogger.spacesAuthorizationSuccess).not.toHaveBeenCalled();
+        });
+
+        test(`returns augmented spaces that the user is authorized for`, async () => {
+          const {
+            mockAuditLogger,
+            mockAuthorization,
+            mockCheckPrivilegesAtSpaces,
+            mockConfig,
+            mockInternalRepository,
+            request,
+            client,
+          } = setup(true);
+          const username = Symbol();
+          const privileges = [
+            mockAuthorization.actions.login,
+            `mockUiAction:savedObjectsManagement/copyIntoSpace`,
+            `mockSavedObjectAction:config/find`,
+            `mockUiAction:savedObjectsManagement/shareIntoSpace`,
+          ];
+          mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
             privileges: {
               kibana: [
-                { resource: savedObjects[0].id, privilege, authorized: true },
-                { resource: savedObjects[1].id, privilege, authorized: false },
-                { resource: savedObjects[2].id, privilege, authorized: false },
+                ...privileges.map((privilege) => {
+                  return { resource: savedObjects[0].id, privilege, authorized: true };
+                }),
+                {
+                  resource: savedObjects[1].id,
+                  privilege: mockAuthorization.actions.login,
+                  authorized: false,
+                },
+                {
+                  resource: savedObjects[1].id,
+                  privilege: `mockUiAction:savedObjectsManagement/copyIntoSpace`,
+                  authorized: false,
+                },
+                {
+                  resource: savedObjects[1].id,
+                  privilege: `mockSavedObjectAction:config/find`,
+                  authorized: true, // special case -- this alone will not authorize the user for the 'findSavedObjects purpose, since it also requires the login action
+                },
+                {
+                  resource: savedObjects[1].id,
+                  privilege: `mockUiAction:savedObjectsManagement/shareIntoSpace`,
+                  authorized: true, // note that this being authorized without the login action is contrived for this test case, and would never happen in a real world scenario
+                },
+                ...privileges.map((privilege) => {
+                  return { resource: savedObjects[2].id, privilege, authorized: false };
+                }),
               ],
             },
           });
-          const defaultPrivilege = mockAuthorization.actions.login;
-          mockCheckPrivilegesAtSpaces.mockReturnValueOnce({
-            username,
-            privileges: {
-              kibana: [
-                { resource: savedObjects[0].id, privilege: defaultPrivilege, authorized: true },
-                { resource: savedObjects[1].id, privilege: defaultPrivilege, authorized: true },
-                { resource: savedObjects[2].id, privilege: defaultPrivilege, authorized: false },
-              ],
-            },
-          });
-          const actualSpaces = await client.getAll({ purpose, allowPartialAuthorization: true });
+          const actualSpaces = await client.getAll({ includeAuthorizedPurposes });
 
           expect(actualSpaces).toEqual([
-            expectedSpaces[0],
-            { ...expectedSpaces[1], isPartiallyAuthorized: true },
+            {
+              ...expectedSpaces[0],
+              authorizedPurposes: {
+                any: true,
+                copySavedObjectsIntoSpace: true,
+                findSavedObjects: true,
+                shareSavedObjectsIntoSpace: true,
+              },
+            },
+            {
+              ...expectedSpaces[1],
+              authorizedPurposes: {
+                any: false,
+                copySavedObjectsIntoSpace: false,
+                findSavedObjects: false,
+                shareSavedObjectsIntoSpace: true,
+              },
+            },
           ]);
           expect(mockInternalRepository.find).toHaveBeenCalledWith({
             type: 'space',
@@ -424,16 +552,18 @@ describe('#getAll', () => {
           });
           expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-          expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledTimes(2);
-          expect(mockCheckPrivilegesAtSpaces).toHaveBeenNthCalledWith(
-            1,
+          expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledTimes(1);
+          expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
             savedObjects.map((savedObject) => savedObject.id),
-            { kibana: [privilege] }
-          );
-          expect(mockCheckPrivilegesAtSpaces).toHaveBeenNthCalledWith(
-            2,
-            savedObjects.map((savedObject) => savedObject.id),
-            { kibana: [defaultPrivilege] }
+            {
+              kibana: [
+                mockAuthorization.actions.login,
+                `mockUiAction:savedObjectsManagement/copyIntoSpace`,
+                mockAuthorization.actions.login, // the actual privilege check deduplicates this -- we mimicked that behavior in our mock result
+                `mockSavedObjectAction:config/find`,
+                `mockUiAction:savedObjectsManagement/shareIntoSpace`,
+              ],
+            }
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
           expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(

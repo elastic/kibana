@@ -18,10 +18,12 @@ experimental[] Retrieve all {kib} spaces.
   (Optional, string) Valid options include `any`, `copySavedObjectsIntoSpace`, and `shareSavedObjectsIntoSpace`. This determines what
   authorization checks are applied to the API call. If `purpose` is not provided in the URL, the `any` purpose is used.
 
-`allowPartialAuthorization`::
-  (Optional, boolean) When enabled, the API will return any space that the user is partially authorized to access. This only has an effect
-  when _not_ using the `any` purpose. Any partially authorized results (for instance, spaces that the user has read-only access to) will 
-  contain the `isPartiallyAuthorized: true` attribute.
+`includeAuthorizedPurposes`::
+  (Optional, boolean) When enabled, the API will return any spaces that the user is authorized to access in any capacity, and each space
+  will contain the purpose(s) for which the user is authorized. This can be useful to determine which spaces a user can read but not take a
+  specific action in. If the Security plugin is not enabled, this will have no effect, as no authorization checks would take place.
++
+NOTE: This option cannot be used in conjunction with `purpose`.
 
 [[spaces-api-get-all-response-codes]]
 ==== Response code
@@ -81,7 +83,7 @@ The user has read-only access to the Sales space. Retrieve all spaces and specif
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/spaces/space?purpose=shareSavedObjectsIntoSpace&allowPartialAuthorization=true
+$ curl -X GET api/spaces/space?purpose=shareSavedObjectsIntoSpace&includeAuthorizedPurposes=true
 --------------------------------------------------
 
 The API returns the following:
@@ -95,7 +97,13 @@ The API returns the following:
     "description" : "This is the Default Space",
     "disabledFeatures": [],
     "imageUrl": "",
-    "_reserved": true
+    "_reserved": true,
+    "authorizedPurposes": {
+      "any": true,
+      "copySavedObjectsIntoSpace": true,
+      "findSavedObjects": true,
+      "shareSavedObjectsIntoSpace": true,
+    }
   },
   {
     "id": "marketing",
@@ -104,7 +112,13 @@ The API returns the following:
     "color": "#aabbcc",
     "disabledFeatures": ["apm"],
     "initials": "MK",
-    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU"
+    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU",
+    "authorizedPurposes": {
+      "any": true,
+      "copySavedObjectsIntoSpace": true,
+      "findSavedObjects": true,
+      "shareSavedObjectsIntoSpace": true,
+    }
   },
   {
     "id": "sales",
@@ -112,7 +126,12 @@ The API returns the following:
     "initials": "MK",
     "disabledFeatures": ["discover", "timelion"],
     "imageUrl": "",
-    "isPartiallyAuthorized": true
+    "authorizedPurposes": {
+      "any": true,
+      "copySavedObjectsIntoSpace": false,
+      "findSavedObjects": true,
+      "shareSavedObjectsIntoSpace": false,
+    }
   }
 ]
 --------------------------------------------------

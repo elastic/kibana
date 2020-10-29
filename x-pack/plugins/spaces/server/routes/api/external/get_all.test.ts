@@ -78,7 +78,7 @@ describe('GET /spaces/space', () => {
   [undefined, 'any', 'copySavedObjectsIntoSpace', 'shareSavedObjectsIntoSpace'].forEach(
     (purpose) => {
       describe(`with purpose='${purpose}'`, () => {
-        it(`returns all available spaces`, async () => {
+        it(`returns expected result when not specifying includeAuthorizedPurposes`, async () => {
           const { routeHandler } = await setup();
 
           const request = httpServerMock.createKibanaRequest({ method: 'get', query: { purpose } });
@@ -88,12 +88,32 @@ describe('GET /spaces/space', () => {
           expect(response.payload).toEqual(spaces);
         });
 
-        it(`returns all available spaces when specifying allowPartialAuthorization=true`, async () => {
+        it(`returns expected result when specifying includeAuthorizedPurposes=true`, async () => {
           const { routeHandler } = await setup();
 
           const request = httpServerMock.createKibanaRequest({
             method: 'get',
-            query: { purpose, allowPartialAuthorization: true },
+            query: { purpose, includeAuthorizedPurposes: true },
+          });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+          if (purpose === undefined) {
+            expect(response.status).toEqual(200);
+            expect(response.payload).toEqual(spaces);
+          } else {
+            expect(response.status).toEqual(400);
+            expect(response.payload).toEqual(
+              new Error(`'purpose' cannot be supplied with 'includeAuthorizedPurposes'`)
+            );
+          }
+        });
+
+        it(`returns expected result when specifying includeAuthorizedPurposes=false`, async () => {
+          const { routeHandler } = await setup();
+
+          const request = httpServerMock.createKibanaRequest({
+            method: 'get',
+            query: { purpose, includeAuthorizedPurposes: false },
           });
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 

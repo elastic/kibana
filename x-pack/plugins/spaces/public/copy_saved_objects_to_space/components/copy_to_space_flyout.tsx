@@ -61,7 +61,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
   );
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('copySavedObjectsIntoSpace');
+    const getSpaces = spacesManager.getSpaces({ purpose: 'copySavedObjectsIntoSpace' });
     const getActiveSpace = spacesManager.getActiveSpace();
     Promise.all([getSpaces, getActiveSpace])
       .then(([allSpaces, activeSpace]) => {

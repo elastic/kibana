@@ -18,24 +18,26 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space',
       validate: {
         query: schema.object({
-          purpose: schema.oneOf(
-            [
+          purpose: schema.maybe(
+            schema.oneOf([
               schema.literal('any'),
               schema.literal('copySavedObjectsIntoSpace'),
               schema.literal('shareSavedObjectsIntoSpace'),
-            ],
-            {
-              defaultValue: 'any',
-            }
+            ])
           ),
-          allowPartialAuthorization: schema.boolean({ defaultValue: false }),
+          includeAuthorizedPurposes: schema.conditional(
+            schema.siblingRef('purpose'),
+            schema.string(),
+            schema.maybe(schema.literal(false)),
+            schema.maybe(schema.boolean())
+          ),
         }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside GET /api/spaces/space`);
 
-      const { purpose, allowPartialAuthorization } = request.query;
+      const { purpose, includeAuthorizedPurposes } = request.query;
 
       const spacesClient = await spacesService.scopedClient(request);
 
@@ -43,15 +45,15 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
 
       try {
         log.debug(
-          `Attempting to retrieve all spaces for ${purpose} purpose with allowPartialAuthorization=${allowPartialAuthorization}`
+          `Attempting to retrieve all spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
         );
-        spaces = await spacesClient.getAll({ purpose, allowPartialAuthorization });
+        spaces = await spacesClient.getAll({ purpose, includeAuthorizedPurposes });
         log.debug(
-          `Retrieved ${spaces.length} spaces for ${purpose} purpose with allowPartialAuthorization=${allowPartialAuthorization}`
+          `Retrieved ${spaces.length} spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
         );
       } catch (error) {
         log.debug(
-          `Error retrieving spaces for ${purpose} purpose with allowPartialAuthorization=${allowPartialAuthorization}: ${error}`
+          `Error retrieving spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}: ${error}`
         );
         return response.customError(wrapError(error));
       }
