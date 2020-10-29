@@ -76,7 +76,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
       }
       setIsSubmitting(false);
       const successMessage = i18n.translate(
-        'xpack.ingestManager.agentReassignPolicy.successSingleNotificationTitle',
+        'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
           defaultMessage: 'Agent policy reassigned',
         }
@@ -97,7 +97,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         <EuiTitle size="m">
           <h2 id="FleetAgentReassigmentFlyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.agentReassignPolicy.flyoutTitle"
+              id="xpack.fleet.agentReassignPolicy.flyoutTitle"
               defaultMessage="Assign new agent policy"
             />
           </h2>
@@ -105,7 +105,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.ingestManager.agentReassignPolicy.flyoutDescription"
+            id="xpack.fleet.agentReassignPolicy.flyoutDescription"
             defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
             values={{
               count: isSingleAgent ? 1 : 0,
@@ -118,7 +118,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           <EuiFlexItem>
             <EuiFormRow
               fullWidth
-              label={i18n.translate('xpack.ingestManager.agentReassignPolicy.selectPolicyLabel', {
+              label={i18n.translate('xpack.fleet.agentReassignPolicy.selectPolicyLabel', {
                 defaultMessage: 'Agent policy',
               })}
             >
@@ -146,7 +146,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ingestManager.agentReassignPolicy.cancelButtonLabel"
+                id="xpack.fleet.agentReassignPolicy.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -159,7 +159,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
               isLoading={isSubmitting}
             >
               <FormattedMessage
-                id="xpack.ingestManager.agentReassignPolicy.continueButtonLabel"
+                id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
                 defaultMessage="Assign policy"
               />
             </EuiButton>

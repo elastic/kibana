@@ -4,33 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { fieldValidators, ValidationFunc } from '../../../shared_imports';
-
-import { i18nTexts } from './components/phases/hot_phase/i18n_texts';
 
 import { ROLLOVER_FORM_PATHS } from './constants';
 
+import { i18nTexts } from './i18n_texts';
+
 const { numberGreaterThanField } = fieldValidators;
 
-export const positiveNumberRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.numberAboveZeroRequiredError',
-  {
-    defaultMessage: 'Only numbers above 0 are allowed.',
-  }
-);
-
-export const ifExistsNumberGreaterThanZero: ValidationFunc<any, any, any> = (arg) => {
-  if (arg.value) {
-    return numberGreaterThanField({
-      than: 0,
-      message: positiveNumberRequiredMessage,
-    })({
-      ...arg,
-      value: parseInt(arg.value, 10),
-    });
-  }
+const createIfNumberExistsValidator = ({
+  than,
+  message,
+}: {
+  than: number;
+  message: string;
+}): ValidationFunc<any, any, any> => {
+  return (arg) => {
+    if (arg.value) {
+      return numberGreaterThanField({
+        than,
+        message,
+      })({
+        ...arg,
+        value: parseInt(arg.value, 10),
+      });
+    }
+  };
 };
+
+export const ifExistsNumberGreaterThanZero = createIfNumberExistsValidator({
+  than: 0,
+  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+});
+
+export const ifExistsNumberNonNegative = createIfNumberExistsValidator({
+  than: -1,
+  message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
+});
 
 /**
  * A special validation type used to keep track of validation errors for
@@ -54,16 +64,22 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
     )
   ) {
     fields[ROLLOVER_FORM_PATHS.maxAge].setErrors([
-      { validationType: ROLLOVER_EMPTY_VALIDATION, message: i18nTexts.maximumAgeRequiredMessage },
+      {
+        validationType: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
+      },
     ]);
     fields[ROLLOVER_FORM_PATHS.maxDocs].setErrors([
       {
         validationType: ROLLOVER_EMPTY_VALIDATION,
-        message: i18nTexts.maximumDocumentsRequiredMessage,
+        message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
       },
     ]);
     fields[ROLLOVER_FORM_PATHS.maxSize].setErrors([
-      { validationType: ROLLOVER_EMPTY_VALIDATION, message: i18nTexts.maximumSizeRequiredMessage },
+      {
+        validationType: ROLLOVER_EMPTY_VALIDATION,
+        message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
+      },
     ]);
   } else {
     fields[ROLLOVER_FORM_PATHS.maxAge].clearErrors(ROLLOVER_EMPTY_VALIDATION);
