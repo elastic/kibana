@@ -14,15 +14,10 @@ import { StatefulEventDetails } from '../../../../common/components/event_detail
 import { LazyAccordion } from '../../lazy_accordion';
 import { OnUpdateColumns } from '../events';
 
-const ExpandableDetails = styled.div<{ hideExpandButton: boolean }>`
-  ${({ hideExpandButton }) =>
-    hideExpandButton
-      ? `
+const ExpandableDetails = styled.div`
   .euiAccordion__button {
     display: none;
   }
-  `
-      : ''};
 `;
 
 ExpandableDetails.displayName = 'ExpandableDetails';
@@ -34,7 +29,6 @@ interface Props {
   event: TimelineEventsDetailsItem[];
   forceExpand?: boolean;
   hideExpandButton?: boolean;
-  onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -49,7 +43,6 @@ export const ExpandableEvent = React.memo<Props>(
     id,
     timelineId,
     toggleColumn,
-    onEventToggled,
     onUpdateColumns,
   }) => {
     const handleRenderExpandedContent = useCallback(
@@ -59,26 +52,16 @@ export const ExpandableEvent = React.memo<Props>(
           columnHeaders={columnHeaders}
           data={event}
           id={id}
-          onEventToggled={onEventToggled}
           onUpdateColumns={onUpdateColumns}
           timelineId={timelineId}
           toggleColumn={toggleColumn}
         />
       ),
-      [
-        browserFields,
-        columnHeaders,
-        event,
-        id,
-        onEventToggled,
-        onUpdateColumns,
-        timelineId,
-        toggleColumn,
-      ]
+      [browserFields, columnHeaders, event, id, onUpdateColumns, timelineId, toggleColumn]
     );
 
     return (
-      <ExpandableDetails hideExpandButton={true}>
+      <ExpandableDetails>
         <LazyAccordion
           id={`timeline-${timelineId}-row-${id}`}
           renderExpandedContent={handleRenderExpandedContent}

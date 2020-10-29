@@ -15,7 +15,6 @@ import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
-import { COLLAPSE, COLLAPSE_EVENT } from '../../../timelines/components/timeline/body/translations';
 
 export type View = 'table-view' | 'json-view';
 
@@ -31,7 +30,6 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   id: string;
   view: View;
-  onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
   timelineId: string;
@@ -51,7 +49,6 @@ export const EventDetails = React.memo<Props>(
     data,
     id,
     view,
-    onEventToggled,
     onUpdateColumns,
     onViewSelected,
     timelineId,
@@ -90,9 +87,6 @@ export const EventDetails = React.memo<Props>(
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}
           onTabClick={(e) => onViewSelected(e.id as View)}
         />
-        <CollapseLink aria-label={COLLAPSE} data-test-subj="collapse" onClick={onEventToggled}>
-          {COLLAPSE_EVENT}
-        </CollapseLink>
       </Details>
     );
   }

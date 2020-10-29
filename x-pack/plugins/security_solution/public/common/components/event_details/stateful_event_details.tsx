@@ -18,35 +18,24 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   data: TimelineEventsDetailsItem[];
   id: string;
-  onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 export const StatefulEventDetails = React.memo<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    data,
-    id,
-    onEventToggled,
-    onUpdateColumns,
-    timelineId,
-    toggleColumn,
-  }) => {
+  ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn }) => {
+    // TODO: Move to the store
     const [view, setView] = useState<View>('table-view');
 
-    const handleSetView = useCallback((newView) => setView(newView), []);
     return (
       <EventDetails
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         data={data}
         id={id}
-        onEventToggled={onEventToggled}
         onUpdateColumns={onUpdateColumns}
-        onViewSelected={handleSetView}
+        onViewSelected={setView}
         timelineId={timelineId}
         toggleColumn={toggleColumn}
         view={view}

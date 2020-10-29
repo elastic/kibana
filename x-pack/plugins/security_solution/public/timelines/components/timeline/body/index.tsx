@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import {
+  TimelineItem,
+  TimelineEventsDetailsItem,
+  TimelineNonEcsData,
+} from '../../../../../common/search_strategy';
 import { Note } from '../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
@@ -32,6 +38,8 @@ import { Sort } from './sort';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { ExpandableEvent } from '../expandable_event';
+import { useTimelineEventsDetails } from '../../../containers/details';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -76,6 +84,16 @@ export const hasAdditionalActions = (id: TimelineId): boolean =>
 
 const EXTRA_WIDTH = 4; // px
 
+const emptyDetails: TimelineEventsDetailsItem[] = [];
+
+const FullWithFlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
+`;
+
 /** Renders the timeline body */
 export const Body = React.memo<BodyProps>(
   ({
@@ -112,7 +130,26 @@ export const Body = React.memo<BodyProps>(
     timelineType,
     updateNote,
   }) => {
-    const containerElementRef = useRef<HTMLDivElement>(null);
+    const [expanded, setExpanded] = useState<{ eventId?: string; indexName?: string }>({});
+    const [loading, detailsData] = useTimelineEventsDetails({
+      docValueFields,
+      indexName: expanded.indexName!,
+      eventId: expanded.eventId!,
+      skip: !expanded.eventId,
+    });
+
+    const onEventToggled = useCallback((event) => {
+      const eventId = event._id;
+
+      setExpanded((currentExpanded) => {
+        if (currentExpanded.eventId === eventId) {
+          return {};
+        }
+
+        return { eventId, indexName: event._index };
+      });
+    }, []);
+
     const actionsColumnWidth = useMemo(
       () =>
         getActionsColumnWidth(
@@ -141,64 +178,81 @@ export const Body = React.memo<BodyProps>(
             timelineType={timelineType}
           />
         )}
-        <TimelineBody
-          data-test-subj="timeline-body"
-          data-timeline-id={timelineId}
-          ref={containerElementRef}
-          visible={show && !graphEventId}
-        >
-          <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
-            <ColumnHeaders
-              actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              isEventViewer={isEventViewer}
-              isSelectAllChecked={isSelectAllChecked}
-              onColumnRemoved={onColumnRemoved}
-              onColumnResized={onColumnResized}
-              onColumnSorted={onColumnSorted}
-              onSelectAll={onSelectAll}
-              onUpdateColumns={onUpdateColumns}
-              showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
-              sort={sort}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-            />
+        <FullWithFlexGroup>
+          <ScrollableFlexItem grow={2}>
+            <div>
+              <TimelineBody
+                data-test-subj="timeline-body"
+                data-timeline-id={timelineId}
+                visible={show && !graphEventId}
+              >
+                <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
+                  <ColumnHeaders
+                    actionsColumnWidth={actionsColumnWidth}
+                    browserFields={browserFields}
+                    columnHeaders={columnHeaders}
+                    isEventViewer={isEventViewer}
+                    isSelectAllChecked={isSelectAllChecked}
+                    onColumnRemoved={onColumnRemoved}
+                    onColumnResized={onColumnResized}
+                    onColumnSorted={onColumnSorted}
+                    onSelectAll={onSelectAll}
+                    onUpdateColumns={onUpdateColumns}
+                    showEventsSelect={false}
+                    showSelectAllCheckbox={showCheckboxes}
+                    sort={sort}
+                    timelineId={timelineId}
+                    toggleColumn={toggleColumn}
+                  />
 
-            <Events
-              containerElementRef={containerElementRef.current!}
-              actionsColumnWidth={actionsColumnWidth}
-              addNoteToEvent={addNoteToEvent}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
-              data={data}
-              docValueFields={docValueFields}
-              eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
-              id={timelineId}
-              isEventViewer={isEventViewer}
-              loadingEventIds={loadingEventIds}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
-              onRowSelected={onRowSelected}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
-              pinnedEventIds={pinnedEventIds}
-              refetch={refetch}
-              rowRenderers={rowRenderers}
-              onRuleChange={onRuleChange}
-              selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
-            />
-          </EventsTable>
-        </TimelineBody>
+                  <Events
+                    actionsColumnWidth={actionsColumnWidth}
+                    addNoteToEvent={addNoteToEvent}
+                    browserFields={browserFields}
+                    columnHeaders={columnHeaders}
+                    columnRenderers={columnRenderers}
+                    data={data}
+                    expanded={expanded}
+                    eventIdToNoteIds={eventIdToNoteIds}
+                    getNotesByIds={getNotesByIds}
+                    id={timelineId}
+                    isEventViewer={isEventViewer}
+                    loadingEventIds={loadingEventIds}
+                    onColumnResized={onColumnResized}
+                    onPinEvent={onPinEvent}
+                    onRowSelected={onRowSelected}
+                    onUnPinEvent={onUnPinEvent}
+                    onEventToggled={onEventToggled}
+                    pinnedEventIds={pinnedEventIds}
+                    refetch={refetch}
+                    rowRenderers={rowRenderers}
+                    onRuleChange={onRuleChange}
+                    selectedEventIds={selectedEventIds}
+                    showCheckboxes={showCheckboxes}
+                    toggleColumn={toggleColumn}
+                    updateNote={updateNote}
+                  />
+                </EventsTable>
+              </TimelineBody>
+            </div>
+          </ScrollableFlexItem>
+          <ScrollableFlexItem grow={1}>
+            {expanded.eventId && (
+              <ExpandableEvent
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                event={detailsData || emptyDetails}
+                forceExpand={!!expanded.eventId && !loading}
+                id={expanded.eventId!}
+                onUpdateColumns={onUpdateColumns}
+                timelineId={timelineId}
+                toggleColumn={toggleColumn}
+              />
+            )}
+          </ScrollableFlexItem>
+        </FullWithFlexGroup>
         <TimelineBodyGlobalStyle />
       </>
     );
   }
 );
-Body.displayName = 'Body';
