@@ -25,7 +25,7 @@ In this document, you’ll learn how to:
 * If a read-only indicator appears in {kib}, you have insufficient privileges
 to create or save index patterns. The buttons to create new index patterns or
 save existing index patterns are not visible. For more information,
-see <<xpack-security-authorization,Granting access to {kib}>>.
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
 [[settings-create-pattern]]
