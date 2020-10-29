@@ -1461,7 +1461,7 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsRemoveReferencesToOptions = {}
   ): Promise<SavedObjectsRemoveReferencesToResponse> {
-    const { namespace, refresh } = options;
+    const { namespace, refresh = true } = options;
     const allTypes = this._registry.getAllTypes().map((t) => t.name);
 
     // we need to target all SO indices as all types of objects may have references to the given SO.

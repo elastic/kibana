@@ -4,7 +4,7 @@
 
 ## SavedObjectsRemoveReferencesToOptions.refresh property
 
-Elasticsearch only supports boolean values for this operation
+Elasticsearch only supports boolean values for this operation. Defaults to `true`
 
 <b>Signature:</b>
 

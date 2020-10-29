@@ -2468,6 +2468,16 @@ describe('SavedObjectsRepository', () => {
         expect(client.updateByQuery).toHaveBeenCalledTimes(1);
       });
 
+      it('uses the correct default `refresh` value', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            refresh: true,
+          }),
+          expect.any(Object)
+        );
+      });
+
       it('merges output of getSearchDsl into es request body', async () => {
         const query = { query: 1, aggregations: 2 };
         getSearchDslNS.getSearchDsl.mockReturnValue(query);

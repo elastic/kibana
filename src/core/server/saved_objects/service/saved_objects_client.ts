@@ -214,7 +214,7 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
  * @public
  */
 export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
-  /** Elasticsearch only supports boolean values for this operation */
+  /** Elasticsearch only supports boolean values for this operation. Defaults to `true` */
   refresh?: boolean;
 }
 
