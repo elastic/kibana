@@ -184,6 +184,13 @@ export function SuggestionPanel({
       activeVisualizationId: currentVisualizationId,
       visualizationState: currentVisualizationState,
     })
+      .filter(({ visualizationId, visualizationState: suggestionVisualizationState }) => {
+        const suggestionVisualization = visualizationMap[visualizationId];
+        // filter out visualizations with errors
+        return (
+          suggestionVisualization.getErrorMessages(suggestionVisualizationState, frame) == null
+        );
+      })
       .map((suggestion) => ({
         ...suggestion,
         previewExpression: preparePreviewExpression(
