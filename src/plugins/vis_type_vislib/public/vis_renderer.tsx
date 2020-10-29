@@ -20,38 +20,40 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { KibanaContextProvider } from '../../kibana_react/public';
+import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
-import { TimelionVisDependencies } from './plugin';
-import { TimelionRenderValue } from './timelion_vis_fn';
-// @ts-ignore
-const TimelionVisComponent = lazy(() => import('./components/timelion_vis_component'));
+import { ChartsPluginSetup } from '../../charts/public';
 
-export const getTimelionVisRenderer: (
-  deps: TimelionVisDependencies
-) => ExpressionRenderDefinition<TimelionRenderValue> = (deps) => ({
-  name: 'timelion_vis',
-  displayName: 'Timelion visualization',
+import { VisTypeVislibCoreSetup } from './plugin';
+import { VislibRenderValue, vislibVisName } from './vis_type_vislib_vis_fn';
+
+function shouldShowNoResultsMessage(visData: any, visType: string): boolean {
+  if (['goal', 'gauge'].includes(visType)) {
+    return false;
+  }
+
+  const rows: object[] | undefined = visData?.rows;
+  const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
+
+  return Boolean(isZeroHits);
+}
+
+const VislibWrapper = lazy(() => import('./vis_wrapper'));
+
+export const getVislibVisRenderer: (
+  core: VisTypeVislibCoreSetup,
+  charts: ChartsPluginSetup
+) => ExpressionRenderDefinition<VislibRenderValue> = (core, charts) => ({
+  name: vislibVisName,
   reuseDomNode: true,
-  render: (domNode, { visData, visParams }, handlers) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+  render: async (domNode, config, handlers) => {
+    const showNoResult = shouldShowNoResultsMessage(config.visData, config.visType);
 
-    const [seriesList] = visData.sheet;
-    const showNoResult = !seriesList || !seriesList.list.length;
+    handlers.onDestroy(() => unmountComponentAtNode(domNode));
 
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-        <KibanaContextProvider services={{ ...deps }}>
-          <TimelionVisComponent
-            interval={visParams.interval}
-            seriesList={seriesList}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-          />
-        </KibanaContextProvider>
+        <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
       </VisualizationContainer>,
       domNode
     );
