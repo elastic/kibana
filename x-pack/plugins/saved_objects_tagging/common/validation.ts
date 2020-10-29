@@ -9,7 +9,7 @@ import { Tag } from './types';
 
 export const tagNameMinLength = 2;
 export const tagNameMaxLength = 50;
-export const tagDescriptionMaxLength = 200;
+export const tagDescriptionMaxLength = 100;
 
 const hexColorRegexp = /^#[0-9A-F]{6}$/i;
 const nameValidCharsRegexp = /^[0-9A-Z:\-_\s]+$/i;

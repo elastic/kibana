@@ -56,8 +56,8 @@ describe('Tag attributes validation', () => {
 
   describe('validateTagDescription', () => {
     it('returns an error message if the description is too long', () => {
-      expect(validateTagDescription('a'.repeat(205))).toMatchInlineSnapshot(
-        `"Tag description may not exceed 200 characters"`
+      expect(validateTagDescription('a'.repeat(101))).toMatchInlineSnapshot(
+        `"Tag description may not exceed 100 characters"`
       );
     });
 
