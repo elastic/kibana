@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { SaveTimelineButton } from './save_timeline_button';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react-hooks';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
