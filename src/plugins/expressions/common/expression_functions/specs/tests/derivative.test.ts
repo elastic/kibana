@@ -81,6 +81,44 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
+  it('treats 0 as real data', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [
+          {},
+          { val: null },
+          { val: undefined },
+          { val: 1 },
+          { val: 2 },
+          { val: 0 },
+          { val: undefined },
+          { val: 0 },
+          { val: undefined },
+          { val: 0 },
+          { val: 8 },
+          { val: 0 },
+        ],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      2 - 1,
+      0 - 2,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      8 - 0,
+      0 - 8,
+    ]);
+  });
+
   it('calculates derivative for multiple series', () => {
     const result = runFn(
       {
@@ -250,7 +288,7 @@ describe('interpreter/functions#derivative', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 7 - 5, 3 - 7, 2 - 3]);
   });
 
-  it('casts values to number before calculating cumulative sum for NaN like values', () => {
+  it('casts values to number before calculating derivative for NaN like values', () => {
     const result = runFn(
       {
         type: 'datatable',
