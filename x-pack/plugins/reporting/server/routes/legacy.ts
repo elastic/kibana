@@ -38,7 +38,7 @@ export function registerLegacy(
       },
 
       userHandler(async (user, context, req, res) => {
-        const message = `The following URL is deprecated and will stop working in the next major version: ${req.url.path}`;
+        const message = `The following URL is deprecated and will stop working in the next major version: ${req.url.pathname}${req.url.search}`;
         logger.warn(message, ['deprecation']);
 
         try {
