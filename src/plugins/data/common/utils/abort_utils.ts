@@ -36,29 +36,47 @@ export class AbortError extends Error {
  *
  * @param signal The `AbortSignal` to generate the `Promise` from
  */
-export function toPromise(signal: AbortSignal): Promise<never> {
-  return new Promise((resolve, reject) => {
-    if (signal.aborted) reject(new AbortError());
-    const abortHandler = () => {
+export function toPromise(signal: AbortSignal): Promise<never> & { cleanup: () => void } {
+  let abortHandler: () => void;
+  const cleanup = () => {
+    if (abortHandler) {
       signal.removeEventListener('abort', abortHandler);
+    }
+  };
+  const promise = new Promise<never>((resolve, reject) => {
+    if (signal.aborted) reject(new AbortError());
+    abortHandler = () => {
+      cleanup();
       reject(new AbortError());
     };
     signal.addEventListener('abort', abortHandler);
   });
+
+  return Object.assign(promise, { cleanup });
 }
 
 /**
- * Returns an `AbortSignal` that will be aborted when the first of the given signals aborts.
+ * Returns an `AbortController` that will be aborted when the first of the given signals aborts.
  *
  * @param signals
  */
-export function getCombinedSignal(signals: AbortSignal[]) {
+export function getCombinedController(signals: AbortSignal[]) {
   const controller = new AbortController();
+
   if (signals.some((signal) => signal.aborted)) {
     controller.abort();
   } else {
     const promises = signals.map((signal) => toPromise(signal));
-    Promise.race(promises).catch(() => controller.abort());
+    const cleanup = () => {
+      promises.forEach((p) => p.cleanup());
+      controller.signal.removeEventListener('abort', cleanup);
+    };
+    controller.signal.addEventListener('abort', cleanup);
+    Promise.race(promises).catch(() => {
+      cleanup();
+      controller.abort();
+    });
   }
-  return controller.signal;
+
+  return controller;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AbortError, toPromise, getCombinedSignal } from './abort_utils';
+import { AbortError, toPromise, getCombinedController } from './abort_utils';
 
 jest.useFakeTimers();
 
@@ -58,13 +58,30 @@ describe('AbortUtils', () => {
         expect(whenRejected).toBeCalled();
         expect(whenRejected.mock.calls[0][0]).toBeInstanceOf(AbortError);
       });
+
+      test('should expose cleanup handler', () => {
+        const controller = new AbortController();
+        const promise = toPromise(controller.signal);
+        expect(promise.cleanup).toBeDefined();
+      });
+
+      test('calling clean up handler prevents rejects', async () => {
+        const controller = new AbortController();
+        const promise = toPromise(controller.signal);
+        const whenRejected = jest.fn();
+        promise.catch(whenRejected);
+        promise.cleanup();
+        controller.abort();
+        await flushPromises();
+        expect(whenRejected).not.toBeCalled();
+      });
     });
   });
 
-  describe('getCombinedSignal', () => {
-    test('should return an AbortSignal', () => {
-      const signal = getCombinedSignal([]);
-      expect(signal instanceof AbortSignal).toBe(true);
+  describe('getCombinedController', () => {
+    test('should return an AbortController', () => {
+      const controller = getCombinedController([]);
+      expect(controller).toBeInstanceOf(AbortController);
     });
 
     test('should not abort if none of the signals abort', async () => {
@@ -72,7 +89,7 @@ describe('AbortUtils', () => {
       const controller2 = new AbortController();
       setTimeout(() => controller1.abort(), 2000);
       setTimeout(() => controller2.abort(), 1000);
-      const signal = getCombinedSignal([controller1.signal, controller2.signal]);
+      const signal = getCombinedController([controller1.signal, controller2.signal]).signal;
       expect(signal.aborted).toBe(false);
       jest.advanceTimersByTime(500);
       await flushPromises();
@@ -84,7 +101,7 @@ describe('AbortUtils', () => {
       const controller2 = new AbortController();
       setTimeout(() => controller1.abort(), 2000);
       setTimeout(() => controller2.abort(), 1000);
-      const signal = getCombinedSignal([controller1.signal, controller2.signal]);
+      const signal = getCombinedController([controller1.signal, controller2.signal]).signal;
       expect(signal.aborted).toBe(false);
       jest.advanceTimersByTime(1000);
       await flushPromises();
@@ -95,7 +112,7 @@ describe('AbortUtils', () => {
       const controller1 = new AbortController();
       const controller2 = new AbortController();
       controller1.abort();
-      const signal = getCombinedSignal([controller1.signal, controller2.signal]);
+      const signal = getCombinedController([controller1.signal, controller2.signal]).signal;
       expect(signal.aborted).toBe(true);
     });
   });

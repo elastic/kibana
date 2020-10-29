@@ -24,13 +24,13 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
-  getCombinedSignal,
   AbortError,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
   ISessionService,
+  getCombinedController,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -171,16 +171,17 @@ export class SearchInterceptor {
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const combinedSignal = getCombinedSignal(signals);
+    const combinedController = getCombinedController(signals);
     const cleanup = () => {
       subscription.unsubscribe();
+      combinedController.signal.removeEventListener('abort', cleanup);
+      combinedController.abort();
     };
-
-    combinedSignal.addEventListener('abort', cleanup);
+    combinedController.signal.addEventListener('abort', cleanup);
 
     return {
       timeoutSignal,
-      combinedSignal,
+      combinedSignal: combinedController.signal,
       cleanup,
     };
   }
