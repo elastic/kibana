@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RuntimeFieldForm, FormState } from './runtime_field_form';
+export { RuntimeFieldEditorFlyout } from './runtime_field_editor_flyout';

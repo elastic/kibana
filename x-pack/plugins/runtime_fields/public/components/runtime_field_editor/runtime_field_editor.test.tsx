@@ -35,7 +35,7 @@ describe('Runtime field editor', () => {
     onChange = jest.fn();
   });
 
-  test('should render the <RuntimeFieldForm />)', () => {
+  test('should render the <RuntimeFieldForm />', () => {
     testBed = setup({ docLinks });
     const { component } = testBed;
 
