@@ -131,7 +131,7 @@ describe('getHealth()', () => {
     expect(result).toStrictEqual({
       executionHealth: {
         status: HealthStatus.OK,
-        timestamp: lastExecutionDateError,
+        timestamp: lastExecutionDate,
       },
       readHealth: {
         status: HealthStatus.OK,
@@ -139,7 +139,7 @@ describe('getHealth()', () => {
       },
       decryptionHealth: {
         status: HealthStatus.Warning,
-        timestamp: lastExecutionDate,
+        timestamp: lastExecutionDateError,
       },
     });
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -216,7 +216,7 @@ describe('getHealth()', () => {
     expect(result).toStrictEqual({
       executionHealth: {
         status: HealthStatus.Warning,
-        timestamp: lastExecutionDate,
+        timestamp: lastExecutionDateError,
       },
       readHealth: {
         status: HealthStatus.OK,
@@ -224,7 +224,7 @@ describe('getHealth()', () => {
       },
       decryptionHealth: {
         status: HealthStatus.OK,
-        timestamp: lastExecutionDateError,
+        timestamp: lastExecutionDate,
       },
     });
   });

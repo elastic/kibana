@@ -12,20 +12,29 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { alertsClientMock } from '../alerts_client.mock';
+import { HealthStatus } from '../types';
 const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
+const currentDate = new Date().toISOString();
 beforeEach(() => {
   jest.resetAllMocks();
   alertsClient.getHealth.mockResolvedValue({
-    hasDecryptionErrors: true,
-    hasUnknownErrors: true,
-    hasExecutionErrors: true,
-    hasReadErrors: true,
-    hasActionExecutionErrors: true,
+    decryptionHealth: {
+      status: HealthStatus.OK,
+      timestamp: currentDate,
+    },
+    executionHealth: {
+      status: HealthStatus.OK,
+      timestamp: currentDate,
+    },
+    readHealth: {
+      status: HealthStatus.OK,
+      timestamp: currentDate,
+    },
   });
 });
 
@@ -86,21 +95,26 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "alertingFrameworkHeath": Object {
-            "hasActionExecutionErrors": true,
-            "hasDecryptionErrors": true,
-            "hasExecutionErrors": true,
-            "hasReadErrors": true,
-            "hasUnknownErrors": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
           },
-          "hasPermanentEncryptionKey": false,
-          "isSufficientlySecure": true,
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: false,
+        isSufficientlySecure: true,
+      },
+    });
   });
 
   it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
@@ -117,21 +131,26 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "alertingFrameworkHeath": Object {
-            "hasActionExecutionErrors": true,
-            "hasDecryptionErrors": true,
-            "hasExecutionErrors": true,
-            "hasReadErrors": true,
-            "hasUnknownErrors": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
           },
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": true,
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: true,
+      },
+    });
   });
 
   it('evaluates missing security http info from the usage api to mean that the security plugin is disbled', async () => {
@@ -148,21 +167,26 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "alertingFrameworkHeath": Object {
-            "hasActionExecutionErrors": true,
-            "hasDecryptionErrors": true,
-            "hasExecutionErrors": true,
-            "hasReadErrors": true,
-            "hasUnknownErrors": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
           },
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": true,
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: true,
+      },
+    });
   });
 
   it('evaluates security enabled, and missing ssl info from the usage api to mean that the user cannot generate keys', async () => {
@@ -179,21 +203,26 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "alertingFrameworkHeath": Object {
-            "hasActionExecutionErrors": true,
-            "hasDecryptionErrors": true,
-            "hasExecutionErrors": true,
-            "hasReadErrors": true,
-            "hasUnknownErrors": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
           },
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": false,
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: false,
+      },
+    });
   });
 
   it('evaluates security enabled, SSL info present but missing http info from the usage api to mean that the user cannot generate keys', async () => {
@@ -212,21 +241,26 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "alertingFrameworkHeath": Object {
-            "hasActionExecutionErrors": true,
-            "hasDecryptionErrors": true,
-            "hasExecutionErrors": true,
-            "hasReadErrors": true,
-            "hasUnknownErrors": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
           },
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": false,
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: false,
+      },
+    });
   });
 
   it('evaluates security and tls enabled to mean that the user can generate keys', async () => {
@@ -245,20 +279,25 @@ describe('healthRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "alertingFrameworkHeath": Object {
-            "hasActionExecutionErrors": true,
-            "hasDecryptionErrors": true,
-            "hasExecutionErrors": true,
-            "hasReadErrors": true,
-            "hasUnknownErrors": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
           },
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": true,
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: true,
+      },
+    });
   });
 });
