@@ -221,5 +221,21 @@ describe('TagsClient', () => {
       expect(soClient.removeReferencesTo).toHaveBeenCalledTimes(1);
       expect(soClient.removeReferencesTo).toHaveBeenCalledWith('tag', tagId);
     });
+
+    it('calls `soClient.removeReferencesTo` before `soClient.delete`', async () => {
+      await tagsClient.delete(tagId);
+
+      expect(soClient.removeReferencesTo.mock.invocationCallOrder[0]).toBeLessThan(
+        soClient.delete.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not calls `soClient.delete` if `soClient.removeReferencesTo` throws', async () => {
+      soClient.removeReferencesTo.mockRejectedValue(new Error('something went wrong'));
+
+      await expect(tagsClient.delete(tagId)).rejects.toThrowError();
+
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
   });
 });

@@ -56,10 +56,11 @@ export class TagsClient implements ITagsClient {
   }
 
   public async delete(id: string) {
-    await this.soClient.delete(this.type, id);
     // `removeReferencesTo` security check is the same as a `delete` operation's, so we can use the scoped client here.
     // If that was to change, we would need to use the internal client instead. A FTR test is ensuring
     // that this behave properly even with only 'tag' SO type write permission.
     await this.soClient.removeReferencesTo(this.type, id);
+    // deleting the tag after reference removal in case of failure during the first call.
+    await this.soClient.delete(this.type, id);
   }
 }
