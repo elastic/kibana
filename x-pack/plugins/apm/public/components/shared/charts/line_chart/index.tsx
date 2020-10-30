@@ -23,7 +23,6 @@ import { TimeSeries } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useChartsSync } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
-import { Annotations } from '../annotations';
 import { ChartContainer } from '../chart_container';
 import { onBrushEnd } from '../helper/helper';
 

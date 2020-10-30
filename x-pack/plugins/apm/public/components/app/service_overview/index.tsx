@@ -9,16 +9,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { useTrackPageview } from '../../../../../observability/public';
+import { isRumAgentName } from '../../../../common/agent_name';
 import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { ErroneousTransactionsRateChart } from '../../shared/charts/erroneous_transactions_rate_chart';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 
-// const rowHeight = 310;
-// const latencyChartRowHeight = 230;
-const rowHeight = 0;
-const latencyChartRowHeight = 0;
+const rowHeight = 310;
+const latencyChartRowHeight = 230;
+
 const Row = styled(EuiFlexItem)`
   height: ${rowHeight}px;
 `;
@@ -34,10 +34,14 @@ const TableLinkFlexItem = styled(EuiFlexItem)`
 `;
 
 interface ServiceOverviewProps {
+  agentName?: string;
   serviceName: string;
 }
 
-export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
+export function ServiceOverview({
+  agentName,
+  serviceName,
+}: ServiceOverviewProps) {
   useTrackPageview({ app: 'apm', path: 'service_overview' });
   useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
 
@@ -119,21 +123,23 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
         </Row>
         <Row>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={4}>
-              <EuiPanel>
-                <EuiTitle size="xs">
-                  <h2>
-                    {i18n.translate(
-                      'xpack.apm.serviceOverview.errorRateChartTitle',
-                      {
-                        defaultMessage: 'Error rate',
-                      }
-                    )}
-                  </h2>
-                </EuiTitle>
-                <ErroneousTransactionsRateChart />
-              </EuiPanel>
-            </EuiFlexItem>
+            {!isRumAgentName(agentName) && (
+              <EuiFlexItem grow={4}>
+                <EuiPanel>
+                  <EuiTitle size="xs">
+                    <h2>
+                      {i18n.translate(
+                        'xpack.apm.serviceOverview.errorRateChartTitle',
+                        {
+                          defaultMessage: 'Error rate',
+                        }
+                      )}
+                    </h2>
+                  </EuiTitle>
+                  <ErroneousTransactionsRateChart />
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={6}>
               <EuiPanel>
                 <EuiFlexGroup>
