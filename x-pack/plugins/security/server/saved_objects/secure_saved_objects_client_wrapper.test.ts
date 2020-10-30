@@ -31,7 +31,9 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     createBadRequestError: jest.fn().mockImplementation((message) => new Error(message)),
     isNotFoundError: jest.fn().mockReturnValue(false),
   } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
-  const getSpacesService = jest.fn().mockReturnValue(true);
+  const getSpacesService = jest.fn().mockReturnValue({
+    namespaceToSpaceId: (namespace?: string) => (namespace ? namespace : 'default'),
+  });
 
   return {
     actions,
@@ -174,7 +176,9 @@ const expectObjectNamespaceFiltering = async (
   );
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
     'login:',
-    namespaces.filter((x) => x !== '*') // when we check what namespaces to redact, we don't check privileges for '*', only actual space IDs
+    ['some-other-namespace']
+    // when we check what namespaces to redact, we don't check privileges for '*', only actual space IDs
+    // we don't check privileges for authorizedNamespace either, as that was already checked earlier in the operation
   );
 };
 
@@ -206,12 +210,17 @@ const expectObjectsNamespaceFiltering = async (fn: Function, args: Record<string
     getMockCheckPrivilegesFailure // privilege check for namespace filtering
   );
 
-  const authorizedNamespace = args.options.namespace || 'default';
+  // the 'find' operation has options.namespaces, the others have options.namespace
+  const authorizedNamespaces = args.options.namespaces
+    ? args.options.namespaces
+    : args.options.namespace
+    ? [args.options.namespace]
+    : ['default'];
   const returnValue = {
     saved_objects: [
-      { namespaces: ['foo'] },
-      { namespaces: [authorizedNamespace] },
-      { namespaces: ['foo', authorizedNamespace] },
+      { namespaces: ['*'] },
+      { namespaces: authorizedNamespaces },
+      { namespaces: ['some-other-namespace', ...authorizedNamespaces] },
     ],
   };
 
@@ -224,17 +233,19 @@ const expectObjectsNamespaceFiltering = async (fn: Function, args: Record<string
   const result = await fn.bind(client)(...Object.values(args));
   expect(result).toEqual({
     saved_objects: [
-      { namespaces: ['?'] },
-      { namespaces: [authorizedNamespace] },
-      { namespaces: [authorizedNamespace, '?'] },
+      { namespaces: ['*'] },
+      { namespaces: authorizedNamespaces },
+      { namespaces: [...authorizedNamespaces, '?'] },
     ],
   });
 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
-  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith('login:', [
-    'foo',
-    authorizedNamespace,
-  ]);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
+    'login:',
+    ['some-other-namespace']
+    // when we check what namespaces to redact, we don't check privileges for '*', only actual space IDs
+    // we don't check privileges for authorizedNamespaces either, as that was already checked earlier in the operation
+  );
 };
 
 function getMockCheckPrivilegesSuccess(actions: string | string[], namespaces?: string | string[]) {
@@ -964,8 +975,8 @@ describe('#get', () => {
 describe('#deleteFromNamespaces', () => {
   const type = 'foo';
   const id = `${type}-id`;
-  const namespace1 = 'foo-namespace';
-  const namespace2 = 'bar-namespace';
+  const namespace1 = 'default';
+  const namespace2 = 'another-namespace';
   const namespaces = [namespace1, namespace2];
   const privilege = `mock-saved_object:${type}/share_to_space`;
 
