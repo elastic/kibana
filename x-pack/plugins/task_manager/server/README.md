@@ -141,18 +141,34 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 ## Task result
 
 The task runner's `run` method is expected to return a promise that resolves to undefined or to an object that looks like the following:
+
+|Property|Description|Type|
+|---|---|---|
+|runAt| Optional. If specified, this is used as the tasks' next `runAt`, overriding the default system scheduler. | Date ISO String | 
+|schedule| Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule.  | { interval: string } | 
+|error| Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.| Error |
+|state| Optional, this will be passed into the next run of the task, if this is a recurring task. |Record<string, unknown>|
+
+### Examples
+
 ```js
 {
   // Optional, if specified, this is used as the tasks' nextRun, overriding
   // the default system scheduler.
   runAt: "2020-07-24T17:34:35.272Z",
 
-  // Optional, an error object, logged out as a warning. The pressence of this
-  // property indicates that the task did not succeed.
   error: { message: 'Hrumph!' },
 
-  // Optional, this will be passed into the next run of the task, if
-  // this is a recurring task.
+  state: {
+    anything: 'goes here',
+  },
+}
+```
+
+```js
+{
+  schedule: { interval: '30s' },
+  
   state: {
     anything: 'goes here',
   },
