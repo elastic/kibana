@@ -12,7 +12,7 @@ import { parseInterval } from 'src/plugins/data/common';
 
 type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
-interface TimeScaleArgs {
+export interface TimeScaleArgs {
   dateColumnId: string;
   inputColumnId: string;
   outputColumnId: string;
@@ -129,10 +129,8 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
       const defaultTimezone = moment().zoneName();
       moment.tz.setDefault(timeInfo.timeZone);
 
-      const timeBounds = timeInfo.timeRange && {
-        min: moment(timeInfo.timeRange.min),
-        max: moment(timeInfo.timeRange.max),
-      };
+      const timeBounds =
+        timeInfo.timeRange && data.query.timefilter.timefilter.calculateBounds(timeInfo.timeRange);
 
       const result = {
         ...input,
@@ -144,7 +142,7 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
           if (timeBounds && timeBounds.min) {
             startOfBucket = moment.max(startOfBucket, timeBounds.min);
           }
-          let endOfBucket = startOfBucket.add(intervalDuration);
+          let endOfBucket = startOfBucket.clone().add(intervalDuration);
           if (timeBounds && timeBounds.max) {
             endOfBucket = moment.min(endOfBucket, timeBounds.max);
           }

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { DatatableColumn } from 'src/plugins/expressions/common';
 import { IndexPattern } from '../../../index_patterns';
 
@@ -39,15 +38,11 @@ export const getDateMetaByDatatableColumn = ({
   getConfig,
 }: DateMetaByColumnDeps) => async (
   column: DatatableColumn
-): Promise<
-  undefined | { timeZone: string; timeRange?: { min?: number; max?: number }; interval: string }
-> => {
+): Promise<undefined | { timeZone: string; timeRange?: TimeRange; interval: string }> => {
   if (column.meta.source !== 'esaggs') return;
   if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) return;
   const params = column.meta.sourceParams.params as AggParamsDateHistogram;
-  const appliedTimeRange = column.meta.sourceParams.appliedTimeRange as
-    | { min?: number; max?: number }
-    | undefined;
+  const appliedTimeRange = column.meta.sourceParams.appliedTimeRange as TimeRange | undefined;
 
   const tz = inferTimeZone(
     params,
@@ -58,10 +53,7 @@ export const getDateMetaByDatatableColumn = ({
 
   const interval =
     params.interval === 'auto' && appliedTimeRange
-      ? calculateAutoTimeExpression({
-          from: moment(appliedTimeRange.min).toISOString(),
-          to: moment(appliedTimeRange.max).toISOString(),
-        })
+      ? calculateAutoTimeExpression(appliedTimeRange)
       : params.interval;
 
   if (!interval) {

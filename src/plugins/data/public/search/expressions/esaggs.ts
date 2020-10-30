@@ -306,8 +306,8 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
                 args.timeFields &&
                 args.timeFields.includes(column.aggConfig.params.field?.name)
                   ? {
-                      min: resolvedTimeRange?.min?.valueOf(),
-                      max: resolvedTimeRange?.max?.valueOf(),
+                      from: resolvedTimeRange?.min?.toISOString(),
+                      to: resolvedTimeRange?.max?.toISOString(),
                     }
                   : undefined,
               ...column.aggConfig.serialize(),

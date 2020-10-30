@@ -20,6 +20,7 @@
 import { Assign } from '@kbn/utility-types';
 import { DatatableColumn } from 'src/plugins/expressions';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { TimeRange } from '../../query';
 import {
   AggConfigSerialized,
   AggConfigs,
@@ -93,9 +94,7 @@ export interface AggsCommonStart {
    */
   getDateMetaByDatatableColumn: (
     column: DatatableColumn
-  ) => Promise<
-    undefined | { timeZone: string; timeRange?: { min?: number; max?: number }; interval: string }
-  >;
+  ) => Promise<undefined | { timeZone: string; timeRange?: TimeRange; interval: string }>;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
