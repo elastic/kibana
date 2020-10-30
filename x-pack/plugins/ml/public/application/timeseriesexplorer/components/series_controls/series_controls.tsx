@@ -49,10 +49,15 @@ export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
  */
 const getDefaultFieldConfig = (
   fieldTypes: EntityFieldType[],
-  isAnomalousOnly: boolean
+  isAnomalousOnly: boolean,
+  applyTimeRange: boolean
 ): UiPartitionFieldsConfig => {
   return fieldTypes.reduce((acc, f) => {
-    acc[f] = { anomalousOnly: isAnomalousOnly, sort: { by: 'anomaly_score', order: 'desc' } };
+    acc[f] = {
+      applyTimeRange,
+      anomalousOnly: isAnomalousOnly,
+      sort: { by: 'anomaly_score', order: 'desc' },
+    };
     return acc;
   }, {} as UiPartitionFieldsConfig);
 };
@@ -113,7 +118,10 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         entityControls.map((v) => v.fieldType),
         !storageFieldsConfig
           ? true
-          : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly)
+          : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly),
+        !storageFieldsConfig
+          ? true
+          : Object.values(storageFieldsConfig).some((v) => !!v?.applyTimeRange)
       ),
       ...(!storageFieldsConfig ? {} : storageFieldsConfig),
     };
@@ -234,6 +242,17 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
           if (updatedResultConfig.hasOwnProperty(c)) {
             updatedResultConfig[c as EntityFieldType]!.anomalousOnly =
               updatedFieldConfig.anomalousOnly;
+          }
+        }
+      }
+
+      if (resultFieldsConfig[fieldType]?.applyTimeRange !== updatedFieldConfig.applyTimeRange) {
+        // In case time range selector has been changed
+        // we need to change it for all the other fields
+        for (const c in updatedResultConfig) {
+          if (updatedResultConfig.hasOwnProperty(c)) {
+            updatedResultConfig[c as EntityFieldType]!.applyTimeRange =
+              updatedFieldConfig.applyTimeRange;
           }
         }
       }

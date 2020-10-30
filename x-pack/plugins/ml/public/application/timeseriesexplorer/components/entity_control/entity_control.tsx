@@ -10,25 +10,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButtonIcon,
-  EuiSwitch,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexItem,
   EuiFormRow,
-  EuiPopover,
-  EuiRadioGroup,
-  EuiHorizontalRule,
-  EuiToolTip,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiRadioGroupOption,
   EuiHealth,
   EuiHighlight,
 } from '@elastic/eui';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { UiPartitionFieldConfig } from '../series_controls/series_controls';
 import { getSeverityColor } from '../../../../../common';
+import { EntityConfig } from './entity_config';
 
 export interface Entity {
   fieldName: string;
@@ -173,41 +165,8 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     );
   };
 
-  getSortOptions = (): EuiRadioGroupOption[] => {
-    return [
-      {
-        id: 'anomaly_score',
-        label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByScoreLabel', {
-          defaultMessage: 'Anomaly score',
-        }),
-        disabled: !this.props.config?.anomalousOnly && this.props.isModelPlotEnabled,
-      },
-      {
-        id: 'name',
-        label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByNameLabel', {
-          defaultMessage: 'Name',
-        }),
-      },
-    ];
-  };
-
-  private readonly orderOptions: EuiRadioGroupOption[] = [
-    {
-      id: 'asc',
-      label: i18n.translate('xpack.ml.timeSeriesExplorer.ascOptionsOrderLabel', {
-        defaultMessage: 'asc',
-      }),
-    },
-    {
-      id: 'desc',
-      label: i18n.translate('xpack.ml.timeSeriesExplorer.descOptionsOrderLabel', {
-        defaultMessage: 'desc',
-      }),
-    },
-  ];
-
   render() {
-    const { entity, forceSelection } = this.props;
+    const { entity, forceSelection, isModelPlotEnabled, config, onConfigChange } = this.props;
     const { isLoading, options, selectedOptions } = this.state;
 
     const control = (
@@ -237,132 +196,12 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         renderOption={this.renderOption}
         data-test-subj={`mlSingleMetricViewerEntitySelection ${entity.fieldName}`}
         prepend={
-          <EuiPopover
-            ownFocus
-            button={
-              <EuiButtonIcon
-                color="text"
-                iconSize="xxl"
-                iconType="gear"
-                aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.editControlConfiguration', {
-                  defaultMessage: 'Edit field configuration',
-                })}
-                onClick={() => {
-                  this.setState({
-                    isEntityConfigPopoverOpen: !this.state.isEntityConfigPopoverOpen,
-                  });
-                }}
-                data-test-subj={`mlSingleMetricViewerEntitySelectionConfigButton_${entity.fieldName}`}
-              />
-            }
-            isOpen={this.state.isEntityConfigPopoverOpen}
-            closePopover={() => {
-              this.setState({
-                isEntityConfigPopoverOpen: false,
-              });
-            }}
-          >
-            <div
-              data-test-subj={`mlSingleMetricViewerEntitySelectionConfigPopover_${entity.fieldName}`}
-            >
-              <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    label={
-                      <FormattedMessage
-                        id="xpack.ml.timeSeriesExplorer.anomalousOnlyLabel"
-                        defaultMessage="Anomalous only"
-                      />
-                    }
-                    checked={!!this.props.config?.anomalousOnly}
-                    onChange={(e) => {
-                      const isAnomalousOnly = e.target.checked;
-                      this.props.onConfigChange(this.props.entity.fieldType, {
-                        anomalousOnly: isAnomalousOnly,
-                        sort: {
-                          order: this.props.config.sort.order,
-                          by: this.props.config.sort.by,
-                        },
-                      });
-                    }}
-                    compressed
-                    data-test-subj={`mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entity.fieldName}`}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false} style={{ width: '16px', height: '24px' }}>
-                  {!this.props.config?.anomalousOnly ? (
-                    <EuiToolTip
-                      position="top"
-                      content={
-                        this.props.isModelPlotEnabled ? (
-                          <FormattedMessage
-                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo"
-                            defaultMessage="The list contains values from the model plot results."
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsAllRecordsInfo"
-                            defaultMessage="The list contains values from all records created during the lifetime of the job."
-                          />
-                        )
-                      }
-                    >
-                      <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
-                    </EuiToolTip>
-                  ) : null}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiHorizontalRule margin="s" />
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.sortByLabel"
-                    defaultMessage="Sort by"
-                  />
-                }
-              >
-                <EuiRadioGroup
-                  options={this.getSortOptions()}
-                  idSelected={this.props.config?.sort?.by}
-                  onChange={(id) => {
-                    this.props.onConfigChange(this.props.entity.fieldType, {
-                      sort: {
-                        order: this.props.config.sort.order,
-                        by: id,
-                      },
-                    });
-                  }}
-                  compressed
-                  data-test-subj={`mlSingleMetricViewerEntitySelectionConfigSortBy_${entity.fieldName}`}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.orderLabel"
-                    defaultMessage="Order"
-                  />
-                }
-              >
-                <EuiRadioGroup
-                  options={this.orderOptions}
-                  idSelected={this.props.config?.sort?.order}
-                  onChange={(id) => {
-                    this.props.onConfigChange(this.props.entity.fieldType, {
-                      sort: {
-                        by: this.props.config.sort.by,
-                        order: id,
-                      },
-                    });
-                  }}
-                  compressed
-                  data-test-subj={`mlSingleMetricViewerEntitySelectionConfigOrder_${entity.fieldName}`}
-                />
-              </EuiFormRow>
-            </div>
-          </EuiPopover>
+          <EntityConfig
+            entity={entity}
+            isModelPlotEnabled={isModelPlotEnabled}
+            config={config}
+            onConfigChange={onConfigChange}
+          />
         }
       />
     );

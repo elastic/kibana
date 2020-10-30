@@ -10,7 +10,18 @@ export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
 
 export type PartitionFieldConfig =
   | {
+      /**
+       * Relevant for jobs with enabled model plot.
+       * If true, entity values are based on records with anomalies.
+       * Otherwise aggregated from the model plot results.
+       */
       anomalousOnly: boolean;
+      /**
+       * Relevant for jobs with disabled model plot.
+       * If true, entity values are filtered by the active time range.
+       * If false, the lists consist of the values from all existing records.
+       */
+      applyTimeRange: boolean;
       sort: {
         by: string; // 'anomaly_score' | 'name';
         order: string; // 'asc' | 'desc';
