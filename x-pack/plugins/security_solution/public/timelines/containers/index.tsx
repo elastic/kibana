@@ -31,6 +31,7 @@ import {
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
 import { TimelineId } from '../../../common/types/timeline';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -78,15 +79,15 @@ const initSortDefault = {
  *
  */
 class ActiveTimelineEvents {
-  private _request: TimelineEventsAllRequestOptions | null = null;
+  private _pageName: string = '';
   private _response: TimelineArgs | null = null;
 
-  getRequest() {
-    return this._request;
+  getPageName() {
+    return this._pageName;
   }
 
-  setRequest(req: TimelineEventsAllRequestOptions) {
-    this._request = req;
+  setPageName(pageName: string) {
+    this._pageName = pageName;
   }
 
   getResponse() {
@@ -114,6 +115,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+  const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
@@ -194,7 +196,7 @@ export const useTimelineEvents = ({
         return;
       }
 
-      if (id === TimelineId.active && deepEqual(request, activeTimeline.getRequest())) {
+      if (id === TimelineId.active && pageName !== activeTimeline.getPageName()) {
         abortCtrl.current.abort();
         setLoading(false);
         setTimelineResponse((prevResp) => {
@@ -233,7 +235,7 @@ export const useTimelineEvents = ({
                       updatedAt: Date.now(),
                     };
                     if (id === TimelineId.active) {
-                      activeTimeline.setRequest(request);
+                      activeTimeline.setPageName(pageName);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
                     return newTimelineResponse;
@@ -268,7 +270,7 @@ export const useTimelineEvents = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, id, notifications.toasts]
+    [data.search, id, notifications.toasts, pageName]
   );
 
   useEffect(() => {
