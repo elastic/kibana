@@ -36,6 +36,7 @@ interface ValueSuggestionsGetFnArgs {
   query: string;
   boolFilter?: any[];
   signal?: AbortSignal;
+  ignoreTimeRange?: boolean;
 }
 
 export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;
@@ -57,13 +58,13 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
     query,
     boolFilter,
     signal,
+    ignoreTimeRange,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
     const shouldSuggestValues = core!.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
     );
-    const ignoreTimeRange = core!.uiSettings.get<boolean>(
-      UI_SETTINGS.AUTOCOMPLETE_IGNORE_TIMERANGE
-    );
+    ignoreTimeRange =
+      ignoreTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_IGNORE_TIMERANGE);
     const { title } = indexPattern;
 
     if (field.type === 'boolean') {
@@ -72,9 +73,9 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       return [];
     }
 
-    const timeFilter = ignoreTimeRange
-      ? undefined
-      : getQueryService().timefilter.timefilter.createFilter(indexPattern);
+    const { timefilter } = getQueryService().timefilter;
+
+    const timeFilter = ignoreTimeRange ? undefined : timefilter.createFilter(indexPattern);
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     return await requestSuggestions(title, field, query, filters, signal);
