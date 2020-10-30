@@ -30,7 +30,7 @@ import {
   ISearchOptions,
   ES_SEARCH_STRATEGY,
   ISessionService,
-  getCombinedController,
+  getCombinedSignal,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -171,17 +171,17 @@ export class SearchInterceptor {
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const combinedController = getCombinedController(signals);
+    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedSignal(signals);
     const cleanup = () => {
       subscription.unsubscribe();
-      combinedController.signal.removeEventListener('abort', cleanup);
-      combinedController.abort();
+      combinedSignal.removeEventListener('abort', cleanup);
+      cleanupCombinedSignal();
     };
-    combinedController.signal.addEventListener('abort', cleanup);
+    combinedSignal.addEventListener('abort', cleanup);
 
     return {
       timeoutSignal,
-      combinedSignal: combinedController.signal,
+      combinedSignal,
       cleanup,
     };
   }

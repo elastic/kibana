@@ -90,7 +90,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           })
         );
       }),
-      takeUntil(from(abortedPromise)),
+      takeUntil(from(abortedPromise.promise)),
       catchError((e: any) => {
         // If we haven't received the response to the initial request, including the ID, then
         // we don't need to send a follow-up request to delete this search. Otherwise, we

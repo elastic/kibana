@@ -99,7 +99,7 @@ export class Execution<
    * Races a given promise against the "abort" event of `abortController`.
    */
   private race<T>(promise: Promise<T>): Promise<T> {
-    return Promise.race<T>([this.abortRejection, promise]);
+    return Promise.race<T>([this.abortRejection.promise, promise]);
   }
 
   /**
