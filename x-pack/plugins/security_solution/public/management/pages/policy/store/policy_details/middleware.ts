@@ -34,10 +34,11 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
       const id = policyIdFromParams(state);
       let policyItem: PolicyData;
+      let policyItemDefault: PolicyData;
 
       try {
         policyItem = (await sendGetPackagePolicy(http, id)).item;
-        const policyItemDefault = cloneDeep(policyItem);
+        policyItemDefault = cloneDeep(policyItem);
         // sets default user notification message if policy config message is empty
         if (policyItemDefault.inputs[0].config.policy.value.windows.popup.malware.message === '') {
           policyItemDefault.inputs[0].config.policy.value.windows.popup.malware.message =
@@ -56,7 +57,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       dispatch({
         type: 'serverReturnedPolicyDetailsData',
         payload: {
-          policyItem,
+          policyItem: policyItemDefault,
         },
       });
 
