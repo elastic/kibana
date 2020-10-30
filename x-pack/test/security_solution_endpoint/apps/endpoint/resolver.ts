@@ -285,7 +285,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
         await queryBar.setQuery('');
         await queryBar.submitQuery();
-        const expectedAlertData = ['1 library', '157 file', '520 registry', '3 file', '5 library'];
+        const expectedAlertData = ['1 library', '157 file', '520 registry', '3 file'];
         await pageObjects.hosts.navigateToEventsPanel();
         await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
         await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
