@@ -84,7 +84,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiStat
-                titleSize="s"
+                titleSize="xs"
                 title={`${numeral(anomaly.typical).format('0.00a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateTitle',
                   {
@@ -102,7 +102,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiStat
-                titleSize="s"
+                titleSize="xs"
                 title={`${numeral(anomaly.actual).format('0.00a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateTitle',
                   {
