@@ -248,7 +248,6 @@ describe('createLayerDescriptor', () => {
         sourceDescriptor: {
           applyGlobalQuery: true,
           destGeoField: 'server.geo.location',
-          geoField: undefined,
           id: '12345',
           indexPatternId: 'id',
           metrics: [
@@ -582,7 +581,6 @@ describe('createLayerDescriptor', () => {
         sourceDescriptor: {
           applyGlobalQuery: true,
           destGeoField: 'destination.geo.location',
-          geoField: undefined,
           id: '12345',
           indexPatternId: 'id',
           metrics: [

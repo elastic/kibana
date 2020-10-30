@@ -78,7 +78,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       id: typeof descriptor.id === 'string' ? descriptor.id : uuid(),
       type: descriptor.type ? descriptor.type : '',
       indexPatternId: descriptor.indexPatternId,
-      geoField: descriptor.geoField,
       applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
     };
   }
