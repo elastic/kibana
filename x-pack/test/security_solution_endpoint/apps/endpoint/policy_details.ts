@@ -196,28 +196,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-              policy: {
-                linux: {
-                  events: { file: false, network: true, process: true },
-                  logging: { file: 'info' },
-                },
-                mac: {
-                  events: { file: false, network: true, process: true },
-                  logging: { file: 'info' },
-                  malware: { mode: 'prevent' },
-                },
-                windows: {
-                  events: {
-                    dll_and_driver_load: true,
-                    dns: true,
-                    file: false,
-                    network: true,
-                    process: true,
-                    registry: true,
-                    security: true,
+                popup: {
+                  malware: {
+                    enabled: true,
+                    message: '',
                   },
-                  logging: { file: 'info' },
-                  malware: { mode: 'prevent' },
+                },
+              },
+              windows: {
+                events: {
+                  dll_and_driver_load: true,
+                  dns: true,
+                  file: false,
+                  network: true,
+                  process: true,
+                  registry: true,
+                  security: true,
+                },
+                logging: { file: 'info' },
+                malware: { mode: 'prevent' },
+                popup: {
+                  malware: {
+                    enabled: true,
+                    message: '',
+                  },
                 },
               },
             },
