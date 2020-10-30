@@ -33,7 +33,7 @@ export interface CustomPaletteState {
 
 export interface SystemPaletteArguments {
   name: string;
-  params: unknown;
+  params?: unknown;
 }
 
 export interface PaletteOutput<T = unknown> {
@@ -144,6 +144,19 @@ export function systemPalette(): ExpressionFunctionDefinition<
         help: i18n.translate('charts.functions.systemPalette.args.nameHelpText', {
           defaultMessage: 'Name of the palette in the palette list',
         }),
+        options: [
+          'default',
+          'kibana_palette',
+          'custom',
+          'status',
+          'temperature',
+          'complimentary',
+          'negative',
+          'positive',
+          'cool',
+          'warm',
+          'gray',
+        ],
       },
       params: {
         help: i18n.translate('charts.functions.systemPalette.args.paramsHelpText', {

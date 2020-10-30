@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import { palette, defaultCustomColors } from './palette';
-import { ExecutionContext } from '../../expressions/common';
+import {
+  palette,
+  defaultCustomColors,
+  systemPalette,
+  PaletteOutput,
+  CustomPaletteState,
+} from './palette';
+import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('palette', () => {
-  const fn = (
+  const fn = functionWrapper(palette()) as (
     context: null,
-    args: { color?: string[]; gradient?: boolean; reverse?: boolean } = {}
-  ) => {
-    return palette().fn(
-      context,
-      { gradient: false, reverse: false, ...args },
-      {} as ExecutionContext
-    );
-  };
+    args?: { color?: string[]; gradient?: boolean; reverse?: boolean }
+  ) => PaletteOutput<CustomPaletteState>;
 
   it('results a palette', () => {
     const result = fn(null);
@@ -81,5 +81,27 @@ describe('palette', () => {
         expect(result.params!.colors).toEqual(defaultCustomColors);
       });
     });
+  });
+});
+
+describe('system_palette', () => {
+  const fn = functionWrapper(systemPalette()) as (
+    context: null,
+    args: { name: string; params?: unknown }
+  ) => PaletteOutput<unknown>;
+
+  it('results a palette', () => {
+    const result = fn(null, { name: 'test' });
+    expect(result).toHaveProperty('type', 'palette');
+  });
+
+  it('returns the name', () => {
+    const result = fn(null, { name: 'test' });
+    expect(result).toHaveProperty('name', 'test');
+  });
+
+  it('passes params through', () => {
+    const result = fn(null, { name: 'test', params: { customProp: 123 } });
+    expect(result).toHaveProperty('params', { customProp: 123 });
   });
 });
