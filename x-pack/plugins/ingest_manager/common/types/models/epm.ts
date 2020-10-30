@@ -277,6 +277,9 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
 };
 
+export const requiredPackages = ['system', 'endpoint'] as const;
+export type RequiredPackage = typeof requiredPackages[number];
+
 export enum DefaultPackages {
   system = 'system',
   endpoint = 'endpoint',

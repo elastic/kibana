@@ -5,6 +5,7 @@
  */
 
 import { SavedObject } from 'src/core/server';
+import { RequiredPackage, requiredPackages } from '../../../../common';
 import {
   AssetType,
   Installable,
@@ -35,14 +36,8 @@ export {
 } from './install';
 export { removeInstallation } from './remove';
 
-type RequiredPackage = 'system' | 'endpoint';
-const requiredPackages: Record<RequiredPackage, boolean> = {
-  system: true,
-  endpoint: true,
-};
-
 export function isRequiredPackage(value: string): value is RequiredPackage {
-  return value in requiredPackages;
+  return requiredPackages.some((required) => value === required);
 }
 
 export class PackageNotInstalledError extends Error {
