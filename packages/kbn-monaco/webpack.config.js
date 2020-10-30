@@ -19,33 +19,40 @@
 
 const path = require('path');
 
-const createLangWorkerConfig = (lang) => ({
-  mode: 'production',
-  entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
-  output: {
-    path: path.resolve(__dirname, 'target/public'),
-    filename: `${lang}.editor.worker.js`,
-  },
-  resolve: {
-    modules: ['node_modules'],
-    extensions: ['.js', '.ts', '.tsx'],
-  },
-  stats: 'errors-only',
-  module: {
-    rules: [
-      {
-        test: /\.(js|ts)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+const createLangWorkerConfig = (lang) => {
+  const entry =
+    lang === 'default'
+      ? 'monaco-editor/esm/vs/editor/editor.worker.js'
+      : path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`);
+
+  return {
+    mode: 'production',
+    entry,
+    output: {
+      path: path.resolve(__dirname, 'target/public'),
+      filename: `${lang}.editor.worker.js`,
+    },
+    resolve: {
+      modules: ['node_modules'],
+      extensions: ['.js', '.ts', '.tsx'],
+    },
+    stats: 'errors-only',
+    module: {
+      rules: [
+        {
+          test: /\.(js|ts)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            },
           },
         },
-      },
-    ],
-  },
-});
+      ],
+    },
+  };
+};
 
-module.exports = [createLangWorkerConfig('xjson')];
+module.exports = [createLangWorkerConfig('xjson'), createLangWorkerConfig('default')];

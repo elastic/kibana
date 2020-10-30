@@ -41,7 +41,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.flyoutTitle"
+              id="xpack.fleet.agentEnrollment.flyoutTitle"
               defaultMessage="Add agent"
             />
           </h2>
@@ -49,7 +49,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         <EuiSpacer size="l" />
         <EuiText>
           <FormattedMessage
-            id="xpack.ingestManager.agentEnrollment.agentDescription"
+            id="xpack.fleet.agentEnrollment.agentDescription"
             defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
           />
         </EuiText>
@@ -57,13 +57,13 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         <EuiTabs style={{ marginBottom: '-25px' }}>
           <EuiTab isSelected={mode === 'managed'} onClick={() => setMode('managed')}>
             <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.enrollFleetTabLabel"
+              id="xpack.fleet.agentEnrollment.enrollFleetTabLabel"
               defaultMessage="Enroll in Fleet"
             />
           </EuiTab>
           <EuiTab isSelected={mode === 'standalone'} onClick={() => setMode('standalone')}>
             <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.enrollStandaloneTabLabel"
+              id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
               defaultMessage="Run standalone"
             />
           </EuiTab>
@@ -82,7 +82,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ingestManager.agentEnrollment.cancelButtonLabel"
+                id="xpack.fleet.agentEnrollment.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -90,7 +90,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={onClose}>
               <FormattedMessage
-                id="xpack.ingestManager.agentEnrollment.continueButtonLabel"
+                id="xpack.fleet.agentEnrollment.continueButtonLabel"
                 defaultMessage="Continue"
               />
             </EuiButton>

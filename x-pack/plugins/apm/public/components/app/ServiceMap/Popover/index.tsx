@@ -18,7 +18,7 @@ import cytoscape from 'cytoscape';
 import { useTheme } from '../../../../hooks/useTheme';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
-import { getAnimationOptions } from '../cytoscapeOptions';
+import { getAnimationOptions } from '../cytoscape_options';
 import { Contents } from './Contents';
 
 interface PopoverProps {

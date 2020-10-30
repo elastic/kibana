@@ -178,7 +178,7 @@ describe('action_form', () => {
           },
         },
         setHasActionsWithBrokenConnector: jest.fn(),
-        actionTypeRegistry: actionTypeRegistry as any,
+        actionTypeRegistry,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
       actionTypeRegistry.list.mockReturnValue([
@@ -366,7 +366,7 @@ describe('action_form', () => {
       `);
     });
 
-    it('does not render "Add new" button for preconfigured only action type', async () => {
+    it('does not render "Add connector" button for preconfigured only action type', async () => {
       await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');

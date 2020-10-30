@@ -28,6 +28,7 @@ import { IBasePath } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -171,6 +172,7 @@ describe('embeddable', () => {
       timeRange,
       query,
       filters,
+      searchSessionId: 'searchSessionId',
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
@@ -181,7 +183,13 @@ describe('embeddable', () => {
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
-    const input = { savedObjectId: '123', timeRange, query, filters } as LensEmbeddableInput;
+    const input = {
+      savedObjectId: '123',
+      timeRange,
+      query,
+      filters,
+      searchSessionId: 'searchSessionId',
+    } as LensEmbeddableInput;
 
     const embeddable = new Embeddable(
       {
@@ -213,6 +221,8 @@ describe('embeddable', () => {
         filters,
       })
     );
+
+    expect(expressionRenderer.mock.calls[0][0].searchSessionId).toBe(input.searchSessionId);
   });
 
   it('should merge external context with query and filters of the saved object', async () => {
@@ -337,10 +347,12 @@ describe('embeddable', () => {
     } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    embeddable.updateInput({
-      timeRange,
-      query,
-      filters: [{ meta: { alias: 'test', negate: true, disabled: true } }],
+    act(() => {
+      embeddable.updateInput({
+        timeRange,
+        query,
+        filters: [{ meta: { alias: 'test', negate: true, disabled: true } }],
+      });
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
@@ -384,7 +396,9 @@ describe('embeddable', () => {
     } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    autoRefreshFetchSubject.next();
+    act(() => {
+      autoRefreshFetchSubject.next();
+    });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });

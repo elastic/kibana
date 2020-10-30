@@ -9,12 +9,16 @@ To access these settings, click *Map settings* in the application toolbar.
 [[maps-settings-navigation]]
 === Navigation
 
+*Auto fit map to bounds*::
+When enabled, the map will automatically pan and zoom to show the filtered data bounds.
+
 *Zoom range*::
 Constrain the map to the defined zoom range.
 
 *Initial map location*::
 Configure the initial map center and zoom.
 * *Map location at save*: Use the map center and zoom from the map position at the time of the latest save.
+* *Auto fit map to bounds*: Set the initial map location to show the filtered data bounds.
 * *Fixed location*: Lock the map center and zoom to fixed values.
 * *Browser location*: Set the initial map center to the browser location.
 

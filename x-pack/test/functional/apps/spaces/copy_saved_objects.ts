@@ -115,5 +115,33 @@ export default function spaceSelectorFunctonalTests({
 
       await PageObjects.copySavedObjectsToSpace.finishCopy();
     });
+
+    it('allows a dashboard to be copied to the marketing space, with circular references', async () => {
+      const destinationSpaceId = 'marketing';
+
+      await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('Dashboard Foo');
+
+      await PageObjects.copySavedObjectsToSpace.setupForm({
+        overwrite: true,
+        destinationSpaceId,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.startCopy();
+
+      // Wait for successful copy
+      await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
+      await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
+
+      const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
+
+      expect(summaryCounts).to.eql({
+        success: 2,
+        pending: 0,
+        skipped: 0,
+        errors: 0,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.finishCopy();
+    });
   });
 }

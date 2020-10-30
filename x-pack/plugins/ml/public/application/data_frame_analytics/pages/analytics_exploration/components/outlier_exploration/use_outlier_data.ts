@@ -39,11 +39,6 @@ import {
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 
-interface FeatureInfluence {
-  feature_name: string;
-  influence: number;
-}
-
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
@@ -88,8 +83,15 @@ export const useOutlierData = (
     }
   }, [jobConfig && jobConfig.id]);
 
+  // The pattern using `didCancel` allows us to abort out of date remote request.
+  // We wrap `didCancel` in a object so we can mutate the value as it's being
+  // passed on to `getIndexData`.
   useEffect(() => {
-    getIndexData(jobConfig, dataGrid, searchQuery);
+    const options = { didCancel: false };
+    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    return () => {
+      options.didCancel = true;
+    };
     // custom comparison
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
@@ -151,19 +153,17 @@ export const useOutlierData = (
       const split = columnId.split('.');
       let backgroundColor;
 
+      const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}.feature_name`];
+
       // column with feature values get color coded by its corresponding influencer value
-      if (
-        fullItem[resultsField] !== undefined &&
-        fullItem[resultsField][FEATURE_INFLUENCE] !== undefined &&
-        fullItem[resultsField][FEATURE_INFLUENCE].find(
-          (d: FeatureInfluence) => d.feature_name === columnId
-        ) !== undefined
-      ) {
-        backgroundColor = colorRange(
-          fullItem[resultsField][FEATURE_INFLUENCE].find(
-            (d: FeatureInfluence) => d.feature_name === columnId
-          ).influence
-        );
+      if (Array.isArray(featureNames)) {
+        const featureIndex = featureNames.indexOf(columnId);
+
+        if (featureIndex > -1) {
+          backgroundColor = colorRange(
+            fullItem[`${resultsField}.${FEATURE_INFLUENCE}.influence`][featureIndex]
+          );
+        }
       }
 
       // column with influencer values get color coded by its own value

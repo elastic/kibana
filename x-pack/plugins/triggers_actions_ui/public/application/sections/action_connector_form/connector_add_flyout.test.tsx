@@ -34,7 +34,7 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
@@ -75,6 +75,8 @@ describe('connector_add_flyout', () => {
     );
     expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
     expect(wrapper.find(`[data-test-subj="${actionType.id}-card"]`).exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="cancelButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="backButton"]').exists()).toBeFalsy();
   });
 
   it('renders banner with subscription links when gold features are disabled due to licensing ', () => {

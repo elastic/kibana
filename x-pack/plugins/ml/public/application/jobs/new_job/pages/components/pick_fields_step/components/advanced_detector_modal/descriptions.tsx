@@ -142,7 +142,7 @@ export const ExcludeFrequentDescription: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.description"
-          defaultMessage="If true will automatically identify and exclude frequently occurring entities which may otherwise have dominated results."
+          defaultMessage="If set, it will automatically identify and exclude frequently occurring entities which may otherwise have dominated results."
         />
       }
     >

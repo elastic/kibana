@@ -32,7 +32,8 @@ import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableState, SerializableState } from '../../../kibana_utils/common';
+import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
   /**
@@ -86,6 +87,20 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
     return Object.values(this.toJS());
   }
 }
+
+const semverGte = (semver1: string, semver2: string) => {
+  const regex = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/;
+  const matches1 = regex.exec(semver1) as RegExpMatchArray;
+  const matches2 = regex.exec(semver2) as RegExpMatchArray;
+
+  const [, major1, minor1, patch1] = matches1;
+  const [, major2, minor2, patch2] = matches2;
+
+  return (
+    major1 > major2 ||
+    (major1 === major2 && (minor1 > minor2 || (minor1 === minor2 && patch1 >= patch2)))
+  );
+};
 
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
   implements PersistableState<ExpressionAstExpression> {
@@ -166,38 +181,34 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    * @param context Extra global context object that will be merged into the
    *    expression global context object that is provided to each function to allow side-effects.
    */
-  public async run<
-    Input,
-    Output,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
-  >(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) {
-    const execution = this.createExecution(ast, context);
+  public async run<Input, Output>(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    params: ExpressionExecutionParams = {}
+  ) {
+    const execution = this.createExecution(ast, params);
     execution.start(input);
     return (await execution.result) as Output;
   }
 
-  public createExecution<
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
-    Input = unknown,
-    Output = unknown
-  >(
+  public createExecution<Input = unknown, Output = unknown>(
     ast: string | ExpressionAstExpression,
-    context: ExtraContext = {} as ExtraContext,
-    { debug }: ExpressionExecOptions = {} as ExpressionExecOptions
-  ): Execution<Context & ExtraContext, Input, Output> {
-    const params: ExecutionParams<Context & ExtraContext> = {
+    params: ExpressionExecutionParams = {}
+  ): Execution<Input, Output> {
+    const executionParams: ExecutionParams = {
       executor: this,
-      context: {
-        ...this.context,
-        ...context,
-      } as Context & ExtraContext,
-      debug,
+      params: {
+        ...params,
+        // for canvas we are passing this in,
+        // canvas should be refactored to not pass any extra context in
+        extraContext: this.context,
+      } as any,
     };
 
-    if (typeof ast === 'string') params.expression = ast;
-    else params.ast = ast;
+    if (typeof ast === 'string') executionParams.expression = ast;
+    else executionParams.ast = ast;
 
-    const execution = new Execution<Context & ExtraContext, Input, Output>(params);
+    const execution = new Execution<Input, Output>(executionParams);
 
     return execution;
   }
@@ -250,6 +261,27 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     });
 
     return telemetryData;
+  }
+
+  public migrate(ast: SerializableState, version: string) {
+    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      if (!fn.migrations[version]) return link;
+      const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;
+      link.arguments = updatedAst.arguments;
+      link.type = updatedAst.type;
+    });
+  }
+
+  public migrateToLatest(ast: unknown, version: string) {
+    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      for (const key of Object.keys(fn.migrations)) {
+        if (semverGte(key, version)) {
+          const updatedAst = fn.migrations[key](link) as ExpressionAstFunction;
+          link.arguments = updatedAst.arguments;
+          link.type = updatedAst.type;
+        }
+      }
+    });
   }
 
   public fork(): Executor<Context> {

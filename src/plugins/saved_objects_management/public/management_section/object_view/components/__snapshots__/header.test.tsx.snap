@@ -90,7 +90,7 @@ exports[`Intro component renders correctly 1`] = `
                               size="m"
                               type="eye"
                             >
-                              <div
+                              <span
                                 className="euiButtonContent__icon"
                                 data-euiicon-type="eye"
                                 size="m"
@@ -164,7 +164,7 @@ exports[`Intro component renders correctly 1`] = `
                               size="m"
                               type="trash"
                             >
-                              <div
+                              <span
                                 className="euiButtonContent__icon"
                                 data-euiicon-type="trash"
                                 size="m"
