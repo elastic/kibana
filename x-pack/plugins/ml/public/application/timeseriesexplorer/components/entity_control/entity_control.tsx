@@ -184,6 +184,9 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         })}
         singleSelection={{ asPlainText: true }}
         onCreateOption={this.onManualInput}
+        customOptionText={i18n.translate('xpack.ml.timeSeriesExplorer.setManualInputHelperText', {
+          defaultMessage: 'No matching values',
+        })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={this.onChange}
