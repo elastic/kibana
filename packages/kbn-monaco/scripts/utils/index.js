@@ -18,9 +18,11 @@
  */
 
 const cloneAndCheckout = require('./clone_es');
-const createAutocompleteDefinitions = require('./create_autocomplete_definitions');
+const { createAutocompleteDefinitions } = require('./create_autocomplete_definitions');
+const createAutocompletExports = require('./create_autocomplete_exports');
 
 module.exports = {
   cloneAndCheckout,
   createAutocompleteDefinitions,
+  createAutocompletExports,
 };

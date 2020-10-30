@@ -16,14 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { string_script_field_script_field } from './string_script_field_script_field';
-export { score } from './score';
-export { processor_conditional } from './processor_conditional';
-export { painless_test } from './painless_test';
-export { long_script_field_script_field } from './long_script_field_script_field';
-export { ip_script_field_script_field } from './ip_script_field_script_field';
-export { filter } from './filter';
-export { double_script_field_script_field } from './double_script_field_script_field';
-export { date_script_field } from './date_script_field';
-export { boolean_script_field_script_field } from './boolean_script_field_script_field';
+// DO NOT EDIT: THIS FILE CONTAINS GENERATED CODE. REFER TO THE README FOR MORE INFORMATION.
+import * as stringScriptFieldScriptFieldContext from './string_script_field_script_field.json';
+import * as scoreContext from './score.json';
+import * as processorConditionalContext from './processor_conditional.json';
+import * as painlessTestContext from './painless_test.json';
+import * as longScriptFieldScriptFieldContext from './long_script_field_script_field.json';
+import * as ipScriptFieldScriptFieldContext from './ip_script_field_script_field.json';
+import * as filterContext from './filter.json';
+import * as doubleScriptFieldScriptFieldContext from './double_script_field_script_field.json';
+import * as dateScriptFieldContext from './date_script_field.json';
+import * as booleanScriptFieldScriptFieldContext from './boolean_script_field_script_field.json';
+export { stringScriptFieldScriptFieldContext };
+export { scoreContext };
+export { processorConditionalContext };
+export { painlessTestContext };
+export { longScriptFieldScriptFieldContext };
+export { ipScriptFieldScriptFieldContext };
+export { filterContext };
+export { doubleScriptFieldScriptFieldContext };
+export { dateScriptFieldContext };
+export { booleanScriptFieldScriptFieldContext };

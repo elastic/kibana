@@ -25,106 +25,123 @@ const simpleGit = require('simple-git');
 const esRepo = 'https://github.com/stu-elastic/elasticsearch.git';
 
 const esFolder = join(__dirname, '..', '..', 'elasticsearch');
-const generatedFolder = join(esFolder, 'modules', 'lang-painless', 'src', 'main', 'generated');
+const esPainlessContextFolder = join(
+  esFolder,
+  'modules',
+  'lang-painless',
+  'src',
+  'main',
+  'generated'
+);
 
-function cloneAndCheckout(opts, callback) {
-  const { tag, branch } = opts;
-  withTag(tag, callback);
+/**
+ * Checks if the given path exists
+ * @param {string} path
+ * @returns {boolean} true if exists, false if not
+ */
+const pathExist = (path) => {
+  try {
+    accessSync(path);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
 
-  /**
-   * Sets the elasticsearch repository to the given tag.
-   * If the repository is not present in `esFolder` it will
-   * clone the repository and the checkout the tag.
-   * If the repository is already present but it cannot checkout to
-   * the given tag, it will perform a pull and then try again.
-   * @param {string} tag
-   * @param {function} callback
-   */
-  function withTag(tag, callback) {
-    let fresh = false;
-    let retry = 0;
+/**
+ * Creates the given folder
+ * @param {string} name
+ * @returns {boolean} true on success, false on failure
+ */
+const createFolder = (name) => {
+  try {
+    mkdirSync(name);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
 
-    if (!pathExist(esFolder)) {
-      if (!createFolder(esFolder)) {
+/**
+ * Sets the Elasticsearch repository to the given branch or tag.
+ * If the repository is not present in `esFolder` it will
+ * clone the repository and the checkout the branch or tag.
+ * If the repository is already present but it cannot checkout to
+ * the given tag, it will perform a pull and then try again.
+ *
+ * This code was largely borrowed from the ES JS client:
+ * https://github.com/elastic/elasticsearch-js/blob/master/scripts/utils/clone-es.js
+ *
+ * @param {object} options
+ * @param {function} callback
+ */
+const cloneAndCheckout = (opts, callback) => {
+  const { log, tag, branch } = opts;
+
+  let fresh = false;
+  let retry = 0;
+
+  if (!pathExist(esFolder)) {
+    if (!createFolder(esFolder)) {
+      log.fail('Failed to create ES folder');
+      return;
+    }
+    fresh = true;
+  }
+
+  const git = simpleGit(esFolder);
+
+  const pull = (cb) => {
+    log.text = 'Pulling Elasticsearch repository';
+
+    git.pull((err) => {
+      if (err) {
+        callback(err, { esPainlessContextFolder });
         return;
       }
-      fresh = true;
-    }
+      cb();
+    });
+  };
 
-    const git = simpleGit(esFolder);
+  const clone = (cb) => {
+    log.text = 'Cloning Elasticsearch repository';
 
-    if (fresh) {
-      clone(checkout);
-    } else if (opts.branch) {
-      checkout(true);
+    git.clone(esRepo, esFolder, (err) => {
+      if (err) {
+        callback(err, { esPainlessContextFolder });
+        return;
+      }
+      cb();
+    });
+  };
+
+  const checkout = (alsoPull = false) => {
+    if (branch) {
+      log.text = `Checking out branch '${branch}'`;
     } else {
-      checkout();
+      log.text = `Checking out tag '${tag}'`;
     }
 
-    function checkout(alsoPull = false) {
-      git.checkout(branch || tag, (err) => {
-        if (err) {
-          if (retry++ > 0) {
-            callback(new Error(`Cannot checkout tag '${tag}'`), { generatedFolder });
-            return;
-          }
-          return pull(checkout);
-        }
-        if (alsoPull) {
-          return pull(checkout);
-        }
-        callback(null, { generatedFolder });
-      });
-    }
-
-    function pull(cb) {
-      git.pull((err) => {
-        if (err) {
-          callback(err, { generatedFolder });
+    git.checkout(branch || tag, (err) => {
+      if (err) {
+        if (retry++ > 0) {
+          callback(new Error(`Cannot checkout tag '${tag}'`), { esPainlessContextFolder });
           return;
         }
-        cb();
-      });
-    }
+        return pull(checkout);
+      }
+      if (alsoPull) {
+        return pull(checkout);
+      }
+      callback(null, { esPainlessContextFolder });
+    });
+  };
 
-    function clone(cb) {
-      git.clone(esRepo, esFolder, (err) => {
-        if (err) {
-          callback(err, { generatedFolder });
-          return;
-        }
-        cb();
-      });
-    }
+  if (fresh) {
+    clone(checkout);
+  } else {
+    checkout(Boolean(opts.branch));
   }
-
-  /**
-   * Checks if the given path exists
-   * @param {string} path
-   * @returns {boolean} true if exists, false if not
-   */
-  function pathExist(path) {
-    try {
-      accessSync(path);
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-
-  /**
-   * Creates the given folder
-   * @param {string} name
-   * @returns {boolean} true on success, false on failure
-   */
-  function createFolder(name) {
-    try {
-      mkdirSync(name);
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-}
+};
 
 module.exports = cloneAndCheckout;

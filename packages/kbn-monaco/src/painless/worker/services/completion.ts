@@ -26,39 +26,39 @@ import {
 } from '../../types';
 
 import {
-  painless_test,
-  score,
-  filter,
-  boolean_script_field_script_field,
-  date_script_field,
-  double_script_field_script_field,
-  ip_script_field_script_field,
-  long_script_field_script_field,
-  processor_conditional,
-  string_script_field_script_field,
+  painlessTestContext,
+  scoreContext,
+  filterContext,
+  booleanScriptFieldScriptFieldContext,
+  dateScriptFieldContext,
+  doubleScriptFieldScriptFieldContext,
+  ipScriptFieldScriptFieldContext,
+  longScriptFieldScriptFieldContext,
+  processorConditionalContext,
+  stringScriptFieldScriptFieldContext,
 } from '../../autocomplete_definitions';
 
 interface Suggestion extends PainlessCompletionItem {
-  children: PainlessCompletionItem[];
+  children?: PainlessCompletionItem[];
 }
 
-const mapContextToData: { [key: string]: object } = {
-  painless_test,
-  score,
-  filter,
-  boolean_script_field_script_field,
-  date_script_field,
-  double_script_field_script_field,
-  ip_script_field_script_field,
-  long_script_field_script_field,
-  processor_conditional,
-  string_script_field_script_field,
+const mapContextToData: { [key: string]: { suggestions: any[] } } = {
+  painless_test: painlessTestContext,
+  score: scoreContext,
+  filter: filterContext,
+  boolean_script_field_script_field: booleanScriptFieldScriptFieldContext,
+  date_script_field: dateScriptFieldContext,
+  double_script_field_script_field: doubleScriptFieldScriptFieldContext,
+  ip_script_field_script_field: ipScriptFieldScriptFieldContext,
+  long_script_field_script_field: longScriptFieldScriptFieldContext,
+  processor_conditional: processorConditionalContext,
+  string_script_field_script_field: stringScriptFieldScriptFieldContext,
 };
 
 export class PainlessCompletionService {
   suggestions: Suggestion[];
   constructor(private _painlessContext: PainlessContext) {
-    this.suggestions = mapContextToData[this._painlessContext] as Suggestion[];
+    this.suggestions = mapContextToData[this._painlessContext].suggestions;
   }
 
   getStaticSuggestions(): PainlessCompletionResult {
