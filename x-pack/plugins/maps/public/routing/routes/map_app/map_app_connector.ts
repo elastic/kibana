@@ -26,10 +26,7 @@ import {
   setMapSettings,
   setOpenTOCDetails,
   setQuery,
-  setReadOnly,
   setRefreshConfig,
-  setSelectedLayer,
-  updateFlyout,
   enableFullScreen,
   openMapSettings,
 } from '../../../actions';
@@ -89,11 +86,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setMapSettings: (mapSettings: MapSettings) => dispatch(setMapSettings(mapSettings)),
     setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => dispatch(setIsLayerTOCOpen(isLayerTOCOpen)),
     setOpenTOCDetails: (openTOCDetails: string[]) => dispatch(setOpenTOCDetails(openTOCDetails)),
-    clearUi: () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(setReadOnly(!getMapsCapabilities().save));
-    },
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
   };

@@ -88,7 +88,6 @@ interface Props {
   refreshConfig: MapRefreshConfig;
   setRefreshConfig: (refreshConfig: MapRefreshConfig) => void;
   isSaveDisabled: boolean;
-  clearUi: () => void;
   setGotoWithCenter: (latLonZoom: MapCenterAndZoom) => void;
   setMapSettings: (mapSettings: MapSettings) => void;
   setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => void;
@@ -378,8 +377,6 @@ export class MapApp extends React.Component<Props, State> {
     }*/
 
     this._initMapAndLayerSettings(mapSavedObjectAttributes);
-
-    this.props.clearUi();
 
     if (mapSavedObjectAttributes.mapStateJSON) {
       const mapState = JSON.parse(mapSavedObjectAttributes.mapStateJSON);

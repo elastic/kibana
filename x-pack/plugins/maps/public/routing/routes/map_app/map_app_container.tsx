@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { MapApp } from './map_app_connector';
 import { SavedMap } from './saved_map';
 
-// react-route "render" method may be called multiple times for the same route.
+// react-router-dom.route "render" method may be called multiple times for the same route.
 // Therefore state can not exist in the "render" closure
 // MapAppContainer exists to wrap MapApp in a component so that a single instance of SavedMap
 // exists per route regardless of how many times render method is called.
