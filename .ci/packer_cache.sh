@@ -3,4 +3,4 @@
 set -e
 
 ./.ci/packer_cache_for_branch.sh master
-# ./.ci/packer_cache_for_branch.sh 7.x # TODO uncomment before merge
+./.ci/packer_cache_for_branch.sh 7.x
