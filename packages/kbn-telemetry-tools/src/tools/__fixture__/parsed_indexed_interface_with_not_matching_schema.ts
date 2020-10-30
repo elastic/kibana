@@ -28,7 +28,7 @@ export const parsedIndexedInterfaceWithNoMatchingSchema: ParsedUsageCollection =
       value: {
         something: {
           count_1: {
-            type: 'number',
+            type: 'long',
           },
         },
       },
