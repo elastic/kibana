@@ -28,7 +28,7 @@ import { StringUtils } from './helpers/string_utils';
 export interface SavedObjectLoaderFindOptions {
   size?: number;
   fields?: string[];
-  references?: SavedObjectsFindOptionsReference[];
+  hasReference?: SavedObjectsFindOptionsReference[];
 }
 
 /**
@@ -138,7 +138,7 @@ export class SavedObjectLoader {
    */
   private findAll(
     search: string = '',
-    { size = 100, fields, references }: SavedObjectLoaderFindOptions
+    { size = 100, fields, hasReference }: SavedObjectLoaderFindOptions
   ) {
     return this.savedObjectsClient
       .find<Record<string, unknown>>({
@@ -149,7 +149,7 @@ export class SavedObjectLoader {
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
-        hasReference: references,
+        hasReference,
       } as SavedObjectsFindOptions)
       .then((resp) => {
         return {
@@ -159,7 +159,7 @@ export class SavedObjectLoader {
       });
   }
 
-  find(search: string = '', sizeOrOptions: number | SavedObjectsFindOptions = 100) {
+  find(search: string = '', sizeOrOptions: number | SavedObjectLoaderFindOptions = 100) {
     const options: SavedObjectLoaderFindOptions =
       typeof sizeOrOptions === 'number'
         ? {

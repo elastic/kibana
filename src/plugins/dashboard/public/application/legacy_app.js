@@ -132,7 +132,7 @@ export function initDashboardApp(app, deps) {
 
             return service.find(searchTerm, {
               size: $scope.listingLimit,
-              references: references,
+              hasReference: references,
             });
           };
           $scope.editItem = ({ id }) => {
