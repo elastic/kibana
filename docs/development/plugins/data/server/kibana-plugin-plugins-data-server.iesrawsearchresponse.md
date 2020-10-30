@@ -17,5 +17,4 @@ export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Sourc
 |  [id](./kibana-plugin-plugins-data-server.iesrawsearchresponse.id.md) | <code>string</code> |  |
 |  [is\_partial](./kibana-plugin-plugins-data-server.iesrawsearchresponse.is_partial.md) | <code>boolean</code> |  |
 |  [is\_running](./kibana-plugin-plugins-data-server.iesrawsearchresponse.is_running.md) | <code>boolean</code> |  |
-|  [response](./kibana-plugin-plugins-data-server.iesrawsearchresponse.response.md) | <code>SearchResponse&lt;Source&gt;</code> |  |
 
