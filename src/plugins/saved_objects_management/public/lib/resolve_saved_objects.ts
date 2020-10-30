@@ -24,9 +24,10 @@ import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
-  injectSearchSourceReferences,
   IndexPatternSpec,
 } from '../../../data/public';
+// used deep import to avoid adding the whole data bundle to the plugin
+import { injectReferences as injectSearchSourceReferences } from '../../../data/common/search/search_source/inject_references';
 import { FailedImport } from './process_import_response';
 import { DuplicateIndexPatternError, IndexPattern } from '../../../data/public';
 
