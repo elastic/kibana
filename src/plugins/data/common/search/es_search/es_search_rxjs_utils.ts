@@ -50,10 +50,7 @@ export const toKibanaSearchResponse = <
   );
 
 export const includeTotalLoaded = () =>
-  map(
-    (response: IKibanaSearchResponse) =>
-      ({
-        ...response,
-        ...(response.rawResponse._shards && getTotalLoaded(response.rawResponse._shards)),
-      } as Assign<IKibanaSearchResponse, ShardsResponse>)
-  );
+  map((response: IKibanaSearchResponse<SearchResponse<unknown>>) => ({
+    ...response,
+    ...getTotalLoaded(response.rawResponse._shards),
+  }));
