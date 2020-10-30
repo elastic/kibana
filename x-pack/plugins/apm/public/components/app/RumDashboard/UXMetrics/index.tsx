@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +18,15 @@ import { KeyUXMetrics } from './KeyUXMetrics';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { CoreVitals } from '../../../../../../observability/public';
+import { CsmSharedContext } from '../CsmSharedContext';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
+
   const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
@@ -37,12 +44,18 @@ export function UXMetrics() {
     [uxQuery]
   );
 
+  const {
+    sharedData: { totalPageViews },
+  } = useContext(CsmSharedContext);
+
   return (
     <EuiPanel>
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-          <EuiTitle size="s">
-            <h2>{I18LABELS.userExperienceMetrics}</h2>
+          <EuiTitle size="xs">
+            <h3>
+              {I18LABELS.metrics} ({getPercentileLabel(percentile!)})
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <KeyUXMetrics data={data} loading={status !== 'success'} />
@@ -54,7 +67,12 @@ export function UXMetrics() {
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiSpacer size="s" />
-          <CoreVitals data={data} loading={status !== 'success'} />
+          <CoreVitals
+            data={data}
+            totalPageViews={totalPageViews}
+            loading={status !== 'success'}
+            displayTrafficMetric={true}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
