@@ -116,12 +116,12 @@ export class Server {
     const environmentSetup = await this.environment.setup();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins, pluginConfig } = await this.plugins.discover({
+    const { pluginTree, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    const i18nServiceSetup = await this.i18n.setup({ pluginConfig });
+    const i18nServiceSetup = await this.i18n.setup();
 
     // rely on dev server to validate config, don't validate in the parent process
     if (!this.env.isDevClusterMaster) {

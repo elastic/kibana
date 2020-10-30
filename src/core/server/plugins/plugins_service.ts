@@ -123,7 +123,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         public: uiPlugins,
         browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
       },
-      pluginConfig: config,
     };
   }
 

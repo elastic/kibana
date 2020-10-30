@@ -18,19 +18,19 @@
  */
 
 import { basename } from 'path';
-import { take } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { fromRoot } from '../utils';
 import { Logger } from '../logging';
-import { IConfigService } from '../config';
+import { Env, IConfigService } from '../config';
 import { CoreContext } from '../core_context';
-import type { PluginsConfig } from '../plugins';
+import {
+  config as pluginsConfigDef,
+  PluginsConfig,
+  PluginsConfigType,
+} from '../plugins/plugins_config';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getTranslationPaths } from './get_translations_path';
-
-interface SetupDeps {
-  pluginConfig: PluginsConfig;
-}
 
 export interface I18nServiceSetup {
   getLocale(): string;
@@ -40,16 +40,25 @@ export interface I18nServiceSetup {
 export class I18nService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
+  private readonly env: Env;
 
-  constructor(core: CoreContext) {
-    this.log = core.logger.get('i18n');
-    this.configService = core.configService;
+  constructor(coreContext: CoreContext) {
+    this.log = coreContext.logger.get('i18n');
+    this.configService = coreContext.configService;
+    this.env = coreContext.env;
   }
 
-  public async setup({ pluginConfig }: SetupDeps): Promise<I18nServiceSetup> {
+  public async setup(): Promise<I18nServiceSetup> {
     const i18nConfig = await this.configService
       .atPath<I18nConfigType>(i18nConfigDef.path)
       .pipe(take(1))
+      .toPromise();
+    const pluginConfig = await this.configService
+      .atPath<PluginsConfigType>(pluginsConfigDef.path)
+      .pipe(
+        take(1),
+        map((rawConfig) => new PluginsConfig(rawConfig, this.env))
+      )
       .toPromise();
 
     const locale = i18nConfig.locale;
