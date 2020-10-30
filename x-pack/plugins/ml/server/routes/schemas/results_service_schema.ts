@@ -47,7 +47,8 @@ export const categoryExamplesSchema = schema.object({
 
 const fieldConfig = schema.maybe(
   schema.object({
-    anomalousOnly: schema.boolean(),
+    applyTimeRange: schema.maybe(schema.boolean()),
+    anomalousOnly: schema.maybe(schema.boolean()),
     sort: schema.object({
       by: schema.string(),
       order: schema.maybe(schema.string()),

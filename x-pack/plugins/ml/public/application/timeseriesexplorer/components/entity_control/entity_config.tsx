@@ -143,7 +143,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
             )}
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} style={{ width: '16px', height: '24px' }}>
+          <EuiFlexItem grow={false} style={{ width: '16px' }}>
             {isModelPlotEnabled && !config?.anomalousOnly ? (
               <EuiToolTip
                 position="top"

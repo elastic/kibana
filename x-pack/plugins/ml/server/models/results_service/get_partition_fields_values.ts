@@ -160,12 +160,18 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
       }
     );
 
+    const applyTimeRange = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(
+      ([k, v]) => {
+        return !!v?.applyTimeRange;
+      }
+    );
+
     const isModelPlotSearch = !!isModelPlotEnabled && !isAnomalousOnly;
 
     // Remove the time filter in case model plot is not enabled
-    // and not only anomalous records have been requested, so
+    // and time range is not applied, so
     // it includes the records that occurred as anomalies historically
-    const searchAllTime = !isModelPlotEnabled && !isAnomalousOnly;
+    const searchAllTime = !isModelPlotEnabled && !applyTimeRange;
 
     const requestBody = {
       query: {
