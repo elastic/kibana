@@ -329,6 +329,9 @@ export const xyVisualization: Visualization<State> = {
           errors.push(result.payload);
         }
       }
+      // Note: this mechanism may produce additional errors (i.e. Missing Y and X Axis on the same layers)
+      // Right now this is not a big concern as Y Axis will be shown/solved first and the redundant error will be wiped out
+      // TODO: maybe better filter out errors in the future?
     }
     return errors.length ? errors : undefined;
   },
