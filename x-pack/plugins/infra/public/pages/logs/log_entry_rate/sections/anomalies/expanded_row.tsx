@@ -51,7 +51,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     <>
       <ExpandedContentWrapper direction="column">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{examplesTitle}</h3>
           </EuiTitle>
           <LogEntryExampleMessages
