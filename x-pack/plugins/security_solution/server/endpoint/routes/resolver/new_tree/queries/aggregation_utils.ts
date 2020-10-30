@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 
 export type Nodes = Array<string | number>;
 
@@ -39,10 +38,13 @@ export function sourceFilter(schema: Schema) {
 
 export function getNodesFromAggs(idField: string, aggregations: any) {
   // TODO fix types
-  aggregations[idField].buckets.reduce((results: Array<Record<string, any>>, bucket: Aggs) => {
-    results.push(...bucket.singleEvent.hits.hits.map((hit) => hit._source));
-    return results;
-  });
+  return aggregations[idField].buckets.reduce(
+    (results: Array<Record<string, any>>, bucket: Aggs) => {
+      results.push(...bucket.singleEvent.hits.hits.map((hit) => hit._source));
+      return results;
+    },
+    []
+  );
 }
 
 interface Aggs {
