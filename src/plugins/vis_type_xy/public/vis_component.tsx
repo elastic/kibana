@@ -204,14 +204,10 @@ const VisComponent = (props: VisComponentProps) => {
 
       const overwriteColors: Record<string, string> = props.uiState?.get('vis.colors', {});
 
-      if (config.isVislibVis) {
-        allSeries.push(seriesName);
-        return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
-      }
-
-      return overwriteColors[seriesName];
+      allSeries.push(seriesName);
+      return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
     },
-    [allSeries, config.isVislibVis, getSeriesName, props.uiState?.get]
+    [allSeries, getSeriesName, props.uiState?.get]
   );
 
   if (visParams.dimensions.splitRow || visParams.dimensions.splitRow) {
