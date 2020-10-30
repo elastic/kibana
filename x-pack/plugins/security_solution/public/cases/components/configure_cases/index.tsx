@@ -158,7 +158,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       setEditedConnectorItem(
         normalizeCaseConnector(connectors, connector) as ActionConnectorTableItem
       );
-      setEditFlyoutVisibility(true);
     }
   }, [connectors, connector, isLoadingConnectors]);
 

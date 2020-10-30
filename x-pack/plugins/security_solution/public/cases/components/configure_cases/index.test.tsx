@@ -157,10 +157,6 @@ describe('ConfigureCases', () => {
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
 
-    test('it renders the ConnectorEditFlyout', () => {
-      expect(wrapper.find(ConnectorEditFlyout).exists()).toBeTruthy();
-    });
-
     test('it renders with correct props', () => {
       // Connector
       expect(wrapper.find(Connectors).prop('connectors')).toEqual(connectors);
@@ -174,8 +170,7 @@ describe('ConfigureCases', () => {
 
       // Flyouts
       expect(wrapper.find(ConnectorAddFlyout).exists()).toBe(false);
-      expect(wrapper.find(ConnectorEditFlyout).exists()).toBe(true);
-      expect(wrapper.find(ConnectorEditFlyout).prop('initialConnector')).toEqual(connectors[0]);
+      expect(wrapper.find(ConnectorEditFlyout).exists()).toBe(false);
     });
 
     test('it disables correctly when the user cannot crud', () => {
@@ -528,6 +523,7 @@ describe('user interactions', () => {
     wrapper.update();
 
     expect(wrapper.find(ConnectorEditFlyout).exists()).toBe(true);
+    expect(wrapper.find(ConnectorEditFlyout).prop('initialConnector')).toEqual(connectors[1]);
     expect(
       wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
     ).toBeFalsy();
