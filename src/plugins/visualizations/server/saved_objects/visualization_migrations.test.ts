@@ -1654,4 +1654,94 @@ describe('migration visualization', () => {
       expect(attributes).toEqual(oldAttributes);
     });
   });
+
+  describe('7.11.0 update vislib visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.11.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (type = 'area', categoryAxes?: object[], valueAxes?: object[]) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type,
+          title: '[Flights] Delay Type',
+          params: {
+            type: type === 'horizontal_bar' ? 'histogram' : type,
+            categoryAxes: categoryAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+            valueAxes: valueAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+          },
+        }),
+      },
+    });
+
+    it('should return original doc if not area, line or histogram chart', () => {
+      const doc = getTestDoc('pie');
+      const migratedTestDoc = migrate(doc);
+      expect(migratedTestDoc).toEqual(doc);
+    });
+
+    it('should decorate existing docs with isVislibVis flag', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(isVislibVis).toEqual(true);
+    });
+
+    describe('labels.filter', () => {
+      it('should keep existing categoryAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(getTestDoc('area', [{ labels: { filter: false } }]));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should keep existing valueAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(
+          getTestDoc('area', undefined, [{ labels: { filter: true } }])
+        );
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to true for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to false for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to false for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to true for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+    });
+  });
 });

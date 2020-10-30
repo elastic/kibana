@@ -760,9 +760,9 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
 };
 
 /**
- * Decorates axes with default label filter value
+ * Decorate axes with default label filter value
  */
-const addDefaultLabelFilter = <T extends { labels: { filter?: boolean } }>(
+const decorateAxes = <T extends { labels: { filter?: boolean } }>(
   axes: T[],
   fallback: boolean
 ): T[] =>
@@ -791,6 +791,7 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
       visState &&
       [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
     ) {
+      const isHorizontalBar = visState.type !== 'horizontal_bar';
       return {
         ...doc,
         attributes: {
@@ -799,14 +800,12 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             ...visState,
             params: {
               ...visState.params,
-              categoryAxes: addDefaultLabelFilter(
-                visState.params.categoryAxes,
-                visState.params.type !== 'horizontal_bar'
-              ),
-              valueAxes: addDefaultLabelFilter(
-                visState.params.valueAxes,
-                visState.params.type === 'horizontal_bar'
-              ),
+              categoryAxes:
+                visState.params.categoryAxes &&
+                decorateAxes(visState.params.categoryAxes, !isHorizontalBar),
+              valueAxes:
+                visState.params.valueAxes &&
+                decorateAxes(visState.params.valueAxes, isHorizontalBar),
               isVislibVis: true,
               detailedTooltip: true,
             },
@@ -851,4 +850,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource, migrateVislibAreaLineBarTypes),
+  '7.11.0': flow(migrateVislibAreaLineBarTypes),
 };
