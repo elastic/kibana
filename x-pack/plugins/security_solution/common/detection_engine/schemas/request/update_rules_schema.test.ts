@@ -126,8 +126,12 @@ describe('update rules schema', () => {
   });
 
   test('name cannot be an empty string', () => {
-    const payload: Partial<UpdateRulesSchema> = {
+    const payload: UpdateRulesSchema = {
+      description: 'some description',
       name: '',
+      risk_score: 50,
+      severity: 'low',
+      type: 'query',
     };
 
     const decoded = updateRulesSchema.decode(payload);
@@ -138,8 +142,12 @@ describe('update rules schema', () => {
   });
 
   test('description cannot be an empty string', () => {
-    const payload: Partial<UpdateRulesSchema> = {
+    const payload: UpdateRulesSchema = {
       description: '',
+      name: 'rule name',
+      risk_score: 50,
+      severity: 'low',
+      type: 'query',
     };
 
     const decoded = updateRulesSchema.decode(payload);
