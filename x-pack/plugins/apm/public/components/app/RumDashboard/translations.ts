@@ -10,6 +10,9 @@ export const I18LABELS = {
   dataMissing: i18n.translate('xpack.apm.rum.dashboard.dataMissing', {
     defaultMessage: 'N/A',
   }),
+  totalPageLoad: i18n.translate('xpack.apm.rum.dashboard.totalPageLoad', {
+    defaultMessage: 'Total',
+  }),
   backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
     defaultMessage: 'Backend',
   }),
@@ -34,6 +37,9 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration',
     }
   ),
+  pageLoad: i18n.translate('xpack.apm.rum.dashboard.pageLoad.label', {
+    defaultMessage: 'Page load',
+  }),
   pageLoadDistribution: i18n.translate(
     'xpack.apm.rum.dashboard.pageLoadDistribution.label',
     {
@@ -155,6 +161,21 @@ export const I18LABELS = {
   }),
   noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
     defaultMessage: 'No data.',
+  }),
+  // Helper tooltips
+  totalPageLoadTooltip: i18n.translate(
+    'xpack.apm.rum.dashboard.tooltips.totalPageLoad',
+    {
+      defaultMessage: 'Total represents the full page load duration',
+    }
+  ),
+  frontEndTooltip: i18n.translate('xpack.apm.rum.dashboard.tooltips.frontEnd', {
+    defaultMessage:
+      'Frontend time represents the total page load duration minus the backend time',
+  }),
+  backEndTooltip: i18n.translate('xpack.apm.rum.dashboard.tooltips.backEnd', {
+    defaultMessage:
+      'Backend time represents time to first byte (TTFB), which is when the first response packet is received after the request has been made',
   }),
 };
 

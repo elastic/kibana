@@ -139,7 +139,7 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService },
+    data: { query: queryService, search: searchService },
     core: {
       notifications,
       overlays,
@@ -412,8 +412,9 @@ export class DashboardAppController {
     >(DASHBOARD_CONTAINER_TYPE);
 
     if (dashboardFactory) {
+      const searchSessionId = searchService.session.start();
       dashboardFactory
-        .create(getDashboardInput())
+        .create({ ...getDashboardInput(), searchSessionId })
         .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
           if (container && !isErrorEmbeddable(container)) {
             dashboardContainer = container;
@@ -572,7 +573,7 @@ export class DashboardAppController {
         differences.filters = appStateDashboardInput.filters;
       }
 
-      Object.keys(_.omit(containerInput, ['filters'])).forEach((key) => {
+      Object.keys(_.omit(containerInput, ['filters', 'searchSessionId'])).forEach((key) => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -590,7 +591,8 @@ export class DashboardAppController {
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
       if (changes && dashboardContainer) {
-        dashboardContainer.updateInput(changes);
+        const searchSessionId = searchService.session.start();
+        dashboardContainer.updateInput({ ...changes, searchSessionId });
       }
     };
 
@@ -1109,12 +1111,6 @@ export class DashboardAppController {
         $scope.model.filters = filterManager.getFilters();
         $scope.model.query = queryStringManager.getQuery();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
-        if (dashboardContainer) {
-          dashboardContainer.updateInput({
-            filters: $scope.model.filters,
-            query: $scope.model.query,
-          });
-        }
       },
     });
 
@@ -1159,6 +1155,7 @@ export class DashboardAppController {
       if (dashboardContainer) {
         dashboardContainer.destroy();
       }
+      searchService.session.clear();
     });
   }
 }
