@@ -18,13 +18,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDebounce } from 'react-use';
@@ -142,11 +136,15 @@ function DefaultEditorControls({
             onClick={() => toggleAutoApply(!autoApplyEnabled)}
             size="s"
             minWidth={80}
-            aria-label={autoApplyEnabled ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOn', {
-              defaultMessage: 'Auto apply is on',
-            }) : autoApplyEnabled ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOff', {
-              defaultMessage: 'Auto apply is off',
-            })}
+            aria-label={
+              autoApplyEnabled
+                ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOn', {
+                    defaultMessage: 'Auto apply is on',
+                  })
+                : i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOff', {
+                    defaultMessage: 'Auto apply is off',
+                  })
+            }
           >
             {autoApplyEnabled
               ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOn', {
