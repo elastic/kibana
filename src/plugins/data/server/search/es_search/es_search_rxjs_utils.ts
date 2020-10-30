@@ -27,29 +27,25 @@ import type { IKibanaSearchResponse } from '../../../common/search';
  * @param SearchUsage
  */
 export const trackSearchStatus = <
-  KibanaResponse extends IKibanaSearchResponse = IKibanaSearchResponse
+  KibanaResponse extends IKibanaSearchResponse = IEsSearchResponse<SearchResponse<unknown>>
 >(
   logger: Logger,
   usage?: SearchUsage
-) => (source: Observable<KibanaResponse>) =>
-  new Observable<KibanaResponse>((observer) =>
-    source.subscribe({
-      next(response) {
+) => {
+  return pipe(
+    tap(
+      (response) => {
         const trackSuccessData = response.rawResponse.took;
 
-        if (trackSuccessData) {
+        if (trackSuccessData !== undefined) {
           logger.debug(`trackSearchStatus:next  ${trackSuccessData}`);
           usage?.trackSuccess(trackSuccessData);
         }
-        observer.next(response);
       },
-      error(err) {
+      (err) => {
         logger.debug(`trackSearchStatus:error ${err}`);
         usage?.trackError();
-        observer.error(err);
-      },
-      complete() {
-        observer.complete();
-      },
-    })
+      }
+    )
   );
+};
