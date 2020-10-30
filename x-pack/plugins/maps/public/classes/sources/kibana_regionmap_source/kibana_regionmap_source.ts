@@ -11,15 +11,14 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
-
-export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
-  defaultMessage: 'Configured GeoJSON',
-});
-
 import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { LayerConfig } from '../../../../../../../src/plugins/region_map/config';
+
+export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
+  defaultMessage: 'Configured GeoJSON',
+});
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
   readonly _descriptor: KibanaRegionmapSourceDescriptor;
@@ -60,11 +59,11 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getVectorFileMeta(): Promise<LayerConfig> {
-    const regionList: any[] = getKibanaRegionList();
-    const meta: LayerConfig | undefined = regionList.find(
-      (regionConfig: any) => (regionConfig.name as string) === this._descriptor.name
+    const regionList: LayerConfig[] = getKibanaRegionList() as LayerConfig[];
+    const layerConfig: LayerConfig | undefined = regionList.find(
+      (regionConfig: LayerConfig) => (regionConfig.name as string) === this._descriptor.name
     );
-    if (!meta) {
+    if (!layerConfig) {
       throw new Error(
         i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
           defaultMessage: `Unable to find map.regionmap configuration for {name}`,
@@ -74,15 +73,15 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
         })
       );
     }
-    return meta as LayerConfig;
+    return layerConfig;
   }
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const vectorFileMeta: LayerConfig = await this.getVectorFileMeta();
     const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: (vectorFileMeta.format as any).type as FORMAT_TYPE,
-      featureCollectionPath: (vectorFileMeta.meta as any).feature_collection_path as string,
-      fetchUrl: vectorFileMeta.url as string,
+      format: vectorFileMeta.format.type as FORMAT_TYPE,
+      featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
+      fetchUrl: vectorFileMeta.url,
     });
     return {
       data: featureCollection,

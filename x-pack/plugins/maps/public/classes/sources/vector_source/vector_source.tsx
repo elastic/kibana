@@ -8,14 +8,6 @@
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { FORMAT_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -38,18 +30,18 @@ export interface SourceTooltipConfig {
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
-export type GeoJsonWithMeta = {
+export interface GeoJsonWithMeta {
   data: FeatureCollection;
   meta?: GeoJsonFetchMeta;
-};
+}
 
-export type BoundsFilters = {
+export interface BoundsFilters {
   applyGlobalQuery: boolean;
   filters: Filter[];
   query?: MapQuery;
   sourceQuery?: MapQuery;
   timeFilters: TimeRange;
-};
+}
 
 export interface IVectorSource extends ISource {
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;

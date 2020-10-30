@@ -351,7 +351,7 @@ export class VectorLayer extends AbstractLayer {
       startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this._source.getDisplayName();
       const propertiesMap = await joinSource.getPropertiesMap(
-        searchFilters as VectorJoinSourceRequestMeta,
+        searchFilters,
         leftSourceName,
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken)
