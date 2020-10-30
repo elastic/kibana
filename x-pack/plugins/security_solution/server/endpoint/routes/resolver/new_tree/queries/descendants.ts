@@ -18,7 +18,6 @@ interface DescendantsParams {
   schema: Schema;
   indexPatterns: string | string[];
   timerange: Timerange;
-  size: number;
 }
 
 /**
@@ -28,17 +27,15 @@ export class DescendantsQuery {
   private readonly schema: Schema;
   private readonly indexPatterns: string | string[];
   private readonly timerange: Timerange;
-  private readonly size: number;
   private readonly sourceFields: string[];
-  constructor({ schema, indexPatterns, timerange, size }: DescendantsParams) {
+  constructor({ schema, indexPatterns, timerange }: DescendantsParams) {
     this.sourceFields = sourceFilter(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timerange = timerange;
-    this.size = size;
   }
 
-  private query(nodes: Nodes): JsonObject {
+  private query(nodes: Nodes, size: number): JsonObject {
     return {
       // TODO look into switching this to doc_values
       _source: this.sourceFields,
@@ -82,20 +79,25 @@ export class DescendantsQuery {
         [this.schema.id]: {
           terms: {
             field: this.schema.id,
-            size: this.size,
-          },
-          singleEvent: {
-            top_hits: {
-              // TODO figure out if we can use doc_values
-              _source: this.sourceFields,
-              size: 1,
-              // TODO there might a use case to make the order configurable
-              sort: [{ '@timestamp': { order: 'asc' } }],
+            size,
+            order: {
+              timestampMin: 'asc',
             },
           },
-          timestampMax: {
-            max: {
-              field: '@timestamp',
+          aggs: {
+            singleEvent: {
+              top_hits: {
+                // TODO figure out if we can use doc_values
+                _source: this.sourceFields,
+                size: 1,
+                // TODO there might a use case to make the order configurable
+                sort: [{ '@timestamp': { order: 'asc' } }],
+              },
+            },
+            timestampMin: {
+              min: {
+                field: '@timestamp',
+              },
             },
           },
         },
@@ -103,7 +105,7 @@ export class DescendantsQuery {
     };
   }
 
-  private queryWithAncestryArray(nodes: Nodes, ancestryField: string): JsonObject {
+  private queryWithAncestryArray(nodes: Nodes, ancestryField: string, size: number): JsonObject {
     return {
       // TODO look into switching this to doc_values
       _source: this.sourceFields,
@@ -154,44 +156,54 @@ export class DescendantsQuery {
         [this.schema.id]: {
           terms: {
             field: this.schema.id,
-            size: this.size,
+            size,
           },
-          singleEvent: {
-            top_hits: {
-              // TODO figure out if we can use doc_values
-              _source: this.sourceFields,
-              size: 1,
-              // TODO there might a use case to make the order configurable
-              sort: [{ '@timestamp': { order: 'asc' } }],
+          aggs: {
+            singleEvent: {
+              top_hits: {
+                // TODO figure out if we can use doc_values
+                _source: this.sourceFields,
+                size: 1,
+                // TODO there might a use case to make the order configurable
+                sort: [{ '@timestamp': { order: 'asc' } }],
+              },
             },
-          },
-          timestampMax: {
-            max: {
-              field: '@timestamp',
+            bucket_sort_order: {
+              bucket_sort: {
+                // first sort the buckets by which documents are more direct descendants of the requested nodes
+                // (a direct descendants are children, then grandchildren etc)
+                // then sort those by which document was created first (timestamp ascending)
+                sort: [{ ancestry: 'asc' }, { timestampMin: 'asc' }],
+              },
             },
-          },
-          ancestry: {
-            max: {
-              script: {
-                // This will return the location of the id in the ancestry array field. This
-                // will allow us to sort by levels of the tree.
-                source: `
-                  Map ancestryToIndex = [:];
-                  List sourceAncestryArray = params._source.process.Ext.ancestry;
-                  int length = sourceAncestryArray.length;
-                  for (int i = 0; i < length; i++) {
-                    ancestryToIndex[sourceAncestryArray[i]] = i;
-                  }
-                  for (String id : params.ids) {
-                    def index = ancestryToIndex[id];
-                    if (index != null) {
-                      return index;
+            timestampMin: {
+              min: {
+                field: '@timestamp',
+              },
+            },
+            ancestry: {
+              max: {
+                script: {
+                  // This will return the location of the id in the ancestry array field. This
+                  // will allow us to sort by levels of the tree.
+                  source: `
+                    Map ancestryToIndex = [:];
+                    List sourceAncestryArray = params._source.process.Ext.ancestry;
+                    int length = sourceAncestryArray.length;
+                    for (int i = 0; i < length; i++) {
+                      ancestryToIndex[sourceAncestryArray[i]] = i;
                     }
-                  }
-                  return -1;
-                `,
-                params: {
-                  ids: nodes,
+                    for (String id : params.ids) {
+                      def index = ancestryToIndex[id];
+                      if (index != null) {
+                        return index;
+                      }
+                    }
+                    return -1;
+                  `,
+                  params: {
+                    ids: nodes,
+                  },
                 },
               },
             },
@@ -204,20 +216,21 @@ export class DescendantsQuery {
   /**
    * TODO get rid of the unknowns
    */
-  async search(client: IScopedClusterClient, nodes: Nodes): Promise<unknown> {
+  async search(client: IScopedClusterClient, nodes: Nodes, limit: number): Promise<unknown> {
     let response: ApiResponse<SearchResponse<unknown>>;
     if (this.schema.ancestry) {
       response = await client.asCurrentUser.search({
-        body: this.queryWithAncestryArray(nodes, this.schema.ancestry),
+        body: this.queryWithAncestryArray(nodes, this.schema.ancestry, limit),
         index: this.indexPatterns,
       });
-      return getNodesFromAggs(this.schema.id, response.body.aggregations);
+    } else {
+      response = await client.asCurrentUser.search({
+        body: this.query(nodes, limit),
+        index: this.indexPatterns,
+      });
     }
 
-    response = await client.asCurrentUser.search({
-      body: this.query(nodes),
-      index: this.indexPatterns,
-    });
+    console.log('response ', JSON.stringify(response, null, 2));
     return getNodesFromAggs(this.schema.id, response.body.aggregations);
   }
 }

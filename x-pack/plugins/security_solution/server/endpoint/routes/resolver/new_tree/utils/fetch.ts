@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import _ from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 import { DescendantsQuery } from '../queries/descendants';
 import { Schema } from '../queries/aggregation_utils';
@@ -13,7 +13,7 @@ import { Schema } from '../queries/aggregation_utils';
  * resolver tree.
  */
 export interface TreeOptions {
-  levels?: {
+  levels: {
     ancestors: number;
     descendants: number;
   };
@@ -41,13 +41,58 @@ export class Fetcher {
    * @param options the options for retrieving the structure of the tree.
    */
   public async tree(options: TreeOptions) {
+    // const query = new DescendantsQuery({
+    //   schema: options.schema,
+    //   indexPatterns: options.indexPatterns,
+    //   timerange: options.timerange,
+    // });
+
+    // return query.search(this.client, options.nodes, options.descendants);
+
+    return this.retrieveDescendants(options);
+  }
+
+  private async retrieveDescendants(options: TreeOptions) {
+    const descendants = [];
     const query = new DescendantsQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
       timerange: options.timerange,
-      size: options.descendants,
     });
 
-    return query.search(this.client, options.nodes);
+    let nodes = options.nodes;
+    let numNodesLeftToRequest = options.descendants;
+    let levelsLeftToRequest = options.levels.descendants;
+    while (levelsLeftToRequest > 0 && numNodesLeftToRequest) {
+      const results = await query.search(this.client, nodes, numNodesLeftToRequest);
+      if (results.length <= 0) {
+        return descendants;
+      }
+
+      const parents = results.reduce((totalParents, result) => {
+        // TODO get rid of lodash :)
+        totalParents.add(_.get(result, options.schema.parent));
+        return totalParents;
+      }, new Set<string>()).size;
+
+      // TODO need to use the same algorithm from children_helper.ts to determine the most distant grand children and
+      // use those to query the next set of descendants, otherwise we'll get duplicates when using the ancestry array
+      // TODO remove this
+      nodes = results.map((node) => {
+        // TODO get rid of lodash
+        return _.get(node, options.schema.id);
+      });
+
+      numNodesLeftToRequest -= results.length;
+      levelsLeftToRequest -= parents;
+      descendants.push(...results);
+
+      // if the ancestry array is defined then that will override levels
+      if (options.schema.ancestry) {
+        levelsLeftToRequest = 1;
+      }
+    }
+
+    return descendants;
   }
 }
