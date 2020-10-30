@@ -82,7 +82,7 @@ describe('Runtime field editor flyout', () => {
     test('should validate the fields and prevent saving invalid form', async () => {
       const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-      const { find, form, component } = setup({ ...defaultProps, onSave });
+      const { find, exists, form, component } = setup({ ...defaultProps, onSave });
 
       expect(find('saveFieldButton').props().disabled).toBe(false);
 
@@ -97,9 +97,11 @@ describe('Runtime field editor flyout', () => {
         'Give a name to the field.',
         'Script must emit() a value.',
       ]);
+      expect(exists('formError')).toBe(true);
+      expect(find('formError').text()).toBe('Fix errors in form before continuing.');
     });
 
-    test('should forward changes to the form', async () => {
+    test('should forward values from the form', async () => {
       const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
       const { find, form } = setup({ ...defaultProps, onSave });

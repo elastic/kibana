@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 
@@ -38,6 +40,9 @@ const geti18nTexts = (field?: RuntimeField) => {
     }),
     saveButtonLabel: i18n.translate('xpack.runtimeFields.editor.flyoutSaveButtonLabel', {
       defaultMessage: 'Save',
+    }),
+    formErrorsCalloutTitle: i18n.translate('xpack.runtimeFields.editor.validationErrorTitle', {
+      defaultMessage: 'Fix errors in form before continuing.',
     }),
   };
 };
@@ -71,7 +76,7 @@ export const RuntimeFieldEditorFlyout = ({ onSave, onCancel, docLinks, field }: 
       ? async () => ({ isValid: true, data: field })
       : async () => ({ isValid: false, data: {} as RuntimeField }),
   });
-  const { submit, isValid: isFormValid } = formState;
+  const { submit, isValid: isFormValid, isSubmitted } = formState;
 
   const onSaveField = useCallback(async () => {
     const { isValid, data } = await submit();
@@ -94,6 +99,18 @@ export const RuntimeFieldEditorFlyout = ({ onSave, onCancel, docLinks, field }: 
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
+        {isSubmitted && !isFormValid && (
+          <>
+            <EuiCallOut
+              title={i18nTexts.formErrorsCalloutTitle}
+              color="danger"
+              iconType="cross"
+              data-test-subj="formError"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -111,7 +128,7 @@ export const RuntimeFieldEditorFlyout = ({ onSave, onCancel, docLinks, field }: 
               color="primary"
               onClick={() => onSaveField()}
               data-test-subj="saveFieldButton"
-              disabled={isFormValid === false}
+              disabled={isSubmitted && !isFormValid}
               fill
             >
               {i18nTexts.saveButtonLabel}
