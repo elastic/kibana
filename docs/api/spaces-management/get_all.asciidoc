@@ -18,7 +18,7 @@ experimental[] Retrieve all {kib} spaces.
   (Optional, string) Valid options include `any`, `copySavedObjectsIntoSpace`, and `shareSavedObjectsIntoSpace`. This determines what
   authorization checks are applied to the API call. If `purpose` is not provided in the URL, the `any` purpose is used.
 
-`includeAuthorizedPurposes`::
+`include_authorized_purposes`::
   (Optional, boolean) When enabled, the API will return any spaces that the user is authorized to access in any capacity, and each space
   will contain the purpose(s) for which the user is authorized. This can be useful to determine which spaces a user can read but not take a
   specific action in. If the Security plugin is not enabled, this will have no effect, as no authorization checks would take place.
@@ -83,7 +83,7 @@ The user has read-only access to the Sales space. Retrieve all spaces and specif
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/spaces/space?purpose=shareSavedObjectsIntoSpace&includeAuthorizedPurposes=true
+$ curl -X GET api/spaces/space?purpose=shareSavedObjectsIntoSpace&include_authorized_purposes=true
 --------------------------------------------------
 
 The API returns the following:

@@ -25,7 +25,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
               schema.literal('shareSavedObjectsIntoSpace'),
             ])
           ),
-          includeAuthorizedPurposes: schema.conditional(
+          include_authorized_purposes: schema.conditional(
             schema.siblingRef('purpose'),
             schema.string(),
             schema.maybe(schema.literal(false)),
@@ -37,7 +37,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside GET /api/spaces/space`);
 
-      const { purpose, includeAuthorizedPurposes } = request.query;
+      const { purpose, include_authorized_purposes: includeAuthorizedPurposes } = request.query;
 
       const spacesClient = await spacesService.scopedClient(request);
 

@@ -78,7 +78,7 @@ describe('GET /spaces/space', () => {
   [undefined, 'any', 'copySavedObjectsIntoSpace', 'shareSavedObjectsIntoSpace'].forEach(
     (purpose) => {
       describe(`with purpose='${purpose}'`, () => {
-        it(`returns expected result when not specifying includeAuthorizedPurposes`, async () => {
+        it(`returns expected result when not specifying include_authorized_purposes`, async () => {
           const { routeHandler } = await setup();
 
           const request = httpServerMock.createKibanaRequest({ method: 'get', query: { purpose } });
@@ -88,12 +88,12 @@ describe('GET /spaces/space', () => {
           expect(response.payload).toEqual(spaces);
         });
 
-        it(`returns expected result when specifying includeAuthorizedPurposes=true`, async () => {
+        it(`returns expected result when specifying include_authorized_purposes=true`, async () => {
           const { routeHandler } = await setup();
 
           const request = httpServerMock.createKibanaRequest({
             method: 'get',
-            query: { purpose, includeAuthorizedPurposes: true },
+            query: { purpose, include_authorized_purposes: true },
           });
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
@@ -103,17 +103,17 @@ describe('GET /spaces/space', () => {
           } else {
             expect(response.status).toEqual(400);
             expect(response.payload).toEqual(
-              new Error(`'purpose' cannot be supplied with 'includeAuthorizedPurposes'`)
+              new Error(`'purpose' cannot be supplied with 'include_authorized_purposes'`)
             );
           }
         });
 
-        it(`returns expected result when specifying includeAuthorizedPurposes=false`, async () => {
+        it(`returns expected result when specifying include_authorized_purposes=false`, async () => {
           const { routeHandler } = await setup();
 
           const request = httpServerMock.createKibanaRequest({
             method: 'get',
-            query: { purpose, includeAuthorizedPurposes: false },
+            query: { purpose, include_authorized_purposes: false },
           });
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 

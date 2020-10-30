@@ -36,7 +36,7 @@ export class SpacesManager {
 
   public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
     const { purpose, includeAuthorizedPurposes } = options;
-    const query = { purpose, includeAuthorizedPurposes };
+    const query = { purpose, include_authorized_purposes: includeAuthorizedPurposes };
     return await this.http.get('/api/spaces/space', { query });
   }
 
