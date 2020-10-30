@@ -204,19 +204,17 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           consumer: 'case',
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={handleSetAddFlyoutVisibility as Dispatch<SetStateAction<boolean>>}
-          actionTypes={actionTypes}
-        />
-        {editedConnectorItem && (
+        {addFlyoutVisible && (
+          <ConnectorAddFlyout
+            onClose={() => handleSetAddFlyoutVisibility(false)}
+            actionTypes={actionTypes}
+          />
+        )}
+        {editedConnectorItem && editFlyoutVisible && (
           <ConnectorEditFlyout
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={
-              handleSetEditFlyoutVisibility as Dispatch<SetStateAction<boolean>>
-            }
+            onClose={() => handleSetEditFlyoutVisibility(false)}
           />
         )}
       </ActionsConnectorsContextProvider>
