@@ -165,10 +165,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       ).toYieldEqualTo({ treeCount: 1, nodesOwnedByTrees: 3 });
     });
 
-    it(`should show links to the 3 nodes (with icons) in the node list.`, async () => {
-      await expect(
-        simulator.map(() => simulator.testSubject('resolver:node-list:node-link:title').length)
-      ).toYieldEqualTo(3);
+    it(`should show links to the 3 nodes in the node list.`, async () => {
       await expect(
         simulator.map(() => simulator.testSubject('resolver:node-list:node-link:title').length)
       ).toYieldEqualTo(3);

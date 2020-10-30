@@ -41,13 +41,18 @@ export const getIndexNamesSelectedSelector = () => {
   const getScopesSelector = scopesSelector();
   const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): string[] => {
+  const mapStateToProps = (
+    state: State,
+    scopeId: SourcererScopeName
+  ): { indexNames: string[]; previousIndexNames: string } => {
     const scope = getScopesSelector(state)[scopeId];
     const configIndexPatterns = getConfigIndexPatternsSelector(state);
-
-    return scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns;
+    return {
+      indexNames:
+        scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns,
+      previousIndexNames: scope.indexPattern.title,
+    };
   };
-
   return mapStateToProps;
 };
 

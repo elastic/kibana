@@ -6,6 +6,7 @@
 import React, { Component } from 'react';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsSetup } from 'src/core/public';
 import { AuthenticatedUser, canUserChangePassword } from '../../../common/model';
 import { UserAPIClient } from '../../management/users';

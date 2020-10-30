@@ -8,7 +8,7 @@ import { EuiDataGridSorting } from '@elastic/eui';
 
 import { multiColumnSortFactory } from './common';
 
-describe('Transform: Define Pivot Common', () => {
+describe('Data Frame Analytics: Data Grid Common', () => {
   test('multiColumnSortFactory()', () => {
     const data = [
       { s: 'a', n: 1 },

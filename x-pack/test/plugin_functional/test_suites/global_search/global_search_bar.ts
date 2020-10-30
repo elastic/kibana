@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  describe('GlobalSearchBar', function () {
+  // See: https://github.com/elastic/kibana/issues/81397
+  describe.skip('GlobalSearchBar', function () {
     const { common } = getPageObjects(['common']);
     const find = getService('find');
     const testSubjects = getService('testSubjects');
