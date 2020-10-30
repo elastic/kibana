@@ -176,7 +176,7 @@ Array [
           },
           "my_objects": Object {
             "total": Object {
-              "type": "number",
+              "type": "long",
             },
             "type": Object {
               "type": "boolean",
@@ -248,7 +248,7 @@ Array [
           "my_array": Object {
             "items": Object {
               "total": Object {
-                "type": "number",
+                "type": "long",
               },
               "type": Object {
                 "type": "boolean",
@@ -258,21 +258,21 @@ Array [
           },
           "my_index_signature_prop": Object {
             "avg": Object {
-              "type": "number",
+              "type": "float",
             },
             "count": Object {
-              "type": "number",
+              "type": "long",
             },
             "max": Object {
-              "type": "number",
+              "type": "long",
             },
             "min": Object {
-              "type": "number",
+              "type": "long",
             },
           },
           "my_objects": Object {
             "total": Object {
-              "type": "number",
+              "type": "long",
             },
             "type": Object {
               "type": "boolean",

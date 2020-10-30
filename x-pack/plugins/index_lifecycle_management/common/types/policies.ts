@@ -116,7 +116,6 @@ export interface ForcemergeAction {
 export interface LegacyPolicy {
   name: string;
   phases: {
-    cold: ColdPhase;
     delete: DeletePhase;
   };
 }
@@ -157,14 +156,6 @@ export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
   bestCompressionEnabled: boolean;
-}
-
-export interface ColdPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority {
-  freezeEnabled: boolean;
 }
 
 export interface DeletePhase extends CommonPhaseSettings, PhaseWithMinAge {
