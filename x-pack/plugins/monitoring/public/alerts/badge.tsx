@@ -14,11 +14,11 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { CommonAlertStatus, CommonAlertState } from '../../common/types';
+import { CommonAlertStatus, CommonAlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
-import { AlertMessage, AlertState } from '../../server/alerts/types';
+import { AlertMessage, AlertState } from '../../common/types/alerts';
 import { AlertPanel } from './panel';
 import { Legacy } from '../legacy_shims';
 import { isInSetupMode } from '../lib/setup_mode';

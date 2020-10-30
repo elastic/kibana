@@ -43,6 +43,12 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.enabled`
   | Set to `false` to disable the APM app. Defaults to `true`.
 
+| `xpack.apm.serviceMapFingerprintBucketSize`
+  | Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to `100`.
+
+| `xpack.apm.serviceMapFingerprintGlobalBucketSize`
+  | Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `100`.
+
 | `xpack.apm.ui.enabled` {ess-icon}
   | Set to `false` to hide the APM app from the main menu. Defaults to `true`.
 
