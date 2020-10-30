@@ -24,8 +24,9 @@ export const postCaseReq: CasePostRequest = {
   },
 };
 
-export const postCommentReq: { comment: string } = {
+export const postCommentReq: { comment: string; type: string } = {
   comment: 'This is a cool comment',
+  type: 'user',
 };
 
 export const postCaseResp = (
