@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
-import { concatMap, filter, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, map, shareReplay, take, tap, withLatestFrom } from 'rxjs/operators';
 import {
   IEsSearchRequest,
   IKibanaSearchRequest,
@@ -24,7 +24,7 @@ import {
   LogEntrySearchResponsePayload,
   logEntrySearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entry';
-import type { InfraSources } from '../../lib/sources';
+import type { IInfraSources } from '../../lib/sources';
 import { jsonFromBase64StringRT } from '../../utils/typed_search_strategy';
 import { createGetLogEntryQuery, getLogEntryResponseRT } from './queries/log_entry';
 
@@ -53,7 +53,7 @@ export const logEntrySearchStrategyProvider = ({
   sources,
 }: {
   data: DataPluginStart;
-  sources: InfraSources;
+  sources: IInfraSources;
 }): ISearchStrategy<LogEntrySearchRequest, LogEntrySearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
@@ -73,16 +73,19 @@ export const logEntrySearchStrategyProvider = ({
 
         const initialRequest$ = of(request).pipe(
           filter(asyncSubmitRequestRT.is),
-          withLatestFrom(sourceConfiguration$),
-          map(
-            ([{ params }, { configuration }]): IEsSearchRequest => ({
-              params: createGetLogEntryQuery(
-                configuration.logAlias,
-                params.logEntryId,
-                configuration.fields.timestamp,
-                configuration.fields.tiebreaker
-              ),
-            })
+          concatMap(({ params }) =>
+            sourceConfiguration$.pipe(
+              map(
+                ({ configuration }): IEsSearchRequest => ({
+                  params: createGetLogEntryQuery(
+                    configuration.logAlias,
+                    params.logEntryId,
+                    configuration.fields.timestamp,
+                    configuration.fields.tiebreaker
+                  ),
+                })
+              )
+            )
           )
         );
 
@@ -93,22 +96,28 @@ export const logEntrySearchStrategyProvider = ({
             ...esResponse,
             rawResponse: decodeOrThrow(getLogEntryResponseRT)(esResponse.rawResponse),
           })),
-          withLatestFrom(sourceConfiguration$),
-          map(([esResponse, { configuration }]) => ({
-            ...esResponse,
-            rawResponse: logEntrySearchResponsePayloadRT.encode({
-              data:
-                esResponse.rawResponse.hits.hits.map((hit) => ({
-                  id: hit._id,
-                  index: hit._index,
-                  key: getLogEntryCursorFromFields(
-                    configuration.fields.timestamp,
-                    configuration.fields.tiebreaker
-                  )(hit.fields),
-                  fields: [],
-                }))[0] ?? null,
-            }),
-          }))
+          concatMap((esResponse) =>
+            sourceConfiguration$.pipe(
+              map(({ configuration }) => ({
+                ...esResponse,
+                ...(esResponse.id
+                  ? { id: logEntrySearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
+                  : {}),
+                rawResponse: logEntrySearchResponsePayloadRT.encode({
+                  data:
+                    esResponse.rawResponse.hits.hits.map((hit) => ({
+                      id: hit._id,
+                      index: hit._index,
+                      key: getLogEntryCursorFromFields(
+                        configuration.fields.timestamp,
+                        configuration.fields.tiebreaker
+                      )(hit.fields),
+                      fields: [],
+                    }))[0] ?? null,
+                }),
+              }))
+            )
+          )
         );
       }),
     cancel: async (context, id) => {

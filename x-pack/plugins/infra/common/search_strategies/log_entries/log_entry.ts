@@ -34,7 +34,7 @@ export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 
 export const logEntrySearchResponsePayloadRT = rt.intersection([
   rt.type({
-    data: logEntryRT,
+    data: rt.union([logEntryRT, rt.null]),
   }),
   rt.partial({
     errors: rt.array(errorRT),
