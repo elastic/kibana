@@ -44,6 +44,7 @@ export function toPreviewExpression(
         ...state.legend,
         isVisible: false,
       },
+      valueLabels: { mode: 'hide' },
     },
     datasourceLayers
   );

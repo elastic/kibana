@@ -219,7 +219,10 @@ function mergeThemeWithValueLabelsStyling(
   valuesLabelMode: string = 'hide',
   isHorizontal: boolean
 ) {
-  const VALUE_LABELS_FONTSIZE = 15;
+  const VALUE_LABELS_MAX_FONTSIZE = 15;
+  const VALUE_LABELS_MIN_FONTSIZE = 10;
+  const VALUE_LABELS_VERTICAL_OFFSET = -10;
+  const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
 
   if (valuesLabelMode === 'hide') {
     return theme;
@@ -230,15 +233,15 @@ function mergeThemeWithValueLabelsStyling(
       barSeriesStyle: {
         ...theme.barSeriesStyle,
         displayValue: {
-          fontSize: { min: 10, max: VALUE_LABELS_FONTSIZE },
+          fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
           fill: { textInverted: true, textBorder: true },
           alignment: isHorizontal
             ? {
                 vertical: VerticalAlignment.Middle,
               }
             : { horizontal: HorizontalAlignment.Center },
-          offsetX: isHorizontal ? 10 : 0,
-          offsetY: isHorizontal ? 0 : -5,
+          offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
+          offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
         },
       },
     },
@@ -425,15 +428,12 @@ export function XYChart({
     };
     return style;
   };
-  // Based on the XY toPreviewExpression logic
-  const isSuggestionPreview = !legend.isVisible && layers.every(({ hide }) => hide);
+
   const shouldShowValueLabels =
     // No stacked bar charts
     filteredLayers.every((layer) => !layer.seriesType.includes('stacked')) &&
     // No histogram charts
-    !isHistogramViz &&
-    // No suggestion charts
-    !isSuggestionPreview;
+    !isHistogramViz;
 
   const baseThemeWithMaybeValueLabels = !shouldShowValueLabels
     ? chartTheme

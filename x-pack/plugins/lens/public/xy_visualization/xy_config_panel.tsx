@@ -114,8 +114,7 @@ const valueTooltipContentDisabled = {
       'This setting cannot be applied to stacked bar charts. Try other type of charts',
   }),
   histogram: i18n.translate('xpack.lens.xyChart.valuesDisabledHelpText', {
-    defaultMessage:
-      'This setting cannot be applied to bar charts having time dimension on the x axis.',
+    defaultMessage: 'This setting cannot be applied to bar charts having time dimension.',
   }),
 };
 
