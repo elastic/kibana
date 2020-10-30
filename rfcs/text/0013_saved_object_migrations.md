@@ -253,10 +253,10 @@ Note:
 Unlike the existing migration algorithm, we won't create an alias that points
 to the reindexed target. So after migrating a v6 `.kibana` we'll have
 `.kibana_pre6.5_001` but there will be no `.kibana` alias or index. This is
-because we have no way to ensure that we don't accidently reindex from a
-`.kibana` _alias_ instead of an index.
+because we have no way to ensure that when we try to delete the old 
+_index_, we don't accidently delete the newly cloned index with the same _alias_. Should this happen we'd completely loose the data in the legacy index.
 
-This algorithm shares a limitation with our existing migration algorithm
+This algorithm shares a weakness with our existing migration algorithm
 (since v7.4). When the task manager index gets reindexed a reindex script is
 applied. Because we delete the original task manager index there is no way to
 rollback a failed task manager migration without a snapshot.
