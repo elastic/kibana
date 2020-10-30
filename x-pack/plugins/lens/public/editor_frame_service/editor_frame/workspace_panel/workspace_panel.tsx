@@ -366,6 +366,35 @@ export const InnerVisualizationWrapper = ({
   );
 
   if (localState.configurationValidationError) {
+    let showExtraErrors = null;
+    if (localState.configurationValidationError.length > 1) {
+      if (localState.expandError) {
+        showExtraErrors = localState.configurationValidationError
+          .slice(1)
+          .map(({ longMessage }, i) => (
+            <EuiFlexItem className="eui-textBreakAll">{longMessage}</EuiFlexItem>
+          ));
+      } else {
+        showExtraErrors = (
+          <EuiFlexItem data-test-subj="configuration-failure-more-errors">
+            <EuiButtonEmpty
+              onClick={() => {
+                setLocalState((prevState: WorkspaceState) => ({
+                  ...prevState,
+                  expandError: !prevState.expandError,
+                }));
+              }}
+            >
+              {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
+                defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
+                values: { errors: localState.configurationValidationError.length - 1 },
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        );
+      }
+    }
+
     return (
       <EuiFlexGroup
         style={{ maxWidth: '100%' }}
@@ -389,16 +418,7 @@ export const InnerVisualizationWrapper = ({
         <EuiFlexItem className="eui-textBreakAll">
           {localState.configurationValidationError[0].longMessage}
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj="configuration-failure-more-errors">
-          <EuiTextColor color="subdued">
-            {localState.configurationValidationError.length > 1
-              ? i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
-                  defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
-                  values: { errors: localState.configurationValidationError.length - 1 },
-                })
-              : null}
-          </EuiTextColor>
-        </EuiFlexItem>
+        {showExtraErrors}
       </EuiFlexGroup>
     );
   }

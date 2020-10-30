@@ -156,11 +156,7 @@ export const xyVisualization: Visualization<State> = {
 
   getConfiguration(props) {
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
-    // Make it required only if there's a multi-layer inconsistency:
-    // Note that X-Axis is only required if there's an yAxis defined && there's no splitAccessor defined
-    const someLayersAreIncomplete = props.state.layers.every(
-      (l) => l.accessors.length === 0 && l.xAccessor == null && l.splitAccessor == null
-    );
+
     const isHorizontal = isHorizontalChart(props.state.layers);
     return {
       groups: [
@@ -171,7 +167,6 @@ export const xyVisualization: Visualization<State> = {
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: !layer.seriesType.includes('percentage') && someLayersAreIncomplete,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
@@ -283,12 +278,10 @@ export const xyVisualization: Visualization<State> = {
 
   getErrorMessages(state, frame) {
     // Data error handling below here
-    const hasNoXAccessor = ({ xAccessor, accessors, splitAccessor }: LayerConfig) =>
-      // Notify about missing X Axis only if yAxis is missing as well
-      xAccessor == null && accessors.length === 0;
     const hasNoAccessors = ({ accessors }: LayerConfig) =>
       accessors == null || accessors.length === 0;
-    const hasNoSplitAccessor = ({ splitAccessor }: LayerConfig) => splitAccessor == null;
+    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: LayerConfig) =>
+      seriesType.includes('percentage') && splitAccessor == null;
 
     const errors: Array<{
       shortMessage: string;
@@ -300,27 +293,22 @@ export const xyVisualization: Visualization<State> = {
       // Order is important here: Y Axis is fundamental to exist to make it valid
       const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
         ['Y', hasNoAccessors],
-        ['X', hasNoXAccessor],
+        ['Break down', hasNoSplitAccessor],
       ];
 
-      // filter those layers with no accessors at all
+      // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        (layer) =>
-          !checks.every(([dimension, missingCriteria]) => missingCriteria(layer)) ||
-          // Do not discard layers with only breakdown/split Accessor
-          !hasNoSplitAccessor(layer)
+        ({ accessors, xAccessor, splitAccessor }: LayerConfig) =>
+          accessors.length > 0 || xAccessor != null || splitAccessor != null
       );
-
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
         if (!result.valid) {
           errors.push(result.payload);
         }
       }
-      // Note: this mechanism may produce additional errors (i.e. Missing Y and X Axis on the same layers)
-      // Right now this is not a big concern as Y Axis will be shown/solved first and the redundant error will be wiped out
-      // TODO: maybe better filter out errors in the future?
     }
+
     return errors.length ? errors : undefined;
   },
 };
@@ -329,7 +317,12 @@ function validateLayersForDimension(
   dimension: string,
   layers: LayerConfig[],
   missingCriteria: (layer: LayerConfig) => boolean
-): { valid: true } | { valid: false; payload: { shortMessage: string; longMessage: string } } {
+):
+  | { valid: true }
+  | {
+      valid: false;
+      payload: { shortMessage: string; longMessage: string };
+    } {
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
   // * or should not miss on any
@@ -367,15 +360,15 @@ function getAxisName(axis: 'x' | 'y', { isHorizontal }: { isHorizontal: boolean 
 function getMessageIdsForDimension(dimension: string, layers: number[], isHorizontal: boolean) {
   const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
-    case 'X':
+    case 'Break down':
       return {
-        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXShort', {
+        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
           defaultMessage: `Missing {axis}`,
-          values: { axis: getAxisName('x', { isHorizontal }) },
+          values: { axis: 'Break down by axis' },
         }),
-        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXLong', {
+        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitLong', {
           defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}`,
-          values: { layers: layers.length, layersList, axis: getAxisName('x', { isHorizontal }) },
+          values: { layers: layers.length, layersList, axis: 'Break down by axis' },
         }),
       };
     case 'Y':
