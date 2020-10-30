@@ -78,6 +78,7 @@
 |  [defaultEmbeddableFactoryProvider](./kibana-plugin-plugins-embeddable-public.defaultembeddablefactoryprovider.md) |  |
 |  [EmbeddableRenderer](./kibana-plugin-plugins-embeddable-public.embeddablerenderer.md) | Helper react component to render an embeddable Can be used if you have an embeddable object or an embeddable factory Supports updating input by passing <code>input</code> prop |
 |  [ERROR\_EMBEDDABLE\_TYPE](./kibana-plugin-plugins-embeddable-public.error_embeddable_type.md) |  |
+|  [isContextMenuTriggerContext](./kibana-plugin-plugins-embeddable-public.iscontextmenutriggercontext.md) |  |
 |  [isRangeSelectTriggerContext](./kibana-plugin-plugins-embeddable-public.israngeselecttriggercontext.md) |  |
 |  [isValueClickTriggerContext](./kibana-plugin-plugins-embeddable-public.isvalueclicktriggercontext.md) |  |
 |  [PANEL\_BADGE\_TRIGGER](./kibana-plugin-plugins-embeddable-public.panel_badge_trigger.md) |  |
