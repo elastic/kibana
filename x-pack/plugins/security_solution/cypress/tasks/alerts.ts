@@ -23,6 +23,7 @@ import {
   MARK_ALERT_IN_PROGRESS_BTN,
   MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
   ALERT_RISK_SCORE_HEADER,
+  SELECT_ALL_ALERTS_BTN,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -77,6 +78,10 @@ export const markInProgressAlerts = () => {
   cy.get(MARK_SELECTED_ALERTS_IN_PROGRESS_BTN).click();
 };
 
+export const selectAllAlerts = () => {
+  cy.get(SELECT_ALL_ALERTS_BTN).click({ force: true });
+};
+
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
@@ -112,7 +117,6 @@ export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
 };
 
-export const waitForAlertsToBeLoaded = () => {
-  const expectedNumberOfDisplayedAlerts = 25;
+export const waitForAlertsToBeLoaded = (expectedNumberOfDisplayedAlerts = 25) => {
   cy.get(ALERTS).should('have.length', expectedNumberOfDisplayedAlerts);
 };

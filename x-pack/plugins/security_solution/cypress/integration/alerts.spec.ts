@@ -24,11 +24,13 @@ import {
   waitForAlertsToBeLoaded,
   markInProgressFirstAlert,
   goToInProgressAlerts,
+  selectAllAlerts,
 } from '../tasks/alerts';
 import { esArchiverLoad } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
+import { setStartDate, updateDates } from '../tasks/date_picker';
 
 describe('Alerts', () => {
   context('Closing alerts', () => {
@@ -250,6 +252,45 @@ describe('Alerts', () => {
             `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`
           );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeMarkedInProgress);
+        });
+    });
+  });
+
+  // Regression test: https://github.com/elastic/kibana/issues/82004
+  context.only('Regression #82004: Bulk actions ignore daterange filters', () => {
+    beforeEach(() => {
+      esArchiverLoad('alerts');
+      loginAndWaitForPage(DETECTIONS_URL);
+    });
+
+    it('Only alerts within the specified daterange are marked as closed', () => {
+      waitForAlerts();
+      waitForAlertsToBeLoaded();
+
+      // There are 8 open alerts after this date and 100 before
+      setStartDate('Mar 11, 2020 @ 02:58:22.484');
+      updateDates();
+
+      cy.get(NUMBER_OF_ALERTS)
+        .invoke('text')
+        .then((numberOfAlerts) => {
+          const numberOfAlertsToBeMarkedClosed = 8;
+
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
+          selectAllAlerts();
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
+
+          closeAlerts();
+          cy.reload();
+          goToClosedAlerts();
+          waitForAlertsToBeLoaded(numberOfAlertsToBeMarkedClosed);
+
+          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeMarkedClosed.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${numberOfAlertsToBeMarkedClosed.toString()} alerts`
+          );
+          cy.get(ALERTS).should('have.length', numberOfAlertsToBeMarkedClosed);
         });
     });
   });

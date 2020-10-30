@@ -51,6 +51,8 @@ export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedAlerts"]';
 
+export const SELECT_ALL_ALERTS_BTN = '[data-test-subj="selectAllAlertsButton"] button';
+
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
 export const SHOWING_ALERTS = '[data-test-subj="showingAlerts"]';
