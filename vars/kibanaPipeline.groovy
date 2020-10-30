@@ -390,7 +390,7 @@ def scriptTaskDocker(description, script) {
 
 def buildDocker() {
   sh(
-    script: "./ci/build_docker.sh",
+    script: "./.ci/build_docker.sh",
     label: 'Build CI Docker image'
   )
 }
