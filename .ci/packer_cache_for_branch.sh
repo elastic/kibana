@@ -57,6 +57,8 @@ find . -type d -name node_modules -not -path '*__fixtures__*' -prune -print0 | x
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
+.ci/build_docker.sh
+
 if [[ "$branch" != "master" ]]; then
   rm --preserve-root -rf "$checkoutDir"
 fi

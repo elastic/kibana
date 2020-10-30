@@ -3,19 +3,14 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
-        }
-      }
-    }
-  }
+kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true) {
+  githubPr.withDefaultPrComments {
+    workers.base(name: 'packer-cache', size: 's', ramDisk: false, bootstrapped: false) {
+      kibanaPipeline.bash('./.ci/packer_cache.sh', 'Execute packer_cache')
 
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
+      kibanaPipeline.bash("""
+        ./ci/build_docker.sh
+      """, "Testing bootstrap cache")
+    }
   }
 }
