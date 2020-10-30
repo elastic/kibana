@@ -31,7 +31,10 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  * @param services
  */
 export async function checkForDuplicateTitle(
-  savedObject: Pick<SavedObject, 'id' | 'title' | 'lastSavedTitle' | 'copyOnSave' | 'getEsType'>,
+  savedObject: Pick<
+    SavedObject,
+    'id' | 'title' | 'getDisplayName' | 'lastSavedTitle' | 'copyOnSave' | 'getEsType'
+  >,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
   services: Pick<SavedObjectKibanaServices, 'savedObjectsClient' | 'overlays'>

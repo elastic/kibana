@@ -383,6 +383,10 @@ export function App({
             copyOnSave: saveProps.newCopyOnSave,
             lastSavedTitle: lastKnownDoc.title,
             getEsType: () => 'lens',
+            getDisplayName: () =>
+              i18n.translate('xpack.lens.app.saveModalType', {
+                defaultMessage: 'Lens visualization',
+              }),
           },
           saveProps.isTitleDuplicateConfirmed,
           saveProps.onTitleDuplicate,
