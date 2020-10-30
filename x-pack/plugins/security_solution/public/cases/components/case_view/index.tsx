@@ -307,6 +307,11 @@ export const CaseComponent = React.memo<CaseProps>(
       [allCasesLink]
     );
 
+    const isSelected = useMemo(() => caseStatusData.isSelected, [caseStatusData]);
+    const handleToggleStatusCase = useCallback(() => {
+      toggleStatusCase(!isSelected);
+    }, [toggleStatusCase, isSelected]);
+
     return (
       <>
         <HeaderWrapper>
@@ -330,7 +335,7 @@ export const CaseComponent = React.memo<CaseProps>(
               disabled={!userCanCrud}
               isLoading={isLoading && updateKey === 'status'}
               onRefresh={handleRefresh}
-              toggleStatusCase={() => toggleStatusCase(!caseStatusData.isSelected)}
+              toggleStatusCase={handleToggleStatusCase}
               {...caseStatusData}
             />
           </HeaderPage>
@@ -364,7 +369,7 @@ export const CaseComponent = React.memo<CaseProps>(
                           isDisabled={!userCanCrud}
                           isLoading={isLoading && updateKey === 'status'}
                           fill={caseStatusData.isSelected}
-                          onClick={() => toggleStatusCase(!caseStatusData.isSelected)}
+                          onClick={handleToggleStatusCase}
                         >
                           {caseStatusData.buttonLabel}
                         </EuiButton>

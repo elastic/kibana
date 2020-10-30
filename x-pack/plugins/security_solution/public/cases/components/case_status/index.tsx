@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiBadge,
@@ -62,57 +62,62 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
   title,
   toggleStatusCase,
   value,
-}) => (
-  <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
-    <EuiFlexItem grow={false}>
-      <MyDescriptionList compressed>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <EuiBadge color={badgeColor} data-test-subj="case-view-status">
-                {status}
-              </EuiBadge>
-            </EuiDescriptionListDescription>
+}) => {
+  const handleToggleStatusCase = useCallback(() => {
+    toggleStatusCase(!isSelected);
+  }, [toggleStatusCase, isSelected]);
+  return (
+    <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <MyDescriptionList compressed>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiBadge color={badgeColor} data-test-subj="case-view-status">
+                  {status}
+                </EuiBadge>
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <FormattedRelativePreferenceDate data-test-subj={dataTestSubj} value={value} />
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </MyDescriptionList>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          <EuiFlexItem>
+            <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
+              {i18n.CASE_REFRESH}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <FormattedRelativePreferenceDate data-test-subj={dataTestSubj} value={value} />
-            </EuiDescriptionListDescription>
+            <EuiButton
+              data-test-subj="toggle-case-status"
+              isDisabled={disabled}
+              iconType={icon}
+              isLoading={isLoading}
+              fill={isSelected}
+              onClick={handleToggleStatusCase}
+            >
+              {buttonLabel}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CaseViewActions
+              caseData={caseData}
+              currentExternalIncident={currentExternalIncident}
+              disabled={disabled}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </MyDescriptionList>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="l" alignItems="center">
-        <EuiFlexItem>
-          <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
-            {i18n.CASE_REFRESH}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            data-test-subj="toggle-case-status"
-            isDisabled={disabled}
-            iconType={icon}
-            isLoading={isLoading}
-            fill={isSelected}
-            onClick={() => toggleStatusCase(!isSelected)}
-          >
-            {buttonLabel}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CaseViewActions
-            caseData={caseData}
-            currentExternalIncident={currentExternalIncident}
-            disabled={disabled}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const CaseStatus = React.memo(CaseStatusComp);
