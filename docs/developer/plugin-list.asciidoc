@@ -462,7 +462,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields[runtimeFields]
-|WARNING: Missing README.
+|Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
