@@ -9,7 +9,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux';
 import { AppMountParameters } from 'kibana/public';
 import {
   getCoreChrome,
@@ -81,25 +80,6 @@ export async function renderApp({
         originatingApp={originatingApp}
       />
     );
-
-    /*
-    const savedMap = new SavedMap(mapEmbeddableInput);
-    console.log(savedMap);
-
-
-
-    return (
-      <Provider store={savedMap.getStore()}>
-        <MapApp
-          savedMap={savedMap}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          stateTransfer={stateTransfer}
-          originatingApp={originatingApp}
-        />
-      </Provider>
-    )
-    */
   }
 
   render(
