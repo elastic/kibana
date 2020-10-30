@@ -79,6 +79,24 @@ export interface CreateCommentParams {
   comment: Comment;
 }
 
+export interface FieldsSchema {
+  type: string;
+  [key: string]: string;
+}
+
+export interface ExternalServiceFields {
+  clauseNames: string[];
+  custom: boolean;
+  id: string;
+  key: string;
+  name: string;
+  navigatable: boolean;
+  orderable: boolean;
+  schema: FieldsSchema;
+  searchable: boolean;
+}
+export type GetCommonFieldsResponse = ExternalServiceFields[];
+
 export type GetIssueTypesResponse = Array<{ id: string; name: string }>;
 export type GetFieldsByIssueTypeResponse = Record<
   string,
@@ -93,15 +111,16 @@ export interface GetIssueResponse {
 }
 
 export interface ExternalService {
-  getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
-  createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
+  createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+  getCommonFields: () => Promise<GetCommonFieldsResponse>;
   getCapabilities: () => Promise<ExternalServiceParams>;
-  getIssueTypes: () => Promise<GetIssueTypesResponse>;
   getFieldsByIssueType: (issueTypeId: string) => Promise<GetFieldsByIssueTypeResponse>;
-  getIssues: (title: string) => Promise<GetIssuesResponse>;
+  getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   getIssue: (id: string) => Promise<GetIssueResponse>;
+  getIssues: (title: string) => Promise<GetIssuesResponse>;
+  getIssueTypes: () => Promise<GetIssueTypesResponse>;
+  updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
 
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
@@ -157,6 +176,11 @@ export interface GetIssueTypesHandlerArgs {
   params: ExecutorSubActionGetIssueTypesParams;
 }
 
+export interface GetCommonFieldsHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionGetIssueTypesParams;
+}
+
 export interface GetFieldsByIssueTypeHandlerArgs {
   externalService: ExternalService;
   params: ExecutorSubActionGetFieldsByIssueTypeParams;
@@ -177,15 +201,16 @@ export interface GetIssueHandlerArgs {
 }
 
 export interface ExternalServiceApi {
-  handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
-  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
+  commonFields: (args: GetIssueTypesHandlerArgs) => Promise<GetCommonFieldsResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+  handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   issueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;
+  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   fieldsByIssueType: (
     args: GetFieldsByIssueTypeHandlerArgs
   ) => Promise<GetFieldsByIssueTypeResponse>;
-  issues: (args: GetIssuesHandlerArgs) => Promise<GetIssuesResponse>;
   issue: (args: GetIssueHandlerArgs) => Promise<GetIssueResponse>;
+  issues: (args: GetIssuesHandlerArgs) => Promise<GetIssuesResponse>;
 }
 
 export type JiraExecutorResultData =

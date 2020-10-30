@@ -20,6 +20,7 @@ import {
   ResponseError,
   ExternalServiceCommentResponse,
   ExternalServiceIncidentResponse,
+  ExternalServiceFields,
 } from './types';
 
 import * as i18n from './translations';
@@ -46,6 +47,7 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
+  const fieldsUrl = `${url}/${BASE_URL}/field`;
   const incidentUrl = `${url}/${BASE_URL}/issue`;
   const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/comment`;
@@ -149,6 +151,28 @@ export const createExternalService = (
     key: issue.key,
     title: issue.fields?.summary ?? null,
   });
+
+  const getFields = async (): Promise<ExternalServiceFields[]> => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: fieldsUrl,
+        logger,
+        proxySettings,
+      });
+
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get fields from Jira. Error: ${error.message} Reason: ${createErrorMessage(
+            error.response?.data
+          )}`
+        )
+      );
+    }
+  };
 
   const getIncident = async (id: string) => {
     try {
@@ -326,7 +350,6 @@ export const createExternalService = (
   const getIssueTypes = async () => {
     const capabilitiesResponse = await getCapabilities();
     const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-
     try {
       if (!supportsNewAPI) {
         const res = await request({
@@ -409,6 +432,29 @@ export const createExternalService = (
     }
   };
 
+  const getCommonFields = async () => {
+    const fields = await getFields();
+    const issueTypes = await getIssueTypes();
+    const fieldTypes = await Promise.all(
+      issueTypes.map((issueType) => getFieldsByIssueType(issueType.id))
+    );
+    const commonFields = fieldTypes.reduce((acc: string[], fieldTypesByIssue) => {
+      const newKeys = Object.keys(fieldTypesByIssue);
+      if (acc.length === 0) {
+        return [...newKeys];
+      }
+      acc.forEach((key) => {
+        newKeys.includes(key);
+        if (!newKeys.includes(key)) {
+          acc = acc.filter((e) => e !== key);
+        }
+      });
+      return acc;
+    }, []);
+    const fieldDetails = fields.filter((f) => commonFields.includes(f.id));
+    return fieldDetails;
+  };
+
   const getIssues = async (title: string) => {
     const query = `${searchUrl}?jql=${encodeURIComponent(
       `project="${projectKey}" and summary ~"${title}"`
@@ -461,6 +507,7 @@ export const createExternalService = (
   };
 
   return {
+    getCommonFields,
     getIncident,
     createIncident,
     updateIncident,
