@@ -30,8 +30,15 @@ interface Props {
   id: string;
   isLoading: boolean;
   onToggleLegend?: LegendItemListener;
-  tickFormatY: (y: number) => string;
   timeseries: TimeSeries[];
+  /**
+   * Formatter for y-axis tick values
+   */
+  yLabelFormat: (y: number) => string;
+  /**
+   * Formatter for legend and tooltip values
+   */
+  yTickFormat: (y: number) => string;
 }
 
 const XY_HEIGHT = unit * 16;
@@ -40,8 +47,9 @@ export function LineChart({
   id,
   isLoading,
   onToggleLegend,
-  tickFormatY,
   timeseries,
+  yLabelFormat,
+  yTickFormat,
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
@@ -76,58 +84,57 @@ export function LineChart({
     );
 
   return (
-    <div style={{ height: XY_HEIGHT }}>
-      <ChartContainer isLoading={isLoading} height={XY_HEIGHT}>
-        <Chart ref={chartRef} id={id}>
-          <Settings
-            onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-            theme={chartTheme}
-            onPointerUpdate={(currEvent: any) => {
-              setEvent(currEvent);
-            }}
-            externalPointerEvents={{
-              tooltip: { visible: true, placement: Placement.Bottom },
-            }}
-            showLegend
-            showLegendExtra
-            legendPosition={Position.Bottom}
-            xDomain={{ min, max }}
-            onLegendItemClick={(legend) => {
-              if (onToggleLegend) {
-                onToggleLegend(legend);
-              }
-            }}
-          />
-          <Axis
-            id="x-axis"
-            position={Position.Bottom}
-            showOverlappingTicks
-            tickFormat={xFormatter}
-          />
-          <Axis
-            id="y-axis"
-            ticks={3}
-            position={Position.Left}
-            tickFormat={tickFormatY}
-            showGridLines
-          />
+    <ChartContainer isLoading={isLoading} height={XY_HEIGHT}>
+      <Chart ref={chartRef} id={id}>
+        <Settings
+          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          theme={chartTheme}
+          onPointerUpdate={(currEvent: any) => {
+            setEvent(currEvent);
+          }}
+          externalPointerEvents={{
+            tooltip: { visible: true, placement: Placement.Bottom },
+          }}
+          showLegend
+          showLegendExtra
+          legendPosition={Position.Bottom}
+          xDomain={{ min, max }}
+          onLegendItemClick={(legend) => {
+            if (onToggleLegend) {
+              onToggleLegend(legend);
+            }
+          }}
+        />
+        <Axis
+          id="x-axis"
+          position={Position.Bottom}
+          showOverlappingTicks
+          tickFormat={xFormatter}
+        />
+        <Axis
+          id="y-axis"
+          ticks={3}
+          position={Position.Left}
+          tickFormat={yTickFormat}
+          labelFormat={yLabelFormat}
+          showGridLines
+        />
 
-          {timeseries.map((serie) => {
-            return (
-              <LineSeries
-                key={serie.title}
-                id={serie.title}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="x"
-                yAccessors={['y']}
-                data={isEmpty ? [] : serie.data}
-                color={serie.color}
-              />
-            );
-          })}
-        </Chart>
-      </ChartContainer>
-    </div>
+        {timeseries.map((serie) => {
+          return (
+            <LineSeries
+              key={serie.title}
+              id={serie.title}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={isEmpty ? [] : serie.data}
+              color={serie.color}
+            />
+          );
+        })}
+      </Chart>
+    </ChartContainer>
   );
 }

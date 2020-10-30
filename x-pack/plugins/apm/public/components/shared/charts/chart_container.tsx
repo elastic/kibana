@@ -13,20 +13,17 @@ interface Props {
 }
 
 export function ChartContainer({ isLoading, children, height }: Props) {
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          height,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <EuiLoadingChart data-test-subj="loading" size={'xl'} />
-      </div>
-    );
-  }
-
-  return <>{children}</>;
+  return (
+    <div
+      style={{
+        height,
+        display: isLoading ? 'flex' : 'block',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {isLoading && <EuiLoadingChart data-test-subj="loading" size={'xl'} />}
+      {children}
+    </div>
+  );
 }

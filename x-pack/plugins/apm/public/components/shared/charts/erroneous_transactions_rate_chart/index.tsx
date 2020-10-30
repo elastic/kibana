@@ -14,9 +14,16 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { LineChart } from '../line_chart';
 
-const tickFormatY = (y?: number | null) => {
+function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
-};
+}
+
+function yTickFormat(y?: number | null) {
+  return i18n.translate('xpack.apm.chart.averagePercentLabel', {
+    defaultMessage: '{y} (avg.)',
+    values: { y: yLabelFormat(y) },
+  });
+}
 
 export function ErroneousTransactionsRateChart() {
   const theme = useTheme();
@@ -66,7 +73,8 @@ export function ErroneousTransactionsRateChart() {
           }),
         },
       ]}
-      tickFormatY={tickFormatY}
+      yLabelFormat={yLabelFormat}
+      yTickFormat={yTickFormat}
     />
   );
 }
