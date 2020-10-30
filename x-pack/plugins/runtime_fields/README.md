@@ -75,11 +75,7 @@ const MyComponent = () => {
           <RuntimeFieldEditorFlyout
             onSave={saveRuntimeField}
             onCancel={() => flyoutEditor.current?.close()}
-            docLinks={{
-              ELASTIC_WEBSITE_URL: 'https://elastic.co/',
-              DOC_LINK_VERSION: 'master',
-              links: {} as any,
-            }}
+            docLinks={docLinksStart}
             defaultValue={defaultRuntimeField}
           />
         </KibanaReactContextProvider>
