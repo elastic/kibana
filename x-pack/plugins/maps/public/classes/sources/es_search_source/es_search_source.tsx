@@ -9,7 +9,6 @@ import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
 import { IFieldType, IndexPattern, SortDirection } from 'src/plugins/data/public';
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
@@ -107,10 +106,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
     const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
+    if (typeof normalizedDescriptor.geoField !== 'string') {
+      throw new Error('Cannot create an ESGeoGridSourceDescriptor without a geoField');
+    }
     return {
       ...normalizedDescriptor,
-      id: descriptor.id ? descriptor.id : uuid(),
       type: SOURCE_TYPES.ES_SEARCH,
+      geoField: normalizedDescriptor.geoField,
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
       sortField: _.get(descriptor, 'sortField', ''),

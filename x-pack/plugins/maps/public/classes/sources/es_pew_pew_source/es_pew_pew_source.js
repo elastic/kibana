@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import uuid from 'uuid/v4';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
 
@@ -28,14 +27,15 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 export class ESPewPewSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_PEW_PEW;
 
-  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField, metrics }) {
+  static createDescriptor(descriptor) {
+    const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     return {
+      ...normalizedDescriptor,
       type: ESPewPewSource.type,
-      id: uuid(),
-      indexPatternId: indexPatternId,
-      sourceGeoField,
-      destGeoField,
-      metrics: metrics ? metrics : [DEFAULT_METRIC],
+      indexPatternId: descriptor.indexPatternId,
+      sourceGeoField: descriptor.sourceGeoField,
+      destGeoField: descriptor.destGeoField,
+      metrics: descriptor.metrics ? descriptor.metrics : [DEFAULT_METRIC],
     };
   }
 

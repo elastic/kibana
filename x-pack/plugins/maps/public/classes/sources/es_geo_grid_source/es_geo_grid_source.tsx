@@ -5,7 +5,6 @@
  */
 
 import React, { ReactElement } from 'react';
-import uuid from 'uuid/v4';
 
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
@@ -65,10 +64,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     descriptor: Partial<ESGeoGridSourceDescriptor>
   ): ESGeoGridSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
+    if (typeof normalizedDescriptor.geoField !== 'string') {
+      throw new Error('Cannot create an ESGeoGridSourceDescriptor without a geoField');
+    }
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      id: descriptor.id ? descriptor.id : uuid(),
+      geoField: normalizedDescriptor.geoField,
       metrics:
         descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
       requestType: descriptor.requestType || RENDER_AS.POINT,

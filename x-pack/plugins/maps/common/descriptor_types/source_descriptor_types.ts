@@ -42,6 +42,7 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
   indexPatternId: string;
   geoField?: string;
+  id: string;
 };
 
 export type AggDescriptor = {
@@ -55,11 +56,13 @@ export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
 };
 
 export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
+  geoField: string;
   requestType: RENDER_AS;
   resolution?: GRID_RESOLUTION;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
+  geoField: string;
   filterByMapBounds?: boolean;
   tooltipProperties?: string[];
   sortField?: string;
@@ -78,7 +81,6 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle?: string;
   term: string; // term field name
   whereQuery?: Query;
-  id: string;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {

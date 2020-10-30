@@ -19,20 +19,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle',
 import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
-
-interface VectorFileField {
-  name: string;
-  description: string;
-}
-
-interface VectorFileMeta {
-  url: string;
-  format: {
-    type: FORMAT_TYPE;
-  };
-  meta: {};
-  fields: VectorFileField[];
-}
+import { LayerConfig } from '../../../../../../../src/plugins/region_map/config';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
   readonly _descriptor: KibanaRegionmapSourceDescriptor;
@@ -72,9 +59,9 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     ];
   }
 
-  async getVectorFileMeta(): Promise<VectorFileMeta> {
+  async getVectorFileMeta(): Promise<LayerConfig> {
     const regionList: any[] = getKibanaRegionList();
-    const meta: VectorFileMeta | undefined = regionList.find(
+    const meta: LayerConfig | undefined = regionList.find(
       (regionConfig: any) => (regionConfig.name as string) === this._descriptor.name
     );
     if (!meta) {
@@ -87,11 +74,11 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
         })
       );
     }
-    return meta as VectorFileMeta;
+    return meta as LayerConfig;
   }
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
-    const vectorFileMeta: VectorFileMeta = await this.getVectorFileMeta();
+    const vectorFileMeta: LayerConfig = await this.getVectorFileMeta();
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: (vectorFileMeta.format as any).type as FORMAT_TYPE,
       featureCollectionPath: (vectorFileMeta.meta as any).feature_collection_path as string,
@@ -104,9 +91,9 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getLeftJoinFields(): Promise<IField[]> {
-    const vectorFileMeta: VectorFileMeta = await this.getVectorFileMeta();
+    const vectorFileMeta: LayerConfig = await this.getVectorFileMeta();
     return vectorFileMeta.fields.map(
-      (field: VectorFileField): KibanaRegionField => {
+      (field): KibanaRegionField => {
         return this.createField({ fieldName: field.name }) as KibanaRegionField;
       }
     ) as KibanaRegionField[];
