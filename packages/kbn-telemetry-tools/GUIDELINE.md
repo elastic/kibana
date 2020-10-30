@@ -148,14 +148,7 @@ usageCollection.makeUsageCollector<Usage>({
 Any field property in the schema accepts a `type` field. By default the type is `object` which accepts nested properties under it. Currently we accept the following property types:
 
 ```
-AllowedSchemaTypes =
-  | 'keyword'
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'long'
-  | 'date'
-  | 'float';
+'long', 'integer', 'short', 'byte', 'double', 'float', 'keyword', 'text', 'boolean', 'date'
 ```
 
 
