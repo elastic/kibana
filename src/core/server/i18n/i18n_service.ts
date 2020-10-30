@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { basename } from 'path';
 import { take, map } from 'rxjs/operators';
 import { i18n, i18nLoader } from '@kbn/i18n';
-import { fromRoot } from '../utils';
 import { Logger } from '../logging';
 import { Env, IConfigService } from '../config';
 import { CoreContext } from '../core_context';
@@ -30,7 +28,7 @@ import {
   PluginsConfigType,
 } from '../plugins/plugins_config';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
-import { getTranslationPaths } from './get_translations_path';
+import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 
 export interface I18nServiceSetup {
   getLocale(): string;
@@ -64,7 +62,7 @@ export class I18nService {
     const locale = i18nConfig.locale;
     this.log.debug(`Using locale: ${locale}`);
 
-    const translationFiles = await getTranslationFiles(locale, pluginConfig);
+    const translationFiles = await getKibanaTranslationFiles(locale, pluginConfig);
 
     this.log.debug(`Registering translation files: [${translationFiles.join(', ')}]`);
     i18nLoader.registerTranslationFiles(translationFiles);
@@ -83,25 +81,3 @@ export class I18nService {
     };
   }
 }
-
-const getTranslationFiles = async (
-  locale: string,
-  pluginConfig: PluginsConfig
-): Promise<string[]> => {
-  const translationPaths = await Promise.all([
-    getTranslationPaths({
-      cwd: fromRoot('.'),
-      nested: true,
-    }),
-    ...pluginConfig.additionalPluginPaths.map((cwd) => getTranslationPaths({ cwd, nested: false })),
-    ...pluginConfig.pluginSearchPaths.map((cwd) => getTranslationPaths({ cwd, nested: true })),
-    getTranslationPaths({
-      cwd: fromRoot('../kibana-extra'),
-      nested: true,
-    }),
-  ]);
-
-  return ([] as string[])
-    .concat(...translationPaths)
-    .filter((translationPath) => basename(translationPath, '.json') === locale);
-};
