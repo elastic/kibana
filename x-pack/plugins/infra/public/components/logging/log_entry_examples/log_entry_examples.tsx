@@ -45,5 +45,4 @@ const Wrapper = euiStyled.div`
   align-items: stretch;
   flex-direction: column;
   flex: 1 0 0%;
-  overflow: hidden;
 `;

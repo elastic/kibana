@@ -54,6 +54,8 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           <EuiTitle size="xs">
             <h3>{examplesTitle}</h3>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <LogEntryExampleMessages
             isLoading={isLoadingLogEntryExamples}
             hasFailedLoading={hasFailedLoadingLogEntryExamples}
