@@ -9,7 +9,7 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true) {
       kibanaPipeline.bash('./.ci/packer_cache.sh', 'Execute packer_cache')
 
       kibanaPipeline.bash("""
-        ./ci/build_docker.sh
+        ./.ci/build_docker.sh
       """, "Testing bootstrap cache")
     }
   }
