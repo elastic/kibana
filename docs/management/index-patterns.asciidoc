@@ -180,7 +180,7 @@ The first index pattern you create is automatically designated as the default pa
 but you can set any index pattern as the default.  The default index pattern is automatically selected when you first open <<discover,*Discover*>> or create a visualization from scratch.
 
 . In *Index patterns*, click the index pattern name.
-. Click the star icon (image:management/index-patterns/images/star.png[Star icon]).
+. Click the star (image:management/index-patterns/images/star.png[Star icon]).
 
 [float]
 [[delete-index-pattern]]
