@@ -12,7 +12,7 @@ import { EventsCheckbox } from './checkbox';
 import { OS } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedMacEvents, totalMacEvents } from '../../../store/policy_details/selectors';
-import { ConfigForm } from '../config_form';
+import { ConfigForm } from '../../components/config_form';
 import { getIn, setIn } from '../../../models/policy_details_config';
 import { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 

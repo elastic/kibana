@@ -12,7 +12,7 @@ import { EventsCheckbox } from './checkbox';
 import { OS } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedWindowsEvents, totalWindowsEvents } from '../../../store/policy_details/selectors';
-import { ConfigForm } from '../config_form';
+import { ConfigForm } from '../../components/config_form';
 import { setIn, getIn } from '../../../models/policy_details_config';
 import { UIPolicyConfig, Immutable } from '../../../../../../../common/endpoint/types';
 

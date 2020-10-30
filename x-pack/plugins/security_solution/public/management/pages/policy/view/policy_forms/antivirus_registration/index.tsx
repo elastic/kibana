@@ -11,7 +11,7 @@ import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { ConfigForm } from '../config_form';
+import { ConfigForm } from '../../components/config_form';
 
 export const AntivirusRegistrationForm = memo(() => {
   const antivirusRegistrationEnabled = usePolicyDetailsSelector(isAntivirusRegistrationEnabled);

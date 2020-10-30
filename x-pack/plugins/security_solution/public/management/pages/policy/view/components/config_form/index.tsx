@@ -16,8 +16,8 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { OperatingSystem } from '../../../../../../common/endpoint/types';
-import { OS_TITLES } from '../../../../common/translations';
+import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { OS_TITLES } from '../../../../../common/translations';
 
 interface ConfigFormProps {
   /**
