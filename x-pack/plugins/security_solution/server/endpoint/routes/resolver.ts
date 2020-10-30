@@ -13,16 +13,27 @@ import {
   validateAncestry,
   validateAlerts,
   validateEntities,
+  validateTree2,
 } from '../../../common/endpoint/schema/resolver';
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
 import { handleTree } from './resolver/tree';
+import { handleTree as handleTree2 } from './resolver/new_tree/tree_route';
 import { handleAlerts } from './resolver/alerts';
 import { handleEntities } from './resolver/entity';
 import { handleEvents } from './resolver/events';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
+
+  router.post(
+    {
+      path: '/api/endpoint/resolver/tree',
+      validate: validateTree2,
+      options: { authRequired: true },
+    },
+    handleTree2(log)
+  );
 
   router.post(
     {
