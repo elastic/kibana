@@ -15,7 +15,7 @@ export * from '../../actions';
 export * from '../../selectors/map_selectors';
 export * from '../../routing/bootstrap/get_initial_layers';
 export * from '../../embeddable/merge_input_with_saved_map';
-export * from '../../routing/maps_router';
+export { renderApp } from '../../routing/render_app';
 export * from '../../classes/layers/solution_layers/security';
 export { registerLayerWizard } from '../../classes/layers/layer_wizard_registry';
 export { registerSource } from '../../classes/sources/source_registry';
