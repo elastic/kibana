@@ -35,11 +35,11 @@ import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Exceptions', () => {
   beforeEach(() => {
-    esArchiverLoad('exceptions');
+    esArchiverLoad('rule_for_exceptions');
   });
 
   afterEach(() => {
-    esArchiverUnload('exceptions');
+    esArchiverUnload('rule_for_exceptions');
     esArchiverUnload('auditbeat_for_exceptions');
   });
 
