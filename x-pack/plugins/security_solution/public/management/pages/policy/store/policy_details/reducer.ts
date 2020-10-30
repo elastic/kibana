@@ -148,7 +148,7 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     return newState;
   }
 
-  if (action.type === 'userChangedRegisteredAV') {
+  if (action.type === 'userChangedAntivirusRegistration') {
     if (state.policyItem) {
       const policyConfig = fullPolicy(state);
 
@@ -158,7 +158,9 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
           ...policyConfig,
           windows: {
             ...policyConfig.windows,
-            registeredAV: action.payload.registeredAV,
+            antivirus_registration: {
+              enabled: action.payload.enabled,
+            },
           },
         }),
       };

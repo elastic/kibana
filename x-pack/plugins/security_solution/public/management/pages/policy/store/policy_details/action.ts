@@ -31,10 +31,10 @@ interface UserChangedPolicyConfig {
   };
 }
 
-interface UserChangedRegisteredAV {
-  type: 'userChangedRegisteredAV';
+interface UserChangedAntivirusRegistration {
+  type: 'userChangedAntivirusRegistration';
   payload: {
-    registeredAV: boolean;
+    enabled: boolean;
   };
 }
 
@@ -70,4 +70,4 @@ export type PolicyDetailsAction =
   | ServerReturnedUpdatedPolicyDetailsData
   | ServerFailedToReturnPolicyDetailsData
   | UserChangedPolicyConfig
-  | UserChangedRegisteredAV;
+  | UserChangedAntivirusRegistration;

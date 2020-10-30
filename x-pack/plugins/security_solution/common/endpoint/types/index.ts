@@ -880,7 +880,9 @@ export interface PolicyConfig {
         enabled: boolean;
       };
     };
-    registeredAV: boolean;
+    antivirus_registration: {
+      enabled: boolean;
+    };
   };
   mac: {
     events: {
@@ -918,7 +920,7 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup' | 'registeredAV'>;
+  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup' | 'antivirus_registration'>;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
