@@ -20,6 +20,8 @@ import { MonitoringViewBaseController } from '../../../base_controller';
 import {
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
@@ -76,6 +78,8 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             alertTypeIds: [
               ALERT_CPU_USAGE,
               ALERT_DISK_USAGE,
+              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+              ALERT_THREAD_POOL_WRITE_REJECTIONS,
               ALERT_MEMORY_USAGE,
               ALERT_MISSING_MONITORING_DATA,
             ],
