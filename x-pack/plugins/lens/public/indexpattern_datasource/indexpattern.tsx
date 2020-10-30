@@ -376,19 +376,39 @@ export function getIndexPatternDatasource({
                 return column.sourceField;
               }
             );
+
+            if (originalLayersList.length === 1) {
+              return {
+                shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
+                  defaultMessage: 'Invalid {fields, plural, one {reference} other {references}}',
+                  values: {
+                    layer: layerIndex,
+                    fields: fieldsWithBrokenReferences.length,
+                  },
+                }),
+                longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
+                  defaultMessage: `{fieldsLength, plural, one {Field} other {Fields}} "{fields}" {fieldsLength, plural, one {has} other {have}} invalid reference`,
+                  values: {
+                    fields: fieldsWithBrokenReferences.join('", "'),
+                    fieldsLength: fieldsWithBrokenReferences.length,
+                  },
+                }),
+              };
+            }
             return {
               shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
                 defaultMessage:
-                  'Invalid {fields, plural, one {reference} other {references}} {hasMultipleLayers, plural, one {} other {on Layer {layer}}}',
+                  'Invalid {fieldsLength, plural, one {reference} other {references}} on Layer {layer}',
                 values: {
                   layer: layerIndex,
-                  fields: fieldsWithBrokenReferences.length,
+                  fieldsLength: fieldsWithBrokenReferences.length,
                   hasMultipleLayers: originalLayersList.length,
                 },
               }),
               longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
-                defaultMessage: `{fieldsLength, plural, one {Field} other {Fields}} "{fields}" {fieldsLength, plural, one {has} other {have}} invalid reference`,
+                defaultMessage: `Layer {layer} has invalid {fieldsLength, plural, one {reference} other {references}} in {fieldsLength, plural, one {field} other {fields}} "{fields}"`,
                 values: {
+                  layer: layerIndex,
                   fields: fieldsWithBrokenReferences.join('", "'),
                   fieldsLength: fieldsWithBrokenReferences.length,
                 },

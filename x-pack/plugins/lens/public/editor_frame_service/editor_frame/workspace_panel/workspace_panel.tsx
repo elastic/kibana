@@ -386,9 +386,6 @@ export const InnerVisualizationWrapper = ({
             </EuiTextColor>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj="configuration-failure-short-message">
-          {localState.configurationValidationError[0].shortMessage}
-        </EuiFlexItem>
         <EuiFlexItem className="eui-textBreakAll">
           {localState.configurationValidationError[0].longMessage}
         </EuiFlexItem>
