@@ -30,7 +30,7 @@ import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
 
-export const VisualizeListing = () => {
+const VisualizeListing = () => {
   const {
     services: {
       application,
@@ -152,3 +152,7 @@ export const VisualizeListing = () => {
     />
   );
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { VisualizeListing as default };

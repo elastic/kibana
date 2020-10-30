@@ -18,20 +18,17 @@
  */
 
 import './app.scss';
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
-
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 import { syncQueryStateWithUrl } from '../../../data/public';
 import { useKibana } from '../../../kibana_react/public';
 import { VisualizeServices } from './types';
-import {
-  VisualizeEditor,
-  VisualizeListing,
-  VisualizeNoMatch,
-  VisualizeByValueEditor,
-} from './components';
+import { VisualizeEditor, VisualizeNoMatch, VisualizeByValueEditor } from './components';
 import { VisualizeConstants } from './visualize_constants';
+
+const VisualizeListingComponent = lazy(() => import('./components/visualize_listing'));
 
 export interface VisualizeAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
@@ -68,7 +65,9 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         exact
         path={[VisualizeConstants.LANDING_PAGE_PATH, VisualizeConstants.WIZARD_STEP_1_PAGE_PATH]}
       >
-        <VisualizeListing />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <VisualizeListingComponent />
+        </Suspense>
       </Route>
       <VisualizeNoMatch />
     </Switch>
