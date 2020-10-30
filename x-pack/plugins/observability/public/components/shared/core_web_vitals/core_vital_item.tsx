@@ -34,7 +34,7 @@ export interface Thresholds {
 
 interface Props {
   title: string;
-  value?: string;
+  value?: string | null;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;
@@ -88,14 +88,14 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
-  if (value === undefined && ranks[0] === 100 && !loading) {
+  if ((value === null || value !== undefined) && ranks[0] === 100 && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
   return (
     <>
       <EuiStat
         titleSize="s"
-        title={value}
+        title={value ?? ''}
         description={
           <>
             {title}

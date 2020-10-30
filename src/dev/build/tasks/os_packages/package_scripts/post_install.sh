@@ -7,14 +7,17 @@ set_chmod() {
   chmod -f 660 ${KBN_PATH_CONF}/kibana.yml || true
   chmod -f 2750 <%= dataDir %> || true
   chmod -f 2750 ${KBN_PATH_CONF} || true
+  chmod -f 2750 <%= logDir %> || true
 }
 
 set_chown() {
+  chown <%= user %>:<%= group %> <%= logDir %>
   chown -R <%= user %>:<%= group %> <%= dataDir %>
   chown -R root:<%= group %> ${KBN_PATH_CONF}
 }
 
-set_access() {
+setup() {
+  [ ! -d "<%= logDir %>" ] && mkdir "<%= logDir %>"
   set_chmod
   set_chown
 }
@@ -35,7 +38,7 @@ case $1 in
       IS_UPGRADE=true
     fi
 
-    set_access
+    setup
   ;;
   abort-deconfigure|abort-upgrade|abort-remove)
   ;;
@@ -55,7 +58,7 @@ case $1 in
       IS_UPGRADE=true
     fi
 
-    set_access
+    setup
   ;;
 
   *)

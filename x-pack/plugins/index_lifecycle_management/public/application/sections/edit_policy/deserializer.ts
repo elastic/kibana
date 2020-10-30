@@ -15,18 +15,27 @@ import { determineDataTierAllocationType } from '../../lib';
 import { FormInternal } from './types';
 
 export const deserializer = (policy: SerializedPolicy): FormInternal => {
+  const {
+    phases: { hot, warm, cold },
+  } = policy;
+
   const _meta: FormInternal['_meta'] = {
     hot: {
-      useRollover: Boolean(policy.phases.hot?.actions?.rollover),
-      forceMergeEnabled: Boolean(policy.phases.hot?.actions?.forcemerge),
-      bestCompression: policy.phases.hot?.actions?.forcemerge?.index_codec === 'best_compression',
+      useRollover: Boolean(hot?.actions?.rollover),
+      forceMergeEnabled: Boolean(hot?.actions?.forcemerge),
+      bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
     },
     warm: {
-      enabled: Boolean(policy.phases.warm),
-      warmPhaseOnRollover: Boolean(policy.phases.warm?.min_age === '0ms'),
-      forceMergeEnabled: Boolean(policy.phases.warm?.actions?.forcemerge),
-      bestCompression: policy.phases.warm?.actions?.forcemerge?.index_codec === 'best_compression',
-      dataTierAllocationType: determineDataTierAllocationType(policy.phases.warm?.actions),
+      enabled: Boolean(warm),
+      warmPhaseOnRollover: Boolean(warm?.min_age === '0ms'),
+      forceMergeEnabled: Boolean(warm?.actions?.forcemerge),
+      bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
+      dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
+    },
+    cold: {
+      enabled: Boolean(cold),
+      dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
+      freezeEnabled: Boolean(cold?.actions?.freeze),
     },
   };
 
@@ -61,6 +70,20 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
           const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
           draft.phases.warm.min_age = minAge.size;
           draft._meta.warm.minAgeUnit = minAge.units;
+        }
+      }
+
+      if (draft.phases.cold) {
+        if (draft.phases.cold.actions?.allocate?.require) {
+          Object.entries(draft.phases.cold.actions.allocate.require).forEach((entry) => {
+            draft._meta.cold.allocationNodeAttribute = entry.join(':');
+          });
+        }
+
+        if (draft.phases.cold.min_age) {
+          const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
+          draft.phases.cold.min_age = minAge.size;
+          draft._meta.cold.minAgeUnit = minAge.units;
         }
       }
     }
