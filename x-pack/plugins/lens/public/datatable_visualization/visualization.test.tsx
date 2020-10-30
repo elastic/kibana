@@ -356,7 +356,7 @@ describe('Datatable Visualization', () => {
       datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
-        isBucketed: true,
+        isBucketed: false, // <= make them metrics
         label: 'label',
       });
 
@@ -364,6 +364,7 @@ describe('Datatable Visualization', () => {
         { layers: [layer] },
         frame.datasourceLayers
       ) as Ast;
+
       const tableArgs = buildExpression(expression).findFunction('lens_datatable_columns');
 
       expect(tableArgs).toHaveLength(1);
@@ -371,10 +372,30 @@ describe('Datatable Visualization', () => {
         columnIds: ['c', 'b'],
       });
     });
+
+    it('returns no expression if the metric dimension is not defined', () => {
+      const datasource = createMockDatasource('test');
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true, // move it from the metric to the break down by side
+        label: 'label',
+      });
+
+      const expression = datatableVisualization.toExpression(
+        { layers: [layer] },
+        frame.datasourceLayers
+      );
+
+      expect(expression).toEqual(null);
+    });
   });
 
   describe('#getErrorMessages', () => {
-    it('returns an error explanation if the datasource is missing a metric dimension', () => {
+    it('returns undefined if the datasource is missing a metric dimension', () => {
       const datasource = createMockDatasource('test');
       const layer = { layerId: 'a', columns: ['b', 'c'] };
       const frame = mockFrame();
@@ -388,9 +409,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).toHaveLength(1);
-      expect(error![0].shortMessage).toMatch('Missing metric');
-      expect(error![0].longMessage).toMatch('Add a field in the Metrics panel');
+      expect(error).not.toBeDefined();
     });
 
     it('returns undefined if the metric dimension is defined', () => {
