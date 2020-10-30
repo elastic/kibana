@@ -107,11 +107,14 @@ export const MetricExpression = ({
   );
 
   const expressionDisplayValue = useMemo(
-    () =>
-      (customMetricTabOpen
+    () => {
+      return customMetricTabOpen
         ? customMetric?.field && getCustomMetricLabel(customMetric)
-        : metric?.text) || firstFieldOption.text,
-    [customMetricTabOpen, metric?.text, customMetric?.field, firstFieldOption]
+        : metric?.text || firstFieldOption.text;
+    },
+    // The ?s are confusing eslint here, so...
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [customMetricTabOpen, metric, customMetric, firstFieldOption]
   );
 
   const onChangeTab = useCallback(
@@ -163,7 +166,7 @@ export const MetricExpression = ({
       };
       if (SnapshotCustomMetricInputRT.is(newCustomMetric)) debouncedOnChangeCustom(newCustomMetric);
     },
-    [customMetric, onChangeCustom]
+    [customMetric, debouncedOnChangeCustom]
   );
 
   const availablefieldsOptions = metrics.map((m) => {
