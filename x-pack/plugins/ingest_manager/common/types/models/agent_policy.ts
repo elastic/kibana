@@ -6,10 +6,7 @@
 import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
 
-export enum AgentPolicyStatus {
-  Active = 'active',
-  Inactive = 'inactive',
-}
+export type AgentPolicyStatus = 'active' | 'inactive';
 
 export interface NewAgentPolicy {
   name: string;

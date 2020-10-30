@@ -29,7 +29,6 @@ import {
   GetPackagesResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
 import {
-  AgentPolicyStatus,
   EsAssetReference,
   InstallationStatus,
   KibanaAssetReference,
@@ -1235,7 +1234,7 @@ export class EndpointDocGenerator {
     return {
       id: this.seededUUIDv4(),
       name: 'Agent Policy',
-      status: AgentPolicyStatus.Active,
+      status: 'active',
       description: 'Some description',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],

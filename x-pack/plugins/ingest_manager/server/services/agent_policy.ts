@@ -18,7 +18,6 @@ import {
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
-  AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
 import {
@@ -60,10 +59,7 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    if (
-      oldAgentPolicy.status === AgentPolicyStatus.Inactive &&
-      agentPolicy.status !== AgentPolicyStatus.Active
-    ) {
+    if (oldAgentPolicy.status === 'inactive' && agentPolicy.status !== 'active') {
       throw new Error(
         `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
       );
