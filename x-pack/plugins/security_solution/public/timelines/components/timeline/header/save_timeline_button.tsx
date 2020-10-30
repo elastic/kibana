@@ -77,7 +77,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
         </EuiOverlayMask>
       </>
     ) : (
-      <EuiToolTip content={toolTip || ''} data-test-subj="save-timeline-btn-tooltip">
+      <EuiToolTip content={toolTip ?? ''} data-test-subj="save-timeline-btn-tooltip">
         {saveTimelineButtonIcon}
       </EuiToolTip>
     );
