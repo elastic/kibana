@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  elasticsearchServiceMock,
-  ElasticsearchClientMock,
-} from '../../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
