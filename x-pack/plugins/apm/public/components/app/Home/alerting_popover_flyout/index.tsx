@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { IBasePath } from '../../../../../../../../src/core/public';
 import { AlertType } from '../../../../../common/alert_types';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { AlertingFlyout } from '../../../alerting/AlertingFlyout';
@@ -46,15 +47,14 @@ const CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID =
 const CREATE_ERROR_COUNT_ALERT_PANEL_ID = 'create_error_count_panel';
 
 interface Props {
+  basePath: IBasePath;
   canReadAlerts: boolean;
   canSaveAlerts: boolean;
   canReadAnomalies: boolean;
 }
 
 export function AlertingPopoverAndFlyout(props: Props) {
-  const { canSaveAlerts, canReadAlerts, canReadAnomalies } = props;
-
-  const plugin = useApmPluginContext();
+  const { basePath, canSaveAlerts, canReadAlerts, canReadAnomalies } = props;
 
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -98,7 +98,7 @@ export function AlertingPopoverAndFlyout(props: Props) {
                   'xpack.apm.home.alertsMenu.viewActiveAlerts',
                   { defaultMessage: 'View active alerts' }
                 ),
-                href: plugin.core.http.basePath.prepend(
+                href: basePath.prepend(
                   '/app/management/insightsAndAlerting/triggersActions/alerts'
                 ),
                 icon: 'tableOfContents',

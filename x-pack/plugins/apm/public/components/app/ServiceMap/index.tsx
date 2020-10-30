@@ -126,13 +126,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   }
 
   return (
-    <div
-      data-test-subj="ServiceMap"
-      style={{
-        height: height - parseInt(theme.eui.gutterTypes.gutterLarge, 10),
-      }}
-      ref={ref}
-    >
+    <div data-test-subj="ServiceMap" style={{ height }} ref={ref}>
       <Cytoscape
         elements={data.elements}
         height={height}

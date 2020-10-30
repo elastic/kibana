@@ -7,6 +7,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -94,8 +95,7 @@ function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   }
 
   return (
-    <>
-      <EuiSpacer />
+    <EuiPage>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localUIFiltersConfig} />
@@ -128,7 +128,7 @@ function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiPage>
   );
 }
 
