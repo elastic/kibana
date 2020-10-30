@@ -35,7 +35,7 @@ function DialogNavigation(props: DialogNavigationProps) {
           </EuiFlexItem>
           <EuiFlexItem>
             {i18n.translate('visualizations.newVisWizard.goBackLink', {
-              defaultMessage: 'Go Back',
+              defaultMessage: 'Go back',
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
