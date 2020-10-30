@@ -426,6 +426,7 @@ export type EmbeddableInput = {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
+    searchSessionId?: string;
 };
 
 // Warning: (ae-missing-release-tag) "EmbeddableInstanceConfiguration" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
