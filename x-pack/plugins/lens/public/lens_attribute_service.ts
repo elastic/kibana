@@ -51,11 +51,7 @@ export function getLensAttributeService(
       return { id: savedDoc.savedObjectId };
     },
     unwrapMethod: async (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
-      const attributes = documentToAttributes(
-        await savedObjectStore.load(savedObjectId).catch((e) => {
-          throw e;
-        })
-      );
+      const attributes = documentToAttributes(await savedObjectStore.load(savedObjectId));
       return attributes;
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {

@@ -85,13 +85,15 @@ export abstract class Embeddable<
 
     this.getOutput$()
       .pipe(
-        catchError((error, observable) => observable),
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
-      .subscribe((title) => {
-        this.renderComplete.setTitle(title);
-      });
+      .subscribe(
+        (title) => {
+          this.renderComplete.setTitle(title);
+        },
+        () => {}
+      );
   }
 
   public getIsContainer(): this is IContainer {
