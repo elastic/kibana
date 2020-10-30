@@ -640,7 +640,7 @@ describe('IndexPattern Data Source', () => {
       const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
       expect(messages).toHaveLength(1);
       expect(messages![0]).toEqual({
-        shortMessage: 'Invalid reference ',
+        shortMessage: 'Invalid reference',
         longMessage: 'Field "bytes" has invalid reference',
       });
     });
@@ -678,7 +678,7 @@ describe('IndexPattern Data Source', () => {
       const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
       expect(messages).toHaveLength(1);
       expect(messages![0]).toEqual({
-        shortMessage: 'Invalid references ',
+        shortMessage: 'Invalid references',
         longMessage: 'Fields "bytes", "memory" have invalid reference',
       });
     });
@@ -731,11 +731,11 @@ describe('IndexPattern Data Source', () => {
       expect(messages).toEqual([
         {
           shortMessage: 'Invalid references on Layer 1',
-          longMessage: 'Fields "bytes", "memory" have invalid reference',
+          longMessage: 'Layer 1 has invalid references in fields "bytes", "memory"',
         },
         {
           shortMessage: 'Invalid reference on Layer 2',
-          longMessage: 'Field "source" has invalid reference',
+          longMessage: 'Layer 2 has invalid reference in field "source"',
         },
       ]);
     });

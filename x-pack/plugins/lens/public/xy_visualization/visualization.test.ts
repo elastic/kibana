@@ -579,10 +579,6 @@ describe('xy_visualization', () => {
           shortMessage: 'Missing Vertical axis',
           longMessage: 'Layers 2, 3 require a field for the Vertical axis',
         },
-        {
-          shortMessage: 'Missing Horizontal axis',
-          longMessage: 'Layers 2, 3 require a field for the Horizontal axis',
-        },
       ]);
     });
     it("should return an error when some layers are complete but other layers aren't", () => {

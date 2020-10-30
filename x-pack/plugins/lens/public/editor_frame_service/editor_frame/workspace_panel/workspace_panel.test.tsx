@@ -575,9 +575,6 @@ describe('workspace_panel', () => {
 
     // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
     expect(
-      instance.find('[data-test-subj="configuration-failure-short-message"]').last().text()
-    ).toEqual('An error occurred');
-    expect(
       instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
     ).toEqual(' +1 error');
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
