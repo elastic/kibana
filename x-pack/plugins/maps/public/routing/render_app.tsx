@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { AppMountParameters } from 'kibana/public';
@@ -22,9 +23,8 @@ import {
   withNotifyOnErrors,
   IKbnUrlStateStorage,
 } from '../../../../../src/plugins/kibana_utils/public';
-import { getStore } from './store_operations';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
-import { MapApp } from './routes/map_app';
+import { MapAppContainer, MapApp, SavedMap } from './routes/map_app';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -42,15 +42,7 @@ export async function renderApp({
     ...withNotifyOnErrors(getToasts()),
   });
 
-  const store = getStore();
   const I18nContext = getCoreI18n().Context;
-
-  const stateTransfer = getEmbeddableService()?.getStateTransfer(
-    history as AppMountParameters['history']
-  );
-
-  const { originatingApp } =
-    stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
 
   if (!getMapsCapabilities().save) {
     getCoreChrome().setBadge({
@@ -64,53 +56,75 @@ export async function renderApp({
     });
   }
 
+  function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
+    const stateTransfer = getEmbeddableService()?.getStateTransfer(
+      history as AppMountParameters['history']
+    );
+
+    const { originatingApp, valueInput } =
+      stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
+
+    let mapEmbeddableInput;
+    if (routeProps.match.params.savedMapId) {
+      mapEmbeddableInput = { savedObjectId: routeProps.match.params.savedMapId };
+    }
+    if (valueInput) {
+      mapEmbeddableInput = valueInput;
+    }
+
+    return (
+      <MapAppContainer
+        mapEmbeddableInput={mapEmbeddableInput}
+        onAppLeave={onAppLeave}
+        setHeaderActionMenu={setHeaderActionMenu}
+        stateTransfer={stateTransfer}
+        originatingApp={originatingApp}
+      />
+    );
+
+    /*
+    const savedMap = new SavedMap(mapEmbeddableInput);
+    console.log(savedMap);
+
+
+
+    return (
+      <Provider store={savedMap.getStore()}>
+        <MapApp
+          savedMap={savedMap}
+          onAppLeave={onAppLeave}
+          setHeaderActionMenu={setHeaderActionMenu}
+          stateTransfer={stateTransfer}
+          originatingApp={originatingApp}
+        />
+      </Provider>
+    )
+    */
+  }
+
   render(
     <I18nContext>
-      <Provider store={store}>
-        <Router history={history}>
-          <Switch>
-            <Route
-              path={`/map/:savedMapId`}
-              render={(props) => (
-                <MapApp
-                  savedMapId={props.match.params.savedMapId}
-                  onAppLeave={onAppLeave}
-                  setHeaderActionMenu={setHeaderActionMenu}
-                  stateTransfer={stateTransfer}
-                  originatingApp={originatingApp}
-                />
-              )}
-            />
-            <Route
-              exact
-              path={`/map`}
-              render={() => (
-                <MapApp
-                  onAppLeave={onAppLeave}
-                  setHeaderActionMenu={setHeaderActionMenu}
-                  stateTransfer={stateTransfer}
-                  originatingApp={originatingApp}
-                />
-              )}
-            />
-            // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-            <Route
-              path={``}
-              render={({ location: { pathname, hash } }) => {
-                if (hash) {
-                  // Remove leading hash
-                  const newPath = hash.substr(1);
-                  return <Redirect to={newPath} />;
-                } else if (pathname === '/' || pathname === '') {
-                  return <LoadListAndRender />;
-                } else {
-                  return <Redirect to="/" />;
-                }
-              }}
-            />
-          </Switch>
-        </Router>
-      </Provider>
+      <Router history={history}>
+        <Switch>
+          <Route path={`/map/:savedMapId`} render={renderMapApp} />
+          <Route exact path={`/map`} render={renderMapApp} />
+          // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+          <Route
+            path={``}
+            render={({ location: { pathname, hash } }) => {
+              if (hash) {
+                // Remove leading hash
+                const newPath = hash.substr(1);
+                return <Redirect to={newPath} />;
+              } else if (pathname === '/' || pathname === '') {
+                return <LoadListAndRender />;
+              } else {
+                return <Redirect to="/" />;
+              }
+            }}
+          />
+        </Switch>
+      </Router>
     </I18nContext>,
     element
   );

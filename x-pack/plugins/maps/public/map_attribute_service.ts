@@ -19,8 +19,14 @@ export type MapAttributeService = AttributeService<
   MapByReferenceInput
 >;
 
+let mapAttributeService: MapAttributeService | null = null;
+
 export function getMapAttributeService(): MapAttributeService {
-  return getEmbeddableService().getAttributeService<
+  if (mapAttributeService) {
+    return mapAttributeService;
+  }
+
+  mapAttributeService = getEmbeddableService().getAttributeService<
     MapSavedObjectAttributes,
     MapByValueInput,
     MapByReferenceInput
@@ -65,4 +71,6 @@ export function getMapAttributeService(): MapAttributeService {
       );
     },
   });
+
+  return mapAttributeService;
 }
