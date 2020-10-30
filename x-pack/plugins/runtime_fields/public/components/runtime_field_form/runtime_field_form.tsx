@@ -5,6 +5,7 @@
  */
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { PainlessLang } from '@kbn/monaco';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -122,7 +123,7 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
               fullWidth
             >
               <CodeEditor
-                languageId="painless"
+                languageId={PainlessLang.ID}
                 // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
                 width="99%"
                 height="300px"
