@@ -443,16 +443,9 @@ export const createExternalService = (
       if (acc.length === 0) {
         return [...newKeys];
       }
-      acc.forEach((key) => {
-        newKeys.includes(key);
-        if (!newKeys.includes(key)) {
-          acc = acc.filter((e) => e !== key);
-        }
-      });
-      return acc;
+      return acc.reduce((add: string[], key) => (newKeys.includes(key) ? [...add, key] : add), []);
     }, []);
-    const fieldDetails = fields.filter((f) => commonFields.includes(f.id));
-    return fieldDetails;
+    return fields.filter((f) => commonFields.includes(f.id));
   };
 
   const getIssues = async (title: string) => {
