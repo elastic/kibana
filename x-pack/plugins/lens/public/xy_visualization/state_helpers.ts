@@ -41,7 +41,7 @@ export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
 
 export function hasHistogramSeries(
   layers: ValidLayer[] = [],
-  datasourceLayers: FramePublicAPI['datasourceLayers']
+  datasourceLayers?: FramePublicAPI['datasourceLayers']
 ) {
   if (!datasourceLayers) {
     return false;
