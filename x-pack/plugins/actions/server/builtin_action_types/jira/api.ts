@@ -83,6 +83,7 @@ const pushToServiceHandler = async ({
   }
 
   let incident: Incident;
+  // TO DO STEPH
   // TODO: should be removed later but currently keep it for the Case implementation support
   if (mapping) {
     const fields = prepareFieldsForTransformation({
