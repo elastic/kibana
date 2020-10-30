@@ -184,10 +184,6 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         })}
         singleSelection={{ asPlainText: true }}
         onCreateOption={this.onManualInput}
-        customOptionText={i18n.translate('xpack.ml.timeSeriesExplorer.setManualInputHelperText', {
-          defaultMessage:
-            'No records found. You can still proceed with any value from the source index to view the single metric.',
-        })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={this.onChange}
