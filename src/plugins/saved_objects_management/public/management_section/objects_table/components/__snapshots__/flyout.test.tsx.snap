@@ -101,8 +101,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      onTableChange={[Function]}
       pagination={
         Object {
+          "pageIndex": 0,
+          "pageSize": 5,
           "pageSizeOptions": Array [
             5,
             10,
@@ -246,6 +249,10 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
               "newIndexPatternId": "2",
             },
           ],
+          "unmatchedReferencesTablePagination": Object {
+            "pageIndex": 0,
+            "pageSize": 5,
+          },
         },
       },
     ],
@@ -403,8 +410,11 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      onTableChange={[Function]}
       pagination={
         Object {
+          "pageIndex": 0,
+          "pageSize": 5,
           "pageSizeOptions": Array [
             5,
             10,
