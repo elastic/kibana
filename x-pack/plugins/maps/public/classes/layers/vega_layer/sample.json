@@ -1,125 +1,480 @@
 {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A Dorling cartogram depicting U.S. state obesity rates.",
-  "width": 900,
-  "height": 520,
-  "autosize": "none",
-
-  "config": {
-    "legend": {
-      "gradientDirection": "horizontal",
-      "gradientLength": 120,
-      "gradientThickness": 10
-    }
-  },
-
-  "data": [
-    {
-      "name": "states",
-      "url": "https://vega.github.io/vega/data/us-10m.json",
-      "format": {"type": "topojson", "feature": "states"}
+  "$schema":"https://vega.github.io/schema/vega/v5.json",
+  "config":{
+    "range":{
+      "category":{
+        "scheme":"elastic"
+      }
     },
-    {
-      "name": "obesity",
-      "url": "https://vega.github.io/vega/data/obesity.json",
-      "transform": [
-        {
-          "type": "lookup",
-          "from": "states", "key": "id",
-          "fields": ["id"], "as": ["geo"]
-        },
-        {
-          "type": "filter",
-          "expr": "datum.geo"
-        },
-        {
-          "type": "formula", "as": "centroid",
-          "expr": "geoCentroid('projection', datum.geo)"
-        }
-      ]
-    }
-  ],
-
-  "projections": [
-    {
-      "name": "projection",
-      "type": "albersUsa",
-      "scale": 1100,
-      "translate": [{"signal": "width / 2"}, {"signal": "height / 2"}]
-    }
-  ],
-
-  "scales": [
-    {
-      "name": "size",
-      "domain": {"data": "obesity", "field": "rate"},
-      "zero": false,
-      "range": [1000, 5000]
+    "arc":{
+      "fill":"#54B399"
     },
-    {
-      "name": "color",
-      "type": "linear",
-      "nice": true,
-      "domain": {"data": "obesity", "field": "rate"},
-      "range": "ramp"
-    }
-  ],
-
-  "legends": [
-    {
-      "title": "% of Obese Adults",
-      "orient": "bottom-right",
-      "type": "symbol",
-      "size": "size",
-      "fill": "color",
-      "format": ".1%",
-      "clipHeight": 16
-    }
-  ],
-
-  "marks": [
-    {
-      "name": "circles",
-      "type": "symbol",
-      "from": {"data": "obesity"},
-      "encode": {
-        "enter": {
-          "size": {"scale": "size", "field": "rate"},
-          "fill": {"scale": "color", "field": "rate"},
-          "stroke": {"value": "white"},
-          "strokeWidth": {"value": 1.5},
-          "x": {"field": "centroid[0]"},
-          "y": {"field": "centroid[1]"},
-          "tooltip": {"signal": "'Obesity Rate: ' + format(datum.rate, '.1%')"}
-        }
+    "area":{
+      "fill":"#54B399"
+    },
+    "line":{
+      "stroke":"#54B399"
+    },
+    "path":{
+      "stroke":"#54B399"
+    },
+    "rect":{
+      "fill":"#54B399"
+    },
+    "rule":{
+      "stroke":"#54B399"
+    },
+    "shape":{
+      "stroke":"#54B399"
+    },
+    "symbol":{
+      "fill":"#54B399"
+    },
+    "trail":{
+      "fill":"#54B399"
+    },
+    "title":{
+      "color":"#343741"
+    },
+    "style":{
+      "guide-label":{
+        "fill":"#69707d"
       },
-      "transform": [
+      "guide-title":{
+        "fill":"#343741"
+      },
+      "group-title":{
+        "fill":"#343741"
+      },
+      "group-subtitle":{
+        "fill":"#343741"
+      }
+    },
+    "axis":{
+      "tickColor":"#eef0f3",
+      "domainColor":"#eef0f3",
+      "gridColor":"#eef0f3"
+    },
+    "background":"transparent"
+  },
+  "data":[
+    {
+      "name":"table",
+      "format":{
+        "property":"aggregations.gridSplit.buckets"
+      },
+      "transform":[
         {
-          "type": "force",
-          "static": true,
-          "forces": [
-            {"force": "collide", "radius": {"expr": "1 + sqrt(datum.size) / 2"}},
-            {"force": "x", "x": "datum.centroid[0]"},
-            {"force": "y", "y": "datum.centroid[1]"}
+          "type":"geopoint",
+          "projection":"projection",
+          "fields":[
+            "gridCentroid.location.lon",
+            "gridCentroid.location.lat"
           ]
         }
-      ]
-    },
-    {
-      "type": "text",
-      "interactive": false,
-      "from": {"data": "circles"},
-      "encode": {
-        "enter": {
-          "align": {"value": "center"},
-          "baseline": {"value": "middle"},
-          "fontSize": {"value": 13},
-          "fontWeight": {"value": "bold"},
-          "text": {"field": "datum.state"}
+      ],
+      "values":{
+        "took":2,
+        "timed_out":false,
+        "_shards":{
+          "total":1,
+          "successful":1,
+          "skipped":0,
+          "failed":0
         },
-        "update": {
-          "x": {"field": "x"},
-          "y": {"field": "y"}
+        "hits":{
+          "total":3428,
+          "max_score":null,
+          "hits":[
+
+          ]
+        },
+        "aggregations":{
+          "gridSplit":{
+            "buckets":[
+              {
+                "key":"4/8/5",
+                "doc_count":859,
+                "gridCentroid":{
+                  "location":{
+                    "lat":46.37042500928144,
+                    "lon":10.334117530494911
+                  },
+                  "count":859
+                }
+              },
+              {
+                "key":"4/13/6",
+                "doc_count":237,
+                "gridCentroid":{
+                  "location":{
+                    "lat":34.05462074517921,
+                    "lon":121.55161939514211
+                  },
+                  "count":237
+                }
+              },
+              {
+                "key":"4/4/5",
+                "doc_count":213,
+                "gridCentroid":{
+                  "location":{
+                    "lat":43.63421821258437,
+                    "lon":-78.97652453034591
+                  },
+                  "count":213
+                }
+              },
+              {
+                "key":"4/4/6",
+                "doc_count":200,
+                "gridCentroid":{
+                  "location":{
+                    "lat":35.95623863528017,
+                    "lon":-81.73153855875134
+                  },
+                  "count":200
+                }
+              },
+              {
+                "key":"4/14/6",
+                "doc_count":189,
+                "gridCentroid":{
+                  "location":{
+                    "lat":35.060156681353135,
+                    "lon":137.43739658789266
+                  },
+                  "count":189
+                }
+              },
+              {
+                "key":"4/7/5",
+                "doc_count":159,
+                "gridCentroid":{
+                  "location":{
+                    "lat":52.285822286129985,
+                    "lon":-1.9177137805535547
+                  },
+                  "count":159
+                }
+              },
+              {
+                "key":"4/14/9",
+                "doc_count":138,
+                "gridCentroid":{
+                  "location":{
+                    "lat":-33.20085991619398,
+                    "lon":147.44758323361367
+                  },
+                  "count":138
+                }
+              },
+              {
+                "key":"4/4/8",
+                "doc_count":110,
+                "gridCentroid":{
+                  "location":{
+                    "lat":-3.480755166870288,
+                    "lon":-78.0071447972547
+                  },
+                  "count":110
+                }
+              },
+              {
+                "key":"4/8/6",
+                "doc_count":109,
+                "gridCentroid":{
+                  "location":{
+                    "lat":38.89540576346116,
+                    "lon":13.024944194225133
+                  },
+                  "count":109
+                }
+              },
+              {
+                "key":"4/10/6",
+                "doc_count":106,
+                "gridCentroid":{
+                  "location":{
+                    "lat":24.816668481908668,
+                    "lon":55.02535124739878
+                  },
+                  "count":106
+                }
+              },
+              {
+                "key":"4/11/7",
+                "doc_count":100,
+                "gridCentroid":{
+                  "location":{
+                    "lat":16.472891545202582,
+                    "lon":76.34839992625639
+                  },
+                  "count":100
+                }
+              },
+              {
+                "key":"4/3/6",
+                "doc_count":91,
+                "gridCentroid":{
+                  "location":{
+                    "lat":35.69654316406001,
+                    "lon":-101.19782482192002
+                  },
+                  "count":91
+                }
+              },
+              {
+                "key":"4/3/5",
+                "doc_count":79,
+                "gridCentroid":{
+                  "location":{
+                    "lat":46.132922865910146,
+                    "lon":-97.01694511938133
+                  },
+                  "count":79
+                }
+              },
+              {
+                "key":"4/5/9",
+                "doc_count":67,
+                "gridCentroid":{
+                  "location":{
+                    "lat":-34.822200019843876,
+                    "lon":-58.535800063982606
+                  },
+                  "count":67
+                }
+              },
+              {
+                "key":"4/9/9",
+                "doc_count":66,
+                "gridCentroid":{
+                  "location":{
+                    "lat":-27.71885658487339,
+                    "lon":29.55223733305254
+                  },
+                  "count":66
+                }
+              },
+              {
+                "key":"4/4/7",
+                "doc_count":65,
+                "gridCentroid":{
+                  "location":{
+                    "lat":4.701589993201196,
+                    "lon":-74.14690000936389
+                  },
+                  "count":65
+                }
+              },
+              {
+                "key":"4/8/4",
+                "doc_count":63,
+                "gridCentroid":{
+                  "location":{
+                    "lat":59.92720270995051,
+                    "lon":14.455387282318302
+                  },
+                  "count":63
+                }
+              },
+              {
+                "key":"4/9/4",
+                "doc_count":62,
+                "gridCentroid":{
+                  "location":{
+                    "lat":58.00475093348312,
+                    "lon":31.590605119483605
+                  },
+                  "count":62
+                }
+              },
+              {
+                "key":"4/2/5",
+                "doc_count":62,
+                "gridCentroid":{
+                  "location":{
+                    "lat":50.45117099664264,
+                    "lon":-116.91561313976925
+                  },
+                  "count":62
+                }
+              },
+              {
+                "key":"4/12/6",
+                "doc_count":59,
+                "gridCentroid":{
+                  "location":{
+                    "lat":31.889890988941413,
+                    "lon":105.57581225094401
+                  },
+                  "count":59
+                }
+              },
+              {
+                "key":"4/9/3",
+                "doc_count":46,
+                "gridCentroid":{
+                  "location":{
+                    "lat":68.15180202014744,
+                    "lon":33.46390150487423
+                  },
+                  "count":46
+                }
+              },
+              {
+                "key":"4/11/6",
+                "doc_count":41,
+                "gridCentroid":{
+                  "location":{
+                    "lat":28.56649998575449,
+                    "lon":77.1031039673835
+                  },
+                  "count":41
+                }
+              },
+              {
+                "key":"4/3/7",
+                "doc_count":38,
+                "gridCentroid":{
+                  "location":{
+                    "lat":19.436299977824092,
+                    "lon":-99.07209808006883
+                  },
+                  "count":38
+                }
+              },
+              {
+                "key":"4/14/5",
+                "doc_count":37,
+                "gridCentroid":{
+                  "location":{
+                    "lat":42.77519986499101,
+                    "lon":141.69200127013028
+                  },
+                  "count":37
+                }
+              },
+              {
+                "key":"4/5/7",
+                "doc_count":37,
+                "gridCentroid":{
+                  "location":{
+                    "lat":18.439399707131088,
+                    "lon":-66.00180060602725
+                  },
+                  "count":37
+                }
+              },
+              {
+                "key":"4/13/5",
+                "doc_count":35,
+                "gridCentroid":{
+                  "location":{
+                    "lat":51.16999696008861,
+                    "lon":128.44500697217882
+                  },
+                  "count":35
+                }
+              },
+              {
+                "key":"4/8/9",
+                "doc_count":34,
+                "gridCentroid":{
+                  "location":{
+                    "lat":-33.96480181720108,
+                    "lon":18.601699797436595
+                  },
+                  "count":34
+                }
+              },
+              {
+                "key":"4/2/6",
+                "doc_count":33,
+                "gridCentroid":{
+                  "location":{
+                    "lat":34.89150663964789,
+                    "lon":-117.91824227368289
+                  },
+                  "count":33
+                }
+              },
+              {
+                "key":"4/7/6",
+                "doc_count":32,
+                "gridCentroid":{
+                  "location":{
+                    "lat":40.471925963647664,
+                    "lon":-3.562640016898513
+                  },
+                  "count":32
+                }
+              },
+              {
+                "key":"4/9/6",
+                "doc_count":31,
+                "gridCentroid":{
+                  "location":{
+                    "lat":40.97689816262573,
+                    "lon":28.814599961042404
+                  },
+                  "count":31
+                }
+              },
+              {
+                "key":"4/4/9",
+                "doc_count":30,
+                "gridCentroid":{
+                  "location":{
+                    "lat":-33.39300158433616,
+                    "lon":-70.78579715453088
+                  },
+                  "count":30
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "scales":[
+    {
+      "name":"gridSize",
+      "type":"linear",
+      "domain":{
+        "data":"table",
+        "field":"doc_count"
+      },
+      "range":[
+        50,
+        1000
+      ]
+    }
+  ],
+  "marks":[
+    {
+      "name":"gridMarker",
+      "type":"symbol",
+      "from":{
+        "data":"table"
+      },
+      "encode":{
+        "update":{
+          "size":{
+            "scale":"gridSize",
+            "field":"doc_count"
+          },
+          "xc":{
+            "signal":"datum.x"
+          },
+          "yc":{
+            "signal":"datum.y"
+          },
+          "tooltip":{
+            "signal":"{flights: datum.doc_count}"
+          }
         }
       }
     }

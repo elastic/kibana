@@ -15,16 +15,6 @@ import sample from './sample.json';
 
 // VegaDeckGl.use(vega, deck, layers, luma);
 
-const CANVAS_STYLE = {
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  width: '1000px',
-  height: '1000px',
-  border: 'red solid 5px',
-  'z-index': 10000,
-};
-
 const DEFAULT_PROJECTION = {
   name: 'projection',
   type: 'mercator',
@@ -45,51 +35,67 @@ const augmentSpec = (spec) => {
   return spec;
 };
 
-const signalChangeFactory = (mbMap) => (sig, value) => {
+const signalChangeFactory = (mbMap) => () => {
   try {
     const center = mbMap.getCenter();
-    let zoom = mbMap.getZoom();
+    const zoom = mbMap.getZoom();
 
-    switch (sig) {
-      case 'latitude':
-        center.lat = value;
-        break;
-      case 'longitude':
-        center.lng = value;
-        break;
-      case 'zoom':
-        zoom = value;
-        break;
-      default:
-        return; // ignore
-    }
-
-    // mbMap.flyTo({ center, zoom });
+    mbMap.flyTo({ center, zoom });
   } catch (err) {
     console.error(err);
   }
 };
 
-export const getCanvas = () => {
+export const getCanvas = (width, height) => {
   const deckCanvas = document.createElement('div');
-  Object.assign(deckCanvas.style, CANVAS_STYLE);
+  Object.assign(deckCanvas.style, { width, height });
   return deckCanvas;
 };
 
 export const createMapboxLayer = async function (mbMap, mbLayerId) {
-  const deckCanvas = getCanvas();
+  const width = mbMap.getCanvas().clientWidth;
+  const height = mbMap.getCanvas().clientHeight;
+
+  const deckCanvas = getCanvas(width, height);
   const augmentedSpec = augmentSpec(sample);
   const onSignal = signalChangeFactory(mbMap);
 
   // Parse spec and generate
-  const parsedVega = vega.parse(sample); // Std
+  const parsedVega = vega.parse(augmentedSpec); // Std
   const view = new vega.View(parsedVega)
+    // .logLevel(vega.Debug)
+    // .addSignalListener('latitude', onSignal)
+    // .addSignalListener('longitude', onSignal)
+    // .addSignalListener('zoom', onSignal)
     .renderer('canvas') // renderer (canvas or svg)
-    .width(1000)
-    .height(1000)
+    .width(width)
+    .height(height)
     .initialize(deckCanvas) // parent DOM container
+    .signal('latitude', 0)
+    .signal('longitude', 0)
+    .signal('zoom', 2.37)
     .hover(true); // enable hover processing
+
   await view.runAsync();
-  return deckCanvas.childNodes[0];
+  vegaDebug(view, augmentedSpec);
+  return {
+    view,
+    canvas: deckCanvas.childNodes[0]
+  };
   // return new MapboxLayer({ id: mbLayerId, deck: deckGlLayer });
 };
+
+function vegaDebug(view, spec) {
+  if (window.VEGA_DEBUG === undefined && console) {
+    console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
+    console.log(
+      'You can access the Vega view with VEGA_DEBUG. ' +
+      'Learn more at https://vega.github.io/vega/docs/api/debugging/.'
+    );
+  }
+  const debugObj = {};
+  window.VEGA_DEBUG = debugObj;
+  window.VEGA_DEBUG.VEGA_VERSION = vega.version;
+  window.VEGA_DEBUG.view = view;
+  window.VEGA_DEBUG.vega_spec = spec;
+}

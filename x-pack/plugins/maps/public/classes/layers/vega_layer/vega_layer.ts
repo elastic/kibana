@@ -37,25 +37,43 @@ export class VegaLayer extends AbstractLayer {
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this._getVegaLayerId();
 
-    const testCanvas = getCanvas();
-    //
-    // // Test code
-    // var ctx = testCanvas.getContext("2d");
-    // ctx.font = "30px Arial";
-    // ctx.fillText("Hello World", 10, 50);
 
 
     if (!source) {
-      const newVegaLayer = await createMapboxLayer(mbMap, mbLayerId);
+
+      const { canvas: newVegaLayer, view } = await createMapboxLayer(mbMap, mbLayerId);
+      const onChange = () => {
+        const center = mbMap.getCenter();
+        const zoom = mbMap.getZoom();
+        const width = mbMap.getCanvas().clientWidth;
+        const height = mbMap.getCanvas().clientHeight;
+        mbMap.getSource('canvas-source').setCoordinates([
+          mbMap.getBounds().getNorthWest().toArray(),
+          mbMap.getBounds().getNorthEast().toArray(),
+          mbMap.getBounds().getSouthEast().toArray(),
+          mbMap.getBounds().getSouthWest().toArray(),
+        ]);
+
+        view
+          .signal('latitude', center.lat)
+          .signal('longitude', center.lng)
+          .signal('zoom', zoom + 1)
+          .width(width)
+          .height(height)
+          .run();
+      };
+      mbMap.on('move', onChange);
+      mbMap.on('resize', onChange);
       mbMap.addSource('canvas-source', {
         type: 'canvas',
         canvas: newVegaLayer,
         coordinates: [
-          [-180, 80],
-          [180, 80],
-          [180, -80],
-          [-180, -80],
+          mbMap.getBounds().getNorthWest().toArray(),
+          mbMap.getBounds().getNorthEast().toArray(),
+          mbMap.getBounds().getSouthEast().toArray(),
+          mbMap.getBounds().getSouthWest().toArray(),
         ],
+        // animate: true,
       });
 
       mbMap.addLayer({
