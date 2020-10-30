@@ -10709,7 +10709,6 @@
     "xpack.lens.app.cancel": "取消",
     "xpack.lens.app.cancelButtonAriaLabel": "返回到上一个应用而不保存更改",
     "xpack.lens.app.docLoadingError": "加载已保存文档时出错",
-    "xpack.lens.app.docSavingError": "保存文档时出错",
     "xpack.lens.app.indexPatternLoadingError": "加载索引模式时出错",
     "xpack.lens.app.save": "保存",
     "xpack.lens.app.saveAndReturn": "保存并返回",

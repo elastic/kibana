@@ -359,7 +359,6 @@ export function App({
     const docToSave = {
       ...getLastKnownDocWithoutPinnedFilters()!,
       description: saveProps.newDescription,
-      savedObjectId: saveProps.newCopyOnSave ? undefined : lastKnownDoc.savedObjectId,
       title: saveProps.newTitle,
     };
 
@@ -376,24 +375,29 @@ export function App({
     const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
     const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
     if (options.saveToLibrary && !originalInput) {
-      await checkForDuplicateTitle(
-        {
-          ...docToSave,
-          copyOnSave: saveProps.newCopyOnSave,
-          lastSavedTitle: lastKnownDoc.title,
-          getEsType: () => 'lens',
-          getDisplayName: () =>
-            i18n.translate('xpack.lens.app.saveModalType', {
-              defaultMessage: 'Lens visualization',
-            }),
-        },
-        saveProps.isTitleDuplicateConfirmed,
-        saveProps.onTitleDuplicate,
-        {
-          savedObjectsClient,
-          overlays,
-        }
-      );
+      try {
+        await checkForDuplicateTitle(
+          {
+            ...docToSave,
+            copyOnSave: saveProps.newCopyOnSave,
+            lastSavedTitle: lastKnownDoc.title,
+            getEsType: () => 'lens',
+            getDisplayName: () =>
+              i18n.translate('xpack.lens.app.saveModalType', {
+                defaultMessage: 'Lens visualization',
+              }),
+          },
+          saveProps.isTitleDuplicateConfirmed,
+          saveProps.onTitleDuplicate,
+          {
+            savedObjectsClient,
+            overlays,
+          }
+        );
+      } catch (e) {
+        // ignore duplicate title failure, user notified in save modal
+        return;
+      }
     }
     try {
       const newInput = (await attributeService.wrapAttributes(
@@ -453,11 +457,6 @@ export function App({
       // eslint-disable-next-line no-console
       console.dir(e);
       trackUiEvent('save_failed');
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.lens.app.docSavingError', {
-          defaultMessage: 'Error saving document',
-        })
-      );
       setState((s) => ({ ...s, isSaveModalVisible: false }));
     }
   };
