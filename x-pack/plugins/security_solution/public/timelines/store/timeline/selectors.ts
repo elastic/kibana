@@ -77,3 +77,8 @@ export const isFilterQueryDraftValidSelector = () =>
       timeline.kqlQuery &&
       isFromKueryExpressionValid(timeline.kqlQuery.filterQueryDraft)
   );
+
+export const getTimelineActivePage = () =>
+  createSelector(selectTimeline, (timeline) =>
+    timeline && timeline.activePage ? timeline.activePage : 0
+  );

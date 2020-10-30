@@ -125,6 +125,8 @@ export const addTimelineToStore = ({
   ...timelineById,
   [id]: {
     ...timeline,
+    activePage: 0,
+    expandedEventIds: {},
     isLoading: timelineById[id].isLoading,
   },
 });
@@ -181,12 +183,14 @@ export const addNewTimeline = ({
   return {
     ...timelineById,
     [id]: {
+      activePage: 0,
       id,
       ...timelineDefaults,
       columns,
       dataProviders,
       dateRange,
       excludedRowRendererIds,
+      expandedEventIds: {},
       filters,
       itemsPerPage,
       indexNames,

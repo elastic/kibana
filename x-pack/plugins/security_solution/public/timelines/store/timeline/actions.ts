@@ -282,3 +282,13 @@ export const updateIndexNames = actionCreator<{
   id: string;
   indexNames: string[];
 }>('UPDATE_INDEXES_NAME');
+
+export const setActivePage = actionCreator<{
+  id: string;
+  activePage: number;
+}>('SET_ACTIVE_PAGE');
+
+export const setExpandedEventId = actionCreator<{
+  id: string;
+  expandedEventId: string;
+}>('SET_EXPANDED_EVENT_ID');

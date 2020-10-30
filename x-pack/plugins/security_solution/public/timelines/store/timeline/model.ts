@@ -43,6 +43,7 @@ export interface ColumnHeaderOptions {
 }
 
 export interface TimelineModel {
+  activePage: number;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
   /** The sources of the event data shown in the timeline */
@@ -57,6 +58,7 @@ export interface TimelineModel {
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
+  expandedEventIds: Record<string, boolean>;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
