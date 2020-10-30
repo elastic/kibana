@@ -72,7 +72,7 @@ describe('actions_connectors_list component empty', () => {
       },
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       alertTypeRegistry: {} as any,
       kibanaFeatures,
     };

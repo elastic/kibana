@@ -113,8 +113,8 @@ describe('alerts_list component empty', () => {
       capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       kibanaFeatures,
     };
 
@@ -284,8 +284,8 @@ describe('alerts_list component with items', () => {
       capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       kibanaFeatures,
     };
 
@@ -488,8 +488,8 @@ describe('alerts_list with show only capability', () => {
       capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       kibanaFeatures,
     };
 
