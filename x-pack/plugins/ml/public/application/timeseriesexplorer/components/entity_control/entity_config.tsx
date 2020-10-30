@@ -166,7 +166,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
                 content={
                   <FormattedMessage
                     id="xpack.ml.timeSeriesExplorer.ignoreTimeRangeInfo"
-                    defaultMessage="The list contains values from all records created during the lifetime of the job."
+                    defaultMessage="The list contains values from all anomalies created during the lifetime of the job."
                   />
                 }
               >
