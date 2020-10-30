@@ -138,6 +138,7 @@ export const VisualizeListing = () => {
       listingLimit={listingLimit}
       initialPageSize={savedObjectsPublic.settings.getPerPage()}
       initialFilter={''}
+      rowHeader="title"
       noItemsFragment={noItemsFragment}
       entityName={i18n.translate('visualize.listing.table.entityName', {
         defaultMessage: 'visualization',

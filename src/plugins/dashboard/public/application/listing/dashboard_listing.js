@@ -43,6 +43,7 @@ export class DashboardListing extends React.Component {
       <I18nProvider>
         <TableListView
           headingId="dashboardListingHeading"
+          rowHeader="title"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}

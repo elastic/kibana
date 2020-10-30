@@ -32,6 +32,7 @@ export function Listing(props: ListingProps) {
     <I18nProvider>
       <TableListView
         headingId="graphListingHeading"
+        rowHeader="title"
         createItem={props.capabilities.save ? props.createItem : undefined}
         findItems={props.findItems}
         deleteItems={props.capabilities.delete ? props.deleteItems : undefined}
