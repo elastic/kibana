@@ -36,10 +36,11 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
     });
 
     it('should aggregate alert status totals', async () => {
-      const NumOkAlerts = 1;
-      const NumActiveAlerts = 2;
+      const NumOkAlerts = 4;
+      const NumActiveAlerts = 1;
+      const NumErrorAlerts = 2;
 
-      for (let i = 0; i < NumOkAlerts; i++) {
+      await Promise.all([...Array(NumOkAlerts)].map(async () => {
         const okAlertId = await createTestAlert(
           {
             alertTypeId: 'test.noop',
@@ -48,9 +49,9 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           'ok'
         );
         objectRemover.add(Spaces.space1.id, okAlertId, 'alert', 'alerts');
-      }
+      }));
 
-      for (let i = 0; i < NumActiveAlerts; i++) {
+      await Promise.all([...Array(NumActiveAlerts)].map(async () => {
         const activeAlertId = await createTestAlert(
           {
             alertTypeId: 'test.patternFiring',
@@ -62,8 +63,20 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           'active'
         );
         objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
-      }
+      }));
 
+      await Promise.all([...Array(NumErrorAlerts)].map(async () => {
+        const activeAlertId = await createTestAlert(
+          {
+            alertTypeId: 'test.throw',
+            schedule: { interval: '1s' },
+          },
+          'error'
+        );
+        objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
+      }));
+
+      await delay(1000);
       const reponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
       );
@@ -73,7 +86,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         alertExecutionStatus: {
           ok: NumOkAlerts,
           active: NumActiveAlerts,
-          error: 0,
+          error: NumErrorAlerts,
           pending: 0,
           unknown: 0,
         },
@@ -86,7 +99,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
   async function waitForStatus(
     id: string,
     statuses: Set<string>,
-    waitMillis: number = 20000
+    waitMillis: number = 10000
   ): Promise<Record<string, any>> {
     if (waitMillis < 0) {
       expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
