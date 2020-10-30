@@ -84,7 +84,7 @@ function RawJsonParamEditor({
       label={label}
       isInvalid={showValidation ? !isFieldValid : false}
       fullWidth={true}
-      compressed
+      display="rowCompressed"
     >
       <>
         <EuiCodeEditor
