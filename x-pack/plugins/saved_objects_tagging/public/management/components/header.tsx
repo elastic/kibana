@@ -60,7 +60,7 @@ export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.savedObjectsTagging.management.header.description"
-              defaultMessage="Manage tags and their connection to other saved objects."
+              defaultMessage="Use tags to categorize and easily find your objects."
             />
           </EuiTextColor>
         </p>
