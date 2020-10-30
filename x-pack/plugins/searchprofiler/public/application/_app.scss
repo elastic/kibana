@@ -1,20 +1,3 @@
-@import '@elastic/eui/src/global_styling/variables/header';
-
-@import 'mixins';
-
-@import 'components/highlight_details_flyout';
-@import 'components/profile_tree';
-@import 'components/percentage_badge';
-
-@import 'containers/main';
-@import 'containers/profile_query_editor';
-
-.prfDevTool__licenseWarning {
-  &__container {
-    max-width: 1000px;
-  }
-}
-
 .prfDevTool__page {
   flex: 1 1 auto;
 
@@ -54,14 +37,30 @@ $headerHeightOffset: $euiHeaderHeightCompensation * 3;
   flex-shrink: 1;
 }
 
-.prfDevTool__detail {
-  font-size: $euiFontSizeS;
-  padding-left: $euiSizeL - 3px; // Alignment is weird
-  margin-bottom: $euiSizeS;
-  display: flex;
-  justify-content: space-between;
+  .prfDevTool__main {
+    height: 100%;
+    order: 2;
+    margin-left: $euiSize;
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
 
-  .euiLink {
-    flex-shrink: 0;
+    // Make only the tab content scroll
+    .search-profiler-tabs {
+      flex-shrink: 0;
+    }
+  }
+
+@include euiPanel('.prfDevTool__main');
+
+@include euiBreakpoint('xs', 's') {
+  .prfDevTool__container {
+    flex-direction: column;
+  }
+
+  .prfDevTool__main {
+    flex: 0 0 auto;
+    margin: $euiSize 0;
   }
 }
+

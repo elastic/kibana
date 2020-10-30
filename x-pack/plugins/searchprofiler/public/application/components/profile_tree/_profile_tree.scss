@@ -1,5 +1,8 @@
-
-$badgeSize: $euiSize * 5.5;
+.prfDevTool__main__profiletree {
+  height: 100%;
+  overflow-y: auto;
+  flex-grow: 1;
+}
 
 // Profile details treeview
 

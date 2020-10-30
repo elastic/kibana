@@ -77,14 +77,12 @@ export const App = () => {
 
     if (activeTab) {
       return (
-        <div className="prfDevTool__main__profiletree">
-          <ProfileTree
-            onDataInitError={handleProfileTreeError}
-            onHighlight={onHighlight}
-            target={activeTab}
-            data={currentResponse}
-          />
-        </div>
+        <ProfileTree
+          onDataInitError={handleProfileTreeError}
+          onHighlight={onHighlight}
+          target={activeTab}
+          data={currentResponse}
+        />
       );
     }
 
