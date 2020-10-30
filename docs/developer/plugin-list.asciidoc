@@ -460,6 +460,10 @@ Elastic.
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields[runtimeFields]
+|WARNING: Missing README.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler[searchprofiler]
 |WARNING: Missing README.
 

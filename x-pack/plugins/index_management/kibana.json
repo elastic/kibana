@@ -17,6 +17,7 @@
   "configPath": ["xpack", "index_management"],
   "requiredBundles": [
     "kibanaReact",
-    "esUiShared"
+    "esUiShared",
+    "runtimeFields"
   ]
 }

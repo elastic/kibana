@@ -8,7 +8,7 @@ import { ReactNode } from 'react';
 import { GenericObject } from './mappings_editor';
 
 import { FieldConfig } from '../shared_imports';
-import { PARAMETERS_DEFINITION, RUNTIME_FIELD_TYPES } from '../constants';
+import { PARAMETERS_DEFINITION } from '../constants';
 
 export interface DataTypeDefinition {
   label: string;
@@ -75,8 +75,6 @@ export type MainType =
 export type SubType = NumericType | RangeType;
 
 export type DataType = MainType | SubType;
-
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export type NumericType =
   | 'long'
