@@ -70,7 +70,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
-    const aborted$ = from(toPromise(combinedSignal));
+    const abortedPromise = toPromise(combinedSignal);
     const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
@@ -87,7 +87,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         id = r.id ?? id;
       }),
       throwOnEsError(),
-      takeUntil(aborted$),
+      takeUntil(from(abortedPromise.promise)),
       catchError((e: AbortError) => {
         if (id) {
           this.deps.http.delete(`/internal/search/${strategy}/${id}`);
@@ -98,6 +98,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
+        abortedPromise.cleanup();
       })
     );
   }
