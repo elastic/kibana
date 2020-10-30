@@ -24,7 +24,11 @@ describe('7.10.0', () => {
   test('add hasAuth config property for .email actions', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const action = getMockDataForEmail({});
-    expect(migration710(action, context)).toMatchObject({
+    const migratedAction = migration710(action, context);
+    expect(migratedAction.attributes.config).toEqual({
+      hasAuth: true,
+    });
+    expect(migratedAction).toEqual({
       ...action,
       attributes: {
         ...action.attributes,
@@ -38,7 +42,11 @@ describe('7.10.0', () => {
   test('rename cases configuration object', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const action = getMockData({});
-    expect(migration710(action, context)).toMatchObject({
+    const migratedAction = migration710(action, context);
+    expect(migratedAction.attributes.config).toEqual({
+      incidentConfiguration: { mapping: [] },
+    });
+    expect(migratedAction).toEqual({
       ...action,
       attributes: {
         ...action.attributes,
@@ -49,6 +57,63 @@ describe('7.10.0', () => {
     });
   });
 });
+
+describe('7.11.0', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+
+  test('add hasAuth = true for .webhook actions with user and password', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const action = getMockDataForWebhook({}, true);
+    expect(migration711(action, context)).toMatchObject({
+      ...action,
+      attributes: {
+        ...action.attributes,
+        config: {
+          hasAuth: true,
+        },
+      },
+    });
+  });
+
+  test('add hasAuth = false for .webhook actions without user and password', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const action = getMockDataForWebhook({}, false);
+    expect(migration711(action, context)).toMatchObject({
+      ...action,
+      attributes: {
+        ...action.attributes,
+        config: {
+          hasAuth: false,
+        },
+      },
+    });
+  });
+});
+
+function getMockDataForWebhook(
+  overwrites: Record<string, unknown> = {},
+  hasUserAndPassword: boolean
+): SavedObjectUnsanitizedDoc<RawAction> {
+  const secrets = hasUserAndPassword
+    ? { user: 'test', password: '123' }
+    : { user: '', password: '' };
+  return {
+    attributes: {
+      name: 'abc',
+      actionTypeId: '.webhook',
+      config: {},
+      secrets,
+      ...overwrites,
+    },
+    id: uuid.v4(),
+    type: 'action',
+  };
+}
 
 function getMockDataForEmail(
   overwrites: Record<string, unknown> = {}

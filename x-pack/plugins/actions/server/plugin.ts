@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
@@ -254,9 +254,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-        Params extends ActionTypeParams = ActionTypeParams
+        Params extends ActionTypeParams = ActionTypeParams,
+        ExecutorResultData = void
       >(
-        actionType: ActionType<Config, Secrets, Params>
+        actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
