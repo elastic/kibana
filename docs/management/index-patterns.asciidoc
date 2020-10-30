@@ -8,7 +8,7 @@ An index pattern can point to a specific index, for example, your log data from 
 or all indices that contain your data.  It can also point to a
 {ref}/data-streams.html[data stream] or {ref}/indices-aliases.html[index alias].
 
-In this document, you’ll learn how to:
+You’ll learn how to:
 
 * Create an index pattern
 * Explore and configure the data fields
@@ -78,7 +78,7 @@ based on different timestamps.
 
 [float]
 [[rollup-index-pattern]]
-==== Rollup index pattern
+==== Create an index pattern for rolled up data
 
 An index pattern can match one rollup index.  For a combination rollup
 index pattern with both raw and rolled up data, use the standard notation:
@@ -90,10 +90,10 @@ For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up d
 
 [float]
 [[management-cross-cluster-search]]
-==== {ccs-cap} index pattern
+==== Create an index pattern that searches across clusters
 
 If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
-you can create index patterns to search across the clusters of your choosing. Use the
+you can create an index pattern to search across the clusters of your choosing. Use the
 same syntax that you'd use in a raw {ccs} request in {es}:
 
 ```ts
@@ -158,7 +158,7 @@ date values in {es}, you can use a {kib} field formatter to change the display t
 and <<field-formatters-numeric, numbers>>.
 
 A popularity counter keeps track of the fields you use most often.
-The top five most popular fields and their values are displayed in *Discover*.
+The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
 
 To edit the field format and popularity counter, use the *Edit* modal.
 
@@ -180,7 +180,7 @@ The first index pattern you create is automatically designated as the default pa
 but you can set any index pattern as the default.  The default index pattern is automatically selected when you first open <<discover,*Discover*>> or create a visualization from scratch.
 
 . In *Index patterns*, click the index pattern name.
-. Click the star (image:management/index-patterns/images/star.png[Star icon]).
+. Click the star icon (image:management/index-patterns/images/star.png[Star icon]).
 
 [float]
 [[delete-index-pattern]]
