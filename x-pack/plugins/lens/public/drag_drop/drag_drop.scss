@@ -69,14 +69,6 @@
   pointer-events: none;
 }
 
-.lnsDragDrop-isReorderable--up {
-  transform: translateY(-100%) translateY(-#{$lnsLayerPanelDimensionMargin});
-}
-
-.lnsDragDrop-isReorderable--down {
-  transform: translateY(100%) translateY(#{$lnsLayerPanelDimensionMargin});
-}
-
 // Draggable item when it is moving
 .lnsDragDrop-isHidden {
   opacity: 0;
