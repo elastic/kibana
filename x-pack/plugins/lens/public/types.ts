@@ -559,7 +559,7 @@ export interface Visualization<T = unknown> {
     datasourceLayers: Record<string, DatasourcePublicAPI>
   ) => Ast | string | null;
   /**
-   * The frame will call this function on all visualizations at error time in order
+   * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
   getErrorMessages: (
