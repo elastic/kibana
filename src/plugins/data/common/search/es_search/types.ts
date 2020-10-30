@@ -50,7 +50,6 @@ export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Sourc
   id?: string;
   is_partial?: boolean;
   is_running?: boolean;
-  response?: SearchResponse<Source>;
 }
 
 export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;

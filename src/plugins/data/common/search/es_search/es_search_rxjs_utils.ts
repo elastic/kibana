@@ -20,8 +20,7 @@
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { ShardsResponse } from 'elasticsearch';
-import type { Assign } from 'utility-types';
+import type { SearchResponse } from 'elasticsearch';
 import type { ApiResponse } from '@elastic/elasticsearch';
 
 import { shimAbortSignal } from './shim_abort_signal';
@@ -37,7 +36,7 @@ export const doSearch = <SearchResponse = any>(
 
 export const toKibanaSearchResponse = <
   SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse,
-  KibanaResponse extends IEsSearchResponse = IEsSearchResponse<SearchResponse>
+  KibanaResponse extends IKibanaSearchResponse = IKibanaSearchResponse<SearchResponse>
 >() =>
   map<ApiResponse<SearchResponse>, KibanaResponse>(
     (response) =>

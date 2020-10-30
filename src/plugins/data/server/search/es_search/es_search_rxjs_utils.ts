@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable } from 'rxjs';
-import type { Logger } from 'kibana/server';
+import { pipe } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+import type { Logger, SearchResponse } from 'kibana/server';
 import type { SearchUsage } from '../collectors';
-import type { IKibanaSearchResponse } from '../../../common/search';
+import type { IEsSearchResponse, IKibanaSearchResponse } from '../../../common/search';
 
 /**
  * trackSearchStatus is a custom rxjs operator that can be used to track the progress of a search.
@@ -34,7 +36,7 @@ export const trackSearchStatus = <
 ) => {
   return pipe(
     tap(
-      (response) => {
+      (response: KibanaResponse) => {
         const trackSuccessData = response.rawResponse.took;
 
         if (trackSuccessData !== undefined) {
@@ -42,7 +44,7 @@ export const trackSearchStatus = <
           usage?.trackSuccess(trackSuccessData);
         }
       },
-      (err) => {
+      (err: any) => {
         logger.debug(`trackSearchStatus:error ${err}`);
         usage?.trackError();
       }

@@ -18,29 +18,25 @@ import type { IAsyncSearchOptions } from '../../../common/search/types';
 
 const DEFAULT_POLLING_INTERVAL = 1000;
 
-export const doPartialSearch = <SearchResponse extends IKibanaSearchResponse = IEsSearchResponse>(
+export const doPartialSearch = <SearchResponse = any>(
   searchMethod: () => Promise<SearchResponse>,
   partialSearchMethod: (id: IKibanaSearchRequest['id']) => Promise<SearchResponse>,
-  isCompleted: (response: SearchResponse) => boolean,
+  isPartialResponse: (response: SearchResponse) => boolean,
   getId: (response: SearchResponse) => IKibanaSearchRequest['id'],
   requestId: IKibanaSearchRequest['id'],
-  { abortSignal, pollInterval }: IAsyncSearchOptions
+  { abortSignal, pollInterval = DEFAULT_POLLING_INTERVAL }: IAsyncSearchOptions
 ) => {
   const partialSearch = (id: IKibanaSearchRequest['id']) =>
     doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal).pipe(
-      expand(() =>
-        timer(pollInterval ?? DEFAULT_POLLING_INTERVAL).pipe(
-          switchMap(() => partialSearchMethod(id))
-        )
-      ),
-      takeWhile((response) => !isCompleted(response), true)
+      expand(() => timer(pollInterval).pipe(switchMap(() => partialSearchMethod(id)))),
+      takeWhile((response) => !isPartialResponse(response), true)
     );
 
   return requestId
     ? partialSearch(requestId)
     : doSearch<SearchResponse>(searchMethod, abortSignal).pipe(
         mergeMap((response) =>
-          !isCompleted(response)
+          !isPartialResponse(response)
             ? merge(of(response), partialSearch(getId(response)))
             : of(response)
         )

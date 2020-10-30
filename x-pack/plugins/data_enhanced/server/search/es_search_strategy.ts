@@ -33,6 +33,10 @@ import type { IEnhancedEsSearchRequest } from '../../common';
 
 const { utils } = search.esSearch;
 
+interface IEsRawAsyncSearchResponse<Source = any> extends IEsRawSearchResponse<Source> {
+  response: SearchResponse<Source>;
+}
+
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
@@ -46,7 +50,7 @@ export const enhancedEsSearchStrategyProvider = (
     const asyncOptions = getAsyncOptions();
     const client = context.core.elasticsearch.client.asCurrentUser.asyncSearch;
 
-    return doPartialSearch<ApiResponse<IEsRawSearchResponse>>(
+    return doPartialSearch<ApiResponse<IEsRawAsyncSearchResponse>>(
       async () =>
         client.submit(
           utils.toSnakeCase({
