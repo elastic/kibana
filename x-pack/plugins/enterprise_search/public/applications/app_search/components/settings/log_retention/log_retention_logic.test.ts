@@ -90,5 +90,22 @@ describe('LogRetentionLogic', () => {
         });
       });
     });
+
+    describe('clearLogRetentionUpdating', () => {
+      describe('logsRetentionUpdating', () => {
+        it('resets logsRetentionUpdating to false', () => {
+          mount({
+            logsRetentionUpdating: true,
+          });
+
+          LogRetentionLogic.actions.clearLogRetentionUpdating();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            logsRetentionUpdating: false,
+          });
+        });
+      });
+    });
   });
 });

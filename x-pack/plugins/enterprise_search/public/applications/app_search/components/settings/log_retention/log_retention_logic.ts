@@ -9,8 +9,9 @@ import { kea, MakeLogicType } from 'kea';
 import { ELogRetentionOptions } from './types';
 
 interface ILogRetentionActions {
-  setOpenModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
+  clearLogRetentionUpdating(): { value: boolean };
   closeModals(): { value: boolean };
+  setOpenModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
 }
 
 interface ILogRetentionValues {
@@ -21,13 +22,15 @@ interface ILogRetentionValues {
 export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRetentionActions>>({
   path: ['enterprise_search', 'app_search', 'log_retention_logic'],
   actions: () => ({
-    setOpenModal: (option) => ({ option }),
+    clearLogRetentionUpdating: true,
     closeModals: true,
+    setOpenModal: (option) => ({ option }),
   }),
   reducers: () => ({
     logsRetentionUpdating: [
       false,
       {
+        clearLogRetentionUpdating: () => false,
         closeModals: () => false,
       },
     ],
