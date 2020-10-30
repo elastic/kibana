@@ -13,7 +13,7 @@ import { callApmApi } from './createCallApmApi';
 
 export { createCallApmApi } from './createCallApmApi';
 
-export const fetchOverviewPageData = async ({
+export const fetchObservabilityOverviewPageData = async ({
   absoluteTime,
   relativeTime,
   bucketSize,
