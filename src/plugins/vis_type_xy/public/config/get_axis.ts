@@ -39,7 +39,8 @@ import { LabelRotation } from '../../../charts/public';
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
   { categoryLines, valueAxis }: Grid,
-  { params, formatter, title: fallbackTitle = '', aggType }: Aspect
+  { params, formatter, title: fallbackTitle = '', aggType }: Aspect,
+  isDateHistogram = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
   const groupId = isCategoryAxis ? axis.id : undefined;
@@ -62,6 +63,8 @@ export function getAxis<S extends XScaleType | YScaleType>(
   };
   const scale = getScale<S>(axisScale, params, isCategoryAxis);
   const title = axisTitle.text || fallbackTitle;
+  const falbackRotation =
+    isCategoryAxis && isDateHistogram ? LabelRotation.Horizontal : LabelRotation.Vertical;
 
   return {
     ...axis,
@@ -70,7 +73,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     ticks,
     grid,
     scale,
-    style: getAxisStyle(ticks, title),
+    style: getAxisStyle(ticks, title, falbackRotation),
     domain: getAxisDomain(scale, isCategoryAxis),
   };
 }
@@ -121,14 +124,18 @@ function getScale<S extends XScaleType | YScaleType>(
   };
 }
 
-function getAxisStyle(ticks?: TickOptions, title?: string): AxisSpec['style'] {
+function getAxisStyle(
+  ticks?: TickOptions,
+  title?: string,
+  rotationFallback: LabelRotation = LabelRotation.Vertical
+): AxisSpec['style'] {
   return {
     axisTitle: {
       visible: (title ?? '').trim().length > 0,
     },
     tickLabel: {
       visible: ticks?.show,
-      rotation: -(ticks?.rotation ?? LabelRotation.Vertical),
+      rotation: -(ticks?.rotation ?? rotationFallback),
     },
   };
 }

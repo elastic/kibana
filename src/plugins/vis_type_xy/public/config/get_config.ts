@@ -38,12 +38,17 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     detailedTooltip,
     isVislibVis,
   } = params;
-  const aspects = getAspects(table.columns, params.dimensions);
-  const xAxis = getAxis<XScaleType>(params.categoryAxes[0], params.grid, aspects.x);
-  const tooltip = getTooltip(aspects, params, xAxis.ticks?.formatter);
   const enableHistogramMode = ['date_histogram', 'histogram'].includes(
     params.dimensions.x?.aggType ?? ''
   );
+  const aspects = getAspects(table.columns, params.dimensions);
+  const xAxis = getAxis<XScaleType>(
+    params.categoryAxes[0],
+    params.grid,
+    aspects.x,
+    params.dimensions.x?.aggType === 'date_histogram'
+  );
+  const tooltip = getTooltip(aspects, params, xAxis.ticks?.formatter);
   const fallbackGroupId = params.seriesParams.find(({ valueAxis }) =>
     params.valueAxes.some(({ id }) => valueAxis === id)
   )?.valueAxis;

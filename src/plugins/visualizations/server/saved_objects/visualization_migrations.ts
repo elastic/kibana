@@ -760,6 +760,21 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
 };
 
 /**
+ * Decorates axes with default label filter value
+ */
+const addDefaultLabelFilter = <T extends { labels: { filter?: boolean } }>(
+  axes: T[],
+  fallback: boolean
+): T[] =>
+  axes.map((axis) => ({
+    ...axis,
+    labels: {
+      ...axis.labels,
+      filter: axis.labels.filter ?? fallback,
+    },
+  }));
+
+/**
  * Migrate vislib bar, line and area charts to use new vis_type_xy plugin
  */
 const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -772,7 +787,10 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
     }
-    if (visState && [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState.type)) {
+    if (
+      visState &&
+      [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
+    ) {
       return {
         ...doc,
         attributes: {
@@ -781,6 +799,14 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             ...visState,
             params: {
               ...visState.params,
+              categoryAxes: addDefaultLabelFilter(
+                visState.params.categoryAxes,
+                visState.params.type !== 'horizontal_bar'
+              ),
+              valueAxes: addDefaultLabelFilter(
+                visState.params.valueAxes,
+                visState.params.type === 'horizontal_bar'
+              ),
               isVislibVis: true,
               detailedTooltip: true,
             },
