@@ -9,7 +9,7 @@ import { noop } from 'lodash';
 import { useMount } from 'react-use';
 import { euiStyled } from '../../../../observability/public';
 
-import { LogEntriesCursor } from '../../../common/http_api';
+import { LogEntryCursor } from '../../../common/log_entry';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
@@ -22,7 +22,7 @@ export interface LogStreamProps {
   startTimestamp: number;
   endTimestamp: number;
   query?: string;
-  center?: LogEntriesCursor;
+  center?: LogEntryCursor;
   highlight?: string;
   height?: string | number;
 }

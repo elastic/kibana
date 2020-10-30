@@ -8,7 +8,8 @@ import { useState, useMemo } from 'react';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { LogEntry, LogEntriesCursor } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/http_api';
+import { LogEntryCursor } from '../../../../common/log_entry';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface LogStreamProps {
@@ -16,7 +17,7 @@ interface LogStreamProps {
   startTimestamp: number;
   endTimestamp: number;
   query?: string;
-  center?: LogEntriesCursor;
+  center?: LogEntryCursor;
 }
 
 interface LogStreamState {
