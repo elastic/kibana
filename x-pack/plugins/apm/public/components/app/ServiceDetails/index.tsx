@@ -34,10 +34,6 @@ export function ServiceDetails({ match, tab }: Props) {
     canReadAnomalies,
   } = getAlertingCapabilities(plugins, core.application.capabilities);
 
-  const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
-    defaultMessage: 'Add data',
-  });
-
   return (
     <div>
       <ApmHeader>
@@ -56,16 +52,6 @@ export function ServiceDetails({ match, tab }: Props) {
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
-              size="s"
-              color="primary"
-              iconType="plusInCircle"
-            >
-              {ADD_DATA_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
 

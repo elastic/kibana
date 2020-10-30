@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiPage } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
@@ -120,9 +120,7 @@ export function ServiceInventory() {
     !userHasDismissedCallout;
 
   return (
-    <>
-      <EuiSpacer />
-
+    <EuiPage>
       <Correlations />
 
       <EuiFlexGroup>
@@ -152,6 +150,6 @@ export function ServiceInventory() {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiPage>
   );
 }

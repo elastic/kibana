@@ -17,11 +17,13 @@ import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
+  toMountPoint,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
+import { HeaderLinks } from '../components/shared/header_links';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
@@ -30,11 +32,9 @@ import { ApmPluginSetupDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
-import { px, units } from '../style/variables';
 import { setReadonlyBadge } from '../updateBadge';
 
 const MainContainer = styled.div`
-  padding: ${px(units.plus)};
   height: 100%;
 `;
 
@@ -118,14 +118,15 @@ export function ApmAppRoot({
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
-  { element, history }: AppMountParameters,
+  { element, history, setHeaderActionMenu }: AppMountParameters,
   config: ConfigSchema
 ) => {
   // render APM feedback link in global help menu
   setHelpExtension(core);
   setReadonlyBadge(core);
-
   createCallApmApi(core.http);
+
+  setHeaderActionMenu(toMountPoint(<HeaderLinks core={core} plugins={deps} />));
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {

@@ -7,9 +7,9 @@ import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
   EuiPanel,
   EuiToolTip,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -156,8 +156,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   ];
 
   return (
-    <>
-      <EuiSpacer />
+    <EuiPage>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localFiltersConfig} />
@@ -180,7 +179,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiPage>
   );
 }
 
