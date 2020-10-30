@@ -20,18 +20,20 @@
 import { coreMock } from '../../../core/public/mocks';
 import { savedObjectsPluginMock } from '../../saved_objects/public/mocks';
 import { tagDecoratorConfig } from './decorator';
+import { taggingApiMock } from './api.mock';
 import { SavedObjectTaggingOssPlugin } from './plugin';
 
 describe('SavedObjectTaggingOssPlugin', () => {
   let plugin: SavedObjectTaggingOssPlugin;
+  let coreSetup: ReturnType<typeof coreMock.createSetup>;
 
   beforeEach(() => {
+    coreSetup = coreMock.createSetup();
     plugin = new SavedObjectTaggingOssPlugin(coreMock.createPluginInitializerContext());
   });
 
   describe('#setup', () => {
-    it('registers the tag SO decorator is the `savedObjects` plugin is present', () => {
-      const coreSetup = coreMock.createSetup();
+    it('registers the tag SO decorator if the `savedObjects` plugin is present', () => {
       const savedObjects = savedObjectsPluginMock.createSetupContract();
 
       plugin.setup(coreSetup, { savedObjects });
@@ -41,11 +43,59 @@ describe('SavedObjectTaggingOssPlugin', () => {
     });
 
     it('does not fail if the `savedObjects` plugin is not present', () => {
-      const coreSetup = coreMock.createSetup();
-
       expect(() => {
         plugin.setup(coreSetup, {});
       }).not.toThrow();
+    });
+  });
+
+  describe('#start', () => {
+    let coreStart: ReturnType<typeof coreMock.createStart>;
+
+    // need to wait for api promises to resolve
+    const nextTick = () =>
+      new Promise((resolve) => {
+        window.setTimeout(resolve, 0);
+      });
+
+    beforeEach(() => {
+      coreStart = coreMock.createStart();
+    });
+
+    it('returns the tagging API if registered', async () => {
+      const taggingApi = taggingApiMock.create();
+      const { registerTaggingApi } = plugin.setup(coreSetup, {});
+
+      registerTaggingApi(Promise.resolve(taggingApi));
+
+      await nextTick();
+
+      const { getTaggingApi, isTaggingAvailable } = plugin.start(coreStart);
+
+      expect(isTaggingAvailable()).toBe(true);
+      expect(getTaggingApi()).toStrictEqual(taggingApi);
+    });
+    it('does not return the tagging API if not registered', async () => {
+      plugin.setup(coreSetup, {});
+
+      await nextTick();
+
+      const { getTaggingApi, isTaggingAvailable } = plugin.start(coreStart);
+
+      expect(isTaggingAvailable()).toBe(false);
+      expect(getTaggingApi()).toBeUndefined();
+    });
+    it('does not return the tagging API if resolution promise rejects', async () => {
+      const { registerTaggingApi } = plugin.setup(coreSetup, {});
+
+      registerTaggingApi(Promise.reject(new Error('something went bad')));
+
+      await nextTick();
+
+      const { getTaggingApi, isTaggingAvailable } = plugin.start(coreStart);
+
+      expect(isTaggingAvailable()).toBe(false);
+      expect(getTaggingApi()).toBeUndefined();
     });
   });
 });
