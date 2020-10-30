@@ -8,16 +8,16 @@ import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import { UiActionsPresentableGrouping as PresentableGrouping } from '../../../../../src/plugins/ui_actions/public';
 
-export const drilldownGrouping: PresentableGrouping<{
+export const dynamicActionGrouping: PresentableGrouping<{
   embeddable?: IEmbeddable;
 }> = [
   {
-    id: 'drilldowns',
+    id: 'dynamicActions',
     getDisplayName: () =>
-      i18n.translate('xpack.embeddableEnhanced.Drilldowns', {
-        defaultMessage: 'Drilldowns',
+      i18n.translate('xpack.uiActionsEnhanced.CustomActions', {
+        defaultMessage: 'Custom actions',
       }),
     getIconType: () => 'symlink',
-    order: 25,
+    order: 26,
   },
 ];
