@@ -132,7 +132,7 @@ aggregations using that index pattern in {kib} take advantage of {ccs}.
 [[reload-fields]]
 === Explore and configure the data fields
 
-To explore and configure the data fields in your index pattern, go to
+To explore and configure the data fields in your index pattern, open the main menu, then click
 *Stack Management > Index Patterns*.  Each field has a {ref}/mapping.html[mapping],
 which indicates the type of data the field contains in {es},
 such as strings or boolean values. The field mapping also determines
