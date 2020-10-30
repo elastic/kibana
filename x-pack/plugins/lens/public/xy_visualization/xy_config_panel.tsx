@@ -244,7 +244,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       ? 'hide'
       : 'show';
 
-  const valueLabelsVisibilityMode = state?.valueLabels?.mode || 'hide';
+  const valueLabelsVisibilityMode = state?.valueLabels || 'hide';
   const tooltipContentValueLabels = isHistogramSeries
     ? valueTooltipContentDisabled.histogram
     : valueTooltipContentDisabled.stacked;
@@ -287,7 +287,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                   }
                   onChange={(modeId) => {
                     const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
-                    setState({ ...state, valueLabels: { mode: newMode } });
+                    setState({ ...state, valueLabels: newMode });
                   }}
                 />
               </EuiFormRow>

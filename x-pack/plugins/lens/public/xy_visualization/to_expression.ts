@@ -44,7 +44,7 @@ export function toPreviewExpression(
         ...state.legend,
         isVisible: false,
       },
-      valueLabels: { mode: 'hide' },
+      valueLabels: 'hide',
     },
     datasourceLayers
   );
@@ -168,20 +168,7 @@ export const buildExpression = (
               ],
             },
           ],
-          valueLabels: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_valueLabelsConfig',
-                  arguments: {
-                    mode: [state?.valueLabels?.mode ?? 'hide'],
-                  },
-                },
-              ],
-            },
-          ],
+          valueLabels: [state?.valueLabels],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 

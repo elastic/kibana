@@ -146,20 +146,7 @@ Object {
           "",
         ],
         "valueLabels": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "mode": Array [
-                    "hide",
-                  ],
-                },
-                "function": "lens_xy_valueLabelsConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
+          "hide",
         ],
         "xTitle": Array [
           "",

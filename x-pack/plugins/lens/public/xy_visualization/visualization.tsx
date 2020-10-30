@@ -140,7 +140,7 @@ export const xyVisualization: Visualization<State> = {
       state || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
-        valueLabels: { mode: 'hide' },
+        valueLabels: 'hide',
         preferredSeriesType: defaultSeriesType,
         layers: [
           {

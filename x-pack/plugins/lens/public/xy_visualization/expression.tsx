@@ -130,7 +130,8 @@ export const xyChart: ExpressionFunctionDefinition<
       }),
     },
     valueLabels: {
-      types: ['lens_xy_valueLabelsConfig'],
+      types: ['string'],
+      options: ['hide', 'inside'],
       help: '',
     },
     tickLabelsVisibilitySettings: {
@@ -437,7 +438,7 @@ export function XYChart({
 
   const baseThemeWithMaybeValueLabels = !shouldShowValueLabels
     ? chartTheme
-    : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels?.mode || 'hide', shouldRotate);
+    : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels || 'hide', shouldRotate);
 
   return (
     <Chart>
@@ -745,7 +746,7 @@ export function XYChart({
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
-                  showValueLabel: shouldShowValueLabels && valueLabels?.mode !== 'hide',
+                  showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
                   isAlternatingValueLabel: false,
                   isValueContainedInElement: true,
                   hideClippedValue: true,

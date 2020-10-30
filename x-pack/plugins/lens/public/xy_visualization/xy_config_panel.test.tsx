@@ -21,7 +21,7 @@ describe('XY Config panels', () => {
   function testState(): State {
     return {
       legend: { isVisible: true, position: Position.Right },
-      valueLabels: { mode: 'hide' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -127,7 +127,7 @@ describe('XY Config panels', () => {
             ...state,
             layers: [{ ...state.layers[0], seriesType: 'bar' }],
             fittingFunction: 'Carry',
-            valueLabels: { mode: 'inside' },
+            valueLabels: 'inside',
           }}
         />
       );

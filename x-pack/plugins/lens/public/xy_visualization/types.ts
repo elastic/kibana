@@ -78,35 +78,6 @@ export const legendConfig: ExpressionFunctionDefinition<
   },
 };
 
-type ValueLabelsConfigResult = ValueLabelConfig & {
-  type: 'lens_xy_valueLabelsConfig';
-};
-
-export const valueLabelsConfig: ExpressionFunctionDefinition<
-  'lens_xy_valueLabelsConfig',
-  null,
-  ValueLabelConfig,
-  ValueLabelsConfigResult
-> = {
-  name: 'lens_xy_valueLabelsConfig',
-  aliases: [],
-  type: 'lens_xy_valueLabelsConfig',
-  help: ``,
-  inputTypes: ['null'],
-  args: {
-    mode: {
-      types: ['string'],
-      help: '',
-    },
-  },
-  fn: function fn(input: unknown, args: ValueLabelConfig) {
-    return {
-      type: 'lens_xy_valueLabelsConfig',
-      ...args,
-    };
-  },
-};
-
 export interface AxesSettingsConfig {
   x: boolean;
   yLeft: boolean;
@@ -387,9 +358,7 @@ export type SeriesType =
 
 export type YAxisMode = 'auto' | 'left' | 'right';
 
-export interface ValueLabelConfig {
-  mode?: 'hide' | 'inside' | 'outside';
-}
+export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
 
 export interface YConfig {
   forAccessor: string;
@@ -426,7 +395,7 @@ export interface XYArgs {
   yTitle: string;
   yRightTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
-  valueLabels: ValueLabelConfig & { type: 'lens_xy_valueLabelsConfig' };
+  valueLabels: ValueLabelConfig;
   layers: LayerArgs[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxesSettingsConfig & {
