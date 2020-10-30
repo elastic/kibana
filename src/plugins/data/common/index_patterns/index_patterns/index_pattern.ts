@@ -319,7 +319,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Helper function to extend field specs with e.g. customName
    */
-  private getFieldSpecs(specs: IndexPatternSpec | undefined) {
+  private getFieldSpecs(specs: IndexPatternFieldMap | undefined) {
     if (!specs) {
       return {};
     }
