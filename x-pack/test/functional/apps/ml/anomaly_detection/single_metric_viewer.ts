@@ -185,13 +185,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('modify the entity config');
         await ml.singleMetricViewer.setEntityConfig('geoip.city_name', false, 'name', 'asc');
 
-        // make sure anomalous only control has been synced
-        await ml.singleMetricViewer.assertEntityConfig(
-          'day_of_week',
-          false,
-          'anomaly_score',
-          'desc'
-        );
+        // Make sure anomalous only control has been synced.
+        // Also sorting by name is enforced because the model plot is enabled
+        // and anomalous only is disabled
+        await ml.singleMetricViewer.assertEntityConfig('day_of_week', false, 'name', 'desc');
 
         await ml.testExecution.logTestStep('displays the chart');
         await ml.singleMetricViewer.assertChartExist();
