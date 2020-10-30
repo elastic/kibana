@@ -166,13 +166,7 @@ export const xyVisualization: Visualization<State> = {
       groups: [
         {
           groupId: 'x',
-          groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-                defaultMessage: 'Vertical axis',
-              })
-            : i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-                defaultMessage: 'Horizontal axis',
-              }),
+          groupLabel: getAxisName('x', { isHorizontal }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
           filterOperations: isBucketed,
           suggestedPriority: 1,
@@ -182,13 +176,7 @@ export const xyVisualization: Visualization<State> = {
         },
         {
           groupId: 'y',
-          groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-                defaultMessage: 'Horizontal axis',
-              })
-            : i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-                defaultMessage: 'Vertical axis',
-              }),
+          groupLabel: getAxisName('y', { isHorizontal }),
           accessors: layer.accessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
@@ -358,32 +346,47 @@ function validateLayersForDimension(
 
   return {
     valid: false,
-    payload: getMessageIdsForDimension(dimension, layerMissingAccessors),
+    payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
   };
 }
 
+function getAxisName(axis: 'x' | 'y', { isHorizontal }: { isHorizontal: boolean }) {
+  const vertical = i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
+    defaultMessage: 'Vertical axis',
+  });
+  const horizontal = i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
+    defaultMessage: 'Horizontal axis',
+  });
+  if (axis === 'x') {
+    return isHorizontal ? vertical : horizontal;
+  }
+  return isHorizontal ? horizontal : vertical;
+}
+
 // i18n ids cannot be dynamically generated, hence the function below
-function getMessageIdsForDimension(dimension: string, layers: number[]) {
+function getMessageIdsForDimension(dimension: string, layers: number[], isHorizontal: boolean) {
   const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
     case 'X':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXShort', {
-          defaultMessage: `Missing Horizontal axis`,
+          defaultMessage: `Missing {axis}`,
+          values: { axis: getAxisName('x', { isHorizontal }) },
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureXLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the Horizontal axis`,
-          values: { layers: layers.length, layersList },
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}`,
+          values: { layers: layers.length, layersList, axis: getAxisName('x', { isHorizontal }) },
         }),
       };
     case 'Y':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
-          defaultMessage: `Missing Vertical axis`,
+          defaultMessage: `Missing {axis}`,
+          values: { axis: getAxisName('y', { isHorizontal }) },
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the Vertical axis`,
-          values: { layers: layers.length, layersList },
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}`,
+          values: { layers: layers.length, layersList, axis: getAxisName('y', { isHorizontal }) },
         }),
       };
   }
