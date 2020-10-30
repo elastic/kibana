@@ -26,6 +26,7 @@ describe('POST comment', () => {
       toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
     }));
   });
+
   it(`Posts a new comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
@@ -38,7 +39,7 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -51,6 +52,7 @@ describe('POST comment', () => {
       'mock-comment'
     );
   });
+
   it(`Returns an error if the case does not exist`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
@@ -63,7 +65,7 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -74,6 +76,7 @@ describe('POST comment', () => {
     expect(response.status).toEqual(404);
     expect(response.payload.isBoom).toEqual(true);
   });
+
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
@@ -86,7 +89,7 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -97,6 +100,7 @@ describe('POST comment', () => {
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
   });
+
   it(`Allow user to create comments without authentications`, async () => {
     routeHandler = await createRoute(initPostCommentApi, 'post', true);
 
@@ -111,11 +115,12 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
-      })
+      }),
+      true
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);

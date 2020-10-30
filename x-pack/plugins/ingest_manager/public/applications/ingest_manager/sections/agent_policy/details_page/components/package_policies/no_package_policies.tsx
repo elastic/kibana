@@ -18,14 +18,14 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
       title={
         <h3>
           <FormattedMessage
-            id="xpack.ingestManager.policyDetailsPackagePolicies.createFirstTitle"
+            id="xpack.fleet.policyDetailsPackagePolicies.createFirstTitle"
             defaultMessage="Add your first integration"
           />
         </h3>
       }
       body={
         <FormattedMessage
-          id="xpack.ingestManager.policyDetailsPackagePolicies.createFirstMessage"
+          id="xpack.fleet.policyDetailsPackagePolicies.createFirstMessage"
           defaultMessage="This policy does not have any integrations yet."
         />
       }
@@ -36,7 +36,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
           href={getHref('add_integration_from_policy', { policyId })}
         >
           <FormattedMessage
-            id="xpack.ingestManager.policyDetailsPackagePolicies.createFirstButtonText"
+            id="xpack.fleet.policyDetailsPackagePolicies.createFirstButtonText"
             defaultMessage="Add integration"
           />
         </EuiButton>

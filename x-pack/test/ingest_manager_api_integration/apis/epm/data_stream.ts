@@ -65,7 +65,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     afterEach(async () => {
-      if (!server) return;
+      if (!server.enabled) return;
       await es.transport.request({
         method: 'DELETE',
         path: `/_data_stream/${logsTemplateName}-default`,
