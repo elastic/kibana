@@ -16,7 +16,7 @@ export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = asy
       _shards: { total },
       count,
     },
-  } = await callES.asCurrentUser.count({ index: dynamicSettings.heartbeatIndices });
+  } = await callES.count({ index: dynamicSettings.heartbeatIndices });
   return {
     indexExists: total > 0,
     docCount: count,

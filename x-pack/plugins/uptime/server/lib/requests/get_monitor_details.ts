@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
@@ -14,15 +14,19 @@ export interface GetMonitorDetailsParams {
   dateStart: string;
   dateEnd: string;
   alertsClient: any;
-  esClient: ElasticsearchClient;
 }
 
-const getMonitorAlerts = async (
-  callES: IScopedClusterClient,
-  dynamicSettings: any,
-  alertsClient: any,
-  monitorId: string
-) => {
+const getMonitorAlerts = async ({
+  callES,
+  dynamicSettings,
+  alertsClient,
+  monitorId,
+}: {
+  callES: ElasticsearchClient;
+  dynamicSettings: any;
+  alertsClient: any;
+  monitorId: string;
+}) => {
   const options: any = {
     page: 1,
     perPage: 500,
@@ -74,7 +78,7 @@ const getMonitorAlerts = async (
     );
     esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters?.bool);
 
-    const { body: result } = await callES.asCurrentUser.search(esParams);
+    const { body: result } = await callES.search(esParams);
 
     if (result.hits.total.value > 0) {
       monitorAlerts.push(currAlert);
@@ -130,13 +134,18 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await callES.asCurrentUser.search(params);
+  const { body: result } = await callES.search(params);
 
   const data = result.hits.hits[0]?._source;
 
   const monitorError: MonitorError | undefined = data?.error;
   const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts(callES, dynamicSettings, alertsClient, monitorId);
+  const monAlerts = await getMonitorAlerts({
+    callES,
+    dynamicSettings,
+    alertsClient,
+    monitorId,
+  });
 
   return {
     monitorId,

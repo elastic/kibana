@@ -234,11 +234,15 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       ],
       state: [...commonMonitorStateI18, ...commonStateTranslations],
     },
-    async executor(
-      { params: rawParams, state, services: { alertInstanceFactory } },
+    async executor({
+      options: {
+        params: rawParams,
+        state,
+        services: { alertInstanceFactory },
+      },
       esClient,
-      dynamicSettings
-    ) {
+      dynamicSettings,
+    }) {
       const {
         filters,
         search,
@@ -273,7 +277,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       // after that shouldCheckStatus should be explicitly false
       if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
         downMonitorsByLocation = await libs.requests.getMonitorStatus({
-          callES,
+          callES: esClient,
           dynamicSettings,
           timerange,
           numTimes,
@@ -306,7 +310,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       let availabilityResults: GetMonitorAvailabilityResult[] = [];
       if (shouldCheckAvailability) {
         availabilityResults = await libs.requests.getMonitorAvailability({
-          callES,
+          callES: esClient,
           dynamicSettings,
           ...availability,
           filters: JSON.stringify(filterString) || undefined,

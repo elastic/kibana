@@ -112,7 +112,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       hits: { hits, total },
       aggregations: aggs,
     },
-  } = await callES.asCurrentUser.search(params);
+  } = await callES.search(params);
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 

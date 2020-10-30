@@ -43,12 +43,12 @@ export class QueryContext {
 
   async search(params: any): Promise<any> {
     params.index = this.heartbeatIndices;
-    return this.callES.asCurrentUser.search(params);
+    return this.callES.search(params);
   }
 
   async count(params: any): Promise<any> {
     params.index = this.heartbeatIndices;
-    return this.callES.asCurrentUser.count(params);
+    return this.callES.count(params);
   }
 
   async dateAndCustomFilters(): Promise<any[]> {

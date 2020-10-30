@@ -95,6 +95,6 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
 
   const {
     body: { aggregations },
-  } = await callES.asCurrentUser.search(params);
+  } = await callES.search(params);
   return extractFilterAggsResults(aggregations, ['tags', 'locations', 'ports', 'schemes']);
 };

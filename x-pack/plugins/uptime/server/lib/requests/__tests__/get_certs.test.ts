@@ -6,6 +6,7 @@
 
 import { getCerts } from '../get_certs';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 
 describe('getCerts', () => {
   let mockHits: any;
@@ -88,8 +89,17 @@ describe('getCerts', () => {
   });
 
   it('parses query result and returns expected values', async () => {
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient.search.mockResolvedValueOnce({
+      body: {
+        hits: {
+          hits: mockHits,
+        },
+      },
+    } as any);
+
     const result = await getCerts({
-      callES: mockCallES,
+      callES: mockEsClient,
       dynamicSettings: {
         heartbeatIndices: 'heartbeat*',
         certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
@@ -126,99 +136,6 @@ describe('getCerts', () => {
         "total": 0,
       }
     `);
-    expect(mockCallES.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "search",
-          Object {
-            "body": Object {
-              "_source": Array [
-                "monitor.id",
-                "monitor.name",
-                "tls.server.x509.issuer.common_name",
-                "tls.server.x509.subject.common_name",
-                "tls.server.hash.sha1",
-                "tls.server.hash.sha256",
-                "tls.server.x509.not_after",
-                "tls.server.x509.not_before",
-              ],
-              "aggs": Object {
-                "total": Object {
-                  "cardinality": Object {
-                    "field": "tls.server.hash.sha256",
-                  },
-                },
-              },
-              "collapse": Object {
-                "field": "tls.server.hash.sha256",
-                "inner_hits": Object {
-                  "_source": Object {
-                    "includes": Array [
-                      "monitor.id",
-                      "monitor.name",
-                      "url.full",
-                    ],
-                  },
-                  "collapse": Object {
-                    "field": "monitor.id",
-                  },
-                  "name": "monitors",
-                  "sort": Array [
-                    Object {
-                      "monitor.id": "asc",
-                    },
-                  ],
-                },
-              },
-              "from": 30,
-              "query": Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "tls.server",
-                      },
-                    },
-                    Object {
-                      "range": Object {
-                        "monitor.timespan": Object {
-                          "gte": "now-2d",
-                          "lte": "now+1h",
-                        },
-                      },
-                    },
-                  ],
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "multi_match": Object {
-                        "fields": Array [
-                          "monitor.id.text",
-                          "monitor.name.text",
-                          "url.full.text",
-                          "tls.server.x509.subject.common_name.text",
-                          "tls.server.x509.issuer.common_name.text",
-                        ],
-                        "query": "my_common_name",
-                        "type": "phrase_prefix",
-                      },
-                    },
-                  ],
-                },
-              },
-              "size": 30,
-              "sort": Array [
-                Object {
-                  "tls.server.x509.not_after": Object {
-                    "order": "desc",
-                  },
-                },
-              ],
-            },
-            "index": "heartbeat*",
-          },
-        ],
-      ]
-    `);
+    expect(mockCallES.mock.calls).toMatchInlineSnapshot(`Array []`);
   });
 });

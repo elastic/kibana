@@ -7,8 +7,9 @@
 import moment from 'moment';
 import {
   ISavedObjectsRepository,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   SavedObjectsClientContract,
+  ElasticsearchClient,
 } from 'kibana/server';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
@@ -24,6 +25,8 @@ const BUCKET_SIZE = 3600;
 const BUCKET_NUMBER = 24;
 
 export class KibanaTelemetryAdapter {
+  public static callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] | ElasticsearchClient;
+
   public static registerUsageCollector = (
     usageCollector: UsageCollectionSetup,
     getSavedObjectsClient: () => ISavedObjectsRepository | undefined
@@ -72,10 +75,10 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-      fetch: async ({ esClient }: CollectorFetchContext) => {
+      fetch: async ({ callCluster }: CollectorFetchContext) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          await this.countNoOfUniqueMonitorAndLocations(esClient, savedObjectsClient);
+          await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -128,7 +131,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: IScopedClusterClient,
+    callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] | ElasticsearchClient,
     savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -190,7 +193,11 @@ export class KibanaTelemetryAdapter {
       },
     };
 
-    const result = await callCluster.asCurrentUser.search(params);
+    const { body: result } =
+      typeof callCluster === 'function'
+        ? await callCluster('search', params)
+        : await callCluster.search(params);
+
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
     const monitorNameStats: any = result?.aggregations?.monitor_name;
