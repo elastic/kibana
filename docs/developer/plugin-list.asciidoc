@@ -504,8 +504,9 @@ routes, etc.
 |This plugin provides access to the transforms features provided by Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
-|WARNING: Missing README.
+|<<translations-plugin>>
+|Contains Elastic-supported translations. Owned by the Localizations team.
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/master/packages/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
@@ -547,3 +548,4 @@ include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/plugins/translations/README.asciidoc[leveloffset=+1]
