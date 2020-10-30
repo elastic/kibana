@@ -2,11 +2,9 @@
   "elasticsearch": {
     "cluster": [],
     "indices": [
+      { "names": [".siem-signals-*"], "privileges": ["read", "write"] },
       {
         "names": [
-          ".siem-signals-*",
-          ".lists*",
-          ".items*",
           "apm-*-transaction*",
           "auditbeat-*",
           "endgame-*",
@@ -26,7 +24,7 @@
         "siem": ["all"],
         "actions": ["read"],
         "builtInAlerts": ["read"],
-        "savedObjectsManagement": []
+        "savedObjectsManagement": ["read"]
       },
       "spaces": ["*"]
     }

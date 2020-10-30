@@ -16,11 +16,11 @@
       },
       {
         "names": [".siem-signals-*"],
-        "privileges": ["read", "create_doc"]
+        "privileges": ["read", "write"]
       },
       {
         "names": [".lists*", ".items*"],
-        "privileges": ["read"]
+        "privileges": ["read", "write"]
       }
     ]
   },

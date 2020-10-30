@@ -1,6 +1,6 @@
 {
   "elasticsearch": {
-    "cluster": ["manage"],
+    "cluster": [],
     "indices": [
       {
         "names": [

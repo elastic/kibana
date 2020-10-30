@@ -18,7 +18,7 @@
       },
       {
         "names": [".siem-signals-*"],
-        "privileges": ["read", "write"]
+        "privileges": ["read", "write", "view_index_metadata"]
       }
     ]
   },
@@ -27,7 +27,7 @@
       "feature": {
         "ml": ["read"],
         "siem": ["all"],
-        "actions": ["all"],
+        "actions": ["read"],
         "builtInAlerts": ["all"],
         "savedObjectsManagement": ["all"]
       },

@@ -16,7 +16,7 @@
           "packetbeat-*",
           "winlogbeat-*"
         ],
-        "privileges": ["read", "write"]
+        "privileges": ["all"]
       },
       {
         "names": [".siem-signals-*"],
