@@ -10,9 +10,11 @@ import { ELogRetentionOptions } from './types';
 
 interface ILogRetentionActions {
   setOpenModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
+  closeModals(): { value: boolean };
 }
 
 interface ILogRetentionValues {
+  logsRetentionUpdating: boolean;
   openModal: ELogRetentionOptions | null;
 }
 
@@ -20,11 +22,19 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
   path: ['enterprise_search', 'app_search', 'log_retention_logic'],
   actions: () => ({
     setOpenModal: (option) => ({ option }),
+    closeModals: true,
   }),
   reducers: () => ({
+    logsRetentionUpdating: [
+      false,
+      {
+        closeModals: () => false,
+      },
+    ],
     openModal: [
       null,
       {
+        closeModals: () => null,
         setOpenModal: (_, { option }) => option,
       },
     ],

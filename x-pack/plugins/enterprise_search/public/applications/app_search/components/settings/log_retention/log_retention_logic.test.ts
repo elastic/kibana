@@ -12,6 +12,7 @@ import { LogRetentionLogic } from './log_retention_logic';
 describe('LogRetentionLogic', () => {
   const DEFAULT_VALUES = {
     openModal: null,
+    logsRetentionUpdating: false,
   };
 
   const mount = (defaults?: object) => {
@@ -53,6 +54,38 @@ describe('LogRetentionLogic', () => {
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
             openModal: ELogRetentionOptions.Analytics,
+          });
+        });
+      });
+    });
+
+    describe('closeModals', () => {
+      describe('openModal', () => {
+        it('resets openModal to null', () => {
+          mount({
+            openModal: 'analytics',
+          });
+
+          LogRetentionLogic.actions.closeModals();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            openModal: null,
+          });
+        });
+      });
+
+      describe('logsRetentionUpdating', () => {
+        it('resets logsRetentionUpdating to false', () => {
+          mount({
+            logsRetentionUpdating: true,
+          });
+
+          LogRetentionLogic.actions.closeModals();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            logsRetentionUpdating: false,
           });
         });
       });
