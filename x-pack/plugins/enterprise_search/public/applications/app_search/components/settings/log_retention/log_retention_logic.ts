@@ -6,15 +6,17 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ELogRetentionOptions } from './types';
+import { ELogRetentionOptions, ILogRetention } from './types';
 
 interface ILogRetentionActions {
   clearLogRetentionUpdating(): { value: boolean };
   closeModals(): { value: boolean };
   setOpenModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
+  updateLogRetention(logRetention: ILogRetention): { logRetention: ILogRetention };
 }
 
 interface ILogRetentionValues {
+  logRetention: ILogRetention | null;
   logsRetentionUpdating: boolean;
   openModal: ELogRetentionOptions | null;
 }
@@ -25,8 +27,26 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
     clearLogRetentionUpdating: true,
     closeModals: true,
     setOpenModal: (option) => ({ option }),
+    updateLogRetention: (logRetention) => ({ logRetention }),
   }),
   reducers: () => ({
+    logRetention: [
+      null,
+      {
+        updateLogRetention: (previousValue, { logRetention }) => {
+          return {
+            [ELogRetentionOptions.Analytics]: {
+              ...previousValue?.[ELogRetentionOptions.Analytics],
+              ...logRetention[ELogRetentionOptions.Analytics],
+            },
+            [ELogRetentionOptions.API]: {
+              ...previousValue?.[ELogRetentionOptions.API],
+              ...logRetention[ELogRetentionOptions.API],
+            },
+          };
+        },
+      },
+    ],
     logsRetentionUpdating: [
       false,
       {

@@ -11,6 +11,7 @@ import { LogRetentionLogic } from './log_retention_logic';
 
 describe('LogRetentionLogic', () => {
   const DEFAULT_VALUES = {
+    logRetention: null,
     openModal: null,
     logsRetentionUpdating: false,
   };
@@ -103,6 +104,49 @@ describe('LogRetentionLogic', () => {
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
             logsRetentionUpdating: false,
+          });
+        });
+      });
+    });
+
+    describe('updateLogRetention', () => {
+      describe('logRetention', () => {
+        it('updates the logRetention values that are passed, and defaults the others that are not set', () => {
+          mount({
+            logRetention: {},
+          });
+
+          LogRetentionLogic.actions.updateLogRetention({
+            api: { enabled: true },
+          });
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            logRetention: {
+              api: { enabled: true },
+              analytics: {}, // This is defaulted to {}
+            },
+          });
+        });
+
+        it('updates the logRetention values that are passed, and retains that values that are already set', () => {
+          mount({
+            logRetention: {
+              api: { enabled: true },
+              analytics: { enabled: true },
+            },
+          });
+
+          LogRetentionLogic.actions.updateLogRetention({
+            api: { enabled: false },
+          });
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            logRetention: {
+              api: { enabled: false },
+              analytics: { enabled: true },
+            },
           });
         });
       });

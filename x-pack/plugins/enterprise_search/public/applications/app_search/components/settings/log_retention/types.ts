@@ -8,3 +8,19 @@ export enum ELogRetentionOptions {
   Analytics = 'analytics',
   API = 'api',
 }
+
+export interface ILogRetention {
+  [ELogRetentionOptions.Analytics]?: ILogRetentionSettings;
+  [ELogRetentionOptions.API]?: ILogRetentionSettings;
+}
+
+export interface ILogRetentionPolicy {
+  isDefault: boolean;
+  minAgeDays: number | null;
+}
+
+export interface ILogRetentionSettings {
+  disabledAt?: string | null;
+  enabled?: boolean;
+  retentionPolicy?: ILogRetentionPolicy | null;
+}
