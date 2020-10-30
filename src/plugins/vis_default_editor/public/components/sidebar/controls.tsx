@@ -23,7 +23,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -143,15 +142,12 @@ function DefaultEditorControls({
             onClick={() => toggleAutoApply(!autoApplyEnabled)}
             size="s"
             minWidth={80}
+            aria-label={autoApplyEnabled ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOn', {
+              defaultMessage: 'Auto apply is on',
+            }) : autoApplyEnabled ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOff', {
+              defaultMessage: 'Auto apply is off',
+            })}
           >
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabel', {
-                  defaultMessage: 'Auto apply is',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-
             {autoApplyEnabled
               ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOn', {
                   defaultMessage: 'On',
