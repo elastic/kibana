@@ -63,7 +63,7 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
         <div className="euiFilterSelect__items">
           {options.map((groupItem, groupIndex) => (
             <Fragment key={`group${groupIndex}`}>
-              <EuiTitle size="xxs">
+              <EuiTitle data-test-subj={`alertType${groupIndex}Group`} size="xxs">
                 <h3>{groupItem.groupName}</h3>
               </EuiTitle>
               {groupItem.subOptions.map((item, index) => (
