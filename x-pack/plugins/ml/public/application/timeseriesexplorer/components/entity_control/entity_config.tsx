@@ -144,21 +144,28 @@ export const EntityConfig: FC<EntityConfigProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false} style={{ width: '16px', height: '24px' }}>
-            {!config?.anomalousOnly ? (
+            {isModelPlotEnabled && !config?.anomalousOnly ? (
               <EuiToolTip
                 position="top"
                 content={
-                  isModelPlotEnabled ? (
-                    <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo"
-                      defaultMessage="The list contains values from the model plot results."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsAllRecordsInfo"
-                      defaultMessage="The list contains values from all records created during the lifetime of the job."
-                    />
-                  )
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo"
+                    defaultMessage="The list contains values from the model plot results."
+                  />
+                }
+              >
+                <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+              </EuiToolTip>
+            ) : null}
+
+            {!isModelPlotEnabled && !config?.applyTimeRange ? (
+              <EuiToolTip
+                position="top"
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.ignoreTimeRangeInfo"
+                    defaultMessage="The list contains values from all records created during the lifetime of the job."
+                  />
                 }
               >
                 <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
