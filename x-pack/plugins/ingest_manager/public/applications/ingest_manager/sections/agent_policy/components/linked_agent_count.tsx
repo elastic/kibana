@@ -15,7 +15,7 @@ export const LinkedAgentCount = memo<{ count: number; agentPolicyId: string }>(
     const { getHref } = useLink();
     const displayValue = (
       <FormattedMessage
-        id="xpack.ingestManager.agentPolicy.linkedAgentCountText"
+        id="xpack.fleet.agentPolicy.linkedAgentCountText"
         defaultMessage="{count, plural, one {# agent} other {# agents}}"
         values={{ count }}
       />

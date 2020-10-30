@@ -16,11 +16,9 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
-  EuiBetaBadge,
   EuiText,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { Section, routeToConnectors, routeToAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
@@ -29,7 +27,6 @@ import { hasShowActionsCapability } from './lib/capabilities';
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
-import { PLUGIN } from './constants/plugin';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 
@@ -90,20 +87,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
                   defaultMessage="Alerts and Actions"
-                />
-                &emsp;
-                <EuiBetaBadge
-                  label="Beta"
-                  tooltipContent={i18n.translate(
-                    'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
-                    {
-                      defaultMessage:
-                        '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                      values: {
-                        pluginName: PLUGIN.getI18nName(i18n),
-                      },
-                    }
-                  )}
                 />
               </h1>
             </EuiTitle>

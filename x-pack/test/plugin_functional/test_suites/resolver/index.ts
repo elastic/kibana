@@ -10,18 +10,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
 
-  describe('Resolver embeddable test app', function () {
+  describe('Resolver test app', function () {
     this.tags('ciGroup7');
 
     beforeEach(async function () {
       await pageObjects.common.navigateToApp('resolverTest');
     });
 
-    it('renders a container div for the embeddable', async function () {
-      await testSubjects.existOrFail('resolverEmbeddableContainer');
-    });
-    it('renders resolver', async function () {
-      await testSubjects.existOrFail('resolverEmbeddable');
+    it('renders at least one node, one node-list, one edge line, and graph controls', async function () {
+      await testSubjects.existOrFail('resolver:node');
+      await testSubjects.existOrFail('resolver:node-list');
+      await testSubjects.existOrFail('resolver:graph:edgeline');
+      await testSubjects.existOrFail('resolver:graph-controls');
     });
   });
 }
