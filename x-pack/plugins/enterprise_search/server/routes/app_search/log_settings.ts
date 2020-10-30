@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+import { IRouteDependencies } from '../../plugin';
+
+const logSettingsSchema = schema.object({
+  api: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+    })
+  ),
+  analytics: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+    })
+  ),
+});
+
+export function registerLogSettingsRoutes({
+  router,
+  enterpriseSearchRequestHandler,
+}: IRouteDependencies) {
+  router.get(
+    {
+      path: '/api/app_search/log_settings',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/as/log_settings',
+      })(context, request, response);
+    }
+  );
+
+  router.put(
+    {
+      path: '/api/app_search/log_settings',
+      validate: {
+        body: logSettingsSchema,
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/as/log_settings',
+      })(context, request, response);
+    }
+  );
+}
