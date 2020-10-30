@@ -35,8 +35,6 @@ export type CaseActionType = ActionType<
   CaseExecutorResponse | {}
 >;
 
-export type CaseActionTypeWithoutExecutor = ActionType<CaseConfiguration, {}, CaseExecutorParams>;
-
 export type CaseActionTypeExecutorOptions = ActionTypeExecutorOptions<
   CaseConfiguration,
   {},
