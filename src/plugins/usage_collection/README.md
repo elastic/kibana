@@ -138,7 +138,7 @@ The `schema` field is a proscribed data model assists with detecting changes in 
 The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
 
 ```
-'keyword', 'text', 'number', 'boolean', 'long', 'date', 'float'
+'long', 'integer', 'short', 'byte', 'double', 'float', 'keyword', 'text', 'boolean', 'date'
 ```
 
 ### Arrays
@@ -171,7 +171,7 @@ export const myCollector = makeUsageCollector<Usage>({
     },
     some_obj: {
       total: {
-        type: 'number',
+        type: 'long',
       },
     },
     some_array: {
@@ -182,7 +182,7 @@ export const myCollector = makeUsageCollector<Usage>({
       type: 'array',
       items: { 
         total: {
-          type: 'number',
+          type: 'long',
         },
       },   
     },

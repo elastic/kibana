@@ -21,6 +21,7 @@ export { CollectorSet } from './collector_set';
 export {
   Collector,
   AllowedSchemaTypes,
+  AllowedSchemaNumberTypes,
   SchemaField,
   MakeSchemaFrom,
   CollectorOptions,
