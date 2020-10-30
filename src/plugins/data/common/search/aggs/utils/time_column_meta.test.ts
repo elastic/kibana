@@ -106,8 +106,8 @@ describe('getDateMetaByDatatableColumn', () => {
               interval: 'auto',
             },
             appliedTimeRange: {
-              from: 'now-5d',
-              to: 'now',
+              from: '2020-10-05T00:00:00.000Z',
+              to: '2020-10-10T00:00:00.000Z',
             },
           },
         },
