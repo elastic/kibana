@@ -43,7 +43,7 @@ import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 
-export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
+export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
@@ -127,7 +127,15 @@ export class Embeddable
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes = await this.deps.attributeService.unwrapAttributes(input);
+    const attributes:
+      | LensSavedObjectAttributes
+      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
+      this.onFatalError(e);
+      return false;
+    });
+    if (!attributes) {
+      return;
+    }
     this.savedVis = {
       ...attributes,
       type: this.type,
