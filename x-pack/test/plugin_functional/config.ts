@@ -59,7 +59,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       resolverTest: {
-        pathname: '/app/resolver_test',
+        pathname: '/app/resolverTest',
       },
     },
 

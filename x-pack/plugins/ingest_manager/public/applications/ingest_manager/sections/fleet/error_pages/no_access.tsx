@@ -11,14 +11,14 @@ import { NoDataLayout } from './components/no_data_layout';
 export const NoAccessPage = injectI18n(({ intl }) => (
   <NoDataLayout
     title={intl.formatMessage({
-      id: 'xpack.ingestManager.noAccess.accessDeniedTitle',
+      id: 'xpack.fleet.noAccess.accessDeniedTitle',
       defaultMessage: 'Access denied',
     })}
     actionSection={[]}
   >
     <p>
       <FormattedMessage
-        id="xpack.ingestManager.noAccess.accessDeniedDescription"
+        id="xpack.fleet.noAccess.accessDeniedDescription"
         defaultMessage="You are not authorized to access Elastic Fleet. To use Elastic Fleet,
           you need a user role that contains read or all permissions for this application."
       />
