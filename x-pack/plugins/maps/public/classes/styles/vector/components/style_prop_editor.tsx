@@ -20,21 +20,21 @@ import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { IStyleProperty } from '../properties/style_property';
 import { StyleField } from '../style_fields_helper';
 
-export interface Props<StaticOptionsType, DynamicOptionsType> {
+export interface Props<StaticOptions, DynamicOptions> {
   children: ReactElement<any>;
   customStaticOptionLabel?: string;
-  defaultStaticStyleOptions: StaticOptionsType;
-  defaultDynamicStyleOptions: DynamicOptionsType;
+  defaultStaticStyleOptions: StaticOptions;
+  defaultDynamicStyleOptions: DynamicOptions;
   disabled: boolean;
   disabledBy?: VECTOR_STYLES;
   fields: StyleField[];
-  onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: DynamicOptionsType) => void;
-  onStaticStyleChange: (propertyName: VECTOR_STYLES, options: StaticOptionsType) => void;
+  onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: DynamicOptions) => void;
+  onStaticStyleChange: (propertyName: VECTOR_STYLES, options: StaticOptions) => void;
   styleProperty: IStyleProperty<any>;
 }
 
-export class StylePropEditor<StaticOptionsType, DynamicOptionsType> extends Component<
-  Props<StaticOptionsType, DynamicOptionsType>
+export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
+  Props<StaticOptions, DynamicOptions>
 > {
   private _prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
   private _prevDynamicStyleOptions = this.props.defaultDynamicStyleOptions;
