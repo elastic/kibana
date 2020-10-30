@@ -185,4 +185,6 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   );
 }
 
-export { HeatmapOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { HeatmapOptions as default };
