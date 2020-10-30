@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { EuiLoadingSpinner } from '@elastic/eui';
 // @ts-ignore
 import { ExprVis } from './vis';
-import { Visualization } from '../components';
 import { VisParams } from '../types';
+
+const Visualization = lazy(() => import('../components/visualization'));
 
 export const visualization = () => ({
   name: 'visualization',
@@ -48,14 +50,16 @@ export const visualization = () => ({
 
     const listenOnChange = params ? params.listenOnChange : false;
     render(
-      <Visualization
-        vis={vis}
-        visData={visData}
-        visParams={vis.params}
-        uiState={uiState}
-        listenOnChange={listenOnChange}
-        onInit={handlers.done}
-      />,
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <Visualization
+          vis={vis}
+          visData={visData}
+          visParams={vis.params}
+          uiState={uiState}
+          listenOnChange={listenOnChange}
+          onInit={handlers.done}
+        />
+      </Suspense>,
       domNode
     );
   },

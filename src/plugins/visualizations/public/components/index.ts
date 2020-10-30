@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { Visualization } from './visualization';
 export { VisualizationContainer } from './visualization_container';
 export { VisualizationNoResults } from './visualization_noresults';

@@ -43,7 +43,7 @@ interface VisualizationProps {
   visParams: any;
 }
 
-export class Visualization extends React.Component<VisualizationProps> {
+class Visualization extends React.Component<VisualizationProps> {
   private showNoResultsMessage = memoizeLast(shouldShowNoResultsMessage);
 
   constructor(props: VisualizationProps) {
@@ -82,3 +82,7 @@ export class Visualization extends React.Component<VisualizationProps> {
     return true;
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { Visualization as default };

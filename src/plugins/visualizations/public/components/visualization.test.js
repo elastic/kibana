@@ -21,7 +21,7 @@ jest.useFakeTimers();
 
 import React from 'react';
 import { render, mount } from 'enzyme';
-import { Visualization } from './visualization';
+import Visualization from './visualization';
 
 let renderPromise;
 class VisualizationStub {
