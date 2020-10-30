@@ -32,7 +32,11 @@ export {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementServiceRegistryEntry,
 } from './services';
-export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
+export {
+  ProcessedImportResponse,
+  processImportResponse,
+  FailedImport,
+} from './lib/process_import_response';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
