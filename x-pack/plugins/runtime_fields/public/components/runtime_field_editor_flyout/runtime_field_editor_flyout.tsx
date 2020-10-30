@@ -63,10 +63,15 @@ export interface Props {
   /**
    * An optional runtime field to edit
    */
-  field?: RuntimeField;
+  defaultValue?: RuntimeField;
 }
 
-export const RuntimeFieldEditorFlyout = ({ onSave, onCancel, docLinks, field }: Props) => {
+export const RuntimeFieldEditorFlyout = ({
+  onSave,
+  onCancel,
+  docLinks,
+  defaultValue: field,
+}: Props) => {
   const i18nTexts = geti18nTexts(field);
 
   const [formState, setFormState] = useState<FormState>({

@@ -42,7 +42,7 @@ describe('Runtime field editor flyout', () => {
       script: 'test=123',
     };
 
-    const { find } = setup({ ...defaultProps, field });
+    const { find } = setup({ ...defaultProps, defaultValue: field });
 
     expect(find('flyoutTitle').text()).toBe(`Edit ${field.name} field`);
     expect(find('nameField.input').props().value).toBe(field.name);
@@ -58,7 +58,7 @@ describe('Runtime field editor flyout', () => {
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-    const { find } = setup({ ...defaultProps, onSave, field });
+    const { find } = setup({ ...defaultProps, onSave, defaultValue: field });
 
     await act(async () => {
       find('saveFieldButton').simulate('click');
