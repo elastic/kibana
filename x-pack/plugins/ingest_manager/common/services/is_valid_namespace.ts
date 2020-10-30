@@ -12,26 +12,23 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
   if (!namespace.trim()) {
     return {
       valid: false,
-      error: i18n.translate('xpack.ingestManager.namespaceValidation.requiredErrorMessage', {
+      error: i18n.translate('xpack.fleet.namespaceValidation.requiredErrorMessage', {
         defaultMessage: 'Namespace is required',
       }),
     };
   } else if (namespace !== namespace.toLowerCase()) {
     return {
       valid: false,
-      error: i18n.translate('xpack.ingestManager.namespaceValidation.lowercaseErrorMessage', {
+      error: i18n.translate('xpack.fleet.namespaceValidation.lowercaseErrorMessage', {
         defaultMessage: 'Namespace must be lowercase',
       }),
     };
   } else if (/[\*\\/\?"<>|\s,#:]+/.test(namespace)) {
     return {
       valid: false,
-      error: i18n.translate(
-        'xpack.ingestManager.namespaceValidation.invalidCharactersErrorMessage',
-        {
-          defaultMessage: 'Namespace contains invalid characters',
-        }
-      ),
+      error: i18n.translate('xpack.fleet.namespaceValidation.invalidCharactersErrorMessage', {
+        defaultMessage: 'Namespace contains invalid characters',
+      }),
     };
   }
   // Node.js doesn't have Blob, and browser doesn't have Buffer :)
@@ -41,7 +38,7 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
   ) {
     return {
       valid: false,
-      error: i18n.translate('xpack.ingestManager.namespaceValidation.tooLongErrorMessage', {
+      error: i18n.translate('xpack.fleet.namespaceValidation.tooLongErrorMessage', {
         defaultMessage: 'Namespace cannot be more than 100 bytes',
       }),
     };

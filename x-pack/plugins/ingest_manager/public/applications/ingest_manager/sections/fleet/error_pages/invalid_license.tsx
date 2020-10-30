@@ -11,14 +11,14 @@ import { NoDataLayout } from './components/no_data_layout';
 export const InvalidLicensePage = injectI18n(({ intl }) => (
   <NoDataLayout
     title={intl.formatMessage({
-      id: 'xpack.ingestManager.invalidLicenseTitle',
+      id: 'xpack.fleet.invalidLicenseTitle',
       defaultMessage: 'Expired license',
     })}
     actionSection={[]}
   >
     <p>
       <FormattedMessage
-        id="xpack.ingestManager.invalidLicenseDescription"
+        id="xpack.fleet.invalidLicenseDescription"
         defaultMessage="Your current license is expired. Enrolled Beats Agents will continue to work, but you need a valid
           license to access the Elastic Fleet interface."
       />

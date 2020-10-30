@@ -34,6 +34,12 @@ export interface ISessionService {
    * Starts a new session
    */
   start: () => string;
+
+  /**
+   * Restores existing session
+   */
+  restore: (sessionId: string) => void;
+
   /**
    * Clears the active session.
    */
