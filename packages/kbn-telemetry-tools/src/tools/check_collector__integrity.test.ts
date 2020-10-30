@@ -44,7 +44,7 @@ describe('checkMatchingMapping', () => {
     it('returns diff on mismatching parsedCollections and stored mapping', async () => {
       const mockSchema = await parseJsonFile('mock_schema.json');
       const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
-      const fieldMapping = { type: 'number' };
+      const fieldMapping = { type: 'long' };
       malformedParsedCollector[1].schema.value.flat = fieldMapping;
 
       const diffs = checkMatchingMapping([malformedParsedCollector], mockSchema);
@@ -61,9 +61,9 @@ describe('checkMatchingMapping', () => {
       const mockSchema = await parseJsonFile('mock_schema.json');
       const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       const collectorName = 'New Collector in town!';
-      const collectorMapping = { some_usage: { type: 'number' } };
+      const collectorMapping = { some_usage: { type: 'long' } };
       malformedParsedCollector[1].collectorName = collectorName;
-      malformedParsedCollector[1].schema.value = { some_usage: { type: 'number' } };
+      malformedParsedCollector[1].schema.value = { some_usage: { type: 'long' } };
 
       const diffs = checkMatchingMapping([malformedParsedCollector], mockSchema);
       expect(diffs).toEqual({

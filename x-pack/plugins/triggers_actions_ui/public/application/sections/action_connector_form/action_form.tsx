@@ -34,6 +34,7 @@ import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/act
 import {
   IErrorObject,
   ActionTypeModel,
+  ActionTypeRegistryContract,
   AlertAction,
   ActionTypeIndex,
   ActionConnector,
@@ -42,7 +43,6 @@ import {
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
-import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
@@ -55,7 +55,7 @@ interface ActionAccordionFormProps {
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsSetup;
   docLinks: DocLinksStart;
   actionTypes?: ActionType[];
