@@ -52,8 +52,6 @@ export function getControlsForDetector(
   // For jobs with by and over fields, don't add the 'by' field as this
   // field will only be added to the top-level fields for record type results
   // if it also an influencer over the bucket.
-  // TODO - metric data can be filtered by this field, so should only exclude
-  // from filter for the anomaly records.
   if (byFieldName !== undefined && overFieldName === undefined) {
     const byFieldValue = entitiesState?.[byFieldName] ?? null;
     entities.push({ fieldType: 'by_field', fieldName: byFieldName, fieldValue: byFieldValue });
