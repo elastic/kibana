@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import url from 'url';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 
