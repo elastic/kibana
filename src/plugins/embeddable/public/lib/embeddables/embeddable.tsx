@@ -19,7 +19,7 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { catchError, distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
