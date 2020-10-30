@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  ElasticsearchClientMock,
+} from '../../../../../../../src/core/server/mocks';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;

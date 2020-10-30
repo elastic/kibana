@@ -25,7 +25,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     // protect against possible rounding errors polluting the snapshot comparison
 
     set(
-      mockEsClient.search.mock.calls[0][1],
+      mockEsClient.search.mock.calls[0],
       'body.aggs.timeseries.date_histogram.fixed_interval',
       '36000ms'
     );
@@ -34,7 +34,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
 
   it('inserts empty buckets for missing data', async () => {
     const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockEsClient.search.mockResolvedValueOnce(mockChartsData);
+    mockEsClient.search.mockResolvedValueOnce(mockChartsData as any);
 
     expect(
       await getMonitorDurationChart({
