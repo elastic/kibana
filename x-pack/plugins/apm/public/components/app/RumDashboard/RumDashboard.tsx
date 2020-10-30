@@ -36,8 +36,7 @@ export function RumDashboard() {
             <EuiFlexItem grow={1} data-cy={`client-metrics`}>
               <EuiTitle size="xs">
                 <h3>
-                  {I18LABELS.pageLoadDuration} (
-                  {getPercentileLabel(percentile!)})
+                  {I18LABELS.pageLoad} ({getPercentileLabel(percentile!)})
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />

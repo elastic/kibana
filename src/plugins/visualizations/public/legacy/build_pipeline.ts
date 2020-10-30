@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import moment from 'moment';
 import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
@@ -75,16 +73,6 @@ export interface BuildPipelineParams {
   timeRange?: any;
   abortSignal?: AbortSignal;
 }
-
-const vislibCharts: string[] = [
-  'area',
-  'gauge',
-  'goal',
-  'heatmap',
-  'histogram',
-  'horizontal_bar',
-  'line',
-];
 
 export const getSchemas = <TVisParams>(
   vis: Vis<TVisParams>,
@@ -230,33 +218,7 @@ export const prepareDimension = (variable: string, data: any) => {
   return expr;
 };
 
-const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
-  const visConfig = vis.params;
-  const responseAggs = vis.data.aggs!.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
-
-  (dimensions.y || []).forEach((yDimension) => {
-    const yAgg = responseAggs[yDimension.accessor];
-    const seriesParam = (visConfig.seriesParams || []).find(
-      (param: any) => param.data.id === yAgg.id
-    );
-    if (seriesParam) {
-      const usedValueAxis = (visConfig.valueAxes || []).find(
-        (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
-      );
-      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
-        yDimension.format = { id: 'percent' };
-      }
-    }
-    if (get(visConfig, 'gauge.percentageMode') === true) {
-      yDimension.format = { id: 'percent' };
-    }
-  });
-};
-
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  vega: (params) => {
-    return `vega ${prepareString('spec', params.spec)}`;
-  },
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
@@ -281,13 +243,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     };
     return `tilemap ${prepareJson('visConfig', visConfig)}`;
   },
-  pie: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.pie(schemas),
-    };
-    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
-  },
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
@@ -308,55 +263,6 @@ const buildVisConfig: BuildVisConfigFunction = {
     };
     return visConfig;
   },
-  pie: (schemas) => {
-    const visConfig = {} as any;
-    visConfig.dimensions = {
-      metric: schemas.metric[0],
-      buckets: schemas.segment,
-      splitRow: schemas.split_row,
-      splitColumn: schemas.split_column,
-    };
-    return visConfig;
-  },
-};
-
-export const buildVislibDimensions = async (vis: any, params: BuildPipelineParams) => {
-  const schemas = getSchemas(vis, {
-    timeRange: params.timeRange,
-    timefilter: params.timefilter,
-  });
-  const dimensions = {
-    x: schemas.segment ? schemas.segment[0] : null,
-    y: schemas.metric,
-    z: schemas.radius,
-    width: schemas.width,
-    series: schemas.group,
-    splitRow: schemas.split_row,
-    splitColumn: schemas.split_column,
-  };
-  if (schemas.segment) {
-    const xAgg = vis.data.aggs.getResponseAggs()[dimensions.x.accessor];
-    if (xAgg.type.name === 'date_histogram') {
-      dimensions.x.params.date = true;
-      const { esUnit, esValue } = xAgg.buckets.getInterval();
-      dimensions.x.params.interval = moment.duration(esValue, esUnit);
-      dimensions.x.params.intervalESValue = esValue;
-      dimensions.x.params.intervalESUnit = esUnit;
-      dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
-      dimensions.x.params.bounds = xAgg.buckets.getBounds();
-    } else if (xAgg.type.name === 'histogram') {
-      const intervalParam = xAgg.type.paramByName('interval');
-      const output = { params: {} as any };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, vis.data.searchSource, {
-        abortSignal: params.abortSignal,
-      });
-      intervalParam.write(xAgg, output);
-      dimensions.x.params.interval = output.params.interval;
-    }
-  }
-
-  adjustVislibDimensionFormmaters(vis, dimensions);
-  return dimensions;
 };
 
 export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
@@ -399,11 +305,6 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
         schemas,
         uiState
       );
-    } else if (vislibCharts.includes(vis.type.name)) {
-      const visConfig = { ...vis.params };
-      visConfig.dimensions = await buildVislibDimensions(vis, params);
-
-      pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visConfig)}`;
     } else {
       const visConfig = { ...vis.params };
       visConfig.dimensions = schemas;
