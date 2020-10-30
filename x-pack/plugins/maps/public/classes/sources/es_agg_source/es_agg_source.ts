@@ -46,7 +46,7 @@ export abstract class AbstractESAggSource extends AbstractESSource {
 
     return {
       ...descriptor,
-      indexPatternId: descriptor.indexPatternId as string,
+      indexPatternId: descriptor.indexPatternId,
       type: descriptor.type ? descriptor.type : '',
       metrics: descriptor.metrics ? descriptor.metrics : [],
     };
