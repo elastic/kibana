@@ -37,7 +37,7 @@ export const doSearch = <SearchResponse = any>(
 
 export const toKibanaSearchResponse = <
   SearchResponse extends IEsRawSearchResponse = IEsRawSearchResponse,
-  KibanaResponse extends IKibanaSearchResponse = IKibanaSearchResponse<SearchResponse>
+  KibanaResponse extends IEsSearchResponse = IEsSearchResponse<SearchResponse>
 >() =>
   map<ApiResponse<SearchResponse>, KibanaResponse>(
     (response) =>
