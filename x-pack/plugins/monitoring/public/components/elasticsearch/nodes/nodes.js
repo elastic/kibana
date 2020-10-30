@@ -26,7 +26,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { get } from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
@@ -56,7 +56,7 @@ const getNodeTooltip = (node) => {
   return null;
 };
 
-const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
+const getSortHandler = (type) => (item) => get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
@@ -85,7 +85,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 
       let setupModeStatus = null;
       if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
-        const list = _.get(setupMode, 'data.byUuid', {});
+        const list = get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
         const instance = {
           uuid: node.resolver,
@@ -394,7 +394,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             setupMode.data.totalUniqueInstanceCount
           ) {
             const finishMigrationAction =
-              _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+              get(setupMode.meta, 'liveClusterUuid') === clusterUuid
                 ? setupMode.shortcutToFinishMigration
                 : setupMode.openFlyout;
 

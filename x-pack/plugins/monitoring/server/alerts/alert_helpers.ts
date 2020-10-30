@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertMessageDocLinkToken } from './types';
+import { AlertMessageDocLinkToken } from '../../common/types/alerts';
 import { AlertMessageTokenType } from '../../common/enums';
 
 export class AlertingDefaults {

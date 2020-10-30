@@ -3,8 +3,60 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { AlertInstanceState as BaseAlertInstanceState } from '../../../alerts/server';
+
+import { Alert } from '../../../alerts/common';
+import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
+
+export interface CommonBaseAlert {
+  type: string;
+  label: string;
+  paramDetails: CommonAlertParamDetails;
+  rawAlert: Alert;
+  isLegacy: boolean;
+}
+
+export interface CommonAlertStatus {
+  exists: boolean;
+  enabled: boolean;
+  states: CommonAlertState[];
+  alert: CommonBaseAlert;
+}
+
+export interface CommonAlertState {
+  firing: boolean;
+  state: any;
+  meta: any;
+}
+
+export interface CommonAlertFilter {
+  nodeUuid?: string;
+}
+
+export interface CommonAlertNodeUuidFilter extends CommonAlertFilter {
+  nodeUuid: string;
+}
+
+export interface CommonAlertStackProductFilter extends CommonAlertFilter {
+  stackProduct: string;
+}
+
+export interface CommonAlertParamDetail {
+  label: string;
+  type?: AlertParamType;
+}
+
+export interface CommonAlertParamDetails {
+  [name: string]: CommonAlertParamDetail | undefined;
+}
+
+export interface CommonAlertParams {
+  [name: string]: string | number;
+}
+
+export interface ThreadPoolRejectionsAlertParams {
+  threshold: number;
+  duration: string;
+}
 
 export interface AlertEnableAction {
   id: string;
@@ -12,7 +64,9 @@ export interface AlertEnableAction {
 }
 
 export interface AlertInstanceState {
-  alertStates: Array<AlertState | AlertCpuUsageState | AlertDiskUsageState>;
+  alertStates: Array<
+    AlertState | AlertCpuUsageState | AlertDiskUsageState | AlertThreadPoolRejectionsState
+  >;
   [x: string]: unknown;
 }
 
@@ -44,6 +98,13 @@ export interface AlertMissingDataState extends AlertState {
 
 export interface AlertMemoryUsageState extends AlertNodeState {
   memoryUsage: number;
+}
+
+export interface AlertThreadPoolRejectionsState extends AlertState {
+  rejectionCount: number;
+  type: string;
+  nodeId: string;
+  nodeName?: string;
 }
 
 export interface AlertUiState {
@@ -100,6 +161,14 @@ export interface AlertCpuUsageNodeStats extends AlertNodeStats {
   containerQuota: number;
 }
 
+export interface AlertThreadPoolRejectionsStats {
+  clusterUuid: string;
+  nodeId: string;
+  nodeName: string;
+  rejectionCount: number;
+  ccs?: string;
+}
+
 export interface AlertDiskUsageNodeStats extends AlertNodeStats {
   diskUsage: number;
 }
@@ -121,7 +190,7 @@ export interface AlertData {
   instanceKey: string;
   clusterUuid: string;
   ccs?: string;
-  shouldFire: boolean;
+  shouldFire?: boolean;
   severity: AlertSeverity;
   meta: any;
 }
