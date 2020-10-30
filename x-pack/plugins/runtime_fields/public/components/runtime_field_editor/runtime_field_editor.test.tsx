@@ -20,7 +20,7 @@ const setup = (props?: Props) =>
   })(props) as TestBed;
 
 const docLinks: DocLinksStart = {
-  ELASTIC_WEBSITE_URL: 'htts://jestTest.elastic.co',
+  ELASTIC_WEBSITE_URL: 'https://jestTest.elastic.co',
   DOC_LINK_VERSION: 'jest',
   links: {} as any,
 };
