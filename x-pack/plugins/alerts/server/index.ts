@@ -5,8 +5,9 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertsClient as AlertsClientClass } from './alerts_client';
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { AlertingPlugin } from './plugin';
+import { configSchema } from './config';
 
 export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
 
@@ -28,5 +29,10 @@ export { PluginSetupContract, PluginStartContract } from './plugin';
 export { FindResult } from './alerts_client';
 export { AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
+import { AlertsConfigType } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
+
+export const config: PluginConfigDescriptor<AlertsConfigType> = {
+  schema: configSchema,
+};

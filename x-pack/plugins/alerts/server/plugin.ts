@@ -6,14 +6,14 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
-import { AlertsClient } from './alerts_client';
+import { AlertsClient, InvalidateAPIKeyResult } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { AlertsClientFactory } from './alerts_client_factory';
@@ -61,6 +61,11 @@ import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
+import {
+  initializeAlertsInvalidateApiKeys,
+  scheduleAlertsInvalidateApiKeys,
+} from './invalidate_pending_api_keys/task';
+import { AlertsConfig } from './config';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -98,6 +103,7 @@ export interface AlertingPluginsStart {
 }
 
 export class AlertingPlugin {
+  private readonly config: Promise<AlertsConfig>;
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
@@ -114,6 +120,7 @@ export class AlertingPlugin {
   private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
@@ -184,6 +191,32 @@ export class AlertingPlugin {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
       });
     }
+
+    const invalidateAPIKey = async (
+      params: InvalidateAPIKeyParams
+    ): Promise<InvalidateAPIKeyResult> => {
+      if (!this.security) {
+        return { apiKeysEnabled: false };
+      }
+      const invalidateAPIKeyResult = await this.security.authc.invalidateAPIKeyAsInternalUser(
+        params
+      );
+      // Null when Elasticsearch security is disabled
+      if (!invalidateAPIKeyResult) {
+        return { apiKeysEnabled: false };
+      }
+      return {
+        apiKeysEnabled: true,
+        result: invalidateAPIKeyResult,
+      };
+    };
+
+    initializeAlertsInvalidateApiKeys(
+      this.logger,
+      this.createSOInternalRepositoryContext(core),
+      plugins.taskManager,
+      invalidateAPIKey
+    );
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
@@ -274,11 +307,22 @@ export class AlertingPlugin {
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
 
+    scheduleAlertsInvalidateApiKeys(this.telemetryLogger, this.config, plugins.taskManager);
+
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest,
     };
   }
+
+  private createSOInternalRepositoryContext = async (core: CoreSetup) => {
+    const [{ savedObjects }] = await core.getStartServices();
+    return {
+      createInternalRepository: () => {
+        return savedObjects.createInternalRepository(['alert']);
+      },
+    };
+  };
 
   private createRouteHandlerContext = (
     core: CoreSetup

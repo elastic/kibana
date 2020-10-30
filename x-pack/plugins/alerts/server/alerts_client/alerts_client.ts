@@ -629,10 +629,16 @@ export class AlertsClient {
 
     try {
       const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
-      const response = await this.invalidateAPIKey({ id: apiKeyId });
-      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
-      }
+      // const response = await this.invalidateAPIKey({ id: apiKeyId });
+      // if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+      //  this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
+      // }
+      const markedToDelete = await this.unsecuredSavedObjectsClient.create(
+        'invalidatePendingApiKey',
+        {
+          apiKeyId,
+        }
+      );
     } catch (e) {
       this.logger.error(`Failed to invalidate API Key: ${e.message}`);
     }

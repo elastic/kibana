@@ -172,4 +172,14 @@ export interface AlertingPlugin {
   start: PluginStartContract;
 }
 
+export interface AlertsConfigType {
+  healthCheck: {
+    interval: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+}
+
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;
