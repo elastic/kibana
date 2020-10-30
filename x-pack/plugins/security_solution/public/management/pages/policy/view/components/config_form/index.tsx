@@ -19,6 +19,15 @@ import {
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { OS_TITLES } from '../../../../../common/translations';
 
+const TITLES = {
+  type: i18n.translate('xpack.securitySolution.endpoint.policyDetailType', {
+    defaultMessage: 'Type',
+  }),
+  os: i18n.translate('xpack.securitySolution.endpoint.policyDetailOS', {
+    defaultMessage: 'Operating System',
+  }),
+};
+
 interface ConfigFormProps {
   /**
    * A subtitle for this component.
@@ -33,28 +42,24 @@ interface ConfigFormProps {
   rightCorner?: ReactNode;
 }
 
+export const ConfigFormHeading: FC = memo(({ children }) => (
+  <EuiTitle size="xxs">
+    <h5>{children}</h5>
+  </EuiTitle>
+));
+
+ConfigFormHeading.displayName = 'ConfigFormHeading';
+
 export const ConfigForm: FC<ConfigFormProps> = memo(
   ({ type, supportedOss, dataTestSubj, rightCorner, children }) => (
     <EuiPanel data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
         <EuiFlexItem>
-          <EuiTitle size="xxxs">
-            <h6>
-              {i18n.translate('xpack.securitySolution.endpoint.policyDetailType', {
-                defaultMessage: 'Type',
-              })}
-            </h6>
-          </EuiTitle>
+          <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
           <EuiText size="m">{type}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiTitle size="xxxs">
-            <h6>
-              {i18n.translate('xpack.securitySolution.endpoint.policyDetailOS', {
-                defaultMessage: 'Operating System',
-              })}
-            </h6>
-          </EuiTitle>
+          <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
           <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
