@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { History } from 'history';
-import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -112,13 +112,18 @@ export const getTableColumns = (application: ApplicationStart, history: History)
       defaultMessage: 'Type',
     }),
     sortable: true,
-    render: (field: string, record: VisualizationListItem) => (
-      <span>
-        {renderItemTypeIcon(record)}
-        {record.typeTitle}
-        {getBadge(record)}
-      </span>
-    ),
+    render: (field: string, record: VisualizationListItem) =>
+      !record.error ? (
+        <span>
+          {renderItemTypeIcon(record)}
+          {record.typeTitle}
+          {getBadge(record)}
+        </span>
+      ) : (
+        <EuiBadge iconType="alert" color="warning">
+          {record.error}
+        </EuiBadge>
+      ),
   },
   {
     field: 'description',
