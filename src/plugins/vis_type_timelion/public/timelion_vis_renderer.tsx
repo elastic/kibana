@@ -52,12 +52,12 @@ export const getTimelionVisRenderer: (
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
         <KibanaContextProvider services={{ ...deps }}>
-          <TimelionVisComponent
+          {/* <TimelionVisComponent
             interval={visParams.interval}
             seriesList={seriesList}
             renderComplete={handlers.done}
             fireEvent={handlers.event}
-          />
+          /> */}
           <TimelionVisComponent1
             interval={visParams.interval}
             seriesList={seriesList}

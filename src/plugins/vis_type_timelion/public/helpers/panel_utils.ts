@@ -185,7 +185,7 @@ function buildOptions(
         return wrapperSpan.outerHTML;
       },
     },
-  } as jquery.flot.plotOptions & { yaxes?: Axis[] };
+  };
 
   return options;
 }

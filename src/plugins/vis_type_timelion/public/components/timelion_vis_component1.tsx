@@ -28,6 +28,7 @@ import {
   Position,
   Axis,
   TooltipType,
+  YDomainRange,
 } from '@elastic/charts';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -57,12 +58,34 @@ function TimelionVisComponent1({
 }: TimelionVisComponentProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const options = buildOptions(
-    interval,
-    kibana.services.timefilter,
-    kibana.services.uiSettings,
-    400
-  );
+  const options = buildOptions(interval, kibana.services.timefilter, kibana.services.uiSettings);
+
+  const updateYAxes = function (yaxes: IAxis[]) {
+    yaxes.forEach((yaxis: IAxis) => {
+      if (yaxis.units) {
+        const formatters = tickFormatters(yaxis);
+        yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
+      } else if (yaxis.tickDecimals) {
+        yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
+      }
+
+      if (yaxis.max) {
+        yaxis.domain = {
+          max: yaxis.max,
+        };
+      }
+
+      if (yaxis.min) {
+        if (yaxis.domain) {
+          yaxis.domain.min = yaxis.min;
+        } else {
+          yaxis.domain = {
+            min: yaxis.min,
+          };
+        }
+      }
+    });
+  };
 
   useEffect(() => {
     const newChart = seriesList.list.map((series: Series, seriesIndex: number) => {
@@ -73,28 +96,7 @@ function TimelionVisComponent1({
       }
 
       if (newSeries._global && newSeries._global.yaxes) {
-        newSeries._global.yaxes.forEach((yaxis: IAxis) => {
-          if (yaxis && yaxis.units) {
-            const formatters = tickFormatters();
-            yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
-          }
-
-          if (yaxis.max) {
-            yaxis.domain = {
-              max: yaxis.max,
-            };
-          }
-
-          if (yaxis.min) {
-            if (yaxis.domain) {
-              yaxis.domain.min = yaxis.min;
-            } else {
-              yaxis.domain = {
-                min: yaxis.min,
-              };
-            }
-          }
-        });
+        updateYAxes(newSeries._global.yaxes);
       }
 
       return newSeries;
@@ -104,7 +106,8 @@ function TimelionVisComponent1({
   }, [seriesList.list]);
 
   // temp solution
-  const getLegendPosition = function (chartGlobal: any) {
+  const getLegendPosition = useCallback(() => {
+    const chartGlobal = chart[0]._global;
     if (chartGlobal && chartGlobal.legend) {
       switch (chartGlobal.legend.position) {
         case 'ne':
@@ -118,7 +121,7 @@ function TimelionVisComponent1({
       }
     }
     return Position.Left;
-  };
+  }, [chart]);
 
   const brushEndListener = useCallback(
     ({ x }) => {
@@ -159,13 +162,16 @@ function TimelionVisComponent1({
         <Settings
           onBrushEnd={brushEndListener}
           showLegend
-          legendPosition={getLegendPosition(chart[0]._global)}
+          legendPosition={getLegendPosition()}
           onRenderChange={onRenderChange}
           theme={[
             {
               crosshair: {
                 band: {
-                  fill: '#F00',
+                  fill: options.crosshair.color,
+                },
+                line: {
+                  strokeWidth: options.crosshair.lineWidth,
                 },
               },
             },
@@ -194,7 +200,7 @@ function TimelionVisComponent1({
                   stroke: 'rgba(125,125,125,0.3)',
                   visible: true,
                 }}
-                domain={axis.domain}
+                domain={axis.domain as YDomainRange}
               />
             );
           })
