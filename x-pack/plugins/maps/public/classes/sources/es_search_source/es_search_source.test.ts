@@ -16,15 +16,17 @@ import { loadIndexSettings } from './load_index_settings';
 import { ESSearchSource } from './es_search_source';
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
+const mockDescriptor = { indexPatternId: 'foo', geoField: 'bar' };
+
 describe('ESSearchSource', () => {
   it('constructor', () => {
-    const esSearchSource = new ESSearchSource({});
+    const esSearchSource = new ESSearchSource(mockDescriptor);
     expect(esSearchSource instanceof ESSearchSource).toBe(true);
   });
 
   describe('ITiledSingleLayerVectorSource', () => {
     it('mb-source params', () => {
-      const esSearchSource = new ESSearchSource({});
+      const esSearchSource = new ESSearchSource(mockDescriptor);
       expect(esSearchSource.getMinZoom()).toBe(0);
       expect(esSearchSource.getMaxZoom()).toBe(24);
       expect(esSearchSource.getLayerName()).toBe('source_layer');
@@ -118,22 +120,28 @@ describe('ESSearchSource', () => {
 
   describe('isFilterByMapBounds', () => {
     it('default', () => {
-      const esSearchSource = new ESSearchSource({});
+      const esSearchSource = new ESSearchSource(mockDescriptor);
       expect(esSearchSource.isFilterByMapBounds()).toBe(true);
     });
     it('mvt', () => {
-      const esSearchSource = new ESSearchSource({ scalingType: SCALING_TYPES.MVT });
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.MVT,
+      });
       expect(esSearchSource.isFilterByMapBounds()).toBe(false);
     });
   });
 
   describe('getJoinsDisabledReason', () => {
     it('default', () => {
-      const esSearchSource = new ESSearchSource({});
+      const esSearchSource = new ESSearchSource(mockDescriptor);
       expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
     it('mvt', () => {
-      const esSearchSource = new ESSearchSource({ scalingType: SCALING_TYPES.MVT });
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.MVT,
+      });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(
         'Joins are not supported when scaling by mvt vector tiles'
       );
@@ -142,12 +150,15 @@ describe('ESSearchSource', () => {
 
   describe('getFields', () => {
     it('default', () => {
-      const esSearchSource = new ESSearchSource({});
+      const esSearchSource = new ESSearchSource(mockDescriptor);
       const docField = esSearchSource.createField({ fieldName: 'prop1' });
       expect(docField.canReadFromGeoJson()).toBe(true);
     });
     it('mvt', () => {
-      const esSearchSource = new ESSearchSource({ scalingType: SCALING_TYPES.MVT });
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.MVT,
+      });
       const docField = esSearchSource.createField({ fieldName: 'prop1' });
       expect(docField.canReadFromGeoJson()).toBe(false);
     });
