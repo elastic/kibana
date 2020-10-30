@@ -15,6 +15,7 @@ interface PipelineOptions {
   pipeline: string;
   username?: string;
   settings?: Record<string, any>;
+  metadata: Record<string, any>;
 }
 
 interface DownstreamPipeline {
@@ -31,6 +32,7 @@ export class Pipeline {
   public readonly username?: string;
   public readonly pipeline: string;
   private readonly settings: Record<string, any>;
+  private readonly metadata: Record<string, any>;
 
   constructor(options: PipelineOptions) {
     this.id = options.id;
@@ -38,6 +40,7 @@ export class Pipeline {
     this.username = options.username;
     this.pipeline = options.pipeline;
     this.settings = options.settings || {};
+    this.metadata = options.metadata;
   }
 
   public get downstreamJSON() {
@@ -47,6 +50,7 @@ export class Pipeline {
       username: this.username,
       pipeline: this.pipeline,
       settings: this.settings,
+      metadata: this.metadata,
     };
 
     return json;
@@ -64,10 +68,7 @@ export class Pipeline {
     return {
       description: this.description,
       last_modified: moment().toISOString(),
-      pipeline_metadata: {
-        version: 1,
-        type: 'logstash_pipeline',
-      },
+      pipeline_metadata: this.metadata,
       username: this.username,
       pipeline: this.pipeline,
       pipeline_settings: this.settings,
@@ -86,6 +87,7 @@ export class Pipeline {
       username,
       pipeline: downstreamPipeline.pipeline,
       settings: downstreamPipeline.settings,
+      metadata: downstreamPipeline.metadata,
     };
 
     return new Pipeline(opts);
@@ -108,8 +110,9 @@ export class Pipeline {
     const username = get(upstreamPipeline, id + '.username') as string;
     const pipeline = get(upstreamPipeline, id + '.pipeline') as string;
     const settings = get(upstreamPipeline, id + '.pipeline_settings') as Record<string, any>;
+    const metadata = get(upstreamPipeline, id + '.pipeline_metadata') as Record<string, any>;
 
-    const opts: PipelineOptions = { id, description, username, pipeline, settings };
+    const opts: PipelineOptions = { id, description, username, pipeline, settings, metadata };
 
     return new Pipeline(opts);
   }

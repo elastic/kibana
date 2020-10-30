@@ -28,12 +28,17 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           description: 'foobar baz',
           pipeline: 'input { generator {} }\n\n output { stdout {} }',
+          metadata: {
+            version: '2',
+            type: 'logstash_pipeline'
+          },
         })
         .expect(204);
 
       const { body } = await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
 
       expect(body.description).to.eql('foobar baz');
+      expect(body.metadata.version).to.eql('2');
     });
   });
 }

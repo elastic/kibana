@@ -48,13 +48,17 @@ describe('pipeline', () => {
           description: 'this is an apache pipeline',
           username: 'elastic',
           pipeline: 'input {} filter { grok {} }\n output {}',
+          metadata: {
+            version: '1',
+            type: 'logstash_pipeline',
+          },
         };
         const pipeline = new Pipeline(downstreamJSON);
         const expectedUpstreamJSON = {
           description: 'this is an apache pipeline',
           pipeline_metadata: {
             type: 'logstash_pipeline',
-            version: 1,
+            version: '1',
           },
           username: 'elastic',
           pipeline: 'input {} filter { grok {} }\n output {}',

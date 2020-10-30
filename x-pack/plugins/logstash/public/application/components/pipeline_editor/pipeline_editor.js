@@ -39,7 +39,7 @@ class PipelineEditorUi extends React.Component {
     super(props);
 
     const {
-      pipeline: { id, description, pipeline, settings },
+      pipeline: { id, description, pipeline, settings, metadata },
     } = this.props;
 
     const pipelineWorkersSet = typeof settings['pipeline.workers'] === 'number';
@@ -59,6 +59,7 @@ class PipelineEditorUi extends React.Component {
           'queue.max_bytes': settings['queue.max_bytes.number'] + settings['queue.max_bytes.units'],
           'queue.type': settings['queue.type'],
         },
+        metadata,
       },
       pipelineIdErrors: [],
       pipelineIdPattern: /^[A-Za-z\_][A-Za-z0-9\-\_]*$/,
@@ -124,8 +125,14 @@ class PipelineEditorUi extends React.Component {
   };
 
   onPipelineSave = () => {
-    const { pipelineService, toastNotifications, intl } = this.props;
+    const { pipelineService, toastNotifications, intl, pipeline, isNewPipeline } = this.props;
     const { id, ...pipelineToStore } = this.state.pipeline;
+
+    // when edit a pipeline and the pipeline settings (exclude description) updated, version should increase
+    if (!isNewPipeline && !pipeline.isPipelineSettingsEqualTo(pipelineToStore)) {
+      pipelineToStore.metadata.version = String(Number(pipelineToStore.metadata.version) + 1);
+    }
+
     return pipelineService
       .savePipeline({
         id,
@@ -515,6 +522,10 @@ PipelineEditorUi.propTypes = {
       'queue.checkpoint.writes': PropTypes.number.isRequired,
       'queue.max_bytes': PropTypes.number,
       'queue.type': PropTypes.string.isRequired,
+    }),
+    metadata: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+      version: PropTypes.string.isRequired,
     }),
   }).isRequired,
   pipelineService: PropTypes.shape({

@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           description: 'foobar baz',
           pipeline: 'input { generator {} }\n\n output { stdout {} }',
+          metadata: { version: '1', type: 'logstash_pipeline' },
         })
         .expect(204);
 

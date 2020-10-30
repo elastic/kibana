@@ -20,6 +20,11 @@ const settingsDefaults = {
   'queue.checkpoint.writes': 1024,
 };
 
+const metadataDefaults = {
+  type: 'logstash_pipeline',
+  version: '1',
+};
+
 export class Pipeline {
   /**
    * Represents the pipeline for the client side editing/creating workflow
@@ -35,11 +40,12 @@ export class Pipeline {
     this.pipeline = get(props, 'pipeline', emptyPipeline);
     this.username = get(props, 'username');
     this.settings = defaultsDeep(get(props, 'settings', {}), settingsDefaults);
+    this.metadata = defaultsDeep(get(props, 'metadata', {}), metadataDefaults);
   }
 
   get clone() {
     return new Pipeline({
-      ...omit(this, ['id', 'username']),
+      ...omit(this, ['id', 'username', 'metadata']),
     });
   }
 
@@ -61,6 +67,7 @@ export class Pipeline {
       pipeline: this.pipeline,
       username: this.username,
       settings: upstreamSettings,
+      metadata: this.metadata,
     };
   }
 
@@ -86,6 +93,7 @@ export class Pipeline {
       pipeline: pipeline.pipeline,
       username: pipeline.username,
       settings,
+      metadata: pipeline.metadata,
     });
   }
 
@@ -100,5 +108,22 @@ export class Pipeline {
     };
 
     return isEqual(cleanPipeline, cleanOtherPipeline);
+  };
+
+  // compare config string and settings. ignore metadata and description
+  isPipelineSettingsEqualTo = (otherPojo) => {
+    const thisPojo = { ...this };
+
+    return (
+      thisPojo.pipeline === otherPojo.pipeline &&
+      thisPojo.settings['pipeline.workers'] === otherPojo.settings['pipeline.workers'] &&
+      thisPojo.settings['pipeline.batch.size'] === otherPojo.settings['pipeline.batch.size'] &&
+      thisPojo.settings['pipeline.batch.delay'] === otherPojo.settings['pipeline.batch.delay'] &&
+      thisPojo.settings['queue.type'] === otherPojo.settings['queue.type'] &&
+      thisPojo.settings['queue.checkpoint.writes'] ===
+        otherPojo.settings['queue.checkpoint.writes'] &&
+      `${thisPojo.settings['queue.max_bytes.number']}${thisPojo.settings['queue.max_bytes.units']}` ===
+        otherPojo.settings['queue.max_bytes']
+    );
   };
 }

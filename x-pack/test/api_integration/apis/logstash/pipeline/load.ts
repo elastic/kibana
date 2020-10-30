@@ -12,7 +12,7 @@ import pipeline from './fixtures/load.json';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  describe('list', () => {
+  describe('load', () => {
     const archive = 'logstash/example_pipelines';
 
     before('load pipelines archive', () => {

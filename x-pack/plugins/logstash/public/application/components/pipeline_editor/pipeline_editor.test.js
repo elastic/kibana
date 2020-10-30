@@ -41,6 +41,10 @@ describe('PipelineEditor component', () => {
         'queue.max_bytes': 1024,
         'queue.type': 'MB',
       },
+      metadata: {
+        version: '1',
+        type: 'logstash_pipeline',
+      },
     };
     pipelineService = {
       deletePipeline: jest.fn(),
@@ -135,6 +139,16 @@ describe('PipelineEditor component', () => {
     expect(wrapper.instance().state.pipeline.settings['pipeline.batch.size']).toBe(11);
     expect(wrapper.instance().state.pipeline.settings['pipeline.batch.delay']).toBe(12);
     expect(wrapper.instance().state.pipeline.settings['queue.checkpoint.writes']).toBe(14);
+  });
+
+  it('updates pipeline metadata', () => {
+    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
+    wrapper
+      .find(`[data-test-subj="inputBatchSize"]`)
+      .simulate('change', { target: { value: '11' } });
+
+    expect(wrapper.instance().state.pipeline.settings['pipeline.batch.size']).toBe(11);
+    expect(wrapper.instance().state.pipeline.settings['pipeline.batch.size']).toBe(11);
   });
 
   it('calls the pipelineService delete function on delete', () => {
