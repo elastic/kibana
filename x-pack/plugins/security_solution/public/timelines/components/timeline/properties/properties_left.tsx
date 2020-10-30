@@ -16,6 +16,8 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
+import { SaveTimelineButton } from '../header/save_timeline_button';
+import { ENABLE_NEW_TIMELINE } from '../../../../../common/constants';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -121,6 +123,8 @@ export const PropertiesLeft = React.memo<Props>(
           />
         </EuiFlexItem>
       ) : null}
+
+      {ENABLE_NEW_TIMELINE && <SaveTimelineButton timelineId={timelineId} />}
 
       {showNotesFromWidth ? (
         <EuiFlexItem grow={false}>
