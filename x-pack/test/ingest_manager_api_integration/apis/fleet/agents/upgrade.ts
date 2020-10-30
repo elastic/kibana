@@ -70,6 +70,25 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(400);
     });
+    it('should respond 200 if upgrading agent with version the same as snapshot version and force flag is passed', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+        },
+      });
+      await supertest
+        .post(`/api/fleet/agents/agent1/upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          version: kibanaVersionSnapshot,
+          force: true,
+        })
+        .expect(200);
+    });
     it('should respond 200 if upgrading agent with version less than kibana snapshot version', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
@@ -339,6 +358,75 @@ export default function (providerContext: FtrProviderContext) {
       expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
       expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
       expect(typeof agent3data.body.item.upgrade_started_at).to.be('undefined');
+    });
+    it('should upgrade a non upgradeable agent during bulk_upgrade with force flag', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        },
+      });
+      await kibanaServer.savedObjects.update({
+        id: 'agent2',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: {
+            elastic: { agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') } },
+          },
+        },
+      });
+      await kibanaServer.savedObjects.update({
+        id: 'agent3',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
+        },
+      });
+      await supertest
+        .post(`/api/fleet/agents/bulk_upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: ['agent1', 'agent2', 'agent3'],
+          version: kibanaVersion,
+          force: true,
+        });
+      const [agent1data, agent2data, agent3data] = await Promise.all([
+        supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
+        supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+        supertest.get(`/api/fleet/agents/agent3`).set('kbn-xsrf', 'xxx'),
+      ]);
+      expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
+      expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
+      expect(typeof agent3data.body.item.upgrade_started_at).to.be('string');
+    });
+    it('should respond 400 if trying to bulk upgrade to a version that does not match installed kibana version', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const higherVersion = semver.inc(kibanaVersion, 'patch');
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        },
+      });
+      await kibanaServer.savedObjects.update({
+        id: 'agent2',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        },
+      });
+      await supertest
+        .post(`/api/fleet/agents/bulk_upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: ['agent1', 'agent2'],
+          version: higherVersion,
+          force: true,
+        })
+        .expect(400);
     });
   });
 }
