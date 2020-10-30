@@ -68,10 +68,16 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   static createDescriptor(
     descriptor: Partial<AbstractESSourceDescriptor>
   ): AbstractESSourceDescriptor {
+    if (typeof descriptor.indexPatternId !== 'string') {
+      throw new Error(
+        'Cannot create AbstractESSourceDescriptor when indexPatternId is not provided'
+      );
+    }
     return {
       ...descriptor,
       type: descriptor.type ? descriptor.type : '',
-      indexPatternId: descriptor.indexPatternId ? descriptor.indexPatternId : '',
+      indexPatternId: descriptor.indexPatternId,
+      geoField: descriptor.geoField,
       applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
     };
   }

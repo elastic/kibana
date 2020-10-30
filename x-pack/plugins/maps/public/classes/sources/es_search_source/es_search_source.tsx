@@ -106,13 +106,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   protected readonly _tooltipFields: ESDocField[];
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
-    descriptor = AbstractESSource.createDescriptor(descriptor);
+    const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
     return {
-      ...descriptor,
+      ...normalizedDescriptor,
       id: descriptor.id ? descriptor.id : uuid(),
       type: SOURCE_TYPES.ES_SEARCH,
-      indexPatternId: descriptor.indexPatternId || '',
-      geoField: descriptor.geoField || '',
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
       sortField: _.get(descriptor, 'sortField', ''),
