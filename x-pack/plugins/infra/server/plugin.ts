@@ -165,7 +165,7 @@ export class InfraServerPlugin {
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
     const logEntriesService = new LogEntriesService();
-    logEntriesService.setup(core, plugins);
+    logEntriesService.setup(core, { ...plugins, sources });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

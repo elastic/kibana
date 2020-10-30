@@ -14,7 +14,7 @@ export class LogEntriesService {
     core.getStartServices().then(([, startDeps]) => {
       setupDeps.data.search.registerSearchStrategy(
         LOG_ENTRY_SEARCH_STRATEGY,
-        logEntrySearchStrategyProvider(startDeps)
+        logEntrySearchStrategyProvider({ ...setupDeps, ...startDeps })
       );
     });
   }

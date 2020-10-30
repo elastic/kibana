@@ -9,9 +9,11 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
+import { InfraSources } from '../../lib/sources';
 
 export interface LogEntriesServiceSetupDeps {
   data: DataPluginSetup;
+  sources: InfraSources;
 }
 
 export interface LogEntriesServiceStartDeps {
