@@ -30,6 +30,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   Capabilities,
   FatalErrorsSetup,

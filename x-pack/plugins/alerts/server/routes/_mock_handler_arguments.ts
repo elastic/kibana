@@ -11,6 +11,7 @@ import {
   ILegacyClusterClient,
 } from 'kibana/server';
 import { identity } from 'lodash';
+import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
 import { AlertType } from '../../common';

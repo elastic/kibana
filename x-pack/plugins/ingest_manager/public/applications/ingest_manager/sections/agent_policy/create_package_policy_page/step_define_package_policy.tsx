@@ -87,14 +87,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       title={
         <h4>
           <FormattedMessage
-            id="xpack.ingestManager.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
+            id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
             defaultMessage="Integration settings"
           />
         </h4>
       }
       description={
         <FormattedMessage
-          id="xpack.ingestManager.createPackagePolicy.stepConfigure.integrationSettingsSectionDescription"
+          id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionDescription"
           defaultMessage="Choose a name and description to help identify how this integration will be used."
         />
       }
@@ -106,7 +106,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           error={validationResults.name}
           label={
             <FormattedMessage
-              id="xpack.ingestManager.createPackagePolicy.stepConfigure.packagePolicyNameInputLabel"
+              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNameInputLabel"
               defaultMessage="Integration name"
             />
           }
@@ -126,14 +126,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.ingestManager.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
+              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
               defaultMessage="Description"
             />
           }
           labelAppend={
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
                 defaultMessage="Optional"
               />
             </EuiText>
@@ -162,7 +162,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               flush="left"
             >
               <FormattedMessage
-                id="xpack.ingestManager.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
+                id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
                 defaultMessage="Advanced options"
               />
             </EuiButtonEmpty>
@@ -171,7 +171,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText color="danger" size="s">
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
                   defaultMessage="{count, plural, one {# error} other {# errors}}"
                   values={{ count: 1 }}
                 />
@@ -190,7 +190,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               error={validationResults.namespace}
               label={
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
                   defaultMessage="Namespace"
                 />
               }

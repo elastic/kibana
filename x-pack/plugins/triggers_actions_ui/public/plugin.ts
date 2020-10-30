@@ -21,6 +21,10 @@ import {
   ManagementAppMountParams,
   ManagementSetup,
 } from '../../../../src/plugins/management/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -41,6 +45,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
 
 interface PluginsSetup {
   management: ManagementSetup;
+  home?: HomePublicPluginSetup;
 }
 
 interface PluginsStart {
@@ -75,11 +80,31 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const alertTypeRegistry = this.alertTypeRegistry;
 
+    const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
+      defaultMessage: 'Alerts and Actions',
+    });
+    const featureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.displayDescription',
+      {
+        defaultMessage: 'Detect conditions using alerts, and take actions using connectors.',
+      }
+    );
+
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register({
+        id: 'triggersActions',
+        title: featureTitle,
+        description: featureDescription,
+        icon: 'watchesApp',
+        path: '/app/management/insightsAndAlerting/triggersActions',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
+
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: 'triggersActions',
-      title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-        defaultMessage: 'Alerts and Actions',
-      }),
+      title: featureTitle,
       order: 0,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [

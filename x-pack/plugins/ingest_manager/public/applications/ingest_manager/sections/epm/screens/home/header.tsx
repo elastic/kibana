@@ -18,10 +18,7 @@ export const HeroCopy = memo(() => {
       <EuiFlexItem grow={false}>
         <EuiText>
           <h1>
-            <FormattedMessage
-              id="xpack.ingestManager.epm.pageTitle"
-              defaultMessage="Integrations"
-            />
+            <FormattedMessage id="xpack.fleet.epm.pageTitle" defaultMessage="Integrations" />
           </h1>
         </EuiText>
       </EuiFlexItem>
@@ -29,7 +26,7 @@ export const HeroCopy = memo(() => {
         <EuiText color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.epm.pageSubtitle"
+              id="xpack.fleet.epm.pageSubtitle"
               defaultMessage="Browse integrations for popular apps and services."
             />
           </p>
@@ -51,7 +48,7 @@ export const HeroImage = memo(() => {
 
   return (
     <Illustration
-      alt={i18n.translate('xpack.ingestManager.epm.illustrationAltText', {
+      alt={i18n.translate('xpack.fleet.epm.illustrationAltText', {
         defaultMessage: 'Illustration of an integration',
       })}
       url={
