@@ -18,7 +18,7 @@ import type { IAsyncSearchOptions } from '../../../common/search/types';
 
 const DEFAULT_POLLING_INTERVAL = 1000;
 
-export const doPartialSearch = <SearchResponse = any>(
+export const doPartialSearch = <SearchResponse extends IKibanaSearchResponse = IEsSearchResponse>(
   searchMethod: () => Promise<SearchResponse>,
   partialSearchMethod: (id: IKibanaSearchRequest['id']) => Promise<SearchResponse>,
   isCompleted: (response: SearchResponse) => boolean,
