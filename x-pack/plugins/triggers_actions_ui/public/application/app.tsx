@@ -18,8 +18,7 @@ import {
 } from 'kibana/public';
 import { Section, routeToAlertDetails } from './constants';
 import { AppContextProvider } from './app_context';
-import { ActionTypeModel, AlertTypeModel } from '../types';
-import { TypeRegistry } from './type_registry';
+import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
@@ -42,8 +41,8 @@ export interface AppDeps {
   uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   capabilities: ApplicationStart['capabilities'];
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
 }
 

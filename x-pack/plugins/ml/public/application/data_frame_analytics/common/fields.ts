@@ -213,6 +213,10 @@ export const getDefaultFieldsFromJobCaps = (
         name: `${resultsField}.${FEATURE_IMPORTANCE}`,
         type: KBN_FIELD_TYPES.UNKNOWN,
       });
+      // remove flattened feature importance fields
+      fields = fields.filter(
+        (field: any) => !field.name.includes(`${resultsField}.${FEATURE_IMPORTANCE}.`)
+      );
     }
 
     if ((numTopClasses ?? 0) > 0) {
@@ -221,6 +225,10 @@ export const getDefaultFieldsFromJobCaps = (
         name: `${resultsField}.${TOP_CLASSES}`,
         type: KBN_FIELD_TYPES.UNKNOWN,
       });
+      // remove flattened top classes fields
+      fields = fields.filter(
+        (field: any) => !field.name.includes(`${resultsField}.${TOP_CLASSES}.`)
+      );
     }
 
     // Only need to add these fields if we didn't use dest index pattern to get the fields
