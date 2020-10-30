@@ -5104,7 +5104,7 @@
     "xpack.apm.serviceNodeNameMissing": "(空)",
     "xpack.apm.serviceInventory.toastText": "現在 Elastic Stack 7.0+ を実行中で、以前のバージョン 6.x からの互換性のないデータを検知しました。このデータを APM で表示するには、移行が必要です。詳細: ",
     "xpack.apm.serviceInventory.toastTitle": "選択された時間範囲内にレガシーデータが検知されました。",
-    "xpack.apm.serviceInventory.upgradeAssistantLink": "アップグレードアシスタント",
+    "xpack.apm.serviceInventory.upgradeAssistantLinkText": "アップグレードアシスタント",
     "xpack.apm.servicesTable.7xOldDataMessage": "また、移行が必要な古いデータがある可能性もあります。",
     "xpack.apm.servicesTable.7xUpgradeServerMessage": "バージョン7.xより前からのアップグレードですか？また、\n              APMサーバーインスタンスを7.0以降にアップグレードしていることも確認してください。",
     "xpack.apm.servicesTable.avgResponseTimeColumnLabel": "平均応答時間",
