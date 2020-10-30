@@ -40,41 +40,47 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       const NumActiveAlerts = 1;
       const NumErrorAlerts = 2;
 
-      await Promise.all([...Array(NumOkAlerts)].map(async () => {
-        const okAlertId = await createTestAlert(
-          {
-            alertTypeId: 'test.noop',
-            schedule: { interval: '1s' },
-          },
-          'ok'
-        );
-        objectRemover.add(Spaces.space1.id, okAlertId, 'alert', 'alerts');
-      }));
-
-      await Promise.all([...Array(NumActiveAlerts)].map(async () => {
-        const activeAlertId = await createTestAlert(
-          {
-            alertTypeId: 'test.patternFiring',
-            schedule: { interval: '1s' },
-            params: {
-              pattern: { instance: new Array(100).fill(true) },
+      await Promise.all(
+        [...Array(NumOkAlerts)].map(async () => {
+          const okAlertId = await createTestAlert(
+            {
+              alertTypeId: 'test.noop',
+              schedule: { interval: '1s' },
             },
-          },
-          'active'
-        );
-        objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
-      }));
+            'ok'
+          );
+          objectRemover.add(Spaces.space1.id, okAlertId, 'alert', 'alerts');
+        })
+      );
 
-      await Promise.all([...Array(NumErrorAlerts)].map(async () => {
-        const activeAlertId = await createTestAlert(
-          {
-            alertTypeId: 'test.throw',
-            schedule: { interval: '1s' },
-          },
-          'error'
-        );
-        objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
-      }));
+      await Promise.all(
+        [...Array(NumActiveAlerts)].map(async () => {
+          const activeAlertId = await createTestAlert(
+            {
+              alertTypeId: 'test.patternFiring',
+              schedule: { interval: '1s' },
+              params: {
+                pattern: { instance: new Array(100).fill(true) },
+              },
+            },
+            'active'
+          );
+          objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
+        })
+      );
+
+      await Promise.all(
+        [...Array(NumErrorAlerts)].map(async () => {
+          const activeAlertId = await createTestAlert(
+            {
+              alertTypeId: 'test.throw',
+              schedule: { interval: '1s' },
+            },
+            'error'
+          );
+          objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
+        })
+      );
 
       await delay(1000);
       const reponse = await supertest.get(
