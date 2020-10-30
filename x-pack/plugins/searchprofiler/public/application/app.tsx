@@ -28,7 +28,7 @@ import {
 } from './components';
 
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
-import { hasAggregations, hasSearch } from './utils';
+import { hasAggregations, hasSearch } from './lib';
 import { Targets } from './types';
 
 export const App = () => {
