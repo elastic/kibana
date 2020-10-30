@@ -17,8 +17,24 @@
  * under the License.
  */
 
-export { GaugeOptions } from './gauge';
-export { PieOptions } from './pie';
-export { PointSeriesOptions } from './point_series';
-export { HeatmapOptions } from './heatmap';
-export { MetricsAxisOptions } from './metrics_axes';
+import { Vis } from '../../visualizations/public';
+import { buildExpressionFunction } from '../../expressions/public';
+import { EsaggsExpressionFunctionDefinition } from '../../data/public';
+
+import { PieVisParams } from './pie';
+import { BasicVislibParams } from './types';
+
+/**
+ * Get esaggs expressions function
+ * TODO: replace this with vis.data.aggs!.toExpressionAst();
+ * @param vis
+ */
+export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {
+  return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+    index: vis.data.indexPattern!.id!,
+    metricsAtAllLevels: vis.isHierarchical(),
+    partialRows: false,
+    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    includeFormatHints: false,
+  });
+}
