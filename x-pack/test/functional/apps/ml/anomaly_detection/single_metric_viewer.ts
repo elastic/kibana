@@ -182,6 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
           'desc'
         );
 
+        await ml.testExecution.logTestStep('modify the entity config');
         await ml.singleMetricViewer.setEntityConfig('geoip.city_name', false, 'name', 'asc');
 
         // make sure anomalous only control has been synced

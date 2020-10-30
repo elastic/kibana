@@ -6,8 +6,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
-export function MachineLearningSingleMetricViewerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningSingleMetricViewerProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
@@ -135,24 +139,6 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       );
     },
 
-    // TODO move to some common service for EUI components
-    async assertRadioGroupValue(testSubject: string, expectedValue: string) {
-      const sortByRadioGroup = await testSubjects.find(testSubject);
-      const input = await sortByRadioGroup.findByCssSelector(':checked');
-      const selectedSortBy = await input.getAttribute('id');
-      expect(selectedSortBy).to.eql(
-        expectedValue,
-        `Expected the radio group value to equal "${expectedValue}"`
-      );
-    },
-
-    // TODO move to some common service for EUI components
-    async selectRadioGroupValue(testSubject: string, value: string) {
-      const sortByRadioGroup = await testSubjects.find(testSubject);
-      const label = await sortByRadioGroup.findByCssSelector(`label[for="${value}"]`);
-      await label.click();
-    },
-
     async assertEntityConfig(
       entityFieldName: string,
       anomalousOnly: boolean,
@@ -170,11 +156,11 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
           anomalousOnly ? 'enabled' : 'disabled'
         }`
       );
-      await this.assertRadioGroupValue(
+      await mlCommonUI.assertRadioGroupValue(
         `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
         sortBy
       );
-      await this.assertRadioGroupValue(
+      await mlCommonUI.assertRadioGroupValue(
         `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
         order
       );
@@ -191,11 +177,11 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
         `mlSingleMetricViewerEntitySelectionConfigAnomalousOnly_${entityFieldName}`,
         anomalousOnly ? 'check' : 'uncheck'
       );
-      await this.selectRadioGroupValue(
+      await mlCommonUI.selectRadioGroupValue(
         `mlSingleMetricViewerEntitySelectionConfigSortBy_${entityFieldName}`,
         sortBy
       );
-      await this.selectRadioGroupValue(
+      await mlCommonUI.selectRadioGroupValue(
         `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
         order
       );
