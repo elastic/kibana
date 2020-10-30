@@ -25,14 +25,18 @@ import { ErrorEmbeddable, IContainer } from '..';
 export class ErrorEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = ERROR_EMBEDDABLE_TYPE;
 
+  async isEditable() {
+    return false;
+  }
+
+  public canCreateNew() {
+    return false;
+  }
+
   getDisplayName() {
     return i18n.translate('embeddableApi.errorFactory.displayName', {
       defaultMessage: 'Error',
     });
-  }
-
-  async isEditable() {
-    return false;
   }
 
   async create(input: ErrorEmbeddableInput, parent?: IContainer) {
