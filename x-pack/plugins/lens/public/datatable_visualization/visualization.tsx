@@ -199,7 +199,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  toExpression(state, datasourceLayers, { title, description } = {}): Ast {
+  toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, datasourceLayers, state.layers[0].layerId) || {};
 
