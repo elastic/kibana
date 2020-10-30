@@ -3,16 +3,8 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "expressions",
-    "uiActions"
-  ],
+  "requiredPlugins": ["expressions", "uiActions"],
   "optionalPlugins": ["usageCollection"],
-  "extraPublicDirs": ["common", "common/utils/abort_utils"],
-  "requiredBundles": [
-    "usageCollection",
-    "kibanaUtils",
-    "kibanaReact",
-    "inspector"
-  ]
+  "extraPublicDirs": ["common", "common/utils/abort_utils", "common/search/search_source/inject_references"],
+  "requiredBundles": ["usageCollection", "kibanaUtils", "kibanaReact", "inspector"]
 }
