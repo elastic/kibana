@@ -5,13 +5,13 @@
  */
 
 import moment from 'moment';
-import { IScopedClusterClient } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export class QueryContext {
-  callES: IScopedClusterClient;
+  callES: ElasticsearchClient;
   heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;
