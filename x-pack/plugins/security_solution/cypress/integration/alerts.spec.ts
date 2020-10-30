@@ -257,7 +257,7 @@ describe('Alerts', () => {
   });
 
   // Regression test: https://github.com/elastic/kibana/issues/82004
-  context.only('Regression #82004: Bulk actions ignore daterange filters', () => {
+  context('Regression #82004: Bulk actions ignore daterange filters', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
@@ -279,10 +279,12 @@ describe('Alerts', () => {
           cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
           selectAllAlerts();
           cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
-
           closeAlerts();
+
           cy.reload();
           goToClosedAlerts();
+          setStartDate('Jan 01, 2019 @ 02:58:22.484');
+          updateDates();
           waitForAlertsToBeLoaded(numberOfAlertsToBeMarkedClosed);
 
           cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeMarkedClosed.toString());
