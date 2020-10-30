@@ -39,6 +39,8 @@ export const EntityConfig: FC<EntityConfigProps> = ({
 }) => {
   const [isEntityConfigPopoverOpen, setIsEntityConfigPopoverOpen] = useState(false);
 
+  const forceSortByName = isModelPlotEnabled && !config?.anomalousOnly;
+
   const sortOptions: EuiRadioGroupOption[] = useMemo(() => {
     return [
       {
@@ -46,7 +48,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
         label: i18n.translate('xpack.ml.timeSeriesExplorer.sortByScoreLabel', {
           defaultMessage: 'Anomaly score',
         }),
-        disabled: isModelPlotEnabled && !config?.anomalousOnly,
+        disabled: forceSortByName,
       },
       {
         id: 'name',
@@ -185,7 +187,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
         >
           <EuiRadioGroup
             options={sortOptions}
-            idSelected={config?.sort?.by}
+            idSelected={forceSortByName ? 'name' : config?.sort?.by}
             onChange={(id) => {
               onConfigChange(entity.fieldType, {
                 sort: {
