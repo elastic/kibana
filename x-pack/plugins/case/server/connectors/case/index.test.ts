@@ -51,6 +51,16 @@ describe('case connector', () => {
             title: 'Case from case connector!!',
             tags: ['case', 'connector'],
             description: 'Yo fields!!',
+            connector: {
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                issueType: '10006',
+                priority: 'High',
+                parent: null,
+              },
+            },
           },
         };
 
@@ -65,6 +75,231 @@ describe('case connector', () => {
         expect(() => {
           validateParams(caseActionType, params);
         }).toThrow();
+      });
+
+      describe('connector', () => {
+        it('succeeds when jira fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'jira',
+                name: 'Jira',
+                type: '.jira',
+                fields: {
+                  issueType: '10006',
+                  priority: 'High',
+                  parent: null,
+                },
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual(params);
+        });
+
+        it('succeeds when resilient fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'resilient',
+                name: 'Resilient',
+                type: '.resilient',
+                fields: {
+                  incidentTypes: ['13'],
+                  severityCode: '3',
+                },
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual(params);
+        });
+
+        it('succeeds when servicenow fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: {
+                  impact: 'Medium',
+                  severity: 'Medium',
+                  urgency: 'Medium',
+                },
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual(params);
+        });
+
+        it('set fields to null if they are missing', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: {},
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual({
+            ...params,
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: { impact: null, severity: null, urgency: null },
+              },
+            },
+          });
+        });
+
+        it('succeeds when none fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'none',
+                name: 'None',
+                type: '.none',
+                fields: null,
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual(params);
+        });
+
+        it('fails when issueType is not provided', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'jira',
+                name: 'Jira',
+                type: '.jira',
+                fields: {
+                  priority: 'High',
+                  parent: null,
+                },
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[0.subActionParams.connector.fields.issueType]: expected value of type [string] but got [undefined]'
+          );
+        });
+
+        it('fails with excess fields', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: {
+                  impact: 'Medium',
+                  severity: 'Medium',
+                  urgency: 'Medium',
+                  excess: null,
+                },
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[0.subActionParams.connector.fields.excess]: definition for this key is missing'
+          );
+        });
+
+        it('fails with valid fields but wrong type', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'resilient',
+                name: 'Resilient',
+                type: '.resilient',
+                fields: {
+                  issueType: '10006',
+                  priority: 'High',
+                  parent: null,
+                },
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[0.subActionParams.connector.fields.issueType]: definition for this key is missing'
+          );
+        });
+
+        it('fails when fields are not null and the type is none', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'create',
+            subActionParams: {
+              title: 'Case from case connector!!',
+              tags: ['case', 'connector'],
+              description: 'Yo fields!!',
+              connector: {
+                id: 'none',
+                name: 'None',
+                type: '.none',
+                fields: {},
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[0.subActionParams.connector]: Fields must be set to null for connectors of type .none'
+          );
+        });
       });
     });
 
@@ -86,8 +321,264 @@ describe('case connector', () => {
             tags: null,
             title: null,
             status: null,
+            connector: null,
             ...(params.subActionParams as Record<string, unknown>),
           },
+        });
+      });
+
+      describe('connector', () => {
+        it('succeeds when jira fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'jira',
+                name: 'Jira',
+                type: '.jira',
+                fields: {
+                  issueType: '10006',
+                  priority: 'High',
+                  parent: null,
+                },
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual({
+            ...params,
+            subActionParams: {
+              description: null,
+              tags: null,
+              title: null,
+              status: null,
+              ...(params.subActionParams as Record<string, unknown>),
+            },
+          });
+        });
+
+        it('succeeds when resilient fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'resilient',
+                name: 'Resilient',
+                type: '.resilient',
+                fields: {
+                  incidentTypes: ['13'],
+                  severityCode: '3',
+                },
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual({
+            ...params,
+            subActionParams: {
+              description: null,
+              tags: null,
+              title: null,
+              status: null,
+              ...(params.subActionParams as Record<string, unknown>),
+            },
+          });
+        });
+
+        it('succeeds when servicenow fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: {
+                  impact: 'Medium',
+                  severity: 'Medium',
+                  urgency: 'Medium',
+                },
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual({
+            ...params,
+            subActionParams: {
+              description: null,
+              tags: null,
+              title: null,
+              status: null,
+              ...(params.subActionParams as Record<string, unknown>),
+            },
+          });
+        });
+
+        it('set fields to null if they are missing', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: {},
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual({
+            ...params,
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              description: null,
+              tags: null,
+              title: null,
+              status: null,
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: { impact: null, severity: null, urgency: null },
+              },
+            },
+          });
+        });
+
+        it('succeeds when none fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'none',
+                name: 'None',
+                type: '.none',
+                fields: null,
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual({
+            ...params,
+            subActionParams: {
+              description: null,
+              tags: null,
+              title: null,
+              status: null,
+              ...(params.subActionParams as Record<string, unknown>),
+            },
+          });
+        });
+
+        it('fails when issueType is not provided', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'jira',
+                name: 'Jira',
+                type: '.jira',
+                fields: {
+                  priority: 'High',
+                  parent: null,
+                },
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[subActionParams.connector.0.fields.issueType]: expected value of type [string] but got [undefined]'
+          );
+        });
+
+        it('fails with excess fields', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'servicenow',
+                name: 'Servicenow',
+                type: '.servicenow',
+                fields: {
+                  impact: 'Medium',
+                  severity: 'Medium',
+                  urgency: 'Medium',
+                  excess: null,
+                },
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[subActionParams.connector.0.fields.excess]: definition for this key is missing'
+          );
+        });
+
+        it('fails with valid fields but wrong type', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'resilient',
+                name: 'Resilient',
+                type: '.resilient',
+                fields: {
+                  issueType: '10006',
+                  priority: 'High',
+                  parent: null,
+                },
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[subActionParams.connector.0.fields.issueType]: definition for this key is missing'
+          );
+        });
+
+        it('fails when fields are not null and the type is none', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'none',
+                name: 'None',
+                type: '.none',
+                fields: {},
+              },
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow(
+            '[subActionParams.connector.0]: Fields must be set to null for connectors of type .none'
+          );
         });
       });
 
@@ -186,6 +677,16 @@ describe('case connector', () => {
             title: 'Case from case connector!!',
             tags: ['case', 'connector'],
             description: 'Yo fields!!',
+            connector: {
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                issueType: '10006',
+                priority: 'High',
+                parent: null,
+              },
+            },
           },
         };
 
@@ -204,10 +705,14 @@ describe('case connector', () => {
           theCase: {
             ...params.subActionParams,
             connector: {
-              fields: null,
-              id: 'none',
-              name: 'none',
-              type: '.none',
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                issueType: '10006',
+                priority: 'High',
+                parent: null,
+              },
             },
           },
         });
@@ -266,6 +771,7 @@ describe('case connector', () => {
             description: null,
             tags: null,
             status: null,
+            connector: null,
           },
         };
 

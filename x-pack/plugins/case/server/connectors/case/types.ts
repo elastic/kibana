@@ -12,10 +12,12 @@ import {
   ExecutorSubActionUpdateParamsSchema,
   CaseConfigurationSchema,
   ExecutorSubActionAddCommentParamsSchema,
+  ConnectorSchema,
 } from './schema';
 import { CaseResponse, CasesResponse } from '../../../common/api';
 
 export type CaseConfiguration = TypeOf<typeof CaseConfigurationSchema>;
+export type Connector = TypeOf<typeof ConnectorSchema>;
 
 export type ExecutorSubActionCreateParams = TypeOf<typeof ExecutorSubActionCreateParamsSchema>;
 export type ExecutorSubActionUpdateParams = TypeOf<typeof ExecutorSubActionUpdateParamsSchema>;
@@ -32,6 +34,8 @@ export type CaseActionType = ActionType<
   CaseExecutorParams,
   CaseExecutorResponse | {}
 >;
+
+export type CaseActionTypeWithoutExecutor = ActionType<CaseConfiguration, {}, CaseExecutorParams>;
 
 export type CaseActionTypeExecutorOptions = ActionTypeExecutorOptions<
   CaseConfiguration,

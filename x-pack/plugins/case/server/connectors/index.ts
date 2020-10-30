@@ -19,6 +19,7 @@ import {
 } from '../services';
 
 import { getActionType as getCaseConnector } from './case';
+import { CaseActionTypeWithoutExecutor } from './case/types';
 
 export interface GetActionTypeParams {
   logger: Logger;
@@ -50,6 +51,6 @@ export const registerConnectors = ({
       caseService,
       caseConfigureService,
       userActionService,
-    })
+    }) as CaseActionTypeWithoutExecutor
   );
 };

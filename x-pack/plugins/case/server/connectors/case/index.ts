@@ -8,7 +8,7 @@ import { curry } from 'lodash';
 
 import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import { CasePatchRequest, ConnectorTypes } from '../../../common/api';
+import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
@@ -34,7 +34,7 @@ export function getActionType({
 }: GetActionTypeParams): CaseActionType {
   return {
     id: '.case',
-    minimumLicenseRequired: 'platinum',
+    minimumLicenseRequired: 'gold',
     name: 'Case',
     validate: {
       config: CaseConfigurationSchema,
@@ -71,12 +71,8 @@ async function executor(
 
   if (subAction === 'create') {
     const createParams = subActionParams as ExecutorSubActionCreateParams;
-    const theCase = {
-      ...createParams,
-      connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-    };
 
-    data = await caseClient.create({ theCase });
+    data = await caseClient.create({ theCase: createParams as CasePostRequest });
   }
 
   if (subAction === 'update') {

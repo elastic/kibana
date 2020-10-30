@@ -74,6 +74,16 @@ export default ({ getService }: FtrProviderContext): void => {
           subActionParams: {
             tags: ['case', 'connector'],
             description: 'case description',
+            connector: {
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                issueType: '10006',
+                priority: 'High',
+                parent: null,
+              },
+            },
           },
         };
 
@@ -109,6 +119,16 @@ export default ({ getService }: FtrProviderContext): void => {
           subActionParams: {
             title: 'Case from case connector!!',
             tags: ['case', 'connector'],
+            connector: {
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                issueType: '10006',
+                priority: 'High',
+                parent: null,
+              },
+            },
           },
         };
 
@@ -144,6 +164,16 @@ export default ({ getService }: FtrProviderContext): void => {
           subActionParams: {
             title: 'Case from case connector!!',
             description: 'case description',
+            connector: {
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                issueType: '10006',
+                priority: 'High',
+                parent: null,
+              },
+            },
           },
         };
 
@@ -158,6 +188,175 @@ export default ({ getService }: FtrProviderContext): void => {
           actionId: createdActionId,
           message:
             'error validating action params: types that failed validation:\n- [0.subActionParams.tags]: expected value of type [array] but got [undefined]\n- [1.subAction]: expected value to equal [update]\n- [2.subAction]: expected value to equal [addComment]',
+          retry: false,
+        });
+      });
+
+      it('should respond with a 400 Bad Request when creating a case without connector', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'create',
+          subActionParams: {
+            title: 'Case from case connector!!',
+            description: 'case description',
+            tags: ['case', 'connector'],
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subActionParams.connector.id]: expected value of type [string] but got [undefined]\n- [1.subAction]: expected value to equal [update]\n- [2.subAction]: expected value to equal [addComment]',
+          retry: false,
+        });
+      });
+
+      it('should respond with a 400 Bad Request when creating jira without issueType', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'create',
+          subActionParams: {
+            title: 'Case from case connector!!',
+            description: 'case description',
+            tags: ['case', 'connector'],
+            connector: {
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                priority: 'High',
+                parent: null,
+              },
+            },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subActionParams.connector.fields.issueType]: expected value of type [string] but got [undefined]\n- [1.subAction]: expected value to equal [update]\n- [2.subAction]: expected value to equal [addComment]',
+          retry: false,
+        });
+      });
+
+      it('should respond with a 400 Bad Request when creating a connector with wrong fields', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'create',
+          subActionParams: {
+            title: 'Case from case connector!!',
+            description: 'case description',
+            tags: ['case', 'connector'],
+            connector: {
+              id: 'servicenow',
+              name: 'Servicenow',
+              type: '.servicenow',
+              fields: {
+                impact: 'Medium',
+                severity: 'Medium',
+                notExists: 'not-exists',
+              },
+            },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subActionParams.connector.fields.notExists]: definition for this key is missing\n- [1.subAction]: expected value to equal [update]\n- [2.subAction]: expected value to equal [addComment]',
+          retry: false,
+        });
+      });
+
+      it('should respond with a 400 Bad Request when creating a none without fields as null', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'create',
+          subActionParams: {
+            title: 'Case from case connector!!',
+            description: 'case description',
+            tags: ['case', 'connector'],
+            connector: {
+              id: 'none',
+              name: 'None',
+              type: '.none',
+              fields: {},
+            },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subActionParams.connector]: Fields must be set to null for connectors of type .none\n- [1.subAction]: expected value to equal [update]\n- [2.subAction]: expected value to equal [addComment]',
           retry: false,
         });
       });
@@ -180,6 +379,16 @@ export default ({ getService }: FtrProviderContext): void => {
             title: 'Case from case connector!!',
             tags: ['case', 'connector'],
             description: 'case description',
+            connector: {
+              id: 'jira',
+              name: 'Jira',
+              type: '.jira',
+              fields: {
+                issueType: '10006',
+                priority: 'High',
+                parent: null,
+              },
+            },
           },
         };
 
@@ -199,6 +408,67 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(data).to.eql({
           ...postCaseResp(caseConnector.body.data.id),
           ...params.subActionParams,
+          created_by: {
+            email: null,
+            full_name: null,
+            username: null,
+          },
+        });
+      });
+
+      it('should create a case with connector with field as null if not provided', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'create',
+          subActionParams: {
+            title: 'Case from case connector!!',
+            tags: ['case', 'connector'],
+            description: 'case description',
+            connector: {
+              id: 'servicenow',
+              name: 'Servicenow',
+              type: '.servicenow',
+              fields: {},
+            },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`${CASES_URL}/${caseConnector.body.data.id}`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        const data = removeServerGeneratedPropertiesFromCase(body);
+        expect(data).to.eql({
+          ...postCaseResp(caseConnector.body.data.id),
+          ...params.subActionParams,
+          connector: {
+            id: 'servicenow',
+            name: 'Servicenow',
+            type: '.servicenow',
+            fields: {
+              impact: null,
+              severity: null,
+              urgency: null,
+            },
+          },
           created_by: {
             email: null,
             full_name: null,
