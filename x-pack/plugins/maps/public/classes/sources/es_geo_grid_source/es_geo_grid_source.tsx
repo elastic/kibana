@@ -31,7 +31,7 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
@@ -71,8 +71,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
       geoField: normalizedDescriptor.geoField,
-      metrics:
-        descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
       requestType: descriptor.requestType || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
     };

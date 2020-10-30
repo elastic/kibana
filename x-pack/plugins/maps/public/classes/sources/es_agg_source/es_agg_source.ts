@@ -40,7 +40,8 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     return {
       ...normalizedDescriptor,
       type: descriptor.type ? descriptor.type : '',
-      metrics: descriptor.metrics ? descriptor.metrics : [],
+      metrics:
+        descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
     };
   }
 
