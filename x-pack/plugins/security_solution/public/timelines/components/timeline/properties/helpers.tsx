@@ -16,8 +16,9 @@ import {
   EuiModal,
   EuiOverlayMask,
   EuiToolTip,
+  EuiTextArea,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -41,14 +42,22 @@ import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
 import { NOTES_PANEL_WIDTH } from './notes_size';
-import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
+import {
+  ButtonContainer,
+  DescriptionContainer,
+  LabelText,
+  NameField,
+  NameWrapper,
+  StyledStar,
+} from './styles';
 import * as i18n from './translations';
-import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
+import { setInsertTimeline, showTimeline, TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
+export const TIMELINE_TITLE_CLASSNAME = 'timeline-title';
 
 const NotesCountBadge = (styled(EuiBadge)`
   margin-left: 5px;
@@ -66,8 +75,25 @@ type CreateTimeline = ({
   timelineType?: TimelineTypeLiteral;
 }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
-type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
+export type UpdateTitle = ({
+  id,
+  title,
+  disableAutoSave,
+}: {
+  id: string;
+  title: string;
+  disableAutoSave?: boolean;
+}) => void;
+export type UpdateDescription = ({
+  id,
+  description,
+  disableAutoSave,
+}: {
+  id: string;
+  description: string;
+  disableAutoSave?: boolean;
+}) => void;
+export type SaveTimeline = (args: TimelineInput) => void;
 
 export const StarIcon = React.memo<{
   isFavorite: boolean;
@@ -104,55 +130,146 @@ interface DescriptionProps {
   description: string;
   timelineId: string;
   updateDescription: UpdateDescription;
+  isTextArea?: boolean;
+  disableAutoSave?: boolean;
+  disableTooltip?: boolean;
+  disabled?: boolean;
+  marginRight?: number;
 }
 
 export const Description = React.memo<DescriptionProps>(
-  ({ description, timelineId, updateDescription }) => (
-    <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
-      <DescriptionContainer data-test-subj="description-container">
-        <EuiFieldText
-          aria-label={i18n.TIMELINE_DESCRIPTION}
-          data-test-subj="timeline-description"
-          fullWidth={true}
-          onChange={(e) => updateDescription({ id: timelineId, description: e.target.value })}
-          placeholder={i18n.DESCRIPTION}
-          spellCheck={true}
-          value={description}
-        />
+  ({
+    description,
+    timelineId,
+    updateDescription,
+    isTextArea = false,
+    disableAutoSave = false,
+    disableTooltip = false,
+    disabled = false,
+    marginRight,
+  }) => {
+    const onDescriptionChanged = useCallback(
+      (e) => {
+        updateDescription({ id: timelineId, description: e.target.value, disableAutoSave });
+      },
+      [updateDescription, disableAutoSave, timelineId]
+    );
+
+    const inputField = useMemo(
+      () =>
+        isTextArea ? (
+          <EuiTextArea
+            data-test-subj="timeline-description-textarea"
+            aria-label={i18n.TIMELINE_DESCRIPTION}
+            fullWidth={true}
+            onChange={onDescriptionChanged}
+            placeholder={i18n.DESCRIPTION}
+            value={description}
+            disabled={disabled}
+          />
+        ) : (
+          <EuiFieldText
+            aria-label={i18n.TIMELINE_DESCRIPTION}
+            data-test-subj="timeline-description"
+            fullWidth={true}
+            onChange={onDescriptionChanged}
+            placeholder={i18n.DESCRIPTION}
+            spellCheck={true}
+            value={description}
+          />
+        ),
+      [description, isTextArea, onDescriptionChanged, disabled]
+    );
+    return (
+      <DescriptionContainer data-test-subj="description-container" marginRight={marginRight}>
+        {disableTooltip ? (
+          inputField
+        ) : (
+          <EuiToolTip
+            data-test-subj="timeline-description-tool-tip"
+            content={i18n.DESCRIPTION_TOOL_TIP}
+          >
+            {inputField}
+          </EuiToolTip>
+        )}
       </DescriptionContainer>
-    </EuiToolTip>
-  )
+    );
+  }
 );
 Description.displayName = 'Description';
 
 interface NameProps {
+  autoFocus?: boolean;
+  disableAutoSave?: boolean;
+  disableTooltip?: boolean;
+  disabled?: boolean;
   timelineId: string;
   timelineType: TimelineType;
   title: string;
   updateTitle: UpdateTitle;
+  width?: string;
+  marginRight?: number;
 }
 
-export const Name = React.memo<NameProps>(({ timelineId, timelineType, title, updateTitle }) => {
-  const handleChange = useCallback((e) => updateTitle({ id: timelineId, title: e.target.value }), [
+export const Name = React.memo<NameProps>(
+  ({
+    autoFocus = false,
+    disableAutoSave = false,
+    disableTooltip = false,
+    disabled = false,
     timelineId,
+    timelineType,
+    title,
     updateTitle,
-  ]);
+    width,
+    marginRight,
+  }) => {
+    const timelineNameRef = useRef<HTMLInputElement>(null);
 
-  return (
-    <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-      <NameField
-        aria-label={i18n.TIMELINE_TITLE}
-        data-test-subj="timeline-title"
-        onChange={handleChange}
-        placeholder={
-          timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
-        }
-        spellCheck={true}
-        value={title}
-      />
-    </EuiToolTip>
-  );
-});
+    const handleChange = useCallback(
+      (e) => updateTitle({ id: timelineId, title: e.target.value, disableAutoSave }),
+      [timelineId, updateTitle, disableAutoSave]
+    );
+
+    useEffect(() => {
+      if (autoFocus && timelineNameRef && timelineNameRef.current) {
+        timelineNameRef.current.focus();
+      }
+    }, [autoFocus]);
+
+    const nameField = useMemo(
+      () => (
+        <NameField
+          aria-label={i18n.TIMELINE_TITLE}
+          data-test-subj="timeline-title"
+          disabled={disabled}
+          onChange={handleChange}
+          placeholder={
+            timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
+          }
+          spellCheck={true}
+          value={title}
+          width={width}
+          marginRight={marginRight}
+          inputRef={timelineNameRef}
+        />
+      ),
+      [handleChange, marginRight, timelineType, title, width, disabled]
+    );
+
+    return (
+      <NameWrapper>
+        {disableTooltip ? (
+          nameField
+        ) : (
+          <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
+            {nameField}
+          </EuiToolTip>
+        )}
+      </NameWrapper>
+    );
+  }
+);
 Name.displayName = 'Name';
 
 interface NewCaseProps {
