@@ -31,6 +31,9 @@ export function Listing(props: ListingProps) {
   return (
     <I18nProvider>
       <TableListView
+        tableCaption={i18n.translate('xpack.graph.listing.graphsTitle', {
+          defaultMessage: 'Graphs',
+        })}
         headingId="graphListingHeading"
         rowHeader="title"
         createItem={props.capabilities.save ? props.createItem : undefined}

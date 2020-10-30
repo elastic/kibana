@@ -74,6 +74,10 @@ export interface TableListViewProps {
    * Indicates which column should be used as the identifying cell in each row.
    */
   rowHeader?: string;
+  /**
+   * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
+   */
+  tableCaption?: string;
 }
 
 export interface TableListViewState {
@@ -475,6 +479,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         sorting={true}
         data-test-subj="itemsInMemTable"
         rowHeader={this.props.rowHeader}
+        tableCaption={this.props.tableCaption}
       />
     );
   }

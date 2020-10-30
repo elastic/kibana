@@ -131,6 +131,9 @@ export const VisualizeListing = () => {
       // we allow users to create visualizations even if they can't save them
       // for data exploration purposes
       createItem={createNewVis}
+      tableCaption={i18n.translate('visualize.listing.table.listTitle', {
+        defaultMessage: 'Visualizations',
+      })}
       findItems={fetchItems}
       deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
       editItem={visualizeCapabilities.save ? editItem : undefined}

@@ -62,6 +62,9 @@ export class DashboardListing extends React.Component {
           tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
             defaultMessage: 'Dashboards',
           })}
+          tableCaption={i18n.translate('dashboard.listing.dashboardsTitle', {
+            defaultMessage: 'Dashboards',
+          })}
           toastNotifications={this.props.core.notifications.toasts}
           uiSettings={this.props.core.uiSettings}
         />
