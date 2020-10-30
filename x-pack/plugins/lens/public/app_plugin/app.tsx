@@ -374,18 +374,15 @@ export function App({
 
     const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
     const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
-    if (options.saveToLibrary && !originalInput) {
+    if (options.saveToLibrary) {
       try {
         await checkForDuplicateTitle(
           {
-            ...docToSave,
+            id: originalSavedObjectId,
+            title: docToSave.title,
             copyOnSave: saveProps.newCopyOnSave,
             lastSavedTitle: lastKnownDoc.title,
             getEsType: () => 'lens',
-            getDisplayName: () =>
-              i18n.translate('xpack.lens.app.saveModalType', {
-                defaultMessage: 'Lens visualization',
-              }),
           },
           saveProps.isTitleDuplicateConfirmed,
           saveProps.onTitleDuplicate,
