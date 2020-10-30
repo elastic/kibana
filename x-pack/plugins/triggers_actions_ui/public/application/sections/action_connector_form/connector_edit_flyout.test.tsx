@@ -84,11 +84,7 @@ describe('connector_edit_flyout', () => {
             docLinks: deps.docLinks,
           }}
         >
-          <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={(state) => {}}
-          />
+          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );
@@ -141,11 +137,7 @@ describe('connector_edit_flyout', () => {
             docLinks: deps.docLinks,
           }}
         >
-          <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={(state) => {}}
-          />
+          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );

@@ -58,8 +58,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -100,8 +99,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -160,8 +158,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -208,8 +205,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
