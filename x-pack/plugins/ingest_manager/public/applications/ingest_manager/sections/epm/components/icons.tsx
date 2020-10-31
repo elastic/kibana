@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 
 export const UpdateIcon = ({ size = 'm' }: { size?: EuiIconProps['size'] }) => (
   <EuiIconTip
-    aria-label={i18n.translate('xpack.ingestManager.epm.updateAvailableTooltip', {
+    aria-label={i18n.translate('xpack.fleet.epm.updateAvailableTooltip', {
       defaultMessage: 'Update available',
     })}
     size={size}
     type="alert"
     color="warning"
-    content={i18n.translate('xpack.ingestManager.epm.updateAvailableTooltip', {
+    content={i18n.translate('xpack.fleet.epm.updateAvailableTooltip', {
       defaultMessage: 'Update available',
     })}
   />

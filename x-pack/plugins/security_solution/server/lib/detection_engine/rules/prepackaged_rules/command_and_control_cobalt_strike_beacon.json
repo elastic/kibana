@@ -23,7 +23,9 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Network"
+    "Network",
+    "Threat Detection",
+    "Command and Control"
   ],
   "threat": [
     {

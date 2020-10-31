@@ -364,6 +364,12 @@ describe('Task Runner', () => {
           url: '/',
         },
       },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
+        },
+      },
     });
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -621,9 +627,7 @@ describe('Task Runner', () => {
     expect(await taskRunner.run()).toMatchInlineSnapshot(`
       Object {
         "runAt": 1970-01-01T00:00:10.000Z,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
@@ -664,6 +668,12 @@ describe('Task Runner', () => {
           url: '/',
         },
       },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
+        },
+      },
     });
   });
 
@@ -694,6 +704,12 @@ describe('Task Runner', () => {
       raw: {
         req: {
           url: '/',
+        },
+      },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
         },
       },
     });
@@ -727,9 +743,7 @@ describe('Task Runner', () => {
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
         "runAt": 1970-01-01T00:00:10.000Z,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
 
@@ -781,9 +795,7 @@ describe('Task Runner', () => {
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
         "runAt": 1970-01-01T00:05:00.000Z,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
   });
@@ -814,9 +826,7 @@ describe('Task Runner', () => {
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
         "runAt": 1970-01-01T00:05:00.000Z,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
   });
@@ -846,11 +856,46 @@ describe('Task Runner', () => {
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
         "runAt": 1970-01-01T00:05:00.000Z,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
+  });
+
+  test(`doesn't change previousStartedAt when it fails to run`, async () => {
+    const originalAlertSate = {
+      previousStartedAt: '1970-01-05T00:00:00.000Z',
+    };
+
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        throw new Error('OMG');
+      }
+    );
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: originalAlertSate,
+      },
+      taskRunnerFactoryInitializerParams
+    );
+
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult.state.previousStartedAt).toEqual(
+      new Date(originalAlertSate.previousStartedAt)
+    );
   });
 
   test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
@@ -878,9 +923,7 @@ describe('Task Runner', () => {
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
         "runAt": undefined,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
+        "state": Object {},
       }
     `);
   });
