@@ -258,7 +258,7 @@
     "venn.js": "0.2.20",
     "vinyl-fs": "^3.0.3",
     "whatwg-fetch": "^3.0.0",
-    "xml-crypto": "^1.4.0",
+    "xml-crypto": "^2.0.0",
     "yargs": "^15.4.1"
   },
   "dependencies": {
@@ -266,7 +266,7 @@
     "@babel/runtime": "^7.11.2",
     "@elastic/datemath": "5.0.3",
     "@elastic/ems-client": "7.10.0",
-    "@elastic/eui": "29.5.0",
+    "@elastic/eui": "30.1.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.0",

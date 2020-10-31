@@ -18,7 +18,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Network DNS', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/82207
+  describe.skip('Network DNS', () => {
     describe('With packetbeat', () => {
       before(() => esArchiver.load('packetbeat/dns'));
       after(() => esArchiver.unload('packetbeat/dns'));

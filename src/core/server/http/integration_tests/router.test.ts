@@ -384,7 +384,7 @@ describe('Options', () => {
     });
 
     describe('idleSocket', () => {
-      it('should timeout if payload sending has too long of an idle period', async () => {
+      it.skip('should timeout if payload sending has too long of an idle period', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
