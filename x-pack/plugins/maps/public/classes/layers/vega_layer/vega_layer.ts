@@ -7,7 +7,7 @@
 import { AbstractLayer } from '../layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { VegaSourceDescriptor } from '../../../../common/descriptor_types';
-import {createMapboxLayer, getCanvas} from "./vega_mapbox_layer";
+import { createMapboxLayer, getCanvas } from './vega_mapbox_layer';
 
 export class VegaLayer extends AbstractLayer {
   static type = SOURCE_TYPES.VEGA;
@@ -37,9 +37,17 @@ export class VegaLayer extends AbstractLayer {
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this._getVegaLayerId();
 
-
-
     if (!source) {
+      const getEvent = function (name, x, y) {
+        const evt = new MouseEvent(name, { clientX: x, clientY: y });
+        evt.changedTouches = [
+          {
+            clientX: x || 0,
+            clientY: y || 0,
+          },
+        ];
+        return evt;
+      };
 
       const { canvas: newVegaLayer, view } = await createMapboxLayer(mbMap, mbLayerId);
       const onChange = () => {
@@ -47,12 +55,14 @@ export class VegaLayer extends AbstractLayer {
         const zoom = mbMap.getZoom();
         const width = mbMap.getCanvas().clientWidth;
         const height = mbMap.getCanvas().clientHeight;
-        mbMap.getSource('canvas-source').setCoordinates([
-          mbMap.getBounds().getNorthWest().toArray(),
-          mbMap.getBounds().getNorthEast().toArray(),
-          mbMap.getBounds().getSouthEast().toArray(),
-          mbMap.getBounds().getSouthWest().toArray(),
-        ]);
+        mbMap
+          .getSource('canvas-source')
+          .setCoordinates([
+            mbMap.getBounds().getNorthWest().toArray(),
+            mbMap.getBounds().getNorthEast().toArray(),
+            mbMap.getBounds().getSouthEast().toArray(),
+            mbMap.getBounds().getSouthWest().toArray(),
+          ]);
 
         view
           .signal('latitude', center.lat)
@@ -80,6 +90,10 @@ export class VegaLayer extends AbstractLayer {
         id: 'canvas-layer',
         type: 'raster',
         source: 'canvas-source',
+      });
+      mbMap.on('mousemove', (e) => {
+        const { x, y } = e.point;
+        newVegaLayer.dispatchEvent(getEvent('mousemove', x, y));
       });
     }
   }

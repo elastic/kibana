@@ -11,7 +11,8 @@ import * as vega from 'vega';
 // import * as VegaDeckGl from '@msrvida/vega-deck.gl';
 import { MapboxLayer } from '@deck.gl/mapbox';
 import Vsi from 'vega-spec-injector';
-import sample from './sample.json';
+// import sample from './sample.json';
+import sample from './flights_sample.json';
 
 // VegaDeckGl.use(vega, deck, layers, luma);
 
