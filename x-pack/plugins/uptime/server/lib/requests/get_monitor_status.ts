@@ -7,7 +7,6 @@
 import { JsonObject } from 'src/plugins/kibana_utils/public';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
-import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
@@ -36,18 +35,20 @@ const getLocationClause = (locations: string[]) => ({
   },
 });
 
+type AfterKey = Record<string, string | number | null> | undefined;
+
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
 > = async ({ callES, dynamicSettings, filters, locations, numTimes, timerange: { from, to } }) => {
-  let afterKey: Record<string, string | number | null> | undefined;
+  let afterKey: AfterKey;
 
   const STATUS = 'down';
   let monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
-    const esParams: ESSearchBody = {
+    const esParams = {
       query: {
         bool: {
           filter: [
@@ -126,7 +127,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       index: dynamicSettings.heartbeatIndices,
       body: esParams,
     });
-    afterKey = result?.aggregations?.monitors?.after_key;
+
+    afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
 
     monitors = monitors.concat(result?.aggregations?.monitors?.buckets || []);
   } while (afterKey !== undefined);

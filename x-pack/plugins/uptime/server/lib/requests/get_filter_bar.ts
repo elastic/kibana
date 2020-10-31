@@ -45,37 +45,6 @@ export const combineRangeWithFilters = (
   return filters;
 };
 
-type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
-
-interface FiltersAggType {
-  [x: string]: { doc_count: number } & {
-    term: {
-      doc_count_error_upper_bound: number;
-      sum_other_doc_count: number;
-      buckets: Array<{ doc_count: number; key: string | number }>;
-    };
-  };
-}
-
-export const extractFilterAggsResults = (
-  responseAggregations: FiltersAggType | undefined,
-  keys: SupportedFields[]
-): OverviewFilters => {
-  const values = {
-    locations: [],
-    ports: [],
-    schemes: [],
-    tags: [],
-  };
-  keys.forEach((key) => {
-    const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
-    values[key] = buckets.map((item) =>
-      key === 'ports' ? (item.key as number) : (item.key as string)
-    );
-  });
-  return values;
-};
-
 export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
   callES,
   dynamicSettings,
@@ -108,5 +77,13 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
   const {
     body: { aggregations },
   } = await callES.search(params);
-  return extractFilterAggsResults(aggregations, ['tags', 'locations', 'ports', 'schemes']);
+
+  const { tags, locations, ports, schemes } = aggregations ?? {};
+
+  return {
+    locations: locations?.term?.buckets.map((item) => item.key as string),
+    ports: ports?.term?.buckets.map((item) => item.key as number),
+    schemes: schemes?.term?.buckets.map((item) => item.key as string),
+    tags: tags?.term?.buckets.map((item) => item.key as string),
+  };
 };

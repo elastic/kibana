@@ -43,20 +43,23 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
     size: 500,
   };
   const { body: result } = await callES.search(params);
+
   const screenshotIndexes: number[] = result.hits.hits
-    .filter((h: any) => h?._source?.synthetics?.type === 'step/screenshot')
-    .map((h: any) => h?._source?.synthetics?.step?.index);
-  return result.hits.hits
-    .filter((h: any) => h?._source?.synthetics?.type !== 'step/screenshot')
-    .map(
-      ({ _id, _source, _source: { synthetics } }: any): Ping => ({
-        ..._source,
-        timestamp: _source['@timestamp'],
-        docId: _id,
+    .filter((h) => (h?._source as Ping).synthetics?.type === 'step/screenshot')
+    .map((h) => (h?._source as Ping).synthetics?.step?.index as number);
+
+  return (result.hits.hits
+    .filter((h) => (h?._source as Ping).synthetics?.type !== 'step/screenshot')
+    .map((h) => {
+      const source = h._source as Ping & { '@timestamp': string };
+      return {
+        ...source,
+        timestamp: source['@timestamp'],
+        docId: h._id,
         synthetics: {
-          ...synthetics,
-          screenshotExists: screenshotIndexes.some((i) => i === synthetics?.step?.index),
+          ...source.synthetics,
+          screenshotExists: screenshotIndexes.some((i) => i === source.synthetics?.step?.index),
         },
-      })
-    );
+      };
+    }) as unknown) as Ping;
 };

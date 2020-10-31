@@ -5,8 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { CertResult, GetCertsParams } from '../../../common/runtime_types';
-import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
+import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
 
 enum SortFields {
   'issuer' = 'tls.server.x509.issuer.common_name',
@@ -30,7 +29,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
 }) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
-  const searchBody: ESSearchBody = {
+  const searchBody = {
     from: index * size,
     size,
     sort: [
@@ -42,6 +41,26 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     ],
     query: {
       bool: {
+        ...(search
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(search),
+                    type: 'phrase_prefix',
+                    fields: [
+                      'monitor.id.text',
+                      'monitor.name.text',
+                      'url.full.text',
+                      'tls.server.x509.subject.common_name.text',
+                      'tls.server.x509.issuer.common_name.text',
+                    ],
+                  },
+                },
+              ],
+            }
+          : {}),
         should: [],
         filter: [
           {
@@ -92,25 +111,6 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     },
   };
 
-  if (search) {
-    searchBody.query.bool.minimum_should_match = 1;
-    searchBody.query.bool.should = [
-      {
-        multi_match: {
-          query: escape(search),
-          type: 'phrase_prefix',
-          fields: [
-            'monitor.id.text',
-            'monitor.name.text',
-            'url.full.text',
-            'tls.server.x509.subject.common_name.text',
-            'tls.server.x509.issuer.common_name.text',
-          ],
-        },
-      },
-    ];
-  }
-
   if (notValidBefore || notValidAfter) {
     const validityFilters: any = {
       bool: {
@@ -145,12 +145,9 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     body: searchBody,
   });
 
-  const certs = (result?.hits?.hits ?? []).map((hit: any) => {
-    const {
-      _source: {
-        tls: { server },
-      },
-    } = hit;
+  const certs = (result?.hits?.hits ?? []).map((hit) => {
+    const ping = hit._source as Ping;
+    const server = ping.tls?.server!;
 
     const notAfter = server?.x509?.not_after;
     const notBefore = server?.x509?.not_before;
@@ -169,7 +166,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
       monitors,
       issuer,
       sha1,
-      sha256,
+      sha256: sha256 as string,
       not_after: notAfter,
       not_before: notBefore,
       common_name: commonName,
