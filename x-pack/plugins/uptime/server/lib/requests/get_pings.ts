@@ -11,7 +11,6 @@ import {
   PingsResponse,
   Ping,
 } from '../../../common/runtime_types';
-import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -64,30 +63,21 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   location,
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
-  const filter: any[] = [{ range: { '@timestamp': { gte: from, lte: to } } }];
-  if (monitorId) {
-    filter.push({ term: { 'monitor.id': monitorId } });
-  }
-  if (status) {
-    filter.push({ term: { 'monitor.status': status } });
-  }
 
-  let postFilterClause = {};
-  if (location) {
-    postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
-  }
-  const queryContext = {
-    bool: {
-      filter,
-      ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
-    },
-  };
-  const searchBody: ESSearchBody = {
+  const searchBody = {
     size,
+    ...(index ? { from: index * size } : {}),
     query: {
-      ...queryContext,
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: from, lte: to } } },
+          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+          ...(status ? [{ term: { 'monitor.status': status } }] : []),
+        ],
+        ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
+      },
     },
-    sort: [{ '@timestamp': { order: sort ?? 'desc' } }],
+    sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
     aggs: {
       locations: {
         terms: {
@@ -97,12 +87,8 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
         },
       },
     },
-    ...postFilterClause,
+    ...(location ? { post_filter: { term: { 'observer.geo.name': location } } } : {}),
   };
-
-  if (index) {
-    searchBody.from = index * size;
-  }
 
   const {
     body: {
@@ -128,7 +114,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
 
   return {
     total: total.value,
-    locations: locations.buckets.map((bucket: { key: string }) => bucket.key),
+    locations: locations.buckets.map((bucket) => bucket.key as string),
     pings,
   };
 };

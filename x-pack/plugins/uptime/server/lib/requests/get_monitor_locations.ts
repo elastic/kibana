@@ -7,6 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+import { SortOptions } from '../../../../apm/typings/elasticsearch/aggregations';
 
 /**
  * Fetch data for the monitor page title.
@@ -24,7 +25,16 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
 > = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
+  const sortOptions: SortOptions = [
+    {
+      '@timestamp': {
+        order: 'desc',
+      },
+    },
+  ];
+
   const params = {
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 0,
       query: {
@@ -61,11 +71,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
             most_recent: {
               top_hits: {
                 size: 1,
-                sort: {
-                  '@timestamp': {
-                    order: 'desc',
-                  },
-                },
+                sort: sortOptions,
                 _source: ['monitor', 'summary', 'observer', '@timestamp'],
               },
             },

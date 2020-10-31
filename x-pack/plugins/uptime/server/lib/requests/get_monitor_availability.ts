@@ -6,6 +6,7 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
+import { SortOptions } from '../../../../apm/typings/elasticsearch/aggregations';
 
 export interface AvailabilityKey {
   monitorId: string;
@@ -53,7 +54,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
   }
 
   do {
-    const esParams: any = {
+    const esParams = {
       index: dynamicSettings.heartbeatIndices,
       body: {
         query: {
@@ -77,6 +78,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
           monitors: {
             composite: {
               size: 2000,
+              ...(afterKey ? { after: afterKey } : {}),
               sources: [
                 {
                   monitorId: {
@@ -105,7 +107,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                         order: 'desc',
                       },
                     },
-                  ],
+                  ] as SortOptions,
                 },
               },
               up_sum: {
@@ -145,10 +147,6 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
         },
       },
     };
-
-    if (afterKey) {
-      esParams.body.aggs.monitors.composite.after = afterKey;
-    }
 
     const { body: result } = await callES.search(esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
