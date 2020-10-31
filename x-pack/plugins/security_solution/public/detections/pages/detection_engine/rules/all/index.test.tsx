@@ -32,68 +32,59 @@ jest.mock('../../../../containers/detection_engine/rules');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-jest.mock('./reducer', () => {
-  return {
-    allRulesReducer: jest.fn().mockReturnValue(() => ({
-      exportRuleIds: [],
-      filterOptions: {
-        filter: 'some filter',
-        sortField: 'some sort field',
-        sortOrder: 'desc',
-      },
-      loadingRuleIds: [],
-      loadingRulesAction: null,
-      pagination: {
-        page: 1,
-        perPage: 20,
-        total: 1,
-      },
-      rules: [
-        {
-          actions: [],
-          created_at: '2020-02-14T19:49:28.178Z',
-          created_by: 'elastic',
-          description: 'jibber jabber',
-          enabled: false,
-          false_positives: [],
-          filters: [],
-          from: 'now-660s',
-          id: 'rule-id-1',
-          immutable: true,
-          index: ['endgame-*'],
-          interval: '10m',
-          language: 'kuery',
-          max_signals: 100,
-          name: 'Credential Dumping - Detected - Elastic Endpoint',
-          output_index: '.siem-signals-default',
-          query: 'host.name:*',
-          references: [],
-          risk_score: 73,
-          rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
-          severity: 'high',
-          tags: ['Elastic', 'Endpoint'],
-          threat: [],
-          throttle: null,
-          to: 'now',
-          type: 'query',
-          updated_at: '2020-02-14T19:49:28.320Z',
-          updated_by: 'elastic',
-          version: 1,
-        },
-      ],
-      selectedRuleIds: [],
-    })),
-  };
-});
-
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-
-  return {
-    ...originalModule,
-    useHistory: jest.fn(),
-  };
-});
+// jest.mock('./reducer', () => {
+//   return {
+//     allRulesReducer: jest.fn().mockReturnValue(() => ({
+//       exportRuleIds: [],
+//       filterOptions: {
+//         filter: 'some filter',
+//         sortField: 'some sort field',
+//         sortOrder: 'desc',
+//       },
+//       loadingRuleIds: [],
+//       loadingRulesAction: null,
+//       pagination: {
+//         page: 1,
+//         perPage: 20,
+//         total: 1,
+//       },
+//       rules: [
+//         {
+//           actions: [],
+//           created_at: '2020-02-14T19:49:28.178Z',
+//           created_by: 'elastic',
+//           description: 'jibber jabber',
+//           enabled: false,
+//           false_positives: [],
+//           filters: [],
+//           from: 'now-660s',
+//           id: 'rule-id-1',
+//           immutable: true,
+//           index: ['endgame-*'],
+//           interval: '10m',
+//           language: 'kuery',
+//           max_signals: 100,
+//           name: 'Credential Dumping - Detected - Elastic Endpoint',
+//           output_index: '.siem-signals-default',
+//           query: 'host.name:*',
+//           references: [],
+//           risk_score: 73,
+//           rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
+//           severity: 'high',
+//           tags: ['Elastic', 'Endpoint'],
+//           threat: [],
+//           throttle: null,
+//           to: 'now',
+//           type: 'query',
+//           updated_at: '2020-02-14T19:49:28.320Z',
+//           updated_by: 'elastic',
+//           version: 1,
+//         },
+//       ],
+//       selectedRuleIds: [],
+//     })),
+//   };
+// });
 
 describe('AllRules', () => {
   const mockRefetchRulesData = jest.fn();
@@ -201,7 +192,7 @@ describe('AllRules', () => {
   });
 
   describe('rules tab', () => {
-    it('it refreshes rule data every minute', async () => {
+    xit('it refreshes rule data every minute', async () => {
       await act(async () => {
         mount(
           <TestProviders>

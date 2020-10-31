@@ -20,6 +20,10 @@ export interface State {
   pagination: PaginationOptions;
   rules: Rule[];
   selectedRuleIds: string[];
+  lastUpdated: number;
+  showIdleModal: boolean;
+  isRefreshPaused: boolean;
+  intervalValue: number;
 }
 
 export type Action =
@@ -33,7 +37,11 @@ export type Action =
       filterOptions: Partial<FilterOptions>;
       pagination: Partial<PaginationOptions>;
     }
-  | { type: 'failure' };
+  | { type: 'failure' }
+  | { type: 'setLastRefreshDate' }
+  | { type: 'setShowIdleModal'; show: boolean }
+  | { type: 'setAutoRefreshPaused'; paused: boolean }
+  | { type: 'setAutoRefreshInterval'; interval: number };
 
 export const allRulesReducer = (
   tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>
@@ -124,6 +132,31 @@ export const allRulesReducer = (
       return {
         ...state,
         rules: [],
+      };
+    }
+    case 'setLastRefreshDate': {
+      return {
+        ...state,
+        lastUpdated: Date.now(),
+      };
+    }
+    case 'setShowIdleModal': {
+      return {
+        ...state,
+        showIdleModal: action.show,
+        isRefreshPaused: action.show,
+      };
+    }
+    case 'setAutoRefreshPaused': {
+      return {
+        ...state,
+        isRefreshPaused: action.paused,
+      };
+    }
+    case 'setAutoRefreshInterval': {
+      return {
+        ...state,
+        intervalValue: action.interval,
       };
     }
     default:

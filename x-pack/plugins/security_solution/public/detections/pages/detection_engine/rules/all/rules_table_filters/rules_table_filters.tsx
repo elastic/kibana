@@ -28,8 +28,10 @@ interface RulesTableFiltersProps {
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   isLoading: boolean;
+  isRefreshPaused: boolean;
+  refreshInterval: number;
   onRefresh: () => void;
-  onIntervalChange: (arg: number) => void;
+  onIntervalChange: (arg: OnRefreshChangeProps) => void;
 }
 
 /**
@@ -42,6 +44,8 @@ const RulesTableFiltersComponent = ({
   onFilterChanged,
   rulesCustomInstalled,
   rulesInstalled,
+  isRefreshPaused,
+  refreshInterval,
   isLoading,
   onRefresh,
   onIntervalChange,
@@ -51,8 +55,6 @@ const RulesTableFiltersComponent = ({
   const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
   const [showElasticRules, setShowElasticRules] = useState<boolean>(false);
   const [isLoadingTags, tags, reFetchTags] = useTags();
-  const [isRefreshPaused, setIsPaused] = useState(true);
-  const [interval, setRefreshInterval] = useState(0);
 
   useEffect(() => {
     reFetchTags();
@@ -83,17 +85,6 @@ const RulesTableFiltersComponent = ({
       }
     },
     [selectedTags]
-  );
-
-  const handleRefreshChange = useCallback(
-    ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
-      setIsPaused(isPaused);
-      setRefreshInterval(refreshInterval);
-      if (!isPaused) {
-        onIntervalChange(refreshInterval);
-      }
-    },
-    [onIntervalChange]
   );
 
   const NOOP = useCallback(() => {}, []);
@@ -150,8 +141,8 @@ const RulesTableFiltersComponent = ({
           isPaused={isRefreshPaused}
           onTimeChange={NOOP}
           onRefresh={onRefresh}
-          onRefreshChange={handleRefreshChange}
-          refreshInterval={interval}
+          onRefreshChange={onIntervalChange}
+          refreshInterval={refreshInterval}
           isAutoRefreshOnly
         />
       </EuiFlexItem>

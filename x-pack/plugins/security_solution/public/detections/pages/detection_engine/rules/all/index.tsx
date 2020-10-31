@@ -11,6 +11,9 @@ import {
   EuiTab,
   EuiTabs,
   EuiProgress,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  OnRefreshChangeProps,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -50,6 +53,7 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
 import { LastUpdatedAt } from '../../../../../common/components/last_updated';
+import { APP_ID } from '../../../../../../common/constants';
 
 const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -68,6 +72,10 @@ const initialState: State = {
   },
   rules: [],
   selectedRuleIds: [],
+  lastUpdated: 0,
+  showIdleModal: false,
+  isRefreshPaused: true,
+  intervalValue: 0,
 };
 
 interface AllRulesProps {
@@ -123,7 +131,6 @@ export const AllRules = React.memo<AllRulesProps>(
     setRefreshRulesData,
   }) => {
     const [initLoading, setInitLoading] = useState(true);
-    const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
     const tableRef = useRef<EuiBasicTable>();
     const [
       {
@@ -134,16 +141,28 @@ export const AllRules = React.memo<AllRulesProps>(
         pagination,
         rules,
         selectedRuleIds,
+        lastUpdated,
+        showIdleModal,
+        isRefreshPaused,
+        intervalValue,
       },
       dispatch,
-    ] = useReducer(allRulesReducer(tableRef), initialState);
+    ] = useReducer(allRulesReducer(tableRef), { ...initialState, lastUpdated: Date.now() });
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
-    const refreshInterval = useRef<number | null>(null);
+
+    // Auto rules info refresh refs
+    const idleTimeoutId = useRef<NodeJS.Timeout | null>(null);
+
+    const handleClearIdleTimeout = useCallback(() => {
+      if (idleTimeoutId.current != null) {
+        clearTimeout(idleTimeoutId.current);
+      }
+    }, []);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -153,6 +172,33 @@ export const AllRules = React.memo<AllRulesProps>(
         type: 'setRules',
         rules: newRules,
         pagination: newPagination,
+      });
+    }, []);
+
+    const setShowIdleModal = useCallback((show: boolean) => {
+      dispatch({
+        type: 'setShowIdleModal',
+        show,
+      });
+    }, []);
+
+    const setAutoRefreshPaused = useCallback((paused: boolean) => {
+      dispatch({
+        type: 'setAutoRefreshPaused',
+        paused,
+      });
+    }, []);
+
+    const setAutoRefreshInterval = useCallback((interval: number) => {
+      dispatch({
+        type: 'setAutoRefreshInterval',
+        interval,
+      });
+    }, []);
+
+    const setLastRefreshDate = useCallback(() => {
+      dispatch({
+        type: 'setLastRefreshDate',
       });
     }, []);
 
@@ -183,6 +229,7 @@ export const AllRules = React.memo<AllRulesProps>(
         application: {
           capabilities: { actions },
         },
+        storage,
       },
     } = useKibana();
 
@@ -301,7 +348,7 @@ export const AllRules = React.memo<AllRulesProps>(
       [loadingRuleIds]
     );
 
-    const handleFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+    const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
       dispatch({
         type: 'updateFilterOptions',
         filterOptions: {
@@ -323,62 +370,73 @@ export const AllRules = React.memo<AllRulesProps>(
       return false;
     }, [loadingRuleIds, loadingRulesAction]);
 
-    const handleAllRulesTabClick = useCallback(
-      (tabId: AllRulesTabs) => () => {
-        setAllRulesTab(tabId);
-      },
-      []
-    );
+    const handleResetIdleTimer = useCallback((): void => {
+      handleClearIdleTimeout();
 
-    const handleClearInterval = useCallback(() => {
-      if (refreshInterval.current != null) {
-        clearInterval(refreshInterval.current);
+      if (!isRefreshPaused) {
+        idleTimeoutId.current = setTimeout(() => {
+          setShowIdleModal(true);
+        }, 1800000);
       }
-    }, []);
+    }, [setShowIdleModal, handleClearIdleTimeout, isRefreshPaused]);
 
-    const handleRefreshData = useCallback((): void => {
-      if (reFetchRulesData != null && !isLoadingAnActionOnRule) {
-        reFetchRulesData(true);
-        setLastUpdated(Date.now());
-      }
-    }, [reFetchRulesData, isLoadingAnActionOnRule]);
+    const handleIdleModalContinue = useCallback((): void => {
+      setShowIdleModal(false);
+    }, [setShowIdleModal]);
 
-    const handleRefreshDataInterval = useCallback(
-      (interval) => {
-        handleClearInterval();
-
-        if (interval > 0) {
-          refreshInterval.current = window.setInterval(() => handleRefreshData(), interval);
+    const handleRefreshData = useCallback(
+      (forceRefresh = false): void => {
+        if (
+          reFetchRulesData != null &&
+          !isLoadingAnActionOnRule &&
+          (!isRefreshPaused || forceRefresh)
+        ) {
+          reFetchRulesData(true);
+          setLastRefreshDate();
         }
       },
-      [handleRefreshData, handleClearInterval]
+      [reFetchRulesData, isLoadingAnActionOnRule, isRefreshPaused, setLastRefreshDate]
     );
 
+    const handleRefreshDataInterval = useCallback(
+      ({ isPaused, refreshInterval: interval }: OnRefreshChangeProps) => {
+        setAutoRefreshPaused(isPaused);
+        setAutoRefreshInterval(interval);
+
+        // refresh data when refresh interval is activated
+        if (isRefreshPaused && !isPaused && interval > 0) {
+          handleRefreshData(true);
+          storage.set(`${APP_ID}-rulesRefreshInterval`, [false, interval]);
+        }
+
+        if (isPaused) {
+          storage.set(`${APP_ID}-rulesRefreshInterval`, [true, 0]);
+        }
+      },
+      [handleRefreshData, isRefreshPaused, setAutoRefreshInterval, setAutoRefreshPaused, storage]
+    );
+
+    // on initial render, want to check if user has any interval info
+    useEffect(() => {
+      const [isStoredRefreshPaused, storedRefreshInterval] = storage.get(
+        `${APP_ID}-rulesRefreshInterval`
+      );
+      setAutoRefreshPaused(storedRefreshInterval <= 0 ? true : isStoredRefreshPaused);
+      setAutoRefreshInterval(storedRefreshInterval);
+      window.addEventListener('mousemove', handleResetIdleTimer, { passive: true });
+      window.addEventListener('keydown', handleResetIdleTimer);
+    }, [storage, handleResetIdleTimer, setAutoRefreshPaused, setAutoRefreshInterval]);
+
+    // want to update local storage on cleanup, as opposed to
+    // updating every time interval is changed
     useEffect(() => {
       return () => {
-        handleClearInterval();
-      };
-    }, [handleClearInterval]);
+        handleClearIdleTimeout();
 
-    const tabs = useMemo(
-      () => (
-        <EuiTabs>
-          {allRulesTabs.map((tab) => (
-            <EuiTab
-              data-test-subj={`allRulesTableTab-${tab.id}`}
-              onClick={handleAllRulesTabClick(tab.id)}
-              isSelected={tab.id === allRulesTab}
-              disabled={tab.disabled}
-              key={tab.id}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      ),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [allRulesTabs, allRulesTab, setAllRulesTab]
-    );
+        window.removeEventListener('mousemove', handleResetIdleTimer);
+        window.removeEventListener('keydown', handleResetIdleTimer);
+      };
+    }, [handleClearIdleTimeout, handleResetIdleTimer]);
 
     const shouldShowRulesTable = useMemo(
       (): boolean => showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading,
@@ -392,6 +450,26 @@ export const AllRules = React.memo<AllRulesProps>(
         prePackagedRuleStatus === 'ruleNotInstalled' &&
         !initLoading,
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
+    );
+
+    const tabs = useMemo(
+      () => (
+        <EuiTabs>
+          {allRulesTabs.map((tab) => (
+            <EuiTab
+              data-test-subj={`allRulesTableTab-${tab.id}`}
+              onClick={() => setAllRulesTab(tab.id)}
+              isSelected={tab.id === allRulesTab}
+              disabled={tab.disabled}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [allRulesTabs, allRulesTab, setAllRulesTab]
     );
 
     return (
@@ -417,11 +495,14 @@ export const AllRules = React.memo<AllRulesProps>(
         {tabs}
         <EuiSpacer />
 
-        <Panel loading={loading || isLoadingRules || isLoadingRulesStatuses}>
+        <Panel
+          loading={loading || isLoadingRules || isLoadingRulesStatuses}
+          data-test-subj="allRulesPanel"
+        >
           <>
             {(isLoadingRules || isLoadingRulesStatuses) && (
               <EuiProgress
-                data-test-subj="initialLoadingPanelMatrixOverTime"
+                data-test-subj="loadingRulesInfoProgress"
                 size="xs"
                 position="absolute"
                 color="accent"
@@ -439,9 +520,11 @@ export const AllRules = React.memo<AllRulesProps>(
               }
             >
               <RulesTableFilters
-                onFilterChanged={handleFilterChangedCallback}
+                onFilterChanged={onFilterChangedCallback}
                 rulesCustomInstalled={rulesCustomInstalled}
                 rulesInstalled={rulesInstalled}
+                isRefreshPaused={isRefreshPaused}
+                refreshInterval={intervalValue}
                 isLoading={loading || isLoadingRules || isLoadingRulesStatuses}
                 onRefresh={handleRefreshData}
                 onIntervalChange={handleRefreshDataInterval}
@@ -460,6 +543,20 @@ export const AllRules = React.memo<AllRulesProps>(
             )}
             {initLoading && (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+            )}
+            {showIdleModal && (
+              <EuiOverlayMask>
+                <EuiConfirmModal
+                  title={i18n.REFRESH_PROMPT_TITLE}
+                  onCancel={handleIdleModalContinue}
+                  onConfirm={handleIdleModalContinue}
+                  confirmButtonText={i18n.REFRESH_PROMPT_CONFIRM}
+                  defaultFocusedButton="confirm"
+                  data-test-subj="allRulesIdleModal"
+                >
+                  <p>{i18n.REFRESH_PROMPT_BODY}</p>
+                </EuiConfirmModal>
+              </EuiOverlayMask>
             )}
             {shouldShowRulesTable && (
               <>
