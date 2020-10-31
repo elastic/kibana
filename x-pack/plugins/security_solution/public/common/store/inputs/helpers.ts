@@ -38,6 +38,7 @@ export const updateInputTimerange = (
           ...acc,
           [linkToId]: {
             ...get(linkToId, state),
+            isInitializing: false,
             timerange,
           },
         }),

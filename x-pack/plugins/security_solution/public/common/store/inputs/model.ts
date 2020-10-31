@@ -73,6 +73,7 @@ export interface GlobalKqlQuery extends GlobalGenericQuery {
 export type GlobalQuery = GlobalGraphqlQuery | GlobalKqlQuery;
 
 export interface InputsRange {
+  isInitializing: boolean;
   timerange: TimeRange;
   policy: Policy;
   queries: GlobalQuery[];

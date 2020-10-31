@@ -99,6 +99,7 @@ export interface Props {
   indexPattern: IIndexPattern;
   isLive: boolean;
   isSaving: boolean;
+  isTimerangeInitializing: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
@@ -131,6 +132,7 @@ export const TimelineComponent: React.FC<Props> = ({
   isLive,
   loadingSourcerer,
   isSaving,
+  isTimerangeInitializing,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
@@ -218,6 +220,7 @@ export const TimelineComponent: React.FC<Props> = ({
     endDate: end,
     id,
     indexNames,
+    isTimerangeInitializing,
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery ?? '',

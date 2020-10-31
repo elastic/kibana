@@ -52,6 +52,7 @@ interface UseTimelineEventsProps {
   skip?: boolean;
   endDate: string;
   id: string;
+  isTimerangeInitializing: boolean;
   fields: string[];
   indexNames: string[];
   limit: number;
@@ -80,6 +81,7 @@ const initSortDefault = {
  */
 class ActiveTimelineEvents {
   private _pageName: string = '';
+  private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
 
   getPageName() {
@@ -88,6 +90,14 @@ class ActiveTimelineEvents {
 
   setPageName(pageName: string) {
     this._pageName = pageName;
+  }
+
+  getRequest() {
+    return this._request;
+  }
+
+  setRequest(req: TimelineEventsAllRequestOptions) {
+    this._request = req;
   }
 
   getResponse() {
@@ -108,6 +118,7 @@ export const useTimelineEvents = ({
   endDate,
   id = ID,
   indexNames,
+  isTimerangeInitializing = false,
   fields,
   filterQuery,
   startDate,
@@ -115,6 +126,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+  const isInitialized = useRef(false);
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data, notifications } = useKibana().services;
@@ -192,11 +204,17 @@ export const useTimelineEvents = ({
 
   const timelineSearch = useCallback(
     (request: TimelineEventsAllRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || pageName === '' || !isInitialized.current) {
         return;
       }
 
-      if (id === TimelineId.active && pageName !== activeTimeline.getPageName()) {
+      if (
+        id === TimelineId.active &&
+        activeTimeline.getPageName() !== '' &&
+        pageName !== activeTimeline.getPageName()
+      ) {
+        activeTimeline.setPageName(pageName);
+        activeTimeline.setRequest(request);
         abortCtrl.current.abort();
         setLoading(false);
         setTimelineResponse((prevResp) => {
@@ -206,7 +224,9 @@ export const useTimelineEvents = ({
           }
           return prevResp;
         });
-        return;
+        if (activeTimeline.getResponse() != null) {
+          return;
+        }
       }
 
       let didCancel = false;
@@ -329,9 +349,11 @@ export const useTimelineEvents = ({
 
       if (
         !skip &&
+        !isTimerangeInitializing &&
         !skipQueryForDetectionsPage(id, indexNames) &&
         !deepEqual(prevRequest, currentRequest)
       ) {
+        isInitialized.current = true;
         return currentRequest;
       }
       return prevRequest;
@@ -339,6 +361,7 @@ export const useTimelineEvents = ({
   }, [
     dispatch,
     indexNames,
+    isTimerangeInitializing,
     docValueFields,
     endDate,
     filterQuery,

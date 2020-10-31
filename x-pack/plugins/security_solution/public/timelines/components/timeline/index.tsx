@@ -39,6 +39,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     isLive,
     isSaving,
     isTimelineExists,
+    isTimerangeInitializing,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
@@ -113,6 +114,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         isSaving={isSaving}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}
+        isTimerangeInitializing={isTimerangeInitializing}
         kqlMode={kqlMode}
         kqlQueryExpression={kqlQueryExpression}
         loadingSourcerer={loading}
@@ -129,6 +131,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       />
     );
   },
+  // eslint-disable-next-line complexity
   (prevProps, nextProps) => {
     return (
       prevProps.end === nextProps.end &&
@@ -137,6 +140,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.isLive === nextProps.isLive &&
       prevProps.isSaving === nextProps.isSaving &&
       prevProps.isTimelineExists === nextProps.isTimelineExists &&
+      prevProps.isTimerangeInitializing === nextProps.isTimerangeInitializing &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
@@ -195,6 +199,7 @@ const makeMapStateToProps = () => {
       end: input.timerange.to,
       filters: timelineFilter,
       graphEventId,
+      isTimerangeInitializing: input.isInitializing,
       id,
       isLive: input.policy.kind === 'interval',
       isSaving,

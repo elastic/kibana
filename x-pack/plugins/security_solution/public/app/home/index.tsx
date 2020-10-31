@@ -6,6 +6,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -23,6 +24,7 @@ import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { useThrottledResizeObserver } from '../../common/components/utils';
+import { inputsActions } from '../../common/store/inputs';
 
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
@@ -44,6 +46,7 @@ interface HomePageProps {
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
+  const dispatch = useDispatch();
   const { application, overlays } = useKibana().services;
   const subPluginId = useRef<string>('');
   const { ref, height = 0 } = useThrottledResizeObserver(300);
@@ -78,6 +81,12 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   // a background task solution can be built on the server side. Once a background task solution is available we
   // can remove this.
   useUpgradeEndpointPackage();
+
+  useEffect(() => {
+    return () => {
+      dispatch(inputsActions.setIsInitializing({ id: 'timeline' }));
+    };
+  }, [dispatch]);
 
   return (
     <SecuritySolutionAppWrapper>
