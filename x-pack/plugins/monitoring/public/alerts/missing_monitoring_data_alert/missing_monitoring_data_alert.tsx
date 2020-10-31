@@ -7,19 +7,19 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { validate } from './validation';
-import { ALERT_MISSING_MONITORING_DATA } from '../../../common/constants';
+import { ALERT_MISSING_MONITORING_DATA, ALERT_DETAILS } from '../../../common/constants';
 import { Expression } from './expression';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MissingMonitoringDataAlert } from '../../../server/alerts';
 
 export function createMissingMonitoringDataAlertType(): AlertTypeModel {
-  const alert = new MissingMonitoringDataAlert();
   return {
     id: ALERT_MISSING_MONITORING_DATA,
-    name: alert.label,
+    name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
     iconClass: 'bell',
     alertParamsExpression: (props: any) => (
-      <Expression {...props} paramDetails={MissingMonitoringDataAlert.paramDetails} />
+      <Expression
+        {...props}
+        paramDetails={ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].paramDetails}
+      />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
