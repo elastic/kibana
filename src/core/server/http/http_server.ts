@@ -245,8 +245,11 @@ export class HttpServer {
       return;
     }
 
-    this.log.debug('stopping http server');
-    await this.server.stop();
+    const hasStarted = this.server.info.started > 0;
+    if (hasStarted) {
+      this.log.debug('stopping http server');
+      await this.server.stop();
+    }
   }
 
   private getAuthOption(
