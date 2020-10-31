@@ -62,6 +62,7 @@
     "Elastic",
     "Endpoint Security"
   ],
+  "timeline_id": "db366523-f1c6-4c1f-8731-6ce5ed9e5717",
   "timestamp_override": "event.ingested",
   "type": "query",
   "version": 2
