@@ -149,7 +149,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
+      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
       getSearchStrategy: this.getSearchStrategy,
       search: this.search.bind(this),
       searchSource: {

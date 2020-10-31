@@ -28,7 +28,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
   http.registerOnPostAuth(async (request, response, toolkit) => {
     const serverBasePath = http.basePath.serverBasePath;
 
-    const path = request.url.pathname!;
+    const path = request.url.pathname;
 
     const spaceId = spacesService.getSpaceId(request);
 
