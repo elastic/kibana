@@ -6,7 +6,7 @@
 
 import { getCerts } from '../get_certs';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { getUptimeESMockClient } from './helper';
 
 describe('getCerts', () => {
   let mockHits: any;
@@ -89,8 +89,9 @@ describe('getCerts', () => {
   });
 
   it('parses query result and returns expected values', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockEsClient.search.mockResolvedValueOnce({
+    const { esClient, uptimeClient } = getUptimeESMockClient();
+
+    esClient.search.mockResolvedValueOnce({
       body: {
         hits: {
           hits: mockHits,
@@ -99,7 +100,7 @@ describe('getCerts', () => {
     } as any);
 
     const result = await getCerts({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: {
         heartbeatIndices: 'heartbeat*',
         certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,

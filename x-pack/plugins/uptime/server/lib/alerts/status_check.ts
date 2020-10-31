@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
-import { ElasticsearchClient } from 'kibana/server';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
@@ -27,7 +26,7 @@ import { UNNAMED_LOCATION } from '../../../common/constants';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 import { MonitorStatusTranslations } from '../../../common/translations';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
-import { UMServerLibs } from '../lib';
+import { UMServerLibs, UptimeESClient } from '../lib';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -80,7 +79,7 @@ export const generateFilterDSL = async (
 
 export const formatFilterString = async (
   dynamicSettings: DynamicSettings,
-  esClient: ElasticsearchClient,
+  esClient: UptimeESClient,
   filters: StatusCheckFilters,
   search: string,
   libs?: UMServerLibs
@@ -240,8 +239,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         state,
         services: { alertInstanceFactory },
       },
-      esClient,
       dynamicSettings,
+      uptimeESClient,
     }) {
       const {
         filters,
@@ -258,7 +257,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
 
       const filterString = await formatFilterString(
         dynamicSettings,
-        esClient,
+        uptimeESClient,
         filters,
         search,
         libs
@@ -277,7 +276,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       // after that shouldCheckStatus should be explicitly false
       if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
         downMonitorsByLocation = await libs.requests.getMonitorStatus({
-          callES: esClient,
+          callES: uptimeESClient,
           dynamicSettings,
           timerange,
           numTimes,
@@ -310,7 +309,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       let availabilityResults: GetMonitorAvailabilityResult[] = [];
       if (shouldCheckAvailability) {
         availabilityResults = await libs.requests.getMonitorAvailability({
-          callES: esClient,
+          callES: uptimeESClient,
           dynamicSettings,
           ...availability,
           filters: JSON.stringify(filterString) || undefined,

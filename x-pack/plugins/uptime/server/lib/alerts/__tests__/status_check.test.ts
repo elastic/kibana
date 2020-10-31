@@ -96,7 +96,11 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
+            "callES": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
@@ -152,7 +156,11 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
+            "callES": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
@@ -333,7 +341,11 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
+            "callES": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
@@ -571,7 +583,11 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
+            "callES": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
@@ -758,7 +774,11 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
+            "callES": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
@@ -813,7 +833,11 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
+            "callES": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
@@ -857,7 +881,11 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": [MockFunction],
+            "callES": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,

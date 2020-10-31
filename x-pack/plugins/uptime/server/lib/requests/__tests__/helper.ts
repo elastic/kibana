@@ -8,6 +8,7 @@ import { elasticsearchServiceMock } from '../../../../../../../src/core/server/m
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import { createUptimeESClient } from '../../lib';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
@@ -53,4 +54,9 @@ export const setupMockEsCompositeQuery = <K, C, I>(
   });
 
   return esMock;
+};
+
+export const getUptimeESMockClient = () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  return { esClient, uptimeClient: createUptimeESClient({ esClient }) };
 };

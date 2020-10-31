@@ -207,6 +207,8 @@ interface AggregationResponsePart<
   TDocument
 > {
   terms: {
+    doc_count_error_upper_bound?: number;
+    sum_other_doc_count?: number;
     buckets: Array<
       {
         doc_count: number;

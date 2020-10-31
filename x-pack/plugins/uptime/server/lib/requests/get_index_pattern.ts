@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
 import { DynamicSettings } from '../../../common/runtime_types';
+import { UptimeESClient } from '../lib';
 
 export interface IndexPatternTitleAndFields {
   title: string;
@@ -17,10 +17,10 @@ export const getUptimeIndexPattern = async ({
   esClient,
   dynamicSettings,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: UptimeESClient;
   dynamicSettings: DynamicSettings;
 }): Promise<IndexPatternTitleAndFields | undefined> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
+  const indexPatternsFetcher = new IndexPatternsFetcher(esClient.baseESClient);
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
   // and since `getFieldsForWildcard` will throw if the specified indices don't exist,

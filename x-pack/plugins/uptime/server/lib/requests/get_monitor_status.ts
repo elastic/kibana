@@ -7,6 +7,7 @@
 import { JsonObject } from 'src/plugins/kibana_utils/public';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
+import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
@@ -21,12 +22,6 @@ export interface GetMonitorStatusResult {
   location: string;
   count: number;
   monitorInfo: Ping;
-}
-
-interface MonitorStatusKey {
-  monitor_id: string;
-  status: string;
-  location: string;
 }
 
 const getLocationClause = (locations: string[]) => ({
@@ -45,72 +40,74 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
 > = async ({ callES, dynamicSettings, filters, locations, numTimes, timerange: { from, to } }) => {
-  let afterKey: MonitorStatusKey | undefined;
+  let afterKey: Record<string, string | number | null> | undefined;
 
   const STATUS = 'down';
   let monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
-    const esParams: any = {
-      index: dynamicSettings.heartbeatIndices,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'monitor.status': STATUS,
+    const esParams: ESSearchBody = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'monitor.status': STATUS,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
                 },
               },
+            },
+            // append user filters, if defined
+            ...(filters?.bool ? [filters] : []),
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        monitors: {
+          composite: {
+            size: 2000,
+            /**
+             * We "paginate" results by utilizing the `afterKey` field
+             * to tell Elasticsearch where it should start on subsequent queries.
+             */
+            ...(afterKey ? { after: afterKey } : {}),
+            sources: [
               {
-                range: {
-                  '@timestamp': {
-                    gte: from,
-                    lte: to,
+                monitorId: {
+                  terms: {
+                    field: 'monitor.id',
                   },
                 },
               },
-              // append user filters, if defined
-              ...(filters?.bool ? [filters] : []),
+              {
+                status: {
+                  terms: {
+                    field: 'monitor.status',
+                  },
+                },
+              },
+              {
+                location: {
+                  terms: {
+                    field: 'observer.geo.name',
+                    missing_bucket: true,
+                  },
+                },
+              },
             ],
           },
-        },
-        size: 0,
-        aggs: {
-          monitors: {
-            composite: {
-              size: 2000,
-              sources: [
-                {
-                  monitorId: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
-                  },
-                },
-                {
-                  status: {
-                    terms: {
-                      field: 'monitor.status',
-                    },
-                  },
-                },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
-                  },
-                },
-              ],
-            },
-            aggs: {
-              fields: {
-                top_hits: {
-                  size: 1,
-                },
+          aggs: {
+            fields: {
+              top_hits: {
+                size: 1,
               },
             },
           },
@@ -122,18 +119,13 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
      * Perform a logical `and` against the selected location filters.
      */
     if (locations.length) {
-      esParams.body.query.bool.filter.push(getLocationClause(locations));
+      esParams.query.bool.filter.push(getLocationClause(locations));
     }
 
-    /**
-     * We "paginate" results by utilizing the `afterKey` field
-     * to tell Elasticsearch where it should start on subsequent queries.
-     */
-    if (afterKey) {
-      esParams.body.aggs.monitors.composite.after = afterKey;
-    }
-
-    const { body: result } = await callES.search(esParams);
+    const { body: result } = await callES.search({
+      index: dynamicSettings.heartbeatIndices,
+      body: esParams,
+    });
     afterKey = result?.aggregations?.monitors?.after_key;
 
     monitors = monitors.concat(result?.aggregations?.monitors?.buckets || []);

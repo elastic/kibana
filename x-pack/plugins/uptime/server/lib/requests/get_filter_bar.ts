@@ -47,11 +47,21 @@ export const combineRangeWithFilters = (
 
 type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
 
+interface FiltersAggType {
+  [x: string]: { doc_count: number } & {
+    term: {
+      doc_count_error_upper_bound: number;
+      sum_other_doc_count: number;
+      buckets: Array<{ doc_count: number; key: string | number }>;
+    };
+  };
+}
+
 export const extractFilterAggsResults = (
-  responseAggregations: Record<string, any>,
+  responseAggregations: FiltersAggType | undefined,
   keys: SupportedFields[]
 ): OverviewFilters => {
-  const values: OverviewFilters = {
+  const values = {
     locations: [],
     ports: [],
     schemes: [],
@@ -59,7 +69,9 @@ export const extractFilterAggsResults = (
   };
   keys.forEach((key) => {
     const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
-    values[key] = buckets.map((item: { key: string | number }) => item.key);
+    values[key] = buckets.map((item) =>
+      key === 'ports' ? (item.key as number) : (item.key as string)
+    );
   });
   return values;
 };

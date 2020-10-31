@@ -6,6 +6,7 @@
 
 import { UMKibanaRouteWrapper } from './types';
 import { savedObjectsAdapter } from '../lib/saved_objects';
+import { createUptimeESClient } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
   ...uptimeRoute,
@@ -16,8 +17,11 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
     const { client: esClient } = context.core.elasticsearch;
     const { client: savedObjectsClient } = context.core.savedObjects;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+
+    const uptimeESClient = createUptimeESClient({ esClient: esClient.asCurrentUser });
+
     return uptimeRoute.handler(
-      { callES: esClient.asCurrentUser, esClient, savedObjectsClient, dynamicSettings },
+      { callES: uptimeESClient, esClient, savedObjectsClient, dynamicSettings },
       context,
       request,
       response

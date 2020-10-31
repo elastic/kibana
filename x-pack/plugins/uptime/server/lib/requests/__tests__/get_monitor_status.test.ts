@@ -7,6 +7,7 @@
 import { getMonitorStatus } from '../get_monitor_status';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { setupMockEsCompositeQuery } from './helper';
+import { createUptimeESClient } from '../../lib';
 
 export interface BucketItemCriteria {
   monitorId: string;
@@ -78,7 +79,7 @@ describe('getMonitorStatus', () => {
       },
     };
     await getMonitorStatus({
-      callES: esMock,
+      callES: createUptimeESClient({ esClient: esMock }),
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       filters: exampleFilter,
       locations: [],
@@ -194,7 +195,7 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     await getMonitorStatus({
-      callES: esMock,
+      callES: createUptimeESClient({ esClient: esMock }),
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       locations: ['fairbanks', 'harrisburg'],
       numTimes: 1,
@@ -351,7 +352,7 @@ describe('getMonitorStatus', () => {
       },
     };
     await getMonitorStatus({
-      callES: esMock,
+      callES: createUptimeESClient({ esClient: esMock }),
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       ...clientParameters,
     });
@@ -496,7 +497,7 @@ describe('getMonitorStatus', () => {
       },
     };
     await getMonitorStatus({
-      callES: esMock,
+      callES: createUptimeESClient({ esClient: esMock }),
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       ...clientParameters,
     });
@@ -616,7 +617,7 @@ describe('getMonitorStatus', () => {
       },
     };
     const result = await getMonitorStatus({
-      callES: esMock,
+      callES: createUptimeESClient({ esClient: esMock }),
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       ...clientParameters,
     });
@@ -794,7 +795,7 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const result = await getMonitorStatus({
-      callES: esMock,
+      callES: createUptimeESClient({ esClient: esMock }),
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       locations: [],
       numTimes: 5,

@@ -16,7 +16,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
   dynamicSettings,
   checkGroup,
 }) => {
-  const params: any = {
+  const params = {
     index: dynamicSettings.heartbeatIndices,
     body: {
       query: {

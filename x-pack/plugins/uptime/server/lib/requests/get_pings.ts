@@ -11,6 +11,7 @@ import {
   PingsResponse,
   Ping,
 } from '../../../common/runtime_types';
+import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -63,7 +64,6 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   location,
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
-  const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
   const filter: any[] = [{ range: { '@timestamp': { gte: from, lte: to } } }];
   if (monitorId) {
     filter.push({ term: { 'monitor.id': monitorId } });
@@ -82,29 +82,26 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
     },
   };
-  const params: any = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        ...queryContext,
-      },
-      ...sortParam,
-      size,
-      aggregations: {
-        locations: {
-          terms: {
-            field: 'observer.geo.name',
-            missing: 'N/A',
-            size: 1000,
-          },
+  const searchBody: ESSearchBody = {
+    size,
+    query: {
+      ...queryContext,
+    },
+    sort: [{ '@timestamp': { order: sort ?? 'desc' } }],
+    aggs: {
+      locations: {
+        terms: {
+          field: 'observer.geo.name',
+          missing: 'N/A',
+          size: 1000,
         },
       },
-      ...postFilterClause,
     },
+    ...postFilterClause,
   };
 
   if (index) {
-    params.body.from = index * size;
+    searchBody.from = index * size;
   }
 
   const {
@@ -112,7 +109,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       hits: { hits, total },
       aggregations: aggs,
     },
-  } = await callES.search(params);
+  } = await callES.search({ index: dynamicSettings.heartbeatIndices, body: searchBody });
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 

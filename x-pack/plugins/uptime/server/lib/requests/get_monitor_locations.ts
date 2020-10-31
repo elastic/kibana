@@ -25,7 +25,6 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   MonitorLocations
 > = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
   const params = {
-    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 0,
       query: {
@@ -89,6 +88,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   };
 
   const { body: result } = await callES.search(params);
+
   const locations = result?.aggregations?.location?.buckets ?? [];
 
   const getGeo = (locGeo: { name: string; location?: string }) => {

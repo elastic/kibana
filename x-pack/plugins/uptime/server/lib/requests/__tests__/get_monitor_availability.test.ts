@@ -13,6 +13,8 @@ import {
 import { setupMockEsCompositeQuery } from './helper';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
+import { createUptimeESClient } from '../../lib';
+
 interface AvailabilityTopHit {
   _source: Ping;
 }
@@ -109,7 +111,7 @@ describe('monitor availability', () => {
       }
     }`;
       await getMonitorAvailability({
-        callES: esMock,
+        callES: createUptimeESClient({ esClient: esMock }),
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         filters: exampleFilter,
         range: 2,
@@ -287,7 +289,7 @@ describe('monitor availability', () => {
         threshold: '69',
       };
       const result = await getMonitorAvailability({
-        callES: esMock,
+        callES: createUptimeESClient({ esClient: esMock }),
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         ...clientParameters,
       });
@@ -510,7 +512,7 @@ describe('monitor availability', () => {
         genBucketItem
       );
       const result = await getMonitorAvailability({
-        callES: esMock,
+        callES: createUptimeESClient({ esClient: esMock }),
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         range: 3,
         rangeUnit: 'M',
@@ -813,7 +815,7 @@ describe('monitor availability', () => {
         genBucketItem
       );
       await getMonitorAvailability({
-        callES: esMock,
+        callES: createUptimeESClient({ esClient: esMock }),
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         range: 3,
         rangeUnit: 's',

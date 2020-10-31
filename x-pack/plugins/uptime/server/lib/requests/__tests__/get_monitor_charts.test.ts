@@ -8,14 +8,16 @@ import { set } from '@elastic/safer-lodash-set';
 import mockChartsData from './monitor_charts_mock.json';
 import { getMonitorDurationChart } from '../get_monitor_duration';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { getUptimeESMockClient } from './helper';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will provide expected filters', async () => {
     expect.assertions(2);
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+
     await getMonitorDurationChart({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       monitorId: 'fooID',
       dateStart: 'now-15m',
@@ -33,12 +35,13 @@ describe('ElasticsearchMonitorsAdapter', () => {
   });
 
   it('inserts empty buckets for missing data', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+
     mockEsClient.search.mockResolvedValueOnce(mockChartsData as any);
 
     expect(
       await getMonitorDurationChart({
-        callES: mockEsClient,
+        callES: uptimeClient,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         monitorId: 'id',
         dateStart: 'now-15m',

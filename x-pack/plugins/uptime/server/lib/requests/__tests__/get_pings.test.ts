@@ -7,7 +7,7 @@
 import { getPings } from '../get_pings';
 import { set } from '@elastic/safer-lodash-set';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { getUptimeESMockClient } from './helper';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -87,11 +87,12 @@ describe('getAll', () => {
   });
 
   it('returns data in the appropriate shape', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     const result = await getPings({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
@@ -110,10 +111,12 @@ describe('getAll', () => {
   });
 
   it('creates appropriate sort and size parameters', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
@@ -126,7 +129,7 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -189,10 +192,12 @@ describe('getAll', () => {
   });
 
   it('omits the sort param when no sort passed', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       size: 12,
@@ -203,7 +208,7 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -266,10 +271,12 @@ describe('getAll', () => {
   });
 
   it('omits the size param when no size passed', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
@@ -280,7 +287,7 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -343,10 +350,12 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor ID', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
@@ -357,7 +366,7 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -425,10 +434,12 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor status', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
+      callES: uptimeClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
@@ -439,7 +450,7 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",

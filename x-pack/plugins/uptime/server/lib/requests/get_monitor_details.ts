@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
+import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
+import { UptimeESClient } from '../lib';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
@@ -22,7 +22,7 @@ const getMonitorAlerts = async ({
   alertsClient,
   monitorId,
 }: {
-  callES: ElasticsearchClient;
+  callES: UptimeESClient;
   dynamicSettings: any;
   alertsClient: any;
   monitorId: string;
@@ -136,9 +136,8 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
 
   const { body: result } = await callES.search(params);
 
-  const data = result.hits.hits[0]?._source;
+  const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
 
-  const monitorError: MonitorError | undefined = data?.error;
   const errorTimestamp: string | undefined = data?.['@timestamp'];
   const monAlerts = await getMonitorAlerts({
     callES,
@@ -149,7 +148,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
 
   return {
     monitorId,
-    error: monitorError,
+    error: data?.error,
     timestamp: errorTimestamp,
     alerts: monAlerts,
   };

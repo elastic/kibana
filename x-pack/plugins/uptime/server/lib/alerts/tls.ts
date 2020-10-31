@@ -100,14 +100,14 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
       context: [],
       state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
     },
-    async executor({ options, dynamicSettings, esClient }) {
+    async executor({ options, dynamicSettings, uptimeESClient }) {
       const {
         services: { alertInstanceFactory },
         state,
       } = options;
 
       const { certs, total }: CertResult = await libs.requests.getCerts({
-        callES: esClient,
+        callES: uptimeESClient,
         dynamicSettings,
         from: DEFAULT_FROM,
         to: DEFAULT_TO,
