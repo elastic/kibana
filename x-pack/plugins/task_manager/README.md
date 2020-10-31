@@ -194,8 +194,8 @@ The data stored for a task instance looks something like this:
   // this.
   runAt: "2020-07-24T17:34:35.272Z",
 
-  // Indicates that this is a recurring task. We currently only support
-  // interval syntax with either minutes such as `5m` or seconds `10s`.
+  // Indicates that this is a recurring task. We support interval syntax
+  // with days such as '1d', hours '3h', minutes such as `5m`, seconds `10s`.
   schedule: { interval: '5m' },
 
   // How many times this task has been unsuccesfully attempted,
