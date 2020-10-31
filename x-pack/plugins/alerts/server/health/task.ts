@@ -88,7 +88,7 @@ async function scheduleTasks(
       schedule: {
         interval,
       },
-      state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+      state: {},
       params: {},
     });
   } catch (e) {
