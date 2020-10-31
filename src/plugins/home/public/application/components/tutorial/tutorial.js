@@ -245,6 +245,9 @@ class TutorialUi extends React.Component {
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
               color="primary"
+              legend={i18n.translate('home.tutorial.selectionLegend', {
+                defaultMessage: 'Deployment type',
+              })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
