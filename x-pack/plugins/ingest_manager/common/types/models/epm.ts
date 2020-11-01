@@ -44,10 +44,8 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
 }
 
-export enum DataType {
-  logs = 'logs',
-  metrics = 'metrics',
-}
+export const dataTypes = ['logs', 'metrics'] as const;
+export type DataType = typeof dataTypes[number];
 
 export enum AgentAssetType {
   input = 'input',

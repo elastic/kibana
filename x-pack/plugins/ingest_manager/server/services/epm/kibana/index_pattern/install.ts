@@ -17,6 +17,7 @@ import {
   RegistryPackage,
   CallESAsCurrentUser,
   DataType,
+  dataTypes,
 } from '../../../../types';
 import { appContextService } from '../../../../services';
 
@@ -119,7 +120,7 @@ export async function installIndexPatterns(
   const packageVersionsInfo = await Promise.all(packageVersionsFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
-  const indexPatternTypes = [DataType.logs, DataType.metrics];
+  const indexPatternTypes = dataTypes;
   indexPatternTypes.forEach(async (indexPatternType) => {
     // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
@@ -391,7 +392,7 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => 
   // that no matching indices exist https://github.com/elastic/kibana/issues/62343
   const logger = appContextService.getLogger();
   return Promise.all(
-    Object.keys(DataType).map(async (indexPattern) => {
+    dataTypes.map(async (indexPattern) => {
       const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
       const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
       if (!indexExists) {
