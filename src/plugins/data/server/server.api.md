@@ -15,7 +15,8 @@ import { CoreStart } from 'src/core/server';
 import { CoreStart as CoreStart_2 } from 'kibana/server';
 import { DatatableColumn } from 'src/plugins/expressions';
 import { Duration } from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient as ElasticsearchClient_2 } from 'kibana/server';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
@@ -670,7 +671,7 @@ export const indexPatterns: {
 //
 // @public (undocumented)
 export class IndexPatternsFetcher {
-    constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices?: boolean);
+    constructor(elasticsearchClient: ElasticsearchClient_2, allowNoIndices?: boolean);
     getFieldsForTimePattern(options: {
         pattern: string;
         metaFields: string[];
@@ -699,7 +700,7 @@ export class IndexPatternsService implements Plugin_3<void, IndexPatternsService
     //
     // (undocumented)
     start(core: CoreStart_2, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
-        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract_2, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsService_2>;
+        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract_2, elasticsearchClient: ElasticsearchClient_2) => Promise<IndexPatternsService_2>;
     };
 }
 
