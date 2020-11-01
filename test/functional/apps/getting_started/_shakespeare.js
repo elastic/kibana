@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }) {
 
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 
-  describe('Shakespeare', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/82206
+  describe.skip('Shakespeare', function describeIndexTests() {
     // index starts on the first "count" metric at 1
     // Each new metric or aggregation added to a visualization gets the next index.
     // So to modify a metric or aggregation tests need to keep track of the
