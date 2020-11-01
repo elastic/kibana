@@ -86,9 +86,10 @@ export interface PluginSetupContract {
   registerType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-    Params extends ActionTypeParams = ActionTypeParams
+    Params extends ActionTypeParams = ActionTypeParams,
+    ExecutorResultData = void
   >(
-    actionType: ActionType<Config, Secrets, Params>
+    actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
 }
 
