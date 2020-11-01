@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiPage } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { TraceList } from './TraceList';
@@ -55,7 +55,8 @@ export function TraceOverview() {
   }, []);
 
   return (
-    <EuiPage>
+    <>
+      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
@@ -69,6 +70,6 @@ export function TraceOverview() {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPage>
+    </>
   );
 }

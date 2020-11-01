@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -118,7 +117,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   }
 
   return (
-    <EuiPage>
+    <>
       <Correlations />
       <EuiSpacer />
       <EuiFlexGroup>
@@ -196,6 +195,6 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPage>
+    </>
   );
 }

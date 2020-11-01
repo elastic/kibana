@@ -32,9 +32,11 @@ import { ApmPluginSetupDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
+import { px, units } from '../style/variables';
 import { setReadonlyBadge } from '../updateBadge';
 
 const MainContainer = styled.div`
+  padding: ${px(units.plus)};
   height: 100%;
 `;
 

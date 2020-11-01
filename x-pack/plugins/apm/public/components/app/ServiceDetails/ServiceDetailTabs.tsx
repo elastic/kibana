@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiTabs } from '@elastic/eui';
+import { EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { px, units } from '../../../style/variables';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
@@ -26,11 +24,6 @@ import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../TransactionOverview';
-
-const unit = px(units.unit);
-const Tabs = styled(EuiTabs)`
-  padding: 0 ${unit} ${unit} ${unit};
-`;
 
 interface Props {
   serviceName: string;
@@ -137,7 +130,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   return (
     <>
-      <Tabs display="condensed">
+      <EuiTabs>
         {tabs.map((serviceTab) => (
           <EuiTabLink
             isSelected={serviceTab.name === tab}
@@ -146,8 +139,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
             {serviceTab.link}
           </EuiTabLink>
         ))}
-      </Tabs>
-      <EuiHorizontalRule margin="none" />
+      </EuiTabs>
       {selectedTab ? selectedTab.render() : null}
     </>
   );

@@ -252,6 +252,8 @@ center,
 ${theme.eui.euiColorLightShade}`,
   backgroundSize: `${theme.eui.euiSizeL} ${theme.eui.euiSizeL}`,
   cursor: `${status === FETCH_STATUS.LOADING ? 'wait' : 'grab'}`,
+  margin: `-${theme.eui.gutterTypes.gutterLarge}`,
+  marginTop: 0,
 });
 
 export const getCytoscapeOptions = (
