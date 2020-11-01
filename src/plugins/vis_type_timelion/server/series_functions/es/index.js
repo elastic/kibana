@@ -136,7 +136,7 @@ export default new Datasource('es', {
         body,
         {
           strategy: ES_SEARCH_STRATEGY,
-          sessionId: tlConfig.request.body.sessionId,
+          sessionId: tlConfig.request?.body.sessionId,
         },
         tlConfig.context
       )
