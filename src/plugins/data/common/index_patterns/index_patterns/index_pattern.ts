@@ -277,7 +277,10 @@ export class IndexPattern implements IIndexPattern {
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      fields: this.fields ? JSON.stringify(this.fields) : undefined,
+      // todo only save scripted
+      fields: this.fields
+        ? JSON.stringify(this.fields.filter((field) => field.scripted))
+        : undefined,
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,

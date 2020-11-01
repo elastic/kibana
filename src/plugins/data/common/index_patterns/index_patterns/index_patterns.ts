@@ -195,22 +195,6 @@ export class IndexPatternsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: IndexPatternFieldMap): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return Object.values(specs).every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
   /**
    * Get field list by providing { pattern }
    * @param options
@@ -369,19 +353,14 @@ export class IndexPatternsService {
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta } = spec;
 
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-    let isSaveRequired = isFieldRefreshRequired;
     try {
-      spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title as string,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            rollupIndex: typeMeta?.params?.rollupIndex,
-          })
-        : spec.fields;
+      spec.fields = await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
+        pattern: title as string,
+        metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+        type,
+        rollupIndex: typeMeta?.params?.rollupIndex,
+      });
     } catch (err) {
-      isSaveRequired = false;
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({
           title: (err as any).message,
@@ -404,22 +383,6 @@ export class IndexPatternsService {
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);
-    if (isSaveRequired) {
-      try {
-        this.updateSavedObject(indexPattern);
-      } catch (err) {
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
-            defaultMessage:
-              'Error saving after fetching fields for index pattern {title} (ID: {id})',
-            values: {
-              id: indexPattern.id,
-              title: indexPattern.title,
-            },
-          }),
-        });
-      }
-    }
 
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
