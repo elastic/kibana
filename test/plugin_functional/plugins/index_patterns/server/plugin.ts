@@ -36,6 +36,25 @@ export class IndexPatternsTestPlugin
   public setup(core: CoreSetup<IndexPatternsTestStartDeps>) {
     const router = core.http.createRouter();
 
+    router.post(
+      {
+        path: '/api/index-patterns-plugin/create',
+        validate: {
+          body: schema.object({}, { unknowns: 'allow' }),
+        },
+      },
+      async (context, req, res) => {
+        const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
+        const savedObjectsClient = savedObjects.getScopedClient(req);
+        const service = await data.indexPatterns.indexPatternsServiceFactory(
+          savedObjectsClient,
+          elasticsearch.client.asScoped(req).asCurrentUser
+        );
+        const ids = await service.createAndSave(req.body);
+        return res.ok({ body: ids });
+      }
+    );
+
     router.get(
       { path: '/api/index-patterns-plugin/get-all', validate: false },
       async (context, req, res) => {
