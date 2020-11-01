@@ -37,7 +37,7 @@ export class VegaLayer extends AbstractLayer {
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this._getVegaLayerId();
 
-    if (!source) {
+    if (!mbMap.getSource('canvas-source')) {
       const getEvent = function (name, x, y) {
         const evt = new MouseEvent(name, { clientX: x, clientY: y });
         evt.changedTouches = [
@@ -72,7 +72,7 @@ export class VegaLayer extends AbstractLayer {
           .height(height)
           .run();
       };
-      mbMap.on('move', onChange);
+      mbMap.on('moveend', onChange);
       mbMap.on('resize', onChange);
       mbMap.addSource('canvas-source', {
         type: 'canvas',
@@ -83,7 +83,7 @@ export class VegaLayer extends AbstractLayer {
           mbMap.getBounds().getSouthEast().toArray(),
           mbMap.getBounds().getSouthWest().toArray(),
         ],
-        // animate: true,
+        animate: true,
       });
 
       mbMap.addLayer({

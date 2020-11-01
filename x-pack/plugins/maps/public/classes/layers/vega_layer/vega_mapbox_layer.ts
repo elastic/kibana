@@ -56,6 +56,8 @@ export const getCanvas = (width, height) => {
 export const createMapboxLayer = async function (mbMap, mbLayerId) {
   const width = mbMap.getCanvas().clientWidth;
   const height = mbMap.getCanvas().clientHeight;
+  const center = mbMap.getCenter();
+  const zoom = mbMap.getZoom();
 
   const deckCanvas = getCanvas(width, height);
   const augmentedSpec = augmentSpec(sample);
@@ -69,12 +71,12 @@ export const createMapboxLayer = async function (mbMap, mbLayerId) {
     // .addSignalListener('longitude', onSignal)
     // .addSignalListener('zoom', onSignal)
     .renderer('canvas') // renderer (canvas or svg)
+    .signal('latitude', center.lat)
+    .signal('longitude', center.lng)
+    .signal('zoom', zoom + 1)
     .width(width)
     .height(height)
     .initialize(deckCanvas) // parent DOM container
-    .signal('latitude', 0)
-    .signal('longitude', 0)
-    .signal('zoom', 2.37)
     .hover(true); // enable hover processing
 
   await view.runAsync();
