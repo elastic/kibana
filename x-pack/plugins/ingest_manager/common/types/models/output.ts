@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum OutputType {
-  Elasticsearch = 'elasticsearch',
-}
+export const outputTypes = ['elasticsearch'] as const;
+export type OutputType = typeof outputTypes[number];
 
 export interface NewOutput {
   is_default: boolean;
