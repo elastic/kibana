@@ -867,7 +867,6 @@
     "data.functions.indexPatternLoad.id.help": "読み込むインデックスパターンID",
     "data.indexPatterns.ensureDefaultIndexPattern.bannerLabel": "Kibanaでデータの可視化と閲覧を行うには、Elasticsearchからデータを取得するためのインデックスパターンの作成が必要です。",
     "data.indexPatterns.fetchFieldErrorTitle": "インデックスパターンのフィールド取得中にエラーが発生 {title} (ID: {id})",
-    "data.indexPatterns.fetchFieldSaveErrorTitle": "インデックスパターンのフィールド取得後の保存中にエラーが発生 {title}（ID: {id}）",
     "data.indexPatterns.unableWriteLabel": "インデックスパターンを書き込めません！このインデックスパターンへの最新の変更を取得するには、ページを更新してください。",
     "data.noDataPopover.content": "この時間範囲にはデータが含まれていません表示するフィールドを増やし、グラフを作成するには、時間範囲を広げるか、調整してください。",
     "data.noDataPopover.dismissAction": "今後表示しない",

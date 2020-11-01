@@ -867,7 +867,6 @@
     "data.functions.indexPatternLoad.id.help": "要加载的索引模式 id",
     "data.indexPatterns.ensureDefaultIndexPattern.bannerLabel": "要在 Kibana 中可视化和浏览数据，必须创建索引模式，以从 Elasticsearch 中检索数据。",
     "data.indexPatterns.fetchFieldErrorTitle": "提取索引模式 {title} (ID: {id}) 的字段时出错",
-    "data.indexPatterns.fetchFieldSaveErrorTitle": "在提取索引模式 {title}（ID：{id}）的字段后保存出错",
     "data.indexPatterns.unableWriteLabel": "无法写入索引模式！请刷新页面以获取此索引模式的最新更改。",
     "data.noDataPopover.content": "此时间范围不包含任何数据。增大或调整时间范围，以查看更多的字段并创建图表。",
     "data.noDataPopover.dismissAction": "不再显示",
