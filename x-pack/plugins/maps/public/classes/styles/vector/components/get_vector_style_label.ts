@@ -8,14 +8,14 @@ import { i18n } from '@kbn/i18n';
 
 import { VECTOR_STYLES } from '../../../../../common/constants';
 
-export function getDisabledByMessage(styleName) {
+export function getDisabledByMessage(styleName: VECTOR_STYLES) {
   return i18n.translate('xpack.maps.styles.vector.disabledByMessage', {
     defaultMessage: `Set '{styleLabel}' to enable`,
     values: { styleLabel: getVectorStyleLabel(styleName) },
   });
 }
 
-export function getVectorStyleLabel(styleName) {
+export function getVectorStyleLabel(styleName: VECTOR_STYLES) {
   switch (styleName) {
     case VECTOR_STYLES.FILL_COLOR:
       return i18n.translate('xpack.maps.styles.vector.fillColorLabel', {
