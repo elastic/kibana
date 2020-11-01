@@ -160,6 +160,7 @@ export const mockGlobalState: State = {
   },
   inputs: {
     global: {
+      isInitializing: false,
       timerange: {
         kind: 'relative',
         fromStr: DEFAULT_FROM,
@@ -177,6 +178,7 @@ export const mockGlobalState: State = {
       filters: [],
     },
     timeline: {
+      isInitializing: false,
       timerange: {
         kind: 'relative',
         fromStr: DEFAULT_FROM,
@@ -203,6 +205,7 @@ export const mockGlobalState: State = {
     },
     timelineById: {
       test: {
+        activePage: 0,
         deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
@@ -213,6 +216,7 @@ export const mockGlobalState: State = {
         description: '',
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
+        expandedEventIds: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,

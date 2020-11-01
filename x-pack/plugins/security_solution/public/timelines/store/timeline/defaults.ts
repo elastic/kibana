@@ -16,6 +16,7 @@ import { SubsetTimelineModel, TimelineModel } from './model';
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
+  activePage: 0,
   columns: defaultHeaders,
   dataProviders: [],
   dateRange: { start, end },
@@ -24,6 +25,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   eventType: 'all',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
+  expandedEventIds: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],

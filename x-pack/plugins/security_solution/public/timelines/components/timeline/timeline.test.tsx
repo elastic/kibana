@@ -103,6 +103,7 @@ describe('Timeline', () => {
       indexPattern,
       isLive: false,
       isSaving: false,
+      isTimerangeInitializing: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],

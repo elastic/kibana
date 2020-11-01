@@ -28,6 +28,7 @@ describe('selectors', () => {
   };
 
   let inputState: InputsRange = {
+    isInitializing: false,
     timerange: absoluteTime,
     policy: {
       kind: 'manual',
@@ -62,6 +63,7 @@ describe('selectors', () => {
     };
 
     inputState = {
+      isInitializing: false,
       timerange: absoluteTime,
       policy: {
         kind: 'manual',

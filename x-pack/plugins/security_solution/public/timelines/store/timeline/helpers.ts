@@ -26,6 +26,7 @@ import {
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
+  TimelineId,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
@@ -113,6 +114,21 @@ interface AddTimelineParams {
   timelineById: TimelineById;
 }
 
+export const shouldKeepActiveTimelineContext = (
+  id: string,
+  oldTimeline: TimelineModel,
+  newTimeline: TimelineModel
+) => {
+  if (
+    id === TimelineId.active &&
+    oldTimeline.savedObjectId != null &&
+    oldTimeline.savedObjectId === newTimeline.savedObjectId
+  ) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * Add a saved object timeline to the store
  * and default the value to what need to be if values are null
@@ -121,15 +137,18 @@ export const addTimelineToStore = ({
   id,
   timeline,
   timelineById,
-}: AddTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    ...timeline,
-    activePage: 0,
-    expandedEventIds: {},
-    isLoading: timelineById[id].isLoading,
-  },
-});
+}: AddTimelineParams): TimelineById => {
+  const keepActiveTimelineContext = shouldKeepActiveTimelineContext(id, timelineById[id], timeline);
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      activePage: keepActiveTimelineContext ? timeline.activePage : 0,
+      expandedEventIds: keepActiveTimelineContext ? timeline.expandedEventIds : {},
+      isLoading: timelineById[id].isLoading,
+    },
+  };
+};
 
 interface AddNewTimelineParams {
   columns: ColumnHeaderOptions[];
@@ -183,14 +202,12 @@ export const addNewTimeline = ({
   return {
     ...timelineById,
     [id]: {
-      activePage: 0,
       id,
       ...timelineDefaults,
       columns,
       dataProviders,
       dateRange,
       excludedRowRendererIds,
-      expandedEventIds: {},
       filters,
       itemsPerPage,
       indexNames,

@@ -130,6 +130,7 @@ export interface TimelineModel {
 export type SubsetTimelineModel = Readonly<
   Pick<
     TimelineModel,
+    | 'activePage'
     | 'columns'
     | 'dataProviders'
     | 'deletedEventIds'
@@ -137,6 +138,7 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
+    | 'expandedEventIds'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'

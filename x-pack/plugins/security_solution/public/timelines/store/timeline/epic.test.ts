@@ -14,6 +14,7 @@ describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
       const timelineModel: TimelineModel = {
+        activePage: 0,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -90,6 +91,7 @@ describe('Epic Timeline', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEventIds: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         filters: [

@@ -52,7 +52,7 @@ interface UseTimelineEventsProps {
   skip?: boolean;
   endDate: string;
   id: string;
-  isTimerangeInitializing: boolean;
+  isTimerangeInitializing?: boolean;
   fields: string[];
   indexNames: string[];
   limit: number;
