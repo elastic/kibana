@@ -6,7 +6,8 @@
 import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
 
-export type AgentPolicyStatus = 'active' | 'inactive';
+export const agentPolicyStatuses = ['active', 'inactive'] as const;
+export type AgentPolicyStatus = typeof agentPolicyStatuses[number];
 
 export interface NewAgentPolicy {
   name: string;
