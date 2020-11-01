@@ -26,7 +26,7 @@ export interface GetPingHistogramParams {
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, dynamicSettings, from, to, filters, monitorId, bucketSize }) => {
+> = async ({ callES, from, to, filters, monitorId, bucketSize }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -40,34 +40,31 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   const minInterval = getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT);
 
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter,
-        },
+    query: {
+      bool: {
+        filter,
       },
-      size: 0,
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: bucketSize || minInterval + 'ms',
-            missing: 0,
-          },
-          aggs: {
-            down: {
-              filter: {
-                term: {
-                  'monitor.status': 'down',
-                },
+    },
+    size: 0,
+    aggs: {
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: bucketSize || minInterval + 'ms',
+          missing: 0,
+        },
+        aggs: {
+          down: {
+            filter: {
+              term: {
+                'monitor.status': 'down',
               },
             },
-            up: {
-              filter: {
-                term: {
-                  'monitor.status': 'up',
-                },
+          },
+          up: {
+            filter: {
+              term: {
+                'monitor.status': 'up',
               },
             },
           },
@@ -76,7 +73,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await callES.search(params);
+  const { body: result } = await callES.search({ body: params });
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map((bucket) => {
     const x: number = bucket.key;

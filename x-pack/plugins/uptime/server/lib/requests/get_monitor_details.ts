@@ -8,6 +8,7 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
 import { UptimeESClient } from '../lib';
+import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
@@ -44,27 +45,24 @@ const getMonitorAlerts = async ({
       monitorAlerts.push(currAlert);
       continue;
     }
-    const esParams: any = {
-      index: dynamicSettings.heartbeatIndices,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'monitor.id': monitorId,
-                },
+    const esParams: ESSearchBody = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'monitor.id': monitorId,
               },
-            ],
-          },
-        },
-        size: 0,
-        aggs: {
-          monitors: {
-            terms: {
-              field: 'monitor.id',
-              size: 1000,
             },
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        monitors: {
+          terms: {
+            field: 'monitor.id',
+            size: 1000,
           },
         },
       },
@@ -76,9 +74,9 @@ const getMonitorAlerts = async ({
       currAlert.params.filters,
       currAlert.params.search
     );
-    esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters?.bool);
+    esParams.query.bool = Object.assign({}, esParams.query.bool, parsedFilters?.bool);
 
-    const { body: result } = await callES.search(esParams);
+    const { body: result } = await callES.search({ body: esParams });
 
     if (result.hits.total.value > 0) {
       monitorAlerts.push(currAlert);
@@ -108,33 +106,30 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   ];
 
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      size: 1,
-      _source: ['error', '@timestamp'],
-      query: {
-        bool: {
-          must: [
-            {
-              exists: {
-                field: 'error',
-              },
+    size: 1,
+    _source: ['error', '@timestamp'],
+    query: {
+      bool: {
+        must: [
+          {
+            exists: {
+              field: 'error',
             },
-          ],
-          filter: queryFilters,
+          },
+        ],
+        filter: queryFilters,
+      },
+    },
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
         },
       },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
-        },
-      ],
-    },
+    ],
   };
 
-  const { body: result } = await callES.search(params);
+  const { body: result } = await callES.search({ body: params });
 
   const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
 

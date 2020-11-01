@@ -17,14 +17,12 @@ export interface GetSnapshotCountParams {
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
   callES,
-  dynamicSettings: { heartbeatIndices },
   dateRangeStart,
   dateRangeEnd,
   filters,
 }): Promise<Snapshot> => {
   const context = new QueryContext(
     callES,
-    heartbeatIndices,
     dateRangeStart,
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,
@@ -40,7 +38,6 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   const { body: res } = await context.search({
-    index: context.heartbeatIndices,
     body: statusCountBody(await context.dateAndCustomFilters()),
   });
 

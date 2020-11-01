@@ -7,6 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
 import { SortOptions } from '../../../../apm/typings/elasticsearch/aggregations';
+import { AfterKey } from './get_monitor_status';
 
 export interface AvailabilityKey {
   monitorId: string;
@@ -37,7 +38,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
   GetMonitorAvailabilityResult[]
 > = async ({ callES, dynamicSettings, range, rangeUnit, threshold: thresholdString, filters }) => {
   const queryResults: Array<Promise<GetMonitorAvailabilityResult[]>> = [];
-  let afterKey: AvailabilityKey | undefined;
+  let afterKey: AfterKey;
 
   const threshold = Number(thresholdString) / 100;
   if (threshold <= 0 || threshold > 1.0) {
@@ -55,92 +56,89 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
 
   do {
     const esParams = {
-      index: dynamicSettings.heartbeatIndices,
-      body: {
-        query: {
-          bool: {
-            filter: [
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte,
+                  lte: 'now',
+                },
+              },
+            },
+            // append user filters, if defined
+            ...(parsedFilters?.bool ? [parsedFilters] : []),
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        monitors: {
+          composite: {
+            size: 2000,
+            // ...(afterKey ? { after: afterKey } : {}),
+            sources: [
               {
-                range: {
-                  '@timestamp': {
-                    gte,
-                    lte: 'now',
+                monitorId: {
+                  terms: {
+                    field: 'monitor.id',
                   },
                 },
               },
-              // append user filters, if defined
-              ...(parsedFilters?.bool ? [parsedFilters] : []),
+              {
+                location: {
+                  terms: {
+                    field: 'observer.geo.name',
+                    missing_bucket: true,
+                  },
+                },
+              },
             ],
           },
-        },
-        size: 0,
-        aggs: {
-          monitors: {
-            composite: {
-              size: 2000,
-              ...(afterKey ? { after: afterKey } : {}),
-              sources: [
-                {
-                  monitorId: {
-                    terms: {
-                      field: 'monitor.id',
+          aggs: {
+            fields: {
+              top_hits: {
+                size: 1,
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc',
                     },
                   },
-                },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
-                  },
-                },
-              ],
+                ] as SortOptions,
+              },
             },
-            aggs: {
-              fields: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ] as SortOptions,
-                },
+            up_sum: {
+              sum: {
+                field: 'summary.up',
+                missing: 0,
               },
-              up_sum: {
-                sum: {
-                  field: 'summary.up',
-                  missing: 0,
-                },
+            },
+            down_sum: {
+              sum: {
+                field: 'summary.down',
+                missing: 0,
               },
-              down_sum: {
-                sum: {
-                  field: 'summary.down',
-                  missing: 0,
+            },
+            ratio: {
+              bucket_script: {
+                buckets_path: {
+                  upTotal: 'up_sum',
+                  downTotal: 'down_sum',
                 },
-              },
-              ratio: {
-                bucket_script: {
-                  buckets_path: {
-                    upTotal: 'up_sum',
-                    downTotal: 'down_sum',
-                  },
-                  script: `
+                script: `
                 if (params.upTotal + params.downTotal > 0) {
                   return params.upTotal / (params.upTotal + params.downTotal);
                 } return null;`,
-                },
               },
-              filtered: {
-                bucket_selector: {
-                  buckets_path: {
-                    threshold: 'ratio.value',
-                  },
-                  script: `params.threshold < ${threshold}`,
+            },
+            filtered: {
+              bucket_selector: {
+                buckets_path: {
+                  threshold: 'ratio.value',
                 },
+                script: `params.threshold < ${threshold}`,
               },
             },
           },
@@ -148,8 +146,9 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    const { body: result } = await callES.search(esParams);
-    afterKey = result?.aggregations?.monitors?.after_key;
+    const { body: result } = await callES.search({ body: esParams });
+
+    afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
 
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));
   } while (afterKey !== undefined);

@@ -24,7 +24,7 @@ export interface GetMonitorLocationsParams {
 export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
-> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
+> = async ({ callES, monitorId, dateStart, dateEnd }) => {
   const sortOptions: SortOptions = [
     {
       '@timestamp': {
@@ -34,58 +34,55 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   ];
 
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.id': monitorId,
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.id': monitorId,
             },
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateStart,
-                  lte: dateEnd,
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        location: {
-          terms: {
-            field: 'observer.geo.name',
-            missing: '__location_missing__',
           },
-          aggs: {
-            most_recent: {
-              top_hits: {
-                size: 1,
-                sort: sortOptions,
-                _source: ['monitor', 'summary', 'observer', '@timestamp'],
+          {
+            exists: {
+              field: 'summary',
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: dateStart,
+                lte: dateEnd,
               },
             },
-            down_history: {
-              sum: {
-                field: 'summary.down',
-                missing: 0,
-              },
+          },
+        ],
+      },
+    },
+    aggs: {
+      location: {
+        terms: {
+          field: 'observer.geo.name',
+          missing: '__location_missing__',
+        },
+        aggs: {
+          most_recent: {
+            top_hits: {
+              size: 1,
+              sort: sortOptions,
+              _source: ['monitor', 'summary', 'observer', '@timestamp'],
             },
-            up_history: {
-              sum: {
-                field: 'summary.up',
-                missing: 0,
-              },
+          },
+          down_history: {
+            sum: {
+              field: 'summary.down',
+              missing: 0,
+            },
+          },
+          up_history: {
+            sum: {
+              field: 'summary.up',
+              missing: 0,
             },
           },
         },
@@ -93,7 +90,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await callES.search(params);
+  const { body: result } = await callES.search({ body: params });
 
   const locations = result?.aggregations?.location?.buckets ?? [];
 

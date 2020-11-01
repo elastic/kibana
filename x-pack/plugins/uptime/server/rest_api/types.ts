@@ -16,7 +16,6 @@ import {
   IKibanaResponse,
   IScopedClusterClient,
 } from 'kibana/server';
-import { DynamicSettings } from '../../common/runtime_types';
 import { UMServerLibs, UptimeESClient } from '../lib/lib';
 
 /**
@@ -65,7 +64,6 @@ export type UMKibanaRouteWrapper = (uptimeRoute: UptimeRoute) => UMKibanaRoute;
 export interface UMRouteParams {
   callES: UptimeESClient;
   esClient: IScopedClusterClient;
-  dynamicSettings: DynamicSettings;
   savedObjectsClient: SavedObjectsClientContract;
 }
 

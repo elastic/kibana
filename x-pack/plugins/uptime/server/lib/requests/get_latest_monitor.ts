@@ -33,34 +33,32 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   status,
 }) => {
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateStart,
-                  lte: dateEnd,
-                },
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: dateStart,
+                lte: dateEnd,
               },
             },
-            ...(status ? [{ term: { 'monitor.status': status } }] : []),
-            ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
-            ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
-          ],
-        },
+          },
+          ...(status ? [{ term: { 'monitor.status': status } }] : []),
+          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+          ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
+        ],
       },
-      size: 1,
-      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
-      sort: {
-        '@timestamp': { order: 'desc' },
-      },
+    },
+    size: 1,
+    _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
+    sort: {
+      '@timestamp': { order: 'desc' },
     },
   };
 
-  const { body: result } = await callES.search(params);
+  const { body: result } = await callES.search({ body: params });
+
   const doc = result.hits?.hits?.[0];
   const docId = doc?._id ?? '';
   const { tls, ...ping } = (doc?._source as Ping & { '@timestamp': string }) ?? {};

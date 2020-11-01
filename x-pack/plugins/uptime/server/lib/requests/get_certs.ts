@@ -141,7 +141,6 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
 
   // console.log(JSON.stringify(params, null, 2));
   const { body: result } = await callES.search({
-    index: dynamicSettings.heartbeatIndices,
     body: searchBody,
   });
 

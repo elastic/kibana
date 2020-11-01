@@ -13,36 +13,32 @@ interface GetJourneyStepsParams {
 
 export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
   callES,
-  dynamicSettings,
   checkGroup,
 }) => {
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                'synthetics.type': ['step/end', 'stderr', 'cmd/status', 'step/screenshot'],
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              'synthetics.type': ['step/end', 'stderr', 'cmd/status', 'step/screenshot'],
             },
-            {
-              term: {
-                'monitor.check_group': checkGroup,
-              },
+          },
+          {
+            term: {
+              'monitor.check_group': checkGroup,
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: [{ '@timestamp': { order: 'asc' } }],
-      _source: {
-        excludes: ['synthetics.blob'],
-      },
+    },
+    sort: [{ '@timestamp': { order: 'asc' } }],
+    _source: {
+      excludes: ['synthetics.blob'],
     },
     size: 500,
   };
-  const { body: result } = await callES.search(params);
+  const { body: result } = await callES.search({ body: params });
 
   const screenshotIndexes: number[] = result.hits.hits
     .filter((h) => (h?._source as Ping).synthetics?.type === 'step/screenshot')

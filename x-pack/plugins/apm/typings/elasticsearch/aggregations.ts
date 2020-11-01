@@ -172,6 +172,12 @@ export interface AggregationOptionsByType {
     field?: string;
     background_filter?: Record<string, any>;
   } & AggregationSourceOptions;
+  bucket_selector: {
+    buckets_path: {
+      [x: string]: string;
+    };
+    script: string;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -207,14 +213,14 @@ interface AggregationResponsePart<
   TDocument
 > {
   terms: {
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
     buckets: Array<
       {
         doc_count: number;
         key: string | number;
       } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
+    doc_count_error_upper_bound?: number;
+    sum_other_doc_count?: number;
   };
   histogram: {
     buckets: Array<
@@ -374,6 +380,7 @@ interface AggregationResponsePart<
     >;
   };
   bucket_sort: undefined;
+  bucket_selector: undefined;
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap

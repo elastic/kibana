@@ -34,7 +34,7 @@ export interface ESSearchBody {
   aggs?: AggregationInputMap;
   track_total_hits?: boolean | number;
   collapse?: CollapseQuery;
-  _source?: string | string[];
+  _source?: string | string[] | { excludes: string | string[] };
 }
 
 export type ESSearchRequest = Omit<SearchParams, 'body'> & {

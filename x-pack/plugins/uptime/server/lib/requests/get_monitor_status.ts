@@ -35,12 +35,12 @@ const getLocationClause = (locations: string[]) => ({
   },
 });
 
-type AfterKey = Record<string, string | number | null> | undefined;
+export type AfterKey = Record<string, string | number | null> | undefined;
 
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ callES, dynamicSettings, filters, locations, numTimes, timerange: { from, to } }) => {
+> = async ({ callES, filters, locations, numTimes, timerange: { from, to } }) => {
   let afterKey: AfterKey;
 
   const STATUS = 'down';
@@ -124,7 +124,6 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     }
 
     const { body: result } = await callES.search({
-      index: dynamicSettings.heartbeatIndices,
       body: esParams,
     });
 

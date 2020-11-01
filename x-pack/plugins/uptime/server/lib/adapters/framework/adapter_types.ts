@@ -13,7 +13,6 @@ import {
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../common/runtime_types';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { UptimeESClient } from '../../lib';
 
@@ -21,7 +20,6 @@ export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
     callES: UptimeESClient;
     esClient?: IScopedClusterClient;
-    dynamicSettings: DynamicSettings;
   } & P
 ) => Promise<R>;
 

@@ -47,7 +47,6 @@ export const combineRangeWithFilters = (
 
 export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
   callES,
-  dynamicSettings,
   dateRangeStart,
   dateRangeEnd,
   search,
@@ -63,20 +62,17 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
     filterOptions
   );
   const filters = combineRangeWithFilters(dateRangeStart, dateRangeEnd, search);
-  const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      size: 0,
-      query: {
-        ...filters,
-      },
-      aggs,
+  const searchBody = {
+    size: 0,
+    query: {
+      ...filters,
     },
+    aggs,
   };
 
   const {
     body: { aggregations },
-  } = await callES.search(params);
+  } = await callES.search({ body: searchBody });
 
   const { tags, locations, ports, schemes } = aggregations ?? {};
 
