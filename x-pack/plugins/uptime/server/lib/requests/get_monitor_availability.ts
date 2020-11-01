@@ -36,7 +36,7 @@ export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabil
 export const getMonitorAvailability: UMElasticsearchQueryFn<
   GetMonitorAvailabilityParams,
   GetMonitorAvailabilityResult[]
-> = async ({ callES, dynamicSettings, range, rangeUnit, threshold: thresholdString, filters }) => {
+> = async ({ uptimeESClient, range, rangeUnit, threshold: thresholdString, filters }) => {
   const queryResults: Array<Promise<GetMonitorAvailabilityResult[]>> = [];
   let afterKey: AfterKey;
 
@@ -146,7 +146,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    const { body: result } = await callES.search({ body: esParams });
+    const { body: result } = await uptimeESClient.search({ body: esParams });
 
     afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
 

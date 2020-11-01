@@ -15,8 +15,7 @@ enum SortFields {
 }
 
 export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async ({
-  callES,
-  dynamicSettings,
+  uptimeESClient,
   index,
   from,
   to,
@@ -140,7 +139,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   }
 
   // console.log(JSON.stringify(params, null, 2));
-  const { body: result } = await callES.search({
+  const { body: result } = await uptimeESClient.search({
     body: searchBody,
   });
 

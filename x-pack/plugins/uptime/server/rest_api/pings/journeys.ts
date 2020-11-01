@@ -16,19 +16,16 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       checkGroup: schema.string(),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response) => {
+  handler: async ({ uptimeESClient, request }): Promise<any> => {
     const { checkGroup } = request.params;
     const result = await libs.requests.getJourneySteps({
-      callES,
-      dynamicSettings,
+      uptimeESClient,
       checkGroup,
     });
 
-    return response.ok({
-      body: {
-        checkGroup,
-        steps: result,
-      },
-    });
+    return {
+      checkGroup,
+      steps: result,
+    };
   },
 });

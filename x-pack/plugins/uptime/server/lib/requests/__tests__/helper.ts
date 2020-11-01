@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { createUptimeESClient } from '../../lib';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
@@ -58,5 +59,17 @@ export const setupMockEsCompositeQuery = <K, C, I>(
 
 export const getUptimeESMockClient = () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  return { esClient, uptimeClient: createUptimeESClient({ esClient }) };
+  return {
+    esClient,
+    uptimeESClient: createUptimeESClient({ esClient, dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS }),
+  };
+};
+
+export const getUptimeClientFromESMock = (esMock: ElasticsearchClient) => {
+  return {
+    uptimeESClient: createUptimeESClient({
+      esClient: esMock,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+    }),
+  };
 };

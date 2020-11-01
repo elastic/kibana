@@ -64,13 +64,12 @@ describe('getLatestMonitor', () => {
   });
 
   it('returns data in expected shape', async () => {
-    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     const result = await getLatestMonitor({
-      callES: uptimeClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeESClient,
       dateStart: 'now-1h',
       dateEnd: 'now',
       monitorId: 'testMonitor',

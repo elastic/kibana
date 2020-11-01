@@ -5,13 +5,13 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
+import { UptimeESClient } from '../../lib';
 
 export class QueryContext {
-  callES: ElasticsearchClient;
+  uptimeESClient: UptimeESClient;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -29,7 +29,7 @@ export class QueryContext {
     size: number,
     statusFilter?: string
   ) {
-    this.callES = database;
+    this.uptimeESClient = database;
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
     this.pagination = pagination;
@@ -39,11 +39,11 @@ export class QueryContext {
   }
 
   async search(params: any): Promise<any> {
-    return this.callES.search({ body: params.body });
+    return this.uptimeESClient.search({ body: params.body });
   }
 
   async count(params: any): Promise<any> {
-    return this.callES.count(params);
+    return this.uptimeESClient.count(params);
   }
 
   async dateAndCustomFilters(): Promise<any[]> {
@@ -132,7 +132,7 @@ export class QueryContext {
 
   clone(): QueryContext {
     return new QueryContext(
-      this.callES,
+      this.uptimeESClient,
       this.dateRangeStart,
       this.dateRangeEnd,
       this.pagination,

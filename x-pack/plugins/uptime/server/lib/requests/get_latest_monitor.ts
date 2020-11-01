@@ -24,8 +24,7 @@ export interface GetLatestMonitorParams {
 
 // Get The monitor latest state sorted by timestamp with date range
 export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Ping> = async ({
-  callES,
-  dynamicSettings,
+  uptimeESClient,
   dateStart,
   dateEnd,
   monitorId,
@@ -57,7 +56,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
     },
   };
 
-  const { body: result } = await callES.search({ body: params });
+  const { body: result } = await uptimeESClient.search({ body: params });
 
   const doc = result.hits?.hits?.[0];
   const docId = doc?._id ?? '';

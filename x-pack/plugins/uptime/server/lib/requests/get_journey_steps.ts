@@ -12,7 +12,7 @@ interface GetJourneyStepsParams {
 }
 
 export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
-  callES,
+  uptimeESClient,
   checkGroup,
 }) => {
   const params = {
@@ -38,7 +38,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
     },
     size: 500,
   };
-  const { body: result } = await callES.search({ body: params });
+  const { body: result } = await uptimeESClient.search({ body: params });
 
   const screenshotIndexes: number[] = result.hits.hits
     .filter((h) => (h?._source as Ping).synthetics?.type === 'step/screenshot')

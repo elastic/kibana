@@ -21,23 +21,16 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
       bucketSize: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeESClient, request }): Promise<any> => {
     const { dateStart, dateEnd, monitorId, filters, bucketSize } = request.query;
 
-    const result = await libs.requests.getPingHistogram({
-      callES,
-      dynamicSettings,
+    return await libs.requests.getPingHistogram({
+      uptimeESClient,
       from: dateStart,
       to: dateEnd,
       monitorId,
       filters,
       bucketSize,
-    });
-
-    return response.ok({
-      body: {
-        ...result,
-      },
     });
   },
 });

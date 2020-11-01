@@ -7,18 +7,16 @@
 import { set } from '@elastic/safer-lodash-set';
 import mockChartsData from './monitor_charts_mock.json';
 import { getMonitorDurationChart } from '../get_monitor_duration';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { getUptimeESMockClient } from './helper';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will provide expected filters', async () => {
     expect.assertions(2);
 
-    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
 
     await getMonitorDurationChart({
-      callES: uptimeClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeESClient,
       monitorId: 'fooID',
       dateStart: 'now-15m',
       dateEnd: 'now',
@@ -35,14 +33,13 @@ describe('ElasticsearchMonitorsAdapter', () => {
   });
 
   it('inserts empty buckets for missing data', async () => {
-    const { esClient: mockEsClient, uptimeClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockChartsData as any);
 
     expect(
       await getMonitorDurationChart({
-        callES: uptimeClient,
-        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        uptimeESClient,
         monitorId: 'id',
         dateStart: 'now-15m',
         dateEnd: 'now',

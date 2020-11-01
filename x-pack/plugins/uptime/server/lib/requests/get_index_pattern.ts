@@ -14,13 +14,13 @@ export interface IndexPatternTitleAndFields {
 }
 
 export const getUptimeIndexPattern = async ({
-  esClient,
+  uptimeESClient,
   dynamicSettings,
 }: {
-  esClient: UptimeESClient;
+  uptimeESClient: UptimeESClient;
   dynamicSettings: DynamicSettings;
 }): Promise<IndexPatternTitleAndFields | undefined> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(esClient.baseESClient);
+  const indexPatternsFetcher = new IndexPatternsFetcher(uptimeESClient.baseESClient);
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
   // and since `getFieldsForWildcard` will throw if the specified indices don't exist,

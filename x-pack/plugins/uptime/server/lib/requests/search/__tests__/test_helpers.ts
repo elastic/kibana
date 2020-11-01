@@ -23,14 +23,5 @@ export const nextPagination = (key: any): CursorPagination => {
   };
 };
 export const simpleQueryContext = (): QueryContext => {
-  return new QueryContext(
-    undefined,
-    'indexName',
-    '',
-    '',
-    nextPagination('something'),
-    undefined,
-    0,
-    ''
-  );
+  return new QueryContext(undefined, '', '', nextPagination('something'), undefined, 0, '');
 };

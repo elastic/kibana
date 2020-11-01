@@ -96,23 +96,17 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": Object {
-              "baseESClient": [MockFunction],
-              "count": [Function],
-              "search": [Function],
-            },
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
               "from": "now-15m",
               "to": "now",
+            },
+            "uptimeESClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
             },
           },
         ]
@@ -156,23 +150,17 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": Object {
-              "baseESClient": [MockFunction],
-              "count": [Function],
-              "search": [Function],
-            },
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
               "from": "now-15m",
               "to": "now",
+            },
+            "uptimeESClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
             },
           },
         ]
@@ -341,17 +329,6 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": Object {
-              "baseESClient": [MockFunction],
-              "count": [Function],
-              "search": [Function],
-            },
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": Object {
               "bool": Object {
                 "filter": Array [
@@ -518,6 +495,11 @@ describe('status check alert', () => {
               "from": "now-15m",
               "to": "now",
             },
+            "uptimeESClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -583,17 +565,6 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": Object {
-              "baseESClient": [MockFunction],
-              "count": [Function],
-              "search": [Function],
-            },
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": Object {
               "bool": Object {
                 "filter": Array [
@@ -629,6 +600,11 @@ describe('status check alert', () => {
             "timerange": Object {
               "from": "now-30h",
               "to": "now",
+            },
+            "uptimeESClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "search": [Function],
             },
           },
         ]

@@ -33,7 +33,7 @@ export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
       options.services.savedObjectsClient
     );
 
-    const uptimeESClient = createUptimeESClient({ esClient });
+    const uptimeESClient = createUptimeESClient({ esClient, dynamicSettings });
 
     return uptimeAlert.executor({ options, dynamicSettings, uptimeESClient });
   },

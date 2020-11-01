@@ -91,8 +91,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
 
       if (foundAnomalies) {
         const monitorInfo = await getLatestMonitor({
-          dynamicSettings,
-          callES: uptimeESClient,
+          uptimeESClient,
           dateStart: 'now-15m',
           dateEnd: 'now',
           monitorId: params.monitorId,

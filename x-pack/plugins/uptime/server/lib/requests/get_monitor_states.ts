@@ -40,8 +40,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
   MonitorSummariesResult
 > = async ({
-  callES,
-  dynamicSettings,
+  uptimeESClient,
   dateRangeStart,
   dateRangeEnd,
   pagination,
@@ -53,8 +52,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   statusFilter = statusFilter === null ? undefined : statusFilter;
 
   const queryContext = new QueryContext(
-    callES,
-    dynamicSettings.heartbeatIndices,
+    uptimeESClient,
     dateRangeStart,
     dateRangeEnd,
     pagination,

@@ -27,7 +27,7 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       status: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeESClient, request, response }): Promise<any> => {
     const { from, to, ...optional } = request.query;
     const params = GetPingsParamsType.decode({ dateRange: { from, to }, ...optional });
     if (isLeft(params)) {
@@ -36,16 +36,9 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       return response.badRequest({ body: { message: 'Received invalid request parameters.' } });
     }
 
-    const result = await libs.requests.getPings({
-      callES,
-      dynamicSettings,
+    return await libs.requests.getPings({
+      uptimeESClient,
       ...params.right,
-    });
-
-    return response.ok({
-      body: {
-        ...result,
-      },
     });
   },
 });

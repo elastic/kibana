@@ -5,7 +5,6 @@
  */
 
 import { getCerts } from '../get_certs';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { getUptimeESMockClient } from './helper';
 
 describe('getCerts', () => {
@@ -89,7 +88,7 @@ describe('getCerts', () => {
   });
 
   it('parses query result and returns expected values', async () => {
-    const { esClient, uptimeClient } = getUptimeESMockClient();
+    const { esClient, uptimeESClient } = getUptimeESMockClient();
 
     esClient.search.mockResolvedValueOnce({
       body: {
@@ -100,13 +99,7 @@ describe('getCerts', () => {
     } as any);
 
     const result = await getCerts({
-      callES: uptimeClient,
-      dynamicSettings: {
-        heartbeatIndices: 'heartbeat*',
-        certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-        certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-        defaultConnectors: [],
-      },
+      uptimeESClient,
       index: 1,
       from: 'now-2d',
       to: 'now+1h',

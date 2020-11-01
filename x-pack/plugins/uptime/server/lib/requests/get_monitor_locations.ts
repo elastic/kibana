@@ -24,7 +24,7 @@ export interface GetMonitorLocationsParams {
 export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
-> = async ({ callES, monitorId, dateStart, dateEnd }) => {
+> = async ({ uptimeESClient, monitorId, dateStart, dateEnd }) => {
   const sortOptions: SortOptions = [
     {
       '@timestamp': {
@@ -90,7 +90,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await callES.search({ body: params });
+  const { body: result } = await uptimeESClient.search({ body: params });
 
   const locations = result?.aggregations?.location?.buckets ?? [];
 

@@ -26,7 +26,7 @@ export interface GetPingHistogramParams {
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, from, to, filters, monitorId, bucketSize }) => {
+> = async ({ uptimeESClient, from, to, filters, monitorId, bucketSize }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -50,7 +50,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
       timeseries: {
         date_histogram: {
           field: '@timestamp',
-          fixed_interval: bucketSize || minInterval + 'ms',
+          fixed_interval: bucketSize || minInterval + '1ms',
           missing: 0,
         },
         aggs: {
@@ -73,7 +73,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await callES.search({ body: params });
+  const { body: result } = await uptimeESClient.search({ body: params });
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map((bucket) => {
     const x: number = bucket.key;

@@ -15,7 +15,7 @@ interface GetJourneyScreenshotParams {
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   GetJourneyScreenshotParams,
   any
-> = async ({ callES, checkGroup, stepIndex }) => {
+> = async ({ uptimeESClient, checkGroup, stepIndex }) => {
   const params: ESSearchBody = {
     query: {
       bool: {
@@ -40,7 +40,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
     },
     _source: ['synthetics.blob'],
   };
-  const { body: result } = await callES.search({ body: params });
+  const { body: result } = await uptimeESClient.search({ body: params });
   if (!Array.isArray(result?.hits?.hits) || result.hits.hits.length < 1) {
     return null;
   }

@@ -40,7 +40,7 @@ export type AfterKey = Record<string, string | number | null> | undefined;
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ callES, filters, locations, numTimes, timerange: { from, to } }) => {
+> = async ({ uptimeESClient, filters, locations, numTimes, timerange: { from, to } }) => {
   let afterKey: AfterKey;
 
   const STATUS = 'down';
@@ -123,7 +123,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       esParams.query.bool.filter.push(getLocationClause(locations));
     }
 
-    const { body: result } = await callES.search({
+    const { body: result } = await uptimeESClient.search({
       body: esParams,
     });
 

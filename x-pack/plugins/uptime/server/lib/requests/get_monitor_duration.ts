@@ -23,7 +23,7 @@ export interface GetMonitorChartsParams {
 export const getMonitorDurationChart: UMElasticsearchQueryFn<
   GetMonitorChartsParams,
   MonitorDurationResult
-> = async ({ callES, dateStart, dateEnd, monitorId }) => {
+> = async ({ uptimeESClient, dateStart, dateEnd, monitorId }) => {
   const params = {
     query: {
       bool: {
@@ -56,7 +56,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await callES.search({ body: params });
+  const { body: result } = await uptimeESClient.search({ body: params });
 
   const dateHistogramBuckets: any[] = result?.aggregations?.timeseries?.buckets ?? [];
 

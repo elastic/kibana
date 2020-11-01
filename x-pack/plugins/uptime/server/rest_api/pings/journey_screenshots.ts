@@ -17,11 +17,11 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex: schema.number(),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response) => {
+  handler: async ({ uptimeESClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
+
     const result = await libs.requests.getJourneyScreenshot({
-      callES,
-      dynamicSettings,
+      uptimeESClient,
       checkGroup,
       stepIndex,
     });

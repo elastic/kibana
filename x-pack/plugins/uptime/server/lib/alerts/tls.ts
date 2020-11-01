@@ -107,8 +107,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
       } = options;
 
       const { certs, total }: CertResult = await libs.requests.getCerts({
-        callES: uptimeESClient,
-        dynamicSettings,
+        uptimeESClient,
         from: DEFAULT_FROM,
         to: DEFAULT_TO,
         index: 0,
