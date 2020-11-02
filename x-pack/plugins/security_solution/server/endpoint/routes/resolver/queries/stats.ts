@@ -244,38 +244,3 @@ export class StatsQuery extends ResolverQuery<StatsResult> {
     };
   }
 }
-
-/**
- * {
- *    aggregations: {
- *      "process.pid": {
- *        buckets: [
- *          {
- *            key: "100",
- *            "host.id": {
- *              buckets: [
- *                key: "my-awesome-id",
- *                 top_hits: {
- *                  hits: {
- *                    hits: [
- *                      _source: {}
- *                    ]
- *                  }
- *                }
- *              ]
- *            }
- *          },
- *          {
- *            key: "200",
- *            host.id: {
- *              buckets: [
- *
- *              ]
- *            }
- *          }
- *        ]
- *      }
- *    }
- * }
- *
- */
