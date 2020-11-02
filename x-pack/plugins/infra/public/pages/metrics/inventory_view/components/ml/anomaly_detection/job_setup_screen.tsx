@@ -227,7 +227,7 @@ export const JobSetupScreen = (props: Props) => {
                       defaultMessage="Partition field"
                     />
                   }
-                  compressed
+                  display="rowCompressed"
                 >
                   <EuiComboBox
                     placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {

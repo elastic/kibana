@@ -34,7 +34,7 @@ export const parsedSchemaDefinedWithSpreadsCollector: ParsedUsageCollection = [
         },
         my_objects: {
           total: {
-            type: 'number',
+            type: 'long',
           },
           type: {
             type: 'boolean',

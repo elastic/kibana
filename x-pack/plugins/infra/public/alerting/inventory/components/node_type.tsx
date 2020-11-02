@@ -61,7 +61,6 @@ export const NodeTypeExpression = ({
         setAggTypePopoverOpen(false);
       }}
       ownFocus
-      withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>

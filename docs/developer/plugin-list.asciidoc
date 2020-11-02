@@ -22,8 +22,10 @@ NOTE:
 |Description
 
 
-|{kib-repo}blob/{branch}/src/plugins/advanced_settings[advancedSettings]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/advanced_settings/README.md[advancedSettings]
+|This plugin contains the advanced settings management section
+allowing users to configure their advanced settings, also known
+as uiSettings within the code.
 
 
 |{kib-repo}blob/{branch}/src/plugins/apm_oss[apmOss]
@@ -38,8 +40,8 @@ NOTE:
 |The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations.
 
 
-|{kib-repo}blob/{branch}/src/plugins/console[console]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/console/README.md[console]
+|Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
 |<<kibana-dashboard-plugin>>
@@ -130,12 +132,14 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/management[management]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
+|This plugins contains the "Stack Management" page framework. It offers navigation and an API
+to link individual managment section into it. This plugin does not contain any individual
+management section itself.
 
 
-|{kib-repo}blob/{branch}/src/plugins/maps_legacy[mapsLegacy]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/maps_legacy/README.md[mapsLegacy]
+|Internal objects used by the Coordinate, Region, and Vega visualizations.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -147,8 +151,8 @@ It also provides a stateful version of it on the start contract.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/region_map[regionMap]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
+|Create choropleth maps. Display the results of a term-aggregation as e.g. countries, zip-codes, states.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects[savedObjects]
@@ -180,8 +184,8 @@ so they can properly protect the data within their clusters.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
-|{kib-repo}blob/{branch}/src/plugins/tile_map[tileMap]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/tile_map/README.md[tileMap]
+|Create a coordinate map. Display the results of a geohash_tile aggregation as bubbles, rectangles, or heatmap color blobs.
 
 
 |{kib-repo}blob/{branch}/src/plugins/timelion/README.md[timelion]
@@ -307,8 +311,8 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/console_extensions[consoleExtensions]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
+|This plugin provides autocomplete definitions of licensed APIs to the OSS Console plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
@@ -323,8 +327,8 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |The deprecated dashboard only mode.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced[dataEnhanced]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
+|The data_enhanced plugin is the x-pack counterpart to the OSS data plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
@@ -355,8 +359,8 @@ and actions.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/file_upload/README.md[fileUpload]
+|Backend and core front-end react-components for GeoJson file upload. Only supports the Maps plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
@@ -376,8 +380,9 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/grokdebugger[grokdebugger]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/grokdebugger/README.md[grokdebugger]
+|This plugin helps users define Grok patterns,
+which are particularly useful for ingesting logs.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/index_lifecycle_management/README.md[indexLifecycleManagement]
@@ -406,8 +411,8 @@ the infrastructure monitoring use-case within Kibana.
 |Run all tests from the x-pack root directory
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/license_management[licenseManagement]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
+|This plugin enables users to activate a trial license, downgrade to Basic, and upload a new license.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/licensing/README.md[licensing]
@@ -444,12 +449,12 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/painless_lab[painlessLab]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
+|This plugin helps users learn how to use the Painless scripting language.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters[remoteClusters]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters/README.md[remoteClusters]
+|This plugin helps users manage their remote clusters, which enable cross-cluster search and cross-cluster replication.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/reporting/README.md[reporting]
@@ -460,8 +465,11 @@ Elastic.
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler[searchprofiler]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
+|The search profiler consumes the Profile API
+by sending a search API with profile: true enabled in the request body. The response contains
+detailed information on how Elasticsearch executed the search request. People use this information
+to understand why a search request might be slow.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security/README.md[security]
@@ -513,8 +521,9 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant[upgradeAssistant]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
+|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. Its primary
+purposes are to:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
