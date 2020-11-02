@@ -67,6 +67,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.hasFilter('ip', '97.220.3.248', false, true);
     });
 
+    it('keeps selected index pattern after refresh', async () => {
+      await PageObjects.lens.switchDataPanelIndexPattern('otherpattern');
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('otherpattern');
+    });
+
     it('keeps time range and pinned filters after refreshing directly after saving', async () => {
       // restore defaults so visualization becomes saveable
       await security.testUser.restoreDefaults();

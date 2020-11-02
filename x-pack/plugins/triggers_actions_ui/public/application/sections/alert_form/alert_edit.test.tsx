@@ -36,8 +36,8 @@ describe('alert_edit', () => {
       toastNotifications: mockedCoreSetup.notifications.toasts,
       http: mockedCoreSetup.http,
       uiSettings: mockedCoreSetup.uiSettings,
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       capabilities,
     };
