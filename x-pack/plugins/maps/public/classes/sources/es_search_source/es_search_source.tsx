@@ -51,10 +51,7 @@ import {
 } from '../vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import {
-  SortDirectionNumeric,
-  SortDirection,
-} from '../../../../../../../src/plugins/data/common/search';
+import { SortDirection } from '../../../../../../../src/plugins/data/common/search';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -229,7 +226,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   // Returns sort content for an Elasticsearch search body
-  _buildEsSort(): Array<Record<string, SortDirection | SortDirectionNumeric>> {
+  _buildEsSort(): Array<Record<string, SortDirection>> {
     const { sortField, sortOrder } = this._descriptor;
 
     if (!sortField) {
@@ -238,7 +235,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return [
       {
         [sortField]: {
-          order: (sortOrder as unknown) as SortDirection,
+          order: sortOrder,
         },
       },
     ];
@@ -266,7 +263,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
       _source?: boolean | { includes: string[] };
-      sort?: Array<Record<string, SortDirection | SortDirectionNumeric>>;
+      sort?: Array<Record<string, SortDirection>>;
     } = {
       size: topHitsSize,
       script_fields: scriptFields,
