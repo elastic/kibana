@@ -303,12 +303,28 @@ export const createExternalService = (
     }
   };
 
+  const getCommonFields = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: incidentFieldsUrl,
+        logger,
+        proxySettings,
+      });
+      return res.data ?? [];
+    } catch (error) {
+      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
+    }
+  };
+
   return {
-    getIncident,
-    createIncident,
-    updateIncident,
     createComment,
+    createIncident,
+    getCommonFields,
+    getIncident,
     getIncidentTypes,
     getSeverity,
+    updateIncident,
   };
 };

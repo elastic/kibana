@@ -17,6 +17,7 @@ import {
   PushToServiceApiParams,
   PushToServiceResponse,
   GetIssueHandlerArgs,
+  GetCommonFieldsHandlerArgs,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -39,7 +40,7 @@ const getIssueTypesHandler = async ({ externalService }: GetIssueTypesHandlerArg
   return res;
 };
 
-const getCommonFieldsHandler = async ({ externalService }: GetIssueTypesHandlerArgs) => {
+const getCommonFieldsHandler = async ({ externalService }: GetCommonFieldsHandlerArgs) => {
   const res = await externalService.getCommonFields();
   return res;
 };

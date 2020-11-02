@@ -201,7 +201,7 @@ export interface GetIssueHandlerArgs {
 }
 
 export interface ExternalServiceApi {
-  commonFields: (args: GetIssueTypesHandlerArgs) => Promise<GetCommonFieldsResponse>;
+  commonFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   issueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;
