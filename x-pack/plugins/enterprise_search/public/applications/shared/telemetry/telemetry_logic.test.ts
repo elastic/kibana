@@ -35,13 +35,17 @@ describe('Telemetry logic', () => {
       });
     });
 
-    it('throws an error if the telemetry endpoint fails', () => {
+    it('throws an error if the telemetry endpoint fails', async () => {
       mockHttpValues.http.put.mockImplementationOnce(() => Promise.reject());
-      try {
-        TelemetryLogic.actions.sendTelemetry({ action: '', metric: '', product: '' });
-      } catch (e) {
-        expect(e.message).toEqual('Unable to send telemetry');
-      }
+
+      // To capture thrown errors, we have to call the listener fn directly
+      // instead of using `TelemetryLogic.actions.sendTelemetry` - this is
+      // due to how Kea invokes/wraps action fns by design.
+      const { sendTelemetry } = (TelemetryLogic.inputs[0] as any).listeners({ actions: {} });
+
+      await expect(sendTelemetry({ action: '', metric: '', product: '' })).rejects.toThrow(
+        'Unable to send telemetry'
+      );
     });
   });
 
