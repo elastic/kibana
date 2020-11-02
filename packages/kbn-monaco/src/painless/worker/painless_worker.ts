@@ -38,6 +38,9 @@ export class PainlessWorker {
     // If the preceding word is a type, e.g., "boolean", we assume the user is declaring a variable and skip autocomplete
     const hasDeclaredType =
       words.length === 2 && completionService.getPrimitives().includes(words[0]);
+    // If the preceding word contains the "new" keyword, we only provide constructor autocompletion
+    const isConstructor = words[words.length - 2] === 'new';
+    // If the user appears to be accessing a document field
     const isField = activeTyping === `doc['`;
 
     let autocompleteSuggestions: PainlessCompletionResult = {
@@ -45,11 +48,13 @@ export class PainlessWorker {
       suggestions: [],
     };
 
-    if (fields && isField) {
+    if (isConstructor) {
+      autocompleteSuggestions = completionService.getConstructorSuggestions();
+    } else if (fields && isField) {
       autocompleteSuggestions = completionService.getFieldSuggestions(fields);
     } else if (isProperty) {
       const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
-      autocompleteSuggestions = completionService.getPainlessClassSuggestions(className);
+      autocompleteSuggestions = completionService.getPropertySuggestions(className);
     } else if (!hasDeclaredType) {
       autocompleteSuggestions = completionService.getStaticSuggestions();
     }

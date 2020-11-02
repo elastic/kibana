@@ -139,6 +139,25 @@ const getPainlessClassToAutocomplete = (painlessClass) => {
   ];
 };
 
+const getPainlessConstructorToAutocomplete = (constructors) => {
+  if (constructors.length) {
+    // There are sometimes two constructor definitions if a parameter is accepted
+    // We only care about getting the constructor name for now, so we can access the first one in the array
+    const { declaring } = constructors[0];
+    // The constructor name is sometimes prefixed by the Java package and needs to be removed
+    const constructorName = declaring.split('.').pop() || declaring;
+
+    return {
+      label: constructorName,
+      kind: 'constructor',
+      documentation: `Constructor: ${constructorName}`,
+      insertText: constructorName,
+    };
+  }
+
+  return undefined;
+};
+
 /**
  * Given an array of classes from an ES context definition,
  * reformat the data in a way that can be more easily consumed by Monaco
@@ -148,24 +167,34 @@ const getPainlessClassToAutocomplete = (painlessClass) => {
  */
 const createAutocompleteDefinitions = (painlessClasses) => {
   const suggestions = painlessClasses.map(
-    ({ name, static_fields: staticFields, fields, static_methods: staticMethods, methods }) => {
+    ({
+      name,
+      static_fields: staticFields,
+      fields,
+      static_methods: staticMethods,
+      methods,
+      constructors,
+    }) => {
       // The name is often prefixed by the Java package (e.g., Java.lang.Math) and needs to be removed
       const displayName = name.split('.').pop() || name;
       const isType = getPrimitives(painlessClasses).includes(name);
 
-      const children = getPainlessClassToAutocomplete({
+      const properties = getPainlessClassToAutocomplete({
         staticFields,
         fields,
         staticMethods,
         methods,
       });
 
+      const constructorDefinition = getPainlessConstructorToAutocomplete(constructors);
+
       return {
         label: displayName,
         kind: isType ? 'type' : 'class',
         documentation: isType ? `Primitive: ${displayName}` : `Class: ${displayName}`,
         insertText: displayName,
-        children: children.length ? children : undefined,
+        properties: properties.length ? properties : undefined,
+        constructorDefinition,
       };
     }
   );

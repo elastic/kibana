@@ -41,7 +41,7 @@
       "kind": "class",
       "documentation": "Class: Appendable",
       "insertText": "Appendable",
-      "children": [
+      "properties": [
         {
           "label": "append",
           "kind": "method",
@@ -73,7 +73,7 @@
       "kind": "class",
       "documentation": "Class: ArithmeticException",
       "insertText": "ArithmeticException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -110,14 +110,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ArithmeticException",
+        "kind": "constructor",
+        "documentation": "Constructor: ArithmeticException",
+        "insertText": "ArithmeticException"
+      }
     },
     {
       "label": "ArrayIndexOutOfBoundsException",
       "kind": "class",
       "documentation": "Class: ArrayIndexOutOfBoundsException",
       "insertText": "ArrayIndexOutOfBoundsException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -154,14 +160,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ArrayIndexOutOfBoundsException",
+        "kind": "constructor",
+        "documentation": "Constructor: ArrayIndexOutOfBoundsException",
+        "insertText": "ArrayIndexOutOfBoundsException"
+      }
     },
     {
       "label": "ArrayStoreException",
       "kind": "class",
       "documentation": "Class: ArrayStoreException",
       "insertText": "ArrayStoreException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -198,14 +210,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ArrayStoreException",
+        "kind": "constructor",
+        "documentation": "Constructor: ArrayStoreException",
+        "insertText": "ArrayStoreException"
+      }
     },
     {
       "label": "Boolean",
       "kind": "class",
       "documentation": "Class: Boolean",
       "insertText": "Boolean",
-      "children": [
+      "properties": [
         {
           "label": "FALSE",
           "kind": "property",
@@ -303,7 +321,7 @@
       "kind": "class",
       "documentation": "Class: Byte",
       "insertText": "Byte",
-      "children": [
+      "properties": [
         {
           "label": "BYTES",
           "kind": "property",
@@ -455,7 +473,7 @@
       "kind": "class",
       "documentation": "Class: CharSequence",
       "insertText": "CharSequence",
-      "children": [
+      "properties": [
         {
           "label": "charAt",
           "kind": "method",
@@ -523,7 +541,7 @@
       "kind": "class",
       "documentation": "Class: Character",
       "insertText": "Character",
-      "children": [
+      "properties": [
         {
           "label": "BYTES",
           "kind": "property",
@@ -1257,7 +1275,7 @@
       "kind": "class",
       "documentation": "Class: Character$Subset",
       "insertText": "Character$Subset",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -1283,7 +1301,7 @@
       "kind": "class",
       "documentation": "Class: Character$UnicodeBlock",
       "insertText": "Character$UnicodeBlock",
-      "children": [
+      "properties": [
         {
           "label": "AEGEAN_NUMBERS",
           "kind": "property",
@@ -2641,7 +2659,7 @@
       "kind": "class",
       "documentation": "Class: Character$UnicodeScript",
       "insertText": "Character$UnicodeScript",
-      "children": [
+      "properties": [
         {
           "label": "ARABIC",
           "kind": "property",
@@ -3327,7 +3345,7 @@
       "kind": "class",
       "documentation": "Class: ClassCastException",
       "insertText": "ClassCastException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -3364,14 +3382,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ClassCastException",
+        "kind": "constructor",
+        "documentation": "Constructor: ClassCastException",
+        "insertText": "ClassCastException"
+      }
     },
     {
       "label": "ClassNotFoundException",
       "kind": "class",
       "documentation": "Class: ClassNotFoundException",
       "insertText": "ClassNotFoundException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -3408,14 +3432,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ClassNotFoundException",
+        "kind": "constructor",
+        "documentation": "Constructor: ClassNotFoundException",
+        "insertText": "ClassNotFoundException"
+      }
     },
     {
       "label": "CloneNotSupportedException",
       "kind": "class",
       "documentation": "Class: CloneNotSupportedException",
       "insertText": "CloneNotSupportedException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -3452,14 +3482,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "CloneNotSupportedException",
+        "kind": "constructor",
+        "documentation": "Constructor: CloneNotSupportedException",
+        "insertText": "CloneNotSupportedException"
+      }
     },
     {
       "label": "Comparable",
       "kind": "class",
       "documentation": "Class: Comparable",
       "insertText": "Comparable",
-      "children": [
+      "properties": [
         {
           "label": "compareTo",
           "kind": "method",
@@ -3491,7 +3527,7 @@
       "kind": "class",
       "documentation": "Class: Double",
       "insertText": "Double",
-      "children": [
+      "properties": [
         {
           "label": "BYTES",
           "kind": "property",
@@ -3721,7 +3757,7 @@
       "kind": "class",
       "documentation": "Class: Enum",
       "insertText": "Enum",
-      "children": [
+      "properties": [
         {
           "label": "compareTo",
           "kind": "method",
@@ -3765,7 +3801,7 @@
       "kind": "class",
       "documentation": "Class: EnumConstantNotPresentException",
       "insertText": "EnumConstantNotPresentException",
-      "children": [
+      "properties": [
         {
           "label": "constantName",
           "kind": "method",
@@ -3815,7 +3851,7 @@
       "kind": "class",
       "documentation": "Class: Exception",
       "insertText": "Exception",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -3852,14 +3888,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Exception",
+        "kind": "constructor",
+        "documentation": "Constructor: Exception",
+        "insertText": "Exception"
+      }
     },
     {
       "label": "Float",
       "kind": "class",
       "documentation": "Class: Float",
       "insertText": "Float",
-      "children": [
+      "properties": [
         {
           "label": "BYTES",
           "kind": "property",
@@ -4089,7 +4131,7 @@
       "kind": "class",
       "documentation": "Class: IllegalAccessException",
       "insertText": "IllegalAccessException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4126,14 +4168,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalAccessException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalAccessException",
+        "insertText": "IllegalAccessException"
+      }
     },
     {
       "label": "IllegalArgumentException",
       "kind": "class",
       "documentation": "Class: IllegalArgumentException",
       "insertText": "IllegalArgumentException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4170,14 +4218,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalArgumentException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalArgumentException",
+        "insertText": "IllegalArgumentException"
+      }
     },
     {
       "label": "IllegalMonitorStateException",
       "kind": "class",
       "documentation": "Class: IllegalMonitorStateException",
       "insertText": "IllegalMonitorStateException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4214,14 +4268,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalMonitorStateException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalMonitorStateException",
+        "insertText": "IllegalMonitorStateException"
+      }
     },
     {
       "label": "IllegalStateException",
       "kind": "class",
       "documentation": "Class: IllegalStateException",
       "insertText": "IllegalStateException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4258,14 +4318,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalStateException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalStateException",
+        "insertText": "IllegalStateException"
+      }
     },
     {
       "label": "IllegalThreadStateException",
       "kind": "class",
       "documentation": "Class: IllegalThreadStateException",
       "insertText": "IllegalThreadStateException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4302,14 +4368,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalThreadStateException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalThreadStateException",
+        "insertText": "IllegalThreadStateException"
+      }
     },
     {
       "label": "IndexOutOfBoundsException",
       "kind": "class",
       "documentation": "Class: IndexOutOfBoundsException",
       "insertText": "IndexOutOfBoundsException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4346,14 +4418,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IndexOutOfBoundsException",
+        "kind": "constructor",
+        "documentation": "Constructor: IndexOutOfBoundsException",
+        "insertText": "IndexOutOfBoundsException"
+      }
     },
     {
       "label": "InstantiationException",
       "kind": "class",
       "documentation": "Class: InstantiationException",
       "insertText": "InstantiationException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4390,14 +4468,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "InstantiationException",
+        "kind": "constructor",
+        "documentation": "Constructor: InstantiationException",
+        "insertText": "InstantiationException"
+      }
     },
     {
       "label": "Integer",
       "kind": "class",
       "documentation": "Class: Integer",
       "insertText": "Integer",
-      "children": [
+      "properties": [
         {
           "label": "BYTES",
           "kind": "property",
@@ -4681,7 +4765,7 @@
       "kind": "class",
       "documentation": "Class: InterruptedException",
       "insertText": "InterruptedException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -4718,14 +4802,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "InterruptedException",
+        "kind": "constructor",
+        "documentation": "Constructor: InterruptedException",
+        "insertText": "InterruptedException"
+      }
     },
     {
       "label": "Iterable",
       "kind": "class",
       "documentation": "Class: Iterable",
       "insertText": "Iterable",
-      "children": [
+      "properties": [
         {
           "label": "any",
           "kind": "method",
@@ -4835,7 +4925,7 @@
       "kind": "class",
       "documentation": "Class: Long",
       "insertText": "Long",
-      "children": [
+      "properties": [
         {
           "label": "BYTES",
           "kind": "property",
@@ -5119,7 +5209,7 @@
       "kind": "class",
       "documentation": "Class: Math",
       "insertText": "Math",
-      "children": [
+      "properties": [
         {
           "label": "E",
           "kind": "property",
@@ -5379,7 +5469,7 @@
       "kind": "class",
       "documentation": "Class: NegativeArraySizeException",
       "insertText": "NegativeArraySizeException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5416,14 +5506,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "NegativeArraySizeException",
+        "kind": "constructor",
+        "documentation": "Constructor: NegativeArraySizeException",
+        "insertText": "NegativeArraySizeException"
+      }
     },
     {
       "label": "NoSuchFieldException",
       "kind": "class",
       "documentation": "Class: NoSuchFieldException",
       "insertText": "NoSuchFieldException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5460,14 +5556,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "NoSuchFieldException",
+        "kind": "constructor",
+        "documentation": "Constructor: NoSuchFieldException",
+        "insertText": "NoSuchFieldException"
+      }
     },
     {
       "label": "NoSuchMethodException",
       "kind": "class",
       "documentation": "Class: NoSuchMethodException",
       "insertText": "NoSuchMethodException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5504,14 +5606,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "NoSuchMethodException",
+        "kind": "constructor",
+        "documentation": "Constructor: NoSuchMethodException",
+        "insertText": "NoSuchMethodException"
+      }
     },
     {
       "label": "NullPointerException",
       "kind": "class",
       "documentation": "Class: NullPointerException",
       "insertText": "NullPointerException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5548,14 +5656,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "NullPointerException",
+        "kind": "constructor",
+        "documentation": "Constructor: NullPointerException",
+        "insertText": "NullPointerException"
+      }
     },
     {
       "label": "Number",
       "kind": "class",
       "documentation": "Class: Number",
       "insertText": "Number",
-      "children": [
+      "properties": [
         {
           "label": "byteValue",
           "kind": "method",
@@ -5617,7 +5731,7 @@
       "kind": "class",
       "documentation": "Class: NumberFormatException",
       "insertText": "NumberFormatException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5654,14 +5768,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "NumberFormatException",
+        "kind": "constructor",
+        "documentation": "Constructor: NumberFormatException",
+        "insertText": "NumberFormatException"
+      }
     },
     {
       "label": "Object",
       "kind": "class",
       "documentation": "Class: Object",
       "insertText": "Object",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5687,7 +5807,7 @@
       "kind": "class",
       "documentation": "Class: ReflectiveOperationException",
       "insertText": "ReflectiveOperationException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5724,14 +5844,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ReflectiveOperationException",
+        "kind": "constructor",
+        "documentation": "Constructor: ReflectiveOperationException",
+        "insertText": "ReflectiveOperationException"
+      }
     },
     {
       "label": "RuntimeException",
       "kind": "class",
       "documentation": "Class: RuntimeException",
       "insertText": "RuntimeException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5768,14 +5894,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "RuntimeException",
+        "kind": "constructor",
+        "documentation": "Constructor: RuntimeException",
+        "insertText": "RuntimeException"
+      }
     },
     {
       "label": "SecurityException",
       "kind": "class",
       "documentation": "Class: SecurityException",
       "insertText": "SecurityException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -5812,14 +5944,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "SecurityException",
+        "kind": "constructor",
+        "documentation": "Constructor: SecurityException",
+        "insertText": "SecurityException"
+      }
     },
     {
       "label": "Short",
       "kind": "class",
       "documentation": "Class: Short",
       "insertText": "Short",
-      "children": [
+      "properties": [
         {
           "label": "BYTES",
           "kind": "property",
@@ -5977,7 +6115,7 @@
       "kind": "class",
       "documentation": "Class: StackTraceElement",
       "insertText": "StackTraceElement",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -6026,14 +6164,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "StackTraceElement",
+        "kind": "constructor",
+        "documentation": "Constructor: StackTraceElement",
+        "insertText": "StackTraceElement"
+      }
     },
     {
       "label": "StrictMath",
       "kind": "class",
       "documentation": "Class: StrictMath",
       "insertText": "StrictMath",
-      "children": [
+      "properties": [
         {
           "label": "E",
           "kind": "property",
@@ -6293,7 +6437,7 @@
       "kind": "class",
       "documentation": "Class: String",
       "insertText": "String",
-      "children": [
+      "properties": [
         {
           "label": "copyValueOf",
           "kind": "method",
@@ -6594,14 +6738,20 @@
           "documentation": "trim(): java.lang.String",
           "insertText": "trim"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "String",
+        "kind": "constructor",
+        "documentation": "Constructor: String",
+        "insertText": "String"
+      }
     },
     {
       "label": "StringBuffer",
       "kind": "class",
       "documentation": "Class: StringBuffer",
       "insertText": "StringBuffer",
-      "children": [
+      "properties": [
         {
           "label": "append",
           "kind": "method",
@@ -6800,14 +6950,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "StringBuffer",
+        "kind": "constructor",
+        "documentation": "Constructor: StringBuffer",
+        "insertText": "StringBuffer"
+      }
     },
     {
       "label": "StringBuilder",
       "kind": "class",
       "documentation": "Class: StringBuilder",
       "insertText": "StringBuilder",
-      "children": [
+      "properties": [
         {
           "label": "append",
           "kind": "method",
@@ -7006,14 +7162,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "StringBuilder",
+        "kind": "constructor",
+        "documentation": "Constructor: StringBuilder",
+        "insertText": "StringBuilder"
+      }
     },
     {
       "label": "StringIndexOutOfBoundsException",
       "kind": "class",
       "documentation": "Class: StringIndexOutOfBoundsException",
       "insertText": "StringIndexOutOfBoundsException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -7050,14 +7212,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "StringIndexOutOfBoundsException",
+        "kind": "constructor",
+        "documentation": "Constructor: StringIndexOutOfBoundsException",
+        "insertText": "StringIndexOutOfBoundsException"
+      }
     },
     {
       "label": "System",
       "kind": "class",
       "documentation": "Class: System",
       "insertText": "System",
-      "children": [
+      "properties": [
         {
           "label": "arraycopy",
           "kind": "method",
@@ -7101,7 +7269,7 @@
       "kind": "class",
       "documentation": "Class: TypeNotPresentException",
       "insertText": "TypeNotPresentException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -7151,7 +7319,7 @@
       "kind": "class",
       "documentation": "Class: UnsupportedOperationException",
       "insertText": "UnsupportedOperationException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -7188,14 +7356,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "UnsupportedOperationException",
+        "kind": "constructor",
+        "documentation": "Constructor: UnsupportedOperationException",
+        "insertText": "UnsupportedOperationException"
+      }
     },
     {
       "label": "Void",
       "kind": "class",
       "documentation": "Class: Void",
       "insertText": "Void",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -7221,7 +7395,7 @@
       "kind": "class",
       "documentation": "Class: BigDecimal",
       "insertText": "BigDecimal",
-      "children": [
+      "properties": [
         {
           "label": "ONE",
           "kind": "property",
@@ -7564,14 +7738,20 @@
           "documentation": "ulp(): java.math.BigDecimal",
           "insertText": "ulp"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "BigDecimal",
+        "kind": "constructor",
+        "documentation": "Constructor: BigDecimal",
+        "insertText": "BigDecimal"
+      }
     },
     {
       "label": "BigInteger",
       "kind": "class",
       "documentation": "Class: BigInteger",
       "insertText": "BigInteger",
-      "children": [
+      "properties": [
         {
           "label": "ONE",
           "kind": "property",
@@ -7872,14 +8052,20 @@
           "documentation": "xor(java.math.BigInteger a): java.math.BigInteger",
           "insertText": "xor"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "BigInteger",
+        "kind": "constructor",
+        "documentation": "Constructor: BigInteger",
+        "insertText": "BigInteger"
+      }
     },
     {
       "label": "MathContext",
       "kind": "class",
       "documentation": "Class: MathContext",
       "insertText": "MathContext",
-      "children": [
+      "properties": [
         {
           "label": "DECIMAL128",
           "kind": "property",
@@ -7934,14 +8120,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "MathContext",
+        "kind": "constructor",
+        "documentation": "Constructor: MathContext",
+        "insertText": "MathContext"
+      }
     },
     {
       "label": "RoundingMode",
       "kind": "class",
       "documentation": "Class: RoundingMode",
       "insertText": "RoundingMode",
-      "children": [
+      "properties": [
         {
           "label": "CEILING",
           "kind": "property",
@@ -8045,7 +8237,7 @@
       "kind": "class",
       "documentation": "Class: Annotation",
       "insertText": "Annotation",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -8070,14 +8262,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Annotation",
+        "kind": "constructor",
+        "documentation": "Constructor: Annotation",
+        "insertText": "Annotation"
+      }
     },
     {
       "label": "AttributedCharacterIterator",
       "kind": "class",
       "documentation": "Class: AttributedCharacterIterator",
       "insertText": "AttributedCharacterIterator",
-      "children": [
+      "properties": [
         {
           "label": "clone",
           "kind": "method",
@@ -8205,7 +8403,7 @@
       "kind": "class",
       "documentation": "Class: AttributedCharacterIterator$Attribute",
       "insertText": "AttributedCharacterIterator$Attribute",
-      "children": [
+      "properties": [
         {
           "label": "INPUT_METHOD_SEGMENT",
           "kind": "property",
@@ -8249,7 +8447,7 @@
       "kind": "class",
       "documentation": "Class: AttributedString",
       "insertText": "AttributedString",
-      "children": [
+      "properties": [
         {
           "label": "addAttribute",
           "kind": "method",
@@ -8304,14 +8502,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "AttributedString",
+        "kind": "constructor",
+        "documentation": "Constructor: AttributedString",
+        "insertText": "AttributedString"
+      }
     },
     {
       "label": "Bidi",
       "kind": "class",
       "documentation": "Class: Bidi",
       "insertText": "Bidi",
-      "children": [
+      "properties": [
         {
           "label": "DIRECTION_DEFAULT_LEFT_TO_RIGHT",
           "kind": "property",
@@ -8438,14 +8642,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Bidi",
+        "kind": "constructor",
+        "documentation": "Constructor: Bidi",
+        "insertText": "Bidi"
+      }
     },
     {
       "label": "BreakIterator",
       "kind": "class",
       "documentation": "Class: BreakIterator",
       "insertText": "BreakIterator",
-      "children": [
+      "properties": [
         {
           "label": "DONE",
           "kind": "property",
@@ -8603,7 +8813,7 @@
       "kind": "class",
       "documentation": "Class: CharacterIterator",
       "insertText": "CharacterIterator",
-      "children": [
+      "properties": [
         {
           "label": "DONE",
           "kind": "property",
@@ -8695,7 +8905,7 @@
       "kind": "class",
       "documentation": "Class: ChoiceFormat",
       "insertText": "ChoiceFormat",
-      "children": [
+      "properties": [
         {
           "label": "nextDouble",
           "kind": "method",
@@ -8906,14 +9116,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ChoiceFormat",
+        "kind": "constructor",
+        "documentation": "Constructor: ChoiceFormat",
+        "insertText": "ChoiceFormat"
+      }
     },
     {
       "label": "CollationElementIterator",
       "kind": "class",
       "documentation": "Class: CollationElementIterator",
       "insertText": "CollationElementIterator",
-      "children": [
+      "properties": [
         {
           "label": "NULLORDER",
           "kind": "property",
@@ -9005,7 +9221,7 @@
       "kind": "class",
       "documentation": "Class: CollationKey",
       "insertText": "CollationKey",
-      "children": [
+      "properties": [
         {
           "label": "compareTo",
           "kind": "method",
@@ -9049,7 +9265,7 @@
       "kind": "class",
       "documentation": "Class: Collator",
       "insertText": "Collator",
-      "children": [
+      "properties": [
         {
           "label": "CANONICAL_DECOMPOSITION",
           "kind": "property",
@@ -9219,7 +9435,7 @@
       "kind": "class",
       "documentation": "Class: DateFormat",
       "insertText": "DateFormat",
-      "children": [
+      "properties": [
         {
           "label": "AM_PM_FIELD",
           "kind": "property",
@@ -9545,7 +9761,7 @@
       "kind": "class",
       "documentation": "Class: DateFormat$Field",
       "insertText": "DateFormat$Field",
-      "children": [
+      "properties": [
         {
           "label": "AM_PM",
           "kind": "property",
@@ -9691,7 +9907,7 @@
       "kind": "class",
       "documentation": "Class: DateFormatSymbols",
       "insertText": "DateFormatSymbols",
-      "children": [
+      "properties": [
         {
           "label": "getAvailableLocales",
           "kind": "method",
@@ -9830,14 +10046,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DateFormatSymbols",
+        "kind": "constructor",
+        "documentation": "Constructor: DateFormatSymbols",
+        "insertText": "DateFormatSymbols"
+      }
     },
     {
       "label": "DecimalFormat",
       "kind": "class",
       "documentation": "Class: DecimalFormat",
       "insertText": "DecimalFormat",
-      "children": [
+      "properties": [
         {
           "label": "applyLocalizedPattern",
           "kind": "method",
@@ -10132,14 +10354,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DecimalFormat",
+        "kind": "constructor",
+        "documentation": "Constructor: DecimalFormat",
+        "insertText": "DecimalFormat"
+      }
     },
     {
       "label": "DecimalFormatSymbols",
       "kind": "class",
       "documentation": "Class: DecimalFormatSymbols",
       "insertText": "DecimalFormatSymbols",
-      "children": [
+      "properties": [
         {
           "label": "getAvailableLocales",
           "kind": "method",
@@ -10362,14 +10590,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DecimalFormatSymbols",
+        "kind": "constructor",
+        "documentation": "Constructor: DecimalFormatSymbols",
+        "insertText": "DecimalFormatSymbols"
+      }
     },
     {
       "label": "FieldPosition",
       "kind": "class",
       "documentation": "Class: FieldPosition",
       "insertText": "FieldPosition",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -10424,14 +10658,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "FieldPosition",
+        "kind": "constructor",
+        "documentation": "Constructor: FieldPosition",
+        "insertText": "FieldPosition"
+      }
     },
     {
       "label": "Format",
       "kind": "class",
       "documentation": "Class: Format",
       "insertText": "Format",
-      "children": [
+      "properties": [
         {
           "label": "clone",
           "kind": "method",
@@ -10493,7 +10733,7 @@
       "kind": "class",
       "documentation": "Class: Format$Field",
       "insertText": "Format$Field",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -10519,7 +10759,7 @@
       "kind": "class",
       "documentation": "Class: MessageFormat",
       "insertText": "MessageFormat",
-      "children": [
+      "properties": [
         {
           "label": "format",
           "kind": "method",
@@ -10659,7 +10899,7 @@
       "kind": "class",
       "documentation": "Class: MessageFormat$Field",
       "insertText": "MessageFormat$Field",
-      "children": [
+      "properties": [
         {
           "label": "ARGUMENT",
           "kind": "property",
@@ -10691,7 +10931,7 @@
       "kind": "class",
       "documentation": "Class: Normalizer",
       "insertText": "Normalizer",
-      "children": [
+      "properties": [
         {
           "label": "isNormalized",
           "kind": "method",
@@ -10729,7 +10969,7 @@
       "kind": "class",
       "documentation": "Class: Normalizer$Form",
       "insertText": "Normalizer$Form",
-      "children": [
+      "properties": [
         {
           "label": "NFC",
           "kind": "property",
@@ -10809,7 +11049,7 @@
       "kind": "class",
       "documentation": "Class: NumberFormat",
       "insertText": "NumberFormat",
-      "children": [
+      "properties": [
         {
           "label": "FRACTION_FIELD",
           "kind": "property",
@@ -11057,7 +11297,7 @@
       "kind": "class",
       "documentation": "Class: NumberFormat$Field",
       "insertText": "NumberFormat$Field",
-      "children": [
+      "properties": [
         {
           "label": "CURRENCY",
           "kind": "property",
@@ -11149,7 +11389,7 @@
       "kind": "class",
       "documentation": "Class: ParseException",
       "insertText": "ParseException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -11192,14 +11432,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ParseException",
+        "kind": "constructor",
+        "documentation": "Constructor: ParseException",
+        "insertText": "ParseException"
+      }
     },
     {
       "label": "ParsePosition",
       "kind": "class",
       "documentation": "Class: ParsePosition",
       "insertText": "ParsePosition",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -11242,14 +11488,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ParsePosition",
+        "kind": "constructor",
+        "documentation": "Constructor: ParsePosition",
+        "insertText": "ParsePosition"
+      }
     },
     {
       "label": "RuleBasedCollator",
       "kind": "class",
       "documentation": "Class: RuleBasedCollator",
       "insertText": "RuleBasedCollator",
-      "children": [
+      "properties": [
         {
           "label": "clone",
           "kind": "method",
@@ -11364,14 +11616,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "RuleBasedCollator",
+        "kind": "constructor",
+        "documentation": "Constructor: RuleBasedCollator",
+        "insertText": "RuleBasedCollator"
+      }
     },
     {
       "label": "SimpleDateFormat",
       "kind": "class",
       "documentation": "Class: SimpleDateFormat",
       "insertText": "SimpleDateFormat",
-      "children": [
+      "properties": [
         {
           "label": "applyLocalizedPattern",
           "kind": "method",
@@ -11534,14 +11792,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "SimpleDateFormat",
+        "kind": "constructor",
+        "documentation": "Constructor: SimpleDateFormat",
+        "insertText": "SimpleDateFormat"
+      }
     },
     {
       "label": "StringCharacterIterator",
       "kind": "class",
       "documentation": "Class: StringCharacterIterator",
       "insertText": "StringCharacterIterator",
-      "children": [
+      "properties": [
         {
           "label": "clone",
           "kind": "method",
@@ -11626,14 +11890,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "StringCharacterIterator",
+        "kind": "constructor",
+        "documentation": "Constructor: StringCharacterIterator",
+        "insertText": "StringCharacterIterator"
+      }
     },
     {
       "label": "Clock",
       "kind": "class",
       "documentation": "Class: Clock",
       "insertText": "Clock",
-      "children": [
+      "properties": [
         {
           "label": "fixed",
           "kind": "method",
@@ -11695,7 +11965,7 @@
       "kind": "class",
       "documentation": "Class: DateTimeException",
       "insertText": "DateTimeException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -11732,14 +12002,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DateTimeException",
+        "kind": "constructor",
+        "documentation": "Constructor: DateTimeException",
+        "insertText": "DateTimeException"
+      }
     },
     {
       "label": "DayOfWeek",
       "kind": "class",
       "documentation": "Class: DayOfWeek",
       "insertText": "DayOfWeek",
-      "children": [
+      "properties": [
         {
           "label": "FRIDAY",
           "kind": "property",
@@ -11915,7 +12191,7 @@
       "kind": "class",
       "documentation": "Class: Duration",
       "insertText": "Duration",
-      "children": [
+      "properties": [
         {
           "label": "ZERO",
           "kind": "property",
@@ -12229,7 +12505,7 @@
       "kind": "class",
       "documentation": "Class: Instant",
       "insertText": "Instant",
-      "children": [
+      "properties": [
         {
           "label": "EPOCH",
           "kind": "property",
@@ -12471,7 +12747,7 @@
       "kind": "class",
       "documentation": "Class: LocalDate",
       "insertText": "LocalDate",
-      "children": [
+      "properties": [
         {
           "label": "MAX",
           "kind": "property",
@@ -12845,7 +13121,7 @@
       "kind": "class",
       "documentation": "Class: LocalDateTime",
       "insertText": "LocalDateTime",
-      "children": [
+      "properties": [
         {
           "label": "MAX",
           "kind": "property",
@@ -13297,7 +13573,7 @@
       "kind": "class",
       "documentation": "Class: LocalTime",
       "insertText": "LocalTime",
-      "children": [
+      "properties": [
         {
           "label": "MAX",
           "kind": "property",
@@ -13629,7 +13905,7 @@
       "kind": "class",
       "documentation": "Class: Month",
       "insertText": "Month",
-      "children": [
+      "properties": [
         {
           "label": "APRIL",
           "kind": "property",
@@ -13865,7 +14141,7 @@
       "kind": "class",
       "documentation": "Class: MonthDay",
       "insertText": "MonthDay",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -14029,7 +14305,7 @@
       "kind": "class",
       "documentation": "Class: OffsetDateTime",
       "insertText": "OffsetDateTime",
-      "children": [
+      "properties": [
         {
           "label": "MAX",
           "kind": "property",
@@ -14511,7 +14787,7 @@
       "kind": "class",
       "documentation": "Class: OffsetTime",
       "insertText": "OffsetTime",
-      "children": [
+      "properties": [
         {
           "label": "MAX",
           "kind": "property",
@@ -14825,7 +15101,7 @@
       "kind": "class",
       "documentation": "Class: Period",
       "insertText": "Period",
-      "children": [
+      "properties": [
         {
           "label": "ZERO",
           "kind": "property",
@@ -15055,7 +15331,7 @@
       "kind": "class",
       "documentation": "Class: Year",
       "insertText": "Year",
-      "children": [
+      "properties": [
         {
           "label": "MAX_VALUE",
           "kind": "property",
@@ -15279,7 +15555,7 @@
       "kind": "class",
       "documentation": "Class: YearMonth",
       "insertText": "YearMonth",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -15527,7 +15803,7 @@
       "kind": "class",
       "documentation": "Class: ZoneId",
       "insertText": "ZoneId",
-      "children": [
+      "properties": [
         {
           "label": "SHORT_IDS",
           "kind": "property",
@@ -15619,7 +15895,7 @@
       "kind": "class",
       "documentation": "Class: ZoneOffset",
       "insertText": "ZoneOffset",
-      "children": [
+      "properties": [
         {
           "label": "MAX",
           "kind": "property",
@@ -15777,7 +16053,7 @@
       "kind": "class",
       "documentation": "Class: ZonedDateTime",
       "insertText": "ZonedDateTime",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -16265,7 +16541,7 @@
       "kind": "class",
       "documentation": "Class: AbstractChronology",
       "insertText": "AbstractChronology",
-      "children": [
+      "properties": [
         {
           "label": "compareTo",
           "kind": "method",
@@ -16411,7 +16687,7 @@
       "kind": "class",
       "documentation": "Class: ChronoLocalDate",
       "insertText": "ChronoLocalDate",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -16611,7 +16887,7 @@
       "kind": "class",
       "documentation": "Class: ChronoLocalDateTime",
       "insertText": "ChronoLocalDateTime",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -16799,7 +17075,7 @@
       "kind": "class",
       "documentation": "Class: ChronoPeriod",
       "insertText": "ChronoPeriod",
-      "children": [
+      "properties": [
         {
           "label": "between",
           "kind": "method",
@@ -16903,7 +17179,7 @@
       "kind": "class",
       "documentation": "Class: ChronoZonedDateTime",
       "insertText": "ChronoZonedDateTime",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -17121,7 +17397,7 @@
       "kind": "class",
       "documentation": "Class: Chronology",
       "insertText": "Chronology",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -17291,7 +17567,7 @@
       "kind": "class",
       "documentation": "Class: Era",
       "insertText": "Era",
-      "children": [
+      "properties": [
         {
           "label": "adjustInto",
           "kind": "method",
@@ -17371,7 +17647,7 @@
       "kind": "class",
       "documentation": "Class: HijrahChronology",
       "insertText": "HijrahChronology",
-      "children": [
+      "properties": [
         {
           "label": "INSTANCE",
           "kind": "property",
@@ -17523,7 +17799,7 @@
       "kind": "class",
       "documentation": "Class: HijrahDate",
       "insertText": "HijrahDate",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -17729,7 +18005,7 @@
       "kind": "class",
       "documentation": "Class: HijrahEra",
       "insertText": "HijrahEra",
-      "children": [
+      "properties": [
         {
           "label": "AH",
           "kind": "property",
@@ -17851,7 +18127,7 @@
       "kind": "class",
       "documentation": "Class: IsoChronology",
       "insertText": "IsoChronology",
-      "children": [
+      "properties": [
         {
           "label": "INSTANCE",
           "kind": "property",
@@ -18003,7 +18279,7 @@
       "kind": "class",
       "documentation": "Class: IsoEra",
       "insertText": "IsoEra",
-      "children": [
+      "properties": [
         {
           "label": "BCE",
           "kind": "property",
@@ -18131,7 +18407,7 @@
       "kind": "class",
       "documentation": "Class: JapaneseChronology",
       "insertText": "JapaneseChronology",
-      "children": [
+      "properties": [
         {
           "label": "INSTANCE",
           "kind": "property",
@@ -18283,7 +18559,7 @@
       "kind": "class",
       "documentation": "Class: JapaneseDate",
       "insertText": "JapaneseDate",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -18483,7 +18759,7 @@
       "kind": "class",
       "documentation": "Class: JapaneseEra",
       "insertText": "JapaneseEra",
-      "children": [
+      "properties": [
         {
           "label": "HEISEI",
           "kind": "property",
@@ -18605,7 +18881,7 @@
       "kind": "class",
       "documentation": "Class: MinguoChronology",
       "insertText": "MinguoChronology",
-      "children": [
+      "properties": [
         {
           "label": "INSTANCE",
           "kind": "property",
@@ -18757,7 +19033,7 @@
       "kind": "class",
       "documentation": "Class: MinguoDate",
       "insertText": "MinguoDate",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -18957,7 +19233,7 @@
       "kind": "class",
       "documentation": "Class: MinguoEra",
       "insertText": "MinguoEra",
-      "children": [
+      "properties": [
         {
           "label": "BEFORE_ROC",
           "kind": "property",
@@ -19085,7 +19361,7 @@
       "kind": "class",
       "documentation": "Class: ThaiBuddhistChronology",
       "insertText": "ThaiBuddhistChronology",
-      "children": [
+      "properties": [
         {
           "label": "INSTANCE",
           "kind": "property",
@@ -19237,7 +19513,7 @@
       "kind": "class",
       "documentation": "Class: ThaiBuddhistDate",
       "insertText": "ThaiBuddhistDate",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -19437,7 +19713,7 @@
       "kind": "class",
       "documentation": "Class: ThaiBuddhistEra",
       "insertText": "ThaiBuddhistEra",
-      "children": [
+      "properties": [
         {
           "label": "BE",
           "kind": "property",
@@ -19565,7 +19841,7 @@
       "kind": "class",
       "documentation": "Class: DateTimeFormatter",
       "insertText": "DateTimeFormatter",
-      "children": [
+      "properties": [
         {
           "label": "BASIC_ISO_DATE",
           "kind": "property",
@@ -19849,7 +20125,7 @@
       "kind": "class",
       "documentation": "Class: DateTimeFormatterBuilder",
       "insertText": "DateTimeFormatterBuilder",
-      "children": [
+      "properties": [
         {
           "label": "getLocalizedDateTimePattern",
           "kind": "method",
@@ -20084,14 +20360,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DateTimeFormatterBuilder",
+        "kind": "constructor",
+        "documentation": "Constructor: DateTimeFormatterBuilder",
+        "insertText": "DateTimeFormatterBuilder"
+      }
     },
     {
       "label": "DateTimeParseException",
       "kind": "class",
       "documentation": "Class: DateTimeParseException",
       "insertText": "DateTimeParseException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -20140,14 +20422,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DateTimeParseException",
+        "kind": "constructor",
+        "documentation": "Constructor: DateTimeParseException",
+        "insertText": "DateTimeParseException"
+      }
     },
     {
       "label": "DecimalStyle",
       "kind": "class",
       "documentation": "Class: DecimalStyle",
       "insertText": "DecimalStyle",
-      "children": [
+      "properties": [
         {
           "label": "STANDARD",
           "kind": "property",
@@ -20245,7 +20533,7 @@
       "kind": "class",
       "documentation": "Class: FormatStyle",
       "insertText": "FormatStyle",
-      "children": [
+      "properties": [
         {
           "label": "FULL",
           "kind": "property",
@@ -20325,7 +20613,7 @@
       "kind": "class",
       "documentation": "Class: ResolverStyle",
       "insertText": "ResolverStyle",
-      "children": [
+      "properties": [
         {
           "label": "LENIENT",
           "kind": "property",
@@ -20399,7 +20687,7 @@
       "kind": "class",
       "documentation": "Class: SignStyle",
       "insertText": "SignStyle",
-      "children": [
+      "properties": [
         {
           "label": "ALWAYS",
           "kind": "property",
@@ -20485,7 +20773,7 @@
       "kind": "class",
       "documentation": "Class: TextStyle",
       "insertText": "TextStyle",
-      "children": [
+      "properties": [
         {
           "label": "FULL",
           "kind": "property",
@@ -20595,7 +20883,7 @@
       "kind": "class",
       "documentation": "Class: ChronoField",
       "insertText": "ChronoField",
-      "children": [
+      "properties": [
         {
           "label": "ALIGNED_DAY_OF_WEEK_IN_MONTH",
           "kind": "property",
@@ -20909,7 +21197,7 @@
       "kind": "class",
       "documentation": "Class: ChronoUnit",
       "insertText": "ChronoUnit",
-      "children": [
+      "properties": [
         {
           "label": "CENTURIES",
           "kind": "property",
@@ -21103,7 +21391,7 @@
       "kind": "class",
       "documentation": "Class: IsoFields",
       "insertText": "IsoFields",
-      "children": [
+      "properties": [
         {
           "label": "DAY_OF_QUARTER",
           "kind": "property",
@@ -21165,7 +21453,7 @@
       "kind": "class",
       "documentation": "Class: JulianFields",
       "insertText": "JulianFields",
-      "children": [
+      "properties": [
         {
           "label": "JULIAN_DAY",
           "kind": "property",
@@ -21209,7 +21497,7 @@
       "kind": "class",
       "documentation": "Class: Temporal",
       "insertText": "Temporal",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -21313,7 +21601,7 @@
       "kind": "class",
       "documentation": "Class: TemporalAccessor",
       "insertText": "TemporalAccessor",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -21375,7 +21663,7 @@
       "kind": "class",
       "documentation": "Class: TemporalAdjuster",
       "insertText": "TemporalAdjuster",
-      "children": [
+      "properties": [
         {
           "label": "adjustInto",
           "kind": "method",
@@ -21407,7 +21695,7 @@
       "kind": "class",
       "documentation": "Class: TemporalAdjusters",
       "insertText": "TemporalAdjusters",
-      "children": [
+      "properties": [
         {
           "label": "dayOfWeekInMonth",
           "kind": "method",
@@ -21517,7 +21805,7 @@
       "kind": "class",
       "documentation": "Class: TemporalAmount",
       "insertText": "TemporalAmount",
-      "children": [
+      "properties": [
         {
           "label": "addTo",
           "kind": "method",
@@ -21567,7 +21855,7 @@
       "kind": "class",
       "documentation": "Class: TemporalField",
       "insertText": "TemporalField",
-      "children": [
+      "properties": [
         {
           "label": "adjustInto",
           "kind": "method",
@@ -21659,7 +21947,7 @@
       "kind": "class",
       "documentation": "Class: TemporalQueries",
       "insertText": "TemporalQueries",
-      "children": [
+      "properties": [
         {
           "label": "chronology",
           "kind": "method",
@@ -21727,7 +22015,7 @@
       "kind": "class",
       "documentation": "Class: TemporalQuery",
       "insertText": "TemporalQuery",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -21759,7 +22047,7 @@
       "kind": "class",
       "documentation": "Class: TemporalUnit",
       "insertText": "TemporalUnit",
-      "children": [
+      "properties": [
         {
           "label": "addTo",
           "kind": "method",
@@ -21827,7 +22115,7 @@
       "kind": "class",
       "documentation": "Class: UnsupportedTemporalTypeException",
       "insertText": "UnsupportedTemporalTypeException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -21864,14 +22152,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "UnsupportedTemporalTypeException",
+        "kind": "constructor",
+        "documentation": "Constructor: UnsupportedTemporalTypeException",
+        "insertText": "UnsupportedTemporalTypeException"
+      }
     },
     {
       "label": "ValueRange",
       "kind": "class",
       "documentation": "Class: ValueRange",
       "insertText": "ValueRange",
-      "children": [
+      "properties": [
         {
           "label": "of",
           "kind": "method",
@@ -21975,7 +22269,7 @@
       "kind": "class",
       "documentation": "Class: WeekFields",
       "insertText": "WeekFields",
-      "children": [
+      "properties": [
         {
           "label": "ISO",
           "kind": "property",
@@ -22073,7 +22367,7 @@
       "kind": "class",
       "documentation": "Class: ZoneOffsetTransition",
       "insertText": "ZoneOffsetTransition",
-      "children": [
+      "properties": [
         {
           "label": "of",
           "kind": "method",
@@ -22171,7 +22465,7 @@
       "kind": "class",
       "documentation": "Class: ZoneOffsetTransitionRule",
       "insertText": "ZoneOffsetTransitionRule",
-      "children": [
+      "properties": [
         {
           "label": "of",
           "kind": "method",
@@ -22263,7 +22557,7 @@
       "kind": "class",
       "documentation": "Class: ZoneOffsetTransitionRule$TimeDefinition",
       "insertText": "ZoneOffsetTransitionRule$TimeDefinition",
-      "children": [
+      "properties": [
         {
           "label": "STANDARD",
           "kind": "property",
@@ -22343,7 +22637,7 @@
       "kind": "class",
       "documentation": "Class: ZoneRules",
       "insertText": "ZoneRules",
-      "children": [
+      "properties": [
         {
           "label": "of",
           "kind": "method",
@@ -22453,7 +22747,7 @@
       "kind": "class",
       "documentation": "Class: ZoneRulesException",
       "insertText": "ZoneRulesException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -22490,14 +22784,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ZoneRulesException",
+        "kind": "constructor",
+        "documentation": "Constructor: ZoneRulesException",
+        "insertText": "ZoneRulesException"
+      }
     },
     {
       "label": "ZoneRulesProvider",
       "kind": "class",
       "documentation": "Class: ZoneRulesProvider",
       "insertText": "ZoneRulesProvider",
-      "children": [
+      "properties": [
         {
           "label": "getAvailableZoneIds",
           "kind": "method",
@@ -22541,7 +22841,7 @@
       "kind": "class",
       "documentation": "Class: AbstractCollection",
       "insertText": "AbstractCollection",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -22771,7 +23071,7 @@
       "kind": "class",
       "documentation": "Class: AbstractList",
       "insertText": "AbstractList",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -23091,7 +23391,7 @@
       "kind": "class",
       "documentation": "Class: AbstractMap",
       "insertText": "AbstractMap",
-      "children": [
+      "properties": [
         {
           "label": "clear",
           "kind": "method",
@@ -23333,7 +23633,7 @@
       "kind": "class",
       "documentation": "Class: AbstractMap$SimpleEntry",
       "insertText": "AbstractMap$SimpleEntry",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -23370,14 +23670,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "AbstractMap$SimpleEntry",
+        "kind": "constructor",
+        "documentation": "Constructor: AbstractMap$SimpleEntry",
+        "insertText": "AbstractMap$SimpleEntry"
+      }
     },
     {
       "label": "AbstractMap$SimpleImmutableEntry",
       "kind": "class",
       "documentation": "Class: AbstractMap$SimpleImmutableEntry",
       "insertText": "AbstractMap$SimpleImmutableEntry",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -23414,14 +23720,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "AbstractMap$SimpleImmutableEntry",
+        "kind": "constructor",
+        "documentation": "Constructor: AbstractMap$SimpleImmutableEntry",
+        "insertText": "AbstractMap$SimpleImmutableEntry"
+      }
     },
     {
       "label": "AbstractQueue",
       "kind": "class",
       "documentation": "Class: AbstractQueue",
       "insertText": "AbstractQueue",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -23681,7 +23993,7 @@
       "kind": "class",
       "documentation": "Class: AbstractSequentialList",
       "insertText": "AbstractSequentialList",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -24001,7 +24313,7 @@
       "kind": "class",
       "documentation": "Class: AbstractSet",
       "insertText": "AbstractSet",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -24237,7 +24549,7 @@
       "kind": "class",
       "documentation": "Class: ArrayDeque",
       "insertText": "ArrayDeque",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -24604,14 +24916,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ArrayDeque",
+        "kind": "constructor",
+        "documentation": "Constructor: ArrayDeque",
+        "insertText": "ArrayDeque"
+      }
     },
     {
       "label": "ArrayList",
       "kind": "class",
       "documentation": "Class: ArrayList",
       "insertText": "ArrayList",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -24936,14 +25254,20 @@
           "documentation": "trimToSize(): void",
           "insertText": "trimToSize"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ArrayList",
+        "kind": "constructor",
+        "documentation": "Constructor: ArrayList",
+        "insertText": "ArrayList"
+      }
     },
     {
       "label": "Arrays",
       "kind": "class",
       "documentation": "Class: Arrays",
       "insertText": "Arrays",
-      "children": [
+      "properties": [
         {
           "label": "asList",
           "kind": "method",
@@ -24993,7 +25317,7 @@
       "kind": "class",
       "documentation": "Class: Base64",
       "insertText": "Base64",
-      "children": [
+      "properties": [
         {
           "label": "getDecoder",
           "kind": "method",
@@ -25061,7 +25385,7 @@
       "kind": "class",
       "documentation": "Class: Base64$Decoder",
       "insertText": "Base64$Decoder",
-      "children": [
+      "properties": [
         {
           "label": "decode",
           "kind": "method",
@@ -25099,7 +25423,7 @@
       "kind": "class",
       "documentation": "Class: Base64$Encoder",
       "insertText": "Base64$Encoder",
-      "children": [
+      "properties": [
         {
           "label": "encode",
           "kind": "method",
@@ -25143,7 +25467,7 @@
       "kind": "class",
       "documentation": "Class: BitSet",
       "insertText": "BitSet",
-      "children": [
+      "properties": [
         {
           "label": "valueOf",
           "kind": "method",
@@ -25312,14 +25636,20 @@
           "documentation": "xor(java.util.BitSet a): void",
           "insertText": "xor"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "BitSet",
+        "kind": "constructor",
+        "documentation": "Constructor: BitSet",
+        "insertText": "BitSet"
+      }
     },
     {
       "label": "Calendar",
       "kind": "class",
       "documentation": "Class: Calendar",
       "insertText": "Calendar",
-      "children": [
+      "properties": [
         {
           "label": "ALL_STYLES",
           "kind": "property",
@@ -25915,7 +26245,7 @@
       "kind": "class",
       "documentation": "Class: Calendar$Builder",
       "insertText": "Calendar$Builder",
-      "children": [
+      "properties": [
         {
           "label": "build",
           "kind": "method",
@@ -26012,14 +26342,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Calendar$Builder",
+        "kind": "constructor",
+        "documentation": "Constructor: Calendar$Builder",
+        "insertText": "Calendar$Builder"
+      }
     },
     {
       "label": "Collection",
       "kind": "class",
       "documentation": "Class: Collection",
       "insertText": "Collection",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -26249,7 +26585,7 @@
       "kind": "class",
       "documentation": "Class: Collections",
       "insertText": "Collections",
-      "children": [
+      "properties": [
         {
           "label": "EMPTY_LIST",
           "kind": "property",
@@ -26587,7 +26923,7 @@
       "kind": "class",
       "documentation": "Class: Comparator",
       "insertText": "Comparator",
-      "children": [
+      "properties": [
         {
           "label": "comparing",
           "kind": "method",
@@ -26709,7 +27045,7 @@
       "kind": "class",
       "documentation": "Class: ConcurrentModificationException",
       "insertText": "ConcurrentModificationException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -26746,14 +27082,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "ConcurrentModificationException",
+        "kind": "constructor",
+        "documentation": "Constructor: ConcurrentModificationException",
+        "insertText": "ConcurrentModificationException"
+      }
     },
     {
       "label": "Currency",
       "kind": "class",
       "documentation": "Class: Currency",
       "insertText": "Currency",
-      "children": [
+      "properties": [
         {
           "label": "getAvailableCurrencies",
           "kind": "method",
@@ -26833,7 +27175,7 @@
       "kind": "class",
       "documentation": "Class: Date",
       "insertText": "Date",
-      "children": [
+      "properties": [
         {
           "label": "from",
           "kind": "method",
@@ -26894,14 +27236,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Date",
+        "kind": "constructor",
+        "documentation": "Constructor: Date",
+        "insertText": "Date"
+      }
     },
     {
       "label": "Deque",
       "kind": "class",
       "documentation": "Class: Deque",
       "insertText": "Deque",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -27269,7 +27617,7 @@
       "kind": "class",
       "documentation": "Class: Dictionary",
       "insertText": "Dictionary",
-      "children": [
+      "properties": [
         {
           "label": "elements",
           "kind": "method",
@@ -27337,7 +27685,7 @@
       "kind": "class",
       "documentation": "Class: DoubleSummaryStatistics",
       "insertText": "DoubleSummaryStatistics",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -27404,14 +27752,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DoubleSummaryStatistics",
+        "kind": "constructor",
+        "documentation": "Constructor: DoubleSummaryStatistics",
+        "insertText": "DoubleSummaryStatistics"
+      }
     },
     {
       "label": "DuplicateFormatFlagsException",
       "kind": "class",
       "documentation": "Class: DuplicateFormatFlagsException",
       "insertText": "DuplicateFormatFlagsException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27454,14 +27808,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "DuplicateFormatFlagsException",
+        "kind": "constructor",
+        "documentation": "Constructor: DuplicateFormatFlagsException",
+        "insertText": "DuplicateFormatFlagsException"
+      }
     },
     {
       "label": "EmptyStackException",
       "kind": "class",
       "documentation": "Class: EmptyStackException",
       "insertText": "EmptyStackException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27498,14 +27858,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "EmptyStackException",
+        "kind": "constructor",
+        "documentation": "Constructor: EmptyStackException",
+        "insertText": "EmptyStackException"
+      }
     },
     {
       "label": "Enumeration",
       "kind": "class",
       "documentation": "Class: Enumeration",
       "insertText": "Enumeration",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27543,7 +27909,7 @@
       "kind": "class",
       "documentation": "Class: EventListener",
       "insertText": "EventListener",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27569,7 +27935,7 @@
       "kind": "class",
       "documentation": "Class: EventListenerProxy",
       "insertText": "EventListenerProxy",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27601,7 +27967,7 @@
       "kind": "class",
       "documentation": "Class: EventObject",
       "insertText": "EventObject",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27626,14 +27992,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "EventObject",
+        "kind": "constructor",
+        "documentation": "Constructor: EventObject",
+        "insertText": "EventObject"
+      }
     },
     {
       "label": "FormatFlagsConversionMismatchException",
       "kind": "class",
       "documentation": "Class: FormatFlagsConversionMismatchException",
       "insertText": "FormatFlagsConversionMismatchException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27682,14 +28054,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "FormatFlagsConversionMismatchException",
+        "kind": "constructor",
+        "documentation": "Constructor: FormatFlagsConversionMismatchException",
+        "insertText": "FormatFlagsConversionMismatchException"
+      }
     },
     {
       "label": "Formattable",
       "kind": "class",
       "documentation": "Class: Formattable",
       "insertText": "Formattable",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27721,7 +28099,7 @@
       "kind": "class",
       "documentation": "Class: FormattableFlags",
       "insertText": "FormattableFlags",
-      "children": [
+      "properties": [
         {
           "label": "ALTERNATE",
           "kind": "property",
@@ -27765,7 +28143,7 @@
       "kind": "class",
       "documentation": "Class: Formatter",
       "insertText": "Formatter",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27808,14 +28186,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Formatter",
+        "kind": "constructor",
+        "documentation": "Constructor: Formatter",
+        "insertText": "Formatter"
+      }
     },
     {
       "label": "Formatter$BigDecimalLayoutForm",
       "kind": "class",
       "documentation": "Class: Formatter$BigDecimalLayoutForm",
       "insertText": "Formatter$BigDecimalLayoutForm",
-      "children": [
+      "properties": [
         {
           "label": "DECIMAL_FLOAT",
           "kind": "property",
@@ -27871,7 +28255,7 @@
       "kind": "class",
       "documentation": "Class: FormatterClosedException",
       "insertText": "FormatterClosedException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -27908,14 +28292,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "FormatterClosedException",
+        "kind": "constructor",
+        "documentation": "Constructor: FormatterClosedException",
+        "insertText": "FormatterClosedException"
+      }
     },
     {
       "label": "GregorianCalendar",
       "kind": "class",
       "documentation": "Class: GregorianCalendar",
       "insertText": "GregorianCalendar",
-      "children": [
+      "properties": [
         {
           "label": "AD",
           "kind": "property",
@@ -28216,14 +28606,20 @@
           "documentation": "toZonedDateTime(): java.time.ZonedDateTime",
           "insertText": "toZonedDateTime"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "GregorianCalendar",
+        "kind": "constructor",
+        "documentation": "Constructor: GregorianCalendar",
+        "insertText": "GregorianCalendar"
+      }
     },
     {
       "label": "HashMap",
       "kind": "class",
       "documentation": "Class: HashMap",
       "insertText": "HashMap",
-      "children": [
+      "properties": [
         {
           "label": "clear",
           "kind": "method",
@@ -28464,14 +28860,20 @@
           "documentation": "values(): java.util.Collection",
           "insertText": "values"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "HashMap",
+        "kind": "constructor",
+        "documentation": "Constructor: HashMap",
+        "insertText": "HashMap"
+      }
     },
     {
       "label": "HashSet",
       "kind": "class",
       "documentation": "Class: HashSet",
       "insertText": "HashSet",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -28706,14 +29108,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "HashSet",
+        "kind": "constructor",
+        "documentation": "Constructor: HashSet",
+        "insertText": "HashSet"
+      }
     },
     {
       "label": "Hashtable",
       "kind": "class",
       "documentation": "Class: Hashtable",
       "insertText": "Hashtable",
-      "children": [
+      "properties": [
         {
           "label": "clear",
           "kind": "method",
@@ -28966,14 +29374,20 @@
           "documentation": "values(): java.util.Collection",
           "insertText": "values"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Hashtable",
+        "kind": "constructor",
+        "documentation": "Constructor: Hashtable",
+        "insertText": "Hashtable"
+      }
     },
     {
       "label": "IdentityHashMap",
       "kind": "class",
       "documentation": "Class: IdentityHashMap",
       "insertText": "IdentityHashMap",
-      "children": [
+      "properties": [
         {
           "label": "clear",
           "kind": "method",
@@ -29214,14 +29628,20 @@
           "documentation": "values(): java.util.Collection",
           "insertText": "values"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IdentityHashMap",
+        "kind": "constructor",
+        "documentation": "Constructor: IdentityHashMap",
+        "insertText": "IdentityHashMap"
+      }
     },
     {
       "label": "IllegalFormatCodePointException",
       "kind": "class",
       "documentation": "Class: IllegalFormatCodePointException",
       "insertText": "IllegalFormatCodePointException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29264,14 +29684,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalFormatCodePointException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalFormatCodePointException",
+        "insertText": "IllegalFormatCodePointException"
+      }
     },
     {
       "label": "IllegalFormatConversionException",
       "kind": "class",
       "documentation": "Class: IllegalFormatConversionException",
       "insertText": "IllegalFormatConversionException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29321,7 +29747,7 @@
       "kind": "class",
       "documentation": "Class: IllegalFormatException",
       "insertText": "IllegalFormatException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29365,7 +29791,7 @@
       "kind": "class",
       "documentation": "Class: IllegalFormatFlagsException",
       "insertText": "IllegalFormatFlagsException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29408,14 +29834,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalFormatFlagsException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalFormatFlagsException",
+        "insertText": "IllegalFormatFlagsException"
+      }
     },
     {
       "label": "IllegalFormatPrecisionException",
       "kind": "class",
       "documentation": "Class: IllegalFormatPrecisionException",
       "insertText": "IllegalFormatPrecisionException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29458,14 +29890,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalFormatPrecisionException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalFormatPrecisionException",
+        "insertText": "IllegalFormatPrecisionException"
+      }
     },
     {
       "label": "IllegalFormatWidthException",
       "kind": "class",
       "documentation": "Class: IllegalFormatWidthException",
       "insertText": "IllegalFormatWidthException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29508,14 +29946,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllegalFormatWidthException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllegalFormatWidthException",
+        "insertText": "IllegalFormatWidthException"
+      }
     },
     {
       "label": "IllformedLocaleException",
       "kind": "class",
       "documentation": "Class: IllformedLocaleException",
       "insertText": "IllformedLocaleException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29558,14 +30002,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IllformedLocaleException",
+        "kind": "constructor",
+        "documentation": "Constructor: IllformedLocaleException",
+        "insertText": "IllformedLocaleException"
+      }
     },
     {
       "label": "InputMismatchException",
       "kind": "class",
       "documentation": "Class: InputMismatchException",
       "insertText": "InputMismatchException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29602,14 +30052,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "InputMismatchException",
+        "kind": "constructor",
+        "documentation": "Constructor: InputMismatchException",
+        "insertText": "InputMismatchException"
+      }
     },
     {
       "label": "IntSummaryStatistics",
       "kind": "class",
       "documentation": "Class: IntSummaryStatistics",
       "insertText": "IntSummaryStatistics",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -29676,14 +30132,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "IntSummaryStatistics",
+        "kind": "constructor",
+        "documentation": "Constructor: IntSummaryStatistics",
+        "insertText": "IntSummaryStatistics"
+      }
     },
     {
       "label": "Iterator",
       "kind": "class",
       "documentation": "Class: Iterator",
       "insertText": "Iterator",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -29733,7 +30195,7 @@
       "kind": "class",
       "documentation": "Class: LinkedHashMap",
       "insertText": "LinkedHashMap",
-      "children": [
+      "properties": [
         {
           "label": "clear",
           "kind": "method",
@@ -29974,14 +30436,20 @@
           "documentation": "values(): java.util.Collection",
           "insertText": "values"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "LinkedHashMap",
+        "kind": "constructor",
+        "documentation": "Constructor: LinkedHashMap",
+        "insertText": "LinkedHashMap"
+      }
     },
     {
       "label": "LinkedHashSet",
       "kind": "class",
       "documentation": "Class: LinkedHashSet",
       "insertText": "LinkedHashSet",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -30216,14 +30684,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "LinkedHashSet",
+        "kind": "constructor",
+        "documentation": "Constructor: LinkedHashSet",
+        "insertText": "LinkedHashSet"
+      }
     },
     {
       "label": "LinkedList",
       "kind": "class",
       "documentation": "Class: LinkedList",
       "insertText": "LinkedList",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -30674,14 +31148,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "LinkedList",
+        "kind": "constructor",
+        "documentation": "Constructor: LinkedList",
+        "insertText": "LinkedList"
+      }
     },
     {
       "label": "List",
       "kind": "class",
       "documentation": "Class: List",
       "insertText": "List",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -31001,7 +31481,7 @@
       "kind": "class",
       "documentation": "Class: ListIterator",
       "insertText": "ListIterator",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -31081,7 +31561,7 @@
       "kind": "class",
       "documentation": "Class: Locale",
       "insertText": "Locale",
-      "children": [
+      "properties": [
         {
           "label": "CANADA",
           "kind": "property",
@@ -31454,14 +31934,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Locale",
+        "kind": "constructor",
+        "documentation": "Constructor: Locale",
+        "insertText": "Locale"
+      }
     },
     {
       "label": "Locale$Builder",
       "kind": "class",
       "documentation": "Class: Locale$Builder",
       "insertText": "Locale$Builder",
-      "children": [
+      "properties": [
         {
           "label": "addUnicodeLocaleAttribute",
           "kind": "method",
@@ -31558,14 +32044,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Locale$Builder",
+        "kind": "constructor",
+        "documentation": "Constructor: Locale$Builder",
+        "insertText": "Locale$Builder"
+      }
     },
     {
       "label": "Locale$Category",
       "kind": "class",
       "documentation": "Class: Locale$Category",
       "insertText": "Locale$Category",
-      "children": [
+      "properties": [
         {
           "label": "DISPLAY",
           "kind": "property",
@@ -31633,7 +32125,7 @@
       "kind": "class",
       "documentation": "Class: Locale$FilteringMode",
       "insertText": "Locale$FilteringMode",
-      "children": [
+      "properties": [
         {
           "label": "AUTOSELECT_FILTERING",
           "kind": "property",
@@ -31719,7 +32211,7 @@
       "kind": "class",
       "documentation": "Class: Locale$LanguageRange",
       "insertText": "Locale$LanguageRange",
-      "children": [
+      "properties": [
         {
           "label": "MAX_WEIGHT",
           "kind": "property",
@@ -31780,14 +32272,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Locale$LanguageRange",
+        "kind": "constructor",
+        "documentation": "Constructor: Locale$LanguageRange",
+        "insertText": "Locale$LanguageRange"
+      }
     },
     {
       "label": "LongSummaryStatistics",
       "kind": "class",
       "documentation": "Class: LongSummaryStatistics",
       "insertText": "LongSummaryStatistics",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -31854,14 +32352,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "LongSummaryStatistics",
+        "kind": "constructor",
+        "documentation": "Constructor: LongSummaryStatistics",
+        "insertText": "LongSummaryStatistics"
+      }
     },
     {
       "label": "Map",
       "kind": "class",
       "documentation": "Class: Map",
       "insertText": "Map",
-      "children": [
+      "properties": [
         {
           "label": "clear",
           "kind": "method",
@@ -32103,7 +32607,7 @@
       "kind": "class",
       "documentation": "Class: Map$Entry",
       "insertText": "Map$Entry",
-      "children": [
+      "properties": [
         {
           "label": "comparingByKey",
           "kind": "method",
@@ -32171,7 +32675,7 @@
       "kind": "class",
       "documentation": "Class: MissingFormatArgumentException",
       "insertText": "MissingFormatArgumentException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -32214,14 +32718,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "MissingFormatArgumentException",
+        "kind": "constructor",
+        "documentation": "Constructor: MissingFormatArgumentException",
+        "insertText": "MissingFormatArgumentException"
+      }
     },
     {
       "label": "MissingFormatWidthException",
       "kind": "class",
       "documentation": "Class: MissingFormatWidthException",
       "insertText": "MissingFormatWidthException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -32264,14 +32774,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "MissingFormatWidthException",
+        "kind": "constructor",
+        "documentation": "Constructor: MissingFormatWidthException",
+        "insertText": "MissingFormatWidthException"
+      }
     },
     {
       "label": "MissingResourceException",
       "kind": "class",
       "documentation": "Class: MissingResourceException",
       "insertText": "MissingResourceException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -32320,14 +32836,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "MissingResourceException",
+        "kind": "constructor",
+        "documentation": "Constructor: MissingResourceException",
+        "insertText": "MissingResourceException"
+      }
     },
     {
       "label": "NavigableMap",
       "kind": "class",
       "documentation": "Class: NavigableMap",
       "insertText": "NavigableMap",
-      "children": [
+      "properties": [
         {
           "label": "ceilingEntry",
           "kind": "method",
@@ -32707,7 +33229,7 @@
       "kind": "class",
       "documentation": "Class: NavigableSet",
       "insertText": "NavigableSet",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -33045,7 +33567,7 @@
       "kind": "class",
       "documentation": "Class: NoSuchElementException",
       "insertText": "NoSuchElementException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -33082,14 +33604,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "NoSuchElementException",
+        "kind": "constructor",
+        "documentation": "Constructor: NoSuchElementException",
+        "insertText": "NoSuchElementException"
+      }
     },
     {
       "label": "Objects",
       "kind": "class",
       "documentation": "Class: Objects",
       "insertText": "Objects",
-      "children": [
+      "properties": [
         {
           "label": "compare",
           "kind": "method",
@@ -33181,7 +33709,7 @@
       "kind": "class",
       "documentation": "Class: Observable",
       "insertText": "Observable",
-      "children": [
+      "properties": [
         {
           "label": "addObserver",
           "kind": "method",
@@ -33242,14 +33770,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Observable",
+        "kind": "constructor",
+        "documentation": "Constructor: Observable",
+        "insertText": "Observable"
+      }
     },
     {
       "label": "Observer",
       "kind": "class",
       "documentation": "Class: Observer",
       "insertText": "Observer",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -33281,7 +33815,7 @@
       "kind": "class",
       "documentation": "Class: Optional",
       "insertText": "Optional",
-      "children": [
+      "properties": [
         {
           "label": "empty",
           "kind": "method",
@@ -33379,7 +33913,7 @@
       "kind": "class",
       "documentation": "Class: OptionalDouble",
       "insertText": "OptionalDouble",
-      "children": [
+      "properties": [
         {
           "label": "empty",
           "kind": "method",
@@ -33453,7 +33987,7 @@
       "kind": "class",
       "documentation": "Class: OptionalInt",
       "insertText": "OptionalInt",
-      "children": [
+      "properties": [
         {
           "label": "empty",
           "kind": "method",
@@ -33527,7 +34061,7 @@
       "kind": "class",
       "documentation": "Class: OptionalLong",
       "insertText": "OptionalLong",
-      "children": [
+      "properties": [
         {
           "label": "empty",
           "kind": "method",
@@ -33601,7 +34135,7 @@
       "kind": "class",
       "documentation": "Class: PrimitiveIterator",
       "insertText": "PrimitiveIterator",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -33651,7 +34185,7 @@
       "kind": "class",
       "documentation": "Class: PrimitiveIterator$OfDouble",
       "insertText": "PrimitiveIterator$OfDouble",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -33707,7 +34241,7 @@
       "kind": "class",
       "documentation": "Class: PrimitiveIterator$OfInt",
       "insertText": "PrimitiveIterator$OfInt",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -33763,7 +34297,7 @@
       "kind": "class",
       "documentation": "Class: PrimitiveIterator$OfLong",
       "insertText": "PrimitiveIterator$OfLong",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -33819,7 +34353,7 @@
       "kind": "class",
       "documentation": "Class: PriorityQueue",
       "insertText": "PriorityQueue",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -34072,14 +34606,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "PriorityQueue",
+        "kind": "constructor",
+        "documentation": "Constructor: PriorityQueue",
+        "insertText": "PriorityQueue"
+      }
     },
     {
       "label": "Queue",
       "kind": "class",
       "documentation": "Class: Queue",
       "insertText": "Queue",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -34339,7 +34879,7 @@
       "kind": "class",
       "documentation": "Class: Random",
       "insertText": "Random",
-      "children": [
+      "properties": [
         {
           "label": "doubles",
           "kind": "method",
@@ -34448,14 +34988,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Random",
+        "kind": "constructor",
+        "documentation": "Constructor: Random",
+        "insertText": "Random"
+      }
     },
     {
       "label": "RandomAccess",
       "kind": "class",
       "documentation": "Class: RandomAccess",
       "insertText": "RandomAccess",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -34481,7 +35027,7 @@
       "kind": "class",
       "documentation": "Class: Set",
       "insertText": "Set",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -34717,7 +35263,7 @@
       "kind": "class",
       "documentation": "Class: SimpleTimeZone",
       "insertText": "SimpleTimeZone",
-      "children": [
+      "properties": [
         {
           "label": "STANDARD_TIME",
           "kind": "property",
@@ -34898,14 +35444,20 @@
           "documentation": "useDaylightTime(): boolean",
           "insertText": "useDaylightTime"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "SimpleTimeZone",
+        "kind": "constructor",
+        "documentation": "Constructor: SimpleTimeZone",
+        "insertText": "SimpleTimeZone"
+      }
     },
     {
       "label": "SortedMap",
       "kind": "class",
       "documentation": "Class: SortedMap",
       "insertText": "SortedMap",
-      "children": [
+      "properties": [
         {
           "label": "clear",
           "kind": "method",
@@ -35183,7 +35735,7 @@
       "kind": "class",
       "documentation": "Class: SortedSet",
       "insertText": "SortedSet",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -35455,7 +36007,7 @@
       "kind": "class",
       "documentation": "Class: Spliterator",
       "insertText": "Spliterator",
-      "children": [
+      "properties": [
         {
           "label": "CONCURRENT",
           "kind": "property",
@@ -35577,7 +36129,7 @@
       "kind": "class",
       "documentation": "Class: Spliterator$OfDouble",
       "insertText": "Spliterator$OfDouble",
-      "children": [
+      "properties": [
         {
           "label": "characteristics",
           "kind": "method",
@@ -35651,7 +36203,7 @@
       "kind": "class",
       "documentation": "Class: Spliterator$OfInt",
       "insertText": "Spliterator$OfInt",
-      "children": [
+      "properties": [
         {
           "label": "characteristics",
           "kind": "method",
@@ -35725,7 +36277,7 @@
       "kind": "class",
       "documentation": "Class: Spliterator$OfLong",
       "insertText": "Spliterator$OfLong",
-      "children": [
+      "properties": [
         {
           "label": "characteristics",
           "kind": "method",
@@ -35799,7 +36351,7 @@
       "kind": "class",
       "documentation": "Class: Spliterator$OfPrimitive",
       "insertText": "Spliterator$OfPrimitive",
-      "children": [
+      "properties": [
         {
           "label": "characteristics",
           "kind": "method",
@@ -35873,7 +36425,7 @@
       "kind": "class",
       "documentation": "Class: Spliterators",
       "insertText": "Spliterators",
-      "children": [
+      "properties": [
         {
           "label": "emptyDoubleSpliterator",
           "kind": "method",
@@ -35947,7 +36499,7 @@
       "kind": "class",
       "documentation": "Class: Stack",
       "insertText": "Stack",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -36368,14 +36920,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Stack",
+        "kind": "constructor",
+        "documentation": "Constructor: Stack",
+        "insertText": "Stack"
+      }
     },
     {
       "label": "StringJoiner",
       "kind": "class",
       "documentation": "Class: StringJoiner",
       "insertText": "StringJoiner",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -36418,14 +36976,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "StringJoiner",
+        "kind": "constructor",
+        "documentation": "Constructor: StringJoiner",
+        "insertText": "StringJoiner"
+      }
     },
     {
       "label": "StringTokenizer",
       "kind": "class",
       "documentation": "Class: StringTokenizer",
       "insertText": "StringTokenizer",
-      "children": [
+      "properties": [
         {
           "label": "countTokens",
           "kind": "method",
@@ -36480,14 +37044,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "StringTokenizer",
+        "kind": "constructor",
+        "documentation": "Constructor: StringTokenizer",
+        "insertText": "StringTokenizer"
+      }
     },
     {
       "label": "TimeZone",
       "kind": "class",
       "documentation": "Class: TimeZone",
       "insertText": "TimeZone",
-      "children": [
+      "properties": [
         {
           "label": "LONG",
           "kind": "property",
@@ -36645,7 +37215,7 @@
       "kind": "class",
       "documentation": "Class: TooManyListenersException",
       "insertText": "TooManyListenersException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -36682,14 +37252,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "TooManyListenersException",
+        "kind": "constructor",
+        "documentation": "Constructor: TooManyListenersException",
+        "insertText": "TooManyListenersException"
+      }
     },
     {
       "label": "TreeMap",
       "kind": "class",
       "documentation": "Class: TreeMap",
       "insertText": "TreeMap",
-      "children": [
+      "properties": [
         {
           "label": "ceilingEntry",
           "kind": "method",
@@ -37068,14 +37644,20 @@
           "documentation": "values(): java.util.Collection",
           "insertText": "values"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "TreeMap",
+        "kind": "constructor",
+        "documentation": "Constructor: TreeMap",
+        "insertText": "TreeMap"
+      }
     },
     {
       "label": "TreeSet",
       "kind": "class",
       "documentation": "Class: TreeSet",
       "insertText": "TreeSet",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -37412,14 +37994,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "TreeSet",
+        "kind": "constructor",
+        "documentation": "Constructor: TreeSet",
+        "insertText": "TreeSet"
+      }
     },
     {
       "label": "UUID",
       "kind": "class",
       "documentation": "Class: UUID",
       "insertText": "UUID",
-      "children": [
+      "properties": [
         {
           "label": "fromString",
           "kind": "method",
@@ -37504,14 +38092,20 @@
           "documentation": "version(): int",
           "insertText": "version"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "UUID",
+        "kind": "constructor",
+        "documentation": "Constructor: UUID",
+        "insertText": "UUID"
+      }
     },
     {
       "label": "UnknownFormatConversionException",
       "kind": "class",
       "documentation": "Class: UnknownFormatConversionException",
       "insertText": "UnknownFormatConversionException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -37554,14 +38148,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "UnknownFormatConversionException",
+        "kind": "constructor",
+        "documentation": "Constructor: UnknownFormatConversionException",
+        "insertText": "UnknownFormatConversionException"
+      }
     },
     {
       "label": "UnknownFormatFlagsException",
       "kind": "class",
       "documentation": "Class: UnknownFormatFlagsException",
       "insertText": "UnknownFormatFlagsException",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -37604,14 +38204,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "UnknownFormatFlagsException",
+        "kind": "constructor",
+        "documentation": "Constructor: UnknownFormatFlagsException",
+        "insertText": "UnknownFormatFlagsException"
+      }
     },
     {
       "label": "Vector",
       "kind": "class",
       "documentation": "Class: Vector",
       "insertText": "Vector",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -38002,14 +38608,20 @@
           "documentation": "toString(): java.lang.String",
           "insertText": "toString"
         }
-      ]
+      ],
+      "constructorDefinition": {
+        "label": "Vector",
+        "kind": "constructor",
+        "documentation": "Constructor: Vector",
+        "insertText": "Vector"
+      }
     },
     {
       "label": "BiConsumer",
       "kind": "class",
       "documentation": "Class: BiConsumer",
       "insertText": "BiConsumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -38047,7 +38659,7 @@
       "kind": "class",
       "documentation": "Class: BiFunction",
       "insertText": "BiFunction",
-      "children": [
+      "properties": [
         {
           "label": "andThen",
           "kind": "method",
@@ -38085,7 +38697,7 @@
       "kind": "class",
       "documentation": "Class: BiPredicate",
       "insertText": "BiPredicate",
-      "children": [
+      "properties": [
         {
           "label": "and",
           "kind": "method",
@@ -38135,7 +38747,7 @@
       "kind": "class",
       "documentation": "Class: BinaryOperator",
       "insertText": "BinaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "maxBy",
           "kind": "method",
@@ -38185,7 +38797,7 @@
       "kind": "class",
       "documentation": "Class: BooleanSupplier",
       "insertText": "BooleanSupplier",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -38217,7 +38829,7 @@
       "kind": "class",
       "documentation": "Class: Consumer",
       "insertText": "Consumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -38255,7 +38867,7 @@
       "kind": "class",
       "documentation": "Class: DoubleBinaryOperator",
       "insertText": "DoubleBinaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "applyAsDouble",
           "kind": "method",
@@ -38287,7 +38899,7 @@
       "kind": "class",
       "documentation": "Class: DoubleConsumer",
       "insertText": "DoubleConsumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -38325,7 +38937,7 @@
       "kind": "class",
       "documentation": "Class: DoubleFunction",
       "insertText": "DoubleFunction",
-      "children": [
+      "properties": [
         {
           "label": "apply",
           "kind": "method",
@@ -38357,7 +38969,7 @@
       "kind": "class",
       "documentation": "Class: DoublePredicate",
       "insertText": "DoublePredicate",
-      "children": [
+      "properties": [
         {
           "label": "and",
           "kind": "method",
@@ -38407,7 +39019,7 @@
       "kind": "class",
       "documentation": "Class: DoubleSupplier",
       "insertText": "DoubleSupplier",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -38439,7 +39051,7 @@
       "kind": "class",
       "documentation": "Class: DoubleToIntFunction",
       "insertText": "DoubleToIntFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsInt",
           "kind": "method",
@@ -38471,7 +39083,7 @@
       "kind": "class",
       "documentation": "Class: DoubleToLongFunction",
       "insertText": "DoubleToLongFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsLong",
           "kind": "method",
@@ -38503,7 +39115,7 @@
       "kind": "class",
       "documentation": "Class: DoubleUnaryOperator",
       "insertText": "DoubleUnaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "identity",
           "kind": "method",
@@ -38553,7 +39165,7 @@
       "kind": "class",
       "documentation": "Class: Function",
       "insertText": "Function",
-      "children": [
+      "properties": [
         {
           "label": "identity",
           "kind": "method",
@@ -38603,7 +39215,7 @@
       "kind": "class",
       "documentation": "Class: IntBinaryOperator",
       "insertText": "IntBinaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "applyAsInt",
           "kind": "method",
@@ -38635,7 +39247,7 @@
       "kind": "class",
       "documentation": "Class: IntConsumer",
       "insertText": "IntConsumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -38673,7 +39285,7 @@
       "kind": "class",
       "documentation": "Class: IntFunction",
       "insertText": "IntFunction",
-      "children": [
+      "properties": [
         {
           "label": "apply",
           "kind": "method",
@@ -38705,7 +39317,7 @@
       "kind": "class",
       "documentation": "Class: IntPredicate",
       "insertText": "IntPredicate",
-      "children": [
+      "properties": [
         {
           "label": "and",
           "kind": "method",
@@ -38755,7 +39367,7 @@
       "kind": "class",
       "documentation": "Class: IntSupplier",
       "insertText": "IntSupplier",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -38787,7 +39399,7 @@
       "kind": "class",
       "documentation": "Class: IntToDoubleFunction",
       "insertText": "IntToDoubleFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsDouble",
           "kind": "method",
@@ -38819,7 +39431,7 @@
       "kind": "class",
       "documentation": "Class: IntToLongFunction",
       "insertText": "IntToLongFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsLong",
           "kind": "method",
@@ -38851,7 +39463,7 @@
       "kind": "class",
       "documentation": "Class: IntUnaryOperator",
       "insertText": "IntUnaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "identity",
           "kind": "method",
@@ -38901,7 +39513,7 @@
       "kind": "class",
       "documentation": "Class: LongBinaryOperator",
       "insertText": "LongBinaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "applyAsLong",
           "kind": "method",
@@ -38933,7 +39545,7 @@
       "kind": "class",
       "documentation": "Class: LongConsumer",
       "insertText": "LongConsumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -38971,7 +39583,7 @@
       "kind": "class",
       "documentation": "Class: LongFunction",
       "insertText": "LongFunction",
-      "children": [
+      "properties": [
         {
           "label": "apply",
           "kind": "method",
@@ -39003,7 +39615,7 @@
       "kind": "class",
       "documentation": "Class: LongPredicate",
       "insertText": "LongPredicate",
-      "children": [
+      "properties": [
         {
           "label": "and",
           "kind": "method",
@@ -39053,7 +39665,7 @@
       "kind": "class",
       "documentation": "Class: LongSupplier",
       "insertText": "LongSupplier",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -39085,7 +39697,7 @@
       "kind": "class",
       "documentation": "Class: LongToDoubleFunction",
       "insertText": "LongToDoubleFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsDouble",
           "kind": "method",
@@ -39117,7 +39729,7 @@
       "kind": "class",
       "documentation": "Class: LongToIntFunction",
       "insertText": "LongToIntFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsInt",
           "kind": "method",
@@ -39149,7 +39761,7 @@
       "kind": "class",
       "documentation": "Class: LongUnaryOperator",
       "insertText": "LongUnaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "identity",
           "kind": "method",
@@ -39199,7 +39811,7 @@
       "kind": "class",
       "documentation": "Class: ObjDoubleConsumer",
       "insertText": "ObjDoubleConsumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -39231,7 +39843,7 @@
       "kind": "class",
       "documentation": "Class: ObjIntConsumer",
       "insertText": "ObjIntConsumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -39263,7 +39875,7 @@
       "kind": "class",
       "documentation": "Class: ObjLongConsumer",
       "insertText": "ObjLongConsumer",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -39295,7 +39907,7 @@
       "kind": "class",
       "documentation": "Class: Predicate",
       "insertText": "Predicate",
-      "children": [
+      "properties": [
         {
           "label": "isEqual",
           "kind": "method",
@@ -39351,7 +39963,7 @@
       "kind": "class",
       "documentation": "Class: Supplier",
       "insertText": "Supplier",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -39383,7 +39995,7 @@
       "kind": "class",
       "documentation": "Class: ToDoubleBiFunction",
       "insertText": "ToDoubleBiFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsDouble",
           "kind": "method",
@@ -39415,7 +40027,7 @@
       "kind": "class",
       "documentation": "Class: ToDoubleFunction",
       "insertText": "ToDoubleFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsDouble",
           "kind": "method",
@@ -39447,7 +40059,7 @@
       "kind": "class",
       "documentation": "Class: ToIntBiFunction",
       "insertText": "ToIntBiFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsInt",
           "kind": "method",
@@ -39479,7 +40091,7 @@
       "kind": "class",
       "documentation": "Class: ToIntFunction",
       "insertText": "ToIntFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsInt",
           "kind": "method",
@@ -39511,7 +40123,7 @@
       "kind": "class",
       "documentation": "Class: ToLongBiFunction",
       "insertText": "ToLongBiFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsLong",
           "kind": "method",
@@ -39543,7 +40155,7 @@
       "kind": "class",
       "documentation": "Class: ToLongFunction",
       "insertText": "ToLongFunction",
-      "children": [
+      "properties": [
         {
           "label": "applyAsLong",
           "kind": "method",
@@ -39575,7 +40187,7 @@
       "kind": "class",
       "documentation": "Class: UnaryOperator",
       "insertText": "UnaryOperator",
-      "children": [
+      "properties": [
         {
           "label": "identity",
           "kind": "method",
@@ -39625,7 +40237,7 @@
       "kind": "class",
       "documentation": "Class: Matcher",
       "insertText": "Matcher",
-      "children": [
+      "properties": [
         {
           "label": "quoteReplacement",
           "kind": "method",
@@ -39813,7 +40425,7 @@
       "kind": "class",
       "documentation": "Class: Pattern",
       "insertText": "Pattern",
-      "children": [
+      "properties": [
         {
           "label": "quote",
           "kind": "method",
@@ -39887,7 +40499,7 @@
       "kind": "class",
       "documentation": "Class: BaseStream",
       "insertText": "BaseStream",
-      "children": [
+      "properties": [
         {
           "label": "close",
           "kind": "method",
@@ -39949,7 +40561,7 @@
       "kind": "class",
       "documentation": "Class: Collector",
       "insertText": "Collector",
-      "children": [
+      "properties": [
         {
           "label": "of",
           "kind": "method",
@@ -40017,7 +40629,7 @@
       "kind": "class",
       "documentation": "Class: Collector$Characteristics",
       "insertText": "Collector$Characteristics",
-      "children": [
+      "properties": [
         {
           "label": "CONCURRENT",
           "kind": "property",
@@ -40091,7 +40703,7 @@
       "kind": "class",
       "documentation": "Class: Collectors",
       "insertText": "Collectors",
-      "children": [
+      "properties": [
         {
           "label": "averagingDouble",
           "kind": "method",
@@ -40303,7 +40915,7 @@
       "kind": "class",
       "documentation": "Class: DoubleStream",
       "insertText": "DoubleStream",
-      "children": [
+      "properties": [
         {
           "label": "builder",
           "kind": "method",
@@ -40563,7 +41175,7 @@
       "kind": "class",
       "documentation": "Class: DoubleStream$Builder",
       "insertText": "DoubleStream$Builder",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -40613,7 +41225,7 @@
       "kind": "class",
       "documentation": "Class: IntStream",
       "insertText": "IntStream",
-      "children": [
+      "properties": [
         {
           "label": "builder",
           "kind": "method",
@@ -40897,7 +41509,7 @@
       "kind": "class",
       "documentation": "Class: IntStream$Builder",
       "insertText": "IntStream$Builder",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -40947,7 +41559,7 @@
       "kind": "class",
       "documentation": "Class: LongStream",
       "insertText": "LongStream",
-      "children": [
+      "properties": [
         {
           "label": "builder",
           "kind": "method",
@@ -41225,7 +41837,7 @@
       "kind": "class",
       "documentation": "Class: LongStream$Builder",
       "insertText": "LongStream$Builder",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -41275,7 +41887,7 @@
       "kind": "class",
       "documentation": "Class: Stream",
       "insertText": "Stream",
-      "children": [
+      "properties": [
         {
           "label": "builder",
           "kind": "method",
@@ -41553,7 +42165,7 @@
       "kind": "class",
       "documentation": "Class: Stream$Builder",
       "insertText": "Stream$Builder",
-      "children": [
+      "properties": [
         {
           "label": "accept",
           "kind": "method",
@@ -41609,7 +42221,7 @@
       "kind": "class",
       "documentation": "Class: BytesRef",
       "insertText": "BytesRef",
-      "children": [
+      "properties": [
         {
           "label": "bytesEquals",
           "kind": "method",
@@ -41671,7 +42283,7 @@
       "kind": "class",
       "documentation": "Class: GeoPoint",
       "insertText": "GeoPoint",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -41709,7 +42321,7 @@
       "kind": "class",
       "documentation": "Class: ScriptDocValues$Booleans",
       "insertText": "ScriptDocValues$Booleans",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -42035,7 +42647,7 @@
       "kind": "class",
       "documentation": "Class: ScriptDocValues$BytesRefs",
       "insertText": "ScriptDocValues$BytesRefs",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -42361,7 +42973,7 @@
       "kind": "class",
       "documentation": "Class: ScriptDocValues$Dates",
       "insertText": "ScriptDocValues$Dates",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -42687,7 +43299,7 @@
       "kind": "class",
       "documentation": "Class: ScriptDocValues$Doubles",
       "insertText": "ScriptDocValues$Doubles",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -43013,7 +43625,7 @@
       "kind": "class",
       "documentation": "Class: ScriptDocValues$GeoPoints",
       "insertText": "ScriptDocValues$GeoPoints",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -43399,7 +44011,7 @@
       "kind": "class",
       "documentation": "Class: ScriptDocValues$Longs",
       "insertText": "ScriptDocValues$Longs",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -43725,7 +44337,7 @@
       "kind": "class",
       "documentation": "Class: ScriptDocValues$Strings",
       "insertText": "ScriptDocValues$Strings",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -44051,7 +44663,7 @@
       "kind": "class",
       "documentation": "Class: IpFieldMapper$IpFieldType$IpScriptDocValues",
       "insertText": "IpFieldMapper$IpFieldType$IpScriptDocValues",
-      "children": [
+      "properties": [
         {
           "label": "add",
           "kind": "method",
@@ -44377,7 +44989,7 @@
       "kind": "class",
       "documentation": "Class: IntervalFilterScript$Interval",
       "insertText": "IntervalFilterScript$Interval",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -44421,7 +45033,7 @@
       "kind": "class",
       "documentation": "Class: ScriptedSimilarity$Doc",
       "insertText": "ScriptedSimilarity$Doc",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -44459,7 +45071,7 @@
       "kind": "class",
       "documentation": "Class: ScriptedSimilarity$Field",
       "insertText": "ScriptedSimilarity$Field",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -44503,7 +45115,7 @@
       "kind": "class",
       "documentation": "Class: ScriptedSimilarity$Query",
       "insertText": "ScriptedSimilarity$Query",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -44535,7 +45147,7 @@
       "kind": "class",
       "documentation": "Class: ScriptedSimilarity$Term",
       "insertText": "ScriptedSimilarity$Term",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -44573,7 +45185,7 @@
       "kind": "class",
       "documentation": "Class: Debug",
       "insertText": "Debug",
-      "children": [
+      "properties": [
         {
           "label": "explain",
           "kind": "method",
@@ -44605,7 +45217,7 @@
       "kind": "class",
       "documentation": "Class: JodaCompatibleZonedDateTime",
       "insertText": "JodaCompatibleZonedDateTime",
-      "children": [
+      "properties": [
         {
           "label": "compareTo",
           "kind": "method",
@@ -45141,7 +45753,7 @@
       "kind": "class",
       "documentation": "Class: ScoreScript$ExplanationHolder",
       "insertText": "ScoreScript$ExplanationHolder",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -45173,7 +45785,7 @@
       "kind": "class",
       "documentation": "Class: FieldLookup",
       "insertText": "FieldLookup",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -45217,7 +45829,7 @@
       "kind": "class",
       "documentation": "Class: BooleanFieldScript",
       "insertText": "BooleanFieldScript",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",
@@ -45243,7 +45855,7 @@
       "kind": "class",
       "documentation": "Class: BooleanFieldScript$Factory",
       "insertText": "BooleanFieldScript$Factory",
-      "children": [
+      "properties": [
         {
           "label": "equals",
           "kind": "method",

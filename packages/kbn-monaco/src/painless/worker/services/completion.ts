@@ -39,7 +39,8 @@ import {
 } from '../../autocomplete_definitions';
 
 interface Suggestion extends PainlessCompletionItem {
-  children?: PainlessCompletionItem[];
+  properties?: PainlessCompletionItem[];
+  constructorDefinition?: PainlessCompletionItem;
 }
 
 const mapContextToData: { [key: string]: { suggestions: any[] } } = {
@@ -63,7 +64,7 @@ export class PainlessCompletionService {
 
   getStaticSuggestions(): PainlessCompletionResult {
     const suggestions: PainlessCompletionItem[] = this.suggestions.map((suggestion) => {
-      const { children, ...rootSuggestion } = suggestion;
+      const { properties, ...rootSuggestion } = suggestion;
       return rootSuggestion;
     });
 
@@ -89,16 +90,16 @@ export class PainlessCompletionService {
       .map((type) => type.label);
   }
 
-  getPainlessClassSuggestions(className: string): PainlessCompletionResult {
+  getPropertySuggestions(className: string): PainlessCompletionResult {
     const painlessClass = this.suggestions.find((suggestion) => suggestion.label === className);
 
     return {
       isIncomplete: false,
-      suggestions: painlessClass?.children || [],
+      suggestions: painlessClass?.properties || [],
     };
   }
 
-  getFieldSuggestions(fields: Field[]) {
+  getFieldSuggestions(fields: Field[]): PainlessCompletionResult {
     const suggestions = fields.map(({ name }) => {
       return {
         label: name,
@@ -112,6 +113,25 @@ export class PainlessCompletionService {
     return {
       isIncomplete: false,
       suggestions,
+    };
+  }
+
+  getConstructorSuggestions(): PainlessCompletionResult {
+    let constructorSuggestions: PainlessCompletionItem[] = [];
+
+    const suggestionsWithConstructors = this.suggestions.filter(
+      (suggestion) => suggestion.constructorDefinition
+    );
+
+    if (suggestionsWithConstructors) {
+      constructorSuggestions = suggestionsWithConstructors.map(
+        (filteredSuggestion) => filteredSuggestion.constructorDefinition!
+      );
+    }
+
+    return {
+      isIncomplete: false,
+      suggestions: constructorSuggestions,
     };
   }
 }
