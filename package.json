@@ -110,14 +110,16 @@
       "**/grunt-*/**",
       "x-pack/typescript",
       "@elastic/eui/rehype-react",
+      "@elastic/eui/remark-parse",
       "@elastic/eui/remark-rehype",
-      "@elastic/eui/remark-rehype/**"
+      "@elastic/eui/remark-rehype/**",
+      "@elastic/eui/unified"
     ]
   },
   "dependencies": {
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "7.10.0-rc.1",
-    "@elastic/eui": "29.5.0",
+    "@elastic/eui": "30.1.1",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "^2.5.0",
     "@elastic/request-crypto": "1.1.4",
@@ -228,7 +230,7 @@
     "@babel/register": "^7.10.5",
     "@babel/types": "^7.11.0",
     "@elastic/apm-rum": "^5.6.1",
-    "@elastic/charts": "23.2.1",
+    "@elastic/charts": "24.0.0",
     "@elastic/ems-client": "7.10.0",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",

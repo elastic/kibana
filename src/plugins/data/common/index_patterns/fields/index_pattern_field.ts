@@ -18,6 +18,7 @@
  */
 
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
 import { shortenDottedString } from '../../utils';
@@ -144,7 +145,8 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get visualizable() {
-    return this.aggregatable;
+    const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
+    return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
   }
 
   public toJSON() {

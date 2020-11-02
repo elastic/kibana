@@ -31,7 +31,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
     <EuiDescriptionList>
       {[
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.hostNameLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.hostNameLabel', {
             defaultMessage: 'Host name',
           }),
           description:
@@ -41,19 +41,19 @@ export const AgentDetailsContent: React.FunctionComponent<{
               : '-',
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.hostIdLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
             defaultMessage: 'Agent ID',
           }),
           description: agent.id,
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.statusLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
             defaultMessage: 'Status',
           }),
           description: <AgentHealth agent={agent} />,
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.agentPolicyLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.agentPolicyLabel', {
             defaultMessage: 'Agent policy',
           }),
           description: agentPolicy ? (
@@ -68,7 +68,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
           ),
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.versionLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.versionLabel', {
             defaultMessage: 'Agent version',
           }),
           description:
@@ -85,7 +85,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
                       <EuiIcon size="m" type="alert" color="warning" />
                       &nbsp;
                       <FormattedMessage
-                        id="xpack.ingestManager.agentList.agentUpgradeLabel"
+                        id="xpack.fleet.agentList.agentUpgradeLabel"
                         defaultMessage="Upgrade available"
                       />
                     </EuiText>
@@ -97,7 +97,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
             ),
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.releaseLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
             defaultMessage: 'Agent release',
           }),
           description:
@@ -110,7 +110,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
               : '-',
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.platformLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
             defaultMessage: 'Platform',
           }),
           description:

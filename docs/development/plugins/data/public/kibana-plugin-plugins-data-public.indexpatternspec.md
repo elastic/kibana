@@ -14,6 +14,7 @@ export interface IndexPatternSpec
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [attributes](./kibana-plugin-plugins-data-public.indexpatternspec.attributes.md) | <code>IndexPatternAttrs</code> |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.indexpatternspec.fieldformats.md) | <code>Record&lt;string, SerializedFieldFormat&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternspec.fields.md) | <code>IndexPatternFieldMap</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpatternspec.id.md) | <code>string</code> |  |

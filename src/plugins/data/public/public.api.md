@@ -16,6 +16,7 @@ import { CoreSetup } from 'src/core/public';
 import { CoreSetup as CoreSetup_2 } from 'kibana/public';
 import { CoreStart } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'src/core/public';
+import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
@@ -1097,13 +1098,7 @@ export class IndexPattern implements IIndexPattern {
         time_zone?: string | undefined;
     }>> | undefined;
     getAsSavedObjectBody(): {
-        attributes: {
-            fields: {
-                [key: string]: {
-                    customName: string;
-                };
-            };
-        } | undefined;
+        attributes: IndexPatternAttrs | undefined;
         title: string;
         timeFieldName: string | undefined;
         intervalName: string | undefined;
@@ -1315,6 +1310,8 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
 // @public (undocumented)
 export interface IndexPatternSpec {
     // (undocumented)
+    attributes?: IndexPatternAttrs;
+    // (undocumented)
     fieldFormats?: Record<string, SerializedFieldFormat>;
     // (undocumented)
     fields?: IndexPatternFieldMap;
@@ -1434,8 +1431,6 @@ export interface ISearchSetup {
     //
     // (undocumented)
     aggs: AggsSetup;
-    // Warning: (ae-forgotten-export) The symbol "ISessionService" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
     session: ISessionService;
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
     //
@@ -1451,7 +1446,6 @@ export interface ISearchStart {
     aggs: AggsStart;
     search: ISearchGeneric;
     searchSource: ISearchStartSearchSource;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
     session: ISessionService;
     // (undocumented)
     showError: (e: Error) => void;
@@ -1467,6 +1461,17 @@ export interface ISearchStartSearchSource {
 //
 // @public (undocumented)
 export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
+
+// Warning: (ae-missing-release-tag) "ISessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ISessionService {
+    clear: () => void;
+    getSession$: () => Observable<string | undefined>;
+    getSessionId: () => string | undefined;
+    restore: (sessionId: string) => void;
+    start: () => string;
+}
 
 // Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1618,13 +1623,13 @@ export interface OptionedValueProp {
     value: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "KbnError" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "PainlessError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class PainlessError extends KbnError {
-    // Warning: (ae-forgotten-export) The symbol "EsError" needs to be exported by the entry point index.d.ts
-    constructor(err: EsError, request: IKibanaSearchRequest);
+export class PainlessError extends EsError {
+    // Warning: (ae-forgotten-export) The symbol "IEsError" needs to be exported by the entry point index.d.ts
+    constructor(err: IEsError, request: IKibanaSearchRequest);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
@@ -2154,6 +2159,7 @@ export interface SearchSourceFields {
     version?: boolean;
 }
 
+// Warning: (ae-forgotten-export) The symbol "KbnError" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "SearchTimeoutError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -2304,7 +2310,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/search/aggs/types.ts:98:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/search/aggs/types.ts:113:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:67:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts
