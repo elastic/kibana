@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { monaco } from '../monaco_imports';
-import { PainlessWorker } from './worker';
+import { monaco } from '../../monaco_imports';
+import { PainlessWorker } from '../worker';
 
 export class WorkerProxyService {
   private worker: monaco.editor.MonacoWebWorker<PainlessWorker> | undefined;

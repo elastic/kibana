@@ -18,7 +18,7 @@
  */
 
 import { monaco } from '../monaco_imports';
-import { ContextService } from './context_service';
+import { EditorStateService } from './services';
 import { PainlessCompletionResult, PainlessCompletionKind } from './types';
 import { PainlessWorker } from './worker';
 
@@ -47,22 +47,20 @@ const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.Compl
 
 export class PainlessCompletionAdapter implements monaco.languages.CompletionItemProvider {
   constructor(
-    private _worker: {
+    private worker: {
       (...uris: monaco.Uri[]): Promise<PainlessWorker>;
       (arg0: monaco.Uri): Promise<PainlessWorker>;
     },
-    private _contextService: ContextService
+    private editorStateService: EditorStateService
   ) {}
 
   public get triggerCharacters(): string[] {
     return ['.', `'`];
   }
 
-  provideCompletionItems(
+  async provideCompletionItems(
     model: monaco.editor.IReadOnlyModel,
-    position: monaco.Position,
-    context: monaco.languages.CompletionContext,
-    token: monaco.CancellationToken
+    position: monaco.Position
   ): Promise<monaco.languages.CompletionList> {
     // Active line characters
     const currentLineChars = model.getValueInRange({
@@ -72,42 +70,41 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
       endColumn: position.column,
     });
 
-    return this._worker(model.uri)
-      .then((worker: PainlessWorker) => {
-        return worker.provideAutocompleteSuggestions(
-          currentLineChars,
-          this._contextService.workerContext,
-          this._contextService.editorFields
-        );
-      })
-      .then((completionInfo: PainlessCompletionResult) => {
-        const wordInfo = model.getWordUntilPosition(position);
-        const wordRange = {
-          startLineNumber: position.lineNumber,
-          endLineNumber: position.lineNumber,
-          startColumn: wordInfo.startColumn,
-          endColumn: wordInfo.endColumn,
-        };
+    const worker = await this.worker(model.uri);
 
-        const suggestions = completionInfo.suggestions.map(
-          ({ label, insertText, documentation, kind, insertTextAsSnippet }) => {
-            return {
-              label,
-              insertText,
-              documentation,
-              range: wordRange,
-              kind: getCompletionKind(kind),
-              insertTextRules: insertTextAsSnippet
-                ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-                : undefined,
-            };
-          }
-        );
+    const { context, fields } = this.editorStateService.getState();
+    const autocompleteInfo: PainlessCompletionResult = await worker.provideAutocompleteSuggestions(
+      currentLineChars,
+      context,
+      fields
+    );
 
+    const wordInfo = model.getWordUntilPosition(position);
+    const wordRange = {
+      startLineNumber: position.lineNumber,
+      endLineNumber: position.lineNumber,
+      startColumn: wordInfo.startColumn,
+      endColumn: wordInfo.endColumn,
+    };
+
+    const suggestions = autocompleteInfo.suggestions.map(
+      ({ label, insertText, documentation, kind, insertTextAsSnippet }) => {
         return {
-          isIncomplete: completionInfo.isIncomplete,
-          suggestions,
+          label,
+          insertText,
+          documentation,
+          range: wordRange,
+          kind: getCompletionKind(kind),
+          insertTextRules: insertTextAsSnippet
+            ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+            : undefined,
         };
-      });
+      }
+    );
+
+    return Promise.resolve({
+      isIncomplete: autocompleteInfo.isIncomplete,
+      suggestions,
+    });
   }
 }

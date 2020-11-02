@@ -17,25 +17,29 @@
  * under the License.
  */
 
-import { PainlessContext, Field } from './types';
+import { PainlessContext, Field } from '../types';
 
-export class ContextService {
+export interface EditorState {
+  context: PainlessContext;
+  fields?: Field[];
+}
+
+export class EditorStateService {
   context: PainlessContext = 'painless_test';
   fields: Field[] = [];
 
-  public get workerContext() {
-    return this.context;
+  public getState(): EditorState {
+    return {
+      context: this.context,
+      fields: this.fields,
+    };
   }
 
-  public set workerContext(newContext: PainlessContext) {
-    this.context = newContext;
-  }
+  public setup(context: PainlessContext, fields?: Field[]) {
+    this.context = context;
 
-  public get editorFields() {
-    return this.fields;
-  }
-
-  public set editorFields(newFields: Field[]) {
-    this.fields = newFields;
+    if (fields) {
+      this.fields = fields;
+    }
   }
 }
