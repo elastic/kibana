@@ -38,6 +38,7 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
 
+import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
@@ -69,6 +70,7 @@ export interface DiscoverServices {
   getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
+  trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export async function buildServices(
@@ -82,6 +84,11 @@ export async function buildServices(
     savedObjects: plugins.savedObjects,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+  const { usageCollection } = plugins;
+  let trackUiMetric = (metricType: UiStatsMetricType, eventName: string | string[]) => {};
+  if (usageCollection) {
+    trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'discover');
+  }
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -109,5 +116,6 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
+    trackUiMetric,
   };
 }

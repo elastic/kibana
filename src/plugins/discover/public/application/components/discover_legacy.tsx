@@ -123,6 +123,7 @@ export function DiscoverLegacy({
 }: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
+  const { trackUiMetric } = getServices();
   const { savedSearch, indexPatternList } = opts;
   const bucketAggConfig = vis?.data?.aggs?.aggs[1];
   const bucketInterval =
@@ -190,6 +191,7 @@ export function DiscoverLegacy({
                     onRemoveField={onRemoveColumn}
                     selectedIndexPattern={searchSource && searchSource.getField('index')}
                     setIndexPattern={setIndexPattern}
+                    trackUiMetric={trackUiMetric}
                   />
                 </div>
               )}
