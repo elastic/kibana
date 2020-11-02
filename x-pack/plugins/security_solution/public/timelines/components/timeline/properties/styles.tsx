@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled, { keyframes } from 'styled-components';
 
@@ -39,16 +40,31 @@ export const DatePicker = styled(EuiFlexItem).attrs<WidthProp>(({ width }) => ({
 `;
 DatePicker.displayName = 'DatePicker';
 
-export const NameField = styled(EuiFieldText)`
-  width: 150px;
-  margin-right: 5px;
+export const NameField = styled(({ width, marginRight, ...rest }) => <EuiFieldText {...rest} />)`
+  width: ${({ width = '150px' }) => width};
+  margin-right: ${({ marginRight = 10 }) => marginRight} px;
+
+  .euiToolTipAnchor {
+    display: block;
+  }
 `;
 NameField.displayName = 'NameField';
 
-export const DescriptionContainer = styled.div`
+export const NameWrapper = styled.div`
+  .euiToolTipAnchor {
+    display: block;
+  }
+`;
+NameWrapper.displayName = 'NameWrapper';
+
+export const DescriptionContainer = styled.div<{ marginRight?: number }>`
   animation: ${fadeInEffect} 0.3s;
-  margin-right: 5px;
+  margin-right: ${({ marginRight = 5 }) => marginRight}px;
   min-width: 150px;
+
+  .euiToolTipAnchor {
+    display: block;
+  }
 `;
 DescriptionContainer.displayName = 'DescriptionContainer';
 
