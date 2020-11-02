@@ -22,6 +22,7 @@ interface DownstreamPipeline {
   description?: string;
   pipeline: string;
   settings?: Record<string, any>;
+  metadata: Record<string, any>;
 }
 /**
  * This model deals with a pipeline object from ES and converts it to Kibana downstream

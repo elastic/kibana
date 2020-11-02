@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
           pipeline: 'input { generator {} }\n\n output { stdout {} }',
           metadata: {
             version: '2',
-            type: 'logstash_pipeline'
+            type: 'logstash_pipeline',
           },
         })
         .expect(204);
