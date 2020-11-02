@@ -85,6 +85,7 @@ interface State {
   notifications: Array<Action<EmbeddableContext>>;
   loading?: boolean;
   error?: EmbeddableError;
+  errorEmbeddable?: ErrorEmbeddable;
 }
 
 interface PanelUniversalActions {
@@ -199,6 +200,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
+    if (this.state.errorEmbeddable) {
+      this.state.errorEmbeddable.destroy();
+    }
     this.props.embeddable.destroy();
   }
 
@@ -265,10 +269,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             });
           },
           (error) => {
-            this.props.embeddable.destroy();
             if (this.embeddableRoot.current) {
               const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
               errorEmbeddable.render(this.embeddableRoot.current);
+              this.setState({ errorEmbeddable });
             }
           }
         )
