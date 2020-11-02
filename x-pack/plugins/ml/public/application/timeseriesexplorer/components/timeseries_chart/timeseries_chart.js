@@ -84,12 +84,13 @@ const anomalyGrayScale = d3.scale
   .domain([3, 25, 50, 75, 100])
   .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
-function getSvgHeight() {
+function getSvgHeight(showAnnotations) {
+  const adjustedAnnotationHeight = showAnnotations ? annotationHeight : 0;
   return (
     focusHeight +
     contextChartHeight +
     swimlaneHeight +
-    annotationHeight +
+    adjustedAnnotationHeight +
     chartSpacing +
     margin.top +
     margin.bottom
@@ -261,6 +262,7 @@ class TimeseriesChartIntl extends Component {
       modelPlotEnabled,
       selectedJob,
       svgWidth,
+      showAnnotations,
     } = this.props;
 
     const createFocusChart = this.createFocusChart.bind(this);
@@ -269,7 +271,7 @@ class TimeseriesChartIntl extends Component {
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight = getSvgHeight();
+    const svgHeight = getSvgHeight(showAnnotations);
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.
@@ -1027,7 +1029,9 @@ class TimeseriesChartIntl extends Component {
       .domain([chartLimits.min, chartLimits.max]);
 
     const borders = cxtGroup.append('g').attr('class', 'axis');
-    const brushChartHeight = cxtChartHeight + swlHeight + annotationHeight;
+    const brushChartHeight = showAnnotations
+      ? cxtChartHeight + swlHeight + annotationHeight
+      : cxtChartHeight + swlHeight;
 
     // Add borders left and right.
     borders.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', brushChartHeight);

@@ -35,10 +35,7 @@ import {
 import { getToastNotifications } from '../util/dependency_cache';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 
-import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-} from '../../../common/constants/search';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -50,12 +47,10 @@ import {
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { MlTooltipComponent } from '../components/chart_tooltip';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
-import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 
@@ -84,9 +79,9 @@ import {
   getFocusData,
 } from './timeseriesexplorer_utils';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
-import { extractErrorMessage } from '../../../common/util/errors';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
+import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -119,8 +114,6 @@ function getTimeseriesexplorerDefaultState() {
     dataNotChartable: false,
     entitiesLoading: false,
     entityValues: {},
-    annotationError: undefined,
-    annotationData: [],
     focusAnnotationData: [],
     focusAggregations: {},
     focusAggregationInterval: {},
@@ -383,29 +376,6 @@ export class TimeSeriesExplorer extends React.Component {
           };
         })
       );
-  };
-
-  /**
-   * Loads the full list of annotations for job without any aggs or time boundaries
-   * used to indicate existence of annotations that are beyond the selected time
-   * in the time series brush area
-   */
-  loadAnnotations = (jobId) => {
-    ml.annotations
-      .getAnnotations({
-        jobIds: [jobId],
-        earliestMs: null,
-        latestMs: null,
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-      })
-      .then((resp) => {
-        if (!this.unmounted && resp?.success === true && Array.isArray(resp.annotations[jobId])) {
-          this.setState({ annotationData: resp.annotations[jobId] ?? [] });
-        }
-      })
-      .catch((error) => {
-        this.setState({ annotationData: [], annotationError: extractErrorMessage(error) });
-      });
   };
 
   /**
@@ -933,7 +903,6 @@ export class TimeSeriesExplorer extends React.Component {
         previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId;
       this.loadSingleMetricData(fullRefresh);
-      this.loadAnnotations(this.props.selectedJobId);
     }
 
     if (previousProps === undefined) {
@@ -981,7 +950,6 @@ export class TimeSeriesExplorer extends React.Component {
       contextForecastData,
       dataNotChartable,
       focusAggregationInterval,
-      annotationData,
       focusAnnotationError,
       focusAnnotationData,
       focusAggregations,
@@ -1013,7 +981,6 @@ export class TimeSeriesExplorer extends React.Component {
       contextForecastData,
       contextAggregationInterval,
       swimlaneData,
-      annotationData,
       focusAnnotationData,
       focusChartData,
       focusForecastData,
@@ -1219,23 +1186,17 @@ export class TimeSeriesExplorer extends React.Component {
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
-                <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-                  <MlTooltipComponent>
-                    {(tooltipService) => (
-                      <TimeseriesChart
-                        {...chartProps}
-                        bounds={bounds}
-                        detectorIndex={selectedDetectorIndex}
-                        renderFocusChartOnly={renderFocusChartOnly}
-                        selectedJob={selectedJob}
-                        showAnnotations={showAnnotations}
-                        showForecast={showForecast}
-                        showModelBounds={showModelBounds}
-                        tooltipService={tooltipService}
-                      />
-                    )}
-                  </MlTooltipComponent>
-                </div>
+                <TimeSeriesChartWithTooltips
+                  chartProps={chartProps}
+                  bounds={bounds}
+                  detectorIndex={selectedDetectorIndex}
+                  renderFocusChartOnly={renderFocusChartOnly}
+                  selectedJob={selectedJob}
+                  showAnnotations={showAnnotations}
+                  showForecast={showForecast}
+                  showModelBounds={showModelBounds}
+                  lastRefresh={lastRefresh}
+                />
                 {focusAnnotationError !== undefined && (
                   <>
                     <EuiTitle

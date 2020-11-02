@@ -32,12 +32,12 @@ export const annotations = {
 
   getAnnotations(obj: {
     jobIds: string[];
-    earliestMs: number;
-    latestMs: number;
+    earliestMs: number | null;
+    latestMs: number | null;
     maxAnnotations: number;
-    fields: FieldToBucket[];
-    detectorIndex: number;
-    entities: any[];
+    fields?: FieldToBucket[];
+    detectorIndex?: number;
+    entities?: any[];
   }) {
     const body = JSON.stringify(obj);
     return http<GetAnnotationsResponse>({
