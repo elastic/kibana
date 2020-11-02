@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
