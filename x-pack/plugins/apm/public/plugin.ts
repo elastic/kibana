@@ -81,14 +81,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (plugins.observability) {
       const getApmDataHelper = async () => {
         const {
-          fetchObservabilityOverviewPageData,
+          fetchOverviewPageData,
           hasData,
           createCallApmApi,
-        } = await import('./services/rest/apm_observability_overview_fetchers');
+        } = await import('./services/rest/apm_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core.http);
 
-        return { fetchObservabilityOverviewPageData, hasData };
+        return { fetchOverviewPageData, hasData };
       };
       plugins.observability.dashboard.register({
         appName: 'apm',
@@ -98,7 +98,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         },
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getApmDataHelper();
-          return await dataHelper.fetchObservabilityOverviewPageData(params);
+          return await dataHelper.fetchOverviewPageData(params);
         },
       });
 
@@ -142,6 +142,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
+
         return renderApp(coreStart, pluginSetupDeps, params, config);
       },
     });
