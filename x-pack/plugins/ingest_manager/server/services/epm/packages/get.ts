@@ -86,7 +86,7 @@ export async function getPackageKeysByStatus(
   savedObjectsClient: SavedObjectsClientContract,
   status: InstallationStatus
 ) {
-  const allPackages = await getPackages({ savedObjectsClient });
+  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
     if (pkg.status === status) {
       if (pkg.status === InstallationStatus.installed) {

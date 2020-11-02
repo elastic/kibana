@@ -63,6 +63,7 @@ export interface RawMonitoringStats {
 export function createAggregators(
   taskPollingLifecycle: TaskPollingLifecycle,
   taskStore: TaskStore,
+  elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
   logger: Logger
@@ -72,6 +73,7 @@ export function createAggregators(
     createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
     createWorkloadAggregator(
       taskStore,
+      elasticsearchAndSOAvailability$,
       config.monitored_aggregated_stats_refresh_rate,
       config.poll_interval,
       logger

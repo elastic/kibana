@@ -1445,7 +1445,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                    className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
                     onKeyDown={[Function]}
                     onMouseDown={[Function]}
@@ -2927,7 +2927,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                    className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
                     onKeyDown={[Function]}
                     onMouseDown={[Function]}
@@ -3224,7 +3224,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                    className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
                     onKeyDown={[Function]}
                     onMouseDown={[Function]}
