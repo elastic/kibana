@@ -41,6 +41,7 @@ export {
   SearchSourceDependencies,
   SearchSourceFields,
   SortDirection,
+  ISessionService,
 } from '../../common/search';
 
 export { getEsPreference } from './es_search';
