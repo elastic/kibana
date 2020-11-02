@@ -71,8 +71,8 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [] }) =
         className={`homSolutionPanel homSolutionPanel--${solution.id}`}
         href={addBasePath(solution.path)}
         onClick={(event: MouseEvent) => {
-          createAppNavigationHandler(solution.path)(event);
           trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${solution.id}`);
+          createAppNavigationHandler(solution.path)(event);
         }}
       >
         <EuiPanel className="homSolutionPanel__inner" paddingSize="none">

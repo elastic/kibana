@@ -63,8 +63,8 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
                 <Synopsis
                   id={feature.id}
                   onClick={(event: MouseEvent) => {
-                    createAppNavigationHandler(feature.path)(event);
                     trackUiMetric(METRIC_TYPE.CLICK, `manage_data_card_${feature.id}`);
+                    createAppNavigationHandler(feature.path)(event);
                   }}
                   description={feature.description}
                   iconType={feature.icon}
