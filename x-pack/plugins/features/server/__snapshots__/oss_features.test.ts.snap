@@ -300,7 +300,6 @@ Array [
     "privilege": Object {
       "api": Array [
         "copySavedObjectsToSpaces",
-        "shareSavedObjectsToSpaces",
       ],
       "app": Array [
         "kibana",
