@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ReactNode } from '@elastic/eui/node_modules/@types/react';
+import { ReactNode } from 'react';
 import { Capabilities } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '.';
 
