@@ -67,9 +67,9 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     useEffect(() => {
       if (filterQueryDraft == null) {
-        setDraftQuery((prevFilter) => ({ ...prevFilter, query: '' }));
+        setDraftQuery(filterQuery);
       }
-    }, [filterQueryDraft]);
+    }, [filterQuery, filterQueryDraft]);
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {

@@ -7,7 +7,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import uuid from 'uuid';
 
-import { useDispatch } from 'react-redux';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineEventsDetails } from '../../../../containers/details';
@@ -37,7 +36,8 @@ import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
 import { inputsModel } from '../../../../../common/store';
-import { timelineActions } from '../../../../store/timeline';
+import { TimelineId } from '../../../../../../common/types/timeline';
+import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   actionsColumnWidth: number;
@@ -109,11 +109,13 @@ const StatefulEventComponent: React.FC<Props> = ({
   toggleColumn,
   updateNote,
 }) => {
-  const dispatch = useDispatch();
+  const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>(
+    timelineId === TimelineId.active ? activeTimeline.getExpandedEventIds() : {}
+  );
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const { status: timelineStatus, expandedEventIds: expanded } = useShallowEqualSelector<
-    TimelineModel
-  >((state) => state.timeline.timelineById[timelineId]);
+  const { status: timelineStatus } = useShallowEqualSelector<TimelineModel>(
+    (state) => state.timeline.timelineById[timelineId]
+  );
   const divElement = useRef<HTMLDivElement | null>(null);
   const [loading, detailsData] = useTimelineEventsDetails({
     docValueFields,
@@ -124,18 +126,16 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
-    setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
-  }, [event, showNotes]);
+    setShowNotes((prevShowNotes) => ({ ...prevShowNotes, [eventId]: !prevShowNotes[eventId] }));
+  }, [event]);
 
   const onToggleExpanded = useCallback(() => {
     const eventId = event._id;
-    dispatch(
-      timelineActions.setExpandedEventId({
-        id: timelineId,
-        expandedEventId: eventId,
-      })
-    );
-  }, [dispatch, event._id, timelineId]);
+    setExpanded((prevExpanded) => ({ ...prevExpanded, [eventId]: !prevExpanded[eventId] }));
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent(eventId);
+    }
+  }, [event._id, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {

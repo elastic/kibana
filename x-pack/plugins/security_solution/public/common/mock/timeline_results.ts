@@ -2053,7 +2053,6 @@ export const mockTimelineResults: OpenTimelineResult[] = [
 ];
 
 export const mockTimelineModel: TimelineModel = {
-  activePage: 0,
   columns: [
     {
       columnHeaderType: 'not-filtered',
@@ -2101,7 +2100,6 @@ export const mockTimelineModel: TimelineModel = {
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
-  expandedEventIds: {},
   filters: [
     {
       $state: {
@@ -2194,7 +2192,6 @@ export const mockTimelineApolloResult = {
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
-    activePage: 0,
     columns: [
       { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
       { columnHeaderType: 'not-filtered', id: 'message', width: 180 },
@@ -2223,7 +2220,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     eventIdToNoteIds: {},
     eventType: 'all',
     excludedRowRendererIds: [],
-    expandedEventIds: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],

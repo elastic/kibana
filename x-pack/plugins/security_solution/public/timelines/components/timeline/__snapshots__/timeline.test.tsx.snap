@@ -881,6 +881,7 @@ In other use cases the message field can be used to concatenate different values
               }
               isLive={false}
               isSaving={false}
+              isTimerangeInitializing={false}
               itemsPerPage={5}
               itemsPerPageOptions={
                 Array [

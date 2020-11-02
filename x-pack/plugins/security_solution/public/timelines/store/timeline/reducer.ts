@@ -23,11 +23,9 @@ import {
   pinEvent,
   removeColumn,
   removeProvider,
-  setActivePage,
   setEventsDeleted,
   setEventsLoading,
   setExcludedRowRendererIds,
-  setExpandedEventId,
   setFilters,
   setInsertTimeline,
   setKqlFilterQueryDraft,
@@ -533,30 +531,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         indexNames,
-      },
-    },
-  }))
-  .case(setActivePage, (state, { id, activePage }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        activePage,
-        expandedEventIds: {},
-      },
-    },
-  }))
-  .case(setExpandedEventId, (state, { id, expandedEventId }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        expandedEventIds: {
-          ...state.timelineById[id].expandedEventIds,
-          [expandedEventId]: !state.timelineById[id].expandedEventIds[expandedEventId],
-        },
       },
     },
   }))

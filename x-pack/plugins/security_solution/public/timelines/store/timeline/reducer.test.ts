@@ -63,7 +63,6 @@ const basicDataProvider: DataProvider = {
   kqlQuery: '',
 };
 const basicTimeline: TimelineModel = {
-  activePage: 0,
   columns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
@@ -74,7 +73,6 @@ const basicTimeline: TimelineModel = {
   description: '',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEventIds: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',

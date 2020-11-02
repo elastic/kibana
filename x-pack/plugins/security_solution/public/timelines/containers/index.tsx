@@ -6,16 +6,16 @@
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { ESQuery } from '../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
-import { inputsModel, State } from '../../common/store';
+import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { DocValueFields } from '../../common/containers/query_template';
-import { timelineActions, timelineSelectors } from '../../timelines/store/timeline';
+import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import {
@@ -32,6 +32,7 @@ import { InspectResponse } from '../../types';
 import * as i18n from './translations';
 import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { activeTimeline } from './active_timeline_context';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -69,50 +70,6 @@ const initSortDefault = {
   direction: Direction.asc,
 };
 
-/*
- * Future Engineer
- * This class is just there to manage temporarily the reload of the active timeline when switching tabs
- * because of the bootstrap of the security solution app, we will always trigger the query
- * to avoid it we will cache its request and response so we can go back where the user was before switching tabs
- *
- * !!! Important !!! this is just there until, we will have a better way to bootstrap the app
- * I did not want to put in the store because I was feeling it will feel less temporarily and I did not want other engineer using it
- *
- */
-class ActiveTimelineEvents {
-  private _pageName: string = '';
-  private _request: TimelineEventsAllRequestOptions | null = null;
-  private _response: TimelineArgs | null = null;
-
-  getPageName() {
-    return this._pageName;
-  }
-
-  setPageName(pageName: string) {
-    this._pageName = pageName;
-  }
-
-  getRequest() {
-    return this._request;
-  }
-
-  setRequest(req: TimelineEventsAllRequestOptions) {
-    this._request = req;
-  }
-
-  getResponse() {
-    return this._response;
-  }
-
-  setResponse(resp: TimelineArgs) {
-    this._response = resp;
-  }
-}
-
-const activeTimeline = new ActiveTimelineEvents();
-
-/* End */
-
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
@@ -133,14 +90,9 @@ export const useTimelineEvents = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const getTimelineActivePageSelector = useMemo(
-    () => timelineSelectors.getTimelineActivePage(),
-    []
+  const [activePage, setActivePage] = useState(
+    id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
-  const activePage = useSelector<State, number>(
-    (state) => getTimelineActivePageSelector(state, id) ?? 0
-  );
-
   const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
     !skip
       ? {
@@ -175,13 +127,21 @@ export const useTimelineEvents = ({
   const wrappedLoadPage = useCallback(
     (newActivePage: number) => {
       clearSignalsState();
-      dispatch(timelineActions.setActivePage({ id, activePage: newActivePage }));
+
+      if (id === TimelineId.active) {
+        activeTimeline.setExpandedEventIds({});
+        activeTimeline.setActivePage(newActivePage);
+      }
+
+      setActivePage(newActivePage);
     },
-    [clearSignalsState, dispatch, id]
+    [clearSignalsState, id]
   );
 
   const refetchGrid = useCallback(() => {
-    refetch.current();
+    if (refetch.current != null) {
+      refetch.current();
+    }
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
@@ -206,27 +166,6 @@ export const useTimelineEvents = ({
     (request: TimelineEventsAllRequestOptions | null) => {
       if (request == null || pageName === '' || !isInitialized.current) {
         return;
-      }
-
-      if (
-        id === TimelineId.active &&
-        activeTimeline.getPageName() !== '' &&
-        pageName !== activeTimeline.getPageName()
-      ) {
-        activeTimeline.setPageName(pageName);
-        activeTimeline.setRequest(request);
-        abortCtrl.current.abort();
-        setLoading(false);
-        setTimelineResponse((prevResp) => {
-          const resp = activeTimeline.getResponse();
-          if (resp != null) {
-            return resp;
-          }
-          return prevResp;
-        });
-        if (activeTimeline.getResponse() != null) {
-          return;
-        }
       }
 
       let didCancel = false;
@@ -255,7 +194,9 @@ export const useTimelineEvents = ({
                       updatedAt: Date.now(),
                     };
                     if (id === TimelineId.active) {
+                      activeTimeline.setExpandedEventIds({});
                       activeTimeline.setPageName(pageName);
+                      activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
                     return newTimelineResponse;
@@ -281,6 +222,31 @@ export const useTimelineEvents = ({
           });
       };
 
+      if (
+        id === TimelineId.active &&
+        activeTimeline.getPageName() !== '' &&
+        pageName !== activeTimeline.getPageName()
+      ) {
+        activeTimeline.setPageName(pageName);
+        abortCtrl.current.abort();
+        setLoading(false);
+        refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
+        setTimelineResponse((prevResp) => {
+          const resp = activeTimeline.getResponse();
+          if (resp != null) {
+            return {
+              ...resp,
+              refetch: refetchGrid,
+              loadPage: wrappedLoadPage,
+            };
+          }
+          return prevResp;
+        });
+        if (activeTimeline.getResponse() != null) {
+          return;
+        }
+      }
+
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -290,7 +256,7 @@ export const useTimelineEvents = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, id, notifications.toasts, pageName]
+    [data.search, id, notifications.toasts, pageName, refetchGrid, wrappedLoadPage]
   );
 
   useEffect(() => {
@@ -344,7 +310,10 @@ export const useTimelineEvents = ({
       };
 
       if (activePage !== newActivePage) {
-        dispatch(timelineActions.setActivePage({ id, activePage: 0 }));
+        setActivePage(newActivePage);
+        if (id === TimelineId.active) {
+          activeTimeline.setActivePage(newActivePage);
+        }
       }
 
       if (

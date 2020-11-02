@@ -33,6 +33,7 @@ import { normalizeTimeRange } from '../../../common/components/url_state/normali
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
+import { activeTimeline } from '../../containers/active_timeline_context';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -114,16 +115,12 @@ interface AddTimelineParams {
   timelineById: TimelineById;
 }
 
-export const shouldKeepActiveTimelineContext = (
+export const shouldResetActiveTimelineContext = (
   id: string,
   oldTimeline: TimelineModel,
   newTimeline: TimelineModel
 ) => {
-  if (
-    id === TimelineId.active &&
-    oldTimeline.savedObjectId != null &&
-    oldTimeline.savedObjectId === newTimeline.savedObjectId
-  ) {
+  if (id === TimelineId.active && oldTimeline.savedObjectId !== newTimeline.savedObjectId) {
     return true;
   }
   return false;
@@ -138,13 +135,14 @@ export const addTimelineToStore = ({
   timeline,
   timelineById,
 }: AddTimelineParams): TimelineById => {
-  const keepActiveTimelineContext = shouldKeepActiveTimelineContext(id, timelineById[id], timeline);
+  if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
+    activeTimeline.setActivePage(0);
+    activeTimeline.setExpandedEventIds({});
+  }
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      activePage: keepActiveTimelineContext ? timeline.activePage : 0,
-      expandedEventIds: keepActiveTimelineContext ? timeline.expandedEventIds : {},
       isLoading: timelineById[id].isLoading,
     },
   };
