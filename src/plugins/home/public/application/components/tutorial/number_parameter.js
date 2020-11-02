@@ -19,6 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 export function NumberParameter({ id, label, value, setParameter }) {
   const handleChange = (evt) => {
@@ -26,20 +27,9 @@ export function NumberParameter({ id, label, value, setParameter }) {
   };
 
   return (
-    <div className="visEditorSidebar__formRow">
-      <label className="visEditorSidebar__formLabel" htmlFor={id}>
-        {label}
-      </label>
-      <div className="visEditorSidebar__formControl kuiFieldGroupSection--wide">
-        <input
-          className="kuiTextInput"
-          type="number"
-          value={value}
-          onChange={handleChange}
-          id={id}
-        />
-      </div>
-    </div>
+    <EuiFormRow label={label} id={id}>
+      <EuiFieldNumber value={value} onChange={handleChange} />
+    </EuiFormRow>
   );
 }
 
