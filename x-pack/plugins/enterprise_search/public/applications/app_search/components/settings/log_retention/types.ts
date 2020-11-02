@@ -24,3 +24,19 @@ export interface ILogRetentionSettings {
   enabled?: boolean;
   retentionPolicy?: ILogRetentionPolicy | null;
 }
+
+export interface ILogRetentionServer {
+  [ELogRetentionOptions.Analytics]: ILogRetentionServerSettings;
+  [ELogRetentionOptions.API]: ILogRetentionServerSettings;
+}
+
+export interface ILogRetentionServerPolicy {
+  is_default: boolean;
+  min_age_days: number | null;
+}
+
+export interface ILogRetentionServerSettings {
+  disabled_at: string | null;
+  enabled: boolean;
+  retention_policy: ILogRetentionServerPolicy | null;
+}

@@ -6,11 +6,18 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ELogRetentionOptions, ILogRetention } from './types';
+import { ELogRetentionOptions, ILogRetention, ILogRetentionServer } from './types';
+import { HttpLogic } from '../../../../shared/http';
+import { flashAPIErrors } from '../../../../shared/flash_messages';
+import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';
 
 interface ILogRetentionActions {
   clearLogRetentionUpdating(): { value: boolean };
   closeModals(): { value: boolean };
+  saveLogRetention(
+    option: ELogRetentionOptions,
+    enabled: boolean
+  ): { option: ELogRetentionOptions; enabled: boolean };
   setOpenModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
   updateLogRetention(logRetention: ILogRetention): { logRetention: ILogRetention };
 }
@@ -26,6 +33,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
   actions: () => ({
     clearLogRetentionUpdating: true,
     closeModals: true,
+    saveLogRetention: (option, enabled) => ({ enabled, option }),
     setOpenModal: (option) => ({ option }),
     updateLogRetention: (logRetention) => ({ logRetention }),
   }),
@@ -58,8 +66,28 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
       null,
       {
         closeModals: () => null,
+        saveLogRetention: () => null,
         setOpenModal: (_, { option }) => option,
       },
     ],
+  }),
+  listeners: ({ actions }) => ({
+    saveLogRetention: async ({ enabled, option }) => {
+      const updateData = { [option.toString()]: { enabled } };
+
+      try {
+        const { http } = HttpLogic.values;
+        const response = await http.put('/api/app_search/log_settings', {
+          body: JSON.stringify(updateData),
+        });
+        actions.updateLogRetention(
+          convertLogRetentionFromServerToClient(response as ILogRetentionServer)
+        );
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.clearLogRetentionUpdating();
+      }
+    },
   }),
 });

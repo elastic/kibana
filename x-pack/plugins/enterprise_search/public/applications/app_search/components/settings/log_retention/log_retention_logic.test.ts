@@ -6,6 +6,17 @@
 
 import { resetContext } from 'kea';
 
+import { mockHttpValues } from '../../../../__mocks__';
+jest.mock('../../../../shared/http', () => ({
+  HttpLogic: { values: mockHttpValues },
+}));
+const { http } = mockHttpValues;
+
+jest.mock('../../../../shared/flash_messages', () => ({
+  flashAPIErrors: jest.fn(),
+}));
+import { flashAPIErrors } from '../../../../shared/flash_messages';
+
 import { ELogRetentionOptions } from './types';
 import { LogRetentionLogic } from './log_retention_logic';
 
@@ -149,6 +160,86 @@ describe('LogRetentionLogic', () => {
             },
           });
         });
+      });
+    });
+
+    describe('saveLogRetention', () => {
+      beforeEach(() => {
+        mount();
+        jest.spyOn(LogRetentionLogic.actions, 'clearLogRetentionUpdating');
+      });
+
+      describe('openModal', () => {
+        it('should be reset to null', () => {
+          mount({
+            openModal: ELogRetentionOptions.Analytics,
+          });
+
+          LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            openModal: null,
+          });
+        });
+      });
+
+      it('will call an API endpoint and update log retention', async () => {
+        jest.spyOn(LogRetentionLogic.actions, 'updateLogRetention');
+        const promise = Promise.resolve({
+          analytics: {
+            disabled_at: null,
+            enabled: true,
+            retention_policy: { is_default: true, min_age_days: 180 },
+          },
+          api: {
+            disabled_at: null,
+            enabled: true,
+            retention_policy: { is_default: true, min_age_days: 180 },
+          },
+        });
+        http.put.mockReturnValue(promise);
+
+        LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+
+        expect(http.put).toHaveBeenCalledWith(`/api/app_search/log_settings`, {
+          body: JSON.stringify({
+            analytics: {
+              enabled: true,
+            },
+          }),
+        });
+
+        await promise;
+        expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith({
+          analytics: {
+            disabledAt: null,
+            enabled: true,
+            retentionPolicy: { isDefault: true, minAgeDays: 180 },
+          },
+          api: {
+            disabledAt: null,
+            enabled: true,
+            retentionPolicy: { isDefault: true, minAgeDays: 180 },
+          },
+        });
+
+        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
+      });
+
+      it('handles errors', async () => {
+        const promise = Promise.reject('An error occured');
+        http.put.mockReturnValue(promise);
+
+        LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+
+        try {
+          await promise;
+        } catch {
+          // Do nothing
+        }
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
       });
     });
   });
