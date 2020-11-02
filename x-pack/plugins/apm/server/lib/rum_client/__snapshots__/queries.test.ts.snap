@@ -22,9 +22,9 @@ Object {
               ],
             },
           },
-          "domInteractive": Object {
+          "totalPageLoadDuration": Object {
             "percentiles": Object {
-              "field": "transaction.marks.agent.domInteractive",
+              "field": "transaction.duration.us",
               "hdr": Object {
                 "number_of_significant_value_digits": 3,
               },
