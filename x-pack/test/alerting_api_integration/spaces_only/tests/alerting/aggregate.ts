@@ -82,6 +82,9 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         })
       );
 
+      // Adding delay to allow ES refresh cycle to run. Even when the waitForStatus
+      // calls are successful, the call to aggregate may return stale totals if called
+      // too early.
       await delay(1000);
       const reponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
