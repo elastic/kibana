@@ -39,8 +39,7 @@ import './connector_edit_flyout.scss';
 
 export interface ConnectorEditProps {
   initialConnector: ActionConnector;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   tab?: EditConectorTabs;
 }
 
@@ -51,8 +50,7 @@ export enum EditConectorTabs {
 
 export const ConnectorEditFlyout = ({
   initialConnector,
-  editFlyoutVisible,
-  setEditFlyoutVisibility,
+  onClose,
   tab = EditConectorTabs.Configuration,
 }: ConnectorEditProps) => {
   const {
@@ -86,16 +84,12 @@ export const ConnectorEditFlyout = ({
   const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
-    setEditFlyoutVisibility(false);
     setConnector('connector', { ...initialConnector, secrets: {} });
     setHasChanges(false);
     setTestExecutionResult(none);
+    onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditFlyoutVisibility]);
-
-  if (!editFlyoutVisible) {
-    return null;
-  }
+  }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const errorsInConnectorConfig = (!connector.isPreconfigured
