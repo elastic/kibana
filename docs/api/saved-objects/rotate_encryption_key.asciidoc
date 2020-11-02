@@ -25,7 +25,7 @@ Bulk key rotation can consume a considerable amount of resources and hence only 
 `type`::
 (Optional, string) Limits encryption key rotation only to the saved objects with the specified type. By default, {kib} tries to rotate the encryption key for all saved object types that may contain encrypted attributes.
 
-`batchSize`::
+`batch_size`::
 (Optional, number) Specifies a maximum number of saved objects that {kib} can process in a single batch. Bulk key rotation is an iterative process since {kib} may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.
 
 [[saved-objects-api-rotate-encryption-key-response-body]]
@@ -91,7 +91,7 @@ In this example, key rotation is performed for all saved objects with the `alert
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST /api/encrypted_saved_objects/_rotate_key?type=alert&batchSize=5000
+$ curl -X POST /api/encrypted_saved_objects/_rotate_key?type=alert&batch_size=5000
 --------------------------------------------------
 // KIBANA
 
