@@ -76,6 +76,7 @@ export const RequestCodeViewer = ({ json }: RequestCodeViewerProps) => (
           wrappingIndent: 'indent',
           automaticLayout: true,
         }}
+        data-test-subj="insRequestCodeViewer"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
