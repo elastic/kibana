@@ -78,72 +78,92 @@ describe('case connector', () => {
       });
 
       describe('connector', () => {
-        it('succeeds when jira fields are valid', () => {
-          const params: Record<string, unknown> = {
-            subAction: 'create',
-            subActionParams: {
-              title: 'Case from case connector!!',
-              tags: ['case', 'connector'],
-              description: 'Yo fields!!',
-              connector: {
-                id: 'jira',
-                name: 'Jira',
-                type: '.jira',
-                fields: {
-                  issueType: '10006',
-                  priority: 'High',
-                  parent: null,
+        const connectorTests = [
+          {
+            test: 'jira',
+            params: {
+              subAction: 'create',
+              subActionParams: {
+                title: 'Case from case connector!!',
+                tags: ['case', 'connector'],
+                description: 'Yo fields!!',
+                connector: {
+                  id: 'jira',
+                  name: 'Jira',
+                  type: '.jira',
+                  fields: {
+                    issueType: '10006',
+                    priority: 'High',
+                    parent: null,
+                  },
                 },
               },
             },
-          };
-
-          expect(validateParams(caseActionType, params)).toEqual(params);
-        });
-
-        it('succeeds when resilient fields are valid', () => {
-          const params: Record<string, unknown> = {
-            subAction: 'create',
-            subActionParams: {
-              title: 'Case from case connector!!',
-              tags: ['case', 'connector'],
-              description: 'Yo fields!!',
-              connector: {
-                id: 'resilient',
-                name: 'Resilient',
-                type: '.resilient',
-                fields: {
-                  incidentTypes: ['13'],
-                  severityCode: '3',
+          },
+          {
+            test: 'resilient',
+            params: {
+              subAction: 'create',
+              subActionParams: {
+                title: 'Case from case connector!!',
+                tags: ['case', 'connector'],
+                description: 'Yo fields!!',
+                connector: {
+                  id: 'resilient',
+                  name: 'Resilient',
+                  type: '.resilient',
+                  fields: {
+                    incidentTypes: ['13'],
+                    severityCode: '3',
+                  },
                 },
               },
             },
-          };
-
-          expect(validateParams(caseActionType, params)).toEqual(params);
-        });
-
-        it('succeeds when servicenow fields are valid', () => {
-          const params: Record<string, unknown> = {
-            subAction: 'create',
-            subActionParams: {
-              title: 'Case from case connector!!',
-              tags: ['case', 'connector'],
-              description: 'Yo fields!!',
-              connector: {
-                id: 'servicenow',
-                name: 'Servicenow',
-                type: '.servicenow',
-                fields: {
-                  impact: 'Medium',
-                  severity: 'Medium',
-                  urgency: 'Medium',
+          },
+          {
+            test: 'servicenow',
+            params: {
+              subAction: 'create',
+              subActionParams: {
+                title: 'Case from case connector!!',
+                tags: ['case', 'connector'],
+                description: 'Yo fields!!',
+                connector: {
+                  id: 'servicenow',
+                  name: 'Servicenow',
+                  type: '.servicenow',
+                  fields: {
+                    impact: 'Medium',
+                    severity: 'Medium',
+                    urgency: 'Medium',
+                  },
                 },
               },
             },
-          };
+          },
+          {
+            test: 'none',
+            params: {
+              subAction: 'create',
+              subActionParams: {
+                title: 'Case from case connector!!',
+                tags: ['case', 'connector'],
+                description: 'Yo fields!!',
+                connector: {
+                  id: 'none',
+                  name: 'None',
+                  type: '.none',
+                  fields: null,
+                },
+              },
+            },
+          },
+        ];
 
-          expect(validateParams(caseActionType, params)).toEqual(params);
+        connectorTests.forEach(({ params, test }) => {
+          it(`succeeds when ${test} fields are valid`, () => {
+            expect(validateParams(caseActionType, params)).toEqual(params);
+          });
         });
 
         it('set fields to null if they are missing', () => {
