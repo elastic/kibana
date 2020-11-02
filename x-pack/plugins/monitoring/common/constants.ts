@@ -422,7 +422,8 @@ export const ALERT_DETAILS = {
       values: { type: 'search' },
     }),
     description: i18n.translate('xpack.monitoring.alerts.searchThreadPoolRejections.description', {
-      defaultMessage: 'Alert when the count of search rejections exceeds the threshold.',
+      defaultMessage:
+        'Alert when the number of rejections in the search thread pool exceeds the threshold.',
     }),
   },
   [ALERT_THREAD_POOL_WRITE_REJECTIONS]: {
@@ -446,7 +447,8 @@ export const ALERT_DETAILS = {
       values: { type: 'write' },
     }),
     description: i18n.translate('xpack.monitoring.alerts.writeThreadPoolRejections.description', {
-      defaultMessage: 'Alert when the count of write rejections exceeds the threshold.',
+      defaultMessage:
+        'Alert when the number of rejections in the write thread pool exceeds the threshold.',
     }),
   },
 };
