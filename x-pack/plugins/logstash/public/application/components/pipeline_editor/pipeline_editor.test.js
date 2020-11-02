@@ -8,6 +8,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import 'brace';
 import { PipelineEditor } from './pipeline_editor';
+import { Pipeline } from '../../../models/pipeline';
 
 describe('PipelineEditor component', () => {
   let props;
@@ -48,7 +49,9 @@ describe('PipelineEditor component', () => {
     };
     pipelineService = {
       deletePipeline: jest.fn(),
-      savePipeline: jest.fn(),
+      savePipeline: jest.fn(() => {
+        return Promise.resolve(jest.fn());
+      }),
     };
     toastNotifications = {
       addWarning: jest.fn(),
@@ -155,6 +158,26 @@ describe('PipelineEditor component', () => {
     const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
     wrapper.find(`[data-test-subj="btnDeletePipeline"]`).simulate('click');
     expect(wrapper.instance().state.showConfirmDeleteModal).toBe(true);
+  });
+
+  it('update metadata version on save when ', () => {
+    props.pipeline = new Pipeline(props.pipeline);
+    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
+    wrapper
+      .find(`[data-test-subj="inputBatchSize"]`)
+      .simulate('change', { target: { value: '11' } });
+    wrapper.find(`[data-test-subj="btnSavePipeline"]`).simulate('click');
+    expect(wrapper.instance().state.pipeline.metadata.version).toBe('2');
+  });
+
+  it('keep metadata version on save when description update', () => {
+    props.pipeline = new Pipeline(props.pipeline);
+    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
+    wrapper
+      .find(`[data-test-subj="inputDescription"]`)
+      .simulate('change', { target: { value: 'the new description' } });
+    wrapper.find(`[data-test-subj="btnSavePipeline"]`).simulate('click');
+    expect(wrapper.instance().state.pipeline.metadata.version).toBe('1');
   });
 
   it('only matches pipeline names that fit the acceptable parameters', () => {
