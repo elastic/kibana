@@ -29,8 +29,18 @@ interface SetupDeps {
   pluginPaths: string[];
 }
 
+/**
+ * @public
+ */
 export interface I18nServiceSetup {
+  /**
+   * Return the locale currently in use.
+   */
   getLocale(): string;
+
+  /**
+   * Return the list of translation files currently in use.
+   */
   getTranslationFiles(): string[];
 }
 

@@ -23,7 +23,7 @@ export {
   PluginsServiceStart,
   UiPlugins,
 } from './plugins_service';
-export { config, PluginsConfig } from './plugins_config';
+export { config } from './plugins_config';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';
 export * from './types';
