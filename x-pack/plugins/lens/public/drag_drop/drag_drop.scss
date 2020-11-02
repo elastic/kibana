@@ -30,9 +30,8 @@
   @include lnsDroppableActive;
 }
 
-// Highlighting the items when in keyboard mode
-.lnsDragDrop-isKeyboardModeActive {
-  @include lnsDroppableActive;
+.lnsDragDrop__isActiveGroup {
+  background-color: transparentize($euiColorVis0, .8);
 }
 
 // Drop area while hovering with item
@@ -79,8 +78,10 @@
   position: absolute;
   width: 100%;
   height: 100%;
+  border-radius: $euiBorderRadius;
 
-  &:focus {
+  &:focus,
+  &:focus-within {
     @include euiFocusRing;
     pointer-events: none;
   }

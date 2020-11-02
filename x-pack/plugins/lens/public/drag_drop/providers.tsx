@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import classNames from 'classnames';
 import { EuiScreenReaderOnly, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -93,7 +94,7 @@ export function ChildDragDropProvider({ dragging, setDragging, children }: Provi
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
 }
 
-interface ReorderState {
+export interface ReorderState {
   /**
    * Ids of the elements that are translated up or down
    */
@@ -110,7 +111,7 @@ interface ReorderState {
   /**
    * indicates that user is in keyboard mode
    */
-  isKeyboardReorderOn: boolean;
+  isReorderOn: boolean;
   /**
    * aria-live message for changes in reordering
    */
@@ -121,9 +122,11 @@ interface ReorderState {
   groupId: string;
 }
 
+type SetReorderStateDispatch = (prevState: ReorderState) => ReorderState;
+
 export interface ReorderContextState {
   reorderState: ReorderState;
-  setReorderState: (reorderState: ReorderState) => void;
+  setReorderState: (dispatch: SetReorderStateDispatch) => void;
 }
 
 export const ReorderContext = React.createContext<ReorderContextState>({
@@ -131,28 +134,37 @@ export const ReorderContext = React.createContext<ReorderContextState>({
     reorderedItems: [],
     direction: '-',
     draggingHeight: 40,
-    isKeyboardReorderOn: false,
+    isReorderOn: false,
     keyboardReorderMessage: '',
     groupId: '',
   },
-  setReorderState: () => {},
+  setReorderState: () => () => {},
 });
 
-export function ReorderProvider({ id, children }: { id: string; children: React.ReactNode }) {
+export function ReorderProvider({
+  id,
+  children,
+  className,
+}: {
+  id: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
     reorderedItems: [],
     direction: '-',
     draggingHeight: 40,
-    isKeyboardReorderOn: false,
+    isReorderOn: false,
     keyboardReorderMessage: '',
     groupId: id,
   });
-  const setReorderState = useMemo(() => (reorderState: ReorderState) => setState(reorderState), [
+
+  const setReorderState = useMemo(() => (dispatch: SetReorderStateDispatch) => setState(dispatch), [
     setState,
   ]);
 
   return (
-    <div className={state.isKeyboardReorderOn ? 'lnsDragDrop__reorderableGroup--active' : ''}>
+    <div className={classNames(className, { ['lnsDragDrop__isActiveGroup']: state.isReorderOn })}>
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
         {children}
       </ReorderContext.Provider>

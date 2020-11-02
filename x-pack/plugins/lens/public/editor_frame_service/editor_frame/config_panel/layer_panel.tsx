@@ -180,22 +180,30 @@ export function LayerPanel(
 
           return (
             <EuiFormRow
-              className="lnsLayerPanel__row"
+              className={
+                group.supportsMoreColumns
+                  ? 'lnsLayerPanel__row'
+                  : 'lnsLayerPanel__row lnsLayerPanel__row--notSupportsMoreColumns'
+              }
               fullWidth
-              label={group.groupLabel}
+              label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
               labelType="legend"
               key={index}
               isInvalid={isMissing}
               error={
-                isMissing
-                  ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
+                isMissing ? (
+                  <div className="lnsLayerPanel__error">
+                    {i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
                       defaultMessage: 'Required dimension',
-                    })
-                  : []
+                    })}
+                  </div>
+                ) : (
+                  []
+                )
               }
             >
               <>
-                <ReorderProvider id={group.groupId}>
+                <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
                   {group.accessors.map((accessor) => {
                     const { dragging } = dragDropContext;
                     const dragType =
@@ -232,6 +240,7 @@ export function LayerPanel(
                         dropType={dropType}
                         data-test-subj={group.dataTestSubj}
                         itemsInGroup={group.accessors}
+                        className={'lnsLayerPanel__dimensionContainer'}
                         value={{
                           columnId: accessor,
                           groupId: group.groupId,
@@ -306,6 +315,7 @@ export function LayerPanel(
                             }}
                           />
                           <EuiButtonIcon
+                            className="lnsLayerPanel__dimensionRemove"
                             data-test-subj="indexPattern-dimension-remove"
                             iconType="cross"
                             iconSize="s"
@@ -343,79 +353,81 @@ export function LayerPanel(
                   })}
                 </ReorderProvider>
                 {group.supportsMoreColumns ? (
-                  <DragDrop
-                    data-test-subj={group.dataTestSubj}
-                    droppable={
-                      Boolean(dragDropContext.dragging) &&
-                      // Verify that the dragged item is not coming from the same group
-                      // since this would be a reorder
-                      (!isDraggedOperation(dragDropContext.dragging) ||
-                        dragDropContext.dragging.groupId !== group.groupId) &&
-                      layerDatasource.canHandleDrop({
-                        ...layerDatasourceDropProps,
-                        columnId: newId,
-                        filterOperations: group.filterOperations,
-                      })
-                    }
-                    onDrop={(droppedItem) => {
-                      const dropResult = layerDatasource.onDrop({
-                        ...layerDatasourceDropProps,
-                        droppedItem,
-                        columnId: newId,
-                        filterOperations: group.filterOperations,
-                      });
-                      if (dropResult) {
-                        props.updateVisualization(
-                          activeVisualization.setDimension({
-                            layerId,
-                            groupId: group.groupId,
-                            columnId: newId,
-                            prevState: props.visualizationState,
-                          })
-                        );
-
-                        if (typeof dropResult === 'object') {
-                          // When a column is moved, we delete the reference to the old
+                  <div className={'lnsLayerPanel__dimensionContainer'}>
+                    <DragDrop
+                      data-test-subj={group.dataTestSubj}
+                      droppable={
+                        Boolean(dragDropContext.dragging) &&
+                        // Verify that the dragged item is not coming from the same group
+                        // since this would be a reorder
+                        (!isDraggedOperation(dragDropContext.dragging) ||
+                          dragDropContext.dragging.groupId !== group.groupId) &&
+                        layerDatasource.canHandleDrop({
+                          ...layerDatasourceDropProps,
+                          columnId: newId,
+                          filterOperations: group.filterOperations,
+                        })
+                      }
+                      onDrop={(droppedItem) => {
+                        const dropResult = layerDatasource.onDrop({
+                          ...layerDatasourceDropProps,
+                          droppedItem,
+                          columnId: newId,
+                          filterOperations: group.filterOperations,
+                        });
+                        if (dropResult) {
                           props.updateVisualization(
-                            activeVisualization.removeDimension({
+                            activeVisualization.setDimension({
                               layerId,
-                              columnId: dropResult.deleted,
+                              groupId: group.groupId,
+                              columnId: newId,
                               prevState: props.visualizationState,
                             })
                           );
-                        }
-                      }
-                    }}
-                  >
-                    <div className="lnsLayerPanel__dimension">
-                      <EuiButtonEmpty
-                        className="lnsLayerPanel__triggerLink"
-                        color="text"
-                        size="xs"
-                        iconType="plusInCircleFilled"
-                        contentProps={{
-                          className: 'lnsLayerPanel__triggerLinkContent',
-                        }}
-                        data-test-subj="lns-empty-dimension"
-                        onClick={() => {
-                          if (activeId) {
-                            setActiveDimension(initialActiveDimensionState);
-                          } else {
-                            setActiveDimension({
-                              isNew: true,
-                              activeGroup: group,
-                              activeId: newId,
-                            });
+
+                          if (typeof dropResult === 'object') {
+                            // When a column is moved, we delete the reference to the old
+                            props.updateVisualization(
+                              activeVisualization.removeDimension({
+                                layerId,
+                                columnId: dropResult.deleted,
+                                prevState: props.visualizationState,
+                              })
+                            );
                           }
-                        }}
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.configure.emptyConfig"
-                          defaultMessage="Drop a field or click to add"
-                        />
-                      </EuiButtonEmpty>
-                    </div>
-                  </DragDrop>
+                        }
+                      }}
+                    >
+                      <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
+                        <EuiButtonEmpty
+                          className="lnsLayerPanel__triggerLink"
+                          color="text"
+                          size="xs"
+                          iconType="plusInCircleFilled"
+                          contentProps={{
+                            className: 'lnsLayerPanel__triggerLinkContent',
+                          }}
+                          data-test-subj="lns-empty-dimension"
+                          onClick={() => {
+                            if (activeId) {
+                              setActiveDimension(initialActiveDimensionState);
+                            } else {
+                              setActiveDimension({
+                                isNew: true,
+                                activeGroup: group,
+                                activeId: newId,
+                              });
+                            }
+                          }}
+                        >
+                          <FormattedMessage
+                            id="xpack.lens.configure.emptyConfig"
+                            defaultMessage="Drop a field or click to add"
+                          />
+                        </EuiButtonEmpty>
+                      </div>
+                    </DragDrop>
+                  </div>
                 ) : null}
               </>
             </EuiFormRow>
