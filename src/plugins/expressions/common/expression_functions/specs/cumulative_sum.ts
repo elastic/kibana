@@ -19,7 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { Datatable, DatatableRow } from '../../expression_types';
+import { Datatable } from '../../expression_types';
+import { buildResultColumns, getBucketIdentifier } from './series_calculation_helpers';
 
 export interface CumulativeSumArgs {
   by?: string[];
@@ -34,15 +35,6 @@ export type ExpressionFunctionCumulativeSum = ExpressionFunctionDefinition<
   CumulativeSumArgs,
   Datatable
 >;
-
-/**
- * Returns a string identifying the group of a row by a list of columns to group by
- */
-function getBucketIdentifier(row: DatatableRow, groupColumns?: string[]) {
-  return (groupColumns || [])
-    .map((groupColumnId) => (row[groupColumnId] == null ? '' : String(row[groupColumnId])))
-    .join('|');
-}
 
 /**
  * Calculates the cumulative sum of a specified column in the data table.
@@ -114,37 +106,16 @@ export const cumulativeSum: ExpressionFunctionCumulativeSum = {
   },
 
   fn(input, { by, inputColumnId, outputColumnId, outputColumnName }) {
-    if (input.columns.some((column) => column.id === outputColumnId)) {
-      throw new Error(
-        i18n.translate('expressions.functions.cumulativeSum.columnConflictMessage', {
-          defaultMessage:
-            'Specified outputColumnId {columnId} already exists. Please pick another column id.',
-          values: {
-            columnId: outputColumnId,
-          },
-        })
-      );
-    }
+    const resultColumns = buildResultColumns(
+      input,
+      outputColumnId,
+      inputColumnId,
+      outputColumnName
+    );
 
-    const inputColumnDefinition = input.columns.find((column) => column.id === inputColumnId);
-
-    if (!inputColumnDefinition) {
+    if (!resultColumns) {
       return input;
     }
-
-    const outputColumnDefinition = {
-      ...inputColumnDefinition,
-      id: outputColumnId,
-      name: outputColumnName || outputColumnId,
-    };
-
-    const resultColumns = [...input.columns];
-    // add output column after input column in the table
-    resultColumns.splice(
-      resultColumns.indexOf(inputColumnDefinition) + 1,
-      0,
-      outputColumnDefinition
-    );
 
     const accumulators: Partial<Record<string, number>> = {};
     return {
