@@ -10,7 +10,7 @@ import { max } from 'lodash';
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useChartsSync } from '../../../../hooks/useChartsSync';
+import { useLegacyChartsSync as useChartsSync } from '../../../../hooks/use_charts_sync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
@@ -21,6 +21,12 @@ const tickFormatY = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };
 
+/**
+ * "Legacy" version of this chart using react-vis charts. See index.tsx for the
+ * Elastic Charts version.
+ *
+ * This will be removed with #70290.
+ */
 export function ErroneousTransactionsRateChart() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
