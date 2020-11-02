@@ -2,4 +2,4 @@ user="kibana"
 group="kibana"
 
 KBN_PATH_CONF="/etc/kibana"
-KBN_RESTART_ON_UPGRADE="true"
+RESTART_ON_UPGRADE="true"
