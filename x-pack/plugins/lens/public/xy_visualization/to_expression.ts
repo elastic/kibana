@@ -168,7 +168,7 @@ export const buildExpression = (
               ],
             },
           ],
-          valueLabels: [state?.valueLabels],
+          valueLabels: [state?.valueLabels || 'hide'],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 

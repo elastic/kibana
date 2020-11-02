@@ -745,7 +745,7 @@ export function XYChart({
                   // This format double fixes two issues in elastic-chart
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
-                  valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
+                  // valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
                   isAlternatingValueLabel: false,
                   isValueContainedInElement: true,

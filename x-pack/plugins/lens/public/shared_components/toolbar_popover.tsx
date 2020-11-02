@@ -32,7 +32,7 @@ export interface ToolbarPopoverProps {
    */
   groupPosition?: ToolbarButtonProps['groupPosition'];
   buttonDataTestSubj?: string;
-  larger: boolean;
+  larger?: boolean;
 }
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
