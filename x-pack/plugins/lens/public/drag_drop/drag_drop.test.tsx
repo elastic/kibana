@@ -336,7 +336,7 @@ describe('DragDrop', () => {
         .at(1)
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
 
-      keyboardHandler.simulate('keydown', { key: 'Enter' });
+      keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
       expect(dropTo).toBeCalledWith('3');
 
@@ -352,7 +352,7 @@ describe('DragDrop', () => {
         .first()
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
 
-      keyboardHandler.simulate('keydown', { key: 'Enter' });
+      keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowUp' });
       expect(dropTo).not.toHaveBeenCalled();
 

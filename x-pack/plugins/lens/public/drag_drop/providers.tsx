@@ -152,13 +152,13 @@ export function ReorderProvider({ id, children }: { id: string; children: React.
   ]);
 
   return (
-    <>
+    <div className={state.isKeyboardReorderOn ? 'lnsDragDrop__reorderableGroup--active' : ''}>
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
         {children}
       </ReorderContext.Provider>
       <EuiPortal>
         <EuiScreenReaderOnly>
-          <>
+          <div>
             <p id="lnsDragDrop-reorderAnnouncement" aria-live="assertive">
               {state.keyboardReorderMessage}
             </p>
@@ -167,9 +167,9 @@ export function ReorderProvider({ id, children }: { id: string; children: React.
                 defaultMessage: `Press space bar to start a drag. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
               })}
             </p>
-          </>
+          </div>
         </EuiScreenReaderOnly>
       </EuiPortal>
-    </>
+    </div>
   );
 }

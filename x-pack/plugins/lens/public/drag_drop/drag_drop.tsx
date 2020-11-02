@@ -306,18 +306,22 @@ const DragDropInner = React.memo(function DragDropInner(
   });
 });
 
-const getKeyboardReorderMessageMoved = (position: number, prevPosition: number) =>
+const getKeyboardReorderMessageMoved = (
+  itemLabel: string,
+  position: number,
+  prevPosition: number
+) =>
   i18n.translate('xpack.lens.dragDrop.elementMoved', {
-    defaultMessage: 'You have moved the item from position {prevPosition} to position {position}',
+    defaultMessage: `You have moved the item ${itemLabel} from position {prevPosition} to position {position}`,
     values: {
       position,
       prevPosition,
     },
   });
 
-const getKeyboardReorderMessageLifted = (position: number) =>
+const getKeyboardReorderMessageLifted = (itemLabel: string, position: number) =>
   i18n.translate('xpack.lens.dragDrop.elementLifted', {
-    defaultMessage: 'You have lifted an item in position {position}',
+    defaultMessage: `You have lifted an item ${itemLabel} in position {position}`,
     values: {
       position,
     },
@@ -377,8 +381,8 @@ export const ReorderableDragDrop = ({
     <div className="lnsDragDrop__reorderableContainer">
       <EuiScreenReaderOnly showOnFocus>
         <button
-          aria-label={`Grab ${label}`}
-          aria-describedby={`$lnsDragDrop-reorderInstructions-${groupId}`}
+          aria-label={label}
+          aria-describedby={`lnsDragDrop-reorderInstructions-${groupId}`}
           className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
@@ -395,7 +399,7 @@ export const ReorderableDragDrop = ({
                 isKeyboardReorderOn: !isKeyboardReorderOn,
                 keyboardReorderMessage: isKeyboardReorderOn
                   ? ''
-                  : getKeyboardReorderMessageLifted(currentIndex + 1),
+                  : getKeyboardReorderMessageLifted(label, currentIndex + 1),
               });
             } else if (e.key === keys.ESCAPE) {
               setReorderState({
@@ -413,6 +417,7 @@ export const ReorderableDragDrop = ({
                   setReorderState({
                     ...reorderState,
                     keyboardReorderMessage: getKeyboardReorderMessageMoved(
+                      label,
                       currentIndex + 2,
                       currentIndex + 1
                     ),
@@ -424,6 +429,7 @@ export const ReorderableDragDrop = ({
                   setReorderState({
                     ...reorderState,
                     keyboardReorderMessage: getKeyboardReorderMessageMoved(
+                      label,
                       currentIndex,
                       currentIndex + 1
                     ),
