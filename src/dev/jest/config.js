@@ -84,6 +84,7 @@ export default {
     '<rootDir>/packages/kbn-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
+  testRunner: 'jest-circus/runner',
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
