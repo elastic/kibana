@@ -6,14 +6,17 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { minutesFromNow } from './lib/intervals';
+import { secondsFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
-import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
-import { ConcreteTaskInstance, TaskStatus, TaskDictionary, TaskDefinition } from './task';
-import { TaskManagerRunner } from './task_runner';
-import { mockLogger } from './test_utils';
+import { TaskManagerRunner, TaskRunResult } from './task_runner';
+import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from './task_events';
+import { ConcreteTaskInstance, TaskStatus, TaskDefinition, RunResult } from './task';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
+import { TaskTypeDictionary } from './task_type_dictionary';
+import { mockLogger } from './test_utils';
+
+const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -67,6 +70,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               throw new Error('Dangit!');
@@ -96,9 +100,10 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
-              return;
+              return { state: {} };
             },
           }),
         },
@@ -124,10 +129,11 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `1m`,
           createTaskRunner: () => ({
             async run() {
-              return;
+              return { state: {} };
             },
           }),
         },
@@ -150,10 +156,11 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `1m`,
           createTaskRunner: () => ({
             async run() {
-              return;
+              return { state: {} };
             },
           }),
         },
@@ -171,9 +178,10 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
-              return { runAt };
+              return { runAt, state: {} };
             },
           }),
         },
@@ -194,9 +202,10 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
-              return { runAt };
+              return { runAt, state: {} };
             },
           }),
         },
@@ -218,6 +227,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               return undefined;
@@ -238,6 +248,7 @@ describe('TaskManagerRunner', () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
             async run() {
               const promise = new Promise((r) => setTimeout(r, 1000));
@@ -265,6 +276,7 @@ describe('TaskManagerRunner', () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
             run: async () => undefined,
           }),
@@ -291,6 +303,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           createTaskRunner: () => ({
             run: async () => undefined,
@@ -325,6 +338,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -356,6 +370,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -388,6 +403,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -421,6 +437,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           getRetry: getRetryStub,
           createTaskRunner: () => ({
             async run() {
@@ -456,6 +473,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -490,6 +508,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -522,6 +541,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -557,6 +577,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -592,6 +613,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -625,6 +647,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           timeout: `${timeoutMinutes}m`,
           getRetry: getRetryStub,
           createTaskRunner: () => ({
@@ -655,6 +678,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           maxAttempts: 3,
           createTaskRunner: () => ({
             run: async () => {
@@ -688,6 +712,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          title: 'Bar!',
           maxAttempts: 3,
           createTaskRunner: () => ({
             run: async () => {
@@ -720,8 +745,8 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
+            title: 'Bar!',
             timeout: `1m`,
-            getRetry: () => {},
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -748,8 +773,8 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
+            title: 'Bar!',
             timeout: `1m`,
-            getRetry: () => {},
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -777,9 +802,10 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
-                return {};
+                return { state: {} };
               },
             }),
           },
@@ -788,7 +814,9 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+      );
     });
 
     test('emits TaskEvent when a recurring task is run successfully', async () => {
@@ -803,9 +831,10 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
-                return { runAt };
+                return { runAt, state: {} };
               },
             }),
           },
@@ -814,20 +843,23 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+      );
     });
 
     test('emits TaskEvent when a task run throws an error', async () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner } = testOpts({
+      const { runner, instance } = testOpts({
         onTaskEvent,
         instance: {
           id,
         },
         definitions: {
           bar: {
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
                 throw error;
@@ -838,7 +870,11 @@ describe('TaskManagerRunner', () => {
       });
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(id, asErr({ error, task: instance, result: TaskRunResult.RetryScheduled }))
+        )
+      );
       expect(onTaskEvent).toHaveBeenCalledTimes(1);
     });
 
@@ -846,7 +882,7 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner } = testOpts({
+      const { runner, instance } = testOpts({
         onTaskEvent,
         instance: {
           id,
@@ -855,9 +891,10 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
+            title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
-                return { error };
+                return { error, state: {} };
               },
             }),
           },
@@ -866,7 +903,11 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(id, asErr({ error, task: instance, result: TaskRunResult.RetryScheduled }))
+        )
+      );
       expect(onTaskEvent).toHaveBeenCalledTimes(1);
     });
 
@@ -874,7 +915,7 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner, store } = testOpts({
+      const { runner, store, instance: originalInstance } = testOpts({
         onTaskEvent,
         instance: {
           id,
@@ -882,10 +923,11 @@ describe('TaskManagerRunner', () => {
         },
         definitions: {
           bar: {
+            title: 'Bar!',
             getRetry: () => false,
             createTaskRunner: () => ({
               async run() {
-                return { error };
+                return { error, state: {} };
               },
             }),
           },
@@ -897,15 +939,33 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.args[0][0];
       expect(instance.status).toBe('failed');
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(
+            id,
+            asErr({
+              error,
+              task: originalInstance,
+              result: TaskRunResult.Failed,
+            })
+          )
+        )
+      );
       expect(onTaskEvent).toHaveBeenCalledTimes(1);
     });
   });
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definitions?: unknown;
+    definitions?: Record<string, Omit<TaskDefinition, 'type'>>;
     onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
+  }
+
+  function withAnyTiming(taskRun: TaskRun) {
+    return {
+      ...taskRun,
+      timing: { start: expect.any(Number), stop: expect.any(Number) },
+    };
   }
 
   function testOpts(opts: TestOpts) {
@@ -942,19 +1002,24 @@ describe('TaskManagerRunner', () => {
 
     store.update.returns(instance);
 
+    const definitions = new TaskTypeDictionary(logger);
+    definitions.registerTaskDefinitions({
+      testbar: {
+        title: 'Bar!',
+        createTaskRunner,
+      },
+    });
+    if (opts.definitions) {
+      definitions.registerTaskDefinitions(opts.definitions);
+    }
+
     const runner = new TaskManagerRunner({
       beforeRun: (context) => Promise.resolve(context),
       beforeMarkRunning: (context) => Promise.resolve(context),
       logger,
       store,
       instance,
-      definitions: Object.assign(opts.definitions || {}, {
-        testbar: {
-          type: 'bar',
-          title: 'Bar!',
-          createTaskRunner,
-        },
-      }) as TaskDictionary<TaskDefinition>,
+      definitions,
       onTaskEvent: opts.onTaskEvent,
     });
 
@@ -972,8 +1037,9 @@ describe('TaskManagerRunner', () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
+          title: 'Bar!',
           createTaskRunner: () => ({
-            run: async () => result,
+            run: async () => result as RunResult,
           }),
         },
       },

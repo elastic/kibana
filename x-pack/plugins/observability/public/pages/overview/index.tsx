@@ -24,6 +24,9 @@ import { getBucketSize } from '../../utils/get_bucket_size';
 import { DataSections } from './data_sections';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
+import { getNewsFeed } from '../../services/get_news_feed';
+import { DataSections } from './data_sections';
+import { useTrackPageview, UXHasDataResponse } from '../..';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -72,6 +75,8 @@ export function OverviewPage({ routeParams }: Props) {
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
+    } else if (id === 'ux') {
+      return !(hasData[id] as UXHasDataResponse).hasData;
     }
     return hasData[id]?.status === FETCH_STATUS.FAILURE || hasData[id]?.hasData === false;
   });

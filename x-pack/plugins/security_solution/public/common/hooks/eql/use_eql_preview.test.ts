@@ -14,7 +14,7 @@ import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useEqlPreview } from '.';
-import { getMockResponse } from './helpers.test';
+import { getMockEqlResponse } from './eql_search_response.mock';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -32,7 +32,9 @@ describe('useEqlPreview', () => {
 
     useKibana().services.notifications.toasts.addWarning = jest.fn();
 
-    (useKibana().services.data.search.search as jest.Mock).mockReturnValue(of(getMockResponse()));
+    (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+      of(getMockEqlResponse())
+    );
   });
 
   it('should initiate hook', async () => {
@@ -96,7 +98,7 @@ describe('useEqlPreview', () => {
   it('should not resolve values after search is invoked if component unmounted', async () => {
     await act(async () => {
       (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
-        of(getMockResponse()).pipe(delay(5000))
+        of(getMockEqlResponse()).pipe(delay(5000))
       );
       const { result, waitForNextUpdate, unmount } = renderHook(() => useEqlPreview());
 
@@ -117,9 +119,11 @@ describe('useEqlPreview', () => {
   it('should not resolve new values on search if response is error response', async () => {
     await act(async () => {
       (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
-        of({ isRunning: false, isPartial: true } as EqlSearchStrategyResponse<
-          EqlSearchResponse<Source>
-        >)
+        of<EqlSearchStrategyResponse<EqlSearchResponse<Source>>>({
+          ...getMockEqlResponse(),
+          isRunning: false,
+          isPartial: true,
+        })
       );
 
       const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
@@ -133,6 +137,30 @@ describe('useEqlPreview', () => {
 
       expect(result.current[0]).toBeFalsy();
       expect(mockCalls[0][0]).toEqual(i18n.EQL_PREVIEW_FETCH_FAILURE);
+    });
+  });
+
+  // TODO: Determine why eql search strategy returns null for meta.params.body
+  // in complete responses, but not in partial responses
+  it('should update inspect information on partial response', async () => {
+    const mockResponse = getMockEqlResponse();
+    await act(async () => {
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of<EqlSearchStrategyResponse<EqlSearchResponse<Source>>>({
+          isRunning: true,
+          isPartial: true,
+          rawResponse: mockResponse.rawResponse,
+        })
+      );
+
+      const { result, waitForNextUpdate } = renderHook(() => useEqlPreview());
+
+      await waitForNextUpdate();
+
+      result.current[1](params);
+
+      expect(result.current[2].inspect.dsl.length).toEqual(1);
+      expect(result.current[2].inspect.response.length).toEqual(1);
     });
   });
 

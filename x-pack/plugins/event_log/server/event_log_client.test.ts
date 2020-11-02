@@ -114,7 +114,7 @@ describe('EventLogStart', () => {
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.alias,
+        esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
         'saved-object-id',
@@ -195,7 +195,7 @@ describe('EventLogStart', () => {
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.alias,
+        esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
         'saved-object-id',
@@ -320,6 +320,12 @@ function FakeRequest(): KibanaRequest {
     raw: {
       req: {
         url: '/',
+      },
+    },
+    // TODO: Remove once we upgrade to hapi v18
+    _core: {
+      info: {
+        uri: 'http://localhost',
       },
     },
     getSavedObjectsClient: () => savedObjectGetter,

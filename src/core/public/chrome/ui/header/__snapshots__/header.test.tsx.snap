@@ -300,6 +300,55 @@ exports[`Header renders 1`] = `
       "thrownError": null,
     }
   }
+  breadcrumbsAppendExtension$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
@@ -3028,7 +3077,7 @@ exports[`Header renders 1`] = `
                           size="l"
                           type="logoElastic"
                         >
-                          <div
+                          <span
                             aria-label="Elastic Logo"
                             className="chrHeaderLogo__cluster"
                             data-euiicon-type="logoElastic"
@@ -4743,7 +4792,7 @@ exports[`Header renders 1`] = `
                                     size="m"
                                     type="help"
                                   >
-                                    <div
+                                    <span
                                       data-euiicon-type="help"
                                       size="m"
                                     />
@@ -4863,7 +4912,7 @@ exports[`Header renders 1`] = `
                         size="m"
                         type="menu"
                       >
-                        <div
+                        <span
                           data-euiicon-type="menu"
                           size="m"
                         />
@@ -4984,6 +5033,55 @@ exports[`Header renders 1`] = `
                     "text": "test",
                   },
                 ],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
+              }
+            }
+            breadcrumbsAppendExtension$={
+              BehaviorSubject {
+                "_isScalar": false,
+                "_value": undefined,
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -5694,7 +5792,7 @@ exports[`Header renders 1`] = `
                                     className="euiListGroupItem__icon"
                                     type="home"
                                   >
-                                    <div
+                                    <span
                                       className="euiListGroupItem__icon"
                                       data-euiicon-type="home"
                                     />
@@ -5780,7 +5878,7 @@ exports[`Header renders 1`] = `
                             size="m"
                             type="arrowRight"
                           >
-                            <div
+                            <span
                               className="euiAccordion__icon euiAccordion__icon-isOpen"
                               data-euiicon-type="arrowRight"
                               size="m"
@@ -6002,7 +6100,7 @@ exports[`Header renders 1`] = `
                                       data-test-subj="collapsible-nav-lock"
                                       type="button"
                                     >
-                                      <div
+                                      <span
                                         class="euiListGroupItem__icon"
                                         data-euiicon-type="lock"
                                       />
@@ -6037,7 +6135,7 @@ exports[`Header renders 1`] = `
                                       className="euiListGroupItem__icon"
                                       type="lock"
                                     >
-                                      <div
+                                      <span
                                         className="euiListGroupItem__icon"
                                         data-euiicon-type="lock"
                                       />
@@ -6096,7 +6194,7 @@ exports[`Header renders 1`] = `
                           size="m"
                           type="cross"
                         >
-                          <div
+                          <span
                             className="euiButtonContent__icon"
                             data-euiicon-type="cross"
                             size="m"

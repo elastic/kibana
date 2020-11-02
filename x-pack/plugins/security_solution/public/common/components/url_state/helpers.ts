@@ -278,6 +278,7 @@ export const replaceStateInLocation = <T>({
     replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(getQueryStringFromLocation(search))
   );
   if (history) {
+    newLocation.state = history.location.state;
     history.replace(newLocation);
   }
   return newLocation.search;

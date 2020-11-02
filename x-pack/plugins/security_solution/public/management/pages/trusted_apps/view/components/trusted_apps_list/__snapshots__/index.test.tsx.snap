@@ -304,7 +304,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 <span
                   class="euiTableCellContent__text"
                 >
-                  <div
+                  <span
                     color="danger"
                     data-euiicon-type="minusInCircle"
                   />
@@ -467,7 +467,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 <span
                   class="euiTableCellContent__text"
                 >
-                  <div
+                  <span
                     color="danger"
                     data-euiicon-type="minusInCircle"
                   />
@@ -727,7 +727,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -755,7 +755,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowUp"
@@ -996,22 +996,23 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             <div
                               class="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <button
-                                class="euiButton euiButton--danger euiButton--small"
-                                data-test-subj="trustedAppDeleteButton"
-                                type="button"
-                              >
-                                <span
-                                  class="euiButtonContent euiButton__content"
-                                  style="height: auto;"
+                              <div>
+                                <button
+                                  class="euiButton euiButton--danger euiButton--small eui-fullWidth "
+                                  data-test-subj="trustedAppDeleteButton"
+                                  type="button"
                                 >
                                   <span
-                                    class="euiButton__text"
+                                    class="euiButtonContent euiButton__content"
                                   >
-                                    Remove
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Remove
+                                    </span>
                                   </span>
-                                </span>
-                              </button>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1114,7 +1115,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -1142,7 +1143,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1243,7 +1244,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -1271,7 +1272,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1372,7 +1373,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -1400,7 +1401,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1501,7 +1502,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -1529,7 +1530,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1630,7 +1631,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -1658,7 +1659,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1759,7 +1760,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -1787,7 +1788,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -1888,7 +1889,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -1916,7 +1917,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2017,7 +2018,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2045,7 +2046,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2146,7 +2147,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2174,7 +2175,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2275,7 +2276,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2303,7 +2304,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2404,7 +2405,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2432,7 +2433,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2533,7 +2534,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2561,7 +2562,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2662,7 +2663,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2690,7 +2691,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2791,7 +2792,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2819,7 +2820,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -2920,7 +2921,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -2948,7 +2949,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -3049,7 +3050,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -3077,7 +3078,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -3178,7 +3179,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -3206,7 +3207,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -3307,7 +3308,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -3335,7 +3336,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -3436,7 +3437,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -3464,7 +3465,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -3487,7 +3488,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+            class="euiPopover euiPopover--anchorUpRight"
           >
             <div
               class="euiPopover__anchor"
@@ -3500,7 +3501,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <span
                   class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
@@ -3529,7 +3530,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               disabled=""
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowLeft"
@@ -3686,7 +3687,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               href="#mockId"
               rel="noreferrer"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowRight"
@@ -3925,7 +3926,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -3953,7 +3954,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4054,7 +4055,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4082,7 +4083,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4183,7 +4184,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4211,7 +4212,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4312,7 +4313,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4340,7 +4341,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4441,7 +4442,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4469,7 +4470,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4570,7 +4571,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4598,7 +4599,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4699,7 +4700,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4727,7 +4728,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4828,7 +4829,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4856,7 +4857,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -4957,7 +4958,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -4985,7 +4986,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5086,7 +5087,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -5114,7 +5115,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5215,7 +5216,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -5243,7 +5244,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5344,7 +5345,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -5372,7 +5373,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5473,7 +5474,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -5501,7 +5502,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5602,7 +5603,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -5630,7 +5631,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5731,7 +5732,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -5759,7 +5760,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5860,7 +5861,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -5888,7 +5889,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -5989,7 +5990,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -6017,7 +6018,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -6118,7 +6119,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -6146,7 +6147,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -6247,7 +6248,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -6275,7 +6276,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -6376,7 +6377,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -6404,7 +6405,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -6427,7 +6428,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+            class="euiPopover euiPopover--anchorUpRight"
           >
             <div
               class="euiPopover__anchor"
@@ -6440,7 +6441,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <span
                   class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
@@ -6469,7 +6470,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               disabled=""
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowLeft"
@@ -6626,7 +6627,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               href="#mockId"
               rel="noreferrer"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowRight"
@@ -7023,7 +7024,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7051,7 +7052,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -7152,7 +7153,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7180,7 +7181,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -7281,7 +7282,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7309,7 +7310,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -7410,7 +7411,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7438,7 +7439,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -7539,7 +7540,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7567,7 +7568,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -7668,7 +7669,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7696,7 +7697,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -7797,7 +7798,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7825,7 +7826,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -7926,7 +7927,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -7954,7 +7955,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8055,7 +8056,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8083,7 +8084,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8184,7 +8185,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8212,7 +8213,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8313,7 +8314,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8341,7 +8342,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8442,7 +8443,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8470,7 +8471,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8571,7 +8572,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8599,7 +8600,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8700,7 +8701,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8728,7 +8729,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8829,7 +8830,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8857,7 +8858,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -8958,7 +8959,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -8986,7 +8987,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -9087,7 +9088,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -9115,7 +9116,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -9216,7 +9217,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -9244,7 +9245,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -9345,7 +9346,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -9373,7 +9374,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -9474,7 +9475,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -9502,7 +9503,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -9525,7 +9526,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+            class="euiPopover euiPopover--anchorUpRight"
           >
             <div
               class="euiPopover__anchor"
@@ -9538,7 +9539,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <span
                   class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
@@ -9567,7 +9568,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               disabled=""
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowLeft"
@@ -9724,7 +9725,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               href="#mockId"
               rel="noreferrer"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowRight"
@@ -9963,7 +9964,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -9991,7 +9992,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10092,7 +10093,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -10120,7 +10121,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10221,7 +10222,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -10249,7 +10250,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10350,7 +10351,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -10378,7 +10379,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10479,7 +10480,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -10507,7 +10508,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10608,7 +10609,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -10636,7 +10637,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10737,7 +10738,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -10765,7 +10766,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10866,7 +10867,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -10894,7 +10895,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -10995,7 +10996,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11023,7 +11024,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -11124,7 +11125,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11152,7 +11153,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -11253,7 +11254,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11281,7 +11282,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -11382,7 +11383,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11410,7 +11411,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -11511,7 +11512,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11539,7 +11540,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -11640,7 +11641,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11668,7 +11669,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -11769,7 +11770,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11797,7 +11798,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -11898,7 +11899,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -11926,7 +11927,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -12027,7 +12028,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -12055,7 +12056,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -12156,7 +12157,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -12184,7 +12185,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -12285,7 +12286,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -12313,7 +12314,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -12414,7 +12415,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     data-test-subj="trustedAppDeleteAction"
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       data-euiicon-type="trash"
@@ -12442,7 +12443,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   data-test-subj="trustedAppsListItemExpandButton"
                   type="button"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     data-euiicon-type="arrowDown"
@@ -12465,7 +12466,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+            class="euiPopover euiPopover--anchorUpRight"
           >
             <div
               class="euiPopover__anchor"
@@ -12478,7 +12479,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 <span
                   class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
@@ -12508,7 +12509,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               href="#mockId"
               rel="noreferrer"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowLeft"
@@ -12615,7 +12616,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               href="#mockId"
               rel="noreferrer"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowRight"
