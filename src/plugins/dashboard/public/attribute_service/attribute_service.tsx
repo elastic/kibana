@@ -42,7 +42,6 @@ export const ATTRIBUTE_SERVICE_KEY = 'attributes';
 
 export interface AttributeServiceOptions<A extends { title: string }> {
   saveMethod: (
-    type: string,
     attributes: A,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
@@ -106,20 +105,20 @@ export class AttributeService<
       return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
     }
     try {
-      const savedItem = await this.options.saveMethod(this.type, newAttributes, savedObjectId);
+      const savedItem = await this.options.saveMethod(newAttributes, savedObjectId);
       if ('id' in savedItem) {
         return { ...originalInput, savedObjectId: savedItem.id } as RefType;
       }
       return { ...originalInput } as RefType;
     } catch (error) {
       this.toasts.addDanger({
-        title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
-          defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
+        title: i18n.translate('embeddableApi.attributeService.saveToLibraryError', {
+          defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
           values: {
             errorMessage: error.message,
           },
         }),
-        'data-test-subj': 'saveDashboardFailure',
+        'data-test-subj': 'attributeServiceSaveFailure',
       });
       return Promise.reject({ error });
     }
