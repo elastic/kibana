@@ -135,7 +135,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiButtonGroup).prop('idSelected')).toEqual('value_labels_inside');
     });
 
-    it('should disable the popover if there is no area, line, bar or bar_horizontal series', () => {
+    it('should show the popover, but disable the fitting field if there is no area, line, bar or bar_horizontal series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -148,10 +148,16 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.find(ToolbarPopover).at(0).prop('isDisabled')).toEqual(true);
+      expect(
+        component
+          .find(ToolbarPopover)
+          .at(0)
+          .find('[data-test-subj="lnsMissingValuesSelect"]')
+          .prop('disabled')
+      ).toEqual(true);
     });
 
-    it('should disable the popover if there is histogram series', () => {
+    it('should show the popover, but disabled the display field if there is histogram series', () => {
       // make it detect an histogram series
       frame.datasourceLayers.first.getOperationForColumnId = jest.fn().mockReturnValueOnce({
         isBucketed: true,
@@ -169,10 +175,16 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.find(ToolbarPopover).at(0).prop('isDisabled')).toEqual(true);
+      expect(
+        component
+          .find(ToolbarPopover)
+          .at(0)
+          .find('[data-test-subj="lnsValueLabelsDisplay"]')
+          .prop('isDisabled')
+      ).toEqual(true);
     });
 
-    it('should show the popover for bar and horizontal_bar series', () => {
+    it('should show the popover and display field enabled for bar and horizontal_bar series', () => {
       const state = testState();
 
       const component = shallow(
@@ -187,7 +199,13 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.find(ToolbarPopover).at(0).prop('isDisabled')).toEqual(false);
+      expect(
+        component
+          .find(ToolbarPopover)
+          .at(0)
+          .find('[data-test-subj="lnsValueLabelsDisplay"]')
+          .prop('isDisabled')
+      ).toEqual(false);
     });
 
     it('should disable the fitting option for bar series', () => {
