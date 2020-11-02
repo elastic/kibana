@@ -28,7 +28,6 @@ import {
   setFilterQuery,
   setSavedQuery,
   setSearchBarFilter,
-  setIsInitializing,
 } from './actions';
 import {
   setIsInspected,
@@ -48,7 +47,6 @@ export type InputsState = InputsModel;
 
 export const initialInputsState: InputsState = {
   global: {
-    isInitializing: false,
     timerange: {
       kind: 'relative',
       ...getTimeRangeSettings(false),
@@ -64,7 +62,6 @@ export const initialInputsState: InputsState = {
     fullScreen: false,
   },
   timeline: {
-    isInitializing: false,
     timerange: {
       kind: 'relative',
       ...getTimeRangeSettings(false),
@@ -87,7 +84,6 @@ export const createInitialInputsState = (): InputsState => {
 
   return {
     global: {
-      isInitializing: false,
       timerange: {
         kind: 'relative',
         fromStr,
@@ -109,7 +105,6 @@ export const createInitialInputsState = (): InputsState => {
       fullScreen: false,
     },
     timeline: {
-      isInitializing: false,
       timerange: {
         kind: 'relative',
         fromStr,
@@ -248,13 +243,6 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     [id]: {
       ...get(id, state),
       filters,
-    },
-  }))
-  .case(setIsInitializing, (state, { id }) => ({
-    ...state,
-    [id]: {
-      ...get(id, state),
-      isInitializing: true,
     },
   }))
   .build();

@@ -103,7 +103,6 @@ describe('Timeline', () => {
       indexPattern,
       isLive: false,
       isSaving: false,
-      isTimerangeInitializing: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
@@ -117,6 +116,7 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timelineType: TimelineType.default,
+      timerangeKind: 'absolute',
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };

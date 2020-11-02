@@ -99,7 +99,6 @@ export interface Props {
   indexPattern: IIndexPattern;
   isLive: boolean;
   isSaving: boolean;
-  isTimerangeInitializing: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
@@ -113,6 +112,7 @@ export interface Props {
   start: string;
   status: TimelineStatusLiteral;
   timelineType: TimelineType;
+  timerangeKind: 'absolute' | 'relative';
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -132,7 +132,6 @@ export const TimelineComponent: React.FC<Props> = ({
   isLive,
   loadingSourcerer,
   isSaving,
-  isTimerangeInitializing,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
@@ -145,6 +144,7 @@ export const TimelineComponent: React.FC<Props> = ({
   status,
   sort,
   timelineType,
+  timerangeKind,
   toggleColumn,
   usersViewing,
 }) => {
@@ -220,13 +220,13 @@ export const TimelineComponent: React.FC<Props> = ({
     endDate: end,
     id,
     indexNames,
-    isTimerangeInitializing,
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery ?? '',
     startDate: start,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
+    timerangeKind,
   });
 
   useEffect(() => {

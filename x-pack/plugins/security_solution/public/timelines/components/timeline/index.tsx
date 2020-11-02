@@ -27,6 +27,11 @@ export interface OwnProps {
 
 export type Props = OwnProps & PropsFromRedux;
 
+const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
+  prevProps.end === nextProps.end &&
+  prevProps.start === nextProps.start &&
+  prevProps.timerangeKind === nextProps.timerangeKind;
+
 const StatefulTimelineComponent = React.memo<Props>(
   ({
     columns,
@@ -39,7 +44,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     isLive,
     isSaving,
     isTimelineExists,
-    isTimerangeInitializing,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
@@ -52,6 +56,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     start,
     status,
     timelineType,
+    timerangeKind,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -114,7 +119,6 @@ const StatefulTimelineComponent = React.memo<Props>(
         isSaving={isSaving}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}
-        isTimerangeInitializing={isTimerangeInitializing}
         kqlMode={kqlMode}
         kqlQueryExpression={kqlQueryExpression}
         loadingSourcerer={loading}
@@ -127,26 +131,24 @@ const StatefulTimelineComponent = React.memo<Props>(
         status={status}
         toggleColumn={toggleColumn}
         timelineType={timelineType}
+        timerangeKind={timerangeKind}
         usersViewing={usersViewing}
       />
     );
   },
-  // eslint-disable-next-line complexity
   (prevProps, nextProps) => {
     return (
-      prevProps.end === nextProps.end &&
+      isTimerangeSame(prevProps, nextProps) &&
       prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.isSaving === nextProps.isSaving &&
       prevProps.isTimelineExists === nextProps.isTimelineExists &&
-      prevProps.isTimerangeInitializing === nextProps.isTimerangeInitializing &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.start === nextProps.start &&
       prevProps.timelineType === nextProps.timelineType &&
       prevProps.status === nextProps.status &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -199,7 +201,6 @@ const makeMapStateToProps = () => {
       end: input.timerange.to,
       filters: timelineFilter,
       graphEventId,
-      isTimerangeInitializing: input.isInitializing,
       id,
       isLive: input.policy.kind === 'interval',
       isSaving,
@@ -214,6 +215,7 @@ const makeMapStateToProps = () => {
       start: input.timerange.from,
       status,
       timelineType,
+      timerangeKind: input.timerange.kind,
     };
   };
   return mapStateToProps;

@@ -160,7 +160,6 @@ export const mockGlobalState: State = {
   },
   inputs: {
     global: {
-      isInitializing: false,
       timerange: {
         kind: 'relative',
         fromStr: DEFAULT_FROM,
@@ -178,7 +177,6 @@ export const mockGlobalState: State = {
       filters: [],
     },
     timeline: {
-      isInitializing: false,
       timerange: {
         kind: 'relative',
         fromStr: DEFAULT_FROM,

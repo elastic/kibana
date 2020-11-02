@@ -98,7 +98,6 @@ describe('useTimelineEvents', () => {
     endDate: '',
     id: TimelineId.active,
     indexNames: ['filebeat-*'],
-    isTimerangeInitializing: false,
     fields: [],
     filterQuery: '',
     startDate: '',

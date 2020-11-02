@@ -89,7 +89,3 @@ export const setSearchBarFilter = actionCreator<{
   id: InputsModelId;
   filters: Filter[];
 }>('SET_SEARCH_BAR_FILTER');
-
-export const setIsInitializing = actionCreator<{
-  id: InputsModelId;
-}>('SET_IS_INITIALIZING');

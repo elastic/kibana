@@ -258,7 +258,6 @@ describe('Inputs', () => {
         })
       ).toEqual({
         global: {
-          isInitializing: false,
           linkTo: ['timeline'],
           policy: {
             duration: 300000,
@@ -285,7 +284,6 @@ describe('Inputs', () => {
           filters: [],
         },
         timeline: {
-          isInitializing: false,
           linkTo: ['global'],
           policy: {
             duration: 300000,

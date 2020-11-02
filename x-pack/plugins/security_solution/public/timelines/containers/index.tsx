@@ -53,12 +53,12 @@ export interface UseTimelineEventsProps {
   skip?: boolean;
   endDate: string;
   id: string;
-  isTimerangeInitializing?: boolean;
   fields: string[];
   indexNames: string[];
   limit: number;
   sort: SortField;
   startDate: string;
+  timerangeKind?: 'absolute' | 'relative';
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -70,20 +70,27 @@ export const initSortDefault = {
   direction: Direction.asc,
 };
 
+function usePreviousRequest(value: TimelineEventsAllRequestOptions | null) {
+  const ref = useRef<TimelineEventsAllRequestOptions | null>(value);
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
   id = ID,
   indexNames,
-  isTimerangeInitializing = false,
   fields,
   filterQuery,
   startDate,
   limit,
   sort = initSortDefault,
   skip = false,
+  timerangeKind,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
-  const isInitialized = useRef(false);
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data, notifications } = useKibana().services;
@@ -116,6 +123,7 @@ export const useTimelineEvents = ({
         }
       : null
   );
+  const prevTimelineRequest = usePreviousRequest(timelineRequest);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -164,7 +172,7 @@ export const useTimelineEvents = ({
 
   const timelineSearch = useCallback(
     (request: TimelineEventsAllRequestOptions | null) => {
-      if (request == null || pageName === '' || !isInitialized.current) {
+      if (request == null || pageName === '') {
         return;
       }
       let didCancel = false;
@@ -230,6 +238,7 @@ export const useTimelineEvents = ({
         pageName !== activeTimeline.getPageName()
       ) {
         activeTimeline.setPageName(pageName);
+
         abortCtrl.current.abort();
         setLoading(false);
         refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
@@ -319,11 +328,9 @@ export const useTimelineEvents = ({
       }
       if (
         !skip &&
-        !isTimerangeInitializing &&
         !skipQueryForDetectionsPage(id, indexNames) &&
         !deepEqual(prevRequest, currentRequest)
       ) {
-        isInitialized.current = true;
         return currentRequest;
       }
       return prevRequest;
@@ -331,7 +338,6 @@ export const useTimelineEvents = ({
   }, [
     dispatch,
     indexNames,
-    isTimerangeInitializing,
     docValueFields,
     endDate,
     filterQuery,
@@ -345,8 +351,13 @@ export const useTimelineEvents = ({
   ]);
 
   useEffect(() => {
-    timelineSearch(timelineRequest);
-  }, [timelineRequest, timelineSearch]);
+    if (
+      id !== TimelineId.active ||
+      timerangeKind === 'absolute' ||
+      !deepEqual(prevTimelineRequest, timelineRequest)
+    )
+      timelineSearch(timelineRequest);
+  }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
 
   return [loading, timelineResponse];
 };
