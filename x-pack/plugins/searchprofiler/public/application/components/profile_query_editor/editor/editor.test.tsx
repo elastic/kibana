@@ -6,15 +6,15 @@
 import 'brace';
 import 'brace/mode/json';
 
-import { registerTestBed } from '../../../../../test_utils';
-import { Editor, Props } from '.';
+import { registerTestBed } from '../../../../../../../test_utils';
+import { Editor, Props } from './editor';
 
 describe('Editor Component', () => {
   it('renders', async () => {
     const props: Props = {
       initialValue: '',
       licenseEnabled: true,
-      onEditorReady: (e) => {},
+      onEditorReady: (e: any) => {},
     };
     // Ignore the warning about Worker not existing for now...
     const init = registerTestBed(Editor);
