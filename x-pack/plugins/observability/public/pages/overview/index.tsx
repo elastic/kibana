@@ -6,7 +6,7 @@
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { useTrackPageview } from '../..';
+import { useTrackPageview, UXHasDataResponse } from '../..';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { NewsFeed } from '../../components/app/news_feed';
@@ -24,9 +24,6 @@ import { getBucketSize } from '../../utils/get_bucket_size';
 import { DataSections } from './data_sections';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
-import { getNewsFeed } from '../../services/get_news_feed';
-import { DataSections } from './data_sections';
-import { useTrackPageview, UXHasDataResponse } from '../..';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -74,15 +71,19 @@ export function OverviewPage({ routeParams }: Props) {
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
-      return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
-    } else if (id === 'ux') {
-      return !(hasData[id] as UXHasDataResponse).hasData;
+      return (
+        alertStatus === FETCH_STATUS.FAILURE ||
+        (alertStatus === FETCH_STATUS.SUCCESS && alerts.length === 0)
+      );
+    } else {
+      const app = hasData[id];
+      if (app) {
+        const _hasData = id === 'ux' ? (app.hasData as UXHasDataResponse)?.hasData : app.hasData;
+        return app.status === FETCH_STATUS.FAILURE || !_hasData;
+      }
     }
-    return hasData[id]?.status === FETCH_STATUS.FAILURE || hasData[id]?.hasData === false;
+    return false;
   });
-
-  // Hides the data section when all 'hasData' is false or undefined
-  const showDataSections = Object.values(hasData).some((hasPluginData) => hasPluginData);
 
   return (
     <WithHeaderLayout
@@ -112,7 +113,7 @@ export function OverviewPage({ routeParams }: Props) {
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
           {/* Data sections */}
-          {showDataSections && (
+          {hasAnyData && (
             <DataSections
               hasData={hasData}
               absoluteTime={absoluteTime}

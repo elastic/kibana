@@ -61,10 +61,10 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
             />
           </EuiFlexItem>
         )}
-        {(hasData.ux as UXHasDataResponse).hasData && (
+        {(hasData?.ux?.hasData as UXHasDataResponse)?.hasData && (
           <EuiFlexItem grow={false}>
             <UXSection
-              serviceName={(hasData.ux.hasData as UXHasDataResponse).serviceName as string}
+              serviceName={(hasData?.ux?.hasData as UXHasDataResponse)?.serviceName as string}
               bucketSize={bucketSize}
               absoluteTime={absoluteTime}
               relativeTime={relativeTime}

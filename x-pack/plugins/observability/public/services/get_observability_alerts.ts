@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { Alert } from '../../../alerts/common';
 
 const allowedConsumers = ['apm', 'uptime', 'logs', 'metrics', 'alerts'];
 
-export async function getObservabilityAlerts({ core }: { core: AppMountContext['core'] }) {
+export async function getObservabilityAlerts({ core }: { core: CoreStart }) {
   try {
     const { data = [] }: { data: Alert[] } = await core.http.get('/api/alerts/_find', {
       query: {
