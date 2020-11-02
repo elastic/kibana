@@ -47,12 +47,12 @@ const backgroundSessionIndicatorViewStateToProps: {
       text: 'Loading',
       buttons: [
         ({ onStopLoading = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onStopLoading} iconType={'cross'} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onStopLoading} iconType={'cross'}>
             Cancel
           </EuiButtonEmpty>
         ),
         ({ onContinueInBackground = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onContinueInBackground} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onContinueInBackground}>
             Continue in background
           </EuiButtonEmpty>
         ),
@@ -70,13 +70,13 @@ const backgroundSessionIndicatorViewStateToProps: {
       text: 'Results loaded',
       buttons: [
         ({ onSaveResults = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onSaveResults} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onSaveResults}>
             Save results
           </EuiButtonEmpty>
         ),
         ({ onViewBackgroundRequests = () => {} }) => (
           // TODO: make this a link
-          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests}>
             View requests
           </EuiButtonEmpty>
         ),
@@ -93,12 +93,12 @@ const backgroundSessionIndicatorViewStateToProps: {
       text: 'Loading in the background',
       buttons: [
         ({ onStopLoading = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onStopLoading} iconType={'cross'} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onStopLoading} iconType={'cross'}>
             Cancel
           </EuiButtonEmpty>
         ),
         ({ onViewBackgroundRequests = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests}>
             View requests
           </EuiButtonEmpty>
         ),
@@ -116,7 +116,7 @@ const backgroundSessionIndicatorViewStateToProps: {
       text: 'Loaded in the background',
       buttons: [
         ({ onViewBackgroundRequests = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests}>
             View background requests
           </EuiButtonEmpty>
         ),
@@ -134,7 +134,7 @@ const backgroundSessionIndicatorViewStateToProps: {
       text: 'The data is not current',
       buttons: [
         ({ onReload = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onReload} iconType={'refresh'} flush={'both'}>
+          <EuiButtonEmpty size="xs" onClick={onReload} iconType={'refresh'}>
             Reload
           </EuiButtonEmpty>
         ),
@@ -168,7 +168,7 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
         </EuiToolTip>
       }
     >
-      <EuiFlexGroup responsive={false} alignItems={'center'} gutterSize={'s'}>
+      <EuiFlexGroup responsive={false} alignItems={'center'} gutterSize={'none'}>
         <EuiFlexItem grow={true} style={{ marginRight: '12px' }}>
           <EuiText size="s" color={'subdued'}>
             <p>{popover.text}</p>
