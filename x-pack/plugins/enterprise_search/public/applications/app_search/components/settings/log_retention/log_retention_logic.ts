@@ -14,6 +14,7 @@ import { convertLogRetentionFromServerToClient } from './utils/convert_log_reten
 interface ILogRetentionActions {
   clearLogRetentionUpdating(): { value: boolean };
   closeModals(): { value: boolean };
+  fetchLogRetention(): { value: boolean };
   saveLogRetention(
     option: ELogRetentionOptions,
     enabled: boolean
@@ -34,6 +35,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
   actions: () => ({
     clearLogRetentionUpdating: true,
     closeModals: true,
+    fetchLogRetention: true,
     saveLogRetention: (option, enabled) => ({ enabled, option }),
     setOpenModal: (option) => ({ option }),
     toggleLogRetention: (option) => ({ option }),
@@ -62,6 +64,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
       {
         clearLogRetentionUpdating: () => false,
         closeModals: () => false,
+        fetchLogRetention: () => true,
         toggleLogRetention: () => true,
       },
     ],
@@ -75,6 +78,19 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
     ],
   }),
   listeners: ({ actions, values }) => ({
+    fetchLogRetention: async () => {
+      try {
+        const { http } = HttpLogic.values;
+        const response = await http.get('/api/app_search/log_settings');
+        actions.updateLogRetention(
+          convertLogRetentionFromServerToClient(response as ILogRetentionServer)
+        );
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.clearLogRetentionUpdating();
+      }
+    },
     saveLogRetention: async ({ enabled, option }) => {
       const updateData = { [option.toString()]: { enabled } };
 
