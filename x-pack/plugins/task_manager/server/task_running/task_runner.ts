@@ -16,8 +16,8 @@ import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
-import { Middleware } from './lib/middleware';
-import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from './lib/result_type';
+import { Middleware } from '../lib/middleware';
+import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from '../lib/result_type';
 import {
   TaskRun,
   TaskMarkRunning,
@@ -25,24 +25,25 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
-} from './task_events';
-import { intervalFromDate, intervalFromNow } from './lib/intervals';
+} from '../task_events';
+import { intervalFromDate, intervalFromNow } from '../lib/intervals';
 import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
-  RunResult,
+  isFailedRunResult,
   SuccessfulRunResult,
   FailedRunResult,
   FailedTaskResult,
   TaskDefinition,
   validateRunResult,
   TaskStatus,
-} from './task';
-import { TaskTypeDictionary } from './task_type_dictionary';
+} from '../task';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { isUnrecoverableError } from './errors';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
-const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
+const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -266,7 +267,7 @@ export class TaskManagerRunner implements TaskRunner {
               // and lets us set a proper "retryAt" value each time.
               error: new Error('Task timeout'),
               addDuration: this.definition.timeout,
-            }),
+            }) ?? null,
       });
 
       const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
@@ -310,7 +311,9 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger.debug(`The task ${this} is not cancellable.`);
   }
 
-  private validateResult(result?: RunResult | void): Result<SuccessfulRunResult, FailedRunResult> {
+  private validateResult(
+    result?: SuccessfulRunResult | FailedRunResult | void
+  ): Result<SuccessfulRunResult, FailedRunResult> {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
@@ -324,7 +327,7 @@ export class TaskManagerRunner implements TaskRunner {
       return asOk(EMPTY_RUN_RESULT);
     }
 
-    return result.error ? asErr({ ...result, error: result.error as Error }) : asOk(result);
+    return isFailedRunResult(result) ? asErr({ ...result, error: result.error }) : asOk(result);
   }
 
   private shouldTryToScheduleRetry(): boolean {
@@ -339,22 +342,31 @@ export class TaskManagerRunner implements TaskRunner {
   private rescheduleFailedRun = (
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
-    if (this.shouldTryToScheduleRetry()) {
-      const { runAt, state, error } = failureResult;
+    const { state, error } = failureResult;
+    if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
       const { schedule, attempts } = this.instance;
-      if (runAt || schedule) {
-        return asOk({ state, attempts, runAt });
-      } else {
-        // when result.error is truthy, then we're retrying because it failed
-        const newRunAt = this.getRetryDelay({
-          attempts,
-          error,
-        });
 
-        if (newRunAt) {
-          return asOk({ state, attempts, runAt: newRunAt });
-        }
+      const reschedule = failureResult.runAt
+        ? { runAt: failureResult.runAt }
+        : failureResult.schedule
+        ? { schedule: failureResult.schedule }
+        : schedule
+        ? { schedule }
+        : // when result.error is truthy, then we're retrying because it failed
+          {
+            runAt: this.getRetryDelay({
+              attempts,
+              error,
+            }),
+          };
+
+      if (reschedule.runAt || reschedule.schedule) {
+        return asOk({
+          state,
+          attempts,
+          ...reschedule,
+        });
       }
     }
     // scheduling a retry isn't possible,mark task as failed
@@ -369,15 +381,19 @@ export class TaskManagerRunner implements TaskRunner {
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
-      mapOk(({ runAt, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
-        const { startedAt, schedule: { interval = undefined } = {} } = this.instance;
-        return asOk({
-          runAt: runAt || intervalFromDate(startedAt!, interval)!,
-          state,
-          attempts,
-          status: TaskStatus.Idle,
-        });
-      }),
+      mapOk(
+        ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
+          const { startedAt, schedule } = this.instance;
+          return asOk({
+            runAt:
+              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
+            state,
+            schedule: reschedule ?? schedule,
+            attempts,
+            status: TaskStatus.Idle,
+          });
+        }
+      ),
       unwrap
     )(result);
 
@@ -422,13 +438,13 @@ export class TaskManagerRunner implements TaskRunner {
     const task = this.instance;
     await eitherAsync(
       result,
-      async ({ runAt }: SuccessfulRunResult) => {
+      async ({ runAt, schedule }: SuccessfulRunResult) => {
         this.onTaskEvent(
           asTaskRunEvent(
             this.id,
             asOk({
               task,
-              result: await (runAt || task.schedule
+              result: await (runAt || schedule || task.schedule
                 ? this.processResultForRecurringTask(result)
                 : this.processResultWhenDone()),
             }),
@@ -457,14 +473,11 @@ export class TaskManagerRunner implements TaskRunner {
     error: Error;
     attempts: number;
     addDuration?: string;
-  }): Date | null {
-    let result = null;
-
+  }): Date | undefined {
     // Use custom retry logic, if any, otherwise we'll use the default logic
-    const retry: boolean | Date = this.definition.getRetry
-      ? this.definition.getRetry(attempts, error)
-      : true;
+    const retry: boolean | Date = this.definition.getRetry?.(attempts, error) ?? true;
 
+    let result;
     if (retry instanceof Date) {
       result = retry;
     } else if (retry === true) {

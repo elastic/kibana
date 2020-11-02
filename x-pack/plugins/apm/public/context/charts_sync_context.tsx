@@ -10,14 +10,18 @@ import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
 import { useFetcher } from '../hooks/useFetcher';
 import { useUrlParams } from '../hooks/useUrlParams';
 
-const ChartsSyncContext = React.createContext<{
+export const LegacyChartsSyncContext = React.createContext<{
   hoverX: number | null;
   onHover: (hoverX: number) => void;
   onMouseLeave: () => void;
   onSelectionEnd: (range: { start: number; end: number }) => void;
 } | null>(null);
 
-function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
+export function LegacyChartsSyncContextProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const history = useHistory();
   const [time, setTime] = useState<number | null>(null);
   const { serviceName } = useParams<{ serviceName?: string }>();
@@ -79,7 +83,25 @@ function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
     return { ...hoverXHandlers };
   }, [history, time, data.annotations]);
 
-  return <ChartsSyncContext.Provider value={value} children={children} />;
+  return <LegacyChartsSyncContext.Provider value={value} children={children} />;
 }
 
-export { ChartsSyncContext, ChartsSyncContextProvider };
+export const ChartsSyncContext = React.createContext<{
+  event: any;
+  setEvent: Function;
+} | null>(null);
+
+export function ChartsSyncContextProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [event, setEvent] = useState({});
+
+  return (
+    <ChartsSyncContext.Provider
+      value={{ event, setEvent }}
+      children={children}
+    />
+  );
+}
