@@ -53,7 +53,6 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../kibana_legacy/public';
-import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
@@ -141,8 +140,7 @@ export function initializeInnerAngularModule(
     .run(registerListenEventListener)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverLegacy', createDiscoverLegacyDirective)
-    .directive('discover', createDiscoverDirective)
-    .directive('contextErrorMessage', createContextErrorMessageDirective);
+    .directive('discover', createDiscoverDirective);
 }
 
 function createLocalPromiseModule() {
