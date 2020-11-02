@@ -27,7 +27,7 @@ import {
   isRegressionTotalFeatureImportance,
   RegressionTotalFeatureImportance,
   ClassificationTotalFeatureImportance,
-  FeatureImportClassName,
+  FeatureImportanceClassName,
 } from '../../../../../../../common/types/feature_importance';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -103,7 +103,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     let sortedData: Array<{
       featureName: string;
       meanImportance: number;
-      className?: FeatureImportClassName;
+      className?: FeatureImportanceClassName;
     }> = [];
     let _barSeriesSpec: Partial<BarSeriesSpec> = {
       xAccessor: 'featureName',
