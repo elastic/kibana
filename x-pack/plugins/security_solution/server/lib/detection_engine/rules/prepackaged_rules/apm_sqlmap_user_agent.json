@@ -20,9 +20,9 @@
   "rule_id": "d49cc73f-7a16-4def-89ce-9fc7127d7820",
   "severity": "medium",
   "tags": [
-    "APM",
-    "Elastic"
+    "Elastic",
+    "APM"
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

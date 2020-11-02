@@ -106,9 +106,7 @@ export const AlertForm = ({
   } = alertsContext;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
-    alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
-  );
+  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
@@ -152,6 +150,10 @@ export const AlertForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
+  }, [alert, alertTypeRegistry]);
 
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -430,6 +432,7 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            display="rowCompressed"
             label={labelForAlertChecked}
             isInvalid={errors.interval.length > 0}
             error={errors.interval}
@@ -440,6 +443,7 @@ export const AlertForm = ({
                   fullWidth
                   min={1}
                   isInvalid={errors.interval.length > 0}
+                  compressed
                   value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
@@ -454,6 +458,7 @@ export const AlertForm = ({
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   fullWidth
+                  compressed
                   value={alertIntervalUnit}
                   options={getTimeOptions(alertInterval ?? 1)}
                   onChange={(e) => {
@@ -472,6 +477,7 @@ export const AlertForm = ({
                 <EuiFieldNumber
                   fullWidth
                   min={1}
+                  compressed
                   value={alertThrottle || ''}
                   name="throttle"
                   data-test-subj="throttleInput"
@@ -498,6 +504,7 @@ export const AlertForm = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
+                  compressed
                   value={alertThrottleUnit}
                   options={getTimeOptions(alertThrottle ?? 1)}
                   onChange={(e) => {

@@ -19,14 +19,13 @@ import {
   IndexPatternsContract,
 } from 'src/plugins/data/public';
 import { KibanaFeature } from '../../../../features/common';
-import { TypeRegistry } from '../type_registry';
-import { AlertTypeModel, ActionTypeModel } from '../../types';
+import { AlertTypeRegistryContract, ActionTypeRegistryContract } from '../../types';
 
 export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsStart;
   uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;

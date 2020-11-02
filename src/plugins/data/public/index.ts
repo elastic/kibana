@@ -380,7 +380,7 @@ export {
   PainlessError,
 } from './search';
 
-export type { SearchSource } from './search';
+export type { SearchSource, ISessionService } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
