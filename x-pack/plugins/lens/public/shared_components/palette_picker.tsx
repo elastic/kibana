@@ -31,6 +31,7 @@ export function PalettePicker({
       <>
         <EuiColorPalettePicker
           data-test-subj="lns-palettePicker"
+          compressed
           palettes={palettes
             .getAll()
             .filter(({ internal }) => !internal)

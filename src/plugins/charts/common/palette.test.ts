@@ -99,9 +99,4 @@ describe('system_palette', () => {
     const result = fn(null, { name: 'test' });
     expect(result).toHaveProperty('name', 'test');
   });
-
-  it('passes params through', () => {
-    const result = fn(null, { name: 'test', params: { customProp: 123 } });
-    expect(result).toHaveProperty('params', { customProp: 123 });
-  });
 });

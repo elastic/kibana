@@ -33,7 +33,6 @@ export interface CustomPaletteState {
 
 export interface SystemPaletteArguments {
   name: string;
-  params?: unknown;
 }
 
 export interface PaletteOutput<T = unknown> {
@@ -158,17 +157,11 @@ export function systemPalette(): ExpressionFunctionDefinition<
           'gray',
         ],
       },
-      params: {
-        help: i18n.translate('charts.functions.systemPalette.args.paramsHelpText', {
-          defaultMessage: 'Palette specific params of the palette',
-        }),
-      },
     },
     fn: (input, args) => {
       return {
         type: 'palette',
         name: args.name,
-        params: args.params,
       };
     },
   };
