@@ -5,12 +5,11 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { tagsApiPrefix } from '../../common/constants';
 
 export const registerGetAllTagsRoute = (router: IRouter) => {
   router.get(
     {
-      path: `${tagsApiPrefix}/tags`,
+      path: '/api/saved_objects_tagging/tags',
       validate: {},
     },
     router.handleLegacyErrors(async (ctx, req, res) => {

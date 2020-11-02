@@ -6,12 +6,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { tagsApiPrefix } from '../../common/constants';
 
 export const registerDeleteTagRoute = (router: IRouter) => {
   router.delete(
     {
-      path: `${tagsApiPrefix}/tags/{id}`,
+      path: '/api/saved_objects_tagging/tags/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),

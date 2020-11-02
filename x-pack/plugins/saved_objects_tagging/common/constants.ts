@@ -7,5 +7,3 @@
 export const tagFeatureId = 'savedObjectsTagging';
 export const tagSavedObjectTypeName = 'tag';
 export const tagManagementSectionId = 'tags';
-export const tagsApiPrefix = '/api/saved_objects_tagging';
-export const tagsInternalApiPrefix = '/internal/saved_objects_tagging';

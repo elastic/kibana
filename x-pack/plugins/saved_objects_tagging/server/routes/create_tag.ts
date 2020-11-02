@@ -6,13 +6,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { tagsApiPrefix } from '../../common/constants';
 import { TagValidationError } from '../tags';
 
 export const registerCreateTagRoute = (router: IRouter) => {
   router.post(
     {
-      path: `${tagsApiPrefix}/tags/create`,
+      path: '/api/saved_objects_tagging/tags/create',
       validate: {
         body: schema.object({
           name: schema.string(),

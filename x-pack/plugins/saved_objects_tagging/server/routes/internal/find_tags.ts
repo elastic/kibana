@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { tagsInternalApiPrefix, tagSavedObjectTypeName } from '../../../common/constants';
+import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagAttributes } from '../../../common/types';
 import { savedObjectToTag } from '../../tags';
 import { addConnectionCount } from '../lib';
@@ -14,7 +14,7 @@ import { addConnectionCount } from '../lib';
 export const registerInternalFindTagsRoute = (router: IRouter) => {
   router.get(
     {
-      path: `${tagsInternalApiPrefix}/tags/_find`,
+      path: '/internal/saved_objects_tagging/tags/_find',
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),

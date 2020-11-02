@@ -5,7 +5,6 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { tagsApiPrefix, tagsInternalApiPrefix } from '../../common/constants';
 import { Tag, TagAttributes, ITagsClient, TagWithRelations } from '../../common/types';
 import { ITagsChangeListener } from './tags_cache';
 
@@ -49,7 +48,7 @@ export class TagsClient implements ITagInternalClient {
   // public APIs from ITagsClient
 
   public async create(attributes: TagAttributes) {
-    const { tag } = await this.http.post<{ tag: Tag }>(`${tagsApiPrefix}/tags/create`, {
+    const { tag } = await this.http.post<{ tag: Tag }>('/api/saved_objects_tagging/tags/create', {
       body: JSON.stringify(attributes),
     });
 
@@ -63,7 +62,7 @@ export class TagsClient implements ITagInternalClient {
   }
 
   public async update(id: string, attributes: TagAttributes) {
-    const { tag } = await this.http.post<{ tag: Tag }>(`${tagsApiPrefix}/tags/${id}`, {
+    const { tag } = await this.http.post<{ tag: Tag }>(`/api/saved_objects_tagging/tags/${id}`, {
       body: JSON.stringify(attributes),
     });
 
@@ -78,12 +77,12 @@ export class TagsClient implements ITagInternalClient {
   }
 
   public async get(id: string) {
-    const { tag } = await this.http.get<{ tag: Tag }>(`${tagsApiPrefix}/tags/${id}`);
+    const { tag } = await this.http.get<{ tag: Tag }>(`/api/saved_objects_tagging/tags/${id}`);
     return tag;
   }
 
   public async getAll() {
-    const { tags } = await this.http.get<{ tags: Tag[] }>(`${tagsApiPrefix}/tags`);
+    const { tags } = await this.http.get<{ tags: Tag[] }>('/api/saved_objects_tagging/tags');
 
     trapErrors(() => {
       if (this.changeListener) {
@@ -95,7 +94,7 @@ export class TagsClient implements ITagInternalClient {
   }
 
   public async delete(id: string) {
-    await this.http.delete<{}>(`${tagsApiPrefix}/tags/${id}`);
+    await this.http.delete<{}>(`/api/saved_objects_tagging/tags/${id}`);
 
     trapErrors(() => {
       if (this.changeListener) {
@@ -107,7 +106,7 @@ export class TagsClient implements ITagInternalClient {
   // internal APIs from ITagInternalClient
 
   public async find({ page, perPage, search }: FindTagsOptions) {
-    return await this.http.get<FindTagsResponse>(`${tagsInternalApiPrefix}/tags/_find`, {
+    return await this.http.get<FindTagsResponse>('/internal/saved_objects_tagging/tags/_find', {
       query: {
         page,
         perPage,

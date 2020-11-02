@@ -5,13 +5,7 @@
  */
 
 export { TagsCapabilities, getTagsCapabilities } from './capabilities';
-export {
-  tagFeatureId,
-  tagsInternalApiPrefix,
-  tagSavedObjectTypeName,
-  tagManagementSectionId,
-  tagsApiPrefix,
-} from './constants';
+export { tagFeatureId, tagSavedObjectTypeName, tagManagementSectionId } from './constants';
 export { TagWithRelations, TagAttributes, Tag, ITagsClient, TagSavedObject } from './types';
 export {
   TagValidation,
