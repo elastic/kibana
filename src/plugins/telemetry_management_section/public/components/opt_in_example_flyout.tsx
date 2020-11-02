@@ -22,12 +22,9 @@ import * as React from 'react';
 import {
   EuiCallOut,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiLoadingSpinner,
   EuiPortal, // EuiPortal is a temporary requirement to use EuiFlyout with "ownFocus"
   EuiText,
   EuiTextColor,
@@ -35,6 +32,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { loadingSpinner } from './loading_spinner';
 
 interface Props {
   fetchExample: () => Promise<any[]>;
@@ -76,13 +74,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
 
   renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
     if (isLoading) {
-      return (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+      return loadingSpinner;
     }
 
     if (!hasPrivilegeToRead) {

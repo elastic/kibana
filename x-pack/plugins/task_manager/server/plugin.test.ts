@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskManagerPlugin } from './plugin';
+import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { TaskManagerConfig } from './config';
+import { Subject } from 'rxjs';
+import { bufferCount, take } from 'rxjs/operators';
+import { CoreStatus, ServiceStatusLevels } from 'src/core/server';
 
 describe('TaskManagerPlugin', () => {
   describe('setup', () => {
@@ -88,4 +91,99 @@ describe('TaskManagerPlugin', () => {
       );
     });
   });
+
+  describe('getElasticsearchAndSOAvailability', () => {
+    test('returns true when both services are available', async () => {
+      const core$ = new Subject<CoreStatus>();
+
+      const availability = getElasticsearchAndSOAvailability(core$)
+        .pipe(take(1), bufferCount(1))
+        .toPromise();
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
+
+      expect(await availability).toEqual([true]);
+    });
+
+    test('returns false when both services are unavailable', async () => {
+      const core$ = new Subject<CoreStatus>();
+
+      const availability = getElasticsearchAndSOAvailability(core$)
+        .pipe(take(1), bufferCount(1))
+        .toPromise();
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
+
+      expect(await availability).toEqual([false]);
+    });
+
+    test('returns false when one service is unavailable but the other is available', async () => {
+      const core$ = new Subject<CoreStatus>();
+
+      const availability = getElasticsearchAndSOAvailability(core$)
+        .pipe(take(1), bufferCount(1))
+        .toPromise();
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
+
+      expect(await availability).toEqual([false]);
+    });
+
+    test('shift back and forth between values as status changes', async () => {
+      const core$ = new Subject<CoreStatus>();
+
+      const availability = getElasticsearchAndSOAvailability(core$)
+        .pipe(take(3), bufferCount(3))
+        .toPromise();
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
+
+      expect(await availability).toEqual([false, true, false]);
+    });
+
+    test(`skips values when the status hasn't changed`, async () => {
+      const core$ = new Subject<CoreStatus>();
+
+      const availability = getElasticsearchAndSOAvailability(core$)
+        .pipe(take(3), bufferCount(3))
+        .toPromise();
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
+
+      // still false, so shouldn't emit a second time
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: true }));
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
+
+      // shouldn't emit as already true
+      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
+
+      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
+
+      expect(await availability).toEqual([false, true, false]);
+    });
+  });
 });
+
+function mockCoreStatusAvailability({
+  elasticsearch,
+  savedObjects,
+}: {
+  elasticsearch: boolean;
+  savedObjects: boolean;
+}) {
+  return {
+    elasticsearch: {
+      level: elasticsearch ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
+      summary: '',
+    },
+    savedObjects: {
+      level: savedObjects ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
+      summary: '',
+    },
+  };
+}
