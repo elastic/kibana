@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';

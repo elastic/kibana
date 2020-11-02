@@ -308,5 +308,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
+
+    it('should allow to change index pattern', async () => {
+      await PageObjects.lens.switchFirstLayerIndexPattern('otherpattern');
+      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('otherpattern');
+      expect(await PageObjects.lens.isShowingNoResults()).to.equal(true);
+    });
   });
 }
