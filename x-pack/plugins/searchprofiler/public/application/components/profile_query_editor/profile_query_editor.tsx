@@ -16,10 +16,11 @@ import {
   EuiSpacer,
   EuiFlexItem,
 } from '@elastic/eui';
-import { Editor, EditorInstance } from '../editor';
-import { useRequestProfile } from '../hooks';
-import { useAppContext } from '../contexts/app_context';
-import { useProfilerActionContext } from '../contexts/profiler_context';
+
+import { useRequestProfile } from '../../hooks';
+import { useAppContext } from '../../contexts/app_context';
+import { useProfilerActionContext } from '../../contexts/profiler_context';
+import { Editor, EditorInstance } from './editor';
 
 const DEFAULT_INDEX_VALUE = '_all';
 

@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './index.scss';
-import { SearchProfilerUIPlugin } from './plugin';
-
-export function plugin() {
-  return new SearchProfilerUIPlugin();
-}
+export { PercentageBadge } from './percentage_badge';

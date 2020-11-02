@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../../test_utils';
-import { ProfileLoadingPlaceholder } from '.';
+import { registerTestBed } from '../../../../../../test_utils';
 
-describe('Profile Loading Placeholder', () => {
+import { LicenseWarningNotice } from './license_warning_notice';
+
+describe('License Error Notice', () => {
   it('renders', async () => {
-    const init = registerTestBed(ProfileLoadingPlaceholder);
-    await init();
+    const init = registerTestBed(LicenseWarningNotice);
+    await init({});
   });
 });
