@@ -293,6 +293,38 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsLayerAddButton');
     },
 
+    /**
+     * Changes the index pattern in the data panel
+     */
+    async switchDataPanelIndexPattern(name: string) {
+      await testSubjects.click('indexPattern-switch-link');
+      await find.clickByCssSelector(`[title="${name}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Changes the index pattern for the first layer
+     */
+    async switchFirstLayerIndexPattern(name: string) {
+      await testSubjects.click('lns_layerIndexPatternLabel');
+      await find.clickByCssSelector(`[title="${name}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Returns the current index pattern of the data panel
+     */
+    async getDataPanelIndexPattern() {
+      return await (await testSubjects.find('indexPattern-switch-link')).getAttribute('title');
+    },
+
+    /**
+     * Returns the current index pattern of the first layer
+     */
+    async getFirstLayerIndexPattern() {
+      return await (await testSubjects.find('lns_layerIndexPatternLabel')).getAttribute('title');
+    },
+
     async linkedToOriginatingApp() {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('lnsApp_saveAndReturnButton');
@@ -314,6 +346,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         dimensionElements[index]
       );
       return await trigger.getVisibleText();
+    },
+
+    async isShowingNoResults() {
+      return (
+        (await (await testSubjects.find('lnsWorkspace')).getVisibleText()) === 'No results found'
+      );
     },
 
     /**

@@ -33,7 +33,7 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
