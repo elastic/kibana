@@ -23,6 +23,7 @@ import {
 import {
   DeleteAgentPolicyResponse,
   Settings,
+  agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
 } from '../../common';
 import { AgentPolicyNameExistsError } from '../errors';
@@ -59,7 +60,10 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    if (oldAgentPolicy.status === 'inactive' && agentPolicy.status !== 'active') {
+    if (
+      oldAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      agentPolicy.status !== agentPolicyStatuses.Active
+    ) {
       throw new Error(
         `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
       );

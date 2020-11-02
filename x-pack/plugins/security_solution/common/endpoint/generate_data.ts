@@ -33,6 +33,7 @@ import {
   InstallationStatus,
   KibanaAssetReference,
 } from '../../../ingest_manager/common/types/models';
+import { agentPolicyStatuses } from '../../../ingest_manager/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -1234,7 +1235,7 @@ export class EndpointDocGenerator {
     return {
       id: this.seededUUIDv4(),
       name: 'Agent Policy',
-      status: 'active',
+      status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],

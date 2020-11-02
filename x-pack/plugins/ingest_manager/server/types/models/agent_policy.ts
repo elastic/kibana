@@ -24,8 +24,8 @@ export const AgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
   id: schema.string(),
   status: schema.oneOf([
-    schema.literal(agentPolicyStatuses[0]),
-    schema.literal(agentPolicyStatuses[1]),
+    schema.literal(agentPolicyStatuses.Active),
+    schema.literal(agentPolicyStatuses.Inactive),
   ]),
   package_policies: schema.oneOf([
     schema.arrayOf(schema.string()),
