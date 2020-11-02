@@ -14,7 +14,7 @@ import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 
-function ServiceOverviewLink(props: APMLinkExtendProps) {
+function ServiceInventoryLink(props: APMLinkExtendProps) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(urlParams, 'host', 'agentName');
@@ -22,4 +22,4 @@ function ServiceOverviewLink(props: APMLinkExtendProps) {
   return <APMLink path="/services" query={persistedFilters} {...props} />;
 }
 
-export { ServiceOverviewLink };
+export { ServiceInventoryLink };

@@ -149,7 +149,7 @@ export function ActionBar({
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow displayOnly>
+            <EuiFormRow display="center">
               {isSuccessor ? (
                 <FormattedMessage
                   id="discover.context.olderDocumentsDescription"
