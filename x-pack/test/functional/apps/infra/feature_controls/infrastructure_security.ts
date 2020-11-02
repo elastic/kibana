@@ -264,19 +264,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('infra/metrics_and_logs');
         });
-
-        it(`context menu allows user to view logs`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('~waffleMap');
-          await testSubjects.click('~nodeContainer');
-          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-          await testSubjects.click('~viewLogsContextMenuItem');
-          await testSubjects.existOrFail('~infraLogsPage');
-        });
       });
     });
 
@@ -329,19 +316,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => {
           await esArchiver.unload('infra/metrics_and_logs');
-        });
-
-        it(`context menu allows user to view APM traces`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('~waffleMap');
-          await testSubjects.click('~nodeContainer');
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.click('~viewApmTracesContextMenuItem');
-          await testSubjects.existOrFail('~apmMainContainer');
         });
       });
     });
