@@ -170,7 +170,7 @@ export function Discover({
                         <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                           <EuiButtonEmpty
                             iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                            onChange={() => {
+                            onClick={() => {
                               toggleChart(!toggleOn);
                             }}
                           >
