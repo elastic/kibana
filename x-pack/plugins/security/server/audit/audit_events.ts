@@ -213,7 +213,7 @@ export function savedObjectEvent({
   deleteFromSpaces,
   outcome,
   error,
-}: SavedObjectParams): AuditEvent {
+}: SavedObjectParams): AuditEvent | undefined {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
   const [present, progressive, past] = eventVerbs[action];
   const message = error
@@ -222,6 +222,14 @@ export function savedObjectEvent({
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];
+
+  if (
+    type === EventType.ACCESS &&
+    savedObject &&
+    (savedObject.type === 'config' || savedObject.type === 'telemetry')
+  ) {
+    return;
+  }
 
   return {
     message,
