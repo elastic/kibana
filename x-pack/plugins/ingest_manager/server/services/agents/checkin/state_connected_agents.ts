@@ -23,12 +23,6 @@ function getInternalUserSOClient() {
         url: '/',
       },
     },
-    // TODO: Remove once we upgrade to hapi v18
-    _core: {
-      info: {
-        uri: 'http://localhost',
-      },
-    },
   } as unknown) as KibanaRequest;
 
   return appContextService.getInternalUserSOClient(fakeRequest);

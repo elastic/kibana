@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { URL } from 'url';
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
@@ -111,9 +110,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
 
       if (preRoutingResult.isRewriteUrl(result)) {
         const appState = request.app as KibanaRequestState;
-        appState.rewrittenUrl =
-          // @ts-expect-error request._core isn't supposed to be accessed - remove once we upgrade to hapi v18
-          appState.rewrittenUrl ?? new URL(request.url.href!, request._core.info.uri);
+        appState.rewrittenUrl = appState.rewrittenUrl ?? request.url;
 
         const { url } = result;
 
