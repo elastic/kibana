@@ -8,7 +8,7 @@
   "main": "target/test/plugin_api_integration/plugins/task_manager_fixture",
   "scripts": {
     "kbn": "node ../../../../../../../scripts/kbn.js",
-    "build": "../../../../../../../node_modules/.bin/del './target' && ../../../../../../../node_modules/.bin/tsc"
+    "build": "rm -rf './target' && ../../../../../../../node_modules/.bin/tsc"
   },
   "license": "Apache-2.0"
 }

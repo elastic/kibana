@@ -7,6 +7,6 @@
   "main": "target/test/functional_with_es_ssl/fixtures/plugins/alerts",
   "scripts": {
     "kbn": "node ../../../../../../scripts/kbn.js",
-    "build": "../../../../../../node_modules/.bin/del './target' && ../../../../../../node_modules/.bin/tsc"
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
   }
 }

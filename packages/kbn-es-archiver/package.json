@@ -7,8 +7,8 @@
     "devOnly": true
   },
   "scripts": {
-    "kbn:bootstrap": "../../node_modules/.bin/del target && ../../node_modules/.bin/tsc",
-    "kbn:watch": "../../node_modules/.bin/del target && ../../node_modules/.bin/tsc --watch"
+    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
+    "kbn:watch": "rm -rf target && ../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils"
