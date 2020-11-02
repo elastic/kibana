@@ -54,7 +54,7 @@ function NumberInputOption<ParamName extends string>({
   'data-test-subj': dataTestSubj,
 }: NumberInputOptionProps<ParamName>) {
   return (
-    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth compressed>
+    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth display="rowCompressed">
       <EuiFieldNumber
         data-test-subj={dataTestSubj}
         disabled={disabled}
