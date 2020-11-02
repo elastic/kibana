@@ -209,7 +209,7 @@ export function SuggestionPanel({
 
     const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
     const datasourceValidationErrors = activeDatasourceId
-      ? activeDatasource?.getErrorMessages(datasourceStates[activeDatasourceId]?.state)
+      ? activeDatasource?.getErrorMessages(currentDatasourceStates[activeDatasourceId]?.state)
       : undefined;
 
     const visualizationValidationErrors = currentVisualizationId
@@ -237,7 +237,6 @@ export function SuggestionPanel({
       currentStateExpression: newStateExpression,
       currentStateError: validationErrors,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     currentDatasourceStates,
     currentVisualizationState,
@@ -245,6 +244,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
+    frame,
   ]);
 
   const context: ExecutionContextSearch = useMemo(
