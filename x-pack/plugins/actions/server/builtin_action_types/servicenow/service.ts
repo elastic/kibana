@@ -16,6 +16,7 @@ import { ProxySettings } from '../../types';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
+const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;
 
 // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
 const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
@@ -33,6 +34,7 @@ export const createExternalService = (
   }
 
   const incidentUrl = `${url}/${INCIDENT_URL}`;
+  const fieldsUrl = `${url}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&read_only=false&sysparm_fields=max_length,element,column_label`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
@@ -126,10 +128,29 @@ export const createExternalService = (
     }
   };
 
+  const getCommonFields = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: fieldsUrl,
+        logger,
+        proxySettings,
+        method: 'get',
+      });
+
+      return res.data.result.length > 0 ? { ...res.data.result } : undefined;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to find incidents by query. Error: ${error.message}`)
+      );
+    }
+  };
+
   return {
-    getIncident,
     createIncident,
-    updateIncident,
     findIncidents,
+    getCommonFields,
+    getIncident,
+    updateIncident,
   };
 };
