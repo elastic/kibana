@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, Server } from 'hapi';
+import { Request, Server } from '@hapi/hapi';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
