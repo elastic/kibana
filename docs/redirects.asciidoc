@@ -143,3 +143,8 @@ This content has moved. See
 This content has moved. See
 <<get-started, Quick start>>.
 
+[role="exclude",id="managing-indices"]
+== Index management
+
+This content has moved. See {ref}/index-mgmt.html[Index management].
+

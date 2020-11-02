@@ -61,7 +61,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       icon={'search'}
       placeholder={
         placeholder ||
-        i18n.translate('xpack.ingestManager.defaultSearchPlaceholderText', {
+        i18n.translate('xpack.fleet.defaultSearchPlaceholderText', {
           defaultMessage: 'Search',
         })
       }
