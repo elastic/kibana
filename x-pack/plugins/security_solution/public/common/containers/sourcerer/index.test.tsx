@@ -4,28 +4,80 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+/* eslint-disable react/display-name */
 
-import { getSourceDefaults, useSourceManager, UseSourceManager } from '.';
+import React from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { Provider } from 'react-redux';
+
+import { useInitSourcerer } from '.';
+import { mockPatterns, mockSource } from './mocks';
+// import { SourcererScopeName } from '../../store/sourcerer/model';
+import { RouteSpyState } from '../../utils/route/types';
+import { SecurityPageName } from '../../../../common/constants';
+import { createStore, State } from '../../store';
 import {
-  mockSourceSelections,
-  mockSourceGroup,
-  mockSourceGroups,
-  mockPatterns,
-  mockSource,
-} from './mocks';
-import { SecurityPageName } from './constants';
-const mockSourceDefaults = mockSource(SecurityPageName.default);
+  useUserInfo,
+  initialState as userInfoState,
+} from '../../../detections/components/user_info';
+import {
+  apolloClientObservable,
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+} from '../../mock';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+const mockSourceDefaults = mockSource;
+
+const mockRouteSpy: RouteSpyState = {
+  pageName: SecurityPageName.overview,
+  detailName: undefined,
+  tabName: undefined,
+  search: '',
+  pathName: '/',
+};
+const mockDispatch = jest.fn();
+const mockUseUserInfo = useUserInfo as jest.Mock;
+jest.mock('../../../detections/components/user_info');
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+jest.mock('../../utils/route/use_route_spy', () => ({
+  useRouteSpy: () => [mockRouteSpy],
+}));
 jest.mock('../../lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
+      application: {
+        capabilities: {
+          siem: {
+            crud: true,
+          },
+        },
+      },
       data: {
         indexPatterns: {
           getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
         },
+        search: {
+          search: jest.fn().mockImplementation(() => ({
+            subscribe: jest.fn().mockImplementation(() => ({
+              error: jest.fn(),
+              next: jest.fn(),
+            })),
+          })),
+        },
       },
+      notifications: {},
     },
   }),
+  useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
 }));
 jest.mock('../../utils/apollo_context', () => ({
   useApolloClient: jest.fn().mockReturnValue({
@@ -34,147 +86,108 @@ jest.mock('../../utils/apollo_context', () => ({
 }));
 
 describe('Sourcerer Hooks', () => {
-  const testId = SecurityPageName.default;
-  const uninitializedId = SecurityPageName.host;
+  const state: State = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+      },
+    },
+  };
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
+    mockUseUserInfo.mockImplementation(() => userInfoState);
   });
-  describe('Initialization', () => {
-    it('initializes loading default index patterns', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        expect(result.current).toEqual({
-          activeSourceGroupId: 'default',
-          availableIndexPatterns: [],
-          availableSourceGroupIds: [],
-          isIndexPatternsLoading: true,
-          sourceGroups: {},
-          getManageSourceGroupById: result.current.getManageSourceGroupById,
-          initializeSourceGroup: result.current.initializeSourceGroup,
-          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
-          updateSourceGroupIndicies: result.current.updateSourceGroupIndicies,
-        });
+  it('initializes loading default and timeline index patterns', async () => {
+    await act(async () => {
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-    });
-    it('initializes loading default source group', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        expect(result.current).toEqual({
-          activeSourceGroupId: 'default',
-          availableIndexPatterns: mockPatterns,
-          availableSourceGroupIds: [],
-          isIndexPatternsLoading: false,
-          sourceGroups: {},
-          getManageSourceGroupById: result.current.getManageSourceGroupById,
-          initializeSourceGroup: result.current.initializeSourceGroup,
-          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
-          updateSourceGroupIndicies: result.current.updateSourceGroupIndicies,
-        });
+      await waitForNextUpdate();
+      rerender();
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { id: 'default', loading: true },
       });
-    });
-    it('initialize completes with formatted source group data', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        expect(result.current).toEqual({
-          activeSourceGroupId: testId,
-          availableIndexPatterns: mockPatterns,
-          availableSourceGroupIds: [testId],
-          isIndexPatternsLoading: false,
-          sourceGroups: {
-            default: mockSourceGroup(testId),
-          },
-          getManageSourceGroupById: result.current.getManageSourceGroupById,
-          initializeSourceGroup: result.current.initializeSourceGroup,
-          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
-          updateSourceGroupIndicies: result.current.updateSourceGroupIndicies,
-        });
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { id: 'timeline', loading: true },
       });
     });
   });
-  describe('Methods', () => {
-    it('getManageSourceGroupById: initialized source group returns defaults', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        const initializedSourceGroup = result.current.getManageSourceGroupById(testId);
-        expect(initializedSourceGroup).toEqual(mockSourceGroup(testId));
+  it('sets signal index name', async () => {
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        loading: false,
+        signalIndexName: 'signals-*',
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitForNextUpdate();
+      rerender();
+      expect(mockDispatch.mock.calls[2][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
+        payload: { signalIndexName: 'signals-*' },
+      });
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
+        payload: { id: 'timeline', selectedPatterns: ['signals-*'] },
       });
     });
-    it('getManageSourceGroupById: uninitialized source group returns defaults', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        const uninitializedSourceGroup = result.current.getManageSourceGroupById(uninitializedId);
-        expect(uninitializedSourceGroup).toEqual(getSourceDefaults(uninitializedId, mockPatterns));
-      });
-    });
-    it('initializeSourceGroup: initializes source group', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        result.current.initializeSourceGroup(
-          uninitializedId,
-          mockSourceGroups[uninitializedId],
-          true
-        );
-        await waitForNextUpdate();
-        const initializedSourceGroup = result.current.getManageSourceGroupById(uninitializedId);
-        expect(initializedSourceGroup.indexPatterns).toEqual(mockSourceSelections[uninitializedId]);
-      });
-    });
-    it('setActiveSourceGroupId: active source group id gets set only if it gets initialized first', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        expect(result.current.activeSourceGroupId).toEqual(testId);
-        result.current.setActiveSourceGroupId(uninitializedId);
-        expect(result.current.activeSourceGroupId).toEqual(testId);
-        result.current.initializeSourceGroup(uninitializedId);
-        result.current.setActiveSourceGroupId(uninitializedId);
-        expect(result.current.activeSourceGroupId).toEqual(uninitializedId);
-      });
-    });
-    it('updateSourceGroupIndicies: updates source group indicies', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-          useSourceManager()
-        );
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        let sourceGroup = result.current.getManageSourceGroupById(testId);
-        expect(sourceGroup.indexPatterns).toEqual(mockSourceSelections[testId]);
-        result.current.updateSourceGroupIndicies(testId, ['endgame-*', 'filebeat-*']);
-        await waitForNextUpdate();
-        sourceGroup = result.current.getManageSourceGroupById(testId);
-        expect(sourceGroup.indexPatterns).toEqual(['endgame-*', 'filebeat-*']);
+  });
+  it('handles detections page', async () => {
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        signalIndexName: 'signals-*',
+        isSignalIndexExists: true,
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(
+        () => useInitSourcerer(SourcererScopeName.detections),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
+      await waitForNextUpdate();
+      rerender();
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
+        payload: { id: 'detections', selectedPatterns: ['signals-*'] },
       });
     });
   });

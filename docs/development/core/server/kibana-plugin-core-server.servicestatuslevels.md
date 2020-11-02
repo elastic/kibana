@@ -13,18 +13,22 @@ ServiceStatusLevels: Readonly<{
     available: Readonly<{
         toString: () => "available";
         valueOf: () => 0;
+        toJSON: () => "available";
     }>;
     degraded: Readonly<{
         toString: () => "degraded";
         valueOf: () => 1;
+        toJSON: () => "degraded";
     }>;
     unavailable: Readonly<{
         toString: () => "unavailable";
         valueOf: () => 2;
+        toJSON: () => "unavailable";
     }>;
     critical: Readonly<{
         toString: () => "critical";
         valueOf: () => 3;
+        toJSON: () => "critical";
     }>;
 }>
 ```

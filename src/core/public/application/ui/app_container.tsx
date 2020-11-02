@@ -25,7 +25,7 @@ import React, {
   useState,
   MutableRefObject,
 } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic } from '@elastic/eui';
 
 import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
@@ -94,8 +94,10 @@ export const AppContainer: FunctionComponent<Props> = ({
         // eslint-disable-next-line no-console
         console.error(e);
       } finally {
-        setShowSpinner(false);
-        setIsMounting(false);
+        if (elementRef.current) {
+          setShowSpinner(false);
+          setIsMounting(false);
+        }
       }
     };
 
@@ -118,7 +120,7 @@ export const AppContainer: FunctionComponent<Props> = ({
       {appNotFound && <AppNotFound />}
       {showSpinner && (
         <div className="appContainer__loading">
-          <EuiLoadingSpinner size="l" />
+          <EuiLoadingElastic aria-label="Loading application" size="xxl" />
         </div>
       )}
       <div key={appId} ref={elementRef} />

@@ -25,14 +25,21 @@ const TOO_MANY_FEATURES_LAYER_INDEX = 4;
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('layer with joins', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
+        false
+      );
       await PageObjects.maps.loadSavedMap('join example');
     });
 
     after(async () => {
       await inspector.close();
+      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
+      await security.testUser.restoreDefaults();
     });
 
     it('should re-fetch join with refresh timer', async () => {

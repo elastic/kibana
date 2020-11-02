@@ -9,7 +9,7 @@ import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-import { SetupStatus } from '../../../../../common/log_analysis';
+import { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
 import {
@@ -31,6 +31,7 @@ interface InitialConfigurationStepProps {
   setupStatus: SetupStatus;
   setValidatedIndices: (selectedIndices: AvailableIndex[]) => void;
   validationErrors?: ValidationUIError[];
+  previousQualityWarnings?: QualityWarning[];
 }
 
 export const createInitialConfigurationStep = (
@@ -50,6 +51,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setupStatus,
   setValidatedIndices,
   validationErrors = [],
+  previousQualityWarnings = [],
 }: InitialConfigurationStepProps) => {
   const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
@@ -75,6 +77,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
           indices={validatedIndices}
           isValidating={isValidating}
           onChangeSelectedIndices={setValidatedIndices}
+          previousQualityWarnings={previousQualityWarnings}
           validationErrors={indexValidationErrors}
         />
 

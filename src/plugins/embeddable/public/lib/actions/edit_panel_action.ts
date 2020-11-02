@@ -29,6 +29,8 @@ import {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
   SavedObjectEmbeddableInput,
+  EmbeddableInput,
+  Container,
 } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
@@ -118,8 +120,7 @@ export class EditPanelAction implements Action<ActionContext> {
         const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,
-          byValueMode,
-          valueInput: byValueMode ? embeddable.getInput() : undefined,
+          valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
           embeddableId: embeddable.id,
         };
         return { app, path, state };
@@ -131,5 +132,12 @@ export class EditPanelAction implements Action<ActionContext> {
   public async getHref({ embeddable }: ActionContext): Promise<string> {
     const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
+  }
+
+  private getExplicitInput({ embeddable }: ActionContext): EmbeddableInput {
+    return (
+      (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
+      embeddable.getInput()
+    );
   }
 }

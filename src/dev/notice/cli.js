@@ -22,9 +22,9 @@ import { resolve } from 'path';
 
 import getopts from 'getopts';
 import dedent from 'dedent';
+import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
-import { REPO_ROOT } from '../constants';
 import { generateNoticeFromSource } from './generate_notice_from_source';
 
 const unknownFlags = [];

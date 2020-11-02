@@ -20,6 +20,7 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -35,6 +36,9 @@ import {
   Embeddable,
   IContainer,
   Adapters,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
+  AttributeService,
 } from '../../../../plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
@@ -47,6 +51,9 @@ import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
+import { SavedObjectAttributes } from '../../../../core/types';
+import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { VisSavedObject } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -75,9 +82,19 @@ export interface VisualizeOutput extends EmbeddableOutput {
   visTypeName: string;
 }
 
+export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
+  title: string;
+  vis?: Vis;
+  savedVis?: VisSavedObject;
+};
+export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
+export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
+
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
+export class VisualizeEmbeddable
+  extends Embeddable<VisualizeInput, VisualizeOutput>
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -93,11 +110,23 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
+  private attributeService?: AttributeService<
+    VisualizeSavedObjectAttributes,
+    VisualizeByValueInput,
+    VisualizeByReferenceInput
+  >;
+  private savedVisualizationsLoader?: SavedVisualizationsLoader;
 
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
+    attributeService?: AttributeService<
+      VisualizeSavedObjectAttributes,
+      VisualizeByValueInput,
+      VisualizeByReferenceInput
+    >,
+    savedVisualizationsLoader?: SavedVisualizationsLoader,
     parent?: IContainer
   ) {
     super(
@@ -118,6 +147,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
+    this.attributeService = attributeService;
+    this.savedVisualizationsLoader = savedVisualizationsLoader;
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -136,7 +167,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
-  public getVisualizationDescription() {
+  public getDescription() {
     return this.vis.description;
   }
 
@@ -210,12 +241,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (!_.isEqual(this.input.query, this.query)) {
       this.query = this.input.query;
       dirty = true;
-    }
-
-    // propagate the title to the output embeddable
-    // but only when the visualization is in edit/Visualize mode
-    if (!this.parent && this.vis.title !== this.output.title) {
-      this.updateOutput({ title: this.vis.title });
     }
 
     if (this.vis.description && this.domNode) {
@@ -349,6 +374,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         query: this.input.query,
         filters: this.input.filters,
       },
+      searchSessionId: this.input.searchSessionId,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };
@@ -381,4 +407,52 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public supportedTriggers(): TriggerId[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
+
+  inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
+    if (!this.attributeService) {
+      throw new Error('AttributeService must be defined for getInputAsRefType');
+    }
+    return this.attributeService.inputIsRefType(input as VisualizeByReferenceInput);
+  };
+
+  getInputAsValueType = async (): Promise<VisualizeByValueInput> => {
+    const input = {
+      savedVis: this.vis.serialize(),
+    };
+    if (this.getTitle()) {
+      input.savedVis.title = this.getTitle();
+    }
+    delete input.savedVis.id;
+    return new Promise<VisualizeByValueInput>((resolve) => {
+      resolve({ ...(input as VisualizeByValueInput) });
+    });
+  };
+
+  getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
+    const savedVis = await this.savedVisualizationsLoader?.get({});
+    if (!savedVis) {
+      throw new Error('Error creating a saved vis object');
+    }
+    if (!this.attributeService) {
+      throw new Error('AttributeService must be defined for getInputAsRefType');
+    }
+    const saveModalTitle = this.getTitle()
+      ? this.getTitle()
+      : i18n.translate('visualizations.embeddable.placeholderTitle', {
+          defaultMessage: 'Placeholder Title',
+        });
+    // @ts-ignore
+    const attributes: VisualizeSavedObjectAttributes = {
+      savedVis,
+      vis: this.vis,
+      title: this.vis.title,
+    };
+    return this.attributeService.getInputAsRefType(
+      {
+        id: this.id,
+        attributes,
+      },
+      { showSaveModal: true, saveModalTitle }
+    );
+  };
 }

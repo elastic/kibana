@@ -11,10 +11,10 @@ For additional *Vega* and *Vega-Lite* information, refer to the reference sectio
 
 {kib} has extended Vega and Vega-Lite with extensions that support:
 
-* Default height and width
+* Automatic sizing
 * Default theme to match {kib}
 * Writing {es} queries using the time range and filters from dashboards
-* Using the Elastic Map Service in Vega maps
+* experimental[] Using the Elastic Map Service in Vega maps
 * Additional tooltip styling
 * Advanced setting to enable URL loading from any domain
 * Limited debugging support using the browser dev tools
@@ -22,12 +22,35 @@ For additional *Vega* and *Vega-Lite* information, refer to the reference sectio
 
 [float]
 [[vega-sizing-and-positioning]]
-==== Default height and width
+==== Automatic sizing
 
-By default, Vega visualizations use the `autosize = { type: 'fit', contains: 'padding' }` layout.
-`fit` uses all available space, ignores `width` and `height` values,
-and respects the padding values. To override this behavior, change the
-`autosize` value.
+Most users will want their Vega visualizations to take the full available space, so unlike
+Vega examples, `width` and `height` are not required parameters in {kib}. To set the width
+or height manually, set `autosize: none`. For example, to set the height to a specific pixel value:
+
+```
+autosize: none
+width: container
+height: 200
+```
+
+The default {kib} settings which are inherited by your visualizations are:
+
+```
+autosize: {
+  type: fit
+  contains: padding
+}
+width: container
+height: container
+```
+
+{kib} is able to merge your custom `autosize` settings with the defaults. The options `fit-x`
+and `fit-y` are supported but not recommended over the default `fit` setting.
+
+To learn more, read about
+https://vega.github.io/vega/docs/specification/#autosize[autosize]
+in the Vega documentation.
 
 [float]
 [[vega-theme]]
@@ -41,16 +64,17 @@ Override it by providing a different `stroke`, `fill`, or `color` (Vega-Lite) va
 [[vega-queries]]
 ==== Writing {es} queries in Vega
 
-experimental[] {kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
-with support for direct {es} queries specified as a `url`.
+{kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
+with support for direct {es} queries specified as `url`.
 
-Because of this, {kib} is **unable to support dynamically loaded data**,
+{kib} is **unable to support dynamically loaded data**,
 which would otherwise work in Vega. All data is fetched before it's passed to
 the Vega renderer.
 
-To define an {es} query in Vega, set the `url` to an object. {kib} will parse
+To define an {es} query in Vega, set the `url` to an object. {kib} parses
 the object looking for special tokens that allow your query to integrate with {kib}.
-These tokens are:
+
+Tokens include the following:
 
 * `%context%: true`: Set at the top level, and replaces the `query` section with filters from dashboard
 * `%timefield%: <name>`: Set at the top level, integrates the query with the dashboard time filter
@@ -64,8 +88,7 @@ These tokens are:
 * `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
 * `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
 
-Putting this together, an example query that counts the number of documents in 
-a specific index:
+For example, the following query counts the number of documents in a specific index:
 
 [source,yaml]
 ----
@@ -273,7 +296,8 @@ a configuration option for changing the tooltip position and padding:
     kibana: {
       tooltips: {
         position: 'top',
-        padding: 15
+        padding: 15,
+        textTruncate: true,
       }
     }
   }

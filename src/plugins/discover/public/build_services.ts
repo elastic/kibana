@@ -37,13 +37,13 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
-import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
+import { NavigationPublicPluginStart } from '../../navigation/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -58,6 +58,7 @@ export interface DiscoverServices {
   indexPatterns: IndexPatternsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
+  navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
@@ -65,6 +66,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
+  getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
 }
@@ -72,14 +74,12 @@ export interface DiscoverServices {
 export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  getEmbeddableInjector: any
 ): Promise<DiscoverServices> {
-  const services: SavedObjectKibanaServices = {
+  const services = {
     savedObjectsClient: core.savedObjects.client,
-    indexPatterns: plugins.data.indexPatterns,
-    search: plugins.data.search,
-    chrome: core.chrome,
-    overlays: core.overlays,
+    savedObjects: plugins.savedObjects,
   };
   const savedObjectService = createSavedSearchesLoader(services);
 
@@ -92,6 +92,7 @@ export async function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
+    getEmbeddableInjector,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
@@ -100,6 +101,7 @@ export async function buildServices(
     metadata: {
       branch: context.env.packageInfo.branch,
     },
+    navigation: plugins.navigation,
     share: plugins.share,
     kibanaLegacy: plugins.kibanaLegacy,
     urlForwarding: plugins.urlForwarding,

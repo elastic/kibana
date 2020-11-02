@@ -19,12 +19,12 @@
 
 import Chalk from 'chalk';
 import moment from 'moment';
+import { REPO_ROOT } from '@kbn/utils';
 import {
   ToolingLog,
   pickLevelFromFlags,
   ToolingLogTextWriter,
   parseLogLevel,
-  REPO_ROOT,
 } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
 

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { pick } from '@kbn/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -35,7 +36,6 @@ import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { pick } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';

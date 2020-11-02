@@ -4,6 +4,8 @@
 
 ## IndexPatternField.conflictDescriptions property
 
+Description of field type conflicts across different indices in the same index pattern
+
 <b>Signature:</b>
 
 ```typescript

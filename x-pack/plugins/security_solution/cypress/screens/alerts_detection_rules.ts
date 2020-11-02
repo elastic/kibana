@@ -14,6 +14,8 @@ export const CUSTOM_RULES_BTN = '[data-test-subj="show-custom-rules-filter-butto
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
+export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
+
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="show-elastic-rules-filter-button"]';
@@ -31,6 +33,8 @@ export const LOADING_INITIAL_PREBUILT_RULES_TABLE =
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
+export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
+
 export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
 
 export const RISK_SCORE = '[data-test-subj="riskScore"]';
@@ -43,9 +47,9 @@ export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
 
-export const RULE_SWITCH = '[data-test-subj="rule-switch"]';
+export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 
-export const RULE_SWITCH_LOADER = '[data-test-subj="rule-switch-loader"]';
+export const RULE_SWITCH_LOADER = '[data-test-subj="ruleSwitchLoader"]';
 
 export const RULES_TABLE = '[data-test-subj="rules-table"]';
 

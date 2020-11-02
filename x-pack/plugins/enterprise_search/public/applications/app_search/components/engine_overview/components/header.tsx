@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -16,13 +17,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../../index';
+import { HttpLogic } from '../../../../shared/http';
+import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 
 export const EngineOverviewHeader: React.FC = () => {
-  const {
-    externalUrl: { getAppSearchUrl },
-    http,
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { http } = useValues(HttpLogic);
 
   const buttonProps = {
     fill: true,

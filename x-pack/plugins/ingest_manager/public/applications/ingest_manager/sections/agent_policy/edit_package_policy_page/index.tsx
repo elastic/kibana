@@ -43,28 +43,15 @@ import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_c
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
+  const { notifications } = useCore();
   const {
-    notifications,
-    chrome: { getIsNavDrawerLocked$ },
-    uiSettings,
-  } = useCore();
-  const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
     params: { policyId, packagePolicyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
   const history = useHistory();
   const { getHref, getPath } = useLink();
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
 
   // Agent policy, package info, and package policy states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -227,7 +214,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     if (!error) {
       history.push(getPath('policy_details', { policyId }));
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.ingestManager.editPackagePolicy.updatedNotificationTitle', {
+        title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{packagePolicyName}'`,
           values: {
             packagePolicyName: packagePolicy.name,
@@ -235,7 +222,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
         }),
         text:
           agentCount && agentPolicy
-            ? i18n.translate('xpack.ingestManager.editPackagePolicy.updatedNotificationMessage', {
+            ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
                 defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
                 values: {
                   agentPolicyName: agentPolicy.name,
@@ -246,14 +233,14 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     } else {
       if (error.statusCode === 409) {
         notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.ingestManager.editPackagePolicy.failedNotificationTitle', {
+          title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
             defaultMessage: `Error updating '{packagePolicyName}'`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
           }),
           toastMessage: i18n.translate(
-            'xpack.ingestManager.editPackagePolicy.failedConflictNotificationMessage',
+            'xpack.fleet.editPackagePolicy.failedConflictNotificationMessage',
             {
               defaultMessage: `Data is out of date. Refresh the page to get the latest policy.`,
             }
@@ -261,7 +248,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
         });
       } else {
         notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.ingestManager.editPackagePolicy.failedNotificationTitle', {
+          title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
             defaultMessage: `Error updating '{packagePolicyName}'`,
             values: {
               packagePolicyName: packagePolicy.name,
@@ -322,13 +309,13 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.editPackagePolicy.errorLoadingDataTitle"
+              id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
               defaultMessage="Error loading data"
             />
           }
           error={
             loadingError ||
-            i18n.translate('xpack.ingestManager.editPackagePolicy.errorLoadingDataMessage', {
+            i18n.translate('xpack.fleet.editPackagePolicy.errorLoadingDataMessage', {
               defaultMessage: 'There was an error loading this intergration information',
             })
           }
@@ -346,21 +333,12 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           )}
           {configurePackage}
           <EuiSpacer size="l" />
-          {/* TODO #64541 - Remove classes */}
-          <EuiBottomBar
-            className={
-              uiSettings.get('pageNavigation') === 'legacy'
-                ? isNavDrawerLocked
-                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
-                  : 'ingestManager__bottomBar'
-                : undefined
-            }
-          >
+          <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 {agentPolicy && packageInfo && formState === 'INVALID' ? (
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackagePolicy.errorOnSaveText"
+                    id="xpack.fleet.createPackagePolicy.errorOnSaveText"
                     defaultMessage="Your integration policy has errors. Please fix them before saving."
                   />
                 ) : null}
@@ -370,7 +348,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty color="ghost" href={cancelUrl}>
                       <FormattedMessage
-                        id="xpack.ingestManager.editPackagePolicy.cancelButton"
+                        id="xpack.fleet.editPackagePolicy.cancelButton"
                         defaultMessage="Cancel"
                       />
                     </EuiButtonEmpty>
@@ -385,7 +363,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
                       fill
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.editPackagePolicy.saveButton"
+                        id="xpack.fleet.editPackagePolicy.saveButton"
                         defaultMessage="Save integration"
                       />
                     </EuiButton>

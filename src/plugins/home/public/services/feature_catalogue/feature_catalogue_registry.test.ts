@@ -38,7 +38,7 @@ const KIBANA_SOLUTION: FeatureCatalogueSolution = {
   id: 'kibana',
   title: 'Kibana',
   subtitle: 'Visualize & analyze',
-  descriptions: ['Analyze data in dashboards.', 'Search and find insights.'],
+  appDescriptions: ['Analyze data in dashboards.', 'Search and find insights.'],
   icon: 'kibanaApp',
   path: `/app/home`,
 };
@@ -84,6 +84,40 @@ describe('FeatureCatalogueRegistry', () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: { dashboard: false } } as any;
+        service.start({ capabilities });
+        expect(service.get()).toEqual([]);
+      });
+    });
+
+    describe('visibility filtering', () => {
+      test('retains items with no "visible" callback', () => {
+        const service = new FeatureCatalogueRegistry();
+        service.setup().register(DASHBOARD_FEATURE);
+        const capabilities = { catalogue: {} } as any;
+        service.start({ capabilities });
+        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
+      });
+
+      test('retains items with a "visible" callback which returns "true"', () => {
+        const service = new FeatureCatalogueRegistry();
+        const feature = {
+          ...DASHBOARD_FEATURE,
+          visible: () => true,
+        };
+        service.setup().register(feature);
+        const capabilities = { catalogue: {} } as any;
+        service.start({ capabilities });
+        expect(service.get()).toEqual([feature]);
+      });
+
+      test('removes items with a "visible" callback which returns "false"', () => {
+        const service = new FeatureCatalogueRegistry();
+        const feature = {
+          ...DASHBOARD_FEATURE,
+          visible: () => false,
+        };
+        service.setup().register(feature);
+        const capabilities = { catalogue: {} } as any;
         service.start({ capabilities });
         expect(service.get()).toEqual([]);
       });

@@ -9,6 +9,7 @@ import { PLUGIN_ID } from '../constants/app';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
+  canAccessML: false,
 };
 
 export const userMlCapabilities = {

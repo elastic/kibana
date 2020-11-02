@@ -31,6 +31,7 @@ import {
   SavedObjectsClientContract,
   PluginInitializerContext,
   ScopedHistory,
+  AppMountParameters,
 } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../kibana_utils/public';
@@ -73,6 +74,7 @@ export interface RenderDeps {
   navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
   navigateToLegacyKibanaUrl: UrlForwardingStart['navigateToLegacyKibanaUrl'];
   scopedHistory: () => ScopedHistory;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjects: SavedObjectsStart;
   restorePreviousUrl: () => void;
 }

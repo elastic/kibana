@@ -8,11 +8,11 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, getOr, has, head } from 'lodash/fp';
 
 import {
+  EndpointFields,
   FirstLastSeenHost,
   HostItem,
   HostsData,
   HostsEdges,
-  EndpointFields,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
@@ -25,16 +25,16 @@ import {
   HostAggEsData,
   HostAggEsItem,
   HostBuckets,
-  HostOverviewRequestOptions,
   HostEsData,
   HostLastFirstSeenRequestOptions,
+  HostOverviewRequestOptions,
   HostsAdapter,
   HostsRequestOptions,
   HostValue,
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
-import { getHostData } from '../../endpoint/routes/metadata';
+import { getHostData } from '../../endpoint/routes/metadata/handlers';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(
@@ -95,19 +95,19 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       response: [inspectStringifyObject(response)],
     };
     const formattedHostItem = formatHostItem(options.fields, aggregations);
-    const hostId =
-      formattedHostItem.host && formattedHostItem.host.id
-        ? Array.isArray(formattedHostItem.host.id)
-          ? formattedHostItem.host.id[0]
-          : formattedHostItem.host.id
+    const ident = // endpoint-generated ID, NOT elastic-agent-id
+      formattedHostItem.agent && formattedHostItem.agent.id
+        ? Array.isArray(formattedHostItem.agent.id)
+          ? formattedHostItem.agent.id[0]
+          : formattedHostItem.agent.id
         : null;
-    const endpoint: EndpointFields | null = await this.getHostEndpoint(request, hostId);
+    const endpoint: EndpointFields | null = await this.getHostEndpoint(request, ident);
     return { inspect, _id: options.hostName, ...formattedHostItem, endpoint };
   }
 
   public async getHostEndpoint(
     request: FrameworkRequest,
-    hostId: string | null
+    id: string | null
   ): Promise<EndpointFields | null> {
     const logger = this.endpointContext.logFactory.get('metadata');
     try {
@@ -116,13 +116,13 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
         throw new Error('agentService not available');
       }
       const metadataRequestContext = {
-        agentService,
+        endpointAppContextService: this.endpointContext.service,
         logger,
         requestHandlerContext: request.context,
       };
       const endpointData =
-        hostId != null && metadataRequestContext.agentService != null
-          ? await getHostData(metadataRequestContext, hostId)
+        id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
+          ? await getHostData(metadataRequestContext, id)
           : null;
       return endpointData != null && endpointData.metadata
         ? {

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { OverlayBannersStart, OverlayBannersService } from './banners_service';
 
 const createStartContractMock = () => {

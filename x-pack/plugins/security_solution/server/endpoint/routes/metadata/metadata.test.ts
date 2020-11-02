@@ -22,21 +22,27 @@ import {
 } from '../../../../../../../src/core/server/mocks';
 import {
   HostInfo,
-  HostMetadata,
-  HostMetadataDetails,
   HostResultList,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
-import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes, endpointFilters } from './index';
+import { registerEndpointRoutes, METADATA_REQUEST_ROUTE } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
+  createMockPackageService,
   createRouteHandlerContext,
 } from '../../mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { Agent } from '../../../../../ingest_manager/common/types/models';
+import {
+  Agent,
+  ElasticsearchAssetType,
+  EsAssetReference,
+} from '../../../../../ingest_manager/common/types/models';
+import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
+import { PackageService } from '../../../../../ingest_manager/server/services';
+import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -44,6 +50,7 @@ describe('test endpoint route', () => {
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,195 +68,45 @@ describe('test endpoint route', () => {
   };
 
   beforeEach(() => {
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
       ILegacyClusterClient
     >;
-    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
-    endpointAppContextService = new EndpointAppContextService();
-    const startContract = createMockEndpointAppContextServiceStartContract();
-    endpointAppContextService.start(startContract);
-    mockAgentService = startContract.agentService!;
-
-    registerEndpointRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-    });
   });
 
-  afterEach(() => endpointAppContextService.stop());
-
-  it('test find the latest of all endpoints', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({});
-    const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/metadata')
-    )!;
-    mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-    mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
-    await routeHandler(
-      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
-    expect(mockResponse.ok).toBeCalled();
-    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
-    expect(endpointResultList.hosts.length).toEqual(1);
-    expect(endpointResultList.total).toEqual(1);
-    expect(endpointResultList.request_page_index).toEqual(0);
-    expect(endpointResultList.request_page_size).toEqual(10);
-  });
-
-  it('test find the latest of all endpoints with paging properties', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      body: {
-        paging_properties: [
-          {
-            page_size: 10,
-          },
-          {
-            page_index: 1,
-          },
-        ],
-      },
-    });
-
-    mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-    mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
-    );
-    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/metadata')
-    )!;
-
-    await routeHandler(
-      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-      bool: {
-        must_not: {
-          terms: {
-            'HostDetails.elastic.agent.id': [
-              '00000000-0000-0000-0000-000000000000',
-              '11111111-1111-1111-1111-111111111111',
-            ],
-          },
-        },
-      },
-    });
-    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
-    expect(mockResponse.ok).toBeCalled();
-    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
-    expect(endpointResultList.hosts.length).toEqual(1);
-    expect(endpointResultList.total).toEqual(1);
-    expect(endpointResultList.request_page_index).toEqual(10);
-    expect(endpointResultList.request_page_size).toEqual(10);
-  });
-
-  it('test find the latest of all endpoints with paging and filters properties', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      body: {
-        paging_properties: [
-          {
-            page_size: 10,
-          },
-          {
-            page_index: 1,
-          },
-        ],
-
-        filters: { kql: 'not host.ip:10.140.73.246' },
-      },
-    });
-
-    mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-    mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
-    );
-    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/metadata')
-    )!;
-
-    await routeHandler(
-      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-      bool: {
-        must: [
-          {
-            bool: {
-              must_not: {
-                terms: {
-                  'HostDetails.elastic.agent.id': [
-                    '00000000-0000-0000-0000-000000000000',
-                    '11111111-1111-1111-1111-111111111111',
-                  ],
-                },
-              },
-            },
-          },
-          {
-            bool: {
-              must_not: {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        'host.ip': '10.140.73.246',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
-    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
-    expect(mockResponse.ok).toBeCalled();
-    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
-    expect(endpointResultList.hosts.length).toEqual(1);
-    expect(endpointResultList.total).toEqual(1);
-    expect(endpointResultList.request_page_index).toEqual(10);
-    expect(endpointResultList.request_page_size).toEqual(10);
-  });
-
-  describe('Endpoint Details route', () => {
-    it('should return 404 on no results', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'BADID' } });
-
-      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-        Promise.resolve(createSearchResponse())
+  describe('with no transform package', () => {
+    beforeEach(() => {
+      endpointAppContextService = new EndpointAppContextService();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      mockPackageService = createMockPackageService();
+      mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
+        Promise.resolve(([] as unknown) as EsAssetReference[])
       );
+      endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
+      mockAgentService = startContract.agentService!;
 
-      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-      mockAgentService.getAgent = jest.fn().mockReturnValue(({
-        active: true,
-      } as unknown) as Agent);
+      registerEndpointRoutes(routerMock, {
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      });
+    });
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+    afterEach(() => endpointAppContextService.stop());
+
+    it('test find the latest of all endpoints', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({});
+      const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
+      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
+      mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
@@ -261,13 +118,19 @@ describe('test endpoint route', () => {
         authRequired: true,
         tags: ['access:securitySolution'],
       });
-      expect(mockResponse.notFound).toBeCalled();
-      const message = mockResponse.notFound.mock.calls[0][0]?.body;
-      expect(message).toEqual('Endpoint Not Found');
+      expect(mockResponse.ok).toBeCalled();
+      const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
+      expect(endpointResultList.hosts.length).toEqual(1);
+      expect(endpointResultList.total).toEqual(1);
+      expect(endpointResultList.request_page_index).toEqual(0);
+      expect(endpointResultList.request_page_size).toEqual(10);
+      expect(endpointResultList.query_strategy_version).toEqual(
+        MetadataQueryStrategyVersions.VERSION_1
+      );
     });
 
     it('should return a single endpoint with status online', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
+      const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
       });
@@ -279,7 +142,7 @@ describe('test endpoint route', () => {
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -297,29 +160,48 @@ describe('test endpoint route', () => {
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.Endpoint');
       expect(result.host_status).toEqual(HostStatus.ONLINE);
+      expect(result.query_strategy_version).toEqual(MetadataQueryStrategyVersions.VERSION_1);
+    });
+  });
+
+  describe('with new transform package', () => {
+    beforeEach(() => {
+      endpointAppContextService = new EndpointAppContextService();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      mockPackageService = createMockPackageService();
+      mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
+        Promise.resolve([
+          {
+            id: 'logs-endpoint.events.security',
+            type: ElasticsearchAssetType.indexTemplate,
+          },
+          {
+            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
+            type: ElasticsearchAssetType.transform,
+          },
+        ])
+      );
+      endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
+      mockAgentService = startContract.agentService!;
+
+      registerEndpointRoutes(routerMock, {
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      });
     });
 
-    it('should return a single endpoint with status error when AgentService throw 404', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
+    afterEach(() => endpointAppContextService.stop());
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: response.hits.hits[0]._id },
-      });
-
-      mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
-        SavedObjectsErrorHelpers.createGenericNotFoundError();
-      });
-
-      mockAgentService.getAgent = jest.fn().mockImplementation(() => {
-        SavedObjectsErrorHelpers.createGenericNotFoundError();
-      });
-
+    it('test find the latest of all endpoints', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({});
+      const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
-
+      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
+      mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
@@ -332,151 +214,314 @@ describe('test endpoint route', () => {
         tags: ['access:securitySolution'],
       });
       expect(mockResponse.ok).toBeCalled();
-      const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
-      expect(result.host_status).toEqual(HostStatus.ERROR);
-    });
-
-    it('should return a single endpoint with status error when status is not offline, online or enrolling', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: response.hits.hits[0]._id },
-      });
-
-      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('warning');
-      mockAgentService.getAgent = jest.fn().mockReturnValue(({
-        active: true,
-      } as unknown) as Agent);
-      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
-      )!;
-
-      await routeHandler(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-        mockRequest,
-        mockResponse
+      const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
+      expect(endpointResultList.hosts.length).toEqual(1);
+      expect(endpointResultList.total).toEqual(1);
+      expect(endpointResultList.request_page_index).toEqual(0);
+      expect(endpointResultList.request_page_size).toEqual(10);
+      expect(endpointResultList.query_strategy_version).toEqual(
+        MetadataQueryStrategyVersions.VERSION_2
       );
-
-      expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({
-        authRequired: true,
-        tags: ['access:securitySolution'],
-      });
-      expect(mockResponse.ok).toBeCalled();
-      const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
-      expect(result.host_status).toEqual(HostStatus.ERROR);
     });
 
-    it('should throw error when endpoint agent is not active', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
-
+    it('test find the latest of all endpoints with paging properties', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: response.hits.hits[0]._id },
-      });
-      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-      mockAgentService.getAgent = jest.fn().mockReturnValue(({
-        active: false,
-      } as unknown) as Agent);
-
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
-      )!;
-
-      await routeHandler(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-        mockRequest,
-        mockResponse
-      );
-
-      expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockResponse.customError).toBeCalled();
-    });
-  });
-});
-
-describe('Filters Schema Test', () => {
-  it('accepts a single host status', () => {
-    expect(
-      endpointFilters.validate({
-        host_status: ['error'],
-      })
-    ).toBeTruthy();
-  });
-
-  it('accepts multiple host status filters', () => {
-    expect(
-      endpointFilters.validate({
-        host_status: ['offline', 'unenrolling'],
-      })
-    ).toBeTruthy();
-  });
-
-  it('rejects invalid statuses', () => {
-    expect(() =>
-      endpointFilters.validate({
-        host_status: ['foobar'],
-      })
-    ).toThrowError();
-  });
-
-  it('accepts a KQL string', () => {
-    expect(
-      endpointFilters.validate({
-        kql: 'whatever.field',
-      })
-    ).toBeTruthy();
-  });
-
-  it('accepts KQL + status', () => {
-    expect(
-      endpointFilters.validate({
-        kql: 'thing.var',
-        host_status: ['online'],
-      })
-    ).toBeTruthy();
-  });
-
-  it('accepts no filters', () => {
-    expect(endpointFilters.validate({})).toBeTruthy();
-  });
-});
-
-function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadataDetails> {
-  return ({
-    took: 15,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 1,
-        relation: 'eq',
-      },
-      max_score: null,
-      hits: hostMetadata
-        ? [
+        body: {
+          paging_properties: [
             {
-              _index: 'metrics-endpoint.metadata-default',
-              _id: '8FhM0HEBYyRTvb6lOQnw',
-              _score: null,
-              _source: {
-                agent: {
-                  id: '1e3472bb-5c20-4946-b469-b5af1a809e4f',
-                },
-                HostDetails: {
-                  ...hostMetadata,
+              page_size: 10,
+            },
+            {
+              page_index: 1,
+            },
+          ],
+        },
+      });
+
+      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
+      mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+        Promise.resolve(createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata()))
+      );
+      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
+      )!;
+
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
+        bool: {
+          must_not: {
+            terms: {
+              'HostDetails.elastic.agent.id': [
+                '00000000-0000-0000-0000-000000000000',
+                '11111111-1111-1111-1111-111111111111',
+              ],
+            },
+          },
+        },
+      });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
+      expect(mockResponse.ok).toBeCalled();
+      const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
+      expect(endpointResultList.hosts.length).toEqual(1);
+      expect(endpointResultList.total).toEqual(1);
+      expect(endpointResultList.request_page_index).toEqual(10);
+      expect(endpointResultList.request_page_size).toEqual(10);
+      expect(endpointResultList.query_strategy_version).toEqual(
+        MetadataQueryStrategyVersions.VERSION_2
+      );
+    });
+
+    it('test find the latest of all endpoints with paging and filters properties', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          paging_properties: [
+            {
+              page_size: 10,
+            },
+            {
+              page_index: 1,
+            },
+          ],
+
+          filters: { kql: 'not host.ip:10.140.73.246' },
+        },
+      });
+
+      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
+      mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+        Promise.resolve(createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata()))
+      );
+      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
+      )!;
+
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+      expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
+        bool: {
+          must: [
+            {
+              bool: {
+                must_not: {
+                  terms: {
+                    'HostDetails.elastic.agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                    ],
+                  },
                 },
               },
-              sort: [1588337587997],
             },
-          ]
-        : [],
-    },
-  } as unknown) as SearchResponse<HostMetadataDetails>;
-}
+            {
+              bool: {
+                must_not: {
+                  bool: {
+                    should: [
+                      {
+                        match: {
+                          'host.ip': '10.140.73.246',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
+      expect(mockResponse.ok).toBeCalled();
+      const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
+      expect(endpointResultList.hosts.length).toEqual(1);
+      expect(endpointResultList.total).toEqual(1);
+      expect(endpointResultList.request_page_index).toEqual(10);
+      expect(endpointResultList.request_page_size).toEqual(10);
+      expect(endpointResultList.query_strategy_version).toEqual(
+        MetadataQueryStrategyVersions.VERSION_2
+      );
+    });
+
+    describe('Endpoint Details route', () => {
+      it('should return 404 on no results', async () => {
+        const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'BADID' } });
+
+        mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+          Promise.resolve(createV2SearchResponse())
+        );
+
+        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
+        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+          active: true,
+        } as unknown) as Agent);
+
+        [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+          path.startsWith(`${METADATA_REQUEST_ROUTE}`)
+        )!;
+        await routeHandler(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+          mockRequest,
+          mockResponse
+        );
+
+        expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(routeConfig.options).toEqual({
+          authRequired: true,
+          tags: ['access:securitySolution'],
+        });
+        expect(mockResponse.notFound).toBeCalled();
+        const message = mockResponse.notFound.mock.calls[0][0]?.body;
+        expect(message).toEqual('Endpoint Not Found');
+      });
+
+      it('should return a single endpoint with status online', async () => {
+        const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
+        const mockRequest = httpServerMock.createKibanaRequest({
+          params: { id: response.hits.hits[0]._id },
+        });
+
+        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('online');
+        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+          active: true,
+        } as unknown) as Agent);
+        mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+
+        [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+          path.startsWith(`${METADATA_REQUEST_ROUTE}`)
+        )!;
+
+        await routeHandler(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+          mockRequest,
+          mockResponse
+        );
+
+        expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(routeConfig.options).toEqual({
+          authRequired: true,
+          tags: ['access:securitySolution'],
+        });
+        expect(mockResponse.ok).toBeCalled();
+        const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
+        expect(result).toHaveProperty('metadata.Endpoint');
+        expect(result.host_status).toEqual(HostStatus.ONLINE);
+        expect(result.query_strategy_version).toEqual(MetadataQueryStrategyVersions.VERSION_2);
+      });
+
+      it('should return a single endpoint with status error when AgentService throw 404', async () => {
+        const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          params: { id: response.hits.hits[0]._id },
+        });
+
+        mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
+          SavedObjectsErrorHelpers.createGenericNotFoundError();
+        });
+
+        mockAgentService.getAgent = jest.fn().mockImplementation(() => {
+          SavedObjectsErrorHelpers.createGenericNotFoundError();
+        });
+
+        mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+
+        [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+          path.startsWith(`${METADATA_REQUEST_ROUTE}`)
+        )!;
+
+        await routeHandler(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+          mockRequest,
+          mockResponse
+        );
+
+        expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(routeConfig.options).toEqual({
+          authRequired: true,
+          tags: ['access:securitySolution'],
+        });
+        expect(mockResponse.ok).toBeCalled();
+        const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
+        expect(result.host_status).toEqual(HostStatus.ERROR);
+      });
+
+      it('should return a single endpoint with status error when status is not offline, online or enrolling', async () => {
+        const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          params: { id: response.hits.hits[0]._id },
+        });
+
+        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('warning');
+        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+          active: true,
+        } as unknown) as Agent);
+        mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+
+        [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+          path.startsWith(`${METADATA_REQUEST_ROUTE}`)
+        )!;
+
+        await routeHandler(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+          mockRequest,
+          mockResponse
+        );
+
+        expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(routeConfig.options).toEqual({
+          authRequired: true,
+          tags: ['access:securitySolution'],
+        });
+        expect(mockResponse.ok).toBeCalled();
+        const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
+        expect(result.host_status).toEqual(HostStatus.ERROR);
+      });
+
+      it('should throw error when endpoint agent is not active', async () => {
+        const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          params: { id: response.hits.hits[0]._id },
+        });
+        mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+          active: false,
+        } as unknown) as Agent);
+
+        [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+          path.startsWith(`${METADATA_REQUEST_ROUTE}`)
+        )!;
+
+        await routeHandler(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+          mockRequest,
+          mockResponse
+        );
+
+        expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(mockResponse.customError).toBeCalled();
+      });
+    });
+  });
+});

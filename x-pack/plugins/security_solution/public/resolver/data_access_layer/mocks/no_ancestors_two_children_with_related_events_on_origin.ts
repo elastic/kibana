@@ -10,7 +10,9 @@ import {
   ResolverRelatedEvents,
   ResolverTree,
   ResolverEntityIndex,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
+import * as eventModel from '../../../../common/endpoint/models/event';
 
 interface Metadata {
   /**
@@ -56,31 +58,61 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
       /**
        * Fetch related events for an entity ID
        */
-      relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
         /**
          * Respond with the mocked related events when the origin's related events are fetched.
          **/
         const events = entityID === metadata.entityIDs.origin ? tree.relatedEvents.events : [];
 
-        return Promise.resolve({
+        return {
           entityID,
           events,
           nextEvent: null,
-        } as ResolverRelatedEvents);
+        };
+      },
+
+      /**
+       * Any of the origin's related events by category.
+       * `entityID` must match the origin node's `process.entity_id`.
+       * Does not respect the `_after` parameter.
+       */
+      async eventsWithEntityIDAndCategory(
+        entityID: string,
+        category: string
+      ): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
+        const events =
+          entityID === metadata.entityIDs.origin
+            ? tree.relatedEvents.events.filter((event) =>
+                eventModel.eventCategory(event).includes(category)
+              )
+            : [];
+        return {
+          events,
+          nextEvent: null,
+        };
+      },
+
+      /**
+       * Any of the origin's related events by event.id
+       */
+      async event(eventID: string): Promise<SafeResolverEvent | null> {
+        return (
+          tree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null
+        );
       },
 
       /**
        * Fetch a ResolverTree for a entityID
        */
-      resolverTree(): Promise<ResolverTree> {
-        return Promise.resolve(tree);
+      async resolverTree(): Promise<ResolverTree> {
+        return tree;
       },
 
       /**
        * Get entities matching a document.
        */
-      entities(): Promise<ResolverEntityIndex> {
-        return Promise.resolve([{ entity_id: metadata.entityIDs.origin }]);
+      async entities(): Promise<ResolverEntityIndex> {
+        return [{ entity_id: metadata.entityIDs.origin }];
       },
     },
   };

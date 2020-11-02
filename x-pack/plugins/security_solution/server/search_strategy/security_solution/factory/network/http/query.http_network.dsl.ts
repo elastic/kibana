@@ -69,6 +69,7 @@ export const buildHttpQuery = ({
     size: 0,
     track_total_hits: false,
   };
+
   return dslQuery;
 };
 

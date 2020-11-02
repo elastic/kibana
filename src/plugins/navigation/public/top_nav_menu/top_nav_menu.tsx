@@ -18,7 +18,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
@@ -81,31 +81,16 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderItems(): ReactElement[] | null {
     if (!config || config.length === 0) return null;
     return config.map((menuItem: TopNavMenuData, i: number) => {
-      return (
-        <EuiFlexItem
-          grow={false}
-          key={`nav-menu-${i}`}
-          className={menuItem.emphasize ? 'kbnTopNavItemEmphasized' : ''}
-        >
-          <TopNavMenuItem {...menuItem} />
-        </EuiFlexItem>
-      );
+      return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
     });
   }
 
   function renderMenu(className: string): ReactElement | null {
     if (!config || config.length === 0) return null;
     return (
-      <EuiFlexGroup
-        data-test-subj="top-nav"
-        justifyContent="flexStart"
-        alignItems="center"
-        gutterSize="none"
-        className={className}
-        responsive={false}
-      >
+      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
         {renderItems()}
-      </EuiFlexGroup>
+      </EuiHeaderLinks>
     );
   }
 

@@ -12,6 +12,7 @@ import {
   DataFrameAnalyticsExplorationUrlState,
   DataFrameAnalyticsQueryState,
   DataFrameAnalyticsUrlState,
+  MlCommonGlobalState,
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
@@ -23,18 +24,28 @@ export function createDataFrameAnalyticsJobManagementUrl(
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`;
 
   if (mlUrlGeneratorState) {
-    const { jobId, groupIds } = mlUrlGeneratorState;
-    const queryState: Partial<DataFrameAnalyticsQueryState> = {
-      jobId,
-      groupIds,
-    };
+    const { jobId, groupIds, globalState } = mlUrlGeneratorState;
+    if (jobId || groupIds) {
+      const queryState: Partial<DataFrameAnalyticsQueryState> = {
+        jobId,
+        groupIds,
+      };
 
-    url = setStateToKbnUrl<Partial<DataFrameAnalyticsQueryState>>(
-      'mlManagement',
-      queryState,
-      { useHash: false, storeInHashQuery: false },
-      url
-    );
+      url = setStateToKbnUrl<Partial<DataFrameAnalyticsQueryState>>(
+        'mlManagement',
+        queryState,
+        { useHash: false, storeInHashQuery: false },
+        url
+      );
+    }
+    if (globalState) {
+      url = setStateToKbnUrl<Partial<MlCommonGlobalState>>(
+        '_g',
+        globalState,
+        { useHash: false, storeInHashQuery: false },
+        url
+      );
+    }
   }
 
   return url;
@@ -50,12 +61,15 @@ export function createDataFrameAnalyticsExplorationUrl(
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`;
 
   if (mlUrlGeneratorState) {
-    const { jobId, analysisType } = mlUrlGeneratorState;
+    const { jobId, analysisType, defaultIsTraining, globalState } = mlUrlGeneratorState;
+
     const queryState: DataFrameAnalyticsExplorationQueryState = {
       ml: {
         jobId,
         analysisType,
+        defaultIsTraining,
       },
+      ...globalState,
     };
 
     url = setStateToKbnUrl<DataFrameAnalyticsExplorationQueryState>(

@@ -21,6 +21,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const find = getService('find');
   const retry = getService('retry');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
@@ -49,7 +50,7 @@ export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getRedButtonSign() {
-      return await testSubjects.exists('showBadgeNews');
+      return await find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
     }
 
     async getNewsfeedList() {

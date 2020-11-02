@@ -6,13 +6,9 @@
 /test/functional/apps/reporting/reports/session
 /test/reporting/configs/failure_debug/
 /plugins/reporting/.chromium/
-/legacy/plugins/reporting/.chromium/
-/legacy/plugins/reporting/.phantom/
 /plugins/reporting/chromium/
 /plugins/reporting/.phantom/
 /.aws-config.json
 /.env
 /.kibana-plugin-helpers.dev.*
-!/legacy/plugins/infra/**/target
 .cache
-!/legacy/plugins/security_solution/**/target

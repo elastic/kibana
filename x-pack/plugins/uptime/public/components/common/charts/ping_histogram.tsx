@@ -12,11 +12,14 @@ import {
   Settings,
   timeFormatter,
   BrushEndListener,
+  XYChartElementEvent,
+  ElementClickListener,
 } from '@elastic/charts';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import numeral from '@elastic/numeral';
 import moment from 'moment';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
@@ -24,6 +27,7 @@ import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
 import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
+import { getDateRangeFromChartElement } from './utils';
 
 export interface PingHistogramComponentProps {
   /**
@@ -78,7 +82,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       />
     );
   } else {
-    const { histogram } = data;
+    const { histogram, minInterval } = data;
 
     const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
       defaultMessage: 'Down',
@@ -97,6 +101,12 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
         dateRangeStart: moment(min).toISOString(),
         dateRangeEnd: moment(max).toISOString(),
       });
+    };
+
+    const onBarClicked: ElementClickListener = ([elementData]) => {
+      updateUrlParams(
+        getDateRangeFromChartElement(elementData as XYChartElementEvent, minInterval)
+      );
     };
 
     const barData: BarPoint[] = [];
@@ -124,11 +134,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
         <Chart>
           <Settings
             xDomain={{
+              minInterval,
               min: absoluteStartDate,
               max: absoluteEndDate,
             }}
             showLegend={false}
             onBrushEnd={onBrushEnd}
+            onElementClick={onBarClicked}
             {...chartTheme}
           />
           <Axis
@@ -144,6 +156,8 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
               defaultMessage: 'Ping Y Axis',
             })}
             position="left"
+            tickFormat={(d) => numeral(d).format('0')}
+            labelFormat={(d) => numeral(d).format('0a')}
             title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
               defaultMessage: 'Pings',
               description:

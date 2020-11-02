@@ -32,6 +32,7 @@ import {
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
 } from '../../../common';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,
@@ -64,11 +65,8 @@ export const getAgentPoliciesHandler: RequestHandler<
     );
 
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -91,11 +89,8 @@ export const getOneAgentPolicyHandler: RequestHandler<TypeOf<
         body: { message: 'Agent policy not found' },
       });
     }
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -137,6 +132,8 @@ export const createAgentPolicyHandler: RequestHandler<
       });
     }
 
+    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id);
+
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,
     };
@@ -144,11 +141,8 @@ export const createAgentPolicyHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -172,11 +166,8 @@ export const updateAgentPolicyHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -196,15 +187,13 @@ export const copyAgentPolicyHandler: RequestHandler<
         user: user || undefined,
       }
     );
+
     const body: CopyAgentPolicyResponse = { item: agentPolicy };
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -222,11 +211,8 @@ export const deleteAgentPoliciesHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -255,11 +241,8 @@ export const getFullAgentPolicy: RequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -292,10 +275,7 @@ export const downloadFullAgentPolicy: RequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

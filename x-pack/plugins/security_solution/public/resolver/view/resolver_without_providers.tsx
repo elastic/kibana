@@ -16,12 +16,14 @@ import { EdgeLine } from './edge_line';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-import { SymbolDefinitions, useResolverTheme } from './assets';
+import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
+import { StyledMapContainer, GraphContainer } from './styles';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
+import { PanelRouter } from './panels';
+import { useColors } from './use_colors';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -72,7 +74,7 @@ export const ResolverWithoutProviders = React.memo(
     const isLoading = useSelector(selectors.isTreeLoading);
     const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
-    const { colorMap } = useResolverTheme();
+    const colorMap = useColors();
 
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
@@ -104,7 +106,7 @@ export const ResolverWithoutProviders = React.memo(
               ({ points: [startPosition, endPosition], metadata }) => (
                 <EdgeLine
                   edgeLineMetadata={metadata}
-                  key={metadata.uniqueId}
+                  key={metadata.reactKey}
                   startPosition={startPosition}
                   endPosition={endPosition}
                   projectionMatrix={projectionMatrix}
@@ -126,7 +128,7 @@ export const ResolverWithoutProviders = React.memo(
             })}
           </GraphContainer>
         )}
-        <StyledPanel />
+        <PanelRouter />
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>

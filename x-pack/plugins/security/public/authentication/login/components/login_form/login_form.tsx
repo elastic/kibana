@@ -221,6 +221,7 @@ export class LoginForm extends Component<Props, State> {
               id="password"
               name="password"
               data-test-subj="loginPassword"
+              type={'dual'}
               value={this.state.password}
               onChange={this.onPasswordChange}
               disabled={!this.isLoadingState(LoadingStateType.None)}

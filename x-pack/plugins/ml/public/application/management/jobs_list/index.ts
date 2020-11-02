@@ -13,13 +13,15 @@ import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
 import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 import './_index.scss';
+import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 
 const renderApp = (
   element: HTMLElement,
   history: ManagementAppMountParams['history'],
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  share: SharePluginStart
 ) => {
-  ReactDOM.render(React.createElement(JobsListPage, { coreStart, history }), element);
+  ReactDOM.render(React.createElement(JobsListPage, { coreStart, history, share }), element);
   return () => {
     unmountComponentAtNode(element);
     clearCache();
@@ -30,7 +32,7 @@ export async function mountApp(
   core: CoreSetup<MlStartDependencies>,
   params: ManagementAppMountParams
 ) {
-  const [coreStart] = await core.getStartServices();
+  const [coreStart, pluginsStart] = await core.getStartServices();
 
   setDependencyCache({
     docLinks: coreStart.docLinks!,
@@ -41,5 +43,5 @@ export async function mountApp(
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());
 
-  return renderApp(params.element, params.history, coreStart);
+  return renderApp(params.element, params.history, coreStart, pluginsStart.share);
 }

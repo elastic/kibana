@@ -18,9 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AppCategory } from '../types';
 
 /** @internal */
-export const DEFAULT_APP_CATEGORIES = Object.freeze({
+export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
   kibana: {
     id: 'kibana',
     label: i18n.translate('core.ui.kibanaNavList.label', {
@@ -59,5 +60,6 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
       defaultMessage: 'Management',
     }),
     order: 5000,
+    euiIconType: 'managementApp',
   },
 });

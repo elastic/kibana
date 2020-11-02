@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { User, UserActionField, UserAction } from '../../../../case/common/api';
+import { User, UserActionField, UserAction, CaseConnector } from '../../../../case/common/api';
+
+export { CaseConnector, ActionConnector } from '../../../../case/common/api';
 
 export interface Comment {
   id: string;
@@ -43,7 +45,7 @@ export interface Case {
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
-  connectorId: string;
+  connector: CaseConnector;
   createdAt: string;
   createdBy: ElasticUser;
   description: string;

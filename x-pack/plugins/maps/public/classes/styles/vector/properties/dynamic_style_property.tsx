@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
+import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -15,6 +16,8 @@ import {
   SOURCE_META_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
+  RawValue,
+  FieldFormatter,
 } from '../../../../../common/constants';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
@@ -28,6 +31,7 @@ import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IJoin } from '../../../joins/join';
 import { IVectorStyle } from '../vector_style';
+import { getComputedFieldName } from '../style_util';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -41,14 +45,15 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   isOrdinal(): boolean;
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown>;
-  supportsMbFeatureState(): boolean;
-  getMbLookupFunction(): MB_LOOKUP_FUNCTION;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
+  enrichGeoJsonAndMbFeatureState(
+    featureCollection: FeatureCollection,
+    mbMap: MbMap,
+    mbSourceId: string
+  ): boolean;
 }
-
-export type FieldFormatter = (value: string | number | undefined) => string | number;
 
 export class DynamicStyleProperty<T>
   extends AbstractStyleProperty<T>
@@ -313,7 +318,7 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  formatField(value: string | number | undefined): string | number {
+  formatField(value: RawValue): string | number {
     if (this.getField()) {
       const fieldName = this.getFieldName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
@@ -345,4 +350,78 @@ export class DynamicStyleProperty<T>
       />
     );
   }
+
+  // Returns the name that should be used for accessing the data from the mb-style rule
+  // Depending on
+  // - whether the field is used for labeling, icon-orientation, or other properties (color, size, ...), `feature-state` and or `get` is used
+  // - whether the field was run through a field-formatter, a new dynamic field is created with the formatted-value
+  // The combination of both will inform what field-name (e.g. the "raw" field name from the properties, the "computed field-name" for an on-the-fly created property (e.g. for feature-state or field-formatting).
+  // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
+  getMbPropertyName() {
+    if (!this._field) {
+      return '';
+    }
+
+    let targetName;
+    if (this.supportsMbFeatureState()) {
+      // Base case for any properties that can support feature-state (e.g. color, size, ...)
+      // They just re-use the original property-name
+      targetName = this._field.getName();
+    } else {
+      if (this._field.canReadFromGeoJson() && this._field.supportsAutoDomain()) {
+        // Geojson-sources can support rewrite
+        // e.g. field-formatters will create duplicate field
+        targetName = getComputedFieldName(this.getStyleName(), this._field.getName());
+      } else {
+        // Non-geojson sources (e.g. 3rd party mvt or ES-source as mvt)
+        targetName = this._field.getName();
+      }
+    }
+    return targetName;
+  }
+
+  getMbPropertyValue(rawValue: RawValue): RawValue {
+    // Maps only uses feature-state for numerical values.
+    // `supportsMbFeatureState` will only return true when the mb-style rule does a feature-state lookup on a numerical value
+    // Calling `isOrdinal` would be equivalent.
+    return this.supportsMbFeatureState() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
+  }
+
+  enrichGeoJsonAndMbFeatureState(
+    featureCollection: FeatureCollection,
+    mbMap: MbMap,
+    mbSourceId: string
+  ): boolean {
+    const supportsFeatureState = this.supportsMbFeatureState();
+    const featureIdentifier: FeatureIdentifier = {
+      source: mbSourceId,
+      id: undefined,
+    };
+    const featureState: Record<string, RawValue> = {};
+    const targetMbName = this.getMbPropertyName();
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      const rawValue = feature.properties ? feature.properties[this.getFieldName()] : undefined;
+      const targetMbValue = this.getMbPropertyValue(rawValue);
+      if (supportsFeatureState) {
+        featureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
+        featureIdentifier.id = feature.id;
+        mbMap.setFeatureState(featureIdentifier, featureState);
+      } else {
+        if (feature.properties) {
+          feature.properties[targetMbName] = targetMbValue;
+        }
+      }
+    }
+    return supportsFeatureState;
+  }
+}
+
+export function getNumericalMbFeatureStateValue(value: RawValue) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const valueAsFloat = parseFloat(value);
+  return isNaN(valueAsFloat) ? null : valueAsFloat;
 }

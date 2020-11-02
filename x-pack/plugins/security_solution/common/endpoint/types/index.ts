@@ -183,7 +183,7 @@ export interface ResolverTree {
   relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
   relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: ResolverAncestry;
-  lifecycle: ResolverEvent[];
+  lifecycle: SafeResolverEvent[];
   stats: ResolverNodeStats;
 }
 
@@ -197,7 +197,6 @@ export interface SafeResolverTree {
    */
   entityID: string;
   children: SafeResolverChildren;
-  relatedEvents: Omit<SafeResolverRelatedEvents, 'entityID'>;
   relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: SafeResolverAncestry;
   lifecycle: SafeResolverEvent[];
@@ -209,7 +208,7 @@ export interface SafeResolverTree {
  */
 export interface ResolverLifecycleNode {
   entityID: string;
-  lifecycle: ResolverEvent[];
+  lifecycle: SafeResolverEvent[];
   /**
    * stats are only set when the entire tree is being fetched
    */
@@ -263,15 +262,15 @@ export interface SafeResolverAncestry {
  */
 export interface ResolverRelatedEvents {
   entityID: string;
-  events: ResolverEvent[];
+  events: SafeResolverEvent[];
   nextEvent: string | null;
 }
 
 /**
- * Safe version of `ResolverRelatedEvents`
+ * Response structure for the events route.
+ * `nextEvent` will be set to null when at the time of querying there were no more results to retrieve from ES.
  */
-export interface SafeResolverRelatedEvents {
-  entityID: string;
+export interface ResolverPaginatedEvents {
   events: SafeResolverEvent[];
   nextEvent: string | null;
 }
@@ -297,6 +296,17 @@ export interface HostResultList {
   request_page_size: number;
   /* the page index requested */
   request_page_index: number;
+  /* the version of the query strategy */
+  query_strategy_version: MetadataQueryStrategyVersions;
+}
+
+/**
+ * The data_stream fields in an elasticsearch document.
+ */
+export interface DataStream {
+  dataset: string;
+  namespace: string;
+  type: string;
 }
 
 /**
@@ -504,9 +514,16 @@ export enum HostStatus {
   UNENROLLING = 'unenrolling',
 }
 
+export enum MetadataQueryStrategyVersions {
+  VERSION_1 = 'v1',
+  VERSION_2 = 'v2',
+}
+
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
+  /* the version of the query strategy */
+  query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
 export type HostMetadataDetails = Immutable<{
@@ -548,6 +565,7 @@ export type HostMetadata = Immutable<{
     version: string;
   };
   host: Host;
+  data_stream: DataStream;
 }>;
 
 export interface LegacyEndpointEvent {
@@ -667,6 +685,11 @@ export type SafeEndpointEvent = Partial<{
     version: ECSField<string>;
     type: ECSField<string>;
   }>;
+  data_stream: Partial<{
+    type: ECSField<string>;
+    dataset: ECSField<string>;
+    namespace: ECSField<string>;
+  }>;
   ecs: Partial<{
     version: ECSField<string>;
   }>;
@@ -700,7 +723,10 @@ export type SafeEndpointEvent = Partial<{
     forwarded_ip: ECSField<string>;
   }>;
   dns: Partial<{
-    question: Partial<{ name: ECSField<string> }>;
+    question: Partial<{
+      name: ECSField<string>;
+      type: ECSField<string>;
+    }>;
   }>;
   process: Partial<{
     entity_id: ECSField<string>;
@@ -834,6 +860,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
+    advanced?: {};
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -847,19 +874,33 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
   };
   mac: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
       network: boolean;
     };
     malware: MalwareFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
   };
   linux: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
@@ -878,15 +919,15 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup' | 'advanced'>;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events'>;
+  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
 }
 
 /** Policy: Malware protection fields */
@@ -991,6 +1032,7 @@ interface HostPolicyResponseAppliedArtifact {
  */
 export interface HostPolicyResponse {
   '@timestamp': number;
+  data_stream: DataStream;
   elastic: {
     agent: {
       id: string;

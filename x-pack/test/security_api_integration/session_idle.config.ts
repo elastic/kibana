@@ -36,7 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     junit: {
-      reportName: 'X-Pack Security API Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests (Session Idle Timeout)',
     },
   };
 }

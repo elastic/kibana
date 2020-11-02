@@ -42,12 +42,15 @@ import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import { transactionByTraceIdRoute } from './transaction';
 import {
+  correlationsForRangesRoute,
+  correlationsForSlowTransactionsRoute,
+} from './correlations';
+import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
   transactionGroupsRoute,
-  transactionGroupsAvgDurationByCountry,
-  transactionGroupsAvgDurationByBrowser,
+  transactionSampleForGroupRoute,
   transactionGroupsErrorRateRoute,
 } from './transaction_groups';
 import {
@@ -71,15 +74,6 @@ import {
   customLinkTransactionRoute,
 } from './settings/custom_link';
 import {
-  rumClientMetricsRoute,
-  rumPageViewsTrendRoute,
-  rumPageLoadDistributionRoute,
-  rumPageLoadDistBreakdownRoute,
-  rumServicesRoute,
-  rumVisitorsBreakdownRoute,
-  rumWebCoreVitals,
-} from './rum_client';
-import {
   observabilityOverviewHasDataRoute,
   observabilityOverviewRoute,
 } from './observability_overview';
@@ -88,6 +82,19 @@ import {
   createAnomalyDetectionJobsRoute,
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
+import {
+  rumHasDataRoute,
+  rumClientMetricsRoute,
+  rumJSErrors,
+  rumLongTaskMetrics,
+  rumPageLoadDistBreakdownRoute,
+  rumPageLoadDistributionRoute,
+  rumPageViewsTrendRoute,
+  rumServicesRoute,
+  rumUrlSearch,
+  rumVisitorsBreakdownRoute,
+  rumWebCoreVitals,
+} from './rum_client';
 
 const createApmApi = () => {
   const api = createApi()
@@ -119,6 +126,10 @@ const createApmApi = () => {
     .add(listAgentConfigurationServicesRoute)
     .add(createOrUpdateAgentConfigurationRoute)
 
+    // Correlations
+    .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsForRangesRoute)
+
     // APM indices
     .add(apmIndexSettingsRoute)
     .add(apmIndicesRoute)
@@ -137,8 +148,7 @@ const createApmApi = () => {
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsAvgDurationByBrowser)
-    .add(transactionGroupsAvgDurationByCountry)
+    .add(transactionSampleForGroupRoute)
     .add(transactionGroupsErrorRateRoute)
 
     // UI filters
@@ -165,7 +175,16 @@ const createApmApi = () => {
     .add(listCustomLinksRoute)
     .add(customLinkTransactionRoute)
 
-    // Rum Overview
+    // Observability dashboard
+    .add(observabilityOverviewHasDataRoute)
+    .add(observabilityOverviewRoute)
+
+    // Anomaly detection
+    .add(anomalyDetectionJobsRoute)
+    .add(createAnomalyDetectionJobsRoute)
+    .add(anomalyDetectionEnvironmentsRoute)
+
+    // User Experience app api routes
     .add(rumOverviewLocalFiltersRoute)
     .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
@@ -174,15 +193,10 @@ const createApmApi = () => {
     .add(rumServicesRoute)
     .add(rumVisitorsBreakdownRoute)
     .add(rumWebCoreVitals)
-
-    // Observability dashboard
-    .add(observabilityOverviewHasDataRoute)
-    .add(observabilityOverviewRoute)
-
-    // Anomaly detection
-    .add(anomalyDetectionJobsRoute)
-    .add(createAnomalyDetectionJobsRoute)
-    .add(anomalyDetectionEnvironmentsRoute);
+    .add(rumJSErrors)
+    .add(rumUrlSearch)
+    .add(rumLongTaskMetrics)
+    .add(rumHasDataRoute);
 
   return api;
 };

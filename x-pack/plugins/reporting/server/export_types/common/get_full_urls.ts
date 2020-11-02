@@ -23,25 +23,14 @@ function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
   return (job as TaskPayloadPDF).relativeUrls !== undefined;
 }
 
-export function getFullUrls<TaskPayloadType>({
-  config,
-  job,
-}: {
-  config: ReportingConfig;
-  job: TaskPayloadPDF | TaskPayloadPNG;
-}) {
+export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskPayloadPNG) {
   const [basePath, protocol, hostname, port] = [
     config.kbnConfig.get('server', 'basePath'),
     config.get('kibanaServer', 'protocol'),
     config.get('kibanaServer', 'hostname'),
     config.get('kibanaServer', 'port'),
   ] as string[];
-  const getAbsoluteUrl = getAbsoluteUrlFactory({
-    defaultBasePath: basePath,
-    protocol,
-    hostname,
-    port,
-  });
+  const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
 
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
@@ -61,7 +50,6 @@ export function getFullUrls<TaskPayloadType>({
   const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
-      basePath: job.basePath,
       path: parsedRelative.pathname,
       hash: parsedRelative.hash,
       search: parsedRelative.search,

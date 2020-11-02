@@ -24,14 +24,9 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 ###
 export FORCE_COLOR=1
 
+### APM tracking
 ###
-### The @babel/register cache collects the build output from each file in
-### a map, in memory, and then when the process exits it writes that to the
-### babel cache file as a JSON encoded object. Stringifying that object
-### causes OOMs on CI regularly enough that we need to find another solution,
-### and until we do we need to disable the cache
-###
-export BABEL_DISABLE_CACHE=true
+export ELASTIC_APM_ENVIRONMENT=ci
 
 ###
 ### check that we seem to be in a kibana project
@@ -134,13 +129,13 @@ export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudf
 export CHECKS_REPORTER_ACTIVE=false
 
 # This is mainly for release-manager builds, which run in an environment that doesn't have Chrome installed
-# if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
-#   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
-#   export DETECT_CHROMEDRIVER_VERSION=true
-#   export CHROMEDRIVER_FORCE_DOWNLOAD=true
-# else
-#   echo "Chrome not detected, installing default chromedriver binary for the package version"
-# fi
+if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
+  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+  export DETECT_CHROMEDRIVER_VERSION=true
+  export CHROMEDRIVER_FORCE_DOWNLOAD=true
+else
+  echo "Chrome not detected, installing default chromedriver binary for the package version"
+fi
 
 ### only run on pr jobs for elastic/kibana, checks-reporter doesn't work for other repos
 if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then

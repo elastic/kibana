@@ -8,6 +8,13 @@ the index patterns that retrieve your data from {es}.
 image::images/management-index-patterns.png[]
 
 [float]
+=== Required permissions
+
+The `Index Pattern Management` {kib} privilege is required to access the *Index patterns* UI.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
+
+[float]
 === Create an index pattern
 
 An index pattern is the glue that connects {kib} to your {es} data. Create an
@@ -134,7 +141,7 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 [[create-scripted-field]]
 === Create a scripted field
 
-. Open the menu, then go to *Stack Management > {kib} > Index Patterns*
+. Open the main menu, then click *Stack Management > Index Patterns*.
 . Select the index pattern you want to add a scripted field to.
 . Go to the *Scripted fields* tab for the index pattern, then click *Add scripted field*.
 . Enter a name for the scripted field.

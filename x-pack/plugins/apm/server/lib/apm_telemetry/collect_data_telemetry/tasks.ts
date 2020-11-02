@@ -8,7 +8,7 @@ import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
 import { AggregationOptionsByType } from '../../../../typings/elasticsearch/aggregations';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
-import { AGENT_NAMES, RUM_AGENTS } from '../../../../common/agent_name';
+import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -85,7 +85,7 @@ export const tasks: TelemetryTask[] = [
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   { range: { '@timestamp': { gte: start, lt: end } } },
                 ],
               },
@@ -606,7 +606,10 @@ export const tasks: TelemetryTask[] = [
             timeout,
             query: {
               bool: {
-                filter: [{ term: { [PROCESSOR_EVENT]: 'error' } }, range1d],
+                filter: [
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+                  range1d,
+                ],
               },
             },
             aggs: {
@@ -640,7 +643,7 @@ export const tasks: TelemetryTask[] = [
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   range1d,
                 ],
               },
@@ -674,7 +677,7 @@ export const tasks: TelemetryTask[] = [
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   range1d,
                 ],
                 must_not: {
@@ -1017,7 +1020,7 @@ export const tasks: TelemetryTask[] = [
           timeout,
           query: {
             bool: {
-              filter: [range1d, { terms: { [AGENT_NAME]: RUM_AGENTS } }],
+              filter: [range1d, { terms: { [AGENT_NAME]: RUM_AGENT_NAMES } }],
             },
           },
           aggs: {

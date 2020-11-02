@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { deepFreeze } from '../../utils';
+import { deepFreeze } from '@kbn/std';
 import { PluginName } from '../plugins';
 
 /**
@@ -71,6 +71,9 @@ export const ServiceStatusLevels = deepFreeze({
   available: {
     toString: () => 'available',
     valueOf: () => 0,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * Some features may not be working.
@@ -78,6 +81,9 @@ export const ServiceStatusLevels = deepFreeze({
   degraded: {
     toString: () => 'degraded',
     valueOf: () => 1,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * The service is unavailable, but other functions that do not depend on this service should work.
@@ -85,6 +91,9 @@ export const ServiceStatusLevels = deepFreeze({
   unavailable: {
     toString: () => 'unavailable',
     valueOf: () => 2,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * Block all user functions and display the status page, reserved for Core services only.
@@ -92,6 +101,9 @@ export const ServiceStatusLevels = deepFreeze({
   critical: {
     toString: () => 'critical',
     valueOf: () => 3,
+    toJSON() {
+      return this.toString();
+    },
   },
 });
 
@@ -217,11 +229,17 @@ export interface StatusServiceSetup {
    * through the dependency tree
    */
   derivedStatus$: Observable<ServiceStatus>;
+
+  /**
+   * Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is
+   * present.
+   */
+  isStatusPageAnonymous: () => boolean;
 }
 
 /** @internal */
-export interface InternalStatusServiceSetup extends Pick<StatusServiceSetup, 'core$' | 'overall$'> {
-  isStatusPageAnonymous: () => boolean;
+export interface InternalStatusServiceSetup
+  extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors } from 'elasticsearch';
 import { httpServerMock } from 'src/core/server/mocks';
 import { createAppContextStartContractMock } from '../mocks';
@@ -13,6 +13,7 @@ import {
   IngestManagerError,
   RegistryError,
   PackageNotFoundError,
+  PackageUnsupportedMediaTypeError,
   defaultIngestErrorHandler,
 } from './index';
 
@@ -93,6 +94,25 @@ describe('defaultIngestErrorHandler', () => {
       expect(response.customError).toHaveBeenCalledTimes(1);
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 502,
+        body: { message: error.message },
+      });
+
+      // logging
+      expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
+      expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+    });
+
+    it('415: PackageUnsupportedMediaType', async () => {
+      const error = new PackageUnsupportedMediaTypeError('123');
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultIngestErrorHandler({ error, response });
+
+      // response
+      expect(response.ok).toHaveBeenCalledTimes(0);
+      expect(response.customError).toHaveBeenCalledTimes(1);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 415,
         body: { message: error.message },
       });
 

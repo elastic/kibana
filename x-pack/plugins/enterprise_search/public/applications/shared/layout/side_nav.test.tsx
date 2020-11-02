@@ -89,4 +89,20 @@ describe('SideNavLink', () => {
     expect(wrapper.find('.testing')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="testing"]')).toHaveLength(1);
   });
+
+  it('renders nested subnavigation', () => {
+    const subNav = (
+      <SideNavLink to="/elsewhere" data-test-subj="subNav">
+        Another link!
+      </SideNavLink>
+    );
+    const wrapper = shallow(
+      <SideNavLink to="/" subNav={subNav}>
+        Link
+      </SideNavLink>
+    );
+
+    expect(wrapper.find('.enterpriseSearchNavLinks__subNav')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="subNav"]')).toHaveLength(1);
+  });
 });

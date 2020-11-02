@@ -29,6 +29,9 @@ uiRoutes.when('/elasticsearch/ml_jobs', {
         title: i18n.translate('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
           defaultMessage: 'Elasticsearch - Machine Learning Jobs',
         }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.mlJobs.pageTitle', {
+          defaultMessage: 'Elasticsearch machine learning jobs',
+        }),
         storageKey: 'elasticsearch.mlJobs',
         getPageData,
         $scope,

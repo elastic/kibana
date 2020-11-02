@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../../graphql/types';
+import { Ecs } from '../../../common/ecs';
 
 export const mockEndgameDnsRequest: Ecs = {
   _id: 'S8jPcG0BOpWiDweSou3g',

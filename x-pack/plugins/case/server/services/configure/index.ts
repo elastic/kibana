@@ -12,7 +12,7 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
-import { CasesConfigureAttributes, SavedObjectFindOptions } from '../../../common/api';
+import { ESCasesConfigureAttributes, SavedObjectFindOptions } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../saved_object_types';
 
 interface ClientArgs {
@@ -27,22 +27,22 @@ interface FindCaseConfigureArgs extends ClientArgs {
 }
 
 interface PostCaseConfigureArgs extends ClientArgs {
-  attributes: CasesConfigureAttributes;
+  attributes: ESCasesConfigureAttributes;
 }
 
 interface PatchCaseConfigureArgs extends ClientArgs {
   caseConfigureId: string;
-  updatedAttributes: Partial<CasesConfigureAttributes>;
+  updatedAttributes: Partial<ESCasesConfigureAttributes>;
 }
 
 export interface CaseConfigureServiceSetup {
   delete(args: GetCaseConfigureArgs): Promise<{}>;
-  get(args: GetCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>>;
-  find(args: FindCaseConfigureArgs): Promise<SavedObjectsFindResponse<CasesConfigureAttributes>>;
+  get(args: GetCaseConfigureArgs): Promise<SavedObject<ESCasesConfigureAttributes>>;
+  find(args: FindCaseConfigureArgs): Promise<SavedObjectsFindResponse<ESCasesConfigureAttributes>>;
   patch(
     args: PatchCaseConfigureArgs
-  ): Promise<SavedObjectsUpdateResponse<CasesConfigureAttributes>>;
-  post(args: PostCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>>;
+  ): Promise<SavedObjectsUpdateResponse<ESCasesConfigureAttributes>>;
+  post(args: PostCaseConfigureArgs): Promise<SavedObject<ESCasesConfigureAttributes>>;
 }
 
 export class CaseConfigureService {

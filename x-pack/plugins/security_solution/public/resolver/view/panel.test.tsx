@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
-
-import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
+import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
@@ -15,7 +13,7 @@ import { urlSearch } from '../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe(`Resolver: when analyzing a tree with no ancestors and two children, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */
@@ -31,9 +29,26 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     secondChild: string;
   };
 
+  /**
+   * These are the details we expect to see in the node detail view when the origin is selected.
+   */
+  const originEventDetailEntries: ReadonlyMap<string, string> = new Map([
+    ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
+    ['process.executable', 'executable'],
+    ['process.pid', '0'],
+    ['user.name', 'user.name'],
+    ['user.domain', 'user.domain'],
+    ['process.parent.pid', '0'],
+    ['process.hash.md5', 'hash.md5'],
+    ['process.args', 'args'],
+  ]);
+
   beforeEach(() => {
     // create a mock data access layer
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
+    const {
+      metadata: dataAccessLayerMetadata,
+      dataAccessLayer,
+    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
@@ -61,7 +76,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
   });
 
   const queryStringWithOriginSelected = urlSearch(resolverComponentInstanceID, {
-    selectedEntityID: 'origin',
+    panelParameters: { nodeID: 'origin' },
+    panelView: 'nodeDetail',
   });
 
   describe(`when the URL query string is ${queryStringWithOriginSelected}`, () => {
@@ -84,15 +100,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       ).toYieldEqualTo({
         title: 'c.ext',
         titleIcon: 'Running Process',
-        detailEntries: [
-          ['process.executable', 'executable'],
-          ['process.pid', '0'],
-          ['user.name', 'user.name'],
-          ['user.domain', 'user.domain'],
-          ['process.parent.pid', '0'],
-          ['process.hash.md5', 'hash.md5'],
-          ['process.args', 'args'],
-        ],
+        detailEntries: [...originEventDetailEntries],
       });
     });
     it('should have breaking opportunities (<wbr>s) in node titles to allow wrapping', async () => {
@@ -108,10 +116,51 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         wordBreaks: 2,
       });
     });
+
+    /**
+     * These tests use a statically defined map of fields and expected values. The test finds the `dt` for each field and then finds the related `dd`s. From there it finds a special 'hover area' (via `data-test-subj`) and simulates a `mouseenter` on it. This is because the feature work by adding event listeners to `div`s. There is no way for the user to know that the `div`s are interactable.
+
+     * Finally the test clicks a button and checks that the clipboard was written to.
+     */
+    describe.each([...originEventDetailEntries])(
+      'when the user hovers over the description for the field (%p) with their mouse',
+      (fieldTitleText, value) => {
+        beforeEach(async () => {
+          const dt = await simulator().resolveWrapper(() => {
+            return simulator()
+              .testSubject('resolver:node-detail:entry-title')
+              .filterWhere((title) => title.text() === fieldTitleText);
+          });
+
+          expect(dt).toHaveLength(1);
+
+          const copyableFieldHoverArea = simulator()
+            .descriptionDetails(dt!)
+            // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
+            .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
+            .filterWhere(Simulator.isDOM);
+
+          expect(copyableFieldHoverArea).toHaveLength(1);
+          copyableFieldHoverArea!.simulate('mouseenter');
+        });
+        describe('and when they click the copy-to-clipboard button', () => {
+          beforeEach(async () => {
+            const copyButton = await simulator().resolve('resolver:panel:clipboard');
+            expect(copyButton).toHaveLength(1);
+            copyButton!.simulate('click');
+            simulator().confirmTextWrittenToClipboard();
+          });
+          it(`should write ${value} to the clipboard`, async () => {
+            await expect(simulator().map(() => simulator().clipboardText)).toYieldEqualTo(value);
+          });
+        });
+      }
+    );
   });
 
   const queryStringWithFirstChildSelected = urlSearch(resolverComponentInstanceID, {
-    selectedEntityID: 'firstChild',
+    panelParameters: { nodeID: 'firstChild' },
+    panelView: 'nodeDetail',
   });
 
   describe(`when the URL query string is ${queryStringWithFirstChildSelected}`, () => {
@@ -124,6 +173,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
         ['user.name', 'user.name'],
@@ -135,13 +185,54 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     });
   });
 
+  it('should show a single analyzed event in the node list', async () => {
+    await expect(
+      simulator().map(
+        () => simulator().testSubject('resolver:node-list:node-link:analyzed-event').length
+      )
+    ).toYieldEqualTo(1);
+  });
+
   it('should have 3 nodes (with icons) in the node list', async () => {
     await expect(
-      simulator().map(() => simulator().testSubject('resolver:node-list:node-link:title').length)
-    ).toYieldEqualTo(3);
-    await expect(
-      simulator().map(() => simulator().testSubject('resolver:node-list:node-link:icon').length)
-    ).toYieldEqualTo(3);
+      simulator().map(() => {
+        return {
+          titleCount: simulator().testSubject('resolver:node-list:node-link:title').length,
+          iconCount: simulator().testSubject('resolver:node-list:node-link:icon').length,
+        };
+      })
+    ).toYieldEqualTo({ titleCount: 3, iconCount: 3 });
+  });
+
+  describe('when the user hovers over the timestamp for "c.ext" with their mouse', () => {
+    beforeEach(async () => {
+      const cExtHoverArea = await simulator().resolveWrapper(async () => {
+        const nodeLinkTitles = await simulator().resolve('resolver:node-list:node-link:title');
+
+        expect(nodeLinkTitles).toHaveLength(3);
+
+        return (
+          nodeLinkTitles!
+            .filterWhere((linkTitle) => linkTitle.text() === 'c.ext')
+            // Find the parent `tr` and the find all hover areas in that TR. The test assumes that all cells in a row are associated.
+            .closest('tr')
+            // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
+            .find('[data-test-subj="resolver:panel:copyable-field-hover-area"]')
+            .filterWhere(Simulator.isDOM)
+        );
+      });
+      cExtHoverArea!.simulate('mouseenter');
+    });
+    describe('and when the user clicks the copy-to-clipboard button', () => {
+      beforeEach(async () => {
+        (await simulator().resolve('resolver:panel:clipboard'))!.simulate('click');
+        simulator().confirmTextWrittenToClipboard();
+      });
+      const expected = 'Sep 23, 2020 @ 08:25:32.316';
+      it(`should write "${expected}" to the clipboard`, async () => {
+        await expect(simulator().map(() => simulator().clipboardText)).toYieldEqualTo(expected);
+      });
+    });
   });
 
   describe('when there is an item in the node list and its text has been clicked', () => {
@@ -149,28 +240,126 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       const nodeLinks = await simulator().resolve('resolver:node-list:node-link:title');
       expect(nodeLinks).toBeTruthy();
       if (nodeLinks) {
-        nodeLinks.first().simulate('click');
+        nodeLinks.first().simulate('click', { button: 0 });
       }
     });
     it('should show the details for the first node', async () => {
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
-      ).toYieldEqualTo([
-        ['process.executable', 'executable'],
-        ['process.pid', '0'],
-        ['user.name', 'user.name'],
-        ['user.domain', 'user.domain'],
-        ['process.parent.pid', '0'],
-        ['process.hash.md5', 'hash.md5'],
-        ['process.args', 'args'],
-      ]);
+      ).toYieldEqualTo([...originEventDetailEntries]);
     });
     it("should have the first node's ID in the query string", async () => {
       await expect(simulator().map(() => simulator().historyLocationSearch)).toYieldEqualTo(
         urlSearch(resolverComponentInstanceID, {
-          selectedEntityID: entityIDs.origin,
+          panelView: 'nodeDetail',
+          panelParameters: {
+            nodeID: entityIDs.origin,
+          },
         })
       );
+    });
+    describe("and when the user clicks the link to the node's events", () => {
+      beforeEach(async () => {
+        const nodeEventsListLink = await simulator().resolve(
+          'resolver:node-detail:node-events-link'
+        );
+
+        if (nodeEventsListLink) {
+          nodeEventsListLink.simulate('click', { button: 0 });
+        }
+      });
+      it('should show a link to view 2 registry events', async () => {
+        await expect(
+          simulator().map(() => {
+            // The link text is split across two columns. The first column is the count and the second column has the type.
+            const type = simulator().testSubject('resolver:panel:node-events:event-type-count');
+            const link = simulator().testSubject('resolver:panel:node-events:event-type-link');
+            return {
+              typeLength: type.length,
+              linkLength: link.length,
+              typeText: type.text(),
+              linkText: link.text(),
+            };
+          })
+        ).toYieldEqualTo({
+          typeLength: 1,
+          linkLength: 1,
+          linkText: 'registry',
+          // EUI's Table adds the column name to the value.
+          typeText: 'Count2',
+        });
+      });
+      describe('and when the user clicks the registry events link', () => {
+        beforeEach(async () => {
+          const link = await simulator().resolve('resolver:panel:node-events:event-type-link');
+          const first = link?.first();
+          expect(first).toBeTruthy();
+
+          if (first) {
+            first.simulate('click', { button: 0 });
+          }
+        });
+        it('should show links to two events', async () => {
+          await expect(
+            simulator().map(
+              () =>
+                simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
+            )
+          ).toYieldEqualTo(2);
+        });
+        describe('and when the first event link is clicked', () => {
+          beforeEach(async () => {
+            const link = await simulator().resolve(
+              'resolver:panel:node-events-in-category:event-link'
+            );
+            const first = link?.first();
+            expect(first).toBeTruthy();
+
+            if (first) {
+              first.simulate('click', { button: 0 });
+            }
+          });
+          it('should show the event detail view', async () => {
+            await expect(
+              simulator().map(() => simulator().testSubject('resolver:panel:event-detail').length)
+            ).toYieldEqualTo(1);
+          });
+          describe.each([['user.domain', 'user.domain']])(
+            'when the user hovers over the description for the field "%p"',
+            (fieldName, expectedValue) => {
+              beforeEach(async () => {
+                const fieldHoverArea = await simulator().resolveWrapper(async () => {
+                  const dt = (
+                    await simulator().resolve('resolver:panel:event-detail:event-field-title')
+                  )?.filterWhere((title) => title.text() === fieldName);
+                  return (
+                    simulator()
+                      .descriptionDetails(dt!)
+                      // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
+                      .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
+                      .filterWhere(Simulator.isDOM)
+                  );
+                });
+                expect(fieldHoverArea).toBeTruthy();
+                fieldHoverArea?.simulate('mouseenter');
+              });
+              describe('when the user clicks on the clipboard button', () => {
+                beforeEach(async () => {
+                  const button = await simulator().resolve('resolver:panel:clipboard');
+                  expect(button).toBeTruthy();
+                  button!.simulate('click');
+                  simulator().confirmTextWrittenToClipboard();
+                });
+                it(`should write ${expectedValue} to the clipboard`, async () => {
+                  await expect(simulator().map(() => simulator().clipboardText)).toYieldEqualTo(
+                    expectedValue
+                  );
+                });
+              });
+            }
+          );
+        });
+      });
     });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {
@@ -178,7 +367,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           'resolver:node-detail:breadcrumbs:node-list-link'
         );
         if (nodeListLink) {
-          nodeListLink.simulate('click');
+          nodeListLink.simulate('click', { button: 0 });
         }
       });
       it('should show the list of nodes with links to each node', async () => {

@@ -18,9 +18,8 @@
  */
 
 import React, { PureComponent } from 'react';
-import { InjectedIntlProps } from 'react-intl';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiFlexGroup,

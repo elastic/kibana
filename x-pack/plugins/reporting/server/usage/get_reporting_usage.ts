@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from 'kibana/server';
 import { ReportingConfig } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { GetLicense } from './';
@@ -118,7 +118,7 @@ async function handleResponse(response: SearchResponse): Promise<Partial<RangeSt
 export async function getReportingUsage(
   config: ReportingConfig,
   getLicense: GetLicense,
-  callCluster: CallCluster,
+  callCluster: LegacyAPICaller,
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
   const reportingIndex = config.get('index');

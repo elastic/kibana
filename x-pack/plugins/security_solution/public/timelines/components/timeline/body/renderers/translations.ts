@@ -33,6 +33,6 @@ export const NON_EXISTENT = i18n.translate('xpack.securitySolution.auditd.nonExi
 export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
   'xpack.securitySolution.event.module.linkToElasticEndpointSecurityDescription',
   {
-    defaultMessage: 'Open in Elastic Endpoint Security',
+    defaultMessage: 'Open in Endpoint Security',
   }
 );

@@ -45,12 +45,21 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
       loadTestFile(require.resolve('./transaction_groups/error_rate'));
       loadTestFile(require.resolve('./transaction_groups/breakdown'));
-      loadTestFile(require.resolve('./transaction_groups/avg_duration_by_browser'));
+      loadTestFile(require.resolve('./transaction_groups/distribution'));
     });
 
     describe('Observability overview', function () {
       loadTestFile(require.resolve('./observability_overview/has_data'));
       loadTestFile(require.resolve('./observability_overview/observability_overview'));
+    });
+
+    describe('Metrics', function () {
+      loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
+    });
+
+    describe('Correlations', function () {
+      loadTestFile(require.resolve('./correlations/slow_durations'));
+      loadTestFile(require.resolve('./correlations/ranges'));
     });
   });
 }

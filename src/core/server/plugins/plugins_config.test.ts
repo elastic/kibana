@@ -17,13 +17,14 @@
  * under the License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { getEnvOptions } from '../config/mocks';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 describe('PluginsConfig', () => {
   it('retrieves additionalPluginPaths from config.paths when in production mode', () => {
-    const env = Env.createDefault(getEnvOptions({ cliArgs: { dev: false } }));
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: false } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
       paths: ['some-path', 'another-path'],
@@ -33,7 +34,7 @@ describe('PluginsConfig', () => {
   });
 
   it('retrieves additionalPluginPaths from config.paths when in development mode', () => {
-    const env = Env.createDefault(getEnvOptions({ cliArgs: { dev: true } }));
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
       paths: ['some-path', 'another-path'],

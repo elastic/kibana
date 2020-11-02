@@ -73,11 +73,22 @@ export const Node = ({
           <NodeDetailStatus
             stats={nodeSummary}
             alerts={alerts}
-            alertsStateFilter={(state) => state.nodeId === nodeId}
+            alertsStateFilter={(state) =>
+              state.nodeId === nodeId || state.stackProductUuid === nodeId
+            }
           />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <AlertsCallout alerts={alerts} stateFilter={(state) => state.nodeId === nodeId} />
+        <AlertsCallout
+          alerts={alerts}
+          stateFilter={(state) => state.nodeId === nodeId || state.stackProductUuid === nodeId}
+          nextStepsFilter={(nextStep) => {
+            if (nextStep.text.includes('Elasticsearch nodes')) {
+              return false;
+            }
+            return true;
+          }}
+        />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

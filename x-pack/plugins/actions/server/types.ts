@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -14,7 +14,10 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
+  ElasticsearchClient,
 } from '../../../../src/core/server';
+import { ActionTypeExecutorResult } from '../common';
+export { ActionTypeExecutorResult } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -28,6 +31,7 @@ export type ActionTypeParams = Record<string, unknown>;
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
@@ -78,16 +82,6 @@ export interface PreConfiguredAction<
 
 export interface FindActionResult extends ActionResult {
   referencedByCount: number;
-}
-
-// the result returned from an action type executor function
-export interface ActionTypeExecutorResult<Data> {
-  actionId: string;
-  status: 'ok' | 'error';
-  message?: string;
-  serviceMessage?: string;
-  data?: Data;
-  retry?: null | boolean | Date;
 }
 
 // signature of the action type executor function

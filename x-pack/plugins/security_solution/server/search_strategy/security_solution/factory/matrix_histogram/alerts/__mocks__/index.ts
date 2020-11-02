@@ -59,7 +59,28 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
+          {
+            bool: {
+              must: [],
+              filter: [
+                { match_all: {} },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          should: [{ exists: { field: 'host.name' } }],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              should: [],
+              must_not: [],
+            },
+          },
           {
             bool: {
               filter: [

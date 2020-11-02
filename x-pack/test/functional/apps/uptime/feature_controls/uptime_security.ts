@@ -173,12 +173,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Uptime');
       });
 
-      it(`renders not found page`, async () => {
+      it(`renders no permission page`, async () => {
         await PageObjects.common.navigateToUrl('uptime', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

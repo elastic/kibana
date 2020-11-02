@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { SavedObjectAttributes } from 'kibana/public';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -37,16 +38,19 @@ export const defaultEmbeddableFactoryProvider = <
     getExplicitInput: def.getExplicitInput
       ? def.getExplicitInput.bind(def)
       : () => Promise.resolve({}),
-    createFromSavedObject:
-      def.createFromSavedObject ??
-      ((savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
-        throw new Error(`Creation from saved object not supported by type ${def.type}`);
-      }),
+    createFromSavedObject: def.createFromSavedObject
+      ? def.createFromSavedObject.bind(def)
+      : (savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
+          throw new Error(`Creation from saved object not supported by type ${def.type}`);
+        },
     create: def.create.bind(def),
     type: def.type,
     isEditable: def.isEditable.bind(def),
     getDisplayName: def.getDisplayName.bind(def),
     savedObjectMetaData: def.savedObjectMetaData,
+    telemetry: def.telemetry || (() => ({})),
+    inject: def.inject || ((state: EmbeddableInput) => state),
+    extract: def.extract || ((state: EmbeddableInput) => ({ state, references: [] })),
   };
   return factory;
 };

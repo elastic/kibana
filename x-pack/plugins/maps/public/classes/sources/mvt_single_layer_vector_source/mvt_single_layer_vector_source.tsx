@@ -179,7 +179,7 @@ export class MVTSingleLayerVectorSource
 
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void
   ): MapExtent | null {
     return null;
   }
@@ -190,6 +190,18 @@ export class MVTSingleLayerVectorSource
 
   getApplyGlobalQuery(): boolean {
     return false;
+  }
+
+  isBoundsAware() {
+    return false;
+  }
+
+  getSourceTooltipContent() {
+    return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  async getLeftJoinFields() {
+    return [];
   }
 
   async getTooltipProperties(

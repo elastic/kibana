@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+
 import {
-  HostsQueries,
   HostOverviewRequestOptions,
+  HostsQueries,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostOverviewRequestOptions = {
@@ -111,7 +113,197 @@ export const formattedSearchStrategyResponse = {
   loaded: 21,
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "auditd_count": {\n        "filter": {\n          "term": {\n            "event.module": "auditd"\n          }\n        }\n      },\n      "endgame_module": {\n        "filter": {\n          "bool": {\n            "should": [\n              {\n                "term": {\n                  "event.module": "endpoint"\n                }\n              },\n              {\n                "term": {\n                  "event.module": "endgame"\n                }\n              }\n            ]\n          }\n        },\n        "aggs": {\n          "dns_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "filter": [\n                        {\n                          "term": {\n                            "network.protocol": "dns"\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "network"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "dns_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "file_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "term": {\n                      "event.category": "file"\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "file_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "image_load_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "should": [\n                        {\n                          "term": {\n                            "event.category": "library"\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "driver"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "image_load_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "network_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "filter": [\n                        {\n                          "bool": {\n                            "must_not": {\n                              "term": {\n                                "network.protocol": "dns"\n                              }\n                            }\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "network"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "network_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "process_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "term": {\n                      "event.category": "process"\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "process_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "registry_event": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "term": {\n                      "event.category": "registry"\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "registry_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "security_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "filter": [\n                        {\n                          "term": {\n                            "event.category": "session"\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "authentication"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "security_event"\n                    }\n                  }\n                ]\n              }\n            }\n          }\n        }\n      },\n      "fim_count": {\n        "filter": {\n          "term": {\n            "event.module": "file_integrity"\n          }\n        }\n      },\n      "winlog_module": {\n        "filter": {\n          "term": {\n            "agent.type": "winlogbeat"\n          }\n        },\n        "aggs": {\n          "mwsysmon_operational_event_count": {\n            "filter": {\n              "term": {\n                "winlog.channel": "Microsoft-Windows-Sysmon/Operational"\n              }\n            }\n          },\n          "security_event_count": {\n            "filter": {\n              "term": {\n                "winlog.channel": "Security"\n              }\n            }\n          }\n        }\n      },\n      "system_module": {\n        "filter": {\n          "term": {\n            "event.module": "system"\n          }\n        },\n        "aggs": {\n          "login_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "login"\n              }\n            }\n          },\n          "package_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "package"\n              }\n            }\n          },\n          "process_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "process"\n              }\n            }\n          },\n          "user_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "user"\n              }\n            }\n          },\n          "filebeat_count": {\n            "filter": {\n              "term": {\n                "agent.type": "filebeat"\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"host.name\\"}}],\\"minimum_should_match\\":1}}]}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-07T09:47:28.606Z",\n                "lte": "2020-09-08T09:47:28.606Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              auditd_count: { filter: { term: { 'event.module': 'auditd' } } },
+              endgame_module: {
+                filter: {
+                  bool: {
+                    should: [
+                      { term: { 'event.module': 'endpoint' } },
+                      { term: { 'event.module': 'endgame' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  dns_event_count: {
+                    filter: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              filter: [
+                                { term: { 'network.protocol': 'dns' } },
+                                { term: { 'event.category': 'network' } },
+                              ],
+                            },
+                          },
+                          { term: { 'endgame.event_type_full': 'dns_event' } },
+                        ],
+                      },
+                    },
+                  },
+                  file_event_count: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { 'event.category': 'file' } },
+                          { term: { 'endgame.event_type_full': 'file_event' } },
+                        ],
+                      },
+                    },
+                  },
+                  image_load_event_count: {
+                    filter: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                { term: { 'event.category': 'library' } },
+                                { term: { 'event.category': 'driver' } },
+                              ],
+                            },
+                          },
+                          { term: { 'endgame.event_type_full': 'image_load_event' } },
+                        ],
+                      },
+                    },
+                  },
+                  network_event_count: {
+                    filter: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              filter: [
+                                { bool: { must_not: { term: { 'network.protocol': 'dns' } } } },
+                                { term: { 'event.category': 'network' } },
+                              ],
+                            },
+                          },
+                          { term: { 'endgame.event_type_full': 'network_event' } },
+                        ],
+                      },
+                    },
+                  },
+                  process_event_count: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { 'event.category': 'process' } },
+                          { term: { 'endgame.event_type_full': 'process_event' } },
+                        ],
+                      },
+                    },
+                  },
+                  registry_event: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { 'event.category': 'registry' } },
+                          { term: { 'endgame.event_type_full': 'registry_event' } },
+                        ],
+                      },
+                    },
+                  },
+                  security_event_count: {
+                    filter: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              filter: [
+                                { term: { 'event.category': 'session' } },
+                                { term: { 'event.category': 'authentication' } },
+                              ],
+                            },
+                          },
+                          { term: { 'endgame.event_type_full': 'security_event' } },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              fim_count: { filter: { term: { 'event.module': 'file_integrity' } } },
+              winlog_module: {
+                filter: { term: { 'agent.type': 'winlogbeat' } },
+                aggs: {
+                  mwsysmon_operational_event_count: {
+                    filter: { term: { 'winlog.channel': 'Microsoft-Windows-Sysmon/Operational' } },
+                  },
+                  security_event_count: { filter: { term: { 'winlog.channel': 'Security' } } },
+                },
+              },
+              system_module: {
+                filter: { term: { 'event.module': 'system' } },
+                aggs: {
+                  login_count: { filter: { term: { 'event.dataset': 'login' } } },
+                  package_count: { filter: { term: { 'event.dataset': 'package' } } },
+                  process_count: { filter: { term: { 'event.dataset': 'process' } } },
+                  user_count: { filter: { term: { 'event.dataset': 'user' } } },
+                  filebeat_count: { filter: { term: { 'agent.type': 'filebeat' } } },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { match_all: {} },
+                        {
+                          bool: {
+                            filter: [
+                              {
+                                bool: {
+                                  should: [{ exists: { field: 'host.name' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-07T09:47:28.606Z',
+                        lte: '2020-09-08T09:47:28.606Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: false,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   overviewHost: {
@@ -283,7 +475,28 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
+          {
+            bool: {
+              must: [],
+              filter: [
+                { match_all: {} },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          should: [{ exists: { field: 'host.name' } }],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              should: [],
+              must_not: [],
+            },
+          },
           {
             range: {
               '@timestamp': {

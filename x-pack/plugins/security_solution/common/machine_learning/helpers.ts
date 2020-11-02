@@ -23,4 +23,4 @@ export const isJobFailed = (jobState: string, datafeedState: string): boolean =>
   return failureStates.includes(jobState) || failureStates.includes(datafeedState);
 };
 
-export const isMlRule = (ruleType: Type) => ruleType === 'machine_learning';
+export const isMlRule = (ruleType: Type | undefined) => ruleType === 'machine_learning';

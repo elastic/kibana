@@ -5,7 +5,7 @@
  */
 
 import fs from 'fs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
 import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
@@ -17,7 +17,7 @@ import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import {
   KibanaObjects,
   KibanaObjectConfig,
-  ModuleDataFeed,
+  ModuleDatafeed,
   ModuleJob,
   Module,
   JobOverride,
@@ -248,12 +248,11 @@ export class DataRecognizer {
 
     const { body } = await this._asCurrentUser.search({
       index,
-      rest_total_hits_as_int: true,
       size,
       body: searchBody,
     });
 
-    return body.hits.total !== 0;
+    return body.hits.total.value > 0;
   }
 
   async listModules() {
@@ -284,7 +283,7 @@ export class DataRecognizer {
     }
 
     const jobs: ModuleJob[] = [];
-    const datafeeds: ModuleDataFeed[] = [];
+    const datafeeds: ModuleDatafeed[] = [];
     const kibana: KibanaObjects = {};
     // load all of the job configs
     await Promise.all(
@@ -711,7 +710,7 @@ export class DataRecognizer {
   // save the datafeeds.
   // if any fail (e.g. it already exists), catch the error and mark the result
   // as success: false
-  async saveDatafeeds(datafeeds: ModuleDataFeed[]) {
+  async saveDatafeeds(datafeeds: ModuleDatafeed[]) {
     return await Promise.all(
       datafeeds.map(async (datafeed) => {
         try {
@@ -724,7 +723,7 @@ export class DataRecognizer {
     );
   }
 
-  async saveDatafeed(datafeed: ModuleDataFeed) {
+  async saveDatafeed(datafeed: ModuleDatafeed) {
     return this._asInternalUser.ml.putDatafeed(
       {
         datafeed_id: datafeed.id,
@@ -735,7 +734,7 @@ export class DataRecognizer {
   }
 
   async startDatafeeds(
-    datafeeds: ModuleDataFeed[],
+    datafeeds: ModuleDatafeed[],
     start?: number,
     end?: number
   ): Promise<{ [key: string]: DatafeedResponse }> {
@@ -747,7 +746,7 @@ export class DataRecognizer {
   }
 
   async startDatafeed(
-    datafeed: ModuleDataFeed,
+    datafeed: ModuleDatafeed,
     start: number | undefined,
     end: number | undefined
   ): Promise<DatafeedResponse> {
@@ -1230,6 +1229,25 @@ export class DataRecognizer {
       const overrides = Array.isArray(datafeedOverrides) ? datafeedOverrides : [datafeedOverrides];
       const { datafeeds } = moduleConfig;
 
+      // for some items in the datafeed, we should not merge.
+      // we should instead use the whole override object
+      function overwriteObjects(source: ModuleDatafeed['config'], update: DatafeedOverride) {
+        Object.entries(update).forEach(([key, val]) => {
+          if (typeof val === 'object') {
+            switch (key) {
+              case 'query':
+              case 'aggregations':
+              case 'aggs':
+              case 'script_fields':
+                source[key] = val as any;
+                break;
+              default:
+                break;
+            }
+          }
+        });
+      }
+
       // separate all the overrides.
       // the overrides which don't contain a datafeed id or a job id will be applied to all jobs in the module
       const generalOverrides: GeneralDatafeedsOverride[] = [];
@@ -1245,6 +1263,7 @@ export class DataRecognizer {
       generalOverrides.forEach((o) => {
         datafeeds.forEach(({ config }) => {
           merge(config, o);
+          overwriteObjects(config, o);
         });
       });
 
@@ -1260,6 +1279,7 @@ export class DataRecognizer {
           delete o.job_id;
           delete o.datafeed_id;
           merge(datafeed.config, o);
+          overwriteObjects(datafeed.config, o);
         }
       });
     }

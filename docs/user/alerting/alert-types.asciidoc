@@ -2,7 +2,7 @@
 [[alert-types]]
 == Alert types
 
-{kib} supplies alerts types in two ways: some are built into {kib}, while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<xpack-infra,*Metrics*>>, and <<xpack-uptime,*Uptime*>>.
+{kib} supplies alerts types in two ways: some are built into {kib}, while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, and <<uptime-app,*Uptime*>>.
 
 This section covers built-in alert types. For domain-specific alert types, refer to the documentation for that app. 
 

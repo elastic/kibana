@@ -5,6 +5,8 @@
  */
 
 import React, { useCallback, useContext, useReducer, Reducer } from 'react';
+import { i18n } from '@kbn/i18n';
+
 import { useKibana } from '../../../../shared_imports';
 import {
   DeserializedProcessorResult,
@@ -13,6 +15,7 @@ import {
 } from '../deserialize';
 import { serialize } from '../serialize';
 import { Document } from '../types';
+import { useIsMounted } from '../use_is_mounted';
 
 export interface TestPipelineData {
   config: {
@@ -48,11 +51,14 @@ type Action =
   | {
       type: 'updateIsExecutingPipeline';
       payload: Pick<TestPipelineData, 'isExecutingPipeline'>;
+    }
+  | {
+      type: 'reset';
     };
 
 export interface TestPipelineContext {
   testPipelineData: TestPipelineData;
-  setCurrentTestPipelineData: (data: Action) => void;
+  testPipelineDataDispatch: (data: Action) => void;
   updateTestOutputPerProcessor: (
     documents: Document[] | undefined,
     processors: DeserializeResult
@@ -66,7 +72,7 @@ const DEFAULT_TEST_PIPELINE_CONTEXT = {
     },
     isExecutingPipeline: false,
   },
-  setCurrentTestPipelineData: () => {},
+  testPipelineDataDispatch: () => {},
   updateTestOutputPerProcessor: () => {},
 };
 
@@ -119,12 +125,17 @@ export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
     };
   }
 
+  if (action.type === 'reset') {
+    return DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData;
+  }
+
   return state;
 };
 
 export const TestPipelineContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData);
   const { services } = useKibana();
+  const isMounted = useIsMounted();
 
   const updateTestOutputPerProcessor = useCallback(
     async (documents: Document[] | undefined, processors: DeserializeResult) => {
@@ -150,6 +161,10 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
         pipeline: { ...serializedProcessorsWithTag },
       });
 
+      if (!isMounted.current) {
+        return;
+      }
+
       if (error) {
         dispatch({
           type: 'updateOutputPerProcessor',
@@ -159,6 +174,12 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
             // this will result to the status changing to "inactive"
             testOutputPerProcessor: undefined,
           },
+        });
+
+        services.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.ingestPipelines.testPipeline.errorNotificationText', {
+            defaultMessage: 'Error executing pipeline',
+          }),
         });
 
         return;
@@ -172,14 +193,14 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
         },
       });
     },
-    [services.api]
+    [isMounted, services.api, services.notifications.toasts]
   );
 
   return (
     <TestPipelineContext.Provider
       value={{
         testPipelineData: state,
-        setCurrentTestPipelineData: dispatch,
+        testPipelineDataDispatch: dispatch,
         updateTestOutputPerProcessor,
       }}
     >

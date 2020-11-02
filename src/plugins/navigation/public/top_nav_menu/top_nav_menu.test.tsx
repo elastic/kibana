@@ -164,7 +164,6 @@ describe('TopNavMenu', () => {
 
       // menu is rendered outside of the component
       expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
-      expect(portalTarget.getElementsByTagName('BUTTON').length).toBe(menuItems.length);
     });
   });
 });

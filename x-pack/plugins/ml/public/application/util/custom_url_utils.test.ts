@@ -456,7 +456,7 @@ describe('ML - custom URL utils', () => {
       );
     });
 
-    test('return expected url for Security app', () => {
+    test('return expected URL for Security app', () => {
       const urlConfig = {
         url_name: 'Hosts Details by process name',
         url_value:
@@ -505,6 +505,45 @@ describe('ML - custom URL utils', () => {
 
       expect(getUrlForRecord(urlConfig, testRecords)).toBe(
         "security/hosts/ml-hosts/showcase?_g=()&query=(language:kuery,query:'process.name:\"seq\"')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-02-01T16:00:00.000Z',kind:absolute,to:'2019-02-01T18:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-02-01T16%3A00%3A00.000Z',kind:absolute,to:'2019-02-01T18%3A59%3A59.999Z')))"
+      );
+    });
+
+    test('return expected URL for Metrics app', () => {
+      const urlConfig = {
+        url_name: 'Hosts Details by process name',
+        url_value:
+          'metrics/detail/host/$host.name$?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))',
+      };
+
+      const testRecord = {
+        job_id: 'hosts_memory_usage',
+        result_type: 'record',
+        probability: 0.0001288876418224276,
+        multi_bucket_impact: -5,
+        record_score: 88.26287,
+        initial_record_score: 61.553927615180186,
+        bucket_span: 900,
+        detector_index: 0,
+        is_interim: false,
+        timestamp: 1599571800000,
+        function: 'max',
+        function_description: 'max',
+        typical: [0.23685835059986396],
+        actual: [0.258],
+        field_name: 'system.memory.actual.used.pct',
+        influencers: [
+          {
+            influencer_field_name: 'host.name',
+            influencer_field_values: ['gke-dev-next-oblt-dev-next-oblt-pool-404d7f0c-2bfl'],
+          },
+        ],
+        'host.name': ['gke-dev-next-oblt-dev-next-oblt-pool-404d7f0c-2bfl'],
+        earliest: '2019-09-08T12:00:00.000Z',
+        latest: '2019-09-08T14:59:59.999Z',
+      };
+
+      expect(getUrlForRecord(urlConfig, testRecord)).toBe(
+        "metrics/detail/host/gke-dev-next-oblt-dev-next-oblt-pool-404d7f0c-2bfl?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:'2019-09-08T12:00:00.000Z',interval:>=1m,to:'2019-09-08T14:59:59.999Z'))"
       );
     });
 

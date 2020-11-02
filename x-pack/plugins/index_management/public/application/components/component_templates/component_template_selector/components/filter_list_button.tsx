@@ -56,7 +56,7 @@ export function FilterListButton({ onChange, filters }: Props) {
       numFilters={Object.keys(filters).length}
       hasActiveFilters={activeFilters.length > 0}
       numActiveFilters={activeFilters.length}
-      data-test-subj="viewButton"
+      data-test-subj="filterButton"
     >
       <FormattedMessage
         id="xpack.idxMgmt.indexTemplatesList.filterButtonLabel"

@@ -11,8 +11,8 @@ import { pickKeys } from '../../../../../common/utils/pick_keys';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
-  traceId: string;
-  transactionId: string;
+  traceId?: string;
+  transactionId?: string;
   transactionName: string;
   transactionType: string;
 }

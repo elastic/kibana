@@ -9,20 +9,23 @@ import {
   ClassificationAnalysis,
   OutlierAnalysis,
   RegressionAnalysis,
-  ANALYSIS_CONFIG_TYPE,
 } from '../types/data_frame_analytics';
+import { ANALYSIS_CONFIG_TYPE } from '../../common/constants/data_frame_analytics';
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
+  if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
 };
 
 export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
+  if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
 };
 
 export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
+  if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };

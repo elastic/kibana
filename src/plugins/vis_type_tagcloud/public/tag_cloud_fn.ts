@@ -19,32 +19,33 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 import { TagCloudVisParams } from './types';
 
 const name = 'tagcloud';
 
 interface Arguments extends TagCloudVisParams {
   metric: any; // these aren't typed yet
-  bucket: any; // these aren't typed yet
+  bucket?: any; // these aren't typed yet
 }
 
-interface RenderValue {
+export interface TagCloudVisRenderValue {
   visType: typeof name;
-  visData: KibanaDatatable;
-  visConfig: Arguments;
-  params: any;
+  visData: Datatable;
+  visParams: Arguments;
 }
 
-export const createTagCloudFn = (): ExpressionFunctionDefinition<
+export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
-  KibanaDatatable,
+  Datatable,
   Arguments,
-  Render<RenderValue>
-> => ({
+  Render<TagCloudVisRenderValue>
+>;
+
+export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
   name,
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeTagCloud.function.help', {
     defaultMessage: 'Tagcloud visualization',
   }),
@@ -95,7 +96,7 @@ export const createTagCloudFn = (): ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
-    const visConfig = {
+    const visParams = {
       scale: args.scale,
       orientation: args.orientation,
       minFontSize: args.minFontSize,
@@ -105,19 +106,16 @@ export const createTagCloudFn = (): ExpressionFunctionDefinition<
     } as Arguments;
 
     if (args.bucket !== undefined) {
-      visConfig.bucket = args.bucket;
+      visParams.bucket = args.bucket;
     }
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'tagloud_vis',
       value: {
         visData: input,
         visType: name,
-        visConfig,
-        params: {
-          listenOnChange: true,
-        },
+        visParams,
       },
     };
   },

@@ -82,6 +82,58 @@ describe('#create', () => {
     expect(mockBaseClient.create).not.toHaveBeenCalled();
   });
 
+  it('allows a specified ID when overwriting an existing object', async () => {
+    const attributes = {
+      attrOne: 'one',
+      attrSecret: 'secret',
+      attrNotSoSecret: 'not-so-secret',
+      attrThree: 'three',
+    };
+    const options = { id: 'predefined-uuid', overwrite: true, version: 'some-version' };
+    const mockedResponse = {
+      id: 'predefined-uuid',
+      type: 'known-type',
+      attributes: {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      references: [],
+    };
+
+    mockBaseClient.create.mockResolvedValue(mockedResponse);
+
+    expect(await wrapper.create('known-type', attributes, options)).toEqual({
+      ...mockedResponse,
+      attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
+    });
+
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'predefined-uuid' },
+      {
+        attrOne: 'one',
+        attrSecret: 'secret',
+        attrNotSoSecret: 'not-so-secret',
+        attrThree: 'three',
+      },
+      { user: mockAuthenticatedUser() }
+    );
+
+    expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.create).toHaveBeenCalledWith(
+      'known-type',
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      { id: 'predefined-uuid', overwrite: true, version: 'some-version' }
+    );
+  });
+
   it('generates ID, encrypts attributes and strips them from response except for ones with `dangerouslyExposeValue` set to `true`', async () => {
     const attributes = {
       attrOne: 'one',
@@ -260,6 +312,77 @@ describe('#bulkCreate', () => {
     );
 
     expect(mockBaseClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('allows a specified ID when overwriting an existing object', async () => {
+    const attributes = {
+      attrOne: 'one',
+      attrSecret: 'secret',
+      attrNotSoSecret: 'not-so-secret',
+      attrThree: 'three',
+    };
+    const mockedResponse = {
+      saved_objects: [
+        {
+          id: 'predefined-uuid',
+          type: 'known-type',
+          attributes: { ...attributes, attrSecret: '*secret*', attrNotSoSecret: '*not-so-secret*' },
+          references: [],
+        },
+        {
+          id: 'some-id',
+          type: 'unknown-type',
+          attributes,
+          references: [],
+        },
+      ],
+    };
+
+    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
+
+    const bulkCreateParams = [
+      { id: 'predefined-uuid', type: 'known-type', attributes, version: 'some-version' },
+      { type: 'unknown-type', attributes },
+    ];
+
+    await expect(wrapper.bulkCreate(bulkCreateParams, { overwrite: true })).resolves.toEqual({
+      saved_objects: [
+        {
+          ...mockedResponse.saved_objects[0],
+          attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
+        },
+        mockedResponse.saved_objects[1],
+      ],
+    });
+
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'predefined-uuid' },
+      {
+        attrOne: 'one',
+        attrSecret: 'secret',
+        attrNotSoSecret: 'not-so-secret',
+        attrThree: 'three',
+      },
+      { user: mockAuthenticatedUser() }
+    );
+
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          ...bulkCreateParams[0],
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
+            attrThree: 'three',
+          },
+        },
+        bulkCreateParams[1],
+      ],
+      { overwrite: true }
+    );
   });
 
   it('generates ID, encrypts attributes and strips them from response except for ones with `dangerouslyExposeValue` set to `true`', async () => {

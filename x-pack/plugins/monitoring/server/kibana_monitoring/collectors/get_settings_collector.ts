@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Collector, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
 
@@ -38,11 +40,27 @@ export async function checkForEmailValue(
   }
 }
 
-export function getSettingsCollector(usageCollection: any, config: MonitoringConfig) {
+interface EmailSettingData {
+  xpack: { default_admin_email: string | null };
+}
+
+export interface KibanaSettingsCollector extends Collector<EmailSettingData | undefined> {
+  getEmailValueStructure(email: string | null): EmailSettingData;
+}
+
+export function getSettingsCollector(
+  usageCollection: UsageCollectionSetup,
+  config: MonitoringConfig
+) {
   return usageCollection.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
-    async fetch() {
+    schema: {
+      xpack: {
+        default_admin_email: { type: 'text' },
+      },
+    },
+    async fetch(this: KibanaSettingsCollector) {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config);
 
@@ -64,7 +82,7 @@ export function getSettingsCollector(usageCollection: any, config: MonitoringCon
       // returns undefined if there was no result
       return kibanaSettingsData;
     },
-    getEmailValueStructure(email: string) {
+    getEmailValueStructure(email: string | null) {
       return {
         xpack: {
           default_admin_email: email,

@@ -5,12 +5,9 @@
  */
 
 import { isEmpty } from 'lodash';
+import { Logger } from '@kbn/logging';
 import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
@@ -19,13 +16,19 @@ export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 
 export async function getServices({
   setup,
-  mlAnomaliesEnvironment,
+  searchAggregatedTransactions,
+  logger,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
-  mlAnomaliesEnvironment?: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+  logger: Logger;
 }) {
   const [items, hasLegacyData] = await Promise.all([
-    getServicesItems({ setup, mlAnomaliesEnvironment }),
+    getServicesItems({
+      setup,
+      searchAggregatedTransactions,
+      logger,
+    }),
     getLegacyDataStatus(setup),
   ]);
 

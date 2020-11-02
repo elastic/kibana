@@ -48,7 +48,7 @@ export const networkTls: SecuritySolutionFactory<NetworkQueries.tls> = {
       edges,
       inspect,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

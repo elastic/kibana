@@ -20,9 +20,7 @@
 import moment from 'moment-timezone';
 import { merge } from 'lodash';
 import { schema } from '@kbn/config-schema';
-
-import { LogRecord } from '../log_record';
-import { Layout } from './layouts';
+import { LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 

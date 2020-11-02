@@ -8,12 +8,19 @@ import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
+  ConnectorTypes,
 } from '../../../../plugins/case/common/api';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
   tags: ['defacement'],
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: '.none' as ConnectorTypes,
+    fields: null,
+  },
 };
 
 export const postCommentReq: { comment: string } = {
@@ -25,7 +32,6 @@ export const postCaseResp = (id: string): Partial<CaseResponse> => ({
   id,
   comments: [],
   totalComment: 0,
-  connector_id: 'none',
   closed_by: null,
   created_by: defaultUser,
   external_service: null,

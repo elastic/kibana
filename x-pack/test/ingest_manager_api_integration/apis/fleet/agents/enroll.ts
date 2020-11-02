@@ -59,7 +59,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should not allow to enroll an agent with a invalid enrollment', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', 'ApiKey NOTAVALIDKEY')
         .send({
@@ -76,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should not allow to enroll an agent with a shared id if it already exists ', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'authorization',
@@ -98,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should not allow to enroll an agent with a version > kibana', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'authorization',
@@ -120,7 +120,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should allow to enroll an agent with a valid enrollment token', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'Authorization',
@@ -141,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('when enrolling an agent it should generate an access api key with limited privileges', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'Authorization',

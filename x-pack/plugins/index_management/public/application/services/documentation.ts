@@ -123,6 +123,10 @@ class DocumentationService {
     return `${this.esDocsBase}/ignore-malformed.html`;
   }
 
+  public getMetaLink() {
+    return `${this.esDocsBase}/mapping-field-meta.html`;
+  }
+
   public getFormatLink() {
     return `${this.esDocsBase}/mapping-date-format.html`;
   }

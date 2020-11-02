@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Map as MbMap } from 'mapbox-gl';
-import { DynamicStyleProperty, FieldFormatter } from './dynamic_style_property';
+import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
 import {
@@ -16,7 +16,7 @@ import {
   SMALL_MAKI_ICON_SIZE,
   // @ts-expect-error
 } from '../symbol_utils';
-import { MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
+import { FieldFormatter, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';

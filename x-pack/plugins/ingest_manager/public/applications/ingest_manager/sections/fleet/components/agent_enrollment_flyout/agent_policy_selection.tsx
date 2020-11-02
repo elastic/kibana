@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
 import { sendGetEnrollmentAPIKeys, useCore } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
@@ -98,7 +99,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         try {
           const res = await sendGetEnrollmentAPIKeys({
             page: 1,
-            perPage: 10000,
+            perPage: SO_SEARCH_LIMIT,
           });
           if (res.error) {
             throw res.error;
@@ -154,7 +155,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         prepend={
           <EuiText>
             <FormattedMessage
-              id="xpack.ingestManager.enrollmentStepAgentPolicy.policySelectLabel"
+              id="xpack.fleet.enrollmentStepAgentPolicy.policySelectLabel"
               defaultMessage="Agent policy"
             />
           </EuiText>
@@ -171,10 +172,9 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
             enrollmentAPIKeyId: undefined,
           })
         }
-        aria-label={i18n.translate(
-          'xpack.ingestManager.enrollmentStepAgentPolicy.policySelectAriaLabel',
-          { defaultMessage: 'Agent policy' }
-        )}
+        aria-label={i18n.translate('xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel', {
+          defaultMessage: 'Agent policy',
+        })}
       />
       <EuiSpacer size="m" />
       {selectedState.agentPolicyId && (
@@ -189,7 +189,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
             onClick={() => setIsAuthenticationSettingsOpen(!isAuthenticationSettingsOpen)}
           >
             <FormattedMessage
-              id="xpack.ingestManager.enrollmentStepAgentPolicy.showAuthenticationSettingsButton"
+              id="xpack.fleet.enrollmentStepAgentPolicy.showAuthenticationSettingsButton"
               defaultMessage="Authentication settings"
             />
           </EuiButtonEmpty>
@@ -206,7 +206,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
                 prepend={
                   <EuiText>
                     <FormattedMessage
-                      id="xpack.ingestManager.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel"
+                      id="xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel"
                       defaultMessage="Enrollment token"
                     />
                   </EuiText>

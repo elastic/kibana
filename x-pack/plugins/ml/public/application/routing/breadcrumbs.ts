@@ -54,6 +54,20 @@ export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/jobs/new_job',
 });
 
+export const CALENDAR_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
+    defaultMessage: 'Calendar management',
+  }),
+  href: '/settings/calendars_list',
+});
+
+export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
+    defaultMessage: 'Filter lists',
+  }),
+  href: '/settings/filter_lists',
+});
+
 const breadcrumbs = {
   ML_BREADCRUMB,
   SETTINGS_BREADCRUMB,
@@ -61,6 +75,8 @@ const breadcrumbs = {
   DATA_FRAME_ANALYTICS_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
   CREATE_JOB_BREADCRUMB,
+  CALENDAR_MANAGEMENT_BREADCRUMB,
+  FILTER_LISTS_BREADCRUMB,
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 
@@ -76,10 +92,12 @@ export const breadcrumbOnClickFactory = (
 
 export const getBreadcrumbWithUrlForApp = (
   breadcrumbName: Breadcrumb,
-  navigateToPath: NavigateToPath
+  navigateToPath: NavigateToPath,
+  basePath: string
 ): EuiBreadcrumb => {
   return {
-    ...breadcrumbs[breadcrumbName],
+    text: breadcrumbs[breadcrumbName].text,
+    href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,
     onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
   };
 };

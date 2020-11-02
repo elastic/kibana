@@ -15,7 +15,7 @@ describe('local ui filter queries', () => {
   let mock: SearchParamsMock;
 
   beforeEach(() => {
-    jest.mock('../../helpers/convert_ui_filters/get_ui_filters_es', () => {
+    jest.mock('../../helpers/convert_ui_filters/get_es_filter', () => {
       return [];
     });
   });
@@ -29,7 +29,10 @@ describe('local ui filter queries', () => {
       getLocalUIFilters({
         setup,
         localFilterNames: ['transactionResult', 'host'],
-        projection: getServicesProjection({ setup }),
+        projection: getServicesProjection({
+          setup,
+          searchAggregatedTransactions: false,
+        }),
         uiFilters: {
           transactionResult: ['2xx'],
         },

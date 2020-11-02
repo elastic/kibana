@@ -710,11 +710,17 @@ export interface ApplicationStart {
   navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 
   /**
-   * Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.
+   * Navigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application
+   * within the current basePath).
    *
-   * If all these criteria are true for the given url:
+   * The method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:
+   * - an absolute URL
+   * - an absolute path
+   * - a path relative to the current URL (window.location.href)
+   *
+   * If all these criteria are true for the given URL:
    * - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
-   * - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
+   * - The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)
    * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
    *
    * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
@@ -727,23 +733,27 @@ export interface ApplicationStart {
    * // will call `application.navigateToApp('discover', { path: '/some-path?foo=bar'})`
    * application.navigateToUrl('https://kibana:8080/base-path/s/my-space/app/discover/some-path?foo=bar')
    * application.navigateToUrl('/base-path/s/my-space/app/discover/some-path?foo=bar')
+   * application.navigateToUrl('./discover/some-path?foo=bar')
    *
    * // will perform a full page reload using `window.location.assign`
    * application.navigateToUrl('https://elsewhere:8080/base-path/s/my-space/app/discover/some-path') // origin does not match
    * application.navigateToUrl('/app/discover/some-path') // does not include the current basePath
    * application.navigateToUrl('/base-path/s/my-space/app/unknown-app/some-path') // unknown application
+   * application.navigateToUrl('../discover') // resolve to `/base-path/s/my-space/discover` which is not a path of a known app.
+   * application.navigateToUrl('../../other-space/discover') // resolve to `/base-path/s/other-space/discover` which is not within the current basePath.
    * ```
    *
-   * @param url - an absolute url, or a relative path, to navigate to.
+   * @param url - an absolute URL, an absolute path or a relative path, to navigate to.
    */
   navigateToUrl(url: string): Promise<void>;
 
   /**
-   * Returns an URL to a given app, including the global base path.
-   * By default, the URL is relative (/basePath/app/my-app).
-   * Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
+   * Returns the absolute path (or URL) to a given app, including the global base path.
    *
-   * Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's location.
+   * By default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).
+   * Use the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`)
+   *
+   * Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.
    *
    * @param appId
    * @param options.path - optional path inside application to deep link to

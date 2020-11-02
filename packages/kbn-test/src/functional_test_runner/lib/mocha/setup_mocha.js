@@ -19,7 +19,7 @@
 
 import Mocha from 'mocha';
 import { relative } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { loadTestFiles } from './load_test_files';
 import { filterSuitesByTags } from './filter_suites_by_tags';

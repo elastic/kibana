@@ -10,7 +10,7 @@ import React from 'react';
 
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
-import { Ecs } from '../../../../../../graphql/types';
+import { Ecs } from '../../../../../../../common/ecs';
 import {
   mockDnsEvent,
   mockFimFileCreatedEvent,

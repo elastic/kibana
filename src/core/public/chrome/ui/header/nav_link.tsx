@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
+import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
@@ -87,6 +88,7 @@ export interface RecentNavLink {
   title: string;
   'aria-label': string;
   iconType?: string;
+  onClick: React.MouseEventHandler;
 }
 
 /**
@@ -102,8 +104,9 @@ export interface RecentNavLink {
 export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
-  basePath: HttpStart['basePath']
-) {
+  basePath: HttpStart['basePath'],
+  navigateToUrl: InternalApplicationStart['navigateToUrl']
+): RecentNavLink {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
@@ -125,5 +128,12 @@ export function createRecentNavLink(
     title: titleAndAriaLabel,
     'aria-label': titleAndAriaLabel,
     iconType: navLink?.euiIconType,
+    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
+    onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+      if (event.button === 0 && !isModifiedOrPrevented(event)) {
+        event.preventDefault();
+        navigateToUrl(href);
+      }
+    },
   };
 }

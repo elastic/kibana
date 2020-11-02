@@ -335,6 +335,37 @@ export function MachineLearningJobWizardCommonProvider(
       }
     },
 
+    async assertStartDatafeedSwitchExists() {
+      const subj = 'mlJobWizardStartDatafeedCheckbox';
+      await testSubjects.existOrFail(subj, { allowHidden: true });
+    },
+
+    async getStartDatafeedSwitchCheckedState(): Promise<boolean> {
+      const subj = 'mlJobWizardStartDatafeedCheckbox';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      return isSelected === 'true';
+    },
+
+    async assertStartDatafeedSwitchCheckedState(expectedValue: boolean) {
+      const actualCheckedState = await this.getStartDatafeedSwitchCheckedState();
+      expect(actualCheckedState).to.eql(
+        expectedValue,
+        `Expected start datafeed switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          actualCheckedState ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async toggleStartDatafeedSwitch(toggle: boolean) {
+      const subj = 'mlJobWizardStartDatafeedCheckbox';
+      if ((await this.getStartDatafeedSwitchCheckedState()) !== toggle) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertStartDatafeedSwitchCheckedState(toggle);
+        });
+      }
+    },
+
     async assertModelMemoryLimitInputExists(
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ) {
@@ -509,6 +540,11 @@ export function MachineLearningJobWizardCommonProvider(
     async createJobAndWaitForCompletion() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 2 * 60 * 1000 });
+    },
+
+    async createJobWithoutDatafeedStart() {
+      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.existOrFail('mlPageJobManagement');
     },
   };
 }

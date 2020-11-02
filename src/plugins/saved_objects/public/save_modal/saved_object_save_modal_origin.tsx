@@ -33,6 +33,8 @@ interface SaveModalDocumentInfo {
 interface OriginSaveModalProps {
   originatingApp?: string;
   getAppNameFromId?: (appId: string) => string | undefined;
+  originatingAppName?: string;
+  returnToOriginSwitchLabel?: string;
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;
@@ -73,11 +75,13 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
                 setReturnToOriginMode(event.target.checked);
               }}
               label={
-                <FormattedMessage
-                  id="savedObjects.saveModalOrigin.originAfterSavingSwitchLabel"
-                  defaultMessage="{originVerb} to {origin} after saving"
-                  values={{ originVerb, origin }}
-                />
+                props.returnToOriginSwitchLabel ?? (
+                  <FormattedMessage
+                    id="savedObjects.saveModalOrigin.originAfterSavingSwitchLabel"
+                    defaultMessage="{originVerb} to {origin} after saving"
+                    values={{ originVerb, origin }}
+                  />
+                )
               }
             />
           </EuiFormRow>

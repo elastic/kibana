@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should do nothing on empty post', async () => {
       await supertest
-        .post('/api/lens/telemetry')
+        .post('/api/lens/stats')
         .set(COMMON_HEADERS)
         .send({
           events: {},
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should write a document per results', async () => {
       await supertest
-        .post('/api/lens/telemetry')
+        .post('/api/lens/stats')
         .set(COMMON_HEADERS)
         .send({
           events: {

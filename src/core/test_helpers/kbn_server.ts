@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Client } from 'elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
   createLegacyEsTestCluster,
   DEFAULT_SUPERUSER_PASS,
@@ -66,7 +66,7 @@ export function createRootWithSettings(
   settings: Record<string, any>,
   cliArgs: Partial<CliArgs> = {}
 ) {
-  const env = Env.createDefault({
+  const env = Env.createDefault(REPO_ROOT, {
     configs: [],
     cliArgs: {
       dev: false,

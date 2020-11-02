@@ -20,13 +20,14 @@ const IconType = styled(EuiIcon)`
 `;
 IconType.displayName = 'IconType';
 
-const P = styled.p`
+const P = styled.span`
   margin-bottom: 5px;
 `;
 P.displayName = 'P';
 
 const ToolTipTableMetadata = styled.span`
   margin-right: 5px;
+  display: block;
 `;
 ToolTipTableMetadata.displayName = 'ToolTipTableMetadata';
 

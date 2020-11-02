@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup } from 'kibana/public';
-import { TimeSeriesResult } from '../../../../alerting_builtins/common/alert_types/index_threshold';
+import { TimeSeriesResult } from '../../../../stack_alerts/common/alert_types/index_threshold';
 
-const INDEX_THRESHOLD_API_ROOT = '/api/alerting_builtins/index_threshold';
+const INDEX_THRESHOLD_API_ROOT = '/api/stack_alerts/index_threshold';
 
 export async function getMatchingIndicesForThresholdAlertType({
   pattern,

@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { map, mapValues, remove, fromPairs, has } from 'lodash';
+import Boom from '@hapi/boom';
+import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { ALERTS_FEATURE_ID } from '../../common';
-import { AlertTypeRegistry } from '../types';
+import { AlertTypeRegistry, RawAlert } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
+import { LEGACY_LAST_MODIFIED_VERSION } from '../saved_objects/migrations';
+import { asFiltersByAlertTypeAndConsumer } from './alerts_authorization_kuery';
+import { KueryNode } from '../../../../../src/plugins/data/server';
 
 export enum ReadOperations {
   Get = 'get',
@@ -107,6 +110,10 @@ export class AlertsAuthorization {
           })
         : {}
     );
+  }
+
+  public shouldUseLegacyAuthorization(alert: RawAlert): boolean {
+    return alert.meta?.versionApiKeyLastmodified === LEGACY_LAST_MODIFIED_VERSION;
   }
 
   private shouldCheckAuthorization(): boolean {
@@ -215,7 +222,7 @@ export class AlertsAuthorization {
   }
 
   public async getFindAuthorizationFilter(): Promise<{
-    filter?: string;
+    filter?: KueryNode;
     ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
@@ -244,7 +251,7 @@ export class AlertsAuthorization {
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: `(${this.asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`,
+        filter: asFiltersByAlertTypeAndConsumer(authorizedAlertTypes),
         ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {
           if (!authorizedAlertTypeIdsToConsumers.has(`${alertTypeId}/${consumer}`)) {
             throw Boom.forbidden(
@@ -400,39 +407,6 @@ export class AlertsAuthorization {
       }))
     );
   }
-
-  private asFiltersByAlertTypeAndConsumer(alertTypes: Set<RegistryAlertTypeWithAuth>): string[] {
-    return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
-      ensureFieldIsSafeForQuery('alertTypeId', id);
-      filters.push(
-        `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:(${Object.keys(
-          authorizedConsumers
-        )
-          .map((consumer) => {
-            ensureFieldIsSafeForQuery('alertTypeId', id);
-            return consumer;
-          })
-          .join(' or ')}))`
-      );
-      return filters;
-    }, []);
-  }
-}
-
-export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
-  const invalid = value.match(/([>=<\*:()]+|\s+)/g);
-  if (invalid) {
-    const whitespace = remove(invalid, (chars) => chars.trim().length === 0);
-    const errors = [];
-    if (whitespace.length) {
-      errors.push(`whitespace`);
-    }
-    if (invalid.length) {
-      errors.push(`invalid character${invalid.length > 1 ? `s` : ``}: ${invalid?.join(`, `)}`);
-    }
-    throw new Error(`expected ${field} not to include ${errors.join(' and ')}`);
-  }
-  return true;
 }
 
 function mergeHasPrivileges(left: HasPrivileges, right?: HasPrivileges): HasPrivileges {

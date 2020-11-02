@@ -13,7 +13,7 @@ import { EngineOverviewHeader } from './header';
 export const LoadingState: React.FC = () => {
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <EngineOverviewHeader />
       <EuiPageContent paddingSize="l">
         <EuiLoadingContent lines={5} />

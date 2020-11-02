@@ -19,6 +19,7 @@
 
 import { duration } from 'moment';
 import { ElasticsearchClientConfig, parseClientOptions } from './client_config';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -36,6 +37,18 @@ const createConfig = (
 };
 
 describe('parseClientOptions', () => {
+  it('includes headers designing the HTTP request as originating from Kibana by default', () => {
+    const config = createConfig({});
+
+    expect(parseClientOptions(config, false)).toEqual(
+      expect.objectContaining({
+        headers: {
+          ...DEFAULT_HEADERS,
+        },
+      })
+    );
+  });
+
   describe('basic options', () => {
     it('`customHeaders` option', () => {
       const config = createConfig({
@@ -48,8 +61,28 @@ describe('parseClientOptions', () => {
       expect(parseClientOptions(config, false)).toEqual(
         expect.objectContaining({
           headers: {
+            ...DEFAULT_HEADERS,
             foo: 'bar',
             hello: 'dolly',
+          },
+        })
+      );
+    });
+
+    it('`customHeaders` take precedence to default kibana headers', () => {
+      const customHeader = {
+        [Object.keys(DEFAULT_HEADERS)[0]]: 'foo',
+      };
+      const config = createConfig({
+        customHeaders: {
+          ...customHeader,
+        },
+      });
+
+      expect(parseClientOptions(config, false)).toEqual(
+        expect.objectContaining({
+          headers: {
+            ...customHeader,
           },
         })
       );
@@ -183,49 +216,19 @@ describe('parseClientOptions', () => {
         );
       });
 
-      it('adds auth to the nodes if both `username` and `password` are set', () => {
-        let options = parseClientOptions(
-          createConfig({
-            username: 'user',
-            hosts: ['http://node-A:9200'],
-          }),
-          false
-        );
-        expect(options.nodes).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "url": "http://node-a:9200/",
-                    },
-                  ]
-              `);
-
-        options = parseClientOptions(
-          createConfig({
-            password: 'pass',
-            hosts: ['http://node-A:9200'],
-          }),
-          false
-        );
-        expect(options.nodes).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "url": "http://node-a:9200/",
-                    },
-                  ]
-              `);
-
-        options = parseClientOptions(
+      it('does not add auth to the nodes', () => {
+        const options = parseClientOptions(
           createConfig({
             username: 'user',
             password: 'pass',
             hosts: ['http://node-A:9200'],
           }),
-          false
+          true
         );
         expect(options.nodes).toMatchInlineSnapshot(`
                   Array [
                     Object {
-                      "url": "http://user:pass@node-a:9200/",
+                      "url": "http://node-a:9200/",
                     },
                   ]
               `);

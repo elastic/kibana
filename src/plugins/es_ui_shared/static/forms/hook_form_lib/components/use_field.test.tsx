@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, FunctionComponent } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed } from '../shared_imports';
@@ -58,7 +58,7 @@ describe('<UseField />', () => {
       OnUpdateHandler
     >;
 
-    expect(data.raw).toEqual({
+    expect(data.internal).toEqual({
       name: 'John',
       lastName: 'Snow',
     });
@@ -214,8 +214,8 @@ describe('<UseField />', () => {
       expect(serializer).not.toBeCalled();
       expect(formatter).not.toBeCalled();
 
-      let formData = formHook.getFormData({ unflatten: false });
-      expect(formData.name).toEqual('John-deserialized');
+      const internalFormData = formHook.__getFormData$().value;
+      expect(internalFormData.name).toEqual('John-deserialized');
 
       await act(async () => {
         form.setInputValue('myField', 'Mike');
@@ -224,9 +224,9 @@ describe('<UseField />', () => {
       expect(formatter).toBeCalled(); // Formatters are executed on each value change
       expect(serializer).not.toBeCalled(); // Serializer are executed *only** when outputting the form data
 
-      formData = formHook.getFormData();
+      const outputtedFormData = formHook.getFormData();
       expect(serializer).toBeCalled();
-      expect(formData.name).toEqual('MIKE-serialized');
+      expect(outputtedFormData.name).toEqual('MIKE-serialized');
 
       // Make sure that when we reset the form values, we don't serialize the fields
       serializer.mockReset();
@@ -235,6 +235,66 @@ describe('<UseField />', () => {
         formHook!.reset();
       });
       expect(serializer).not.toBeCalled();
+    });
+  });
+
+  describe('custom components', () => {
+    interface MyForm {
+      name: string;
+    }
+
+    let formHook: FormHook<MyForm> | null = null;
+
+    beforeEach(() => {
+      formHook = null;
+    });
+
+    const onFormHook = (_form: FormHook<MyForm>) => {
+      formHook = _form;
+    };
+
+    const TestComp = ({
+      component,
+      onForm,
+    }: {
+      component: FunctionComponent<any>;
+      onForm: (form: FormHook<MyForm>) => void;
+    }) => {
+      const { form } = useForm<MyForm>();
+
+      useEffect(() => {
+        onForm(form);
+      }, [onForm, form]);
+
+      return (
+        <Form form={form}>
+          <UseField path="name" defaultValue="myName" component={component} />
+        </Form>
+      );
+    };
+
+    it('allows function components', () => {
+      const Component = () => <textarea data-test-subj="function-component" />;
+      const setup = registerTestBed(TestComp, {
+        defaultProps: { onForm: onFormHook, component: Component },
+        memoryRouter: { wrapComponent: false },
+      });
+      const testBed = setup() as TestBed;
+
+      expect(testBed.exists('function-component')).toEqual(true);
+      expect(formHook?.getFormData()).toEqual({ name: 'myName' });
+    });
+
+    it('allows memoized function components', () => {
+      const Component = React.memo(() => <textarea data-test-subj="memoized-component" />);
+      const setup = registerTestBed(TestComp, {
+        defaultProps: { onForm: onFormHook, component: Component },
+        memoryRouter: { wrapComponent: false },
+      });
+      const testBed = setup() as TestBed;
+
+      expect(testBed.exists('memoized-component')).toEqual(true);
+      expect(formHook?.getFormData()).toEqual({ name: 'myName' });
     });
   });
 });

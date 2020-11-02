@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fetch, { FetchError, Response } from 'node-fetch';
+import fetch, { FetchError, Response, RequestInit } from 'node-fetch';
 import pRetry from 'p-retry';
 import { streamToString } from './streams';
+import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
 // not sure what to call this function, but we're not exporting it
 async function registryFetch(url: string) {
-  const response = await fetch(url);
-
+  const response = await fetch(url, getFetchOptions(url));
   if (response.ok) {
     return response;
   } else {
@@ -80,4 +81,18 @@ function isFetchError(error: FailedAttemptErrors): error is FetchError {
 
 function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
+}
+
+export function getFetchOptions(targetUrl: string): RequestInit | undefined {
+  const proxyUrl = getRegistryProxyUrl();
+  if (!proxyUrl) {
+    return undefined;
+  }
+
+  const logger = appContextService.getLogger();
+  logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
+
+  return {
+    agent: getProxyAgent({ proxyUrl, targetUrl }),
+  };
 }

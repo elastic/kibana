@@ -22,8 +22,10 @@ import {
   OPEN_SELECTED_ALERTS_BTN,
   MARK_ALERT_IN_PROGRESS_BTN,
   MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
+  ALERT_RISK_SCORE_HEADER,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
+import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 
 export const closeFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
@@ -40,7 +42,7 @@ export const expandFirstAlert = () => {
 };
 
 export const goToClosedAlerts = () => {
-  cy.get(CLOSED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(CLOSED_ALERTS_FILTER_BTN).click();
 };
 
 export const goToManageAlertsDetectionRules = () => {
@@ -62,7 +64,7 @@ export const openAlerts = () => {
 };
 
 export const goToInProgressAlerts = () => {
-  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click();
 };
 
 export const markInProgressFirstAlert = () => {
@@ -81,12 +83,18 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   }
 };
 
+export const sortRiskScore = () => {
+  cy.get(ALERT_RISK_SCORE_HEADER).click();
+  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+};
+
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
 };
 
 export const waitForAlerts = () => {
-  cy.get(REFRESH_BUTTON).invoke('text').should('not.equal', 'Updating');
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };
 
 export const waitForAlertsIndexToBeCreated = () => {

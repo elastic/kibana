@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
-  deleteMetadataCurrentStream,
   deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
@@ -22,8 +21,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     [
       'Hostname',
       'Agent Status',
-      'Integration',
-      'Configuration Status',
+      'Integration Policy',
+      'Policy Status',
       'Operating System',
       'IP Address',
       'Version',
@@ -72,13 +71,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when initially navigating to page', () => {
       before(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
@@ -101,13 +98,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
       it('finds page title', async () => {
         const title = await testSubjects.getVisibleText('header-page-title');
-        expect(title).to.equal('Endpoints BETA');
+        expect(title).to.equal('Endpoints');
       });
 
       it('displays table data', async () => {
@@ -160,20 +156,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
         });
-
-        // The integration does not work properly yet.  Skipping this test for now.
-        it.skip('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
-          await (await testSubjects.find('hostnameCellLink')).click();
-          await (await testSubjects.find('endpointDetailsLinkToIngest')).click();
-          await testSubjects.existOrFail('fleetAgentListTable');
-        });
       });
 
       // This set of tests fails the flyout does not open in the before() and will be fixed in soon
       describe.skip("has a url with an endpoint host's id", () => {
         before(async () => {
           await pageObjects.endpoint.navigateToEndpointList(
-            'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'
+            'selected_endpoint=3838df35-a095-4af4-8fce-0b6d78793f2e'
           );
         });
 
@@ -188,8 +177,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'OS',
             'Last Seen',
             'Alerts',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'IP Address',
             'Hostname',
             'Sensor Version',
@@ -226,18 +215,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => {
         await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
       it('for the kql query: na, table shows an empty list', async () => {
-        await testSubjects.setValue('adminSearchBar', 'na');
-        await (await testSubjects.find('querySubmitButton')).click();
+        const adminSearchBar = await testSubjects.find('adminSearchBar');
+        await adminSearchBar.clearValueWithKeyboard();
+        await adminSearchBar.type('na');
+        const querySubmitButton = await testSubjects.find('querySubmitButton');
+        await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
@@ -251,24 +242,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
       });
-
       it('for the kql query: HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
-        await testSubjects.setValue('adminSearchBar', ' ');
-        await (await testSubjects.find('querySubmitButton')).click();
-
-        const endpointListTableTotal = await testSubjects.getVisibleText('endpointListTableTotal');
-
-        await testSubjects.setValue(
-          'adminSearchBar',
+        const adminSearchBar = await testSubjects.find('adminSearchBar');
+        await adminSearchBar.clearValueWithKeyboard();
+        await adminSearchBar.type(
           'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
-        await (await testSubjects.find('querySubmitButton')).click();
+        const querySubmitButton = await testSubjects.find('querySubmitButton');
+        await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
@@ -298,25 +285,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '',
           ],
         ];
-
-        await pageObjects.endpoint.waitForVisibleTextToChange(
-          'endpointListTableTotal',
-          endpointListTableTotal
-        );
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable');
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
-      });
-    });
-
-    describe.skip('when there is no data,', () => {
-      before(async () => {
-        // clear out the data and reload the page
-        await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
-        await pageObjects.endpoint.navigateToEndpointList();
-      });
-      it('displays empty Policy Table page.', async () => {
-        await testSubjects.existOrFail('emptyPolicyTable');
       });
     });
   });

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { UptimeDatePicker } from '../components/common/uptime_date_picker';
@@ -13,6 +13,7 @@ import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
+import { SyntheticsCallout } from '../components/overview/synthetics_callout';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -83,6 +84,7 @@ export const PageHeader = React.memo(
 
     return (
       <>
+        <SyntheticsCallout />
         <EuiFlexGroup
           alignItems="center"
           justifyContent="spaceBetween"

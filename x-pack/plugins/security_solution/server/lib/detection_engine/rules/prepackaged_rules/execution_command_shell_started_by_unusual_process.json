@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from an unusual process.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Unusual Parent Process for cmd.exe",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:cmd.exe and process.parent.name:(lsass.exe or csrss.exe or notepad.exe or regsvr32.exe or dllhost.exe or LogonUI.exe or wermgr.exe or spoolsv.exe or jucheck.exe or jusched.exe or ctfmon.exe or taskhostw.exe or GoogleUpdate.exe or sppsvc.exe or sihost.exe or slui.exe or SIHClient.exe or SearchIndexer.exe or SearchProtocolHost.exe or FlashPlayerUpdateService.exe or WerFault.exe or WUDFHost.exe or unsecapp.exe or wlanext.exe)",
+  "risk_score": 47,
+  "rule_id": "3b47900d-e793-49e8-968f-c90dc3526aa1",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

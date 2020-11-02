@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isString } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
@@ -24,7 +24,7 @@ export const buildHostsQuery = ({
   timerange: { from, to },
 }: HostsRequestOptions): ISearchRequestParams => {
   const filter = [
-    ...createQueryFilterClauses(isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery),
+    ...createQueryFilterClauses(filterQuery),
     {
       range: {
         '@timestamp': {

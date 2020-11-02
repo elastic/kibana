@@ -19,6 +19,7 @@ import {
   IgnoreMalformedParameter,
   FormatParameter,
   LocaleParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
@@ -26,6 +27,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'locale':
     case 'format':
+    case 'meta':
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -72,6 +74,8 @@ export const DateType = ({ field }: Props) => {
         />
 
         <StoreParameter />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>

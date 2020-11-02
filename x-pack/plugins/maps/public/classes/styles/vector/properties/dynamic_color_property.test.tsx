@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 import { Feature, Point } from 'geojson';
 
 import { DynamicColorProperty } from './dynamic_color_property';
-import { COLOR_MAP_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
@@ -28,7 +28,7 @@ const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: I
     field ? field : mockField,
     (new MockLayer(style ? style : new MockStyle()) as unknown) as IVectorLayer,
     () => {
-      return (value: string | number | undefined) => value + '_format';
+      return (value: RawValue) => value + '_format';
     }
   );
 };
@@ -273,7 +273,7 @@ describe('supportsFieldMeta', () => {
       null,
       (new MockLayer(new MockStyle()) as unknown) as IVectorLayer,
       () => {
-        return (value: string | number | undefined) => value + '_format';
+        return (value: RawValue) => value + '_format';
       }
     );
 

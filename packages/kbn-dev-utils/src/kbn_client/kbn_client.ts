@@ -54,8 +54,8 @@ export class KbnClient {
   /**
    * Make a direct request to the Kibana server
    */
-  async request(options: ReqOptions) {
-    return await this.requester.request(options);
+  async request<T>(options: ReqOptions) {
+    return await this.requester.request<T>(options);
   }
 
   resolveUrl(relativeUrl: string) {

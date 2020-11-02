@@ -18,9 +18,8 @@ describe('features', () => {
       new KibanaFeature({
         id: 'foo-feature',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
-        navLinkId: 'kibana:foo',
         app: ['app-1', 'app-2'],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['catalogue-1', 'catalogue-2'],
         management: {
           foo: ['management-1', 'management-2'],
@@ -64,8 +63,8 @@ describe('features', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             savedObject: {
@@ -104,6 +103,7 @@ describe('features', () => {
       actions.savedObject.get('all-savedObject-all-1', 'update'),
       actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
       actions.savedObject.get('all-savedObject-all-1', 'delete'),
+      actions.savedObject.get('all-savedObject-all-1', 'share_to_space'),
       actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
       actions.savedObject.get('all-savedObject-all-2', 'get'),
       actions.savedObject.get('all-savedObject-all-2', 'find'),
@@ -112,6 +112,7 @@ describe('features', () => {
       actions.savedObject.get('all-savedObject-all-2', 'update'),
       actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
       actions.savedObject.get('all-savedObject-all-2', 'delete'),
+      actions.savedObject.get('all-savedObject-all-2', 'share_to_space'),
       actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
       actions.savedObject.get('all-savedObject-read-1', 'get'),
       actions.savedObject.get('all-savedObject-read-1', 'find'),
@@ -133,6 +134,7 @@ describe('features', () => {
       actions.savedObject.get('read-savedObject-all-1', 'update'),
       actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
       actions.savedObject.get('read-savedObject-all-1', 'delete'),
+      actions.savedObject.get('read-savedObject-all-1', 'share_to_space'),
       actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
       actions.savedObject.get('read-savedObject-all-2', 'get'),
       actions.savedObject.get('read-savedObject-all-2', 'find'),
@@ -141,6 +143,7 @@ describe('features', () => {
       actions.savedObject.get('read-savedObject-all-2', 'update'),
       actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
       actions.savedObject.get('read-savedObject-all-2', 'delete'),
+      actions.savedObject.get('read-savedObject-all-2', 'share_to_space'),
       actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
       actions.savedObject.get('read-savedObject-read-1', 'get'),
       actions.savedObject.get('read-savedObject-read-1', 'find'),
@@ -163,8 +166,8 @@ describe('features', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
       }),
     ];
@@ -204,9 +207,8 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -272,6 +274,7 @@ describe('features', () => {
         actions.savedObject.get('all-savedObject-all-1', 'update'),
         actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
         actions.savedObject.get('all-savedObject-all-1', 'delete'),
+        actions.savedObject.get('all-savedObject-all-1', 'share_to_space'),
         actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
         actions.savedObject.get('all-savedObject-all-2', 'get'),
         actions.savedObject.get('all-savedObject-all-2', 'find'),
@@ -280,6 +283,7 @@ describe('features', () => {
         actions.savedObject.get('all-savedObject-all-2', 'update'),
         actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
         actions.savedObject.get('all-savedObject-all-2', 'delete'),
+        actions.savedObject.get('all-savedObject-all-2', 'share_to_space'),
         actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
         actions.savedObject.get('all-savedObject-read-1', 'get'),
         actions.savedObject.get('all-savedObject-read-1', 'find'),
@@ -300,6 +304,7 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-all-1', 'update'),
         actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
         actions.savedObject.get('read-savedObject-all-1', 'delete'),
+        actions.savedObject.get('read-savedObject-all-1', 'share_to_space'),
         actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
         actions.savedObject.get('read-savedObject-all-2', 'get'),
         actions.savedObject.get('read-savedObject-all-2', 'find'),
@@ -308,6 +313,7 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-all-2', 'update'),
         actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
         actions.savedObject.get('read-savedObject-all-2', 'delete'),
+        actions.savedObject.get('read-savedObject-all-2', 'share_to_space'),
         actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
         actions.savedObject.get('read-savedObject-read-1', 'get'),
         actions.savedObject.get('read-savedObject-read-1', 'find'),
@@ -324,9 +330,8 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -382,6 +387,7 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-all-1', 'update'),
         actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
         actions.savedObject.get('read-savedObject-all-1', 'delete'),
+        actions.savedObject.get('read-savedObject-all-1', 'share_to_space'),
         actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
         actions.savedObject.get('read-savedObject-all-2', 'get'),
         actions.savedObject.get('read-savedObject-all-2', 'find'),
@@ -390,6 +396,7 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-all-2', 'update'),
         actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
         actions.savedObject.get('read-savedObject-all-2', 'delete'),
+        actions.savedObject.get('read-savedObject-all-2', 'share_to_space'),
         actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
         actions.savedObject.get('read-savedObject-read-1', 'get'),
         actions.savedObject.get('read-savedObject-read-1', 'find'),
@@ -406,9 +413,8 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -464,9 +470,8 @@ describe('features', () => {
           id: 'foo',
           name: 'Foo KibanaFeature',
           excludeFromBasePrivileges: true,
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -529,9 +534,8 @@ describe('features', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           catalogue: ['ignore-me-1', 'ignore-me-2'],
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
@@ -599,9 +603,8 @@ describe('reserved', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
-        navLinkId: 'kibana:foo',
         app: ['app-1', 'app-2'],
+        category: { id: 'foo', label: 'foo' },
         catalogue: ['catalogue-1', 'catalogue-2'],
         management: {
           foo: ['management-1', 'management-2'],
@@ -642,8 +645,8 @@ describe('reserved', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: null,
         reserved: {
           privileges: [
@@ -682,6 +685,7 @@ describe('reserved', () => {
       actions.savedObject.get('savedObject-all-1', 'update'),
       actions.savedObject.get('savedObject-all-1', 'bulk_update'),
       actions.savedObject.get('savedObject-all-1', 'delete'),
+      actions.savedObject.get('savedObject-all-1', 'share_to_space'),
       actions.savedObject.get('savedObject-all-2', 'bulk_get'),
       actions.savedObject.get('savedObject-all-2', 'get'),
       actions.savedObject.get('savedObject-all-2', 'find'),
@@ -690,6 +694,7 @@ describe('reserved', () => {
       actions.savedObject.get('savedObject-all-2', 'update'),
       actions.savedObject.get('savedObject-all-2', 'bulk_update'),
       actions.savedObject.get('savedObject-all-2', 'delete'),
+      actions.savedObject.get('savedObject-all-2', 'share_to_space'),
       actions.savedObject.get('savedObject-read-1', 'bulk_get'),
       actions.savedObject.get('savedObject-read-1', 'get'),
       actions.savedObject.get('savedObject-read-1', 'find'),
@@ -706,8 +711,8 @@ describe('reserved', () => {
       new KibanaFeature({
         id: 'foo',
         name: 'Foo KibanaFeature',
-        icon: 'arrowDown',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             savedObject: {
@@ -747,8 +752,8 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {
@@ -810,6 +815,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -874,8 +880,8 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {
@@ -937,6 +943,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -954,6 +961,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -978,6 +986,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1008,6 +1017,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1025,6 +1035,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1043,6 +1054,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1060,6 +1072,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1073,8 +1086,8 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           excludeFromBasePrivileges: true,
           privileges: {
             all: {
@@ -1137,6 +1150,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1154,6 +1168,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1178,6 +1193,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1214,8 +1230,8 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {
@@ -1277,6 +1293,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1294,6 +1311,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1336,6 +1354,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1359,6 +1378,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1377,8 +1397,8 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           excludeFromBasePrivileges: true,
           privileges: {
             all: {
@@ -1441,6 +1461,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1458,6 +1479,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1506,8 +1528,8 @@ describe('subFeatures', () => {
         new KibanaFeature({
           id: 'foo',
           name: 'Foo KibanaFeature',
-          icon: 'arrowDown',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: {
               savedObject: {
@@ -1571,6 +1593,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1591,6 +1614,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1617,6 +1641,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1634,6 +1659,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1652,6 +1678,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),
@@ -1669,6 +1696,7 @@ describe('subFeatures', () => {
         actions.savedObject.get('all-sub-feature-type', 'update'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
         actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
         actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('read-sub-feature-type', 'get'),
         actions.savedObject.get('read-sub-feature-type', 'find'),

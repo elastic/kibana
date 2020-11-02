@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+
 import {
   AuthenticationHit,
   Direction,
-  HostsQueries,
   HostAuthenticationsRequestOptions,
+  HostsQueries,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostAuthenticationsRequestOptions = {
@@ -2143,7 +2145,80 @@ export const formattedSearchStrategyResponse = {
   loaded: 21,
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "user_count": {\n        "cardinality": {\n          "field": "user.name"\n        }\n      },\n      "group_by_users": {\n        "terms": {\n          "size": 10,\n          "field": "user.name",\n          "order": [\n            {\n              "successes.doc_count": "desc"\n            },\n            {\n              "failures.doc_count": "desc"\n            }\n          ]\n        },\n        "aggs": {\n          "failures": {\n            "filter": {\n              "term": {\n                "event.outcome": "failure"\n              }\n            },\n            "aggs": {\n              "lastFailure": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [],\n                  "sort": [\n                    {\n                      "@timestamp": {\n                        "order": "desc"\n                      }\n                    }\n                  ]\n                }\n              }\n            }\n          },\n          "successes": {\n            "filter": {\n              "term": {\n                "event.outcome": "success"\n              }\n            },\n            "aggs": {\n              "lastSuccess": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [],\n                  "sort": [\n                    {\n                      "@timestamp": {\n                        "order": "desc"\n                      }\n                    }\n                  ]\n                }\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "term": {\n              "event.category": "authentication"\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-02T15:17:13.678Z",\n                "lte": "2020-09-03T15:17:13.678Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0\n  },\n  "track_total_hits": false\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              user_count: { cardinality: { field: 'user.name' } },
+              group_by_users: {
+                terms: {
+                  size: 10,
+                  field: 'user.name',
+                  order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
+                },
+                aggs: {
+                  failures: {
+                    filter: { term: { 'event.outcome': 'failure' } },
+                    aggs: {
+                      lastFailure: {
+                        top_hits: {
+                          size: 1,
+                          _source: [],
+                          sort: [{ '@timestamp': { order: 'desc' } }],
+                        },
+                      },
+                    },
+                  },
+                  successes: {
+                    filter: { term: { 'event.outcome': 'success' } },
+                    aggs: {
+                      lastSuccess: {
+                        top_hits: {
+                          size: 1,
+                          _source: [],
+                          sort: [{ '@timestamp': { order: 'desc' } }],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  { term: { 'event.category': 'authentication' } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-02T15:17:13.678Z',
+                        lte: '2020-09-03T15:17:13.678Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+          },
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
     ],
   },
   edges: [
@@ -2335,7 +2410,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           { term: { 'event.category': 'authentication' } },
           {
             range: {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import archives_metadata from '../../../common/archives_metadata';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -11,8 +12,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
-  const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+  const archiveName = 'apm_8.0.0';
+  const metadata = archives_metadata[archiveName];
+
+  const start = encodeURIComponent(metadata.start);
+  const end = encodeURIComponent(metadata.end);
   const transactionType = 'request';
   const transactionName = 'GET /api';
   const uiFilters = encodeURIComponent(JSON.stringify({}));
@@ -29,8 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('8.0.0'));
-      after(() => esArchiver.unload('8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns the transaction breakdown for a service', async () => {
         const response = await supertest.get(
@@ -46,46 +50,47 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
+
         const { timeseries } = response.body;
+
+        const numberOfSeries = timeseries.length;
+
+        expectSnapshot(numberOfSeries).toMatchInline(`1`);
+
         const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
 
-        expectSnapshot(data).toMatchInline(`
+        const nonNullDataPoints = data.filter((y: number | null) => y !== null);
+
+        expectSnapshot(nonNullDataPoints.length).toMatchInline(`61`);
+
+        expectSnapshot(
+          data.slice(0, 5).map(({ x, y }: { x: number; y: number | null }) => {
+            return {
+              x: new Date(x ?? NaN).toISOString(),
+              y,
+            };
+          })
+        ).toMatchInline(`
           Array [
             Object {
-              "x": 1593413100000,
-              "y": null,
-            },
-            Object {
-              "x": 1593413130000,
-              "y": null,
-            },
-            Object {
-              "x": 1593413160000,
-              "y": null,
-            },
-            Object {
-              "x": 1593413190000,
-              "y": null,
-            },
-            Object {
-              "x": 1593413220000,
-              "y": null,
-            },
-            Object {
-              "x": 1593413250000,
-              "y": null,
-            },
-            Object {
-              "x": 1593413280000,
-              "y": null,
-            },
-            Object {
-              "x": 1593413310000,
+              "x": "2020-09-29T14:30:00.000Z",
               "y": 1,
             },
             Object {
-              "x": 1593413340000,
+              "x": "2020-09-29T14:30:30.000Z",
+              "y": 1,
+            },
+            Object {
+              "x": "2020-09-29T14:31:00.000Z",
+              "y": 1,
+            },
+            Object {
+              "x": "2020-09-29T14:31:30.000Z",
               "y": null,
+            },
+            Object {
+              "x": "2020-09-29T14:32:00.000Z",
+              "y": 1,
             },
           ]
         `);
@@ -95,6 +100,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(type).toMatchInline(`"areaStacked"`);
         expectSnapshot(hideLegend).toMatchInline(`false`);
         expectSnapshot(legendValue).toMatchInline(`"100%"`);
+
+        expectSnapshot(data).toMatch();
       });
       it('returns the transaction breakdown sorted by name', async () => {
         const response = await supertest.get(
@@ -108,7 +115,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "app",
             "http",
             "postgresql",
-            "redis",
           ]
         `);
       });

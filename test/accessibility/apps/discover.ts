@@ -21,20 +21,14 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
-  const retry = getService('retry');
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
-  const docTable = getService('docTable');
-  const filterBar = getService('filterBar');
-  const TEST_COLUMN_NAMES = ['@message'];
-  const TEST_FILTER_COLUMN_NAMES = [
-    ['extension', 'jpg'],
-    ['geo.src', 'IN'],
-  ];
+  const testSubjects = getService('testSubjects');
+  const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
-  describe('Discover', () => {
+  describe('Discover a11y tests', () => {
     before(async () => {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -45,105 +39,89 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    it('main view', async () => {
+    after(async () => {
+      await esArchiver.unload('logstash_functional');
+    });
+
+    it('Discover main page', async () => {
       await a11y.testAppSnapshot();
     });
 
-    it('Click save button', async () => {
+    it('a11y test on save button', async () => {
       await PageObjects.discover.clickSaveSearchButton();
       await a11y.testAppSnapshot();
     });
 
-    it('Save search panel', async () => {
+    it('a11y test on save search panel', async () => {
       await PageObjects.discover.inputSavedSearchTitle('a11ySearch');
       await a11y.testAppSnapshot();
     });
 
-    it('Confirm saved search', async () => {
+    it('a11y test on clicking on confirm save', async () => {
       await PageObjects.discover.clickConfirmSavedSearch();
       await a11y.testAppSnapshot();
     });
 
-    it('Click on new to clear the search', async () => {
+    it('a11y test on click new to reload discover', async () => {
       await PageObjects.discover.clickNewSearchButton();
       await a11y.testAppSnapshot();
     });
 
-    it('Open load saved search panel', async () => {
+    it('a11y test on load saved search panel', async () => {
       await PageObjects.discover.openLoadSavedSearchPanel();
       await a11y.testAppSnapshot();
       await PageObjects.discover.closeLoadSavedSearchPanel();
     });
 
-    it('Open inspector panel', async () => {
+    it('a11y test on inspector panel', async () => {
       await inspector.open();
       await a11y.testAppSnapshot();
       await inspector.close();
     });
 
-    it('Open add filter', async () => {
-      await PageObjects.discover.openAddFilterPanel();
-      await a11y.testAppSnapshot();
-    });
-
-    it('Select values for a filter', async () => {
-      await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-      await a11y.testAppSnapshot();
-    });
-
-    it('Load a new search from the panel', async () => {
-      await PageObjects.discover.clickSaveSearchButton();
-      await PageObjects.discover.inputSavedSearchTitle('filterSearch');
-      await PageObjects.discover.clickConfirmSavedSearch();
-      await PageObjects.discover.openLoadSavedSearchPanel();
-      await PageObjects.discover.loadSavedSearch('filterSearch');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click share button', async () => {
+    it('a11y test on share panel', async () => {
       await PageObjects.share.clickShareTopNavButton();
       await a11y.testAppSnapshot();
     });
 
-    it('Open sidebar filter', async () => {
+    it('a11y test on open sidenav filter', async () => {
       await PageObjects.discover.openSidebarFieldFilter();
       await a11y.testAppSnapshot();
-    });
-
-    it('Close sidebar filter', async () => {
       await PageObjects.discover.closeSidebarFieldFilter();
-      await a11y.testAppSnapshot();
     });
 
-    it('Add a field from sidebar', async () => {
+    it('a11y test on tables with columns view', async () => {
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
+        await PageObjects.discover.clickFieldListItemToggle(columnName);
       }
       await a11y.testAppSnapshot();
     });
 
-    it('Add more fields from sidebar', async () => {
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-      }
+    it('a11y test on save queries popover', async () => {
+      await PageObjects.discover.clickSavedQueriesPopOver();
       await a11y.testAppSnapshot();
     });
 
-    // Context view test
-    it('should open context view on a doc', async () => {
-      await retry.try(async () => {
-        await docTable.clickRowToggle();
-        // click the open action
-        const rowActions = await docTable.getRowActions();
-        if (!rowActions.length) {
-          throw new Error('row actions empty, trying again');
-        }
-        await rowActions[0].click();
-      });
+    it('a11y test on save queries panel', async () => {
+      await PageObjects.discover.clickCurrentSavedQuery();
       await a11y.testAppSnapshot();
     });
 
-    // Adding rest of the tests after https://github.com/elastic/kibana/issues/53888 is resolved
+    it('a11y test on toggle include filters option on saved queries panel', async () => {
+      await PageObjects.discover.setSaveQueryFormTitle('test');
+      await PageObjects.discover.toggleIncludeFilters();
+      await a11y.testAppSnapshot();
+      await PageObjects.discover.saveCurrentSavedQuery();
+    });
+
+    // issue - https://github.com/elastic/kibana/issues/78488
+    it.skip('a11y test on saved queries list panel', async () => {
+      await PageObjects.discover.clickSavedQueriesPopOver();
+      await testSubjects.moveMouseTo(
+        'saved-query-list-item load-saved-query-test-button saved-query-list-item-selected saved-query-list-item-selected'
+      );
+      await testSubjects.find('delete-saved-query-test-button');
+      await a11y.testAppSnapshot();
+    });
   });
 }

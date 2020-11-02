@@ -36,6 +36,7 @@ import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
+  getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
 import { isDraggedField, normalizeOperationDataType } from './utils';
@@ -49,6 +50,7 @@ import {
 } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { deleteColumn } from './state_helpers';
 import { Datasource, StateSetter } from '../index';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
@@ -104,6 +106,9 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
   return columnLabelMap;
 }
 
+export * from './rename_columns';
+export * from './format_column';
+
 export function getIndexPatternDatasource({
   core,
   storage,
@@ -132,7 +137,8 @@ export function getIndexPatternDatasource({
 
     async initialize(
       persistedState?: IndexPatternPersistedState,
-      references?: SavedObjectReference[]
+      references?: SavedObjectReference[],
+      initialContext?: VisualizeFieldContext
     ) {
       return loadInitialState({
         persistedState,
@@ -141,6 +147,7 @@ export function getIndexPatternDatasource({
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
         indexPatternsService,
+        initialContext,
       });
     },
 
@@ -333,6 +340,7 @@ export function getIndexPatternDatasource({
         : [];
     },
     getDatasourceSuggestionsFromCurrentState,
+    getDatasourceSuggestionsForVisualizeField,
   };
 
   return indexPatternDatasource;

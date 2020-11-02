@@ -6,27 +6,16 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
+import '../../../common/mock/react_beautiful_dnd';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
-
-// Suppress warnings about "react-beautiful-dnd" until we migrate to @testing-library/react
-/* eslint-disable no-console */
-const originalError = console.error;
-const originalWarn = console.warn;
-beforeAll(() => {
-  console.warn = jest.fn();
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-  console.warn = originalWarn;
-});
 
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
@@ -93,7 +82,7 @@ describe('StatefulFieldsBrowser', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
-    test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', () => {
+    test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', async () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulFieldsBrowserComponent
@@ -111,14 +100,15 @@ describe('StatefulFieldsBrowser', () => {
       wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
 
       wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first().simulate('click');
-
-      wrapper.update();
-      expect(
-        wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).at(1)
-      ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+      await waitFor(() => {
+        wrapper.update();
+        expect(
+          wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).at(1)
+        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+      });
     });
 
-    test('it updates the selectedCategoryId state according to most fields returned', () => {
+    test('it updates the selectedCategoryId state according to most fields returned', async () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulFieldsBrowserComponent
@@ -133,20 +123,22 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-      expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
-      ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
-      wrapper
-        .find('[data-test-subj="field-search"]')
-        .last()
-        .simulate('change', { target: { value: 'cloud' } });
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
+        expect(
+          wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
+        ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
+        wrapper
+          .find('[data-test-subj="field-search"]')
+          .last()
+          .simulate('change', { target: { value: 'cloud' } });
 
-      jest.runOnlyPendingTimers();
-      wrapper.update();
-      expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
-      ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+        jest.runOnlyPendingTimers();
+        wrapper.update();
+        expect(
+          wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
+        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+      });
     });
   });
 

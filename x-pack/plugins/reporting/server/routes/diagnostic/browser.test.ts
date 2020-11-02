@@ -33,7 +33,15 @@ describe('POST /diagnose/browser', () => {
   const mockedCreateInterface: any = createInterface;
 
   const config = {
-    get: jest.fn().mockImplementation(() => ({})),
+    get: jest.fn().mockImplementation((...keys) => {
+      const key = keys.join('.');
+      switch (key) {
+        case 'queue.timeout':
+          return 120000;
+        case 'capture.browser.chromium.proxy':
+          return { enabled: false };
+      }
+    }),
     kbnConfig: { get: jest.fn() },
   };
 

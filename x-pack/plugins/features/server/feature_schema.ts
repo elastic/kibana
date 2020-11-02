@@ -28,6 +28,14 @@ const managementSchema = Joi.object().pattern(
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 const alertingSchema = Joi.array().items(Joi.string());
 
+const appCategorySchema = Joi.object({
+  id: Joi.string().required(),
+  label: Joi.string().required(),
+  ariaLabel: Joi.string(),
+  euiIconType: Joi.string(),
+  order: Joi.number(),
+}).required();
+
 const kibanaPrivilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
@@ -80,14 +88,17 @@ const kibanaFeatureSchema = Joi.object({
     .invalid(...prohibitedFeatureIds)
     .required(),
   name: Joi.string().required(),
+  category: appCategorySchema,
   order: Joi.number(),
   excludeFromBasePrivileges: Joi.boolean(),
-  validLicenses: Joi.array().items(
-    Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial')
+  minimumLicense: Joi.string().valid(
+    'basic',
+    'standard',
+    'gold',
+    'platinum',
+    'enterprise',
+    'trial'
   ),
-  icon: Joi.string(),
-  description: Joi.string(),
-  navLinkId: Joi.string().regex(uiCapabilitiesRegex),
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,

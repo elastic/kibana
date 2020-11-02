@@ -25,6 +25,7 @@ export function getSupportedFieldsByMetricType(type) {
     case METRIC_TYPES.CARDINALITY:
       return Object.values(KBN_FIELD_TYPES).filter((t) => t !== KBN_FIELD_TYPES.HISTOGRAM);
     case METRIC_TYPES.VALUE_COUNT:
+      return Object.values(KBN_FIELD_TYPES);
     case METRIC_TYPES.AVERAGE:
     case METRIC_TYPES.SUM:
       return [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];

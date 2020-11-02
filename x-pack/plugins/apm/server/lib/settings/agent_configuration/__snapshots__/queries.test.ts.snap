@@ -84,6 +84,41 @@ Object {
 }
 `;
 
+exports[`agent configuration queries getAllEnvironments fetches all environments 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": undefined,
+          "size": 100,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
 exports[`agent configuration queries getExistingEnvironmentsForService fetches unavailable environments 1`] = `
 Object {
   "body": Object {

@@ -8,11 +8,13 @@ import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionGroup } from '../../../../../server/lib/transaction_groups/fetcher';
+import {
+  asDecimal,
+  asMillisecondDuration,
+} from '../../../../../common/utils/formatters';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -46,20 +48,21 @@ export function TransactionList({ items, isLoading }: Props) {
         }),
         width: '50%',
         sortable: true,
-        render: (_, { sample }: TransactionGroup) => {
+        render: (
+          _,
+          { serviceName, transactionName, transactionType }: TransactionGroup
+        ) => {
           return (
             <TransactionNameLink
-              serviceName={sample.service.name}
-              transactionId={sample.transaction.id}
-              traceId={sample.trace.id}
-              transactionName={sample.transaction.name}
-              transactionType={sample.transaction.type}
+              serviceName={serviceName}
+              transactionName={transactionName}
+              transactionType={transactionType}
             >
               <EuiToolTip
                 id="transaction-name-link-tooltip"
-                content={sample.transaction.name || NOT_AVAILABLE_LABEL}
+                content={transactionName}
               >
-                <>{sample.transaction.name || NOT_AVAILABLE_LABEL}</>
+                <>{transactionName}</>
               </EuiToolTip>
             </TransactionNameLink>
           );

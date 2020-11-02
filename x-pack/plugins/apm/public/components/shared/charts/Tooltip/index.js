@@ -18,7 +18,7 @@ import {
   fontSizes,
 } from '../../../../style/variables';
 import { Legend } from '../Legend';
-import { asAbsoluteDateTime } from '../../../../utils/formatters';
+import { asAbsoluteDateTime } from '../../../../../common/utils/formatters';
 
 const TooltipElm = styled.div`
   margin: 0 ${px(unit)};

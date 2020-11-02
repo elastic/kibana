@@ -119,7 +119,7 @@ export const fetchRules = async ({
 
   const tags = [
     ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' OR ');
+  ].join(' AND ');
 
   const filterString =
     filtersWithoutTags !== '' && tags !== ''
@@ -245,13 +245,25 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
  *
  * @throws An error if response is not OK
  */
-export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
-  await KibanaServices.get().http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
+export const createPrepackagedRules = async ({
+  signal,
+}: BasicFetchProps): Promise<{
+  rules_installed: number;
+  rules_updated: number;
+  timelines_installed: number;
+  timelines_updated: number;
+}> => {
+  const result = await KibanaServices.get().http.fetch<{
+    rules_installed: number;
+    rules_updated: number;
+    timelines_installed: number;
+    timelines_updated: number;
+  }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
     signal,
   });
 
-  return true;
+  return result;
 };
 
 /**

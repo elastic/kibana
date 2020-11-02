@@ -20,12 +20,12 @@
 import { readFileSync } from 'fs';
 import Path from 'path';
 
+import { REPO_ROOT } from '@kbn/utils';
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAbsolutePathSerializer,
   createRecursiveSerializer,
-  REPO_ROOT,
 } from '@kbn/dev-utils';
 
 import { Config } from '../../lib';

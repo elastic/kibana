@@ -18,6 +18,8 @@ import { getPings } from './get_pings';
 import { getPingHistogram } from './get_ping_histogram';
 import { getSnapshotCount } from './get_snapshot_counts';
 import { getIndexStatus } from './get_index_status';
+import { getJourneySteps } from './get_journey_steps';
+import { getJourneyScreenshot } from './get_journey_screenshot';
 
 export const requests = {
   getCerts,
@@ -34,6 +36,8 @@ export const requests = {
   getPingHistogram,
   getSnapshotCount,
   getIndexStatus,
+  getJourneySteps,
+  getJourneyScreenshot,
 };
 
 export type UptimeRequests = typeof requests;

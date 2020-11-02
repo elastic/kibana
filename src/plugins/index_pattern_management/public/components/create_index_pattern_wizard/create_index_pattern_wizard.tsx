@@ -40,6 +40,7 @@ import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig } from '../..';
 import { IndexPatternManagmentContextValue } from '../../types';
 import { MatchedItem } from './types';
+import { DuplicateIndexPatternError, IndexPattern } from '../../../../data/public';
 
 interface CreateIndexPatternWizardState {
   step: number;
@@ -156,50 +157,50 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
+    let emptyPattern: IndexPattern;
     const { history } = this.props;
     const { indexPattern } = this.state;
 
-    const emptyPattern = await this.context.services.data.indexPatterns.make();
-
-    Object.assign(emptyPattern, {
-      id: indexPatternId,
-      title: indexPattern,
-      timeFieldName,
-      ...this.state.indexPatternCreationType.getIndexPatternMappings(),
-    });
-
-    const createdId = await emptyPattern.create();
-    if (!createdId) {
-      const confirmMessage = i18n.translate(
-        'indexPatternManagement.indexPattern.titleExistsLabel',
-        {
-          values: { title: emptyPattern.title },
-          defaultMessage: "An index pattern with the title '{title}' already exists.",
-        }
-      );
-
-      const isConfirmed = await this.context.services.overlays.openConfirm(confirmMessage, {
-        confirmButtonText: i18n.translate(
-          'indexPatternManagement.indexPattern.goToPatternButtonLabel',
-          {
-            defaultMessage: 'Go to existing pattern',
-          }
-        ),
+    try {
+      emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
+        id: indexPatternId,
+        title: indexPattern,
+        timeFieldName,
+        ...this.state.indexPatternCreationType.getIndexPatternMappings(),
       });
+    } catch (err) {
+      if (err instanceof DuplicateIndexPatternError) {
+        const confirmMessage = i18n.translate(
+          'indexPatternManagement.indexPattern.titleExistsLabel',
+          {
+            values: { title: emptyPattern!.title },
+            defaultMessage: "An index pattern with the title '{title}' already exists.",
+          }
+        );
 
-      if (isConfirmed) {
-        return history.push(`/patterns/${indexPatternId}`);
+        const isConfirmed = await this.context.services.overlays.openConfirm(confirmMessage, {
+          confirmButtonText: i18n.translate(
+            'indexPatternManagement.indexPattern.goToPatternButtonLabel',
+            {
+              defaultMessage: 'Go to existing pattern',
+            }
+          ),
+        });
+
+        if (isConfirmed) {
+          return history.push(`/patterns/${indexPatternId}`);
+        } else {
+          return;
+        }
       } else {
-        return;
+        throw err;
       }
     }
 
-    if (!this.context.services.uiSettings.get('defaultIndex')) {
-      await this.context.services.uiSettings.set('defaultIndex', createdId);
-    }
+    await this.context.services.data.indexPatterns.setDefault(emptyPattern.id as string);
 
-    this.context.services.data.indexPatterns.clearCache(createdId);
-    history.push(`/patterns/${createdId}`);
+    this.context.services.data.indexPatterns.clearCache(emptyPattern.id as string);
+    history.push(`/patterns/${emptyPattern.id}`);
   };
 
   goToTimeFieldStep = (indexPattern: string, selectedTimeField?: string) => {

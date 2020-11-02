@@ -15,12 +15,8 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-
-import {
-  DataFrameAnalyticsId,
-  useRefreshAnalyticsList,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 import {

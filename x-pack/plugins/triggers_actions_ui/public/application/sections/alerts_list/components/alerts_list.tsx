@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { i18n } from '@kbn/i18n';
+import { capitalize, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
@@ -19,6 +22,10 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiCallOut,
+  EuiButtonEmpty,
+  EuiHealth,
+  EuiText,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -32,14 +39,20 @@ import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../com
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
+import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
 import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatus,
+  AlertExecutionStatusValues,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
+import { alertsStatusesTranslationsMapping } from '../translations';
 
 const ENTER_KEY = 13;
 
@@ -66,6 +79,7 @@ export const AlertsList: React.FunctionComponent = () => {
     docLinks,
     charts,
     dataPlugin,
+    kibanaFeatures,
   } = useAppDependencies();
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
@@ -77,7 +91,19 @@ export const AlertsList: React.FunctionComponent = () => {
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
+  const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
+  const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>(
+    AlertExecutionStatusValues.reduce(
+      (prev: Record<string, number>, status: string) =>
+        ({
+          ...prev,
+          [status]: 0,
+        } as Record<string, number>),
+      {}
+    )
+  );
   const [alertTypesState, setAlertTypesState] = useState<AlertTypeState>({
     isLoading: false,
     isInitialized: false,
@@ -92,8 +118,14 @@ export const AlertsList: React.FunctionComponent = () => {
 
   useEffect(() => {
     loadAlertsData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertTypesState, page, searchText, typesFilter, actionTypesFilter]);
+  }, [
+    alertTypesState,
+    page,
+    searchText,
+    JSON.stringify(typesFilter),
+    JSON.stringify(actionTypesFilter),
+    JSON.stringify(alertStatusesFilter),
+  ]);
 
   useEffect(() => {
     (async () => {
@@ -115,7 +147,6 @@ export const AlertsList: React.FunctionComponent = () => {
         setAlertTypesState({ ...alertTypesState, isLoading: false });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -132,7 +163,6 @@ export const AlertsList: React.FunctionComponent = () => {
         });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadAlertsData() {
@@ -146,7 +176,9 @@ export const AlertsList: React.FunctionComponent = () => {
           searchText,
           typesFilter,
           actionTypesFilter,
+          alertStatusesFilter,
         });
+        await loadAlertsTotalStatuses();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -170,7 +202,52 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
+  async function loadAlertsTotalStatuses() {
+    let alertsStatuses = {};
+    try {
+      AlertExecutionStatusValues.forEach(async (status: string) => {
+        const alertsTotalResponse = await loadAlerts({
+          http,
+          page: { index: 0, size: 0 },
+          searchText,
+          typesFilter,
+          actionTypesFilter,
+          alertStatusesFilter: [status],
+        });
+        setAlertsStatusesTotal({ ...alertsStatuses, [status]: alertsTotalResponse.total });
+        alertsStatuses = { ...alertsStatuses, [status]: alertsTotalResponse.total };
+      });
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
+          {
+            defaultMessage: 'Unable to load alert statuses info',
+          }
+        ),
+      });
+    }
+  }
+
   const alertsTableColumns = [
+    {
+      field: 'executionStatus',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
+        { defaultMessage: 'Status' }
+      ),
+      sortable: false,
+      truncateText: false,
+      'data-test-subj': 'alertsTableCell-status',
+      render: (executionStatus: AlertExecutionStatus) => {
+        const healthColor = getHealthColor(executionStatus.status);
+        return (
+          <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
+            {alertsStatusesTranslationsMapping[executionStatus.status]}
+          </EuiHealth>
+        );
+      },
+    },
     {
       field: 'name',
       name: i18n.translate(
@@ -259,39 +336,55 @@ export const AlertsList: React.FunctionComponent = () => {
     (alertType) => alertType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
 
+  const getProducerFeatureName = (producer: string) => {
+    return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
+  };
+
+  const groupAlertTypesByProducer = () => {
+    return authorizedAlertTypes.reduce(
+      (
+        result: Record<
+          string,
+          Array<{
+            value: string;
+            name: string;
+          }>
+        >,
+        alertType
+      ) => {
+        const producer = alertType.producer;
+        (result[producer] = result[producer] || []).push({
+          value: alertType.id,
+          name: alertType.name,
+        });
+        return result;
+      },
+      {}
+    );
+  };
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
-      options={authorizedAlertTypes
-        .map((alertType) => ({
-          value: alertType.id,
-          name: alertType.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name))}
+      options={sortBy(Object.entries(groupAlertTypesByProducer())).map(
+        ([groupName, alertTypesOptions]) => ({
+          groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
+          subOptions: alertTypesOptions.sort((a, b) => a.name.localeCompare(b.name)),
+        })
+      )}
     />,
     <ActionTypeFilter
       key="action-type-filter"
       actionTypes={actionTypes}
       onChange={(ids: string[]) => setActionTypesFilter(ids)}
     />,
+    <AlertStatusFilter
+      key="alert-status-filter"
+      selectedStatuses={alertStatusesFilter}
+      onChange={(ids: string[]) => setAlertStatusesFilter(ids)}
+    />,
   ];
-
-  if (authorizedToCreateAnyAlerts) {
-    toolsRight.push(
-      <EuiButton
-        key="create-alert"
-        data-test-subj="createAlertButton"
-        fill
-        onClick={() => setAlertFlyoutVisibility(true)}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-          defaultMessage="Create alert"
-        />
-      </EuiButton>
-    );
-  }
 
   const authorizedToModifySelectedAlerts = selectedIds.length
     ? filterAlertsById(alertsState.data, selectedIds).every((selectedAlert) =>
@@ -321,6 +414,21 @@ export const AlertsList: React.FunctionComponent = () => {
             </BulkOperationPopover>
           </EuiFlexItem>
         )}
+        {authorizedToCreateAnyAlerts ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              key="create-alert"
+              data-test-subj="createAlertButton"
+              fill
+              onClick={() => setAlertFlyoutVisibility(true)}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
+                defaultMessage="Create alert"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
@@ -348,7 +456,112 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      <EuiSpacer size="m" />
+      {!dissmissAlertErrors && alertsStatusesTotal.error > 0 ? (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiCallOut
+              color="danger"
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
+                  defaultMessage="Error found in {totalStausesError, plural, one {# alert} other {# alerts}}."
+                  values={{
+                    totalStausesError: alertsStatusesTotal.error,
+                  }}
+                />
+              }
+              iconType="alert"
+              data-test-subj="alertsErrorBanner"
+            >
+              <EuiButton
+                type="primary"
+                size="s"
+                color="danger"
+                onClick={() => setAlertStatusesFilter(['error'])}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertsList.viewBunnerButtonLabel"
+                  defaultMessage="View"
+                />
+              </EuiButton>
+              <EuiButtonEmpty color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertsList.dismissBunnerButtonLabel"
+                  defaultMessage="Dismiss"
+                />
+              </EuiButtonEmpty>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalItemsCountDescription"
+              defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
+              values={{
+                totalItemCount: alertsState.totalItemCount,
+                pageSize: alertsState.data.length,
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="primary" data-test-subj="totalActiveAlertsCount">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
+              defaultMessage="Active: {totalStausesActive}"
+              values={{
+                totalStausesActive: alertsStatusesTotal.active,
+              }}
+            />
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="danger" data-test-subj="totalErrorAlertsCount">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
+              defaultMessage="Error: {totalStausesError}"
+              values={{ totalStausesError: alertsStatusesTotal.error }}
+            />
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="subdued" data-test-subj="totalOkAlertsCount">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
+              defaultMessage="Ok: {totalStausesOk}"
+              values={{ totalStausesOk: alertsStatusesTotal.ok }}
+            />
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="success" data-test-subj="totalPendingAlertsCount">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesPendingDescription"
+              defaultMessage="Pending: {totalStausesPending}"
+              values={{
+                totalStausesPending: alertsStatusesTotal.pending,
+              }}
+            />
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="warning" data-test-subj="totalUnknownAlertsCount">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.totalStausesUnknownDescription"
+              defaultMessage="Unknown: {totalStausesUnknown}"
+              values={{
+                totalStausesUnknown: alertsStatusesTotal.unknown,
+              }}
+            />
+          </EuiHealth>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {/* Large to remain consistent with ActionsList table spacing */}
       <EuiSpacer size="l" />
 
@@ -397,23 +610,24 @@ export const AlertsList: React.FunctionComponent = () => {
   const isFilterApplied = !(
     isEmpty(searchText) &&
     isEmpty(typesFilter) &&
-    isEmpty(actionTypesFilter)
+    isEmpty(actionTypesFilter) &&
+    isEmpty(alertStatusesFilter)
   );
 
   return (
     <section data-test-subj="alertsList">
       <DeleteModalConfirmation
         onDeleted={async (deleted: string[]) => {
-          loadAlertsData();
-          setSelectedIds([]);
           setAlertsToDelete([]);
+          setSelectedIds([]);
+          await loadAlertsData();
         }}
         onErrors={async () => {
           // Refresh the alerts from the server, some alerts may have beend deleted
           await loadAlertsData();
           setAlertsToDelete([]);
         }}
-        onCancel={async () => {
+        onCancel={() => {
           setAlertsToDelete([]);
         }}
         apiDeleteCall={deleteAlerts}
@@ -424,6 +638,9 @@ export const AlertsList: React.FunctionComponent = () => {
         multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.multipleTitle', {
           defaultMessage: 'alerts',
         })}
+        setIsLoadingState={(isLoading: boolean) => {
+          setAlertsState({ ...alertsState, isLoading });
+        }}
       />
       <EuiSpacer size="m" />
       {loadedItems.length || isFilterApplied ? (
@@ -451,6 +668,8 @@ export const AlertsList: React.FunctionComponent = () => {
           charts,
           dataFieldsFormats: dataPlugin.fieldFormats,
           capabilities,
+          dataUi: dataPlugin.ui,
+          dataIndexPatterns: dataPlugin.indexPatterns,
         }}
       >
         <AlertAdd

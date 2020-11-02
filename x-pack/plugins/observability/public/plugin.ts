@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
@@ -21,21 +24,26 @@ export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
 }
 
-interface SetupPlugins {
+export interface ObservabilityPluginSetupDeps {
   home?: HomePublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export type ObservabilityPluginStart = void;
 
 export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: SetupPlugins) {
+  public setup(core: CoreSetup, plugins: ObservabilityPluginSetupDeps) {
     core.application.register({
       id: 'observability-overview',
       title: 'Overview',
       order: 8000,
+      euiIconType: 'logoObservability',
       appRoute: '/app/observability',
+      updater$: this.appUpdater$,
       category: DEFAULT_APP_CATEGORIES.observability,
 
       mount: async (params: AppMountParameters<unknown>) => {
@@ -44,7 +52,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         // Get start services
         const [coreStart] = await core.getStartServices();
 
-        return renderApp(coreStart, params);
+        return renderApp(coreStart, plugins, params);
       },
     });
 
@@ -57,7 +65,11 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         subtitle: i18n.translate('xpack.observability.featureCatalogueSubtitle', {
           defaultMessage: 'Centralize & monitor',
         }),
-        descriptions: [
+        description: i18n.translate('xpack.observability.featureCatalogueDescription', {
+          defaultMessage:
+            'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
+        }),
+        appDescriptions: [
           i18n.translate('xpack.observability.featureCatalogueDescription1', {
             defaultMessage: 'Monitor infrastructure metrics.',
           }),
@@ -69,7 +81,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
           }),
         ],
         icon: 'logoObservability',
-        path: '/app/observability',
+        path: '/app/observability/',
         order: 200,
       });
     }
@@ -78,7 +90,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
       dashboard: { register: registerDataHandler },
     };
   }
-  public start(core: CoreStart) {
-    toggleOverviewLinkInNav(core);
+  public start({ application }: CoreStart) {
+    toggleOverviewLinkInNav(this.appUpdater$, application);
   }
 }

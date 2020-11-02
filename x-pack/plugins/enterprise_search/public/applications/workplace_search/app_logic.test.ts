@@ -50,5 +50,15 @@ describe('AppLogic', () => {
 
       expect(AppLogic.values).toEqual(expectedLogicValues);
     });
+
+    it('gracefully handles missing initial data', () => {
+      AppLogic.actions.initializeAppData({});
+
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        hasInitialized: true,
+        isFederatedAuth: false,
+      });
+    });
   });
 });

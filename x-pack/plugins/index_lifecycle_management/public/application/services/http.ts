@@ -30,8 +30,8 @@ function getFullPath(path: string): string {
   return apiPrefix;
 }
 
-export function sendPost(path: string, payload: GenericObject) {
-  return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
+export function sendPost(path: string, payload: GenericObject, query?: GenericObject) {
+  return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload), query });
 }
 
 export function sendGet(path: string, query?: GenericObject): any {

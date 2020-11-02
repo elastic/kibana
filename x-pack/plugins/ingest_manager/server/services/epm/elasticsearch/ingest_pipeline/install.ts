@@ -7,13 +7,15 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import {
   EsAssetReference,
-  Dataset,
+  RegistryDataStream,
   ElasticsearchAssetType,
-  RegistryPackage,
+  InstallablePackage,
 } from '../../../../types';
 import * as Registry from '../../registry';
 import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
+import { getInstallationObject } from '../../packages';
+import { deletePipelineRefs } from './remove';
 
 interface RewriteSubstitution {
   source: string;
@@ -22,7 +24,7 @@ interface RewriteSubstitution {
 }
 
 export const installPipelines = async (
-  registryPackage: RegistryPackage,
+  installablePackage: InstallablePackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
   savedObjectsClient: SavedObjectsClientContract
@@ -30,33 +32,50 @@ export const installPipelines = async (
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
   // so do not remove the currently installed pipelines here
-  const datasets = registryPackage.datasets;
-  if (!datasets?.length) return [];
+  const dataStreams = installablePackage.data_streams;
+  const { name: pkgName, version: pkgVersion } = installablePackage;
+  if (!dataStreams?.length) return [];
   const pipelinePaths = paths.filter((path) => isPipeline(path));
   // get and save pipeline refs before installing pipelines
-  const pipelineRefs = datasets.reduce<EsAssetReference[]>((acc, dataset) => {
-    const filteredPaths = pipelinePaths.filter((path) => isDatasetPipeline(path, dataset.path));
+  const pipelineRefs = dataStreams.reduce<EsAssetReference[]>((acc, dataStream) => {
+    const filteredPaths = pipelinePaths.filter((path) =>
+      isDataStreamPipeline(path, dataStream.path)
+    );
     const pipelineObjectRefs = filteredPaths.map((path) => {
       const { name } = getNameAndExtension(path);
       const nameForInstallation = getPipelineNameForInstallation({
         pipelineName: name,
-        dataset,
-        packageVersion: registryPackage.version,
+        dataStream,
+        packageVersion: installablePackage.version,
       });
       return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
     });
     acc.push(...pipelineObjectRefs);
     return acc;
   }, []);
-  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, pipelineRefs);
-  const pipelines = datasets.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataset) => {
-    if (dataset.ingest_pipeline) {
+
+  // check that we don't duplicate the pipeline refs if the user is reinstalling
+  const installedPkg = await getInstallationObject({
+    savedObjectsClient,
+    pkgName,
+  });
+  if (!installedPkg) throw new Error("integration wasn't found while installing pipelines");
+  // remove the current pipeline refs, if any exist, associated with this version before saving new ones so no duplicates occur
+  await deletePipelineRefs(
+    savedObjectsClient,
+    installedPkg.attributes.installed_es,
+    pkgName,
+    pkgVersion
+  );
+  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, pipelineRefs);
+  const pipelines = dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
+    if (dataStream.ingest_pipeline) {
       acc.push(
-        installPipelinesForDataset({
-          dataset,
+        installPipelinesForDataStream({
+          dataStream,
           callCluster,
           paths: pipelinePaths,
-          pkgVersion: registryPackage.version,
+          pkgVersion: installablePackage.version,
         })
       );
     }
@@ -86,18 +105,18 @@ export function rewriteIngestPipeline(
   return pipeline;
 }
 
-export async function installPipelinesForDataset({
+export async function installPipelinesForDataStream({
   callCluster,
   pkgVersion,
   paths,
-  dataset,
+  dataStream,
 }: {
   callCluster: CallESAsCurrentUser;
   pkgVersion: string;
   paths: string[];
-  dataset: Dataset;
+  dataStream: RegistryDataStream;
 }): Promise<EsAssetReference[]> {
-  const pipelinePaths = paths.filter((path) => isDatasetPipeline(path, dataset.path));
+  const pipelinePaths = paths.filter((path) => isDataStreamPipeline(path, dataStream.path));
   let pipelines: any[] = [];
   const substitutions: RewriteSubstitution[] = [];
 
@@ -105,7 +124,7 @@ export async function installPipelinesForDataset({
     const { name, extension } = getNameAndExtension(path);
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
-      dataset,
+      dataStream,
       packageVersion: pkgVersion,
     });
     const content = Registry.getAsset(path).toString('utf-8');
@@ -175,13 +194,13 @@ async function installPipeline({
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
 
-const isDatasetPipeline = (path: string, datasetName: string) => {
+const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
   const pathParts = Registry.pathParts(path);
   return (
     !isDirectory({ path }) &&
     pathParts.type === ElasticsearchAssetType.ingestPipeline &&
     pathParts.dataset !== undefined &&
-    datasetName === pathParts.dataset
+    dataStreamDataset === pathParts.dataset
   );
 };
 const isPipeline = (path: string) => {
@@ -206,15 +225,15 @@ const getNameAndExtension = (
 
 export const getPipelineNameForInstallation = ({
   pipelineName,
-  dataset,
+  dataStream,
   packageVersion,
 }: {
   pipelineName: string;
-  dataset: Dataset;
+  dataStream: RegistryDataStream;
   packageVersion: string;
 }): string => {
-  const isPipelineEntry = pipelineName === dataset.ingest_pipeline;
+  const isPipelineEntry = pipelineName === dataStream.ingest_pipeline;
   const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
   // if this is the pipeline entry, don't add a suffix
-  return `${dataset.type}-${dataset.name}-${packageVersion}${suffix}`;
+  return `${dataStream.type}-${dataStream.dataset}-${packageVersion}${suffix}`;
 };

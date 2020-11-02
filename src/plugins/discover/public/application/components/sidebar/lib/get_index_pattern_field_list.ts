@@ -20,8 +20,8 @@ import { difference } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 
 export function getIndexPatternFieldList(
-  indexPattern: IndexPattern,
-  fieldCounts: Record<string, number>
+  indexPattern?: IndexPattern,
+  fieldCounts?: Record<string, number>
 ) {
   if (!indexPattern || !fieldCounts) return [];
 

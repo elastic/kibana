@@ -35,7 +35,7 @@ describe('getPingHistogram', () => {
     },
   };
 
-  it('returns a single bucket if array has 1', async () => {
+  it.skip('returns a single bucket if array has 1', async () => {
     expect.assertions(2);
     const mockEsClient = jest.fn();
     mockEsClient.mockReturnValue({
@@ -140,8 +140,8 @@ describe('getPingHistogram', () => {
     const result = await getPingHistogram({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
-      from: '1234',
-      to: '5678',
+      from: 'now-15m',
+      to: 'now',
       filters: JSON.stringify(searchFilter),
       monitorId: undefined,
     });

@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { caseMigrations } from './migrations';
 
 export const CASE_SAVED_OBJECT = 'cases';
 
@@ -49,8 +50,28 @@ export const caseSavedObjectType: SavedObjectsType = {
       description: {
         type: 'text',
       },
-      connector_id: {
-        type: 'keyword',
+      connector: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          name: {
+            type: 'text',
+          },
+          type: {
+            type: 'keyword',
+          },
+          fields: {
+            properties: {
+              key: {
+                type: 'text',
+              },
+              value: {
+                type: 'text',
+              },
+            },
+          },
+        },
       },
       external_service: {
         properties: {
@@ -115,4 +136,5 @@ export const caseSavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: caseMigrations,
 };

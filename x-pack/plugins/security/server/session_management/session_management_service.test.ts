@@ -50,7 +50,6 @@ describe('SessionManagementService', () => {
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         [SESSION_INDEX_CLEANUP_TASK_NAME]: {
           title: 'Cleanup expired or invalid user sessions',
-          type: SESSION_INDEX_CLEANUP_TASK_NAME,
           createTaskRunner: expect.any(Function),
         },
       });
@@ -147,7 +146,9 @@ describe('SessionManagementService', () => {
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(2);
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
+
+      // Session index task shouldn't be scheduled twice due to TM issue.
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
 
       expect(mockScheduleRetry).not.toHaveBeenCalled();
     });
@@ -199,16 +200,8 @@ describe('SessionManagementService', () => {
       expect(mockTaskManager.get).toHaveBeenCalledWith(SESSION_INDEX_CLEANUP_TASK_NAME);
 
       expect(mockTaskManager.remove).not.toHaveBeenCalled();
-
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith({
-        id: SESSION_INDEX_CLEANUP_TASK_NAME,
-        taskType: SESSION_INDEX_CLEANUP_TASK_NAME,
-        scope: ['security'],
-        schedule: { interval: '3600s' },
-        params: {},
-        state: {},
-      });
+      // No need to schedule a task if Task Manager says it's already scheduled.
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
     });
 
     it('schedules retry if index initialization fails', async () => {
@@ -224,11 +217,12 @@ describe('SessionManagementService', () => {
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
       expect(mockScheduleRetry).toHaveBeenCalledTimes(1);
 
-      // Still fails.
+      // Still fails, but cleanup task is scheduled already
+      mockTaskManager.get.mockResolvedValue({ schedule: { interval: '3600s' } } as any);
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(2);
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
       expect(mockScheduleRetry).toHaveBeenCalledTimes(2);
 
       // And finally succeeds, retry is not scheduled.
@@ -237,7 +231,7 @@ describe('SessionManagementService', () => {
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(3);
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(3);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
       expect(mockScheduleRetry).toHaveBeenCalledTimes(2);
     });
 

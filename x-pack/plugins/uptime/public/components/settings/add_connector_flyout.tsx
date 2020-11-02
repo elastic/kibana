@@ -21,7 +21,7 @@ interface Props {
   focusInput: () => void;
 }
 interface KibanaDeps {
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   application: ApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
@@ -33,7 +33,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
 
   const {
     services: {
-      triggers_actions_ui: { actionTypeRegistry },
+      triggersActionsUi: { actionTypeRegistry },
       application,
       docLinks,
       http,
@@ -69,10 +69,9 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
           capabilities: application?.capabilities,
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-        />
+        {addFlyoutVisible ? (
+          <ConnectorAddFlyout onClose={() => setAddFlyoutVisibility(false)} />
+        ) : null}
       </ActionsConnectorsContextProvider>
     </>
   );

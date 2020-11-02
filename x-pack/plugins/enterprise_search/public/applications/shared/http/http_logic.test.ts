@@ -8,42 +8,39 @@ import { resetContext } from 'kea';
 
 import { httpServiceMock } from 'src/core/public/mocks';
 
-import { HttpLogic } from './http_logic';
+import { HttpLogic, mountHttpLogic } from './http_logic';
 
 describe('HttpLogic', () => {
   const mockHttp = httpServiceMock.createSetupContract();
-  const DEFAULT_VALUES = {
-    http: null,
-    httpInterceptors: [],
-    errorConnecting: false,
-  };
+  const mount = () => mountHttpLogic({ http: mockHttp });
 
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
   });
 
-  it('has expected default values', () => {
-    HttpLogic.mount();
-    expect(HttpLogic.values).toEqual(DEFAULT_VALUES);
-  });
-
-  describe('initializeHttp()', () => {
-    it('sets values based on passed props', () => {
-      HttpLogic.mount();
-      HttpLogic.actions.initializeHttp({ http: mockHttp, errorConnecting: true });
+  describe('mounts', () => {
+    it('sets values from props', () => {
+      mountHttpLogic({
+        http: mockHttp,
+        errorConnecting: true,
+        readOnlyMode: true,
+      });
 
       expect(HttpLogic.values).toEqual({
         http: mockHttp,
-        httpInterceptors: [],
+        httpInterceptors: expect.any(Array),
         errorConnecting: true,
+        readOnlyMode: true,
       });
     });
   });
 
   describe('setErrorConnecting()', () => {
     it('sets errorConnecting value', () => {
-      HttpLogic.mount();
+      mount();
+      expect(HttpLogic.values.errorConnecting).toEqual(false);
+
       HttpLogic.actions.setErrorConnecting(true);
       expect(HttpLogic.values.errorConnecting).toEqual(true);
 
@@ -52,51 +49,114 @@ describe('HttpLogic', () => {
     });
   });
 
+  describe('setReadOnlyMode()', () => {
+    it('sets readOnlyMode value', () => {
+      mount();
+      expect(HttpLogic.values.readOnlyMode).toEqual(false);
+
+      HttpLogic.actions.setReadOnlyMode(true);
+      expect(HttpLogic.values.readOnlyMode).toEqual(true);
+
+      HttpLogic.actions.setReadOnlyMode(false);
+      expect(HttpLogic.values.readOnlyMode).toEqual(false);
+    });
+  });
+
   describe('http interceptors', () => {
     describe('initializeHttpInterceptors()', () => {
       beforeEach(() => {
-        HttpLogic.mount();
+        mount();
         jest.spyOn(HttpLogic.actions, 'setHttpInterceptors');
-        jest.spyOn(HttpLogic.actions, 'setErrorConnecting');
-        HttpLogic.actions.initializeHttp({ http: mockHttp });
-
-        HttpLogic.actions.initializeHttpInterceptors();
       });
 
       it('calls http.intercept and sets an array of interceptors', () => {
-        mockHttp.intercept.mockImplementationOnce(() => 'removeInterceptorFn' as any);
+        mockHttp.intercept
+          .mockImplementationOnce(() => 'removeErrorInterceptorFn' as any)
+          .mockImplementationOnce(() => 'removeReadOnlyInterceptorFn' as any);
         HttpLogic.actions.initializeHttpInterceptors();
 
         expect(mockHttp.intercept).toHaveBeenCalled();
-        expect(HttpLogic.actions.setHttpInterceptors).toHaveBeenCalledWith(['removeInterceptorFn']);
+        expect(HttpLogic.actions.setHttpInterceptors).toHaveBeenCalledWith([
+          'removeErrorInterceptorFn',
+          'removeReadOnlyInterceptorFn',
+        ]);
       });
 
       describe('errorConnectingInterceptor', () => {
+        let interceptedResponse: any;
+
+        beforeEach(() => {
+          interceptedResponse = mockHttp.intercept.mock.calls[0][0].responseError;
+          jest.spyOn(HttpLogic.actions, 'setErrorConnecting');
+        });
+
         it('handles errors connecting to Enterprise Search', async () => {
-          const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          await responseError({ response: { url: '/api/app_search/engines', status: 502 } });
+          const httpResponse = {
+            response: { url: '/api/app_search/engines', status: 502 },
+          };
+          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalled();
         });
 
         it('does not handle non-502 Enterprise Search errors', async () => {
-          const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          await responseError({ response: { url: '/api/workplace_search/overview', status: 404 } });
+          const httpResponse = {
+            response: { url: '/api/workplace_search/overview', status: 404 },
+          };
+          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
         });
 
-        it('does not handle errors for unrelated calls', async () => {
-          const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          await responseError({ response: { url: '/api/some_other_plugin/', status: 502 } });
+        it('does not handle errors for non-Enterprise Search API calls', async () => {
+          const httpResponse = {
+            response: { url: '/api/some_other_plugin/', status: 502 },
+          };
+          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('readOnlyModeInterceptor', () => {
+        let interceptedResponse: any;
+
+        beforeEach(() => {
+          interceptedResponse = mockHttp.intercept.mock.calls[1][0].response;
+          jest.spyOn(HttpLogic.actions, 'setReadOnlyMode');
+        });
+
+        it('sets readOnlyMode to true if the response header is true', async () => {
+          const httpResponse = {
+            response: { url: '/api/app_search/engines', headers: { get: () => 'true' } },
+          };
+          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+
+          expect(HttpLogic.actions.setReadOnlyMode).toHaveBeenCalledWith(true);
+        });
+
+        it('sets readOnlyMode to false if the response header is false', async () => {
+          const httpResponse = {
+            response: { url: '/api/workplace_search/overview', headers: { get: () => 'false' } },
+          };
+          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+
+          expect(HttpLogic.actions.setReadOnlyMode).toHaveBeenCalledWith(false);
+        });
+
+        it('does not handle headers for non-Enterprise Search API calls', async () => {
+          const httpResponse = {
+            response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
+          };
+          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+
+          expect(HttpLogic.actions.setReadOnlyMode).not.toHaveBeenCalled();
         });
       });
     });
 
     it('sets httpInterceptors and calls all valid remove functions on unmount', () => {
-      const unmount = HttpLogic.mount();
+      const unmount = mount();
       const httpInterceptors = [jest.fn(), undefined, jest.fn()] as any;
 
       HttpLogic.actions.setHttpInterceptors(httpInterceptors);

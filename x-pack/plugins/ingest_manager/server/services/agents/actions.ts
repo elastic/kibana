@@ -29,12 +29,20 @@ export async function createAgentAction(
   return createAction(soClient, newAgentAction);
 }
 
+export async function bulkCreateAgentActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentAction, 'id'>>
+): Promise<AgentAction[]> {
+  return bulkCreateActions(soClient, newAgentActions);
+}
+
 export function createAgentPolicyAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentPolicyAction, 'id'>
 ): Promise<AgentPolicyAction> {
   return createAction(soClient, newAgentAction);
 }
+
 async function createAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentPolicyAction, 'id'>
@@ -47,24 +55,68 @@ async function createAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>
 ): Promise<AgentPolicyAction | AgentAction> {
-  const so = await soClient.create<BaseAgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, {
-    ...newAgentAction,
-    data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
-    ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
-  });
+  const actionSO = await soClient.create<BaseAgentActionSOAttributes>(
+    AGENT_ACTION_SAVED_OBJECT_TYPE,
+    {
+      ...newAgentAction,
+      data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
+      ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
+    }
+  );
 
-  if (isAgentActionSavedObject(so)) {
-    const agentAction = savedObjectToAgentAction(so);
+  if (isAgentActionSavedObject(actionSO)) {
+    const agentAction = savedObjectToAgentAction(actionSO);
+    // Action `data` is encrypted, so is not returned from the saved object
+    // so we add back the original value from the request to form the expected
+    // response shape for POST create agent action endpoint
     agentAction.data = newAgentAction.data;
 
     return agentAction;
-  } else if (isPolicyActionSavedObject(so)) {
-    const agentAction = savedObjectToAgentAction(so);
+  } else if (isPolicyActionSavedObject(actionSO)) {
+    const agentAction = savedObjectToAgentAction(actionSO);
     agentAction.data = newAgentAction.data;
 
     return agentAction;
   }
   throw new Error('Invalid action');
+}
+
+async function bulkCreateActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentPolicyAction, 'id'>>
+): Promise<AgentPolicyAction[]>;
+async function bulkCreateActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentAction, 'id'>>
+): Promise<AgentAction[]>;
+async function bulkCreateActions(
+  soClient: SavedObjectsClientContract,
+  newAgentActions: Array<Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>>
+): Promise<Array<AgentPolicyAction | AgentAction>> {
+  const { saved_objects: actionSOs } = await soClient.bulkCreate<BaseAgentActionSOAttributes>(
+    newAgentActions.map((newAgentAction) => ({
+      type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...newAgentAction,
+        data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
+        ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
+      },
+    }))
+  );
+
+  return actionSOs.map((actionSO) => {
+    if (isAgentActionSavedObject(actionSO)) {
+      const agentAction = savedObjectToAgentAction(actionSO);
+      // Compared to single create (createAction()), we don't add back the
+      // original value of `agentAction.data` as this method isn't exposed
+      // via an HTTP endpoint
+      return agentAction;
+    } else if (isPolicyActionSavedObject(actionSO)) {
+      const agentAction = savedObjectToAgentAction(actionSO);
+      return agentAction;
+    }
+    throw new Error('Invalid action');
+  });
 }
 
 export async function getAgentActionsForCheckin(
@@ -74,18 +126,27 @@ export async function getAgentActionsForCheckin(
   const filter = nodeTypes.function.buildNode('and', [
     nodeTypes.function.buildNode(
       'not',
-      nodeTypes.function.buildNode(
-        'is',
-        `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
-        '*'
-      )
+      nodeTypes.function.buildNodeWithArgumentNodes('is', [
+        nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`),
+        nodeTypes.wildcard.buildNode(nodeTypes.wildcard.wildcardSymbol),
+        nodeTypes.literal.buildNode(false),
+      ])
     ),
     nodeTypes.function.buildNode(
-      'is',
-      `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`,
-      agentId
+      'not',
+      nodeTypes.function.buildNodeWithArgumentNodes('is', [
+        nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.type`),
+        nodeTypes.literal.buildNode('INTERNAL_POLICY_REASSIGN'),
+        nodeTypes.literal.buildNode(false),
+      ])
     ),
+    nodeTypes.function.buildNodeWithArgumentNodes('is', [
+      nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`),
+      nodeTypes.literal.buildNode(agentId),
+      nodeTypes.literal.buildNode(false),
+    ]),
   ]);
+
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     filter,
@@ -172,32 +233,60 @@ export async function getAgentPolicyActionByIds(
   );
 }
 
-export async function getNewActionsSince(soClient: SavedObjectsClientContract, timestamp: string) {
+export async function getNewActionsSince(
+  soClient: SavedObjectsClientContract,
+  timestamp: string,
+  decryptData: boolean = true
+) {
   const filter = nodeTypes.function.buildNode('and', [
     nodeTypes.function.buildNode(
       'not',
-      nodeTypes.function.buildNode(
-        'is',
-        `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
-        '*'
-      )
+      nodeTypes.function.buildNodeWithArgumentNodes('is', [
+        nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`),
+        nodeTypes.wildcard.buildNode(nodeTypes.wildcard.wildcardSymbol),
+        nodeTypes.literal.buildNode(false),
+      ])
     ),
+    nodeTypes.function.buildNodeWithArgumentNodes('is', [
+      nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`),
+      nodeTypes.wildcard.buildNode(nodeTypes.wildcard.wildcardSymbol),
+      nodeTypes.literal.buildNode(false),
+    ]),
     nodeTypes.function.buildNode(
       'range',
       `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.created_at`,
       {
-        gte: timestamp,
+        gt: timestamp,
       }
     ),
   ]);
-  const res = await soClient.find<AgentActionSOAttributes>({
-    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    filter,
-  });
 
-  return res.saved_objects
+  const actions = (
+    await soClient.find<AgentActionSOAttributes>({
+      type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      filter,
+    })
+  ).saved_objects
     .filter(isAgentActionSavedObject)
     .map((so) => savedObjectToAgentAction(so));
+
+  if (!decryptData) {
+    return actions;
+  }
+
+  return await Promise.all(
+    actions.map(async (action) => {
+      // Get decrypted actions
+      return savedObjectToAgentAction(
+        await appContextService
+          .getEncryptedSavedObjects()
+          .getDecryptedAsInternalUser<AgentActionSOAttributes>(
+            AGENT_ACTION_SAVED_OBJECT_TYPE,
+            action.id
+          )
+      );
+    })
+  );
 }
 
 export async function getLatestConfigChangeAction(

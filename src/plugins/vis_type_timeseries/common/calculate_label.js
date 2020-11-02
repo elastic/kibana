@@ -72,7 +72,7 @@ export function calculateLabel(metric, metrics) {
   }
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
-      defaultMessage: 'Positive Rate of {field}',
+      defaultMessage: 'Counter Rate of {field}',
       values: { field: metric.field },
     });
   }

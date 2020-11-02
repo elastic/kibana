@@ -13,6 +13,7 @@ it('allows features to be defined without privileges', () => {
     name: 'foo',
     app: [],
     privileges: null,
+    category: { id: 'foo', label: 'foo' },
   });
 
   validateReservedPrivileges([feature]);
@@ -23,6 +24,7 @@ it('allows features with a single reserved privilege to be defined', () => {
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -49,6 +51,7 @@ it('allows multiple features with reserved privileges to be defined', () => {
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -71,6 +74,7 @@ it('allows multiple features with reserved privileges to be defined', () => {
     id: 'foo2',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -97,6 +101,7 @@ it('prevents a feature from specifying the same reserved privilege id', () => {
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -135,6 +140,7 @@ it('prevents features from sharing a reserved privilege id', () => {
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -157,6 +163,7 @@ it('prevents features from sharing a reserved privilege id', () => {
     id: 'foo2',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',

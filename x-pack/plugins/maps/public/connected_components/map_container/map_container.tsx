@@ -50,6 +50,8 @@ interface Props {
   refreshConfig: MapRefreshConfig;
   renderTooltipContent?: RenderToolTipContent;
   triggerRefreshTimer: () => void;
+  title?: string;
+  description?: string;
 }
 
 interface State {
@@ -197,7 +199,12 @@ export class MapContainer extends Component<Props, State> {
 
     if (mapInitError) {
       return (
-        <div data-render-complete data-shared-item>
+        <div
+          data-render-complete
+          data-shared-item
+          data-title={this.props.title}
+          data-description={this.props.description}
+        >
           <EuiCallOut
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
               defaultMessage: 'Unable to initialize map',
@@ -231,6 +238,8 @@ export class MapContainer extends Component<Props, State> {
         data-dom-id={this.state.domId}
         data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
         data-shared-item
+        data-title={this.props.title}
+        data-description={this.props.description}
       >
         <EuiFlexItem className="mapMapWrapper">
           <MBMap

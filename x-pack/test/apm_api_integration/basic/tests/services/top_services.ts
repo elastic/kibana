@@ -33,7 +33,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ hasHistoricalData: false, hasLegacyData: false, items: [] });
+        expect(response.body.hasHistoricalData).to.be(false);
+        expect(response.body.hasLegacyData).to.be(false);
+        expect(response.body.items.length).to.be(0);
       });
     });
 
@@ -71,6 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "opbeans-dotnet",
               "opbeans-java",
               "opbeans-rum",
+              "elastic-co-frontend",
             ]
           `);
         });
@@ -89,76 +92,84 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               Object {
                 "avgResponseTime": Object {
-                  "value": 208079.9121184089,
+                  "value": 219090.56261343,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.041666666666666664,
+                  "value": 0.317604355716878,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 18.016666666666666,
+                  "value": 18.3666666666667,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 578297.1431623931,
+                  "value": 600888.274678112,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.03317535545023697,
+                  "value": 0,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 7.8,
+                  "value": 7.76666666666667,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 60518.587926509186,
+                  "value": 120020.290123457,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.013123359580052493,
+                  "value": 0.0185185185185185,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 6.35,
+                  "value": 5.4,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 25259.78717201166,
+                  "value": 489731.277777778,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.014577259475218658,
+                  "value": 0.0238095238095238,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 5.716666666666667,
+                  "value": 4.2,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 527290.3218390804,
+                  "value": 1250898.95081967,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.01532567049808429,
+                  "value": 0.0163934426229508,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 4.35,
+                  "value": 4.06666666666667,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 530245.8571428572,
+                  "value": 311287.565217391,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.15384615384615385,
+                  "value": 0.152173913043478,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 3.033333333333333,
+                  "value": 3.06666666666667,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 896134.328358209,
+                  "value": 1827564.51612903,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 2.2333333333333334,
+                  "value": 2.06666666666667,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 7480000,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 0.0333333333333333,
                 },
               },
             ]
@@ -190,6 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               Array [
                 "testing",
               ],
+              Array [],
             ]
           `);
         });

@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode, EuiLink } from '@elastic/eui';
-import { useKibana } from '../../../../../shared_imports';
 
 import {
   Append,
@@ -46,7 +45,7 @@ import {
   UrlDecode,
   UserAgent,
   FormFieldsComponent,
-} from '../manage_processor_form/processors';
+} from '../processor_form/processors';
 
 interface FieldDescriptor {
   FieldsComponent?: FormFieldsComponent;
@@ -55,7 +54,7 @@ interface FieldDescriptor {
    * A sentence case label that can be displayed to users
    */
   label: string;
-  description?: string | ReactNode;
+  description?: string | ((esDocUrl: string) => ReactNode);
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
@@ -176,11 +175,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',
     }),
-    description: function Description() {
-      const {
-        services: { documentation },
-      } = useKibana();
-      const esDocUrl = documentation.getEsDocsBasePath();
+    description: (esDocUrl) => {
       return (
         <FormattedMessage
           id="xpack.ingestPipelines.processors.description.enrich"
@@ -234,11 +229,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
       defaultMessage: 'Grok',
     }),
-    description: function Description() {
-      const {
-        services: { documentation },
-      } = useKibana();
-      const esDocUrl = documentation.getEsDocsBasePath();
+    description: (esDocUrl) => {
       return (
         <FormattedMessage
           id="xpack.ingestPipelines.processors.description.grok"
@@ -413,12 +404,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.trim', {
       defaultMessage: 'Trim',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.trim', {
+      defaultMessage: 'Removes leading and trailing whitespace from a string.',
+    }),
   },
   uppercase: {
     FieldsComponent: Uppercase,
     docLinkPath: '/uppercase-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.uppercase', {
       defaultMessage: 'Uppercase',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.uppercase', {
+      defaultMessage: 'Converts a string to uppercase.',
     }),
   },
   urldecode: {
@@ -427,12 +424,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
       defaultMessage: 'URL decode',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.urldecode', {
+      defaultMessage: 'Decodes a URL-encoded string.',
+    }),
   },
   user_agent: {
     FieldsComponent: UserAgent,
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
+      defaultMessage: "Extracts values from a browser's user agent string.",
     }),
   },
 };

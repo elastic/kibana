@@ -19,8 +19,7 @@
 
 jest.mock('../legacy_logging_server');
 
-import { LogLevel } from '../../../logging/log_level';
-import { LogRecord } from '../../../logging/log_record';
+import { LogRecord, LogLevel } from '../../../logging';
 import { LegacyLoggingServer } from '../legacy_logging_server';
 import { LegacyAppender } from './legacy_appender';
 

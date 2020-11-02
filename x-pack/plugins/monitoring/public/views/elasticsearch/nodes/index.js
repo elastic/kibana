@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { uiRoutes } from '../../../angular/helpers/routes';
@@ -19,7 +19,13 @@ import {
   ELASTICSEARCH_SYSTEM_ID,
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_MISSING_MONITORING_DATA,
+  ALERT_DISK_USAGE,
+  ALERT_MEMORY_USAGE,
 } from '../../../../common/constants';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -59,7 +65,7 @@ uiRoutes.when('/elasticsearch/nodes', {
 
         const promise = globalState.cluster_uuid
           ? getNodes()
-          : new Promise((resolve) => resolve({}));
+          : new Promise((resolve) => resolve({ data: {} }));
         return promise
           .then((response) => response.data)
           .catch((err) => {
@@ -73,6 +79,9 @@ uiRoutes.when('/elasticsearch/nodes', {
         title: i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
           defaultMessage: 'Elasticsearch - Nodes',
         }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.nodes.pageTitle', {
+          defaultMessage: 'Elasticsearch nodes',
+        }),
         storageKey: 'elasticsearch.nodes',
         reactNodeId: 'elasticsearchNodesReact',
         defaultData: {},
@@ -83,7 +92,19 @@ uiRoutes.when('/elasticsearch/nodes', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE],
+            alertTypeIds: [
+              ALERT_CPU_USAGE,
+              ALERT_DISK_USAGE,
+              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+              ALERT_THREAD_POOL_WRITE_REJECTIONS,
+              ALERT_MEMORY_USAGE,
+              ALERT_MISSING_MONITORING_DATA,
+            ],
+            filters: [
+              {
+                stackProduct: ELASTICSEARCH_SYSTEM_ID,
+              },
+            ],
           },
         },
       });
@@ -92,38 +113,41 @@ uiRoutes.when('/elasticsearch/nodes', {
 
       $scope.$watch(
         () => this.data,
-        () => this.renderReact(this.data || {})
+        (data) => {
+          if (!data) {
+            return;
+          }
+
+          const { clusterStatus, nodes, totalNodeCount } = data;
+          const pagination = {
+            ...this.pagination,
+            totalItemCount: totalNodeCount,
+          };
+
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <ElasticsearchNodes
+                    clusterStatus={clusterStatus}
+                    clusterUuid={globalState.cluster_uuid}
+                    setupMode={setupMode}
+                    nodes={nodes}
+                    alerts={this.alerts}
+                    showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+                    {...this.getPaginationTableProps(pagination)}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
+            />
+          );
+        }
       );
-
-      this.renderReact = ({ clusterStatus, nodes, totalNodeCount }) => {
-        const pagination = {
-          ...this.pagination,
-          totalItemCount: totalNodeCount,
-        };
-
-        super.renderReact(
-          <SetupModeRenderer
-            scope={$scope}
-            injector={$injector}
-            productName={ELASTICSEARCH_SYSTEM_ID}
-            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-              <Fragment>
-                {flyoutComponent}
-                <ElasticsearchNodes
-                  clusterStatus={clusterStatus}
-                  clusterUuid={globalState.cluster_uuid}
-                  setupMode={setupMode}
-                  nodes={nodes}
-                  alerts={this.alerts}
-                  showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-                  {...this.getPaginationTableProps(pagination)}
-                />
-                {bottomBarComponent}
-              </Fragment>
-            )}
-          />
-        );
-      };
     }
   },
 });

@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useRef, useEffect, useState, Component } from 'react';
 import ReactDOM from 'react-dom';
 import { MountPoint } from 'kibana/public';
+import { useIfMounted } from './utils';
 
 interface MountPointPortalProps {
   setMountPoint: (mountPoint: MountPoint<HTMLElement>) => void;
@@ -33,20 +34,30 @@ export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, se
   // state used to force re-renders when the element changes
   const [shouldRender, setShouldRender] = useState(false);
   const el = useRef<HTMLElement>();
+  const ifMounted = useIfMounted();
 
   useEffect(() => {
     setMountPoint((element) => {
-      el.current = element;
-      setShouldRender(true);
+      ifMounted(() => {
+        el.current = element;
+        setShouldRender(true);
+      });
       return () => {
-        setShouldRender(false);
-        el.current = undefined;
+        // the component can be unmounted from the dom before the portal target actually
+        // calls the `unmount` function. This is a no-op but show a scary warning in the console
+        // so we use a ifMounted effect to avoid it.
+        ifMounted(() => {
+          setShouldRender(false);
+          el.current = undefined;
+        });
       };
     });
 
     return () => {
-      setShouldRender(false);
-      el.current = undefined;
+      ifMounted(() => {
+        setShouldRender(false);
+        el.current = undefined;
+      });
     };
   }, [setMountPoint]);
 

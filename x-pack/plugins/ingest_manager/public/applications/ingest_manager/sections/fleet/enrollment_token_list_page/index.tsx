@@ -73,10 +73,10 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
         <EuiToolTip
           content={
             state === 'VISIBLE'
-              ? i18n.translate('xpack.ingestManager.enrollmentTokensList.hideTokenButtonLabel', {
+              ? i18n.translate('xpack.fleet.enrollmentTokensList.hideTokenButtonLabel', {
                   defaultMessage: 'Hide token',
                 })
-              : i18n.translate('xpack.ingestManager.enrollmentTokensList.showTokenButtonLabel', {
+              : i18n.translate('xpack.fleet.enrollmentTokensList.showTokenButtonLabel', {
                   defaultMessage: 'Show token',
                 })
           }
@@ -84,10 +84,10 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
           <EuiButtonIcon
             aria-label={
               state === 'VISIBLE'
-                ? i18n.translate('xpack.ingestManager.enrollmentTokensList.hideTokenButtonLabel', {
+                ? i18n.translate('xpack.fleet.enrollmentTokensList.hideTokenButtonLabel', {
                     defaultMessage: 'Hide token',
                   })
-                : i18n.translate('xpack.ingestManager.enrollmentTokensList.showTokenButtonLabel', {
+                : i18n.translate('xpack.fleet.enrollmentTokensList.showTokenButtonLabel', {
                     defaultMessage: 'Show token',
                   })
             }
@@ -134,17 +134,14 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
         />
       )}
       <EuiToolTip
-        content={i18n.translate('xpack.ingestManager.enrollmentTokensList.revokeTokenButtonLabel', {
+        content={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
           defaultMessage: 'Revoke token',
         })}
       >
         <EuiButtonIcon
-          aria-label={i18n.translate(
-            'xpack.ingestManager.enrollmentTokensList.revokeTokenButtonLabel',
-            {
-              defaultMessage: 'Revoke token',
-            }
-          )}
+          aria-label={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
+            defaultMessage: 'Revoke token',
+          })}
           onClick={() => setState('CONFIRM_VISIBLE')}
           iconType="trash"
           color="danger"
@@ -178,7 +175,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   const columns = [
     {
       field: 'name',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.nameTitle', {
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.nameTitle', {
         defaultMessage: 'Name',
       }),
       render: (value: string) => (
@@ -189,7 +186,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'id',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.secretTitle', {
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.secretTitle', {
         defaultMessage: 'Secret',
       }),
       width: '215px',
@@ -199,7 +196,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'policy_id',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.policyTitle', {
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.policyTitle', {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string) => {
@@ -214,7 +211,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'created_at',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.createdAtTitle', {
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.createdAtTitle', {
         defaultMessage: 'Created on',
       }),
       width: '150px',
@@ -226,7 +223,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.activeTitle', {
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.activeTitle', {
         defaultMessage: 'Active',
       }),
       width: '70px',
@@ -237,7 +234,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'actions',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.actionsTitle', {
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.actionsTitle', {
         defaultMessage: 'Actions',
       }),
       width: '70px',
@@ -267,8 +264,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       )}
       <EuiText color="subdued">
         <FormattedMessage
-          id="xpack.ingestManager.enrollmentTokensList.pageDescription"
-          defaultMessage="This is a list of enrollment tokens that are available to enroll your agents."
+          id="xpack.fleet.enrollmentTokensList.pageDescription"
+          defaultMessage="Create and revoke enrollment tokens. An enrollment token enables one or more agents to enroll in Fleet and send data."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -289,8 +286,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem grow={false}>
           <EuiButton iconType="plusInCircle" onClick={() => setFlyoutOpen(true)}>
             <FormattedMessage
-              id="xpack.ingestManager.enrollmentTokensList.newKeyButton"
-              defaultMessage="New enrollment token"
+              id="xpack.fleet.enrollmentTokensList.newKeyButton"
+              defaultMessage="Create enrollment token"
             />
           </EuiButton>
         </EuiFlexItem>
@@ -302,12 +299,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         noItemsMessage={
           enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest ? (
             <FormattedMessage
-              id="xpack.ingestManager.enrollemntAPIKeyList.loadingTokensMessage"
+              id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
               defaultMessage="Loading enrollment tokens..."
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.enrollemntAPIKeyList.emptyMessage"
+              id="xpack.fleet.enrollemntAPIKeyList.emptyMessage"
               defaultMessage="No enrollment tokens found."
             />
           )

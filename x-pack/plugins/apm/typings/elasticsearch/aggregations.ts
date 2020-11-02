@@ -94,6 +94,9 @@ export interface AggregationOptionsByType {
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
+  stats: {
+    field: string;
+  };
   extended_stats: {
     field: string;
   };
@@ -142,6 +145,15 @@ export interface AggregationOptionsByType {
     >;
     keyed?: boolean;
   } & AggregationSourceOptions;
+  range: {
+    field: string;
+    ranges: Array<
+      | { key?: string; from: string | number }
+      | { key?: string; to: string | number }
+      | { key?: string; from: string | number; to: string | number }
+    >;
+    keyed?: boolean;
+  };
   auto_date_histogram: {
     buckets: number;
   } & AggregationSourceOptions;
@@ -149,6 +161,16 @@ export interface AggregationOptionsByType {
     values: Array<string | number>;
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
+  } & AggregationSourceOptions;
+  bucket_sort: {
+    sort?: SortOptions;
+    from?: number;
+    size?: number;
+  };
+  significant_terms: {
+    size?: number;
+    field?: string;
+    background_filter?: Record<string, any>;
   } & AggregationSourceOptions;
 }
 
@@ -173,7 +195,7 @@ export interface AggregationInputMap {
   [key: string]: AggregationOptionsMap;
 }
 
-type BucketSubAggregationResponse<
+type SubAggregationResponseOf<
   TAggregationInputMap extends AggregationInputMap | undefined,
   TDocument
 > = TAggregationInputMap extends AggregationInputMap
@@ -189,10 +211,7 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: string | number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   histogram: {
@@ -200,28 +219,32 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   date_histogram: {
     buckets: Array<
       DateHistogramBucket &
-        BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+        SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   avg: MetricsAggregationResponsePart;
   sum: MetricsAggregationResponsePart;
   max: MetricsAggregationResponsePart;
   min: MetricsAggregationResponsePart;
-  value_count: MetricsAggregationResponsePart;
+  value_count: { value: number };
   cardinality: {
     value: number;
   };
   percentiles: {
     values: Record<string, number | null>;
+  };
+  stats: {
+    count: number;
+    min: number | null;
+    max: number | null;
+    avg: number | null;
+    sum: number | null;
   };
   extended_stats: {
     count: number;
@@ -251,7 +274,7 @@ interface AggregationResponsePart<
   };
   filter: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
     ? Array<
         { doc_count: number } & AggregationResponseMap<
@@ -268,13 +291,16 @@ interface AggregationResponsePart<
         buckets: {
           [key in keyof TAggregationOptionsMap['filters']['filters']]: {
             doc_count: number;
-          } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+          } & SubAggregationResponseOf<
+            TAggregationOptionsMap['aggs'],
+            TDocument
+          >;
         };
       }
     : never;
   sampler: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
   derivative:
     | {
         value: number;
@@ -293,10 +319,7 @@ interface AggregationResponsePart<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;
         doc_count: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   diversified_sampler: {
@@ -309,6 +332,18 @@ interface AggregationResponsePart<
     buckets: TAggregationOptionsMap extends { date_range: { keyed: true } }
       ? Record<string, DateRangeBucket>
       : { buckets: DateRangeBucket[] };
+  };
+  range: {
+    buckets: TAggregationOptionsMap extends { range: { keyed: true } }
+      ? Record<
+          string,
+          DateRangeBucket &
+            SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+        >
+      : Array<
+          DateRangeBucket &
+            SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+        >;
   };
   auto_date_histogram: {
     buckets: Array<
@@ -325,6 +360,18 @@ interface AggregationResponsePart<
       ? Array<{ key: number; value: number }>
       : Record<string, number>;
   };
+  significant_terms: {
+    doc_count: number;
+    bg_count: number;
+    buckets: Array<
+      {
+        bg_count: number;
+        doc_count: number;
+        key: string | number;
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+    >;
+  };
+  bucket_sort: undefined;
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap

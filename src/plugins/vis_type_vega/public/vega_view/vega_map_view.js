@@ -21,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { getEmsTileLayerId, getUISettings, getKibanaMapFactory } from '../services';
+import { getEmsTileLayerId, getUISettings } from '../services';
+import { lazyLoadMapsLegacyModules } from '../../../maps_legacy/public';
 
 export class VegaMapView extends VegaBaseView {
   constructor(opts) {
@@ -106,7 +107,9 @@ export class VegaMapView extends VegaBaseView {
     //   maxBounds = L.latLngBounds(L.latLng(b[1], b[0]), L.latLng(b[3], b[2]));
     // }
 
-    this._kibanaMap = getKibanaMapFactory()(this._$container.get(0), {
+    const modules = await lazyLoadMapsLegacyModules();
+
+    this._kibanaMap = new modules.KibanaMap(this._$container.get(0), {
       zoom,
       minZoom,
       maxZoom,
@@ -122,14 +125,18 @@ export class VegaMapView extends VegaBaseView {
       });
     }
 
-    const vegaMapLayer = new VegaMapLayer(this._parser.spec, {
-      vega,
-      bindingsContainer: this._$controls.get(0),
-      delayRepaint: mapConfig.delayRepaint,
-      viewConfig: this._vegaViewConfig,
-      onWarning: this.onWarn.bind(this),
-      onError: this.onError.bind(this),
-    });
+    const vegaMapLayer = new VegaMapLayer(
+      this._parser.spec,
+      {
+        vega,
+        bindingsContainer: this._$controls.get(0),
+        delayRepaint: mapConfig.delayRepaint,
+        viewConfig: this._vegaViewConfig,
+        onWarning: this.onWarn.bind(this),
+        onError: this.onError.bind(this),
+      },
+      modules.L
+    );
 
     this._kibanaMap.addLayer(vegaMapLayer);
 

@@ -50,6 +50,10 @@ export const appToResult = (app: PublicAppInfo, score: number): GlobalSearchProv
     type: 'application',
     icon: app.euiIconType,
     url: app.appRoute,
+    meta: {
+      categoryId: app.category?.id ?? null,
+      categoryLabel: app.category?.label ?? null,
+    },
     score,
   };
 };

@@ -10,6 +10,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
@@ -40,9 +41,8 @@ export class CanvasPlugin implements Plugin {
     plugins.features.registerKibanaFeature({
       id: 'canvas',
       name: 'Canvas',
-      order: 400,
-      icon: 'canvasApp',
-      navLinkId: 'canvas',
+      order: 300,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['canvas', 'kibana'],
       catalogue: ['canvas'],
       privileges: {

@@ -9,10 +9,15 @@
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
+  "kibana": {
+    "devOnly": true
+  },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
+    "@jest/types": "^26.5.2",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
+    "@kbn/utils": "1.0.0",
     "@types/joi": "^13.4.2",
     "@types/lodash": "^4.14.159",
     "@types/parse-link-header": "^1.0.0",
@@ -21,19 +26,22 @@
     "diff": "^4.0.1"
   },
   "dependencies": {
+    "@jest/reporters": "^26.5.2",
     "chalk": "^4.1.0",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
+    "execa": "^4.0.2",
     "exit-hook": "^2.2.0",
-    "getopts": "^2.2.4",
+    "getopts": "^2.2.5",
     "glob": "^7.1.2",
+    "globby": "^8.0.1",
     "joi": "^13.5.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
+    "mustache": "^2.3.2",
     "parse-link-header": "^1.0.1",
     "rxjs": "^6.5.5",
-    "strip-ansi": "^5.2.0",
+    "strip-ansi": "^6.0.0",
     "tar-fs": "^2.1.0",
-    "tmp": "^0.1.0",
     "xml2js": "^0.4.22",
     "zlib": "^1.0.5"
   }

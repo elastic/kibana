@@ -6,7 +6,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 import { ReactNode } from 'react';
-import { History } from 'history';
+
+import { KibanaLogic } from '../kibana';
 
 export interface IFlashMessage {
   type: 'success' | 'info' | 'warning' | 'error';
@@ -24,7 +25,6 @@ export interface IFlashMessagesActions {
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearQueuedMessages(): void;
-  listenToHistory(history: History): History;
   setHistoryListener(historyListener: Function): { historyListener: Function };
 }
 
@@ -32,12 +32,12 @@ const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
   !Array.isArray(messages) ? [messages] : messages;
 
 export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlashMessagesActions>>({
+  path: ['enterprise_search', 'flash_messages_logic'],
   actions: {
     setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearFlashMessages: () => null,
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearQueuedMessages: () => null,
-    listenToHistory: (history) => history,
     setHistoryListener: (historyListener) => ({ historyListener }),
   },
   reducers: {
@@ -62,21 +62,27 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
       },
     ],
   },
-  listeners: ({ values, actions }) => ({
-    listenToHistory: (history) => {
+  events: ({ values, actions }) => ({
+    afterMount: () => {
       // On React Router navigation, clear previous flash messages and load any queued messages
-      const unlisten = history.listen(() => {
+      const unlisten = KibanaLogic.values.history.listen(() => {
         actions.clearFlashMessages();
         actions.setFlashMessages(values.queuedMessages);
         actions.clearQueuedMessages();
       });
       actions.setHistoryListener(unlisten);
     },
-  }),
-  events: ({ values }) => ({
     beforeUnmount: () => {
       const { historyListener: removeHistoryListener } = values;
       if (removeHistoryListener) removeHistoryListener();
     },
   }),
 });
+
+/**
+ * Mount/props helper
+ */
+export const mountFlashMessagesLogic = () => {
+  const unmount = FlashMessagesLogic.mount();
+  return unmount;
+};

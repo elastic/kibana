@@ -69,7 +69,8 @@ To run the optimizer from code, you can import the [`OptimizerConfig`][Optimizer
 Example:
 ```ts
 import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
-import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
 const log = new ToolingLog({
   level: 'verbose',
@@ -83,9 +84,9 @@ const config = OptimizerConfig.create({
   dist: true
 });
 
-await runOptimizer(config)
-  .pipe(logOptimizerState(log, config))
-  .toPromise();
+await lastValueFrom(
+  runOptimizer(config).pipe(logOptimizerState(log, config))
+);
 ```
 
 This is essentially what we're doing in [`script/build_kibana_platform_plugins`][Cli] and the new [build system task][BuildTask].

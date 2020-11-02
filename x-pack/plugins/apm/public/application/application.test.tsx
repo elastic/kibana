@@ -14,6 +14,10 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
 
+jest.mock('../services/rest/index_pattern', () => ({
+  createStaticIndexPattern: () => Promise.resolve(undefined),
+}));
+
 describe('renderApp', () => {
   let mockConsole: jest.SpyInstance;
 
@@ -36,8 +40,15 @@ describe('renderApp', () => {
     const { core, config } = mockApmPluginContextValue;
     const plugins = {
       licensing: { license$: new Observable() },
-      triggers_actions_ui: { actionTypeRegistry: {}, alertTypeRegistry: {} },
+      triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
       usageCollection: { reportUiStats: () => {} },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: { setTime: () => {}, getTime: () => ({}) },
+          },
+        },
+      },
     };
     const params = {
       element: document.createElement('div'),

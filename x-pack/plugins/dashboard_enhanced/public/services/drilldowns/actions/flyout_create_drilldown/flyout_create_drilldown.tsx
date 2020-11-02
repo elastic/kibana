@@ -8,8 +8,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
-import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  isEnhancedEmbeddable,
+  embeddableEnhancedDrilldownGrouping,
+} from '../../../../../../embeddable_enhanced/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableContext,
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { ensureNestedTriggers } from '../drilldown_shared';
@@ -24,6 +30,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 12;
+  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
@@ -79,7 +86,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           onClose={() => handle.close()}
           viewMode={'create'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          supportedTriggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
         />
       ),

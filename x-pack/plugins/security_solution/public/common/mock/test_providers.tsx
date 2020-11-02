@@ -46,7 +46,7 @@ export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
-
+window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 
@@ -77,11 +77,11 @@ const TestProvidersComponent: React.FC<Props> = ({
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-export const useFormFieldMock = (options?: Partial<FieldHook>): FieldHook => {
+export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => {
   return {
     path: 'path',
     type: 'type',
-    value: [],
+    value: ('mockedValue' as unknown) as T,
     isPristine: false,
     isValidating: false,
     isValidated: false,

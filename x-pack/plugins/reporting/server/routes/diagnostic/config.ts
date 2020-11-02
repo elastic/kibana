@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import numeral from '@elastic/numeral';
 import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { LevelLogger as Logger } from '../../lib';
-import { DiagnosticResponse } from '../../types';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { DiagnosticResponse } from './';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
+
+const numberToByteSizeValue = (value: number | ByteSizeValue) => {
+  if (typeof value === 'number') {
+    return new ByteSizeValue(value);
+  }
+
+  return value;
+};
 
 export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -42,12 +50,10 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
         'http.max_content_length',
         '100mb'
       );
-      const elasticSearchMaxContentBytes = numeral().unformat(
-        elasticSearchMaxContent.toUpperCase()
-      );
-      const kibanaMaxContentBytes = config.get('csv', 'maxSizeBytes');
+      const elasticSearchMaxContentBytes = ByteSizeValue.parse(elasticSearchMaxContent);
+      const kibanaMaxContentBytes = numberToByteSizeValue(config.get('csv', 'maxSizeBytes'));
 
-      if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
+      if (kibanaMaxContentBytes.isGreaterThan(elasticSearchMaxContentBytes)) {
         const maxContentSizeWarning = i18n.translate(
           'xpack.reporting.diagnostic.configSizeMismatch',
           {
@@ -55,8 +61,8 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
               `xpack.reporting.{KIBANA_MAX_SIZE_BYTES_PATH} ({kibanaMaxContentBytes}) is higher than ElasticSearch's {ES_MAX_SIZE_BYTES_PATH} ({elasticSearchMaxContentBytes}). ` +
               `Please set {ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your xpack.reporting.{KIBANA_MAX_SIZE_BYTES_PATH} in Kibana.`,
             values: {
-              kibanaMaxContentBytes,
-              elasticSearchMaxContentBytes,
+              kibanaMaxContentBytes: kibanaMaxContentBytes.getValueInBytes(),
+              elasticSearchMaxContentBytes: elasticSearchMaxContentBytes.getValueInBytes(),
               KIBANA_MAX_SIZE_BYTES_PATH,
               ES_MAX_SIZE_BYTES_PATH,
             },

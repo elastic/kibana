@@ -18,10 +18,11 @@
  */
 
 import moment from 'moment';
+
+import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
-import { configServiceMock } from '../config/config_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
 
@@ -104,6 +105,25 @@ describe('MetricsService', () => {
       await expect(metricsService.start()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"#setup() needs to be run first"`
       );
+    });
+
+    it('emits the last value on each getOpsMetrics$ call', async () => {
+      const firstMetrics = { metric: 'first' };
+      const secondMetrics = { metric: 'second' };
+      mockOpsCollector.collect
+        .mockResolvedValueOnce(firstMetrics)
+        .mockResolvedValueOnce(secondMetrics);
+
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
+
+      const firstEmission = getOpsMetrics$().pipe(take(1)).toPromise();
+      jest.advanceTimersByTime(testInterval);
+      expect(await firstEmission).toEqual({ metric: 'first' });
+
+      const secondEmission = getOpsMetrics$().pipe(take(1)).toPromise();
+      jest.advanceTimersByTime(testInterval);
+      expect(await secondEmission).toEqual({ metric: 'second' });
     });
   });
 

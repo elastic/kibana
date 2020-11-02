@@ -4,21 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import {
-  CaseAttributes,
+  ESCasesConfigureAttributes,
   CommentAttributes,
-  CasesConfigureAttributes,
+  ESCaseAttributes,
+  ConnectorTypes,
 } from '../../../../common/api';
 
-export const mockCases: Array<SavedObject<CaseAttributes>> = [
+export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
   {
     type: 'cases',
     id: 'mock-id-1',
     attributes: {
       closed_at: null,
       closed_by: null,
-      connector_id: 'none',
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: [],
+      },
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         full_name: 'elastic',
@@ -47,7 +53,12 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
-      connector_id: 'none',
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: [],
+      },
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
         full_name: 'elastic',
@@ -76,7 +87,16 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
-      connector_id: '123',
+      connector: {
+        id: '123',
+        name: 'My connector',
+        type: ConnectorTypes.jira,
+        fields: [
+          { key: 'issueType', value: 'Task' },
+          { key: 'priority', value: 'High' },
+          { key: 'parent', value: null },
+        ],
+      },
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
@@ -109,7 +129,16 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
-      connector_id: '123',
+      connector: {
+        id: '123',
+        name: 'My connector',
+        type: ConnectorTypes.jira,
+        fields: [
+          { key: 'issueType', value: 'Task' },
+          { key: 'priority', value: 'High' },
+          { key: 'parent', value: null },
+        ],
+      },
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
@@ -134,7 +163,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
   },
 ];
 
-export const mockCaseNoConnectorId: SavedObject<Partial<CaseAttributes>> = {
+export const mockCaseNoConnectorId: SavedObject<Partial<ESCaseAttributes>> = {
   type: 'cases',
   id: 'mock-no-connector_id',
   attributes: {
@@ -266,13 +295,17 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
   },
 ];
 
-export const mockCaseConfigure: Array<SavedObject<CasesConfigureAttributes>> = [
+export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> = [
   {
     type: 'cases-configure',
     id: 'mock-configuration-1',
     attributes: {
-      connector_id: '123',
-      connector_name: 'My connector',
+      connector: {
+        id: '789',
+        name: 'My connector 3',
+        type: ConnectorTypes.jira,
+        fields: null,
+      },
       closure_type: 'close-by-user',
       created_at: '2020-04-09T09:43:51.778Z',
       created_by: {
@@ -290,5 +323,14 @@ export const mockCaseConfigure: Array<SavedObject<CasesConfigureAttributes>> = [
     references: [],
     updated_at: '2020-04-09T09:43:51.778Z',
     version: 'WzYsMV0=',
+  },
+];
+
+export const mockCaseConfigureFind: Array<SavedObjectsFindResponse<ESCasesConfigureAttributes>> = [
+  {
+    page: 1,
+    per_page: 5,
+    total: mockCaseConfigure.length,
+    saved_objects: [{ ...mockCaseConfigure[0], score: 0 }],
   },
 ];

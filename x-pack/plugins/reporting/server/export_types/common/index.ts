@@ -6,7 +6,24 @@
 
 export { decryptJobHeaders } from './decrypt_job_headers';
 export { getConditionalHeaders } from './get_conditional_headers';
-export { getCustomLogo } from './get_custom_logo';
 export { getFullUrls } from './get_full_urls';
-export { omitBlacklistedHeaders } from './omit_blacklisted_headers';
+export { omitBlockedHeaders } from './omit_blocked_headers';
 export { validateUrls } from './validate_urls';
+
+export interface TimeRangeParams {
+  timezone: string;
+  min?: Date | string | number | null;
+  max?: Date | string | number | null;
+}
+
+export interface ConditionalHeadersConditions {
+  protocol: string;
+  hostname: string;
+  port: number;
+  basePath: string;
+}
+
+export interface ConditionalHeaders {
+  headers: Record<string, string>;
+  conditions: ConditionalHeadersConditions;
+}

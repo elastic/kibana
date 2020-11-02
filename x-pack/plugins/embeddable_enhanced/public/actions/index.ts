@@ -5,3 +5,4 @@
  */
 
 export * from './panel_notifications_action';
+export * from './drilldown_grouping';

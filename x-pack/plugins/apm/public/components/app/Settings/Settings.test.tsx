@@ -8,23 +8,27 @@ import { render } from '@testing-library/react';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import React, { ReactNode } from 'react';
 import { Settings } from './';
-import { LocationContext } from '../../../context/LocationContext';
 import { createMemoryHistory } from 'history';
+import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
+
+const { location } = createMemoryHistory();
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  const { location } = createMemoryHistory();
   return (
-    <LocationContext.Provider value={location}>
+    <MemoryRouter>
       <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-    </LocationContext.Provider>
+    </MemoryRouter>
   );
 }
 
 describe('Settings', () => {
   it('renders', async () => {
+    const routerProps = ({
+      location,
+    } as unknown) as RouteComponentProps<{}>;
     expect(() =>
       render(
-        <Settings>
+        <Settings {...routerProps}>
           <div />
         </Settings>,
         { wrapper: Wrapper }

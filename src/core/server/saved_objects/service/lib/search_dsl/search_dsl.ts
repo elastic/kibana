@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { IndexMapping } from '../../../mappings';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KueryNode } from '../../../../../../plugins/data/server';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+
+type KueryNode = any;
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -35,6 +35,7 @@ interface GetSearchDslOptions {
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
   hasReference?: {
     type: string;
     id: string;
@@ -56,6 +57,7 @@ export function getSearchDsl(
     sortField,
     sortOrder,
     namespaces,
+    typeToNamespacesMap,
     hasReference,
     kueryNode,
   } = options;
@@ -74,6 +76,7 @@ export function getSearchDsl(
       registry,
       namespaces,
       type,
+      typeToNamespacesMap,
       search,
       searchFields,
       rootSearchFields,

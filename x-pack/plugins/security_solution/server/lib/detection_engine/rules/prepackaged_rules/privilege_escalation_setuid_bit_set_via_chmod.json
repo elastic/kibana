@@ -18,7 +18,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Privilege Escalation"
   ],
   "threat": [
     {
@@ -39,9 +42,9 @@
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0004",
+        "id": "TA0003",
         "name": "Persistence",
-        "reference": "https://attack.mitre.org/tactics/TA0004/"
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
       "technique": [
         {
@@ -53,5 +56,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

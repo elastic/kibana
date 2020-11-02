@@ -54,7 +54,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
                 <h1>
                   {from === 'edit' ? (
                     <FormattedMessage
-                      id="xpack.ingestManager.editPackagePolicy.pageTitleWithPackageName"
+                      id="xpack.fleet.editPackagePolicy.pageTitleWithPackageName"
                       defaultMessage="Edit {packageName} integration"
                       values={{
                         packageName: packageInfo.title,
@@ -62,7 +62,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.ingestManager.createPackagePolicy.pageTitleWithPackageName"
+                      id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
                       defaultMessage="Add {packageName} integration"
                       values={{
                         packageName: packageInfo.title,
@@ -80,7 +80,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         <EuiText>
           <h1>
             <FormattedMessage
-              id="xpack.ingestManager.editPackagePolicy.pageTitle"
+              id="xpack.fleet.editPackagePolicy.pageTitle"
               defaultMessage="Edit integration"
             />
           </h1>
@@ -89,7 +89,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         <EuiText>
           <h1>
             <FormattedMessage
-              id="xpack.ingestManager.createPackagePolicy.pageTitle"
+              id="xpack.fleet.createPackagePolicy.pageTitle"
               defaultMessage="Add integration"
             />
           </h1>
@@ -100,18 +100,18 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     const pageDescription = useMemo(() => {
       return from === 'edit' ? (
         <FormattedMessage
-          id="xpack.ingestManager.editPackagePolicy.pageDescription"
+          id="xpack.fleet.editPackagePolicy.pageDescription"
           defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
         />
       ) : from === 'policy' ? (
         <FormattedMessage
-          id="xpack.ingestManager.createPackagePolicy.pageDescriptionfromPolicy"
+          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
           defaultMessage="Configure an integration for the selected agent policy."
         />
       ) : (
         <FormattedMessage
-          id="xpack.ingestManager.createPackagePolicy.pageDescriptionfromPackage"
-          defaultMessage="Follow the instructions below to add this integration to an agent policy."
+          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
+          defaultMessage="Follow these instructions to add this integration to an agent policy."
         />
       );
     }, [from]);
@@ -129,7 +129,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             data-test-subj={`${dataTestSubj}_cancelBackLink`}
           >
             <FormattedMessage
-              id="xpack.ingestManager.createPackagePolicy.cancelLinkText"
+              id="xpack.fleet.createPackagePolicy.cancelLinkText"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -149,7 +149,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         <EuiDescriptionList className="eui-textRight" textStyle="reverse">
           <EuiDescriptionListTitle>
             <FormattedMessage
-              id="xpack.ingestManager.createPackagePolicy.agentPolicyNameLabel"
+              id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
               defaultMessage="Agent policy"
             />
           </EuiDescriptionListTitle>

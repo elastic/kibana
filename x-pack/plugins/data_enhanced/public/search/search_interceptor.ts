@@ -5,15 +5,15 @@
  */
 
 import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
-import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
-import { debounce } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { mergeMap, expand, takeUntil, finalize, catchError } from 'rxjs/operators';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
+import { isErrorResponse, isCompleteResponse } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
+import { TimeoutErrorMode } from '../../../../../src/plugins/data/public';
 import { IAsyncSearchOptions } from '.';
 import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
@@ -39,6 +39,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.uiSettingsSub.unsubscribe();
   }
 
+  protected getTimeoutMode() {
+    return this.application.capabilities.advancedSettings?.save
+      ? TimeoutErrorMode.CHANGE
+      : TimeoutErrorMode.CONTACT;
+  }
+
   /**
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
    */
@@ -54,11 +60,11 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    const { combinedSignal, cleanup } = this.setupAbortSignal({
+    const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
-    const aborted$ = from(toPromise(combinedSignal));
+    const abortedPromise = toPromise(combinedSignal);
     const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
@@ -66,12 +72,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     return this.runSearch(request, combinedSignal, strategy).pipe(
       expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (!response.isRunning && response.isPartial)) {
+        if (isErrorResponse(response)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.isRunning) {
+        if (isCompleteResponse(response)) {
           return EMPTY;
         }
 
@@ -84,45 +90,21 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           })
         );
       }),
-      takeUntil(aborted$),
-      tap({
-        error: () => {
-          // If we haven't received the response to the initial request, including the ID, then
-          // we don't need to send a follow-up request to delete this search. Otherwise, we
-          // send the follow-up request to delete this search, then throw an abort error.
-          if (id !== undefined) {
-            this.deps.http.delete(`/internal/search/${strategy}/${id}`);
-          }
-        },
+      takeUntil(from(abortedPromise.promise)),
+      catchError((e: any) => {
+        // If we haven't received the response to the initial request, including the ID, then
+        // we don't need to send a follow-up request to delete this search. Otherwise, we
+        // send the follow-up request to delete this search, then throw an abort error.
+        if (id !== undefined) {
+          this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+        }
+        return throwError(this.handleSearchError(e, request, timeoutSignal, options));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
+        abortedPromise.cleanup();
       })
     );
   }
-
-  // Right now we are debouncing but we will hook this up with background sessions to show only one
-  // error notification per session.
-  protected showTimeoutError = debounce(
-    (e: Error) => {
-      const message = this.application.capabilities.advancedSettings?.save
-        ? i18n.translate('xpack.data.search.timeoutIncreaseSetting', {
-            defaultMessage:
-              'One or more queries timed out. Increase run time with the search.timeout advanced setting.',
-          })
-        : i18n.translate('xpack.data.search.timeoutContactAdmin', {
-            defaultMessage:
-              'One or more queries timed out. Contact your system administrator to increase the run time.',
-          });
-      this.deps.toasts.addError(e, {
-        title: 'Timed out',
-        toastMessage: message,
-      });
-    },
-    60000,
-    {
-      leading: true,
-    }
-  );
 }

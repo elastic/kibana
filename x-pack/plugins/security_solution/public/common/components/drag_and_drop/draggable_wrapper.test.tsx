@@ -6,11 +6,10 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
-
+import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
-import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
+import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
@@ -30,11 +29,9 @@ describe('DraggableWrapper', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <MockedProvider mocks={{}} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+          </DragDropContextWrapper>
         </TestProviders>
       );
 
@@ -44,11 +41,9 @@ describe('DraggableWrapper', () => {
     test('it renders the children passed to the render prop', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+          </DragDropContextWrapper>
         </TestProviders>
       );
 
@@ -58,33 +53,31 @@ describe('DraggableWrapper', () => {
     test('it does NOT render hover actions when the mouse is NOT over the draggable wrapper', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+          </DragDropContextWrapper>
         </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(false);
     });
 
-    test('it renders hover actions when the mouse is over the text of draggable wrapper', () => {
+    test('it renders hover actions when the mouse is over the text of draggable wrapper', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+          </DragDropContextWrapper>
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
-      wrapper.update();
-      jest.runAllTimers();
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
+        wrapper.update();
+        jest.runAllTimers();
+        wrapper.update();
+        expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
+      });
     });
   });
 
@@ -92,11 +85,9 @@ describe('DraggableWrapper', () => {
     test('it applies text truncation styling when truncate IS specified (implicit: and the user is not dragging)', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
+          </DragDropContextWrapper>
         </TestProviders>
       );
 
@@ -108,11 +99,9 @@ describe('DraggableWrapper', () => {
     test('it does NOT apply text truncation styling when truncate is NOT specified', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
-            </DragDropContextWrapper>
-          </MockedProvider>
+          <DragDropContextWrapper browserFields={mockBrowserFields}>
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+          </DragDropContextWrapper>
         </TestProviders>
       );
 

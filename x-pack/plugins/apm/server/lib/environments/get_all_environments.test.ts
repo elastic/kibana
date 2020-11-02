@@ -21,6 +21,7 @@ describe('getAllEnvironments', () => {
     mock = await inspectSearchParams((setup) =>
       getAllEnvironments({
         serviceName: 'test',
+        searchAggregatedTransactions: false,
         setup,
       })
     );
@@ -33,6 +34,7 @@ describe('getAllEnvironments', () => {
       getAllEnvironments({
         serviceName: 'test',
         setup,
+        searchAggregatedTransactions: false,
         includeMissing: true,
       })
     );

@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { take } from 'rxjs/operators';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
@@ -168,9 +169,8 @@ export class MapsPlugin implements Plugin {
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
-      order: 600,
-      icon: APP_ICON,
-      navLinkId: APP_ID,
+      order: 400,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {

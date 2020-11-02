@@ -15,7 +15,8 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../../common/containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
-import { KqlMode, EventType } from '../../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../../common/types/timeline';
+import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
@@ -47,7 +48,7 @@ interface Props {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
-  eventType: EventType;
+  eventType: TimelineEventsType;
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
@@ -66,7 +67,7 @@ interface Props {
   savedQueryId: string | null;
   to: string;
   toStr: string;
-  updateEventType: (eventType: EventType) => void;
+  updateEventTypeAndIndexesName: (eventType: TimelineEventsType, indexNames: string[]) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
@@ -114,7 +115,7 @@ export const SearchOrFilter = React.memo<Props>(
     setSavedQueryId,
     to,
     toStr,
-    updateEventType,
+    updateEventTypeAndIndexesName,
     updateKqlMode,
     updateReduxTime,
   }) => {
@@ -167,7 +168,10 @@ export const SearchOrFilter = React.memo<Props>(
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <PickEventType eventType={eventType} onChangeEventType={updateEventType} />
+              <PickEventType
+                eventType={eventType}
+                onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </SearchOrFilterContainer>

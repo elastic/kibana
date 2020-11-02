@@ -60,9 +60,9 @@ export function createEndpointDockerConfig(
 export function getRegistryUrlFromTestEnv(): string | undefined {
   let registryUrl: string | undefined;
   if (dockerRegistryPort !== undefined) {
-    registryUrl = `--xpack.ingestManager.registryUrl=http://localhost:${dockerRegistryPort}`;
+    registryUrl = `--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`;
   } else if (packageRegistryOverride !== undefined) {
-    registryUrl = `--xpack.ingestManager.registryUrl=${packageRegistryOverride}`;
+    registryUrl = `--xpack.fleet.registryUrl=${packageRegistryOverride}`;
   }
   return registryUrl;
 }

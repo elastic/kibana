@@ -11,12 +11,13 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertMessageDocLinkToken,
-} from '../../../server/alerts/types';
+} from '../../../common/types/alerts';
 // @ts-ignore
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { AlertMessageTokenType } from '../../../common/enums';
 import { Legacy } from '../../legacy_shims';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string | null {
   if (!alertMessage) {
@@ -58,10 +59,11 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     const index = text.indexOf(linkPart[0]);
     const preString = text.substring(0, index);
     const postString = text.substring(index + linkPart[0].length);
+    const safeLink = getSafeForExternalLink(`#/${linkToken.url}`);
     element = (
       <Fragment>
         {preString}
-        <EuiLink href={`#${linkToken.url}`}>{linkPart[1]}</EuiLink>
+        <EuiLink href={safeLink}>{linkPart[1]}</EuiLink>
         {postString}
       </Fragment>
     );
@@ -83,7 +85,9 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     element = (
       <Fragment>
         {preString}
-        <EuiLink href={url}>{linkPart[1]}</EuiLink>
+        <EuiLink href={url} target="_blank" external>
+          {linkPart[1]}
+        </EuiLink>
         {postString}
       </Fragment>
     );

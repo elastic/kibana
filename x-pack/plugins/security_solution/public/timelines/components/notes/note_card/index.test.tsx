@@ -8,6 +8,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import '../../../../common/mock/formatted_relative';
 
 import { NoteCard } from '.';
 

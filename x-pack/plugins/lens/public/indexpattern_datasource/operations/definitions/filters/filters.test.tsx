@@ -54,12 +54,11 @@ describe('filters', () => {
           columnOrder: ['col1', 'col2'],
           columns: {
             col1: {
-              label: 'Custom query',
+              label: 'filters',
               dataType: 'document',
               operationType: 'filters',
               scale: 'ordinal',
               isBucketed: true,
-              sourceField: 'Records',
               params: {
                 filters: [
                   {
@@ -112,33 +111,13 @@ describe('filters', () => {
     });
   });
 
-  describe('getPossibleOperationForField', () => {
+  describe('getPossibleOperation', () => {
     it('should return operation with the right type for document', () => {
-      expect(
-        filtersOperation.getPossibleOperationForField({
-          aggregatable: true,
-          searchable: true,
-          name: 'test',
-          displayName: 'test',
-          type: 'document',
-        })
-      ).toEqual({
+      expect(filtersOperation.getPossibleOperation()).toEqual({
         dataType: 'string',
         isBucketed: true,
         scale: 'ordinal',
       });
-    });
-
-    it('should not return operation if field type is not document', () => {
-      expect(
-        filtersOperation.getPossibleOperationForField({
-          aggregatable: false,
-          searchable: true,
-          name: 'test',
-          displayName: 'test',
-          type: 'string',
-        })
-      ).toEqual(undefined);
     });
   });
 
@@ -209,7 +188,7 @@ describe('filters', () => {
       });
     });
 
-    describe('Modify custom query', () => {
+    describe('Modify filters', () => {
       it('should correctly show existing filters ', () => {
         const setStateSpy = jest.fn();
         const instance = mount(
@@ -231,12 +210,12 @@ describe('filters', () => {
         expect(
           instance
             .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
-            .at(2)
+            .at(3)
             .text()
         ).toEqual('src : 2');
       });
 
-      it('should remove custom query', () => {
+      it('should remove filter', () => {
         const setStateSpy = jest.fn();
         const instance = mount(
           <InlineOptions
@@ -250,7 +229,7 @@ describe('filters', () => {
         );
 
         instance
-          .find('[data-test-subj="indexPattern-filters-existingFilterDelete"]')
+          .find('[data-test-subj="lns-customBucketContainer-remove"]')
           .at(2)
           .simulate('click');
         expect(setStateSpy).toHaveBeenCalledWith({

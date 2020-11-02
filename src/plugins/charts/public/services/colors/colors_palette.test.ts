@@ -37,26 +37,32 @@ describe('Color Palette', () => {
 
   it('should throw an error if input is not a number', () => {
     expect(() => {
+      // @ts-expect-error
       createColorPalette(string);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(bool);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(nullValue);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(emptyArr);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(emptyObject);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette();
     }).toThrowError();
   });
@@ -83,5 +89,9 @@ describe('Color Palette', () => {
 
   it('should create new darker colors when input is greater than 72', () => {
     expect(createColorPalette(num3)[72]).not.toEqual(seedColors[0]);
+  });
+
+  it('should create new colors and convert them correctly', () => {
+    expect(createColorPalette(num3)[72]).toEqual('#404ABF');
   });
 });

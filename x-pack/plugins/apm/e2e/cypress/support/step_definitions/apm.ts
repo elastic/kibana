@@ -11,8 +11,8 @@ import { loginAndWaitForPage } from '../../integration/helpers';
 export const DEFAULT_TIMEOUT = 60 * 1000;
 
 Given(`a user browses the APM UI application`, () => {
-  // open service overview page
-  loginAndWaitForPage(`/app/apm#/services`, {
+  // Open service inventory page
+  loginAndWaitForPage(`/app/apm/services`, {
     from: '2020-06-01T14:59:32.686Z',
     to: '2020-06-16T16:59:36.219Z',
   });

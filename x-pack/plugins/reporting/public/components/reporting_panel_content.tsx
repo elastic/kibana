@@ -7,19 +7,20 @@
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import url from 'url';
 import { ToastsSetup } from 'src/core/public';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { BaseParams } from '../../common/types';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-interface Props {
+export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
   layoutId: string | undefined;
   objectId?: string;
   objectType: string;
-  getJobParams: () => any;
+  getJobParams: () => BaseParams;
   options?: ReactElement<any>;
   isDirty: boolean;
   onClose: () => void;

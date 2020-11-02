@@ -37,7 +37,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';

@@ -438,7 +438,7 @@ export default function ({ getService }: FtrProviderContext) {
               'should display enabled elements of the edit calendar page'
             );
             await ml.settingsFilterList.assertEditDescriptionButtonEnabled(true);
-            await ml.settingsFilterList.assertAddItemButtonEnabled(true);
+            await ml.settingsFilterList.assertAddItemsButtonEnabled(true);
 
             await ml.testExecution.logTestStep('should display the filter item in the list');
             await ml.settingsFilterList.assertFilterItemExists(filterItems[0]);

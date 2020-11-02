@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -109,6 +109,7 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
 
@@ -116,13 +117,14 @@ export class AlertingPlugin {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
-    this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaIndex = initializerContext.config.legacy.globalConfig$
       .pipe(
         first(),
         map((config: SharedGlobalConfig) => config.kibana.index)
       )
       .toPromise();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public async setup(
@@ -241,6 +243,7 @@ export class AlertingPlugin {
       actions: plugins.actions,
       features: plugins.features,
       eventLog: plugins.eventLog,
+      kibanaVersion: this.kibanaVersion,
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
@@ -261,6 +264,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
@@ -298,6 +302,7 @@ export class AlertingPlugin {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
+      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request);
       },

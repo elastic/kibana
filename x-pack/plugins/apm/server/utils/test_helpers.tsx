@@ -9,6 +9,7 @@ import {
   ESSearchRequest,
 } from '../../typings/elasticsearch';
 import { PromiseReturnType } from '../../typings/common';
+import { UIFilters } from '../../typings/ui_filters';
 import { APMConfig } from '..';
 
 interface Options {
@@ -23,7 +24,8 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFiltersES: ESFilter[];
+  uiFilters: UIFilters;
+  esFilter: ESFilter[];
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -78,7 +80,8 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
+    uiFilters: { environment: 'test' },
+    esFilter: [{ term: { 'service.environment': 'test' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

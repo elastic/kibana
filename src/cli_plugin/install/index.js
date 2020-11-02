@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { getConfigPath } from '@kbn/utils';
 import { pkg } from '../../core/server/utils';
 import { install } from './install';
 import { Logger } from '../lib/logger';
-import { getConfigPath } from '../../core/server/path';
 import { parse, parseMilliseconds } from './settings';
 import { logWarnings } from '../lib/log_warnings';
 
