@@ -72,6 +72,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     <EuiInMemoryTable
       {...props}
       items={props.loading && !createdItemId ? [] : props.items}
+      tableCaption={i18n.translate('xpack.security.accountManagement.apiKeys.tableCaption', {
+              defaultMessage: 'Below is a table of your API Keys.',
+            })}
       message={
         props.loading
           ? i18n.translate('xpack.security.accountManagement.apiKeys.loadingMessage', {
@@ -89,7 +92,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         },
         {
           field: 'expiration',
-          name: i18n.translate('xpack.security.accountManagement.apiKeys.espiresHeader', {
+          name: i18n.translate('xpack.security.accountManagement.apiKeys.expiresHeader', {
             defaultMessage: 'Expires',
           }),
           render: (expiration: number) =>

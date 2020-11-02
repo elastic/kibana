@@ -52,7 +52,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.security.accountManagement.apiKeys.forbiddenErrorMessage"
-                defaultMessage="Not authorised to manage API keys."
+                defaultMessage="Not authorized to manage API keys."
               />
             </p>
           }
