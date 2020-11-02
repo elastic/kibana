@@ -11,16 +11,7 @@ export { MinAgeInput } from './min_age_input_legacy';
 export { OptionalLabel } from './optional_label';
 export { PhaseErrorMessage } from './phase_error_message';
 export { PolicyJsonFlyout } from './policy_json_flyout';
-export { SetPriorityInput } from './set_priority_input_legacy';
 export { SnapshotPolicies } from './snapshot_policies';
-export {
-  DataTierAllocation,
-  NodeAllocation,
-  NodeAttrsDetails,
-  NodesDataProvider,
-  DefaultAllocationNotice,
-} from './data_tier_allocation';
 export { DescribedFormField } from './described_form_field';
-export { Forcemerge } from './forcemerge_legacy';
 
 export * from './phases';

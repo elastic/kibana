@@ -18,7 +18,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { DeeplyMockedKeys } from '../typings';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { CoreContext } from './core_context';
 import { Env, IConfigService } from './config';
 import { configServiceMock, getEnvOptions } from './config/mocks';

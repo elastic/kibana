@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandlerContext, Logger, RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
