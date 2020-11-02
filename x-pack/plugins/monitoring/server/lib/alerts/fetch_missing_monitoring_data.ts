@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCluster, AlertMissingData } from '../../alerts/types';
+import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,

@@ -16,3 +16,4 @@ export * from './update';
 export * from './actions';
 export * from './reassign';
 export * from './authenticate';
+export * from './setup';

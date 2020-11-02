@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -14,6 +14,7 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
+  ElasticsearchClient,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
@@ -30,6 +31,7 @@ export type ActionTypeParams = Record<string, unknown>;
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 

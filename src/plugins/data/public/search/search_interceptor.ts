@@ -20,18 +20,28 @@
 import { get, memoize, trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
-  getCombinedSignal,
   AbortError,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
   ISessionService,
+  getCombinedSignal,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
-import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
+import {
+  SearchTimeoutError,
+  PainlessError,
+  isPainlessError,
+  TimeoutErrorMode,
+  isEsError,
+  EsError,
+  getHttpError,
+} from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
 
 export interface SearchInterceptorDeps {
@@ -101,8 +111,12 @@ export class SearchInterceptor {
     } else if (options?.abortSignal?.aborted) {
       // In the case an application initiated abort, throw the existing AbortError.
       return e;
-    } else if (isPainlessError(e)) {
-      return new PainlessError(e, request);
+    } else if (isEsError(e)) {
+      if (isPainlessError(e)) {
+        return new PainlessError(e, request);
+      } else {
+        return new EsError(e);
+      }
     } else {
       return e;
     }
@@ -157,11 +171,12 @@ export class SearchInterceptor {
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const combinedSignal = getCombinedSignal(signals);
+    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedSignal(signals);
     const cleanup = () => {
       subscription.unsubscribe();
+      combinedSignal.removeEventListener('abort', cleanup);
+      cleanupCombinedSignal();
     };
-
     combinedSignal.addEventListener('abort', cleanup);
 
     return {
@@ -236,24 +251,28 @@ export class SearchInterceptor {
    *
    */
   public showError(e: Error) {
-    if (e instanceof AbortError) return;
-
-    if (e instanceof SearchTimeoutError) {
+    if (e instanceof AbortError || e instanceof SearchTimeoutError) {
       // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
       return;
-    }
-
-    if (e instanceof PainlessError) {
+    } else if (e instanceof EsError) {
       this.deps.toasts.addDanger({
-        title: 'Search Error',
+        title: i18n.translate('data.search.esErrorTitle', {
+          defaultMessage: 'Cannot retrieve search results',
+        }),
         text: toMountPoint(e.getErrorMessage(this.application)),
       });
-      return;
+    } else if (e.constructor.name === 'HttpFetchError') {
+      this.deps.toasts.addDanger({
+        title: i18n.translate('data.search.httpErrorTitle', {
+          defaultMessage: 'Cannot retrieve your data',
+        }),
+        text: toMountPoint(getHttpError(e.message)),
+      });
+    } else {
+      this.deps.toasts.addError(e, {
+        title: 'Search Error',
+      });
     }
-
-    this.deps.toasts.addError(e, {
-      title: 'Search Error',
-    });
   }
 }
 
