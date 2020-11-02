@@ -102,7 +102,7 @@ A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the d
 Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
 
 [[helpers]]
-In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Handlebars helpers, you can use the following custom helpers:
+In addition to https://ela.st/handlebars-helpers[built-in] Handlebars helpers, you can use the following custom helpers:
 
 
 |===
