@@ -73,7 +73,6 @@ export const getHistogramVisTypeDefinition = (
             show: true,
             filter: true,
             truncate: 100,
-            rotate: LabelRotation.Vertical,
           },
           title: {},
           style: {},

@@ -63,7 +63,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
   };
   const scale = getScale<S>(axisScale, params, isCategoryAxis);
   const title = axisTitle.text || fallbackTitle;
-  const falbackRotation =
+  const fallbackRotation =
     isCategoryAxis && isDateHistogram ? LabelRotation.Horizontal : LabelRotation.Vertical;
 
   return {
@@ -73,7 +73,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     ticks,
     grid,
     scale,
-    style: getAxisStyle(ticks, title, falbackRotation),
+    style: getAxisStyle(ticks, title, fallbackRotation),
     domain: getAxisDomain(scale, isCategoryAxis),
   };
 }
