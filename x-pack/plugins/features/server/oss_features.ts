@@ -360,7 +360,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             all: [],
             read: [...savedObjectTypes],
           },
-          ui: ['read', 'copyIntoSpace'],
+          ui: ['read'],
         },
       },
     },

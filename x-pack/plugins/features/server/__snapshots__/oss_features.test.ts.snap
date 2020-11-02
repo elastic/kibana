@@ -355,7 +355,6 @@ Array [
       },
       "ui": Array [
         "read",
-        "copyIntoSpace",
       ],
     },
     "privilegeId": "read",
