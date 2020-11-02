@@ -293,6 +293,7 @@ Alerting::
 * Renames "Built-In Alerts" feature to "Stack Alerts" and "Actions" feature to "Actions and Connectors" {kibana-pull}79513[#79513]
 * Fixes sorting of Alert Instance in Details page {kibana-pull}80103[#80103]
 * Fixes migration issue for case specific actions, by extending email action migrator checks {kibana-pull}81673[#81673]
+* Fixes docs in trigger alerting UI {kibana-pull}75363[#75363]
 APM::
 * Uses core.chrome to set window title {kibana-pull}73232[#73232]
 * Chart units don't update when toggling the chart legends {kibana-pull}74931[#74931]
@@ -311,12 +312,16 @@ Dashboard::
 * Sample data link does not work {kibana-pull}75262[#75262]
 * Stores Expanded Panel Id in URL {kibana-pull}78684[#78684]
 * Fixes embeddable title and description for reporting and dashboard tooltip {kibana-pull}78767[#78767]
+* Fixes apps break on unrestorable session state in URL {kibana-pull}74264[#74264]
 Discover::
 * Converts legacy sort to be compatible with multi sort {kibana-pull}76986[#76986]
 * Context - Fix bug when document id contains a slash  {kibana-pull}77435[#77435]
 * Makes _source field not clickable {kibana-pull}78698[#78698]
 * "View surrounding documents" encodes spaces in filters {kibana-pull}79283[#79283]
 * Should not visualize unknown/conflict type fields {kibana-pull}81311[#81311]
+Ingest Manager::
+* Fixes removing ingest pipelines from elasticsearch {kibana-pull}75092[#75092]
+* Installs previous version of package if update fails {kibana-pull}76694[#76694]
 Kibana UI::
 * Removes duplicate string in search dropdown {kibana-pull}77429[#77429]
 Lens and visualizations::
@@ -335,6 +340,20 @@ Lens and visualizations::
 * Don't debounce visualization settings UI  {kibana-pull}79625[#79625]
 * Respects requested sub vis type for xy charts {kibana-pull}80297[#80297]
 * Fixes URL query loss on redirect {kibana-pull}81475[#81475]
+* TSVB Inaccurate Group By {kibana-pull}73683[#73683]
+* Fixes download filename when using split table {kibana-pull}74231[#74231]
+* Disables enableHistogramMode prop when user selects non-stacked bar {kibana-pull}74930[#74930]
+* Fixes bug on TopN weird behavior with zero values {kibana-pull}74942[#74942]
+* In some old TSVB visualization saved objects, queries and filters can be stored. This is not possible anymore for a while and there is no way to edit them besides changing the JSON of the saved object, 
+but they were still applied to the rendered output. In 7.10, these leftover queries and filters will be removed automatically from the saved object. In almost all cases, no change is necessary. 
+If a visualization contained these local queries and filters deliberately, they should be converted to panel filters in the "Panel options" of the TSVB interface {kibana-pull}75137[#75137]
+* Horizontal Bar Percentiles Overlapping {kibana-pull}75315[#75315]
+* Fixes panel config updates on history changes {kibana-pull}75896[#75896]
+* Fixes unexpected change in autosizing behavior post upgrade {kibana-pull}77408[#77408]
+* Hides app from search results when the setting is disabled {kibana-pull}77763[#77763]
+* Allows string fields on value count aggregation {kibana-pull}79267[#79267]
+* [Input controls crashes if index pattern is not available {kibana-pull}79431[#79431]
+* Prevents pageload on drilldown in tsvb {kibana-pull}78005[#78005]
 Logs::
 * Returns 403s rather than 500s for ML privilege errors {kibana-pull}74506[#74506]
 * Correctly filters for log rate anomaly examples with missing dataset {kibana-pull}76775[#76775]
@@ -413,62 +432,38 @@ Reporting::
 * Allows any hostname for chromium proxy bypass {kibana-pull}74693[#74693]
 * Fixes an issue with CSV Export where a job could fail if clearing the scroll ID failed in Elasticsearch {kibana-pull}76014[#76014]
 * Fixes a bug where the downloading CSV from a saved search in a dashboard panel had no file name if the dashboard panels were hidden {kibana-pull}76031[#76031]
-* [Fixes #68076, #70175] Use spaceId from request in export generation {kibana-pull}76998[#76998]
-  - Fixed the reporting exports to use the correct Space for advanced settings.
-* [Fixes #76543] Add Refresh parameter to Delete query {kibana-pull}78516[#78516]
-  - fixed a problem in the list of Reports jobs in Management would not refresh with the correct items immediately after deleting a report from the listing.
+* Fixes the reporting exports to use the correct Space for advanced settings {kibana-pull}76998[#76998]
+* Fixes a problem in the list of Reports jobs in Management would not refresh with the correct items immediately after deleting a report from the listing {kibana-pull}78516[#78516]
 Security::
-* [Fixes #76688] Display useful error when role creation fails {kibana-pull}77600[#77600]
-* [Fixes #75338] Ignore intermediate unauthenticated session during repeated authentication attempt. {kibana-pull}79300[#79300]
-  - previously when user started SAML or OpenID authentication handshake, but didn't or couldn't finish it they weren't able to access Login Selector easily (e.g. to log in with another authentication provider) unless they used /login URL directly or manually cleared the session cookies. That was a very confusing user experience. The reason was that unauthenticated intermediate session that was created to support handshake forced Kibana to automatically restart the same handshake whenever user accessed Kibana. We fixed that and now in certain cases we ignore unauthenticated intermediate session allowing user to easily access Login Selector whenever they need it.
-* [Fixes #22374] Allow idleTimeout/lifespan larger than 32-bit signed integer. {kibana-pull}79858[#79858]
-  - Kibana can now properly handle values for xpack.security.session.idleTimeout and xpack.security.session.lifespan that are larger than ~24 days.
-* [Fixes #66412] Properly encode links to edit user page {kibana-pull}81562[#81562]
-* [Fixes #76715] Fix display of multiple roles in table views {kibana-pull}81603[#81603]
+* Displays useful error when role creation fails {kibana-pull}77600[#77600]
+* Previously when user started SAML or OpenID authentication handshake, but didn't or couldn't finish it they weren't able to access Login Selector easily (e.g. to log in with another 
+authentication provider) unless they used /login URL directly or manually cleared the session cookies. That was a very confusing user experience. 
+The reason was that unauthenticated intermediate session that was created to support handshake forced Kibana to automatically restart the same handshake whenever user accessed Kibana. 
+We fixed that and now in certain cases we ignore unauthenticated intermediate session allowing user to easily access Login Selector whenever they need it {kibana-pull}79300[#79300]
+* Kibana can now properly handle values for xpack.security.session.idleTimeout and xpack.security.session.lifespan that are larger than ~24 days {kibana-pull}79858[#79858]
+* Properly encodes links to edit user page {kibana-pull}81562[#81562]
+* Fixes display of multiple roles in table views {kibana-pull}81603[#81603]
+* Node list and node detail tests {kibana-pull}74421[#74421]
+* Improves simulator. Add more click-through tests and panel tests. {kibana-pull}74601[#74601]
+* [Detections] Refactors signal ancestry to allow multiple parents {kibana-pull}76531[#76531]
 Sharing::
-* [Fixes #75376] Use App Title for Display Instead of App Id {kibana-pull}75457[#75457]
-SIEM::
-* Fixes a bug where invalid regular expressions within the index patterns can cause UI toaster errors {kibana-pull}73754[#73754]
-* Fixes toaster errors when siemDefault index is an empty or empty spaces {kibana-pull}73991[#73991]
-* [Exceptions] - Updates autocomplete validation for numbers and boolean {kibana-pull}74561[#74561]
-* Fix app layout {kibana-pull}76668[#76668]
-* [Fixes #77342] [Detection Engine] Fixes degraded state when signals detected are between 0 and 100 {kibana-pull}77658[#77658]
-* [Fixes #77255] [Detection Engine] Bubbles up errors when it cannot create signal documents {kibana-pull}77687[#77687]
-* [Fixes #77254] [Detection Engine] Bubbles up more error messages from ES queries to the UI {kibana-pull}78004[#78004]
-* [Fixes #74170] [Detections] Only display actions options if user has "read" privileges {kibana-pull}78812[#78812]
-* [Fixes #67299] Update TLS fields used in drag-and-drop {kibana-pull}78815[#78815]
-* Fix source.ip and destination.ip draggables {kibana-pull}79399[#79399]
-* [Detection Engine] Fixes date time errors when source index does not have date time stamps   {kibana-pull}79784[#79784]
-* [Exception Modal] Removes list operators in exception modal for EQL rules {kibana-pull}79871[#79871]
-* [Fixes #79865] [Detection Engine] Fixes critical date time format issues {kibana-pull}79911[#79911]
-* [Detections] Immediately refresh exceptions when new list is created after rule creation {kibana-pull}81014[#81014]
-* critical pref bug with browser fields reducer {kibana-pull}81675[#81675]
+* Uses App Title for Display Instead of App Id {kibana-pull}75457[#75457]
 Uptime::
-* [Fixes #75080] Ml anomaly alert edit {kibana-pull}76909[#76909]
-* [Fixes #80442] Remove custom handling of license enabling {kibana-pull}82019[#82019]
-Visualizations::
-* [Fixes #62081] TSVB Inaccurate Group By {kibana-pull}73683[#73683]
-* [Fixes #73018] Fix download filename when using split table {kibana-pull}74231[#74231]
-* [Fixes #70646, #70771] Disable enableHistogramMode prop when user selects non-stacked bar {kibana-pull}74930[#74930]
-* [Fixes #72604] Fixes bug on TopN weird behavior with zero values {kibana-pull}74942[#74942]
-* [Fixes #74959] Do not apply search source data for tsvb {kibana-pull}75137[#75137]
-  - In some old TSVB visualization saved objects, queries and filters can be stored. This is not possible anymore for a while and there is no way to edit them besides changing the JSON of the saved object, but they were still applied to the rendered output. In 7.10, these leftover queries and filters will be removed automatically from the saved object. In almost all cases, no change is necessary. If a visualization contained these local queries and filters deliberately, they should be converted to panel filters in the "Panel options" of the TSVB interface.
-* [Fixes #74986] Horizontal Bar Percentiles Overlapping {kibana-pull}75315[#75315]
-* [Fixes #68506] Fix panel config updates on history changes {kibana-pull}75896[#75896]
-* [Fixes #77362] Fix unexpected change in autosizing behavior post upgrade {kibana-pull}77408[#77408]
-* [Fixes #77681] Hide app from search results when the setting is disabled {kibana-pull}77763[#77763]
-* [Fixes #67581] Allow string fields on value count aggregation {kibana-pull}79267[#79267]
-* [Fixes #72664] Input controls crashes if index pattern is not available {kibana-pull}79431[#79431]
+* Ml anomaly alert edit {kibana-pull}76909[#76909]
+* Removes custom handling of license enabling {kibana-pull}82019[#82019]
+
+
+
+
 Unknown::
-* [Fixes #71461] Improve state sync error handling {kibana-pull}74264[#74264]
-  - Fix apps break on unrestorable session state in URL
-* node list and node detail tests {kibana-pull}74421[#74421]
-* Improve simulator. Add more click-through tests and panel tests. {kibana-pull}74601[#74601]
-* fix removing ingest pipelines from elasticsearch {kibana-pull}75092[#75092]
-* Fix docs in trigger alerting UI {kibana-pull}75363[#75363]
-* [Detections] Refactor signal ancestry to allow multiple parents {kibana-pull}76531[#76531]
-* install previous version of package if update fails {kibana-pull}76694[#76694]
-* Prevent pageload on drilldown in tsvb {kibana-pull}78005[#78005]
+
+
+
+
+
+
+
+
 * Fixes for the Ticket 78375 {kibana-pull}79004[#79004]
 * [Fixes #71651] Agent Policy names are unique {kibana-pull}79201[#79201]
 * Resolver Tree Events tests {kibana-pull}79344[#79344]
