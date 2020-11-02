@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { from } from 'rxjs';
 
+import { of } from 'rxjs';
 import es from './index';
 import tlConfigFn from '../fixtures/tl_config';
 import * as aggResponse from './lib/agg_response_to_series_list';
@@ -35,7 +35,7 @@ describe('es', () => {
 
   function stubRequestAndServer(response, indexPatternSavedObjects = []) {
     return {
-      context: { search: { search: () => from(Promise.resolve(response)) } },
+      context: { search: { search: jest.fn().mockReturnValue(of(response)) } },
       savedObjectsClient: {
         find: function () {
           return Promise.resolve({
