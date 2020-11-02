@@ -22,9 +22,9 @@ Object {
               ],
             },
           },
-          "domInteractive": Object {
+          "totalPageLoadDuration": Object {
             "percentiles": Object {
-              "field": "transaction.marks.agent.domInteractive",
+              "field": "transaction.duration.us",
               "hdr": Object {
                 "number_of_significant_value_digits": 3,
               },
@@ -580,6 +580,13 @@ Object {
           ],
         },
       },
+      "coreVitalPages": Object {
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.experience",
+          },
+        },
+      },
       "fcp": Object {
         "percentiles": Object {
           "field": "transaction.marks.agent.firstContentfulPaint",
@@ -658,11 +665,6 @@ Object {
           Object {
             "term": Object {
               "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
-              "user_agent.name": "Chrome",
             },
           },
         ],
