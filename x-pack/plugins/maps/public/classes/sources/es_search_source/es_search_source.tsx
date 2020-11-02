@@ -51,7 +51,10 @@ import {
 } from '../vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { SortDirection } from '../../../../../../../src/plugins/data/common/search';
+import {
+  SortDirection,
+  SortDirectionNumeric,
+} from '../../../../../../../src/plugins/data/common/search';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -112,13 +115,24 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_SEARCH,
       geoField: normalizedDescriptor.geoField,
-      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
-      tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
-      sortField: _.get(descriptor, 'sortField', ''),
-      sortOrder: _.get(descriptor, 'sortOrder', SortDirection.desc),
-      scalingType: _.get(descriptor, 'scalingType', SCALING_TYPES.LIMIT),
-      topHitsSplitField: descriptor.topHitsSplitField,
-      topHitsSize: _.get(descriptor, 'topHitsSize', 1),
+      filterByMapBounds:
+        typeof descriptor.filterByMapBounds === 'boolean'
+          ? descriptor.filterByMapBounds
+          : DEFAULT_FILTER_BY_MAP_BOUNDS,
+      tooltipProperties: Array.isArray(descriptor.tooltipProperties)
+        ? descriptor.tooltipProperties
+        : [],
+      sortField: typeof descriptor.sortField === 'string' ? descriptor.sortField : '',
+      sortOrder:
+        typeof descriptor.sortOrder === 'string' ? descriptor.sortOrder : SortDirection.desc,
+      scalingType:
+        typeof descriptor.scalingType === 'string' ? descriptor.scalingType : SCALING_TYPES.LIMIT,
+      topHitsSplitField:
+        typeof descriptor.topHitsSplitField === 'string' ? descriptor.topHitsSplitField : '',
+      topHitsSize:
+        typeof descriptor.topHitsSize === 'number' && descriptor.topHitsSize > 0
+          ? descriptor.topHitsSize
+          : 1,
     };
   }
 
@@ -226,7 +240,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   // Returns sort content for an Elasticsearch search body
-  _buildEsSort(): Array<Record<string, SortDirection>> {
+  _buildEsSort(): Array<Record<string, SortDirectionNumeric>> {
     const { sortField, sortOrder } = this._descriptor;
 
     if (!sortField) {
@@ -263,7 +277,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
       _source?: boolean | { includes: string[] };
-      sort?: Array<Record<string, SortDirection>>;
+      sort?: Array<Record<string, SortDirectionNumeric>>;
     } = {
       size: topHitsSize,
       script_fields: scriptFields,
@@ -624,15 +638,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getSyncMeta(): VectorSourceSyncMeta | null {
     return {
-      sortField: typeof this._descriptor.sortField === 'string' ? this._descriptor.sortField : '',
-      sortOrder: this._descriptor.sortOrder ? this._descriptor.sortOrder : SortDirection.asc,
+      sortField: this._descriptor.sortField,
+      sortOrder: this._descriptor.sortOrder,
       scalingType: this._descriptor.scalingType,
-      topHitsSplitField:
-        typeof this._descriptor.topHitsSplitField === 'string'
-          ? typeof this._descriptor.topHitsSplitField
-          : '',
-      topHitsSize:
-        typeof this._descriptor.topHitsSize === 'number' ? this._descriptor.topHitsSize : 1,
+      topHitsSplitField: this._descriptor.topHitsSplitField,
+      topHitsSize: this._descriptor.topHitsSize,
     };
   }
 

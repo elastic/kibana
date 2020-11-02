@@ -59,11 +59,11 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   geoField: string;
   filterByMapBounds?: boolean;
   tooltipProperties?: string[];
-  sortField?: string;
-  sortOrder?: SortDirection;
+  sortField: string;
+  sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
-  topHitsSplitField?: string;
-  topHitsSize?: number;
+  topHitsSplitField: string;
+  topHitsSize: number;
 };
 
 export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
