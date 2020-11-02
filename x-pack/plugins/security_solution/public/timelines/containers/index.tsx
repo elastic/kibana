@@ -47,7 +47,7 @@ export interface TimelineArgs {
 
 type LoadPage = (newActivePage: number) => void;
 
-interface UseTimelineEventsProps {
+export interface UseTimelineEventsProps {
   docValueFields?: DocValueFields[];
   filterQuery?: ESQuery | string;
   skip?: boolean;
@@ -65,7 +65,7 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-const initSortDefault = {
+export const initSortDefault = {
   field: '@timestamp',
   direction: Direction.asc,
 };
@@ -99,7 +99,7 @@ export const useTimelineEvents = ({
           fields: [],
           fieldRequested: fields,
           filterQuery: createFilter(filterQuery),
-          id: ID,
+          id,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -146,7 +146,7 @@ export const useTimelineEvents = ({
   }, [wrappedLoadPage]);
 
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],
@@ -167,12 +167,10 @@ export const useTimelineEvents = ({
       if (request == null || pageName === '' || !isInitialized.current) {
         return;
       }
-
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
         const searchSubscription$ = data.search
           .search<TimelineEventsAllRequestOptions, TimelineEventsAllStrategyResponse>(request, {
             strategy: 'securitySolutionTimelineSearchStrategy',
@@ -180,35 +178,39 @@ export const useTimelineEvents = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
+              try {
+                if (isCompleteResponse(response)) {
+                  if (!didCancel) {
+                    setLoading(false);
 
-                  setTimelineResponse((prevResponse) => {
-                    const newTimelineResponse = {
-                      ...prevResponse,
-                      events: getTimelineEvents(response.edges),
-                      inspect: getInspectResponse(response, prevResponse.inspect),
-                      pageInfo: response.pageInfo,
-                      totalCount: response.totalCount,
-                      updatedAt: Date.now(),
-                    };
-                    if (id === TimelineId.active) {
-                      activeTimeline.setExpandedEventIds({});
-                      activeTimeline.setPageName(pageName);
-                      activeTimeline.setRequest(request);
-                      activeTimeline.setResponse(newTimelineResponse);
-                    }
-                    return newTimelineResponse;
-                  });
+                    setTimelineResponse((prevResponse) => {
+                      const newTimelineResponse = {
+                        ...prevResponse,
+                        events: getTimelineEvents(response.edges),
+                        inspect: getInspectResponse(response, prevResponse.inspect),
+                        pageInfo: response.pageInfo,
+                        totalCount: response.totalCount,
+                        updatedAt: Date.now(),
+                      };
+                      if (id === TimelineId.active) {
+                        activeTimeline.setExpandedEventIds({});
+                        activeTimeline.setPageName(pageName);
+                        activeTimeline.setRequest(request);
+                        activeTimeline.setResponse(newTimelineResponse);
+                      }
+                      return newTimelineResponse;
+                    });
+                  }
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
+                  if (!didCancel) {
+                    setLoading(false);
+                  }
+                  notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
+                  searchSubscription$.unsubscribe();
                 }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
+              } catch {
                 notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
-                searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
@@ -315,7 +317,6 @@ export const useTimelineEvents = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-
       if (
         !skip &&
         !isTimerangeInitializing &&
