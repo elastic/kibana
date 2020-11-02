@@ -1,5 +1,5 @@
 [[release-notes]]
-= Release information
+= Release notes
 
 [partintro]
 --
@@ -15,7 +15,7 @@ Review important information about {kib} releases.
 --
 
 [[release-notes-prototype]]
-== {kib} 7.0.0 release notes
+== {kib} 7.0.0 -- high-level of cool, or group of cool, new features in this release
 
 coming[7.0.0]
 
