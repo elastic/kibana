@@ -458,6 +458,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const failinfAlert = await createFailingAlert();
       await refreshAlertsList();
       await testSubjects.click('alertTypeFilterButton');
+      expect(await (await testSubjects.find('alertType0Group')).getVisibleText()).to.eql('Alerts');
       await testSubjects.click('alertTypetest.failingFilterOption');
 
       await retry.try(async () => {

@@ -11,6 +11,7 @@ import { basePath } from './index';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
+import { PartitionFieldsConfig } from '../../../../common/types/storage';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -89,9 +90,17 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     searchTerm: Record<string, string>,
     criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    fieldsConfig?: PartitionFieldsConfig
   ) {
-    const body = JSON.stringify({ jobId, searchTerm, criteriaFields, earliestMs, latestMs });
+    const body = JSON.stringify({
+      jobId,
+      searchTerm,
+      criteriaFields,
+      earliestMs,
+      latestMs,
+      fieldsConfig,
+    });
     return httpService.http$<PartitionFieldsDefinition>({
       path: `${basePath()}/results/partition_fields_values`,
       method: 'POST',

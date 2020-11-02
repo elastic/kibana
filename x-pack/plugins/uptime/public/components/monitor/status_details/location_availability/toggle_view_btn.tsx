@@ -7,6 +7,7 @@
 import * as React from 'react';
 import styled from 'styled-components';
 import { EuiButtonGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useSelectedView } from './use_selected_view';
 import { ChangeToListView, ChangeToMapView } from '../translations';
 
@@ -55,6 +56,9 @@ export const ToggleViewBtn = ({ onChange }: Props) => {
         type="multi"
         isIconOnly
         style={{ marginLeft: 'auto' }}
+        legend={i18n.translate('xpack.uptime.locationAvailabilityViewToggleLegend', {
+          defaultMessage: 'View toggle',
+        })}
       />
     </ToggleViewButtons>
   );

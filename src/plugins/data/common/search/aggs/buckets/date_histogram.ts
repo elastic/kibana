@@ -34,6 +34,7 @@ import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 import { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
+import { inferTimeZone } from '../utils';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
@@ -235,25 +236,7 @@ export const getDateHistogramBucketAgg = ({
         // time_zones being persisted into saved_objects
         serialize: noop,
         write(agg, output) {
-          // If a time_zone has been set explicitly always prefer this.
-          let tz = agg.params.time_zone;
-          if (!tz && agg.params.field) {
-            // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
-            // field requires a specific time_zone
-            tz = get(agg.getIndexPattern(), [
-              'typeMeta',
-              'aggs',
-              'date_histogram',
-              agg.params.field.name,
-              'time_zone',
-            ]);
-          }
-          if (!tz) {
-            // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
-            const detectedTimezone = moment.tz.guess();
-            const tzOffset = moment().format('Z');
-            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
-          }
+          const tz = inferTimeZone(agg.params, agg.getIndexPattern(), isDefaultTimezone, getConfig);
           output.params.time_zone = tz;
         },
       },

@@ -74,8 +74,15 @@ function getMaxAnomalyScore(client: IScopedClusterClient, payload: any) {
 
 function getPartitionFieldsValues(client: IScopedClusterClient, payload: any) {
   const rs = resultsServiceProvider(client);
-  const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
-  return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
+  const { jobId, searchTerm, criteriaFields, earliestMs, latestMs, fieldsConfig } = payload;
+  return rs.getPartitionFieldsValues(
+    jobId,
+    searchTerm,
+    criteriaFields,
+    earliestMs,
+    latestMs,
+    fieldsConfig
+  );
 }
 
 function getCategorizerStats(client: IScopedClusterClient, params: any, query: any) {
