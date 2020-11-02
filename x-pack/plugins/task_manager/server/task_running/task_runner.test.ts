@@ -6,15 +6,16 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { secondsFromNow } from './lib/intervals';
-import { asOk, asErr } from './lib/result_type';
-import { TaskManagerRunner, TaskRunResult } from './task_runner';
-import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from './task_events';
-import { ConcreteTaskInstance, TaskStatus, TaskDefinition, SuccessfulRunResult } from './task';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import { secondsFromNow } from '../lib/intervals';
+import { asOk, asErr } from '../lib/result_type';
+import { TaskManagerRunner, TaskRunResult } from '../task_running';
+import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from '../task_events';
+import { ConcreteTaskInstance, TaskStatus, TaskDefinition, SuccessfulRunResult } from '../task';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import moment from 'moment';
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { mockLogger } from './test_utils';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { mockLogger } from '../test_utils';
+import { throwUnrecoverableError } from './errors';
 
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
@@ -220,6 +221,45 @@ describe('TaskManagerRunner', () => {
 
     sinon.assert.calledOnce(store.update);
     sinon.assert.calledWithMatch(store.update, { runAt });
+  });
+
+  test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
+    const id = _.random(1, 20).toString();
+    const error = new Error('Dangit!');
+    const onTaskEvent = jest.fn();
+    const { runner, store, instance: originalInstance } = testOpts({
+      onTaskEvent,
+      instance: { id, status: TaskStatus.Running, startedAt: new Date() },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          createTaskRunner: () => ({
+            async run() {
+              throwUnrecoverableError(error);
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    const instance = store.update.args[0][0];
+    expect(instance.status).toBe('failed');
+
+    expect(onTaskEvent).toHaveBeenCalledWith(
+      withAnyTiming(
+        asTaskRunEvent(
+          id,
+          asErr({
+            error,
+            task: originalInstance,
+            result: TaskRunResult.Failed,
+          })
+        )
+      )
+    );
+    expect(onTaskEvent).toHaveBeenCalledTimes(1);
   });
 
   test('tasks that return runAt override the schedule', async () => {

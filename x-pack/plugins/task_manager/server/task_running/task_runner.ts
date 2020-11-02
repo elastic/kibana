@@ -16,8 +16,8 @@ import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
-import { Middleware } from './lib/middleware';
-import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from './lib/result_type';
+import { Middleware } from '../lib/middleware';
+import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from '../lib/result_type';
 import {
   TaskRun,
   TaskMarkRunning,
@@ -25,8 +25,8 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
-} from './task_events';
-import { intervalFromDate, intervalFromNow } from './lib/intervals';
+} from '../task_events';
+import { intervalFromDate, intervalFromNow } from '../lib/intervals';
 import {
   CancelFunction,
   CancellableTask,
@@ -38,8 +38,9 @@ import {
   TaskDefinition,
   validateRunResult,
   TaskStatus,
-} from './task';
-import { TaskTypeDictionary } from './task_type_dictionary';
+} from '../task';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { isUnrecoverableError } from './errors';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
@@ -341,11 +342,11 @@ export class TaskManagerRunner implements TaskRunner {
   private rescheduleFailedRun = (
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
-    if (this.shouldTryToScheduleRetry()) {
+    const { state, error } = failureResult;
+    if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
       const { schedule, attempts } = this.instance;
 
-      const { state, error } = failureResult;
       const reschedule = failureResult.runAt
         ? { runAt: failureResult.runAt }
         : failureResult.schedule

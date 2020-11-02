@@ -7,7 +7,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
+import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import {
@@ -376,9 +376,10 @@ export class TaskRunner {
         }
       ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
-        return isAlertSavedObjectNotFoundError(error, alertId)
-          ? undefined
-          : { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
+        if (isAlertSavedObjectNotFoundError(error, alertId)) {
+          throwUnrecoverableError(error);
+        }
+        return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
       }),
     };
   }

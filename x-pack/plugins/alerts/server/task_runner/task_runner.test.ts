@@ -7,7 +7,11 @@
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import {
+  ConcreteTaskInstance,
+  isUnrecoverableError,
+  TaskStatus,
+} from '../../../task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
@@ -985,7 +989,7 @@ describe('Task Runner', () => {
 
   test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
     alertsClient.get.mockImplementation(() => {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', '1');
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
     });
 
     const taskRunner = new TaskRunner(
@@ -1003,13 +1007,9 @@ describe('Task Runner', () => {
       references: [],
     });
 
-    const runnerResult = await taskRunner.run();
-
-    expect(runnerResult).toMatchInlineSnapshot(`
-      Object {
-        "schedule": undefined,
-        "state": Object {},
-      }
-    `);
+    return taskRunner.run().catch((ex) => {
+      expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
+      expect(isUnrecoverableError(ex)).toBeTruthy();
+    });
   });
 });
