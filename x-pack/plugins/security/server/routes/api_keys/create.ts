@@ -10,7 +10,7 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { elasticsearchRoleSchema } from '../authorization/roles/model/put_payload';
 import { RouteDefinitionParams } from '..';
 
-export function defineCreateApiKeyRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineCreateApiKeyRoutes({ router, authc }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/api_key',
@@ -18,16 +18,19 @@ export function defineCreateApiKeyRoutes({ router, clusterClient }: RouteDefinit
         body: schema.object({
           name: schema.string(),
           expiration: schema.maybe(schema.string()),
-          role_descriptors: schema.maybe(schema.recordOf(schema.string(), elasticsearchRoleSchema)),
+          role_descriptors: schema.recordOf(schema.string(), elasticsearchRoleSchema, {
+            defaultValue: {},
+          }),
         }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const scopedClusterClient = clusterClient.asScoped(request);
       try {
-        const apiKey = await scopedClusterClient.callAsCurrentUser('shield.createAPIKey', {
-          body: request.body,
-        });
+        const apiKey = await authc.createAPIKey(request, request.body);
+
+        if (!apiKey) {
+          return response.badRequest({ body: { message: `API Keys are not available` } });
+        }
 
         return response.ok({ body: apiKey });
       } catch (error) {
