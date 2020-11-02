@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
 import { mapToObject } from '@kbn/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
+import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
@@ -33,8 +35,8 @@ import { SavedObjectsService } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
-import { StatusService } from './status';
-import { I18nService } from './i18n';
+// do not try to shorten the import to `./status`, it will break server test mocking
+import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -121,8 +123,6 @@ export class Server {
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    const i18nServiceSetup = await this.i18n.setup();
-
     // rely on dev server to validate config, don't validate in the parent process
     if (!this.env.isDevClusterMaster) {
       // Immediately terminate in case of invalid configuration
@@ -130,6 +130,9 @@ export class Server {
       await this.configService.validate();
       await ensureValidConfiguration(this.configService, legacyConfigSetup);
     }
+
+    // setup i18n prior to any other service, to have translations ready
+    const i18nServiceSetup = await this.i18n.setup();
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:

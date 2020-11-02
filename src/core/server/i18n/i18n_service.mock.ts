@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { I18nServiceSetup } from './i18n_service';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { I18nServiceSetup, I18nService } from './i18n_service';
 
-const createSetupContractMock = (): jest.Mocked<I18nServiceSetup> => {
-  const mock = {
+const createSetupContractMock = () => {
+  const mock: jest.Mocked<I18nServiceSetup> = {
     getLocale: jest.fn(),
     getTranslationFiles: jest.fn(),
   };
@@ -31,6 +32,19 @@ const createSetupContractMock = (): jest.Mocked<I18nServiceSetup> => {
   return mock;
 };
 
+type I18nServiceContract = PublicMethodsOf<I18nService>;
+
+const createMock = () => {
+  const mock: jest.Mocked<I18nServiceContract> = {
+    setup: jest.fn(),
+  };
+
+  mock.setup.mockResolvedValue(createSetupContractMock());
+
+  return mock;
+};
+
 export const i18nServiceMock = {
+  create: createMock,
   createSetupContract: createSetupContractMock,
 };

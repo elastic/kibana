@@ -17,7 +17,7 @@
  * under the License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { StatusService } from './status_service';
+import type { StatusService } from './status_service';
 import {
   InternalStatusServiceSetup,
   StatusServiceSetup,
