@@ -39,13 +39,13 @@ import {
   Query,
   IndexPatternAttributes,
   DataPublicPluginStart,
+  AggConfigs,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
 import { SavedSearch } from '../../saved_searches';
 
 import { SavedObject } from '../../../../../core/types';
-import { Vis } from '../../../../visualizations/public';
 import { TopNavMenuData } from '../../../../navigation/public';
 
 export interface DiscoverLegacyProps {
@@ -87,7 +87,7 @@ export interface DiscoverLegacyProps {
   topNavMenu: TopNavMenuData[];
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   updateSavedQueryId: (savedQueryId?: string) => void;
-  vis?: Vis;
+  vis?: AggConfigs;
 }
 
 export function DiscoverLegacy({
@@ -124,7 +124,7 @@ export function DiscoverLegacy({
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
-  const bucketAggConfig = vis?.data?.aggs?.aggs[1];
+  const bucketAggConfig = vis?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()

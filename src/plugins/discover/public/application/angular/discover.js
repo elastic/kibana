@@ -65,7 +65,6 @@ const {
   timefilter,
   toastNotifications,
   uiSettings: config,
-  visualizations,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -874,11 +873,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
-      const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
+      const tabifiedData = tabifyAggResponse($scope.vis, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
-        getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
+        getDimensions($scope.vis.aggs, $scope.timeRange)
       );
       $scope.updateTime();
     }
@@ -1045,27 +1044,16 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         },
       },
     ];
-
-    $scope.vis = await visualizations.createVis('histogram', {
-      title: savedSearch.title,
-      params: {
-        addLegend: false,
-        addTimeMarker: true,
-      },
-      data: {
-        aggs: visStateAggs,
-        searchSource: $scope.searchSource.getSerializedFields(),
-      },
-    });
+    $scope.vis = data.search.aggs.createAggConfigs($scope.indexPattern, visStateAggs);
 
     $scope.searchSource.onRequestStart((searchSource, options) => {
       if (!$scope.vis) return;
-      return $scope.vis.data.aggs.onSearchRequestStart(searchSource, options);
+      return $scope.vis.onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function () {
       if (!$scope.vis) return;
-      return $scope.vis.data.aggs.toDsl();
+      return $scope.vis.toDsl();
     });
   }
 
