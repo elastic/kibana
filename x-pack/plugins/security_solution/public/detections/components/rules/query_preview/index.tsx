@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useCallback, useEffect, useReducer } from 'react';
+import React, { Fragment, useCallback, useEffect, useReducer, useRef } from 'react';
 import { Unit } from '@elastic/datemath';
 import styled from 'styled-components';
 import {
@@ -110,28 +110,30 @@ export const PreviewQuery = ({
     { inspect, totalCount: matrixHistTotal, refetch, data: matrixHistoData, buckets },
     startNonEql,
   ] = useMatrixHistogram({
-    errorMessage: i18n.PREVIEW_QUERY_ERROR,
+    errorMessage: i18n.QUERY_PREVIEW_ERROR,
     endDate: fromTime,
     startDate: toTime,
     filterQuery: queryFilter,
     indexNames: index,
     histogramType: MatrixHistogramType.events,
     stackByField: 'event.category',
-    threshold,
+    threshold: ruleType === 'threshold' ? threshold : undefined,
     skip: true,
   });
 
   const setQueryInfo = useCallback(
-    (queryBar: FieldValueQueryBar | undefined): void => {
+    (queryBar: FieldValueQueryBar | undefined, indices: string[], type: Type): void => {
       dispatch({
         type: 'setQueryInfo',
         queryBar,
-        index,
-        ruleType,
+        index: indices,
+        ruleType: type,
       });
     },
-    [dispatch, index, ruleType]
+    [dispatch]
   );
+
+  const debouncedSetQueryInfo = useRef(debounce(500, setQueryInfo));
 
   const setTimeframeSelect = useCallback(
     (selection: Unit): void => {
@@ -190,11 +192,9 @@ export const PreviewQuery = ({
     [dispatch]
   );
 
-  useEffect((): void => {
-    const debounced = debounce(1000, setQueryInfo);
-
-    debounced(query);
-  }, [setQueryInfo, query]);
+  useEffect(() => {
+    debouncedSetQueryInfo.current(query, index, ruleType);
+  }, [index, query, ruleType]);
 
   useEffect((): void => {
     setThresholdValues(threshold, ruleType);
@@ -205,12 +205,32 @@ export const PreviewQuery = ({
   }, [ruleType, setRuleTypeChange]);
 
   useEffect((): void => {
-    const totalHits = ruleType === 'eql' ? eqlQueryTotal : matrixHistTotal;
-
-    if (isNoisy(totalHits, timeframe)) {
-      setNoiseWarning();
+    switch (ruleType) {
+      case 'eql':
+        if (isNoisy(eqlQueryTotal, timeframe)) {
+          setNoiseWarning();
+        }
+        break;
+      case 'threshold':
+        const totalHits = thresholdFieldExists ? buckets.length : matrixHistTotal;
+        if (isNoisy(totalHits, timeframe)) {
+          setNoiseWarning();
+        }
+        break;
+      default:
+        if (isNoisy(matrixHistTotal, timeframe)) {
+          setNoiseWarning();
+        }
     }
-  }, [timeframe, matrixHistTotal, eqlQueryTotal, ruleType, setNoiseWarning]);
+  }, [
+    timeframe,
+    matrixHistTotal,
+    eqlQueryTotal,
+    ruleType,
+    setNoiseWarning,
+    thresholdFieldExists,
+    buckets.length,
+  ]);
 
   const handlePreviewEqlQuery = useCallback(
     (to: string, from: string): void => {
@@ -263,8 +283,9 @@ export const PreviewQuery = ({
               options={timeframeOptions}
               value={timeframe}
               onChange={handleSelectPreviewTimeframe}
-              aria-label={i18n.PREVIEW_SELECT_ARIA}
+              aria-label={i18n.QUERY_PREVIEW_SELECT_ARIA}
               disabled={isDisabled}
+              data-test-subj="queryPreviewTimeframeSelect"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -276,7 +297,7 @@ export const PreviewQuery = ({
               onClick={handlePreviewClicked}
               data-test-subj="queryPreviewButton"
             >
-              {i18n.PREVIEW_LABEL}
+              {i18n.QUERY_PREVIEW_BUTTON}
             </PreviewButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -307,7 +328,6 @@ export const PreviewQuery = ({
         <PreviewEqlQueryHistogram
           to={toTime}
           from={fromTime}
-          query={queryString}
           totalCount={eqlQueryTotal}
           data={eqlQueryData}
           inspect={eqlQueryInspect}

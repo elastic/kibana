@@ -41,7 +41,7 @@ export const AgentMetadataFlyout: React.FunctionComponent<Props> = ({ agent, fly
         <EuiTitle size="m">
           <h2 id="flyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.agentDetails.metadataSectionTitle"
+              id="xpack.fleet.agentDetails.metadataSectionTitle"
               defaultMessage="Metadata"
             />
           </h2>
@@ -51,7 +51,7 @@ export const AgentMetadataFlyout: React.FunctionComponent<Props> = ({ agent, fly
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.ingestManager.agentDetails.localMetadataSectionSubtitle"
+              id="xpack.fleet.agentDetails.localMetadataSectionSubtitle"
               defaultMessage="Local metadata"
             />
           </h3>
@@ -62,7 +62,7 @@ export const AgentMetadataFlyout: React.FunctionComponent<Props> = ({ agent, fly
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.ingestManager.agentDetails.userProvidedMetadataSectionSubtitle"
+              id="xpack.fleet.agentDetails.userProvidedMetadataSectionSubtitle"
               defaultMessage="User provided metadata"
             />
           </h3>

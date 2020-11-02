@@ -860,6 +860,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
+    advanced?: {};
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -873,19 +874,33 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
   };
   mac: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
       network: boolean;
     };
     malware: MalwareFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
   };
   linux: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
@@ -904,15 +919,15 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup' | 'advanced'>;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events'>;
+  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
 }
 
 /** Policy: Malware protection fields */

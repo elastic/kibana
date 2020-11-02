@@ -172,7 +172,7 @@ export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJ
 
   if (ml) {
     try {
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = { headers: {} } as KibanaRequest;
       const fakeSOClient = {} as SavedObjectsClient;
 
       const modules = await ml.modulesProvider(fakeRequest, fakeSOClient).listModules();

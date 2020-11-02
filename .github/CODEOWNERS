@@ -39,7 +39,6 @@
 #CC# /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
 #CC# /src/legacy/server/url_shortening/ @elastic/kibana-app
 #CC# /src/legacy/ui/public/state_management @elastic/kibana-app
-#CC# /src/plugins/index_pattern_management/public @elastic/kibana-app
 
 # App Architecture
 /examples/bfetch_explorer/ @elastic/kibana-app-arch
@@ -70,23 +69,10 @@
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-arch
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-arch
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/kibana/public/management/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/kibana/server/routes/api/management/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/status_page/public @elastic/kibana-app-arch
-#CC# /src/legacy/server/index_patterns/ @elastic/kibana-app-arch
-#CC# /src/legacy/ui/public/field_editor @elastic/kibana-app-arch
-#CC# /src/legacy/ui/public/management @elastic/kibana-app-arch
-#CC# /src/plugins/advanced_settings/ @elastic/kibana-app-arch
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-arch
-#CC# /src/plugins/charts/ @elastic/kibana-app-arch
-#CC# /src/plugins/index_pattern_management/public/service @elastic/kibana-app-arch
+#CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-arch
 #CC# /src/plugins/inspector/ @elastic/kibana-app-arch
-#CC# /src/plugins/saved_objects/ @elastic/kibana-app-arch
 #CC# /src/plugins/share/ @elastic/kibana-app-arch
-#CC# /src/plugins/vis_default_editor @elastic/kibana-app-arch
 #CC# /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 #CC# /x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 #CC# /packages/kbn-interpreter/ @elastic/kibana-app-arch
@@ -171,8 +157,6 @@
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
-#CC# /src/legacy/core_plugins/region_map @elastic/kibana-gis
-#CC# /src/legacy/core_plugins/tile_map @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 #CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
@@ -245,6 +229,7 @@
 #CC# /src/legacy/ui/public/documentation_links @elastic/kibana-platform
 #CC# /src/legacy/ui/public/autoload @elastic/kibana-platform
 #CC# /src/plugins/legacy_export/ @elastic/kibana-platform
+#CC# /src/plugins/saved_objects/ @elastic/kibana-platform
 #CC# /src/plugins/status_page/ @elastic/kibana-platform
 #CC# /src/plugins/testbed/server/ @elastic/kibana-platform
 #CC# /x-pack/legacy/plugins/xpack_main/server/ @elastic/kibana-platform
@@ -381,8 +366,9 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 **/*.scss  @elastic/kibana-design
 #CC# /packages/kbn-ui-framework/ @elastic/kibana-design
 
-# Core design
+# Core UI design
 /src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
+/src/plugins/embeddable/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers

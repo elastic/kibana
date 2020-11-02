@@ -794,11 +794,14 @@ export const waitForRuleSuccess = async (
 };
 
 /**
- * Waits for the signal hits to be greater than zero before continuing
+ * Waits for the signal hits to be greater than the supplied number
+ * before continuing with a default of at least one signal
  * @param supertest Deps
+ * @param numberOfSignals The number of signals to wait for, default is 1
  */
 export const waitForSignalsToBePresent = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  numberOfSignals = 1
 ): Promise<void> => {
   await waitFor(async () => {
     const {
@@ -808,7 +811,7 @@ export const waitForSignalsToBePresent = async (
       .set('kbn-xsrf', 'true')
       .send(getQueryAllSignals())
       .expect(200);
-    return signalsOpen.hits.hits.length > 0;
+    return signalsOpen.hits.hits.length >= numberOfSignals;
   });
 };
 

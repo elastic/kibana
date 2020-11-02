@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockLogger } from '../test_utils';
+
 import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
-import { mockLogger } from '../test_utils';
 
 interface TaskInstance extends Entity {
   attempts: number;
