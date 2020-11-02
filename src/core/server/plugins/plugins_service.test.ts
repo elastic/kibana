@@ -127,6 +127,7 @@ async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
 
   [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
   mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+  mockPluginSystem.getPlugins.mockReturnValue([]);
 
   environmentSetup = environmentServiceMock.createSetupContract();
 }
@@ -469,6 +470,22 @@ describe('PluginsService', () => {
         deprecationProvider
       );
     });
+
+    it('returns the paths of the plugins', async () => {
+      const pluginA = createPlugin('A', { path: '/plugin-A-path', configPath: 'pathA' });
+      const pluginB = createPlugin('B', { path: '/plugin-B-path', configPath: 'pathB' });
+
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([]),
+      });
+
+      mockPluginSystem.getPlugins.mockReturnValue([pluginA, pluginB]);
+
+      const { pluginPaths } = await pluginsService.discover({ environment: environmentSetup });
+
+      expect(pluginPaths).toEqual(['/plugin-A-path', '/plugin-B-path']);
+    });
   });
 
   describe('#generateUiPluginsConfigs()', () => {
@@ -633,6 +650,7 @@ describe('PluginService when isDevClusterMaster is true', () => {
       await expect(pluginsService.discover({ environment: environmentSetup })).resolves
         .toMatchInlineSnapshot(`
               Object {
+                "pluginPaths": Array [],
                 "pluginTree": undefined,
                 "uiPlugins": Object {
                   "browserConfigs": Map {},
