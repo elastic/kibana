@@ -15,7 +15,7 @@ import { APMLink } from '../../../shared/Links/apm/APMLink';
 export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
   return (
     <EuiCallOut
-      title={i18n.translate('xpack.apm.serviceOverview.mlNudgeMessage.title', {
+      title={i18n.translate('xpack.apm.serviceInventory.mlNudgeMessageTitle', {
         defaultMessage:
           'Enable anomaly detection to see the health of your services',
       })}
