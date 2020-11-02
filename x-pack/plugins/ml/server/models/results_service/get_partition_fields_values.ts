@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
