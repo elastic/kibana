@@ -60,7 +60,7 @@ export async function renderApp({
       history as AppMountParameters['history']
     );
 
-    const { originatingApp, valueInput } =
+    const { embeddableId, originatingApp, valueInput } =
       stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
 
     let mapEmbeddableInput;
@@ -74,6 +74,7 @@ export async function renderApp({
     return (
       <MapAppContainer
         mapEmbeddableInput={mapEmbeddableInput}
+        embeddableId={embeddableId}
         onAppLeave={onAppLeave}
         setHeaderActionMenu={setHeaderActionMenu}
         stateTransfer={stateTransfer}

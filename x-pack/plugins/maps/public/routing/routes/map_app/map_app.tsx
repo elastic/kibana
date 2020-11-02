@@ -53,8 +53,6 @@ import {
   MapQuery,
 } from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
-import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { goToSpecifiedPath } from '../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { SavedMap } from './saved_map';

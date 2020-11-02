@@ -36,13 +36,25 @@ export function getMapAttributeService(): MapAttributeService {
       attributes: MapSavedObjectAttributes,
       savedObjectId?: string
     ) => {
-      throw new Error('saveMethod not implemented');
-      /* const savedDoc = await savedObjectStore.save({
-        ...attributes,
-        savedObjectId,
-        type: MAP_SAVED_OBJECT_TYPE,
+      const { attributes: attributesWithExtractedReferences, references } = extractReferences({
+        attributes,
       });
-      return { id: savedDoc.savedObjectId };*/
+
+      const options = { references };
+
+      const savedObject = await (savedObjectId
+        ? getSavedObjectsClient().update<MapSavedObjectAttributes>(
+            MAP_SAVED_OBJECT_TYPE,
+            savedObjectId,
+            attributesWithExtractedReferences,
+            options
+          )
+        : getSavedObjectsClient().create<MapSavedObjectAttributes>(
+            MAP_SAVED_OBJECT_TYPE,
+            attributesWithExtractedReferences,
+            options
+          ));
+      return { id: savedObject.id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<MapSavedObjectAttributes> => {
       const savedObject = await getSavedObjectsClient().get<MapSavedObjectAttributes>(

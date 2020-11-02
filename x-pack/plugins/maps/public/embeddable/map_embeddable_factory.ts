@@ -10,11 +10,9 @@ import {
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
 import '../index.scss';
-import {
-  MAP_SAVED_OBJECT_TYPE,
-  APP_ICON,
-} from '../../common/constants';
+import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
+import { getMapEmbeddableTitle } from '../../common/i18n_getters';
 import { MapByValueInput, MapByReferenceInput, MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
@@ -39,9 +37,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   getDisplayName() {
-    return i18n.translate('xpack.maps.embeddableDisplayName', {
-      defaultMessage: 'map',
-    });
+    return getMapEmbeddableTitle();
   }
 
   createFromSavedObject = async (
@@ -59,10 +55,10 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const { MapEmbeddable } = await lazyLoadMapModules();
     return new MapEmbeddable(
       {
-        editable: await this.isEditable()
+        editable: await this.isEditable(),
       },
       input,
-      parent,
+      parent
     );
   };
 }

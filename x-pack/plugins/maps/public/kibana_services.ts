@@ -74,3 +74,6 @@ export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionma
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
 
 export const getShareService = () => pluginsStart.share;
+
+export const getIsAllowByValueEmbeddables = () =>
+  pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;

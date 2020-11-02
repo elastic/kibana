@@ -8,6 +8,7 @@ import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -73,6 +74,7 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   savedObjects: SavedObjectsStart;
+  dashboard: DashboardStart;
 }
 
 /**

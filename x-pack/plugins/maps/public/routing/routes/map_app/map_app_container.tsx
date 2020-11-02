@@ -6,8 +6,20 @@
 
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
+import { AppMountParameters } from 'kibana/public';
+import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app_connector';
 import { SavedMap } from './saved_map';
+import { MapEmbeddableInput } from '../../../embeddable/types';
+
+interface Props {
+  mapEmbeddableInput?: MapEmbeddableInput;
+  embeddableId?: string;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  stateTransfer: EmbeddableStateTransfer;
+  originatingApp?: string;
+}
 
 // react-router-dom.route "render" method may be called multiple times for the same route.
 // Therefore state can not exist in the "render" closure
@@ -17,7 +29,7 @@ export class MapAppContainer extends Component {
   constructor(props: Props) {
     super(props);
     this.state = {
-      savedMap: new SavedMap(props.mapEmbeddableInput),
+      savedMap: new SavedMap(props.mapEmbeddableInput, this.props.embeddableId),
     };
   }
 
