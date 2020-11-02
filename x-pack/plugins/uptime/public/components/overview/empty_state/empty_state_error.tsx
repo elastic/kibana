@@ -47,7 +47,7 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
               <Fragment>
                 {!unauthorized &&
                   errors.map((error: IHttpFetchError) => (
-                    <p key={error.body.message}>{error.body.message}</p>
+                    <p key={error.body.message}>{error.body.message || error.message}</p>
                   ))}
               </Fragment>
             }
