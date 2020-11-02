@@ -17,27 +17,7 @@
  * under the License.
  */
 
-import { basename } from 'path';
-import { fromRoot } from '../utils';
-import { getTranslationPaths } from './get_translation_paths';
+import Fs from 'fs';
+import { promisify } from 'util';
 
-export const getKibanaTranslationFiles = async (
-  locale: string,
-  pluginPaths: string[]
-): Promise<string[]> => {
-  const translationPaths = await Promise.all([
-    getTranslationPaths({
-      cwd: fromRoot('.'),
-      nested: true,
-    }),
-    ...pluginPaths.map((pluginPath) => getTranslationPaths({ cwd: pluginPath, nested: false })),
-    getTranslationPaths({
-      cwd: fromRoot('../kibana-extra'),
-      nested: true,
-    }),
-  ]);
-
-  return ([] as string[])
-    .concat(...translationPaths)
-    .filter((translationPath) => basename(translationPath, '.json') === locale);
-};
+export const readFile = promisify(Fs.readFile);

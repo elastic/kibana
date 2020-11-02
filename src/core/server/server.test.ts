@@ -50,6 +50,7 @@ beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -99,6 +100,7 @@ test('injects legacy dependency to context#setup()', async () => {
   ]);
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 

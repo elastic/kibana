@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { promisify } from 'util';
-import { readFile } from 'fs';
 import { resolve, dirname } from 'path';
 import globby from 'globby';
-
-const readFileAsync = promisify(readFile);
+import { readFile } from './fs';
 
 interface I18NRCFileStructure {
   translations?: string[];
@@ -39,7 +36,7 @@ export async function getTranslationPaths({ cwd, nested }: { cwd: string; nested
     const entryFullPath = resolve(cwd, entry);
     const pluginBasePath = dirname(entryFullPath);
     try {
-      const content = await readFileAsync(entryFullPath, 'utf8');
+      const content = await readFile(entryFullPath, 'utf8');
       const { translations } = JSON.parse(content) as I18NRCFileStructure;
       if (translations && translations.length) {
         translations.forEach((translation) => {

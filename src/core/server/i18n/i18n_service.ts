@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { take, map } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { Logger } from '../logging';
-import { Env, IConfigService } from '../config';
+import { IConfigService } from '../config';
 import { CoreContext } from '../core_context';
-import {
-  config as pluginsConfigDef,
-  PluginsConfig,
-  PluginsConfigType,
-} from '../plugins/plugins_config';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
+
+interface SetupDeps {
+  pluginPaths: string[];
+}
 
 export interface I18nServiceSetup {
   getLocale(): string;
@@ -38,31 +37,22 @@ export interface I18nServiceSetup {
 export class I18nService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
-  private readonly env: Env;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('i18n');
     this.configService = coreContext.configService;
-    this.env = coreContext.env;
   }
 
-  public async setup(): Promise<I18nServiceSetup> {
+  public async setup({ pluginPaths }: SetupDeps): Promise<I18nServiceSetup> {
     const i18nConfig = await this.configService
       .atPath<I18nConfigType>(i18nConfigDef.path)
       .pipe(take(1))
-      .toPromise();
-    const pluginConfig = await this.configService
-      .atPath<PluginsConfigType>(pluginsConfigDef.path)
-      .pipe(
-        take(1),
-        map((rawConfig) => new PluginsConfig(rawConfig, this.env))
-      )
       .toPromise();
 
     const locale = i18nConfig.locale;
     this.log.debug(`Using locale: ${locale}`);
 
-    const translationFiles = await getKibanaTranslationFiles(locale, pluginConfig);
+    const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
 
     this.log.debug(`Registering translation files: [${translationFiles.join(', ')}]`);
     i18nLoader.registerTranslationFiles(translationFiles);

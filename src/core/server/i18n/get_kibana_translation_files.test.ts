@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import {
-  getKibanaTranslationFiles,
-  PluginsTranslationConfig,
-} from './get_kibana_translation_files';
-import { getTranslationPaths as mockGetTranslationPaths } from './get_translation_paths';
+import { getKibanaTranslationFiles } from './get_kibana_translation_files';
+import { getTranslationPaths } from './get_translation_paths';
+
+const mockGetTranslationPaths = getTranslationPaths as jest.Mock;
 
 jest.mock('./get_translation_paths', () => ({
   getTranslationPaths: jest.fn().mockResolvedValue([]),
@@ -29,14 +28,6 @@ jest.mock('./get_translation_paths', () => ({
 jest.mock('../utils', () => ({
   fromRoot: jest.fn().mockImplementation((path: string) => path),
 }));
-
-const createPluginConfig = (
-  pluginSearchPaths: string[] = [],
-  additionalPluginPaths: string[] = []
-): PluginsTranslationConfig => ({
-  pluginSearchPaths,
-  additionalPluginPaths,
-});
 
 const locale = 'en';
 
@@ -46,7 +37,7 @@ describe('getKibanaTranslationPaths', () => {
   });
 
   it('calls getTranslationPaths against kibana root and kibana-extra', async () => {
-    await getKibanaTranslationFiles(locale, createPluginConfig());
+    await getKibanaTranslationFiles(locale, []);
 
     expect(mockGetTranslationPaths).toHaveBeenCalledTimes(2);
 
@@ -62,27 +53,29 @@ describe('getKibanaTranslationPaths', () => {
   });
 
   it('calls getTranslationPaths for each config returned in plugin.paths and plugins.scanDirs', async () => {
-    const searchPaths = ['searchPath-A', 'searchPath-B'];
-    const additionalPluginPaths = ['additionalPath-A', 'additionalPath-B'];
+    const pluginPaths = ['/path/to/pluginA', '/path/to/pluginB'];
 
-    const pluginConfig = createPluginConfig(searchPaths, additionalPluginPaths);
+    await getKibanaTranslationFiles(locale, pluginPaths);
 
-    await getKibanaTranslationFiles(locale, pluginConfig);
+    expect(mockGetTranslationPaths).toHaveBeenCalledTimes(2 + pluginPaths.length);
 
-    searchPaths.forEach((searchPath) => {
+    pluginPaths.forEach((pluginPath) => {
       expect(mockGetTranslationPaths).toHaveBeenCalledWith({
-        cwd: searchPath,
-        nested: true,
-      });
-    });
-
-    additionalPluginPaths.forEach((additionalPluginPath) => {
-      expect(mockGetTranslationPaths).toHaveBeenCalledWith({
-        cwd: additionalPluginPath,
+        cwd: pluginPath,
         nested: false,
       });
     });
   });
 
-  // TODO: filter per locale logic test.
+  it('only return files for specified locale', async () => {
+    mockGetTranslationPaths.mockResolvedValueOnce(['/root/en.json', '/root/fr.json']);
+    mockGetTranslationPaths.mockResolvedValueOnce([
+      '/kibana-extra/en.json',
+      '/kibana-extra/fr.json',
+    ]);
+
+    const translationFiles = await getKibanaTranslationFiles('en', []);
+
+    expect(translationFiles).toEqual(['/root/en.json', '/kibana-extra/en.json']);
+  });
 });

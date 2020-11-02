@@ -118,7 +118,7 @@ export class Server {
     const environmentSetup = await this.environment.setup();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins } = await this.plugins.discover({
+    const { pluginTree, pluginPaths, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
@@ -132,7 +132,7 @@ export class Server {
     }
 
     // setup i18n prior to any other service, to have translations ready
-    const i18nServiceSetup = await this.i18n.setup();
+    const i18nServiceSetup = await this.i18n.setup({ pluginPaths });
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
