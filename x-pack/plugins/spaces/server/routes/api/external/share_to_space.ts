@@ -40,6 +40,7 @@ export function initShareToSpacesApi(deps: ExternalRouteDeps) {
   externalRouter.get(
     {
       path: '/internal/spaces/_share_saved_object_permissions',
+      options: { tags: ['access:shareSavedObjectsToSpaces'] },
       validate: { query: schema.object({ type: schema.string() }) },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
@@ -63,7 +64,11 @@ export function initShareToSpacesApi(deps: ExternalRouteDeps) {
   );
 
   externalRouter.post(
-    { path: '/api/spaces/_share_saved_object_add', validate: { body: shareSchema } },
+    {
+      path: '/api/spaces/_share_saved_object_add',
+      options: { tags: ['access:shareSavedObjectsToSpaces'] },
+      validate: { body: shareSchema },
+    },
     createLicensedRouteHandler(async (_context, request, response) => {
       const [startServices] = await getStartServices();
       const scopedClient = startServices.savedObjects.getScopedClient(request);
@@ -81,7 +86,11 @@ export function initShareToSpacesApi(deps: ExternalRouteDeps) {
   );
 
   externalRouter.post(
-    { path: '/api/spaces/_share_saved_object_remove', validate: { body: shareSchema } },
+    {
+      path: '/api/spaces/_share_saved_object_remove',
+      options: { tags: ['access:shareSavedObjectsToSpaces'] },
+      validate: { body: shareSchema },
+    },
     createLicensedRouteHandler(async (_context, request, response) => {
       const [startServices] = await getStartServices();
       const scopedClient = startServices.savedObjects.getScopedClient(request);

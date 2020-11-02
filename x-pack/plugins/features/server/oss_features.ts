@@ -342,7 +342,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           management: {
             kibana: ['objects'],
           },
-          api: ['copySavedObjectsToSpaces'],
+          api: ['copySavedObjectsToSpaces', 'shareSavedObjectsToSpaces'],
           savedObject: {
             all: [...savedObjectTypes],
             read: [],
