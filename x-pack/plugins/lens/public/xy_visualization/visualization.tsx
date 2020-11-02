@@ -363,22 +363,22 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
     case 'Break down':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
-          defaultMessage: `Missing {axis}`,
+          defaultMessage: `Missing {axis}.`,
           values: { axis: 'Break down by axis' },
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}`,
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}.`,
           values: { layers: layers.length, layersList, axis: 'Break down by axis' },
         }),
       };
     case 'Y':
       return {
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
-          defaultMessage: `Missing {axis}`,
+          defaultMessage: `Missing {axis}.`,
           values: { axis: getAxisName('y', { isHorizontal }) },
         }),
         longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
-          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}`,
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}.`,
           values: { layers: layers.length, layersList, axis: getAxisName('y', { isHorizontal }) },
         }),
       };

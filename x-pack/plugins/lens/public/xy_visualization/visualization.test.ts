@@ -539,8 +539,8 @@ describe('xy_visualization', () => {
         )
       ).toEqual([
         {
-          shortMessage: 'Missing Vertical axis',
-          longMessage: 'Layer 1 requires a field for the Vertical axis',
+          shortMessage: 'Missing Vertical axis.',
+          longMessage: 'Layer 1 requires a field for the Vertical axis.',
         },
       ]);
     });
@@ -576,8 +576,8 @@ describe('xy_visualization', () => {
         )
       ).toEqual([
         {
-          shortMessage: 'Missing Vertical axis',
-          longMessage: 'Layers 2, 3 require a field for the Vertical axis',
+          shortMessage: 'Missing Vertical axis.',
+          longMessage: 'Layers 2, 3 require a field for the Vertical axis.',
         },
       ]);
     });
@@ -611,8 +611,8 @@ describe('xy_visualization', () => {
         )
       ).toEqual([
         {
-          shortMessage: 'Missing Vertical axis',
-          longMessage: 'Layer 1 requires a field for the Vertical axis',
+          shortMessage: 'Missing Vertical axis.',
+          longMessage: 'Layer 1 requires a field for the Vertical axis.',
         },
       ]);
     });
