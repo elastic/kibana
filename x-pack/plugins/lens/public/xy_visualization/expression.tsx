@@ -8,7 +8,6 @@ import './expression.scss';
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { uniq } from 'lodash';
 import moment from 'moment';
 import {
   Chart,
@@ -52,6 +51,7 @@ import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
+import { getColorAssignments } from './color_assignment';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -396,15 +396,7 @@ export function XYChart({
     return style;
   };
 
-  const seriesPerLayer = filteredLayers.map((layer, layerIndex) => {
-    const splits = uniq(
-      data.tables[layer.layerId].rows.map((row) => {
-        return layer.splitAccessor && row[layer.splitAccessor];
-      })
-    );
-    return (splits.length || 1) * layer.accessors.length;
-  });
-  const totalSeriesCount = seriesPerLayer.reduce((sum, perLayer) => sum + perLayer, 0);
+  const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
 
   return (
     <Chart>
@@ -621,12 +613,6 @@ export function XYChart({
             });
           }
 
-          const splits = uniq(
-            table.rows.map((row) => {
-              return splitAccessor && row[splitAccessor];
-            })
-          );
-
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
@@ -641,18 +627,16 @@ export function XYChart({
               if (overwriteColor !== null) {
                 return overwriteColor;
               }
+              const colorAssignment = colorAssignments[palette.name];
               const seriesLayers: SeriesLayer[] = [
                 {
                   name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
-                  totalSeriesAtDepth: totalSeriesCount,
-                  rankAtDepth:
-                    (layerIndex === 0
-                      ? 0
-                      : seriesPerLayer
-                          .slice(0, layerIndex)
-                          .reduce((sum, perLayer) => sum + perLayer, 0)) +
-                    (splitAccessor ? splits.indexOf(seriesKeys[0]) * accessors.length : 0) +
-                    accessors.indexOf(String(yAccessor)),
+                  totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+                  rankAtDepth: colorAssignment.getRank(
+                    layer,
+                    String(seriesKeys[0]),
+                    String(yAccessor)
+                  ),
                 },
               ];
               return paletteService.get(palette.name).getColor(
@@ -660,7 +644,7 @@ export function XYChart({
                 {
                   maxDepth: 1,
                   behindText: false,
-                  totalSeries: totalSeriesCount,
+                  totalSeries: colorAssignment.totalSeriesCount,
                 },
                 palette.params
               );
