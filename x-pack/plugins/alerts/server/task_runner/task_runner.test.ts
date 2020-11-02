@@ -364,6 +364,12 @@ describe('Task Runner', () => {
           url: '/',
         },
       },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
+        },
+      },
     });
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -662,6 +668,12 @@ describe('Task Runner', () => {
           url: '/',
         },
       },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
+        },
+      },
     });
   });
 
@@ -692,6 +704,12 @@ describe('Task Runner', () => {
       raw: {
         req: {
           url: '/',
+        },
+      },
+      // TODO: Remove once we upgrade to hapi v18
+      _core: {
+        info: {
+          uri: 'http://localhost',
         },
       },
     });

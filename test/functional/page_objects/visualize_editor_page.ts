@@ -97,9 +97,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickSplitDirection(direction: string) {
-      const radioBtn = await find.byCssSelector(
-        `[data-test-subj="visEditorSplitBy"][title="${direction}"]`
-      );
+      const radioBtn = await find.byCssSelector(`[data-test-subj="visEditorSplitBy-${direction}"]`);
       await radioBtn.click();
     }
 
@@ -334,10 +332,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async toggleAutoMode() {
-      // this is a temporary solution, should be replaced with initial after fixing the EuiToggleButton
-      // passing the data-test-subj attribute to a checkbox
-      await find.clickByCssSelector('.visEditorSidebar__controls input[type="checkbox"]');
-      // await testSubjects.click('visualizeEditorAutoButton');
+      await testSubjects.click('visualizeEditorAutoButton');
     }
 
     public async isApplyEnabled() {

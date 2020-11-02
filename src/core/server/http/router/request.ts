@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Url } from 'url';
+import { URL } from 'url';
 import uuid from 'uuid';
 import { Request, RouteOptionsApp, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
@@ -45,7 +45,7 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
 export interface KibanaRequestState extends ApplicationState {
   requestId: string;
   requestUuid: string;
-  rewrittenUrl?: Url;
+  rewrittenUrl?: URL;
 }
 
 /**
@@ -163,7 +163,7 @@ export class KibanaRequest<
    */
   public readonly uuid: string;
   /** a WHATWG URL standard object. */
-  public readonly url: Url;
+  public readonly url: URL;
   /** matched route details */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
   /**
@@ -190,7 +190,7 @@ export class KibanaRequest<
   /**
    * URL rewritten in onPreRouting request interceptor.
    */
-  public readonly rewrittenUrl?: Url;
+  public readonly rewrittenUrl?: URL;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -212,7 +212,8 @@ export class KibanaRequest<
     this.uuid = appState?.requestUuid ?? uuid.v4();
     this.rewrittenUrl = appState?.rewrittenUrl;
 
-    this.url = request.url;
+    // @ts-expect-error request._core isn't supposed to be accessed - remove once we upgrade to hapi v18
+    this.url = new URL(request.url.href!, request._core.info.uri);
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest =
       request.headers['kbn-system-request'] === 'true' ||
@@ -304,8 +305,8 @@ export class KibanaRequest<
     if (authOptions === false) return false;
     throw new Error(
       `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
-        this.url.href
-      }`
+        this.url.pathname
+      }${this.url.search}`
     );
   }
 }
