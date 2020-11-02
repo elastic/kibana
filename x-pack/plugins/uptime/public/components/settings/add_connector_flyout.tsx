@@ -71,10 +71,9 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
           capabilities: application?.capabilities,
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-        />
+        {addFlyoutVisible ? (
+          <ConnectorAddFlyout onClose={() => setAddFlyoutVisibility(false)} />
+        ) : null}
       </ActionsConnectorsContextProvider>
     </>
   );
