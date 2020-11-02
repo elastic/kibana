@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { act } from 'react-dom/test-utils';
 
 import { getRouter } from '../../../public/application/services';
@@ -15,12 +16,7 @@ import { setupEnvironment, nextTick, getRandomString, findTestSubject } from '..
 import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList />', () => {
-  let server;
-  let httpRequestsMockHelpers;
-
-  beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
     server.restore();
@@ -43,14 +39,13 @@ describe('<RemoteClusterList />', () => {
   });
 
   describe('when there are no remote clusters', () => {
+    let waitFor;
     let exists;
-    let component;
 
     beforeEach(async () => {
-      ({ exists, component } = setup());
+      ({ waitFor, exists } = setup());
 
-      // await nextTick(100); // We need to wait next tick for the mock server response to kick in
-      component.update();
+      await waitFor('remoteClusterListEmptyPrompt');
     });
 
     test('should display an empty prompt', async () => {
