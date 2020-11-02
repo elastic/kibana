@@ -13,3 +13,7 @@ export const requiredPackages = {
   System: 'system',
   Endpoint: 'endpoint',
 } as const;
+
+export const agentAssetTypes = {
+  Input: 'input',
+} as const;

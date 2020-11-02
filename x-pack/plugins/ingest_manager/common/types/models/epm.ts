@@ -7,7 +7,8 @@
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
-import { requiredPackages } from '../../constants';
+import { agentAssetTypes, requiredPackages } from '../../constants';
+import { ValueOf } from '../../types';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -27,7 +28,8 @@ export type EpmPackageInstallStatus = 'installed' | 'installing';
 
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
-export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
+export type AgentAssetType = typeof agentAssetTypes;
+export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType>;
 
 export enum KibanaAssetType {
   dashboard = 'dashboard',
@@ -48,10 +50,6 @@ export enum ElasticsearchAssetType {
 export enum DataType {
   logs = 'logs',
   metrics = 'metrics',
-}
-
-export enum AgentAssetType {
-  input = 'input',
 }
 
 export type RegistryRelease = 'ga' | 'beta' | 'experimental';
