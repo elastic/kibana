@@ -32,7 +32,6 @@ import { UI_SETTINGS } from '../../../../data/server';
 
 describe('es', () => {
   let tlConfig;
-  let dataSearchStub;
 
   function stubRequestAndServer(response, indexPatternSavedObjects = []) {
     return {
@@ -73,7 +72,7 @@ describe('es', () => {
 
       await invoke(es, [5], tlConfig);
 
-      expect(dataSearchStub.data.search.search.mock.calls[0][1]).toHaveProperty('sessionId', 1);
+      expect(tlConfig.context.search.search.mock.calls[0][1]).toHaveProperty('sessionId', 1);
     });
 
     test('returns a seriesList', () => {
