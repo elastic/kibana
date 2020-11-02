@@ -83,8 +83,10 @@ import {
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
+import { PlotByFunctionControls } from './components/plot_function_controls';
+import { getPlotByOptions, UNKNOWN_METRIC_PLOT_FUNCTION } from './get_plot_by_options';
+import { getToastNotificationService } from '../services/toast_notification_service';
 
-const UNKNOWN_METRIC_PLOT_FUNCTION = 'unknown';
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
 // obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
@@ -144,6 +146,7 @@ function getTimeseriesexplorerDefaultState() {
     zoomToFocusLoaded: undefined,
     // Sets function to plot by if original function is metric
     actualPlotFunction: undefined,
+    defaultFunctionToPlotIfMetric: undefined,
   };
 }
 
@@ -392,29 +395,18 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
-  loadPlotByOptions = async () => {
-    // only load the options to view chart by 'avg', 'min', or 'max'
-    // if the original function is 'metric'
+  getPlotByOptions = () => {
     const { selectedJobId, selectedDetectorIndex } = this.props;
-    const selectedJob = mlJobService.getJob(selectedJobId);
-
-    if (selectedJob === undefined) return;
-
-    const detectors = selectedJob.analysis_config.detectors;
-
-    if (detectors && detectors[selectedDetectorIndex]?.function) {
-      if (detectors[selectedDetectorIndex]?.function === 'metric') {
-        if (this.state.actualPlotFunction === undefined) {
-          // here we just know the detector is a metric function, but we don't know what to plot yet
-          // need to find the highest scoring anomaly record in order to pick the default view
-          this.setState({ actualPlotFunction: UNKNOWN_METRIC_PLOT_FUNCTION });
-        }
-      } else {
-        this.setState({ actualPlotFunction: undefined });
-      }
-    }
+    const { actualPlotFunction, defaultFunctionToPlotIfMetric } = this.state;
+    this.setPlotByFunction(
+      getPlotByOptions(
+        selectedJobId,
+        selectedDetectorIndex,
+        actualPlotFunction,
+        defaultFunctionToPlotIfMetric
+      )
+    );
   };
-
   /**
    * Loads available entity values.
    * @param {Array} entities - Entity controls configuration
@@ -805,13 +797,19 @@ export class TimeSeriesExplorer extends React.Component {
         .then((resp) => {
           if (Array.isArray(resp?.records) && resp.records.length === 1) {
             const highestScoringAnomaly = resp.records[0];
-            this.setState({ actualPlotFunction: highestScoringAnomaly.function_description });
+            const defaultFunctionToPlotIfMetric = mlFunctionToESAggregation(
+              highestScoringAnomaly?.function_description
+            );
+            this.setState({ defaultFunctionToPlotIfMetric });
+            this.setPlotByFunction(defaultFunctionToPlotIfMetric);
           }
         })
-        .catch((resp) => {
-          console.log(
-            'Time series explorer - error getting record with highest anomaly score:',
-            resp
+        .catch((error) => {
+          getToastNotificationService().displayErrorToast(
+            error,
+            i18n.translate('xpack.ml.timeSeriesExplorer.highestAnomalyScoreErrorToastTitle', {
+              defaultMessage: 'An error occurred getting record with the highest anomaly score',
+            })
           );
         });
     } else {
@@ -956,7 +954,7 @@ export class TimeSeriesExplorer extends React.Component {
     ) {
       const entityControls = this.getControlsForDetector();
       this.loadEntityValues(entityControls);
-      this.loadPlotByOptions();
+      this.getPlotByOptions();
     }
 
     if (
@@ -1143,6 +1141,13 @@ export class TimeSeriesExplorer extends React.Component {
           selectedEntities={this.props.selectedEntities}
           bounds={bounds}
         >
+          {actualPlotFunction && (
+            <PlotByFunctionControls
+              actualPlotFunction={actualPlotFunction}
+              setPlotByFunction={this.setPlotByFunction}
+            />
+          )}
+
           {arePartitioningFieldsProvided && (
             <EuiFlexItem style={{ textAlign: 'right' }}>
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
@@ -1157,7 +1162,6 @@ export class TimeSeriesExplorer extends React.Component {
             </EuiFlexItem>
           )}
         </SeriesControls>
-
         <EuiSpacer size="m" />
 
         {fullRefresh && loading === true && (
