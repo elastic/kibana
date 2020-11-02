@@ -15,6 +15,7 @@ import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
+import { featuresPluginMock } from '../../../../../../features/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -49,6 +50,8 @@ describe('actions_connectors_list component empty', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
+
     const deps = {
       chrome,
       docLinks,
@@ -69,8 +72,9 @@ describe('actions_connectors_list component empty', () => {
       },
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       alertTypeRegistry: {} as any,
+      kibanaFeatures,
     };
     actionTypeRegistry.has.mockReturnValue(true);
 
@@ -156,6 +160,8 @@ describe('actions_connectors_list component with items', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
+
     const deps = {
       chrome,
       docLinks,
@@ -182,6 +188,7 @@ describe('actions_connectors_list component with items', () => {
         },
       } as any,
       alertTypeRegistry: {} as any,
+      kibanaFeatures,
     };
 
     wrapper = mountWithIntl(
@@ -244,6 +251,8 @@ describe('actions_connectors_list component empty with show only capability', ()
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
+
     const deps = {
       chrome,
       docLinks,
@@ -270,6 +279,7 @@ describe('actions_connectors_list component empty with show only capability', ()
         },
       } as any,
       alertTypeRegistry: {} as any,
+      kibanaFeatures,
     };
 
     wrapper = mountWithIntl(
@@ -333,6 +343,8 @@ describe('actions_connectors_list with show only capability', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
+
     const deps = {
       chrome,
       docLinks,
@@ -359,6 +371,7 @@ describe('actions_connectors_list with show only capability', () => {
         },
       } as any,
       alertTypeRegistry: {} as any,
+      kibanaFeatures,
     };
 
     wrapper = mountWithIntl(
@@ -434,6 +447,8 @@ describe('actions_connectors_list component with disabled items', () => {
         application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
+    const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
+
     const deps = {
       chrome,
       docLinks,
@@ -460,6 +475,7 @@ describe('actions_connectors_list component with disabled items', () => {
         },
       } as any,
       alertTypeRegistry: {} as any,
+      kibanaFeatures,
     };
 
     wrapper = mountWithIntl(
