@@ -180,7 +180,7 @@ export const SeverityField = ({
   }, [handleSeverityMappingChecked, isDisabled, isMappingChecked]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction={'column'}>
       <EuiFlexItem>
         <EuiFormRow
           label={severityLabel}
@@ -204,7 +204,7 @@ export const SeverityField = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <SeverityMappingEuiFormRow
+        <EuiFormRow
           label={severityMappingLabel}
           labelAppend={field.labelAppend}
           helpText={
@@ -301,7 +301,7 @@ export const SeverityField = ({
               </EuiFlexGroup>
             )}
           </NestedContent>
-        </SeverityMappingEuiFormRow>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
