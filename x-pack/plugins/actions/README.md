@@ -1,4 +1,3 @@
-# Kibana Actions
 
 The Kibana actions plugin provides a framework to create executable actions. You can:
 
@@ -14,31 +13,6 @@ The Kibana actions plugin provides a framework to create executable actions. You
 
 Table of Contents
 
-- [Kibana Actions](#kibana-actions)
-  - [Terminology](#terminology)
-  - [Usage](#usage)
-  - [Kibana Actions Configuration](#kibana-actions-configuration)
-    - [Configuration Options](#configuration-options)
-      - [Adding Built-in Action Types to allowedHosts](#adding-built-in-action-types-to-allowedhosts)
-    - [Configuration Utilities](#configuration-utilities)
-  - [Action types](#action-types)
-    - [Methods](#methods)
-    - [Executor](#executor)
-    - [Example](#example)
-  - [RESTful API](#restful-api)
-    - [`POST /api/actions/action`: Create action](#post-apiactionsaction-create-action)
-    - [`DELETE /api/actions/action/{id}`: Delete action](#delete-apiactionsactionid-delete-action)
-    - [`GET /api/actions`: Get all actions](#get-apiactions-get-all-actions)
-    - [`GET /api/actions/action/{id}`: Get action](#get-apiactionsactionid-get-action)
-    - [`GET /api/actions/list_action_types`: List action types](#get-apiactionslist_action_types-list-action-types)
-    - [`PUT /api/actions/action/{id}`: Update action](#put-apiactionsactionid-update-action)
-    - [`POST /api/actions/action/{id}/_execute`: Execute action](#post-apiactionsactionid_execute-execute-action)
-  - [Firing actions](#firing-actions)
-  - [Accessing a scoped ActionsClient](#accessing-a-scoped-actionsclient)
-    - [actionsClient.enqueueExecution(options)](#actionsclientenqueueexecutionoptions)
-  - [Example](#example-1)
-    - [actionsClient.execute(options)](#actionsclientexecuteoptions)
-  - [Example](#example-2)
 - [Built-in Action Types](#built-in-action-types)
   - [Server log](#server-log)
     - [`config`](#config)
@@ -81,6 +55,15 @@ Table of Contents
     - [`secrets`](#secrets-8)
     - [`params`](#params-8)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+  - [Case](#case)
+    - [`config`](#config-9)
+    - [`secrets`](#secrets-9)
+    - [`params`](#params-9)
+      - [`subActionParams (create)`](#subactionparams-create)
+      - [`subActionParams (update)`](#subactionparams-update)
+      - [`subActionParams (addComment)`](#subactionparams-addcomment)
+      - [`connector`](#connector)
+      - [`fields`](#fields)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -669,6 +652,91 @@ ID: `.resilient`
 | externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 | incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
 | severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
+
+## Case 
+
+ID: `.case`
+
+The params properties are modelled after the arguments to the [Cases API](https://www.elastic.co/guide/en/security/master/cases-api-overview.html).
+
+### `config`
+
+This action has no `config` properties.
+
+### `secrets`
+
+This action type has no `secrets` properties.
+
+### `params`
+
+| Property        | Description                                                               | Type   |
+| --------------- | ------------------------------------------------------------------------- | ------ |
+| subAction       | The sub action to perform. It can be `create`, `update`, and `addComment` | string |
+| subActionParams | The parameters of the sub action                                          | object |
+
+#### `subActionParams (create)`
+
+| Property    | Description                                                           | Type                    |
+| ----------- | --------------------------------------------------------------------- | ----------------------- |
+| tile        | The case’s title.                                                     | string                  |
+| description | The case’s description.                                               | string                  |
+| tags        | String array containing words and phrases that help categorize cases. | string[]                |
+| connector   | Object containing the connector’s configuration.                      | [connector](#connector) |
+
+#### `subActionParams (update)`
+
+| Property    | Description                                                | Type                    |
+| ----------- | ---------------------------------------------------------- | ----------------------- |
+| id          | The ID of the case being updated.                          | string                  |
+| tile        | The updated case title.                                    | string                  |
+| description | The updated case description.                              | string                  |
+| tags        | The updated case tags.                                     | string                  |
+| connector   | Object containing the connector’s configuration.           | [connector](#connector) |
+| status      | The updated case status, which can be: `open` or `closed`. | string                  |
+| version     | The current case version.                                  | string                  |
+
+#### `subActionParams (addComment)`
+
+| Property | Description                                               | Type   |
+| -------- | --------------------------------------------------------- | ------ |
+| comment  | The case’s new comment.                                   | string |
+| type     | The type of the comment, which can be: `user` or `alert`. | string |
+
+#### `connector`
+
+| Property | Description                                                                                       | Type              |
+| -------- | ------------------------------------------------------------------------------------------------- | ----------------- |
+| id       | ID of the connector used for pushing case updates to external systems.                            | string            |
+| name     | The connector name.                                                                               | string            |
+| type     | The type of the connector. Must be one of these: `.servicenow`, `jira`, `.resilient`, and `.none` | string            |
+| fields   | Object containing the connector’s fields.                                                         | [fields](#fields) |
+
+#### `fields`
+
+For ServiceNow connectors:
+
+| Property | Description                   | Type   |
+| -------- | ----------------------------- | ------ |
+| urgency  | The urgency of the incident.  | string |
+| severity | The severity of the incident. | string |
+| impact   | The impact of the incident.   | string |
+
+For Jira connectors:
+
+| Property  | Description                                                          | Type   |
+| --------- | -------------------------------------------------------------------- | ------ |
+| issueType | The issue type of the issue.                                         | string |
+| priority  | The priority of the issue.                                           | string |
+| parent    | The key of the parent issue (Valid when the issue type is Sub-task). | string |
+
+For IBM Resilient connectors:
+
+| Property     | Description                     | Type     |
+| ------------ | ------------------------------- | -------- |
+| issueTypes   | The issue types of the issue.   | string[] |
+| severityCode | The severity code of the issue. | string   |
+
+---
 
 # Command Line Utility
 
