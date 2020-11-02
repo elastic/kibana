@@ -17,27 +17,13 @@
  * under the License.
  */
 
-import './table_vis_cell.scss';
-import React, { useCallback } from 'react';
-import {
-  EuiDataGridCellValueElementProps,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
 import { FormattedColumn } from '../types';
 
-export const createTableVisCell = (
-  table: Table,
-  formattedColumns: FormattedColumn[],
-  rows: Table['rows'],
-  fireEvent: IInterpreterRenderHandlers['event']
-) => ({
+export const createTableVisCell = (formattedColumns: FormattedColumn[], rows: Table['rows']) => ({
   // @ts-expect-error
   colIndex,
   rowIndex,
@@ -45,7 +31,6 @@ export const createTableVisCell = (
 }: EuiDataGridCellValueElementProps) => {
   const rowValue = rows[rowIndex][columnId];
   const column = formattedColumns[colIndex];
-  const contentsIsDefined = rowValue !== null && rowValue !== undefined;
   const content = column?.formatter?.convert(rowValue, 'html') || (rowValue as string) || '';
 
   const cellContent = (
@@ -59,68 +44,6 @@ export const createTableVisCell = (
       data-test-subj="tbvChartCellContent"
     />
   );
-
-  const onFilterClick = useCallback(
-    (negate: boolean) => {
-      fireEvent({
-        name: 'filterBucket',
-        data: {
-          data: [
-            {
-              table,
-              row: rowIndex,
-              column: colIndex,
-              value: rowValue,
-            },
-          ],
-          negate,
-        },
-      });
-    },
-    [colIndex, rowIndex, rowValue]
-  );
-
-  if (column?.filterable && contentsIsDefined) {
-    const filterForToolTipText = i18n.translate(
-      'visTypeTable.tableCellFilter.filterForValueTooltip',
-      {
-        defaultMessage: 'Filter for value',
-      }
-    );
-    const filterOutToolTipText = i18n.translate(
-      'visTypeTable.tableCellFilter.filterOutValueTooltip',
-      {
-        defaultMessage: 'Filter out value',
-      }
-    );
-
-    return (
-      <EuiFlexGroup className="tbvChartCell__filterable" gutterSize="s" alignItems="center">
-        <EuiFlexItem>{cellContent}</EuiFlexItem>
-
-        <EuiFlexItem className="tbvChartCellFilter" grow={false}>
-          <EuiToolTip content={filterForToolTipText}>
-            <EuiButtonIcon
-              aria-label={filterForToolTipText}
-              data-test-subj="tbvChartCell__filterForCellValue"
-              onClick={() => onFilterClick(false)}
-              iconType="magnifyWithPlus"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-
-        <EuiFlexItem className="tbvChartCellFilter" grow={false}>
-          <EuiToolTip content={filterOutToolTipText}>
-            <EuiButtonIcon
-              aria-label={filterOutToolTipText}
-              onClick={() => onFilterClick(true)}
-              iconType="magnifyWithMinus"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
 
   return cellContent;
 };

@@ -19,7 +19,6 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDataGrid, EuiDataGridSorting } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
@@ -27,6 +26,7 @@ import { Table } from '../table_vis_response_handler';
 import { TableVisConfig, TableVisUiState } from '../types';
 import { useFormattedColumnsAndRows, usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
+import { createGridColumns } from './table_vis_columns';
 
 interface TableVisBasicProps {
   fireEvent: IInterpreterRenderHandlers['event'];
@@ -39,7 +39,8 @@ interface TableVisBasicProps {
 export const TableVisBasic = memo(
   ({ fireEvent, setSort, sort, table, visConfig }: TableVisBasicProps) => {
     const { columns, rows, splitRow } = useFormattedColumnsAndRows(table, visConfig);
-    const renderCellValue = useMemo(() => createTableVisCell(table, columns, rows, fireEvent), [
+    const renderCellValue = useMemo(() => createTableVisCell(columns, rows), [columns, rows]);
+    const gridColumns = useMemo(() => createGridColumns(table, columns, rows, fireEvent), [
       table,
       columns,
       rows,
@@ -74,26 +75,7 @@ export const TableVisBasic = memo(
     return (
       <EuiDataGrid
         aria-label=""
-        columns={columns.map((col) => ({
-          id: col.id,
-          display: col.title,
-          displayAsText: col.title,
-          actions: {
-            showHide: false,
-            showMoveLeft: false,
-            showMoveRight: false,
-            showSortAsc: {
-              label: i18n.translate('visTypeTable.sort.ascLabel', {
-                defaultMessage: 'Sort asc',
-              }),
-            },
-            showSortDesc: {
-              label: i18n.translate('visTypeTable.sort.descLabel', {
-                defaultMessage: 'Sort desc',
-              }),
-            },
-          },
-        }))}
+        columns={gridColumns}
         gridStyle={{
           border: 'horizontal',
           header: 'underline',
