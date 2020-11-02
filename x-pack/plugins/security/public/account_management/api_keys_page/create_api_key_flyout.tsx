@@ -29,7 +29,7 @@ export interface FormValues {
   name: string;
   expiration: string;
   customExpiration: boolean;
-  customPriviliges: boolean;
+  customPrivileges: boolean;
   role_descriptors: string;
 }
 
