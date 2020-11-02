@@ -20,10 +20,6 @@ interface State {
   annotation: Annotation | null;
 }
 
-export interface TimeseriesChart extends React.Component<Props, State> {
-  focusXScale: d3.scale.Ordinal<{}, number>;
-}
-
 interface TimeseriesChartProps {
   annotation: object;
   autoZoomDuration: number;
@@ -49,4 +45,8 @@ interface TimeseriesChartProps {
   zoomFromFocusLoaded: object;
   zoomToFocusLoaded: object;
   tooltipService: object;
+}
+
+declare class TimeseriesChart extends React.Component<Props, any> {
+  focusXScale: d3.scale.Ordinal<{}, number>;
 }
