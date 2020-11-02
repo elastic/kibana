@@ -13,7 +13,6 @@ import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
@@ -234,32 +233,36 @@ export interface ChromeHelpExtension {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
-    linkType: 'custom';
+export type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' | 'target' | 'rel' | 'data-test-subj'>;
+
+// @public (undocumented)
+export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
     content: React.ReactNode;
-};
+    href: string;
+    linkType: 'custom';
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'discuss';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'documentation';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
-    linkType: 'github';
+export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase {
     labels: string[];
+    linkType: 'github';
     title?: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
+export type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;
 
 // @public (undocumented)
 export interface ChromeNavControl {

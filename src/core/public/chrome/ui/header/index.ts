@@ -20,6 +20,7 @@
 export { Header, HeaderProps } from './header';
 export { OnIsLockedUpdate, NavType } from './types';
 export {
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,

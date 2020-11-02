@@ -28,7 +28,6 @@ import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
 import React, { Component, Fragment } from 'react';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -35,14 +35,20 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { ExclusiveUnion } from '@elastic/eui';
-import { combineLatest } from 'rxjs';
-import { HeaderExtension } from './header_extension';
-import { ChromeHelpExtension } from '../../chrome_service';
+import { InternalApplicationStart } from '../../../application';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
+import { ChromeHelpExtension } from '../../chrome_service';
+import { HeaderExtension } from './header_extension';
+import { isModifiedOrPrevented } from './nav_link';
 
 /** @public */
-export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
+export type ChromeHelpExtensionLinkBase = Pick<
+  EuiButtonEmptyProps,
+  'iconType' | 'target' | 'rel' | 'data-test-subj'
+>;
+
+/** @public */
+export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase {
   /**
    * Creates a link to a new github issue in the Kibana repo
    */
@@ -55,10 +61,10 @@ export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
    * Provides initial text for the title of the issue
    */
   title?: string;
-};
+}
 
 /** @public */
-export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase {
   /**
    * Creates a generic give feedback link with comment icon
    */
@@ -68,10 +74,10 @@ export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
    * i.e. `https://discuss.elastic.co/c/${appName}`
    */
   href: string;
-};
+}
 
 /** @public */
-export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase {
   /**
    * Creates a deep-link to app-specific documentation
    */
@@ -81,35 +87,36 @@ export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
    * i.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
    */
   href: string;
-};
+}
 
 /** @public */
-export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
   /**
    * Extend EuiButtonEmpty to provide extra functionality
    */
   linkType: 'custom';
   /**
+   * URL of the link
+   */
+  href: string;
+  /**
    * Content of the button (in lieu of `children`)
    */
   content: React.ReactNode;
-};
+}
 
 /** @public */
-export type ChromeHelpExtensionMenuLink = ExclusiveUnion<
-  ChromeHelpExtensionMenuGitHubLink,
-  ExclusiveUnion<
-    ChromeHelpExtensionMenuDiscussLink,
-    ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>
-  >
->;
+export type ChromeHelpExtensionMenuLink =
+  | ChromeHelpExtensionMenuGitHubLink
+  | ChromeHelpExtensionMenuDiscussLink
+  | ChromeHelpExtensionMenuDocumentationLink
+  | ChromeHelpExtensionMenuCustomLink;
 
 interface Props {
-  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
-  helpSupportUrl$: Rx.Observable<string>;
-  intl: InjectedIntl;
+  navigateToUrl: InternalApplicationStart['navigateToUrl'];
+  helpExtension$: Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Observable<string>;
   kibanaVersion: string;
-  useDefaultContent?: boolean;
   kibanaDocLink: string;
 }
 
@@ -119,8 +126,8 @@ interface State {
   helpSupportUrl: string;
 }
 
-class HeaderHelpMenuUI extends Component<Props, State> {
-  private subscription?: Rx.Subscription;
+export class HeaderHelpMenu extends Component<Props, State> {
+  private subscription?: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -151,158 +158,17 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     }
   }
 
-  createGithubUrl = (labels: string[], title?: string) => {
-    const url = new URL('https://github.com/elastic/kibana/issues/new?');
-
-    if (labels.length) {
-      url.searchParams.set('labels', labels.join(','));
-    }
-
-    if (title) {
-      url.searchParams.set('title', title);
-    }
-
-    return url.toString();
-  };
-
-  createCustomLink = (
-    index: number,
-    text: React.ReactNode,
-    addSpacer?: boolean,
-    buttonProps?: EuiButtonEmptyProps
-  ) => {
-    return (
-      <Fragment key={`helpButton${index}`}>
-        <EuiButtonEmpty {...buttonProps} size="xs" flush="left">
-          {text}
-        </EuiButtonEmpty>
-        {addSpacer && <EuiSpacer size="xs" />}
-      </Fragment>
-    );
-  };
-
   public render() {
-    const { intl, kibanaVersion, useDefaultContent, kibanaDocLink } = this.props;
-    const { helpExtension, helpSupportUrl } = this.state;
+    const { kibanaVersion } = this.props;
 
-    const defaultContent = useDefaultContent ? (
-      <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-            defaultMessage="Kibana documentation"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-            defaultMessage="Ask Elastic"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
-            defaultMessage="Give feedback"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty
-          href={GITHUB_CREATE_ISSUE_LINK}
-          target="_blank"
-          size="xs"
-          iconType="logoGithub"
-          flush="left"
-        >
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
-            defaultMessage="Open an issue in GitHub"
-          />
-        </EuiButtonEmpty>
-      </Fragment>
-    ) : null;
-
-    let customContent;
-    if (helpExtension) {
-      const { appName, links, content } = helpExtension;
-
-      const getFeedbackText = () =>
-        i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackOnApp', {
-          defaultMessage: 'Give feedback on {appName}',
-          values: { appName: helpExtension.appName },
-        });
-
-      const customLinks =
-        links &&
-        links.map((link, index) => {
-          const { linkType, title, labels = [], content: text, ...rest } = link;
-          switch (linkType) {
-            case 'documentation':
-              return this.createCustomLink(
-                index,
-                <FormattedMessage
-                  id="core.ui.chrome.headerGlobalNav.helpMenuDocumentation"
-                  defaultMessage="Documentation"
-                />,
-                index < links.length - 1,
-                {
-                  target: '_blank',
-                  rel: 'noopener',
-                  ...rest,
-                }
-              );
-            case 'github':
-              return this.createCustomLink(index, getFeedbackText(), index < links.length - 1, {
-                iconType: 'logoGithub',
-                href: this.createGithubUrl(labels, title),
-                target: '_blank',
-                rel: 'noopener',
-                ...rest,
-              });
-            case 'discuss':
-              return this.createCustomLink(index, getFeedbackText(), index < links.length - 1, {
-                iconType: 'editorComment',
-                target: '_blank',
-                rel: 'noopener',
-                ...rest,
-              });
-            case 'custom':
-              return this.createCustomLink(index, text, index < links.length - 1, { ...rest });
-            default:
-              break;
-          }
-        });
-
-      customContent = (
-        <>
-          <EuiTitle size="xxs">
-            <h3>{appName}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {customLinks}
-          {content && (
-            <>
-              {customLinks && <EuiSpacer size="s" />}
-              <HeaderExtension extension={content} />
-            </>
-          )}
-        </>
-      );
-    }
+    const defaultContent = this.renderDefaultContent();
+    const customContent = this.renderCustomContent();
 
     const button = (
       <EuiHeaderSectionItemButton
         aria-expanded={this.state.isOpen}
         aria-haspopup="true"
-        aria-label={intl.formatMessage({
-          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel', {
           defaultMessage: 'Help menu',
         })}
         onClick={this.onMenuButtonClick}
@@ -351,6 +217,139 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     );
   }
 
+  private renderDefaultContent() {
+    const { kibanaDocLink } = this.props;
+    const { helpSupportUrl } = this.state;
+
+    return (
+      <Fragment>
+        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs" flush="left">
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
+            defaultMessage="Kibana documentation"
+          />
+        </EuiButtonEmpty>
+
+        <EuiSpacer size="xs" />
+
+        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
+            defaultMessage="Ask Elastic"
+          />
+        </EuiButtonEmpty>
+
+        <EuiSpacer size="xs" />
+
+        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
+            defaultMessage="Give feedback"
+          />
+        </EuiButtonEmpty>
+
+        <EuiSpacer size="xs" />
+
+        <EuiButtonEmpty
+          href={GITHUB_CREATE_ISSUE_LINK}
+          target="_blank"
+          size="xs"
+          iconType="logoGithub"
+          flush="left"
+        >
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
+            defaultMessage="Open an issue in GitHub"
+          />
+        </EuiButtonEmpty>
+      </Fragment>
+    );
+  }
+
+  private renderCustomContent() {
+    const { helpExtension } = this.state;
+    if (!helpExtension) {
+      return null;
+    }
+    const { navigateToUrl } = this.props;
+    const { appName, links, content } = helpExtension;
+
+    const getFeedbackText = () =>
+      i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackOnApp', {
+        defaultMessage: 'Give feedback on {appName}',
+        values: { appName: helpExtension.appName },
+      });
+
+    const customLinks =
+      links &&
+      links.map((link, index) => {
+        const addSpacer = index < links.length - 1;
+        switch (link.linkType) {
+          case 'documentation': {
+            const { linkType, ...rest } = link;
+            return createCustomLink(
+              index,
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuDocumentation"
+                defaultMessage="Documentation"
+              />,
+              addSpacer,
+              {
+                target: '_blank',
+                rel: 'noopener',
+                ...rest,
+              }
+            );
+          }
+          case 'github': {
+            const { linkType, labels, title, ...rest } = link;
+            return createCustomLink(index, getFeedbackText(), addSpacer, {
+              iconType: 'logoGithub',
+              href: createGithubUrl(labels, title),
+              target: '_blank',
+              rel: 'noopener',
+              ...rest,
+            });
+          }
+          case 'discuss': {
+            const { linkType, ...rest } = link;
+            return createCustomLink(index, getFeedbackText(), addSpacer, {
+              iconType: 'editorComment',
+              target: '_blank',
+              rel: 'noopener',
+              ...rest,
+            });
+          }
+          case 'custom': {
+            const { linkType, content: text, href, ...rest } = link;
+            return createCustomLink(index, text, addSpacer, {
+              href,
+              onClick: this.createOnClickHandler(href, navigateToUrl),
+              ...rest,
+            });
+          }
+          default:
+            break;
+        }
+      });
+
+    return (
+      <>
+        <EuiTitle size="xxs">
+          <h3>{appName}</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        {customLinks}
+        {content && (
+          <>
+            {customLinks && <EuiSpacer size="s" />}
+            <HeaderExtension extension={content} />
+          </>
+        )}
+      </>
+    );
+  }
+
   private onMenuButtonClick = () => {
     this.setState({
       isOpen: !this.state.isOpen,
@@ -362,10 +361,44 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       isOpen: false,
     });
   };
+
+  private createOnClickHandler(href: string, navigate: Props['navigateToUrl']) {
+    return (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      if (!isModifiedOrPrevented(event) && event.button === 0) {
+        event.preventDefault();
+        this.closeMenu();
+        navigate(href);
+      }
+    };
+  }
 }
 
-export const HeaderHelpMenu = injectI18n(HeaderHelpMenuUI);
+const createGithubUrl = (labels: string[], title?: string) => {
+  const url = new URL('https://github.com/elastic/kibana/issues/new?');
 
-HeaderHelpMenu.defaultProps = {
-  useDefaultContent: true,
+  if (labels.length) {
+    url.searchParams.set('labels', labels.join(','));
+  }
+
+  if (title) {
+    url.searchParams.set('title', title);
+  }
+
+  return url.toString();
+};
+
+const createCustomLink = (
+  index: number,
+  text: React.ReactNode,
+  addSpacer?: boolean,
+  buttonProps?: EuiButtonEmptyProps
+) => {
+  return (
+    <Fragment key={`helpButton${index}`}>
+      <EuiButtonEmpty {...buttonProps} size="xs" flush="left">
+        {text}
+      </EuiButtonEmpty>
+      {addSpacer && <EuiSpacer size="xs" />}
+    </Fragment>
+  );
 };
