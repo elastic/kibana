@@ -19,7 +19,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import reactCSS from 'reactcss';
 
 import { startsWith, get, cloneDeep, map } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
@@ -150,13 +149,6 @@ export class TimeseriesVisualization extends Component {
 
   render() {
     const { model, visData, onBrush } = this.props;
-    const styles = reactCSS({
-      default: {
-        tvbVis: {
-          borderColor: get(model, 'background_color'),
-        },
-      },
-    });
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -231,7 +223,7 @@ export class TimeseriesVisualization extends Component {
     });
 
     return (
-      <div className="tvbVis" style={styles.tvbVis}>
+      <div className="tvbVis">
         <TimeSeries
           series={series}
           yAxis={yAxis}
