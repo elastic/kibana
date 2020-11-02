@@ -42,7 +42,7 @@ interface CpuUsageParams {
 export class CpuUsageAlert extends BaseAlert {
   public type = ALERT_CPU_USAGE;
   public label = ALERT_DETAILS[ALERT_CPU_USAGE].label;
- public description = ALERT_DETAILS[ALERT_CPU_USAGE].description;
+  public description = ALERT_DETAILS[ALERT_CPU_USAGE].description;
 
   protected defaultParams: CpuUsageParams = {
     threshold: 85,

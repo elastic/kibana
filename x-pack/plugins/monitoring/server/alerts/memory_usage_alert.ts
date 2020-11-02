@@ -35,7 +35,7 @@ import { parseDuration } from '../../../alerts/common/parse_duration';
 export class MemoryUsageAlert extends BaseAlert {
   public type = ALERT_MEMORY_USAGE;
   public label = ALERT_DETAILS[ALERT_MEMORY_USAGE].label;
- public description = ALERT_DETAILS[ALERT_MEMORY_USAGE].description;
+  public description = ALERT_DETAILS[ALERT_MEMORY_USAGE].description;
 
   protected defaultParams = {
     threshold: 85,
