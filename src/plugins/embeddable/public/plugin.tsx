@@ -294,7 +294,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     const enhancements: SerializableState = (state.enhancements as SerializableState) || {};
     const factory = this.getEmbeddableFactory(state.type as string);
 
-    let updatedInput = baseEmbeddableMigrations[version](state);
+    let updatedInput = baseEmbeddableMigrations[version]
+      ? baseEmbeddableMigrations[version](state)
+      : state;
 
     if (factory && factory.migrations[version]) {
       updatedInput = factory.migrations[version](updatedInput);

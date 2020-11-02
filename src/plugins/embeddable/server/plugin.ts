@@ -135,7 +135,9 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
     const enhancements = state.enhancements || {};
     const factory = this.getEmbeddableFactory(state.id);
 
-    let updatedInput = baseEmbeddableMigrations[version](state);
+    let updatedInput = baseEmbeddableMigrations[version]
+      ? baseEmbeddableMigrations[version](state)
+      : state;
 
     if (factory && factory.migrations[version]) {
       updatedInput = factory.migrations[version](updatedInput);

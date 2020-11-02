@@ -112,6 +112,7 @@ describe('embeddable factory', () => {
   } as any;
   const embeddableState = {
     id: embeddableFactoryId,
+    type: embeddableFactoryId,
     my: 'state',
   } as any;
 
