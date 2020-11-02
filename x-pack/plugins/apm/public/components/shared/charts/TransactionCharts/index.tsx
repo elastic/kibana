@@ -37,11 +37,13 @@ import { useFormatter } from './use_formatter';
 interface TransactionChartProps {
   charts: ITransactionChartData;
   urlParams: IUrlParams;
+  isLoading: boolean;
 }
 
 export function TransactionCharts({
   charts,
   urlParams,
+  isLoading,
 }: TransactionChartProps) {
   const getTPMFormatter = (t: number) => {
     return `${asDecimal(t)} ${tpmUnit(urlParams.transactionType)}`;
@@ -79,9 +81,10 @@ export function TransactionCharts({
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
               <LineChart
+                isLoading={isLoading}
                 id="transactionDuration"
                 timeseries={responseTimeSeries}
-                tickFormatY={getResponseTimeTickFormatter(formatter)}
+                yLabelFormat={getResponseTimeTickFormatter(formatter)}
                 onToggleLegend={(serie) => {
                   if (serie) {
                     toggleSerie(serie);
@@ -97,9 +100,10 @@ export function TransactionCharts({
                 <span>{tpmLabel(transactionType)}</span>
               </EuiTitle>
               <LineChart
+                isLoading={isLoading}
                 id="requestPerMinutes"
                 timeseries={tpmSeries}
-                tickFormatY={getTPMTooltipFormatter}
+                yLabelFormat={getTPMTooltipFormatter}
               />
             </EuiPanel>
           </EuiFlexItem>

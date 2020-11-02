@@ -39,7 +39,7 @@ interface Props {
   /**
    * Formatter for legend and tooltip values
    */
-  yTickFormat: (y: number) => string;
+  yTickFormat?: (y: number) => string;
 }
 
 const XY_HEIGHT = unit * 16;
@@ -116,7 +116,7 @@ export function LineChart({
           id="y-axis"
           ticks={3}
           position={Position.Left}
-          tickFormat={yTickFormat}
+          tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
           showGridLines
         />

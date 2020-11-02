@@ -38,6 +38,7 @@ import { useRedirect } from './useRedirect';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { UserExperienceCallout } from './user_experience_callout';
 import { Correlations } from '../Correlations';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 function getRedirectLocation({
   urlParams,
@@ -83,7 +84,10 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     })
   );
 
-  const { data: transactionCharts } = useTransactionCharts();
+  const {
+    data: transactionCharts,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
 
   useTrackPageview({ app: 'apm', path: 'transaction_overview' });
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
@@ -137,6 +141,11 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           )}
           <ChartsSyncContextProvider>
             <TransactionCharts
+              isLoading={
+                (transactionChartsStatus === FETCH_STATUS.LOADING ||
+                  transactionChartsStatus === FETCH_STATUS.PENDING) &&
+                !transactionListData.items
+              }
               charts={transactionCharts}
               urlParams={urlParams}
             />
@@ -190,7 +199,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
             <EuiSpacer size="s" />
             <TransactionList
               isLoading={transactionListStatus === 'loading'}
-              items={transactionListData.items}
+              items={transactionListData.items || []}
             />
           </EuiPanel>
         </EuiFlexItem>

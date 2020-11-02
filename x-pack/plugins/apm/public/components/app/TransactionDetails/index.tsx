@@ -52,7 +52,10 @@ export function TransactionDetails({
     status: distributionStatus,
   } = useTransactionDistribution(urlParams);
 
-  const { data: transactionChartsData } = useTransactionCharts();
+  const {
+    data: transactionChartsData,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
@@ -121,6 +124,11 @@ export function TransactionDetails({
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
             <TransactionCharts
+              isLoading={
+                (transactionChartsStatus === FETCH_STATUS.LOADING ||
+                  transactionChartsStatus === FETCH_STATUS.PENDING) &&
+                !transactionChartsData
+              }
               charts={transactionChartsData}
               urlParams={urlParams}
             />
