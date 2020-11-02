@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { History } from 'history';
-import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -92,20 +92,24 @@ export const getTableColumns = (
       defaultMessage: 'Title',
     }),
     sortable: true,
-    render: (field: string, { editApp, editUrl, title }: VisualizationListItem) => (
-      <EuiLink
-        onClick={() => {
-          if (editApp) {
-            application.navigateToApp(editApp, { path: editUrl });
-          } else if (editUrl) {
-            history.push(editUrl);
-          }
-        }}
-        data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
-      >
-        {field}
-      </EuiLink>
-    ),
+    render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) =>
+      // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
+      !error ? (
+        <EuiLink
+          onClick={() => {
+            if (editApp) {
+              application.navigateToApp(editApp, { path: editUrl });
+            } else if (editUrl) {
+              history.push(editUrl);
+            }
+          }}
+          data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
+        >
+          {field}
+        </EuiLink>
+      ) : (
+        field
+      ),
   },
   {
     field: 'typeTitle',
@@ -113,13 +117,18 @@ export const getTableColumns = (
       defaultMessage: 'Type',
     }),
     sortable: true,
-    render: (field: string, record: VisualizationListItem) => (
-      <span>
-        {renderItemTypeIcon(record)}
-        {record.typeTitle}
-        {getBadge(record)}
-      </span>
-    ),
+    render: (field: string, record: VisualizationListItem) =>
+      !record.error ? (
+        <span>
+          {renderItemTypeIcon(record)}
+          {record.typeTitle}
+          {getBadge(record)}
+        </span>
+      ) : (
+        <EuiBadge iconType="alert" color="warning">
+          {record.error}
+        </EuiBadge>
+      ),
   },
   {
     field: 'description',

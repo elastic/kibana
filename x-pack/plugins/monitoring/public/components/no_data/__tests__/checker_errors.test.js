@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { boomify, forbidden } from 'boom';
+import { boomify, forbidden } from '@hapi/boom';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { CheckerErrors } from '../checker_errors';
 

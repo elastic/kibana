@@ -119,7 +119,9 @@ export const VisualizeListing = () => {
         .findListItems(searchTerm, { size: listingLimit, references })
         .then(({ total, hits }: { total: number; hits: object[] }) => ({
           total,
-          hits: hits.filter((result: any) => isLabsEnabled || result.type.stage !== 'experimental'),
+          hits: hits.filter(
+            (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'
+          ),
         }));
     },
     [listingLimit, savedVisualizations, uiSettings, savedObjectsTagging]

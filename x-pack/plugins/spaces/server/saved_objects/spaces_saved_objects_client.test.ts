@@ -11,7 +11,7 @@ import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectTypeRegistry } from 'src/core/server';
 import { SpacesClient } from '../lib/spaces_client';
 import { spacesClientMock } from '../lib/spaces_client/spaces_client.mock';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
