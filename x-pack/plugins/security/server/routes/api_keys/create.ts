@@ -6,14 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { ApiKey } from '../../../common/model';
-import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
+import { wrapIntoCustomErrorResponse } from '../../errors';
+import { elasticsearchRoleSchema } from '../authorization/roles/model/put_payload';
 import { RouteDefinitionParams } from '..';
-
-interface ResponseType {
-  itemsInvalidated: Array<Pick<ApiKey, 'id' | 'name'>>;
-  errors: Array<Pick<ApiKey, 'id' | 'name'> & { error: Error }>;
-}
 
 export function defineCreateApiKeyRoutes({ router, clusterClient }: RouteDefinitionParams) {
   router.post(
@@ -23,6 +18,7 @@ export function defineCreateApiKeyRoutes({ router, clusterClient }: RouteDefinit
         body: schema.object({
           name: schema.string(),
           expiration: schema.maybe(schema.string()),
+          role_descriptors: schema.maybe(schema.recordOf(schema.string(), elasticsearchRoleSchema)),
         }),
       },
     },

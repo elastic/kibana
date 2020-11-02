@@ -39,10 +39,14 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
             <EuiButtonIcon
               iconType="minusInCircle"
               color="danger"
+              aria-label={i18n.translate(
+                'xpack.security.accountManagement.apiKeys.invalidateButton',
+                {
+                  defaultMessage: 'Invalidate',
+                }
+              )}
               disabled={props.loading}
-              onClick={() => {
-                onInvalidateItem(item);
-              }}
+              onClick={() => onInvalidateItem(item)}
             />
           </EuiShowFor>
           <EuiHideFor sizes={['xs', 's']}>
@@ -51,9 +55,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
               color="danger"
               flush="right"
               disabled={props.loading}
-              onClick={() => {
-                onInvalidateItem(item);
-              }}
+              onClick={() => onInvalidateItem(item)}
             >
               <FormattedMessage
                 id="xpack.security.accountManagement.apiKeys.invalidateButton"

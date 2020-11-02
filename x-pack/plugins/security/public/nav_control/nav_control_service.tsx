@@ -8,9 +8,10 @@ import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { SecurityLicense } from '../../common/licensing';
-import { SecurityNavControl } from './nav_control_component';
 import { AuthenticationServiceSetup } from '../authentication';
+import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
@@ -75,7 +76,9 @@ export class SecurityNavControlService {
         };
         ReactDOM.render(
           <I18nContext>
-            <SecurityNavControl {...props} />
+            <RedirectAppLinks application={core.application}>
+              <SecurityNavControl {...props} />
+            </RedirectAppLinks>
           </I18nContext>,
           el
         );

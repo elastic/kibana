@@ -23,24 +23,14 @@ import { KibanaReactNotifications } from './types';
 import { toMountPoint } from '../util';
 
 export const createNotifications = (services: KibanaServices): KibanaReactNotifications => {
-  const show: KibanaReactNotifications['toasts']['show'] = ({
-    title,
-    body,
-    color,
-    iconType,
-    toastLifeTimeMs,
-    onClose,
-  }) => {
+  const show: KibanaReactNotifications['toasts']['show'] = ({ title, body, ...rest }) => {
     if (!services.notifications) {
       throw new TypeError('Could not show notification as notifications service is not available.');
     }
     services.notifications!.toasts.add({
       title: toMountPoint(title),
       text: toMountPoint(<>{body || null}</>),
-      color,
-      iconType,
-      toastLifeTimeMs,
-      onClose,
+      ...rest,
     });
   };
 

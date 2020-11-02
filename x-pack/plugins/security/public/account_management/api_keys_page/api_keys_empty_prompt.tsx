@@ -5,9 +5,9 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { DocLink } from '../components/doc_link';
 
 export interface ApiKeysEmptyPromptProps {
   error?: Error;
@@ -17,15 +17,11 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   error,
   children,
 }) => {
-  const { services } = useKibana();
-
   if (error) {
-    const { statusCode, message = '' } = (error as any).body ?? {};
-
-    if (statusCode === 400 && message.indexOf('[feature_not_enabled_exception]') !== -1) {
+    if (doesErrorIndicateAPIKeysAreDisabled(error)) {
       return (
         <EuiEmptyPrompt
-          iconType="gear"
+          iconType="alert"
           body={
             <>
               <p>
@@ -35,16 +31,12 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
                 />
               </p>
               <p>
-                <EuiLink
-                  href={`${services.docLinks?.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${services.docLinks?.DOC_LINK_VERSION}/security-settings.html#api-key-service-settings`}
-                  target="_blank"
-                  external
-                >
+                <DocLink app="elasticsearch" doc="security-settings.html#api-key-service-settings">
                   <FormattedMessage
                     id="xpack.security.accountManagement.apiKeys.docsLinkText"
                     defaultMessage="Learn how to enable API keys."
                   />
-                </EuiLink>
+                </DocLink>
               </p>
             </>
           }
@@ -52,7 +44,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
       );
     }
 
-    if (statusCode === 403) {
+    if (doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error)) {
       return (
         <EuiEmptyPrompt
           iconType="lock"
@@ -107,3 +99,12 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
     />
   );
 };
+
+function doesErrorIndicateAPIKeysAreDisabled(error: Record<string, any>) {
+  const message = error.body?.message || '';
+  return message.indexOf('disabled.feature="api_keys"') !== -1;
+}
+
+function doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error: Record<string, any>) {
+  return error.body?.statusCode === 403;
+}

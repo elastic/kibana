@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
@@ -120,7 +122,11 @@ export class SecurityNavControl extends Component<Props, State> {
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
-                      <EuiLink href={editProfileUrl} data-test-subj="profileLink">
+                      <EuiLink
+                        href={editProfileUrl}
+                        onClick={this.closeMenu}
+                        data-test-subj="profileLink"
+                      >
                         <FormattedMessage
                           id="xpack.security.navControlComponent.editProfileLinkText"
                           defaultMessage="Edit profile"
@@ -129,7 +135,11 @@ export class SecurityNavControl extends Component<Props, State> {
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiLink href={logoutUrl} data-test-subj="logoutLink">
+                      <EuiLink
+                        href={logoutUrl}
+                        onClick={this.closeMenu}
+                        data-test-subj="logoutLink"
+                      >
                         <FormattedMessage
                           id="xpack.security.navControlComponent.logoutLinkText"
                           defaultMessage="Log out"

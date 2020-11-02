@@ -15,7 +15,7 @@ import { ElasticsearchRole } from './elasticsearch_role';
  * Elasticsearch specific portion of the role definition.
  * See more details at https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api.html#security-role-apis.
  */
-const elasticsearchRoleSchema = schema.object({
+export const elasticsearchRoleSchema = schema.object({
   /**
    * An optional list of cluster privileges. These privileges define the cluster level actions that
    * users with this role are able to execute

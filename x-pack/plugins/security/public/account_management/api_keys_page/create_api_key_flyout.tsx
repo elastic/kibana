@@ -7,15 +7,17 @@
 import React, { useRef, FunctionComponent } from 'react';
 import {
   EuiCallOut,
-  EuiCodeEditor,
   EuiFieldNumber,
   EuiFieldText,
   EuiForm,
+  EuiPanel,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana, CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 import {
   APIKeysAPIClient,
   CreateApiKeyRequest,
@@ -23,13 +25,13 @@ import {
 } from '../../management/api_keys/api_keys_api_client';
 import { useForm, ValidationErrors } from '../components/use_form';
 import { FormFlyout, FormFlyoutProps } from '../components/form_flyout';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { DocLink } from '../components/doc_link';
 
 export interface FormValues {
   name: string;
   expiration: string;
   customExpiration: boolean;
-  customPriviliges: boolean;
+  customPrivileges: boolean;
   role_descriptors: string;
 }
 
@@ -75,6 +77,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
       initialFocus={nameInput}
       onSubmit={eventHandlers.onSubmit}
       onClose={onClose}
+      size="s"
     >
       {form.submitError && (
         <>
@@ -100,7 +103,9 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
           label={i18n.translate('xpack.security.accountManagement.createApiKey.nameLabel', {
             defaultMessage: 'Name',
           })}
-          helpText="What is the API key used for?"
+          helpText={i18n.translate('xpack.security.accountManagement.createApiKey.nameHelpText', {
+            defaultMessage: 'What is the API key used for?',
+          })}
           error={form.errors.name}
           isInvalid={!!form.errors.name}
         >
@@ -109,6 +114,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
             defaultValue={form.values.name}
             isInvalid={!!form.errors.name}
             inputRef={nameInput}
+            fullWidth
           />
         </EuiFormRow>
 
@@ -121,10 +127,10 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               defaultMessage: 'Grant subset of your permissions',
             }
           )}
-          checked={!!form.values.customPriviliges}
-          onChange={(e) => form.setValue('customPriviliges', e.target.checked)}
+          checked={!!form.values.customPrivileges}
+          onChange={(e) => form.setValue('customPrivileges', e.target.checked)}
         />
-        {form.values.customPriviliges && (
+        {form.values.customPrivileges && (
           <>
             <EuiSpacer />
             <EuiFormRow
@@ -134,17 +140,44 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                   defaultMessage: 'Role Descriptors',
                 }
               )}
-              helpText="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html#security-api-create-api-key-request-body"
+              helpText={
+                <DocLink
+                  app="elasticsearch"
+                  doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                >
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.createApiKey.nameHelpText"
+                    defaultMessage="Learn about role descriptors."
+                  />
+                </DocLink>
+              }
               error={form.errors.role_descriptors}
               isInvalid={!!form.errors.role_descriptors}
             >
-              <EuiCodeEditor
-                onChange={(value) => form.setValue('role_descriptors', value)}
-                onBlur={() => form.trigger('role_descriptors')}
-                value={form.values.role_descriptors}
-                height="300px"
-                mode="json"
-              />
+              <EuiPanel paddingSize="s" style={{ boxShadow: 'none' }}>
+                <CodeEditor
+                  value={form.values.role_descriptors!}
+                  onChange={(value) => form.setValue('role_descriptors', value)}
+                  width="100%"
+                  height="300px"
+                  languageId="xjson"
+                  options={{
+                    fixedOverflowWidgets: true,
+                    folding: false,
+                    lineNumbers: 'off',
+                    scrollBeyondLastLine: false,
+                    minimap: {
+                      enabled: false,
+                    },
+                    scrollbar: {
+                      useShadows: false,
+                    },
+                    wordBasedSuggestions: false,
+                    wordWrap: 'on',
+                    wrappingIndent: 'indent',
+                  }}
+                />
+              </EuiPanel>
             </EuiFormRow>
           </>
         )}
@@ -167,7 +200,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
             <EuiSpacer />
             <EuiFormRow
               label={i18n.translate(
-                'xpack.security.accountManagement.createApiKey.roleDescriptorsLabel',
+                'xpack.security.accountManagement.createApiKey.expirationLabel',
                 {
                   defaultMessage: 'Duration',
                 }
@@ -180,6 +213,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                 name="expiration"
                 defaultValue={form.values.expiration}
                 isInvalid={!!form.errors.expiration}
+                fullWidth
               />
             </EuiFormRow>
           </>
@@ -192,12 +226,12 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
 CreateApiKeyFlyout.defaultProps = {
   defaultValues: {
     customExpiration: false,
-    customPriviliges: false,
+    customPrivileges: false,
     role_descriptors: JSON.stringify(
       {
         'role-a': {
           cluster: ['all'],
-          index: [
+          indices: [
             {
               names: ['index-a*'],
               privileges: ['read'],
@@ -206,7 +240,7 @@ CreateApiKeyFlyout.defaultProps = {
         },
         'role-b': {
           cluster: ['all'],
-          index: [
+          indices: [
             {
               names: ['index-b*'],
               privileges: ['all'],
@@ -224,22 +258,24 @@ export function validate(v: Partial<FormValues>) {
   const errors: ValidationErrors<FormValues> = {};
 
   if (!v.name) {
-    errors.name = 'Enter a name.';
+    errors.name = i18n.translate('xpack.security.management.apiKeys.createApiKey.nameRequired', {
+      defaultMessage: 'Enter a name.',
+    });
   }
 
   if (v.customExpiration && !v.expiration) {
     errors.expiration = i18n.translate(
-      'xpack.security.management.apiKeys.createApiKey.successNotification',
+      'xpack.security.management.apiKeys.createApiKey.expirationRequired',
       {
         defaultMessage: 'Enter a duration or disable the option.',
       }
     );
   }
 
-  if (v.customPriviliges) {
+  if (v.customPrivileges) {
     if (!v.role_descriptors) {
       errors.role_descriptors = i18n.translate(
-        'xpack.security.management.apiKeys.createApiKey.successNotification',
+        'xpack.security.management.apiKeys.createApiKey.roleDescriptorsRequired',
         {
           defaultMessage: 'Enter role descriptors or disable the option.',
         }
@@ -249,7 +285,7 @@ export function validate(v: Partial<FormValues>) {
         JSON.parse(v.role_descriptors);
       } catch (e) {
         errors.role_descriptors = i18n.translate(
-          'xpack.security.management.apiKeys.createApiKey.successNotification',
+          'xpack.security.management.apiKeys.createApiKey.invalidJsonError',
           {
             defaultMessage: 'Enter valid JSON.',
           }
@@ -266,7 +302,7 @@ export function mapValues(values: FormValues): CreateApiKeyRequest {
     name: values.name,
     expiration: values.customExpiration && values.expiration ? `${values.expiration}d` : undefined,
     role_descriptors:
-      values.customPriviliges && values.role_descriptors
+      values.customPrivileges && values.role_descriptors
         ? JSON.parse(values.role_descriptors)
         : undefined,
   };

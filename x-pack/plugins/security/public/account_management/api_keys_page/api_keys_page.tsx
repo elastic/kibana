@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { Route, useHistory } from 'react-router-dom';
-import { useAsyncFn } from 'react-use';
+import { useAsyncFn, useMount } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -27,20 +27,19 @@ import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 export const ApiKeysPage: FunctionComponent = () => {
   const history = useHistory();
   const { services } = useKibana();
-  const apiKeysApiClient = new APIKeysAPIClient(services.http!);
-  const [state, getApiKeys] = useAsyncFn(apiKeysApiClient.getApiKeys, [services.http]);
+  const [state, getApiKeys] = useAsyncFn(() => new APIKeysAPIClient(services.http!).getApiKeys(), [
+    services.http,
+  ]);
   const [createdApiKey, setCreatedApiKey] = useState<CreateApiKeyResponse | undefined>();
   const [apiKeyToInvalidate, setApiKeyToInvalidate] = useState<ApiKey | undefined>();
 
-  useEffect(() => {
-    getApiKeys();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useMount(getApiKeys);
 
   if (!state.value) {
     if (state.error && !state.loading) {
       return (
         <ApiKeysEmptyPrompt error={state.error}>
-          <EuiButton iconType="refresh" onClick={() => getApiKeys()}>
+          <EuiButton iconType="refresh" onClick={getApiKeys}>
             <FormattedMessage
               id="xpack.security.accountManagement.apiKeys.retryButton"
               defaultMessage="Try again"
@@ -144,7 +143,7 @@ export const ApiKeysPage: FunctionComponent = () => {
 
           <EuiSpacer />
           <ApiKeysTable
-            items={state.value?.apiKeys}
+            items={state.value.apiKeys}
             loading={state.loading}
             createdItemId={createdApiKey?.id}
             onInvalidateItem={setApiKeyToInvalidate}

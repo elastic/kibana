@@ -47,7 +47,6 @@ export const InvalidateApiKeyModal: FunctionComponent<InvalidateApiKeyModalProps
               values: { name: apiKey.name },
             }
           ),
-          toastLifeTimeMs: 3000,
         });
         onSuccess?.(values);
       },
@@ -59,7 +58,6 @@ export const InvalidateApiKeyModal: FunctionComponent<InvalidateApiKeyModalProps
             values: { name: apiKey.name },
           }),
           body: (error as any).body?.message || error.message,
-          toastLifeTimeMs: 1500,
         });
         onError?.(error);
       },

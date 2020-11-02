@@ -42,23 +42,23 @@ const apiKeysUrl = '/internal/security/api_key';
 export class APIKeysAPIClient {
   constructor(private readonly http: HttpStart) {}
 
-  public checkPrivileges = async () => {
+  public async checkPrivileges() {
     return await this.http.get<CheckPrivilegesResponse>(`${apiKeysUrl}/privileges`);
-  };
+  }
 
-  public getApiKeys = async (isAdmin = false) => {
+  public async getApiKeys(isAdmin = false) {
     return await this.http.get<GetApiKeysResponse>(apiKeysUrl, { query: { isAdmin } });
-  };
+  }
 
-  public invalidateApiKeys = async (apiKeys: ApiKeyToInvalidate[], isAdmin = false) => {
+  public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
     return await this.http.post<InvalidateApiKeysResponse>(`${apiKeysUrl}/invalidate`, {
       body: JSON.stringify({ apiKeys, isAdmin }),
     });
-  };
+  }
 
-  public createApiKey = async (apiKey: CreateApiKeyRequest) => {
+  public async createApiKey(apiKey: CreateApiKeyRequest) {
     return await this.http.post<CreateApiKeyResponse>(apiKeysUrl, {
       body: JSON.stringify(apiKey),
     });
-  };
+  }
 }

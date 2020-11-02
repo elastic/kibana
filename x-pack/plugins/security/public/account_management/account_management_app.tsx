@@ -7,6 +7,7 @@
 import React, { lazy, Suspense, FunctionComponent } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, useHistory } from 'react-router-dom';
+import { History } from 'history';
 import { useAsync } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import {
@@ -29,9 +30,10 @@ import {
   AppNavLinkStatus,
   StartServicesAccessor,
   NotificationsSetup,
+  CoreStart,
 } from '../../../../../src/core/public';
 import {
-  createKibanaReactContext,
+  KibanaContextProvider,
   reactRouterNavigate,
 } from '../../../../../src/plugins/kibana_react/public';
 import { getUserDisplayName } from '../../common/model';
@@ -60,19 +62,12 @@ export const accountManagementApp = Object.freeze({
       async mount({ element, history }: AppMountParameters) {
         const [coreStart] = await getStartServices();
 
-        const { Provider: KibanaProvider } = createKibanaReactContext(coreStart);
-        const { Context: IntlProvider } = coreStart.i18n;
-
         ReactDOM.render(
-          <IntlProvider>
-            <KibanaProvider>
-              <Router history={history}>
-                <Breadcrumb text={title} {...reactRouterNavigate(history, '')}>
-                  <AccountManagement authc={authc} notifications={coreStart.notifications} />
-                </Breadcrumb>
-              </Router>
-            </KibanaProvider>
-          </IntlProvider>,
+          <Providers services={coreStart} history={history}>
+            <Breadcrumb text={title} {...reactRouterNavigate(history, '')}>
+              <AccountManagement authc={authc} notifications={coreStart.notifications} />
+            </Breadcrumb>
+          </Providers>,
           element
         );
 
@@ -81,6 +76,19 @@ export const accountManagementApp = Object.freeze({
     });
   },
 });
+
+export interface ProvidersProps {
+  services: CoreStart;
+  history: History;
+}
+
+export const Providers: FunctionComponent<ProvidersProps> = ({ services, history, children }) => (
+  <KibanaContextProvider services={services}>
+    <services.i18n.Context>
+      <Router history={history}>{children}</Router>
+    </services.i18n.Context>
+  </KibanaContextProvider>
+);
 
 export interface AccountManagementProps {
   authc: AuthenticationServiceSetup;
