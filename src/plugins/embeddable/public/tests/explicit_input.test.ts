@@ -82,7 +82,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   ]);
 });
 
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
+test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async () => {
   const testPanel = createEmbeddablePanelMock({
     getActions: uiActions.getTriggerCompatibleActions,
     getEmbeddableFactory: start.getEmbeddableFactory,
@@ -115,7 +115,6 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
     .subscribe(() => {
       if (embeddable.getInput().filters === undefined) {
         subscription.unsubscribe();
-        done();
       }
     });
 

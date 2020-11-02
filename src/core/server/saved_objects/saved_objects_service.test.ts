@@ -201,7 +201,7 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async (done) => {
+    it('waits for all es nodes to be compatible before running migrations', async () => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -227,7 +227,6 @@ describe('SavedObjectsService', () => {
       });
       setImmediate(() => {
         expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-        done();
       });
     });
 

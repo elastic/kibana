@@ -38,14 +38,13 @@ describe('filter_manager/lib', () => {
     });
 
     describe('when given a filter that is not match_all', () => {
-      test('filter is rejected', async (done) => {
+      test('filter is rejected', async () => {
         delete filter.match_all;
 
         try {
           mapMatchAll(filter);
         } catch (e) {
           expect(e).toBe(filter);
-          done();
         }
       });
     });

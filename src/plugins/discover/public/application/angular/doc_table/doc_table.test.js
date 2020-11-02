@@ -18,7 +18,6 @@
  */
 import angular from 'angular';
 import _ from 'lodash';
-import 'angular-mocks';
 import 'angular-sanitize';
 import 'angular-route';
 import { createBrowserHistory } from 'history';
@@ -29,6 +28,7 @@ import { dataPluginMock } from '../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../navigation/public/mocks';
 import { setScopedHistory, setServices } from '../../../kibana_services';
 import { getInnerAngularModule } from '../../../get_inner_angular';
+import 'angular-mocks';
 
 let $parentScope;
 

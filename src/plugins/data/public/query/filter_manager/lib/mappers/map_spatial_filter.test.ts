@@ -65,7 +65,7 @@ describe('mapSpatialFilter()', () => {
     expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
   });
 
-  test('should return undefined for none matching', async (done) => {
+  test('should return undefined for none matching', async () => {
     const filter = {
       meta: {
         key: 'location',
@@ -80,8 +80,6 @@ describe('mapSpatialFilter()', () => {
       mapSpatialFilter(filter);
     } catch (e) {
       expect(e).toBe(filter);
-
-      done();
     }
   });
 });
