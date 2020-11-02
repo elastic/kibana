@@ -31,28 +31,22 @@ export function getMapAttributeService(): MapAttributeService {
     MapByValueInput,
     MapByReferenceInput
   >(MAP_SAVED_OBJECT_TYPE, {
-    saveMethod: async (
-      type: string,
-      attributes: MapSavedObjectAttributes,
-      savedObjectId?: string
-    ) => {
+    saveMethod: async (attributes: MapSavedObjectAttributes, savedObjectId?: string) => {
       const { attributes: attributesWithExtractedReferences, references } = extractReferences({
         attributes,
       });
-
-      const options = { references };
 
       const savedObject = await (savedObjectId
         ? getSavedObjectsClient().update<MapSavedObjectAttributes>(
             MAP_SAVED_OBJECT_TYPE,
             savedObjectId,
             attributesWithExtractedReferences,
-            options
+            { references }
           )
         : getSavedObjectsClient().create<MapSavedObjectAttributes>(
             MAP_SAVED_OBJECT_TYPE,
             attributesWithExtractedReferences,
-            options
+            { references }
           ));
       return { id: savedObject.id };
     },
