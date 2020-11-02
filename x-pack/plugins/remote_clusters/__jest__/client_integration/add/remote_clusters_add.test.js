@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pageHelpers, nextTick, setupEnvironment } from './helpers';
-import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './helpers/constants';
-
-const { setup } = pageHelpers.remoteClustersAdd;
+import { nextTick, setupEnvironment } from '../helpers';
+import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
+import { setup } from './remote_clusters_add.helpers';
 
 describe('Create Remote cluster', () => {
   describe('on component mount', () => {

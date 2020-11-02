@@ -5,20 +5,14 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import {
-  pageHelpers,
-  setupEnvironment,
-  nextTick,
-  getRandomString,
-  findTestSubject,
-} from './helpers';
+import { getRouter } from '../../../public/application/services';
+import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
 
-import { getRouter } from '../../public/application/services';
-import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
+import { PROXY_MODE } from '../../../common/constants';
 
-import { PROXY_MODE } from '../../common/constants';
+import { setupEnvironment, nextTick, getRandomString, findTestSubject } from '../helpers';
 
-const { setup } = pageHelpers.remoteClustersList;
+import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList />', () => {
   let server;
@@ -33,8 +27,7 @@ describe('<RemoteClusterList />', () => {
   });
 
   beforeEach(() => {
-    // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse();
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
   });
 
   describe('on component mount', () => {
@@ -56,7 +49,7 @@ describe('<RemoteClusterList />', () => {
     beforeEach(async () => {
       ({ exists, component } = setup());
 
-      await nextTick(100); // We need to wait next tick for the mock server response to kick in
+      // await nextTick(100); // We need to wait next tick for the mock server response to kick in
       component.update();
     });
 
