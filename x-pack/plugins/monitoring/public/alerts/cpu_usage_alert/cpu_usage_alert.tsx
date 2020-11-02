@@ -6,21 +6,18 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { ALERT_CPU_USAGE } from '../../../common/constants';
+import { ALERT_CPU_USAGE, ALERT_DETAILS } from '../../../common/constants';
 import { validate } from '../components/duration/validation';
 import { Expression, Props } from '../components/duration/expression';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CpuUsageAlert } from '../../../server/alerts';
 
 export function createCpuUsageAlertType(): AlertTypeModel {
-  const alert = new CpuUsageAlert();
   return {
     id: ALERT_CPU_USAGE,
-    name: alert.label,
-    description: alert.description,
+    name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
+    description: ALERT_DETAILS[ALERT_CPU_USAGE].description,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={CpuUsageAlert.paramDetails} />
+      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CPU_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',

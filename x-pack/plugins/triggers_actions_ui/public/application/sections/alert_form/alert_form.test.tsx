@@ -100,8 +100,8 @@ describe('alert_form', () => {
         toastNotifications: mocks.notifications.toasts,
         http: mocks.http,
         uiSettings: mocks.uiSettings,
-        actionTypeRegistry: actionTypeRegistry as any,
-        alertTypeRegistry: alertTypeRegistry as any,
+        actionTypeRegistry,
+        alertTypeRegistry,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
         capabilities,
       };
@@ -233,8 +233,8 @@ describe('alert_form', () => {
         toastNotifications: mocks.notifications.toasts,
         http: mocks.http,
         uiSettings: mocks.uiSettings,
-        actionTypeRegistry: actionTypeRegistry as any,
-        alertTypeRegistry: alertTypeRegistry as any,
+        actionTypeRegistry,
+        alertTypeRegistry,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
         capabilities,
       };
@@ -336,8 +336,8 @@ describe('alert_form', () => {
         toastNotifications: mockes.notifications.toasts,
         http: mockes.http,
         uiSettings: mockes.uiSettings,
-        actionTypeRegistry: actionTypeRegistry as any,
-        alertTypeRegistry: alertTypeRegistry as any,
+        actionTypeRegistry,
+        alertTypeRegistry,
       };
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.get.mockReturnValue(alertType);

@@ -10,18 +10,16 @@ import { Expression, Props } from '../components/duration/expression';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MemoryUsageAlert } from '../../../server/alerts';
+import { ALERT_MEMORY_USAGE, ALERT_DETAILS } from '../../../common/constants';
 
 export function createMemoryUsageAlertType(): AlertTypeModel {
   return {
-    id: MemoryUsageAlert.TYPE,
-    name: MemoryUsageAlert.LABEL,
-    description: MemoryUsageAlert.DESCRIPTION,
+    id: ALERT_MEMORY_USAGE,
+    name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
+    description: ALERT_DETAILS[ALERT_MEMORY_USAGE].description,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={MemoryUsageAlert.PARAM_DETAILS} />
+      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_MEMORY_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
