@@ -12,7 +12,10 @@ import {
   ClusterDetails,
 } from 'src/plugins/telemetry_collection_manager/server';
 import { createQuery } from './create_query';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  CLUSTER_DETAILS_FETCH_INTERVAL,
+} from '../../common/constants';
 import { CustomContext } from './get_all_stats';
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
@@ -32,7 +35,8 @@ export async function fetchClusterUuids(
   { callCluster, timestamp }: StatsCollectionConfig,
   maxBucketSize: number
 ) {
-  const start = moment(timestamp).subtract(3, 'hours').toISOString();
+  const start = moment(timestamp).subtract(CLUSTER_DETAILS_FETCH_INTERVAL, 'ms').toISOString();
+
   const end = moment(timestamp).toISOString();
 
   const params = {

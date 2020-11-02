@@ -193,7 +193,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
         icon: 'list',
         onClick: () => {
           navigateToApp('management', {
-            path: `/data/index_management${getIndexListUri(`ilm.policy:${policy.name}`, true)}`,
+            path: `/data/index_management${getIndexListUri(`ilm.policy:"${policy.name}"`, true)}`,
           });
         },
       });
@@ -306,7 +306,6 @@ export const TableContent: React.FunctionComponent<Props> = ({
           isOpen={isPolicyPopoverOpen(policy.name)}
           closePopover={closePolicyPopover}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="rightUp"
           repositionOnScroll
         >

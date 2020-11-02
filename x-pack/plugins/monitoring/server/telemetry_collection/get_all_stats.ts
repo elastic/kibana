@@ -9,7 +9,12 @@ import { get, merge } from 'lodash';
 
 import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import moment from 'moment';
-import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
+import {
+  LOGSTASH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  USAGE_FETCH_INTERVAL,
+} from '../../common/constants';
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
@@ -28,7 +33,7 @@ export const getAllStats: StatsGetter<CustomContext> = async (
   { callCluster, timestamp },
   { maxBucketSize }
 ) => {
-  const start = moment(timestamp).subtract(20, 'minutes').toISOString();
+  const start = moment(timestamp).subtract(USAGE_FETCH_INTERVAL, 'ms').toISOString();
   const end = moment(timestamp).toISOString();
 
   const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);

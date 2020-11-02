@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiCode } from '@elastic/eui';
+
 /* eslint-disable no-duplicate-imports */
 
 import { EuiBreadcrumbs } from '@elastic/eui';
@@ -88,4 +90,22 @@ export const StyledLabelContainer = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+`;
+
+/**
+ * A bold version of EuiCode to display certain titles with
+ */
+export const BoldCode = styled(EuiCode)`
+  &.euiCodeBlock code.euiCodeBlock__code {
+    font-weight: 900;
+  }
+`;
+
+/**
+ * A component to keep time representations in blocks so they don't wrap
+ * and look bad.
+ */
+export const StyledTime = styled('time')`
+  display: inline-block;
+  text-align: start;
 `;

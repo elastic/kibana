@@ -25,8 +25,17 @@ export function createContextAppLegacy(reactDirective: any) {
     ['indexPattern', { watchDepth: 'reference' }],
     ['sorting', { watchDepth: 'reference' }],
     ['columns', { watchDepth: 'collection' }],
-    ['infiniteScroll', { watchDepth: 'reference' }],
     ['minimumVisibleRows', { watchDepth: 'reference' }],
     ['status', { watchDepth: 'reference' }],
+    ['reason', { watchDepth: 'reference' }],
+    ['defaultStepSize', { watchDepth: 'reference' }],
+    ['predecessorCount', { watchDepth: 'reference' }],
+    ['predecessorAvailable', { watchDepth: 'reference' }],
+    ['predecessorStatus', { watchDepth: 'reference' }],
+    ['onChangePredecessorCount', { watchDepth: 'reference' }],
+    ['successorCount', { watchDepth: 'reference' }],
+    ['successorAvailable', { watchDepth: 'reference' }],
+    ['successorStatus', { watchDepth: 'reference' }],
+    ['onChangeSuccessorCount', { watchDepth: 'reference' }],
   ]);
 }

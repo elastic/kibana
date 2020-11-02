@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { URL } from 'url';
 import {
   EventOutcome,
   SavedObjectAction,
@@ -192,11 +193,48 @@ describe('#httpRequestEvent', () => {
         },
         "message": "User is requesting [/path] endpoint",
         "url": Object {
-          "domain": undefined,
+          "domain": "localhost",
           "path": "/path",
           "port": undefined,
           "query": undefined,
-          "scheme": undefined,
+          "scheme": "http:",
+        },
+      }
+    `);
+  });
+
+  test('uses original URL if rewritten', () => {
+    expect(
+      httpRequestEvent({
+        request: httpServerMock.createKibanaRequest({
+          path: '/path',
+          query: { query: 'param' },
+          kibanaRequestState: {
+            requestId: '123',
+            requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+            rewrittenUrl: new URL('http://localhost/original/path?query=param'),
+          },
+        }),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "http_request",
+          "category": "web",
+          "outcome": "unknown",
+        },
+        "http": Object {
+          "request": Object {
+            "method": "get",
+          },
+        },
+        "message": "User is requesting [/original/path] endpoint",
+        "url": Object {
+          "domain": "localhost",
+          "path": "/original/path",
+          "port": undefined,
+          "query": "query=param",
+          "scheme": "http:",
         },
       }
     `);

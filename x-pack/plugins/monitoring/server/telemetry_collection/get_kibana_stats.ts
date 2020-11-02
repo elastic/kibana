@@ -147,8 +147,8 @@ export function combineStats(
  * Ensure the start and end dates are, at least, TELEMETRY_COLLECTION_INTERVAL apart
  * because, otherwise, we are sending telemetry with empty Kibana usage data.
  *
- * @param {string} [start] The start time from which to get the telemetry data
- * @param {string} [end] The end time from which to get the telemetry data
+ * @param {string} [start] The start time (in ISO string format) from which to get the telemetry data
+ * @param {string} [end] The end time (in ISO string format) from which to get the telemetry data
  */
 export function ensureTimeSpan(start: string, end: string): { start: string; end: string };
 export function ensureTimeSpan(start: string, end: undefined): { start: string; end: undefined };
