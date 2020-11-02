@@ -18,5 +18,3 @@
  */
 
 export { FieldEditor } from './field_editor';
-
-export { DefaultFormatEditor } from './components/field_format_editor';
