@@ -208,12 +208,10 @@ describe('KibanaRequest', () => {
       expect(kibanaRequest.route.options.authRequired).toBe(false);
     });
     it('handles required auth: { mode: "required" }', () => {
-      const auth: RouteOptions['auth'] = { mode: 'required' };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
-            auth,
+            auth: { mode: 'required' },
           },
         },
       });
@@ -223,12 +221,10 @@ describe('KibanaRequest', () => {
     });
 
     it('handles required auth: { mode: "optional" }', () => {
-      const auth: RouteOptions['auth'] = { mode: 'optional' };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
-            auth,
+            auth: { mode: 'optional' },
           },
         },
       });
@@ -238,12 +234,10 @@ describe('KibanaRequest', () => {
     });
 
     it('handles required auth: { mode: "try" } as "optional"', () => {
-      const auth: RouteOptions['auth'] = { mode: 'try' };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
-            auth,
+            auth: { mode: 'try' },
           },
         },
       });
@@ -253,28 +247,24 @@ describe('KibanaRequest', () => {
     });
 
     it('throws on auth: strategy name', () => {
-      const auth: RouteOptions['auth'] = 'session';
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            // @ts-expect-error According to types/hapi__hapi, `auth` can't be a string, but I'm not sure that's true
-            auth,
+            auth: { strategies: ['session'] },
           },
         },
       });
 
       expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
-        `"unexpected authentication options: \\"session\\" for route: /"`
+        `"unexpected authentication options: {\\"strategies\\":[\\"session\\"]} for route: /"`
       );
     });
 
     it('throws on auth: { mode: unexpected mode }', () => {
-      const auth: RouteOptions['auth'] = { mode: undefined };
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
-            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
-            auth,
+            auth: { mode: undefined },
           },
         },
       });
