@@ -707,7 +707,7 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error and invalidates API key when create saved object fails', async () => {
+  test('throws error and add API key to invalidatePendingApiKey SO when create saved object fails', async () => {
     const data = getMockData();
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
@@ -727,11 +727,22 @@ describe('create()', () => {
       ],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
+      apiKeyId: '123',
+    });
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {

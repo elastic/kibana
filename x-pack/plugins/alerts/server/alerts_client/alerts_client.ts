@@ -626,7 +626,7 @@ export class AlertsClient {
         apiKeyId,
       });
     } catch (e) {
-      this.logger.error(`Failed to mark for invalidate API Key: ${e.message}`);
+      this.logger.error(`Failed to mark for invalidating API Key: ${e.message}`);
     }
   }
 

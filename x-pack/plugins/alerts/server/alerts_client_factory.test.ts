@@ -125,7 +125,6 @@ test('creates an alerts client with proper constructor arguments when security i
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     createAPIKey: expect.any(Function),
-    invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
   });
@@ -167,7 +166,6 @@ test('creates an alerts client with proper constructor arguments', async () => {
     namespace: 'default',
     getUserName: expect.any(Function),
     createAPIKey: expect.any(Function),
-    invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),

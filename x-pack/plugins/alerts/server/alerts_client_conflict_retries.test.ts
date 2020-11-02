@@ -114,7 +114,7 @@ async function update(success: boolean) {
     );
     return expectConflict(success, err, 'create');
   }
-  expectSuccess(success, 2, 'create');
+  expectSuccess(success, 3, 'create');
 
   // only checking the debug messages in this test
   expect(logger.debug).nthCalledWith(1, `alertsClient.update('alert-id') conflict, retrying ...`);

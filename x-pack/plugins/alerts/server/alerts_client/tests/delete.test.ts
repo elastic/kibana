@@ -93,11 +93,21 @@ describe('delete()', () => {
   });
 
   test('successfully removes an alert', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidatePendingApiKey', {
+      apiKeyId: '123',
+    });
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -106,12 +116,20 @@ describe('delete()', () => {
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
 
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
@@ -132,6 +150,14 @@ describe('delete()', () => {
   });
 
   test(`doesn't invalidate API key when apiKey is null`, async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
       ...existingAlert,
       attributes: {
@@ -141,24 +167,33 @@ describe('delete()', () => {
     });
 
     await alertsClient.delete({ id: '1' });
-    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('swallows error when invalidate API key throws', async () => {
-    // alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
-
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await alertsClient.delete({ id: '1' });
-    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidatePendingApiKey', {
+      apiKeyId: '123',
+    });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to invalidate API Key: Fail'
+      'Failed to mark for invalidating API Key: Fail'
     );
   });
 
   test('swallows error when getDecryptedAsInternalUser throws an error', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
     await alertsClient.delete({ id: '1' });
-    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
     );

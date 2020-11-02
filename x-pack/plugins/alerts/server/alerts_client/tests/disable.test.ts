@@ -107,6 +107,14 @@ describe('disable()', () => {
   });
 
   test('disables an alert', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: '123',
+      },
+      references: [],
+    });
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -144,11 +152,21 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidatePendingApiKey', {
+      apiKeyId: '123',
+    });
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
 
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
@@ -187,7 +205,7 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test(`doesn't disable already disabled alerts`, async () => {
@@ -200,26 +218,51 @@ describe('disable()', () => {
       },
     });
 
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
+
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     expect(taskManager.remove).not.toHaveBeenCalled();
-    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test(`doesn't invalidate when no API key is used`, async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(existingAlert);
 
     await alertsClient.disable({ id: '1' });
-    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('swallows error when failing to load decrypted saved object', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'invalidatePendingApiKey',
+      attributes: {
+        apiKeyId: 'test',
+      },
+      references: [],
+    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(taskManager.remove).toHaveBeenCalled();
-    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -234,11 +277,10 @@ describe('disable()', () => {
   });
 
   test('swallows error when invalidate API key throws', async () => {
-    // alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
-
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await alertsClient.disable({ id: '1' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to invalidate API Key: Fail'
+      'Failed to mark for invalidating API Key: Fail'
     );
   });
 
