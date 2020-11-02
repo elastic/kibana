@@ -9,7 +9,7 @@ jest.mock('./providers/token');
 jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   loggingSystemMock,
