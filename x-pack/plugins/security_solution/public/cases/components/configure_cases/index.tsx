@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
@@ -204,19 +204,17 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           consumer: 'case',
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={handleSetAddFlyoutVisibility as Dispatch<SetStateAction<boolean>>}
-          actionTypes={actionTypes}
-        />
-        {editedConnectorItem && (
+        {addFlyoutVisible && (
+          <ConnectorAddFlyout
+            onClose={() => handleSetAddFlyoutVisibility(false)}
+            actionTypes={actionTypes}
+          />
+        )}
+        {editedConnectorItem && editFlyoutVisible && (
           <ConnectorEditFlyout
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={
-              handleSetEditFlyoutVisibility as Dispatch<SetStateAction<boolean>>
-            }
+            onClose={() => handleSetEditFlyoutVisibility(false)}
           />
         )}
       </ActionsConnectorsContextProvider>
