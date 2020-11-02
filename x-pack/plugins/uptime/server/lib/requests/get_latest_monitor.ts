@@ -38,6 +38,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
       query: {
         bool: {
           filter: [
+            { exists: { field: 'summary' } },
             {
               range: {
                 '@timestamp': {
@@ -46,7 +47,6 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
                 },
               },
             },
-            ...(status ? [{ term: { 'monitor.status': status } }] : []),
             ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
             ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
           ],
