@@ -376,7 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
 
             await ml.testExecution.logTestStep(
-              'should displays components of the file details page'
+              'should display components of the file details page'
             );
             await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
             await ml.dataVisualizerFileBased.assertFileContentPanelExists();

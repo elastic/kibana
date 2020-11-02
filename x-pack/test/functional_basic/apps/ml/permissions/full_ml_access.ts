@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
 
-          await ml.testExecution.logTestStep('should displays components of the file details page');
+          await ml.testExecution.logTestStep('should display components of the file details page');
           await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
           await ml.dataVisualizerFileBased.assertFileContentPanelExists();
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.assertImportButtonEnabled(true);
         });
 
-        it('should not allow to access the Stack Management ML page', async () => {
+        it('should not allow access to the Stack Management ML page', async () => {
           await ml.testExecution.logTestStep(
             'should load the stack management with the ML menu item being absent'
           );
