@@ -18,12 +18,13 @@
  */
 
 import { tickFormatters } from './tick_formatters';
+import { Axis } from './panel_utils';
 
 describe('Tick Formatters', function () {
   let formatters: any;
 
   beforeEach(function () {
-    formatters = tickFormatters();
+    formatters = tickFormatters({} as Axis);
   });
 
   describe('Bits mode', function () {

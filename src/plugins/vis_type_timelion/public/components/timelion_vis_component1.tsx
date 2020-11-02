@@ -225,6 +225,9 @@ function TimelionVisComponent1({
                 xAccessor={0}
                 yAccessors={[1]}
                 data={data.data}
+                sortIndex={index}
+                stackAccessors={data.stack ? [0] : undefined}
+                color={data.color}
                 {...getBarStyles(data.bars, data.color)}
               />
             );
@@ -238,6 +241,9 @@ function TimelionVisComponent1({
                 xAccessor={0}
                 yAccessors={[1]}
                 data={data.data}
+                sortIndex={index}
+                color={data.color}
+                stackAccessors={data.stack ? [0] : undefined}
                 {...getAreaStyles(data)}
               />
             );

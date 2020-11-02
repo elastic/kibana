@@ -48,7 +48,6 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
       help: 'Draw a timeseries chart',
       render($scope: any, $elem: any) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
-        const formatters = tickFormatters() as any;
         const getxAxisFormatter = xaxisFormatterProvider(uiSettings);
         const generateTicks = generateTicksProvider();
 
@@ -360,6 +359,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           if (options.yaxes) {
             options.yaxes.forEach((yaxis: any) => {
               if (yaxis && yaxis.units) {
+                const formatters = tickFormatters(yaxis) as any;
                 yaxis.tickFormatter = formatters[yaxis.units.type];
                 const byteModes = ['bytes', 'bytes/s'];
                 if (byteModes.includes(yaxis.units.type)) {

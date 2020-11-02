@@ -206,7 +206,7 @@ function TimelionVisComponent({
         if (options.yaxes) {
           options.yaxes.forEach((yaxis: Axis) => {
             if (yaxis && yaxis.units) {
-              const formatters = tickFormatters();
+              const formatters = tickFormatters(yaxis);
               yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
               const byteModes = ['bytes', 'bytes/s'];
               if (byteModes.includes(yaxis.units.type)) {

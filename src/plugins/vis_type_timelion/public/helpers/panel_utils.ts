@@ -40,7 +40,7 @@ export interface Axis {
   tickLength: number;
   timezone: string;
   tickDecimals?: number;
-  tickFormatter: ((val: number) => string) | ((val: number, axis: Axis) => string);
+  tickFormatter: ((val: number) => string) | ((val: number, axis: any) => string);
   tickGenerator?(axis: Axis): number[];
   units?: { type: string };
   domain?: {
@@ -185,6 +185,7 @@ function buildOptions(
         return wrapperSpan.outerHTML;
       },
     },
+    yaxes: [],
   };
 
   return options;
