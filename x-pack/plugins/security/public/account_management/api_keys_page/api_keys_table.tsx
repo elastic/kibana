@@ -73,8 +73,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       {...props}
       items={props.loading && !createdItemId ? [] : props.items}
       tableCaption={i18n.translate('xpack.security.accountManagement.apiKeys.tableCaption', {
-              defaultMessage: 'Below is a table of your API Keys.',
-            })}
+        defaultMessage: 'Below is a table of your API Keys.',
+      })}
       message={
         props.loading
           ? i18n.translate('xpack.security.accountManagement.apiKeys.loadingMessage', {

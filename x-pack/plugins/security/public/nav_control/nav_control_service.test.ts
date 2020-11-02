@@ -56,34 +56,38 @@ describe('SecurityNavControlService', () => {
     expect(target).toMatchInlineSnapshot(`
       <div>
         <div
-          class="euiPopover euiPopover--anchorDownRight"
-          id="headerUserMenu"
+          class="kbnRedirectCrossAppLinks"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover euiPopover--anchorDownRight"
+            id="headerUserMenu"
           >
-            <button
-              aria-controls="headerUserMenu"
-              aria-expanded="false"
-              aria-haspopup="true"
-              aria-label="Account menu"
-              class="euiHeaderSectionItem__button"
-              data-test-subj="userMenuButton"
-              type="button"
+            <div
+              class="euiPopover__anchor"
             >
-              <div
-                aria-label="some-user"
-                class="euiAvatar euiAvatar--s euiAvatar--user"
-                style="background-image: none; background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
-                title="some-user"
+              <button
+                aria-controls="headerUserMenu"
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Account menu"
+                class="euiHeaderSectionItem__button"
+                data-test-subj="userMenuButton"
+                type="button"
               >
-                <span
-                  aria-hidden="true"
+                <div
+                  aria-label="some-user"
+                  class="euiAvatar euiAvatar--s euiAvatar--user"
+                  style="background-image: none; background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
+                  title="some-user"
                 >
-                  s
-                </span>
-              </div>
-            </button>
+                  <span
+                    aria-hidden="true"
+                  >
+                    s
+                  </span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </div>
