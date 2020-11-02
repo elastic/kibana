@@ -47,7 +47,6 @@ export class CalculationVars extends Component {
   renderRow(row, i, items) {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newVariable);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
-    console.dir(this.props);
 
     return (
       <EuiFlexItem key={row.id} data-test-subj="varRow">
