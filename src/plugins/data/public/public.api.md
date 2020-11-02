@@ -1224,7 +1224,7 @@ export class IndexPatternField implements IFieldType {
     get customName(): string | undefined;
     set customName(label: string | undefined);
     // (undocumented)
-    get displayName(): any;
+    get displayName(): string;
     // (undocumented)
     get esTypes(): string[] | undefined;
     // (undocumented)

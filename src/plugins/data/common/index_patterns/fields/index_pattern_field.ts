@@ -92,7 +92,7 @@ export class IndexPatternField implements IFieldType {
     return this.spec.name;
   }
 
-  public get displayName() {
+  public get displayName(): string {
     return this.spec.customName
       ? this.spec.customName
       : this.spec.shortDotsEnable
