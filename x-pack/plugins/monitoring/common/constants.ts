@@ -271,7 +271,7 @@ export const LEGACY_ALERT_DETAILS = {
     description: i18n.translate(
       'xpack.monitoring.alerts.elasticsearchVersionMismatch.description',
       {
-        defaultMessage: 'Alert when there is a version mismatch in Elasticsearch.',
+        defaultMessage: 'Alert when the cluster has mutliple versions of Elasticsearch.',
       }
     ),
   },
@@ -280,7 +280,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Kibana version mismatch',
     }),
     description: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.description', {
-      defaultMessage: 'Alert when there is a version mismatch in Kibana.',
+      defaultMessage: 'Alert when the cluser has multiple versions of Kibana.',
     }),
   },
   [ALERT_LICENSE_EXPIRATION]: {
@@ -288,7 +288,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'License expiration',
     }),
     description: i18n.translate('xpack.monitoring.alerts.licenseExpiration.description', {
-      defaultMessage: 'Alert when the license is about to expire.',
+      defaultMessage: 'Alert when the cluster license is about to expire.',
     }),
   },
   [ALERT_LOGSTASH_VERSION_MISMATCH]: {
@@ -296,7 +296,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Logstash version mismatch',
     }),
     description: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.description', {
-      defaultMessage: 'Alert when there is a version mismatch in Logstash.',
+      defaultMessage: 'Alert when the cluster has mutliple versions of Logstash.',
     })
   },
   [ALERT_NODES_CHANGED]: {
@@ -304,7 +304,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Nodes changed',
     }),
     description: i18n.translate('xpack.monitoring.alerts.nodesChanged.description', {
-      defaultMessage: 'Alert when cluster nodes change.',
+      defaultMessage: 'Alert when adding, removing, or restarting a node.',
     }),
   },
 };
@@ -318,7 +318,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'CPU Usage',
     }),
     description: i18n.translate('xpack.monitoring.alerts.cpuUsage.description', {
-      defaultMessage: 'Alert when a node runs a consistently high CPU load.',
+      defaultMessage: 'Alert when the CPU load for a node is consistently high.',
     }),
     paramDetails: {
       threshold: {
@@ -354,7 +354,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Disk Usage',
     }),
     description: i18n.translate('xpack.monitoring.alerts.diskUsage.description', {
-      defaultMessage: 'Alert when a node runs a consistently high disk usage.',
+      defaultMessage: 'Alert when the disk usage for a node is consistently high.',
     }),
   },
   [ALERT_MEMORY_USAGE]: {
@@ -376,7 +376,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Memory Usage (JVM)',
     }),
     description: i18n.translate('xpack.monitoring.alerts.memoryUsage.description', {
-      defaultMessage: 'Alert when a node is reporting high memory usage.',
+      defaultMessage: 'Alert when a node reports high memory usage.',
     }),
   },
   [ALERT_MISSING_MONITORING_DATA]: {

@@ -18,7 +18,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
       defaultMessage: 'Index threshold',
     }),
     description: i18n.translate('xpack.triggersActionsUI.indexThresholdAlert.descriptionText', {
-      defaultMessage: 'Alert when the threshold from an aggregated query is met',
+      defaultMessage: 'Alert when an aggregated query meets the threshold.',
     }),
     iconClass: 'alert',
     alertParamsExpression: lazy(() => import('./expression')),

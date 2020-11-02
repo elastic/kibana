@@ -16,7 +16,7 @@ export function getAlertType(): AlertTypeModel {
       defaultMessage: 'Log threshold',
     }),
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
-      defaultMessage: 'Alert when the threshold of a logs aggregation has exceeded.',
+      defaultMessage: 'Alert when the log aggregation exceeds the threshold.',
     }),
     iconClass: 'bell',
     alertParamsExpression: React.lazy(() => import('./components/expression_editor/editor')),

@@ -59,6 +59,6 @@ Response times as high as {slowestAnomalyResponse} have been detected from locat
     defaultMessage: 'Uptime Duration Anomaly',
   }),
   description: i18n.translate('xpack.uptime.alerts.durationAnomaly.description', {
-    defaultMessage: 'Alert when the uptime duration is considered anomalous.',
+    defaultMessage: 'Alert when the Uptime monitor duration is anaomalous.',
   }),
 };
