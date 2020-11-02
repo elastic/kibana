@@ -137,8 +137,6 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 It is registered as disabled. The x-pack plugin should unregister this.
 
 
-|{kib-repo}blob/{branch}/src/plugins/management[management]
-|WARNING: Missing README.
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual managment section into it. This plugin does not contain any individual
