@@ -273,7 +273,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchFilters.fieldNames
     );
     const topHits: {
-      size: number | undefined;
+      size: number;
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
       _source?: boolean | { includes: string[] };
