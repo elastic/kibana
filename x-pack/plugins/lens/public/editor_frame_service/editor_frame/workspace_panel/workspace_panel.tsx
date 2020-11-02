@@ -372,8 +372,10 @@ export const InnerVisualizationWrapper = ({
       if (localState.expandError) {
         showExtraErrors = localState.configurationValidationError
           .slice(1)
-          .map(({ longMessage }, i) => (
-            <EuiFlexItem className="eui-textBreakAll">{longMessage}</EuiFlexItem>
+          .map(({ longMessage }) => (
+            <EuiFlexItem key={longMessage} className="eui-textBreakAll">
+              {longMessage}
+            </EuiFlexItem>
           ));
       } else {
         showExtraErrors = (
