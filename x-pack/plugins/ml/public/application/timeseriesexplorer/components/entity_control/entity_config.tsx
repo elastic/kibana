@@ -115,7 +115,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
               onConfigChange(entity.fieldType, {
                 sort: {
                   order: config.sort.order,
-                  by: id,
+                  by: id as UiPartitionFieldConfig['sort']['by'],
                 },
               });
             }}
@@ -135,7 +135,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
               onConfigChange(entity.fieldType, {
                 sort: {
                   by: config.sort.by,
-                  order: id,
+                  order: id as UiPartitionFieldConfig['sort']['order'],
                 },
               });
             }}

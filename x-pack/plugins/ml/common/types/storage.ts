@@ -23,8 +23,8 @@ export type PartitionFieldConfig =
        */
       applyTimeRange: boolean;
       sort: {
-        by: string; // 'anomaly_score' | 'name';
-        order: string; // 'asc' | 'desc';
+        by: 'anomaly_score' | 'name';
+        order: 'asc' | 'desc';
       };
     }
   | undefined;
