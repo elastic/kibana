@@ -596,14 +596,13 @@ exports[`extend index management ilm summary extension should return extension w
                     key="phaseExecutionPopover"
                     ownFocus={false}
                     panelPaddingSize="m"
-                    withTitle={true}
                   >
                     <EuiOutsideClickDetector
                       isDisabled={true}
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
+                        className="euiPopover euiPopover--anchorDownCenter"
                         id="phaseExecutionPopover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}

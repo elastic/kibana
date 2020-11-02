@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ResponseObject, Server as HapiServer } from 'hapi';
+import { ResponseObject, Server as HapiServer } from '@hapi/hapi';
 import { OpsServerMetrics, MetricsCollector } from './types';
 
 interface ServerResponseTime {

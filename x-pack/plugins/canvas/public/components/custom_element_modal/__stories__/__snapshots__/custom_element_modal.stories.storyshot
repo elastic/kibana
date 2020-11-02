@@ -281,6 +281,11 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span
@@ -585,6 +590,11 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span
@@ -887,6 +897,11 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span
@@ -1187,6 +1202,11 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
               onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
               type="button"
             >
               <span

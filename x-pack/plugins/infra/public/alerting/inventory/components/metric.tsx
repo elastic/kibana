@@ -196,7 +196,6 @@ export const MetricExpression = ({
       closePopover={() => {
         setPopoverOpen(false);
       }}
-      withTitle
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >

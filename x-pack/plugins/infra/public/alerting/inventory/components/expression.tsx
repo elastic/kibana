@@ -370,7 +370,7 @@ export const Expressions: React.FC<Props> = (props) => {
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
-        compressed
+        display="rowCompressed"
       >
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
