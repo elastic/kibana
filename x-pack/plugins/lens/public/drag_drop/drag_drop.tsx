@@ -366,19 +366,14 @@ export const ReorderableDragDrop = ({
   const { isReorderOn, reorderedItems, draggingHeight, direction, groupId } = reorderState;
   const currentIndex = itemsInGroup.indexOf(id);
 
-  useEffect(() => {
-    if (draggingProps.isReorderDragging) {
+  useEffect(
+    () =>
       setReorderState((s: ReorderState) => ({
         ...s,
-        isReorderOn: true,
-      }));
-    } else {
-      setReorderState((s: ReorderState) => ({
-        ...s,
-        isReorderOn: false,
-      }));
-    }
-  }, [draggingProps.isReorderDragging, setReorderState]);
+        isReorderOn: draggingProps.isReorderDragging,
+      })),
+    [draggingProps.isReorderDragging, setReorderState]
+  );
 
   return (
     <div className={classNames('lnsDragDrop__reorderableContainer', className)}>

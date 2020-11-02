@@ -30,7 +30,7 @@
   @include lnsDroppableActive;
 }
 
-.lnsDragDrop__isActiveGroup {
+.lnsDragDrop-isActiveGroup {
   background-color: transparentize($euiColorVis0, .8);
 }
 

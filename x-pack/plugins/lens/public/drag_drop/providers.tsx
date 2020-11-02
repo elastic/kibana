@@ -164,7 +164,7 @@ export function ReorderProvider({
   ]);
 
   return (
-    <div className={classNames(className, { ['lnsDragDrop__isActiveGroup']: state.isReorderOn })}>
+    <div className={classNames(className, { 'lnsDragDrop-isActiveGroup': state.isReorderOn })}>
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
         {children}
       </ReorderContext.Provider>
