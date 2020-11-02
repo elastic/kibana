@@ -5,7 +5,6 @@
  */
 
 import { IHttpFetchError } from 'kibana/public';
-import { cloneDeep } from 'lodash';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
@@ -34,17 +33,15 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
       const id = policyIdFromParams(state);
       let policyItem: PolicyData;
-      let policyItemDefault: PolicyData;
 
       try {
         policyItem = (await sendGetPackagePolicy(http, id)).item;
-        policyItemDefault = cloneDeep(policyItem);
         // sets default user notification message if policy config message is empty
-        if (policyItemDefault.inputs[0].config.policy.value.windows.popup.malware.message === '') {
-          policyItemDefault.inputs[0].config.policy.value.windows.popup.malware.message =
-            'Elastic Security { pathname } { file }';
-          policyItemDefault.inputs[0].config.policy.value.mac.popup.malware.message =
-            'Elastic Security { pathname } { file }';
+        if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
+          policyItem.inputs[0].config.policy.value.windows.popup.malware.message =
+            'Elastic Security { action } { filename }';
+          policyItem.inputs[0].config.policy.value.mac.popup.malware.message =
+            'Elastic Security { action } { filename }';
         }
       } catch (error) {
         dispatch({
@@ -57,7 +54,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       dispatch({
         type: 'serverReturnedPolicyDetailsData',
         payload: {
-          policyItem: policyItemDefault,
+          policyItem,
         },
       });
 
