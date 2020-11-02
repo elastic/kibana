@@ -17,7 +17,7 @@ import {
   sortToSnake,
 } from './utils';
 import { newCase } from './__mocks__/request_responses';
-import { isBoom, boomify } from 'boom';
+import { isBoom, boomify } from '@hapi/boom';
 import {
   mockCases,
   mockCaseComments,

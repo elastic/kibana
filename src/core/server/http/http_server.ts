@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from 'hapi';
-import HapiStaticFiles from 'inert';
+import { Server } from '@hapi/hapi';
+import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
 
@@ -271,7 +271,7 @@ export class HttpServer {
     }
 
     this.registerOnPreRouting((request, response, toolkit) => {
-      const oldUrl = request.url.href!;
+      const oldUrl = request.url.pathname + request.url.search;
       const newURL = basePathService.remove(oldUrl);
       const shouldRedirect = newURL !== oldUrl;
       if (shouldRedirect) {
