@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -269,7 +269,11 @@ export class AlertsClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert.alertTypeId);
+        scheduledTask = await this.scheduleAlert(
+          createdAlert.id,
+          rawAlert.alertTypeId,
+          data.schedule
+        );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -751,7 +755,11 @@ export class AlertsClient {
         this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
         throw e;
       }
-      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
+      const scheduledTask = await this.scheduleAlert(
+        id,
+        attributes.alertTypeId,
+        attributes.schedule as IntervalSchedule
+      );
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
@@ -987,9 +995,10 @@ export class AlertsClient {
     ]);
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string) {
+  private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
+      schedule,
       params: {
         alertId: id,
         spaceId: this.spaceId,
