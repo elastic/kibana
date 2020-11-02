@@ -94,7 +94,7 @@ export const getMetricChartRenderer = (
     const resolvedFormatFactory = await formatFactory;
     ReactDOM.render(
       <I18nProvider>
-        <MetricChart {...config} formatFactory={resolvedFormatFactory} />,
+        <MetricChart {...config} formatFactory={resolvedFormatFactory} />
       </I18nProvider>,
       domNode,
       () => {
