@@ -47,6 +47,7 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
       { defaultMessage: 'Status' }
     ),
+    width: '100px',
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
       return <EuiHealth color={value.healthColor}>{value.label}</EuiHealth>;
     },
@@ -55,6 +56,7 @@ export const alertInstancesTableColumns = (
   },
   {
     field: 'start',
+    width: '200px',
     render: (value: Date | undefined, instance: AlertInstanceListItem) => {
       return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
     },
@@ -76,11 +78,13 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Duration' }
     ),
     sortable: false,
+    width: '100px',
     'data-test-subj': 'alertInstancesTableCell-duration',
   },
   {
     field: '',
     align: RIGHT_ALIGNMENT,
+    width: '60px',
     name: i18n.translate(
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
       { defaultMessage: 'Mute' }
@@ -167,7 +171,7 @@ export function AlertInstances({
         })}
         columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
-        tableLayout="auto"
+        tableLayout="fixed"
       />
     </Fragment>
   );
