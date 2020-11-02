@@ -47,6 +47,7 @@ import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
+import { AdvancedPolicyForms } from './policy_advanced';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -69,6 +70,7 @@ export const PolicyDetails = React.memo(() => {
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
+  const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
 
@@ -127,6 +129,10 @@ export const PolicyDetails = React.memo(() => {
   const handleSaveCancel = useCallback(() => {
     setShowConfirm(false);
   }, []);
+
+  const handleAdvancedPolicyClick = useCallback(() => {
+    setShowAdvancedPolicy(!showAdvancedPolicy);
+  }, [showAdvancedPolicy]);
 
   useEffect(() => {
     if (!routeState && locationRouteState) {
@@ -245,6 +251,18 @@ export const PolicyDetails = React.memo(() => {
         <MacEvents />
         <EuiSpacer size="l" />
         <LinuxEvents />
+
+        <EuiSpacer size="l" />
+        <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.advanced.show"
+            defaultMessage="{action} advanced settings"
+            values={{ action: showAdvancedPolicy ? 'Hide' : 'Show' }}
+          />
+        </EuiButtonEmpty>
+
+        <EuiSpacer size="l" />
+        {showAdvancedPolicy && <AdvancedPolicyForms />}
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />

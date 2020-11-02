@@ -6,7 +6,7 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { BulkInstallPackageInfo, InstallSource } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
