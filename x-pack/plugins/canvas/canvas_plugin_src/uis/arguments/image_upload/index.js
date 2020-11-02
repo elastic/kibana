@@ -131,6 +131,7 @@ class ImageUpload extends React.Component {
           onChange={this.changeUrlType}
           isFullWidth
           className="canvasSidebar__buttonGroup"
+          legend={strings.getUrlTypeChangeLegend()}
         />
       </EuiFormRow>
     );

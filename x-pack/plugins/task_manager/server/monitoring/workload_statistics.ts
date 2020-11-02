@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timer } from 'rxjs';
-import { mergeMap, map, catchError } from 'rxjs/operators';
+import { combineLatest, Observable, timer } from 'rxjs';
+import { mergeMap, map, filter, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
@@ -94,6 +94,7 @@ const MAX_SHCEDULE_DENSITY_BUCKETS = 50;
 
 export function createWorkloadAggregator(
   taskStore: TaskStore,
+  elasticsearchAndSOAvailability$: Observable<boolean>,
   refreshInterval: number,
   pollInterval: number,
   logger: Logger
@@ -105,7 +106,8 @@ export function createWorkloadAggregator(
     MAX_SHCEDULE_DENSITY_BUCKETS
   );
 
-  return timer(0, refreshInterval).pipe(
+  return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
+    filter(([, areElasticsearchAndSOAvailable]) => areElasticsearchAndSOAvailable),
     mergeMap(() =>
       taskStore.aggregate({
         aggs: {
