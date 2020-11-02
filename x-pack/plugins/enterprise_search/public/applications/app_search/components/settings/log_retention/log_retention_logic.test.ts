@@ -242,5 +242,70 @@ describe('LogRetentionLogic', () => {
         expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
       });
     });
+
+    describe('toggleLogRetention', () => {
+      describe('logsRetentionUpdating', () => {
+        it('sets logsRetentionUpdating to true', () => {
+          mount({
+            logsRetentionUpdating: false,
+          });
+
+          LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            logsRetentionUpdating: true,
+          });
+        });
+      });
+
+      it('will call setOpenModal if already enabled', () => {
+        mount({
+          logRetention: {
+            [ELogRetentionOptions.Analytics]: {
+              enabled: true,
+            },
+          },
+        });
+        jest.spyOn(LogRetentionLogic.actions, 'setOpenModal');
+
+        LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+
+        expect(LogRetentionLogic.actions.setOpenModal).toHaveBeenCalledWith(
+          ELogRetentionOptions.Analytics
+        );
+      });
+    });
+
+    it('will call saveLogRetention if NOT already enabled', () => {
+      mount({
+        logRetention: {
+          [ELogRetentionOptions.Analytics]: {
+            enabled: false,
+          },
+        },
+      });
+      jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
+
+      LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+
+      expect(LogRetentionLogic.actions.saveLogRetention).toHaveBeenCalledWith(
+        ELogRetentionOptions.Analytics,
+        true
+      );
+    });
+
+    it('will do nothing if logRetention option is not yet set', () => {
+      mount({
+        logRetention: {},
+      });
+      jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
+      jest.spyOn(LogRetentionLogic.actions, 'setOpenModal');
+
+      LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.API);
+
+      expect(LogRetentionLogic.actions.saveLogRetention).not.toHaveBeenCalled();
+      expect(LogRetentionLogic.actions.setOpenModal).not.toHaveBeenCalled();
+    });
   });
 });

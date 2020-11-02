@@ -19,6 +19,7 @@ interface ILogRetentionActions {
     enabled: boolean
   ): { option: ELogRetentionOptions; enabled: boolean };
   setOpenModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
+  toggleLogRetention(option: ELogRetentionOptions): { option: ELogRetentionOptions };
   updateLogRetention(logRetention: ILogRetention): { logRetention: ILogRetention };
 }
 
@@ -35,6 +36,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
     closeModals: true,
     saveLogRetention: (option, enabled) => ({ enabled, option }),
     setOpenModal: (option) => ({ option }),
+    toggleLogRetention: (option) => ({ option }),
     updateLogRetention: (logRetention) => ({ logRetention }),
   }),
   reducers: () => ({
@@ -60,6 +62,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
       {
         clearLogRetentionUpdating: () => false,
         closeModals: () => false,
+        toggleLogRetention: () => true,
       },
     ],
     openModal: [
@@ -71,7 +74,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
       },
     ],
   }),
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
     saveLogRetention: async ({ enabled, option }) => {
       const updateData = { [option.toString()]: { enabled } };
 
@@ -87,6 +90,22 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
         flashAPIErrors(e);
       } finally {
         actions.clearLogRetentionUpdating();
+      }
+    },
+    toggleLogRetention: ({ option }) => {
+      const logRetention = values.logRetention && values.logRetention[option];
+
+      // If the user has found a way to call this before we've retrieved
+      // log retention settings from the server, short circuit this and return early
+      if (!logRetention) {
+        return;
+      }
+
+      const optionIsAlreadyEnabled = logRetention.enabled;
+      if (optionIsAlreadyEnabled) {
+        actions.setOpenModal(option);
+      } else {
+        actions.saveLogRetention(option, true);
       }
     },
   }),
