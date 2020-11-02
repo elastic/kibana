@@ -56,7 +56,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
     setFormatService(getFieldFormatsRegistry(core));
     initAngularBootstrap();
     initLocalAngular();
-    angular.mock.module('kibana/table_vis');
+    window.angular.mock.module('kibana/table_vis');
     angular.mock.inject(($injector) => {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');

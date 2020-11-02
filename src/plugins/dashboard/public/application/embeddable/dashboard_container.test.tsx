@@ -50,7 +50,7 @@ beforeEach(() => {
   options.embeddable = doStart();
 });
 
-test('DashboardContainer initializes embeddables', async (done) => {
+test('DashboardContainer initializes embeddables', async () => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -66,7 +66,6 @@ test('DashboardContainer initializes embeddables', async (done) => {
       const embeddable = container.getChild<ContactCardEmbeddable>('123');
       expect(embeddable).toBeDefined();
       expect(embeddable.id).toBe('123');
-      done();
     }
   });
 
@@ -75,7 +74,6 @@ test('DashboardContainer initializes embeddables', async (done) => {
     expect(embeddable).toBeDefined();
     expect(embeddable.id).toBe('123');
     subscription.unsubscribe();
-    done();
   }
 });
 

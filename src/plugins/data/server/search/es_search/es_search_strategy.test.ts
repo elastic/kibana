@@ -59,7 +59,7 @@ describe('ES search strategy', () => {
     expect(typeof esSearch.search).toBe('function');
   });
 
-  it('calls the API caller with the params with defaults', async (done) => {
+  it('calls the API caller with the params with defaults', async () => {
     const params = { index: 'logstash-*' };
 
     await esSearchStrategyProvider(mockConfig$, mockLogger)
@@ -71,11 +71,10 @@ describe('ES search strategy', () => {
           ignore_unavailable: true,
           track_total_hits: true,
         });
-        done();
       });
   });
 
-  it('calls the API caller with overridden defaults', async (done) => {
+  it('calls the API caller with overridden defaults', async () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
     await esSearchStrategyProvider(mockConfig$, mockLogger)
@@ -86,11 +85,10 @@ describe('ES search strategy', () => {
           ...params,
           track_total_hits: true,
         });
-        done();
       });
   });
 
-  it('has all response parameters', async (done) =>
+  it('has all response parameters', async () =>
     await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search(
         {
@@ -104,6 +102,5 @@ describe('ES search strategy', () => {
         expect(data.isPartial).toBe(false);
         expect(data).toHaveProperty('loaded');
         expect(data).toHaveProperty('rawResponse');
-        done();
       }));
 });

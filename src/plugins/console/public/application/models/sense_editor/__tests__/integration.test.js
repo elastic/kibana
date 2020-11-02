@@ -41,7 +41,7 @@ describe('Integration', () => {
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
-    test(testToRun.name, async function (done) {
+    test(testToRun.name, async function () {
       let lineOffset = 0; // add one for the extra method line
       let editorValue = data;
       if (requestLine != null) {
@@ -89,7 +89,6 @@ describe('Integration', () => {
         terms
       ) {
         if (testToRun.assertThrows) {
-          done();
           return;
         }
 
@@ -105,7 +104,6 @@ describe('Integration', () => {
         }
 
         if (!terms || terms.length === 0) {
-          done();
           return;
         }
 
@@ -166,7 +164,6 @@ describe('Integration', () => {
         ac('addTemplate');
         ac('textBoxPosition', posCompare);
         ac('rangeToReplace', rangeCompare);
-        done();
       });
     });
   }
