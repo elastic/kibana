@@ -16,6 +16,6 @@ export interface ISearchStrategy<SearchStrategyRequest extends IKibanaSearchRequ
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [cancel](./kibana-plugin-plugins-data-server.isearchstrategy.cancel.md) | <code>(deps: SearchStrategyDependencies, id: string) =&gt; Promise&lt;void&gt;</code> |  |
-|  [search](./kibana-plugin-plugins-data-server.isearchstrategy.search.md) | <code>(deps: SearchStrategyDependencies, request: SearchStrategyRequest, options?: ISearchOptions) =&gt; Observable&lt;SearchStrategyResponse&gt;</code> |  |
+|  [cancel](./kibana-plugin-plugins-data-server.isearchstrategy.cancel.md) | <code>(id: string, options: ISearchOptions, deps: SearchStrategyDependencies) =&gt; Promise&lt;void&gt;</code> |  |
+|  [search](./kibana-plugin-plugins-data-server.isearchstrategy.search.md) | <code>(request: SearchStrategyRequest, options: ISearchOptions, deps: SearchStrategyDependencies) =&gt; Observable&lt;SearchStrategyResponse&gt;</code> |  |
 

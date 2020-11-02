@@ -17,7 +17,7 @@ import { SecuritySolutionTimelineFactory } from './factory/types';
 export const securitySolutionTimelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy();
+  const es = data.search.getSearchStrategy('es');
 
   return {
     search: (request, options, deps) => {

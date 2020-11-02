@@ -742,9 +742,9 @@ export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest
 // @public
 export interface ISearchStrategy<SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse> {
     // (undocumented)
-    cancel?: (deps: SearchStrategyDependencies, id: string) => Promise<void>;
+    cancel?: (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
     // (undocumented)
-    search: (deps: SearchStrategyDependencies, request: SearchStrategyRequest, options?: ISearchOptions) => Observable<SearchStrategyResponse>;
+    search: (request: SearchStrategyRequest, options: ISearchOptions, deps: SearchStrategyDependencies) => Observable<SearchStrategyResponse>;
 }
 
 // @public (undocumented)
