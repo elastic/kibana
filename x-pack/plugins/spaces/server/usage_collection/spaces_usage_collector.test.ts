@@ -10,6 +10,7 @@ import { PluginsSetup } from '../plugin';
 import { KibanaFeature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -67,6 +68,13 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
+const getMockFetchContext = (mockedCallCluster: jest.Mock) => {
+  return {
+    ...createCollectorFetchContextMock(),
+    callCluster: mockedCallCluster,
+  };
+};
+
 describe('error handling', () => {
   it('handles a 404 when searching for space usage', async () => {
     const { features, licensing, usageCollecion } = setup({
@@ -78,7 +86,7 @@ describe('error handling', () => {
       licensing,
     });
 
-    await getSpacesUsage(jest.fn().mockRejectedValue({ status: 404 }));
+    await getSpacesUsage(getMockFetchContext(jest.fn().mockRejectedValue({ status: 404 })));
   });
 
   it('throws error for a non-404', async () => {
@@ -94,7 +102,9 @@ describe('error handling', () => {
     const statusCodes = [401, 402, 403, 500];
     for (const statusCode of statusCodes) {
       const error = { status: statusCode };
-      await expect(getSpacesUsage(jest.fn().mockRejectedValue(error))).rejects.toBe(error);
+      await expect(
+        getSpacesUsage(getMockFetchContext(jest.fn().mockRejectedValue(error)))
+      ).rejects.toBe(error);
     }
   });
 });
@@ -110,7 +120,7 @@ describe('with a basic license', () => {
       features,
       licensing,
     });
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
+    usageStats = await getSpacesUsage(getMockFetchContext(defaultCallClusterMock));
 
     expect(defaultCallClusterMock).toHaveBeenCalledWith('search', {
       body: {
@@ -158,7 +168,7 @@ describe('with no license', () => {
       features,
       licensing,
     });
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
+    usageStats = await getSpacesUsage(getMockFetchContext(defaultCallClusterMock));
   });
 
   test('sets enabled to false', () => {
@@ -189,7 +199,7 @@ describe('with platinum license', () => {
       features,
       licensing,
     });
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
+    usageStats = await getSpacesUsage(getMockFetchContext(defaultCallClusterMock));
   });
 
   test('sets enabled to true', () => {

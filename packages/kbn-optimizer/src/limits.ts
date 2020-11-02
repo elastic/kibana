@@ -23,19 +23,28 @@ import dedent from 'dedent';
 import Yaml from 'js-yaml';
 import { createFailError, ToolingLog } from '@kbn/dev-utils';
 
-import { OptimizerConfig, getMetrics } from './optimizer';
+import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
 const DEFAULT_BUDGET = 15000;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
-export function readLimits() {
-  return Yaml.safeLoad(Fs.readFileSync(LIMITS_PATH, 'utf8'));
+export function readLimits(): Limits {
+  let yaml;
+  try {
+    yaml = Fs.readFileSync(LIMITS_PATH, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  return yaml ? Yaml.safeLoad(yaml) : {};
 }
 
 export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
-  const limitBundleIds = Object.keys(config.limits.pageLoadAssetSize);
+  const limitBundleIds = Object.keys(config.limits.pageLoadAssetSize || {});
   const configBundleIds = config.bundles.map((b) => b.id);
 
   const missingBundleIds = diff(configBundleIds, limitBundleIds);
@@ -56,7 +65,11 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
 
           ${issues.join('\n          ')}
 
-        To validate your changes locally, run:
+        To automatically update the limits file locally run:
+
+          node scripts/build_kibana_platform_plugins.js --update-limits
+
+        To validate your changes locally run:
 
           node scripts/build_kibana_platform_plugins.js --validate-limits
       ` + '\n'
@@ -66,18 +79,33 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
   log.success('limits.yml file valid');
 }
 
-export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
+interface UpdateBundleLimitsOptions {
+  log: ToolingLog;
+  config: OptimizerConfig;
+  dropMissing: boolean;
+}
+
+export function updateBundleLimits({ log, config, dropMissing }: UpdateBundleLimitsOptions) {
   const metrics = getMetrics(log, config);
 
-  const number = (input: number) => input.toLocaleString('en').split(',').join('_');
+  const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = dropMissing
+    ? {}
+    : config.limits.pageLoadAssetSize ?? {};
 
-  let yaml = `pageLoadAssetSize:\n`;
   for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
     if (metric.group === 'page load bundle size') {
-      yaml += `  ${metric.id}: ${number(metric.value + DEFAULT_BUDGET)}\n`;
+      const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
+      pageLoadAssetSize[metric.id] =
+        existingLimit != null && existingLimit >= metric.value
+          ? existingLimit
+          : metric.value + DEFAULT_BUDGET;
     }
   }
 
-  Fs.writeFileSync(LIMITS_PATH, yaml);
+  const newLimits: Limits = {
+    pageLoadAssetSize,
+  };
+
+  Fs.writeFileSync(LIMITS_PATH, Yaml.safeDump(newLimits));
   log.success(`wrote updated limits to ${LIMITS_PATH}`);
 }

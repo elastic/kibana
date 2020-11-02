@@ -232,7 +232,6 @@ export const SearchExamplesApp = ({
                       <EuiFlexItem>
                         <EuiFormLabel>Index Pattern</EuiFormLabel>
                         <IndexPatternSelect
-                          savedObjectsClient={savedObjectsClient}
                           placeholder={i18n.translate(
                             'backgroundSessionExample.selectIndexPatternPlaceholder',
                             {

@@ -17,6 +17,8 @@ export interface ExpressionFunctionDefinitions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [clog](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.clog.md) | <code>ExpressionFunctionClog</code> |  |
+|  [cumulative\_sum](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.cumulative_sum.md) | <code>ExpressionFunctionCumulativeSum</code> |  |
+|  [derivative](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.derivative.md) | <code>ExpressionFunctionDerivative</code> |  |
 |  [font](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.font.md) | <code>ExpressionFunctionFont</code> |  |
 |  [kibana\_context](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.kibana_context.md) | <code>ExpressionFunctionKibanaContext</code> |  |
 |  [kibana](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.kibana.md) | <code>ExpressionFunctionKibana</code> |  |

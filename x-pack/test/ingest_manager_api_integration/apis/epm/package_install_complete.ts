@@ -9,22 +9,28 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
 } from '../../../../plugins/ingest_manager/common';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const dockerServers = getService('dockerServers');
+  const server = dockerServers.get('registry');
   const pkgName = 'multiple_versions';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
   describe('setup checks packages completed install', async () => {
+    skipIfNoDockerRegistry(providerContext);
     describe('package install', async () => {
       before(async () => {
+        if (!server.enabled) return;
         await supertest
           .post(`/api/fleet/epm/packages/${pkgName}-0.1.0`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ force: true });
+          .send({ force: true })
+          .expect(200);
       });
       it('should have not reinstalled if package install completed', async function () {
         const packageBeforeSetup = await kibanaServer.savedObjects.get({
@@ -32,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
           id: pkgName,
         });
         const installStartedAtBeforeSetup = packageBeforeSetup.attributes.install_started_at;
-        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -51,7 +57,7 @@ export default function (providerContext: FtrProviderContext) {
             install_started_at: previousInstallDate,
           },
         });
-        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -71,7 +77,7 @@ export default function (providerContext: FtrProviderContext) {
             install_started_at: previousInstallDate,
           },
         });
-        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -81,21 +87,26 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageAfterSetup.attributes.install_status).equal('installing');
       });
       after(async () => {
+        if (!server.enabled) return;
         await supertest
           .delete(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
-          .set('kbn-xsrf', 'xxxx');
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
       });
     });
     describe('package update', async () => {
       before(async () => {
+        if (!server.enabled) return;
         await supertest
           .post(`/api/fleet/epm/packages/${pkgName}-0.1.0`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ force: true });
+          .send({ force: true })
+          .expect(200);
         await supertest
           .post(`/api/fleet/epm/packages/${pkgName}-0.2.0`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ force: true });
+          .send({ force: true })
+          .expect(200);
       });
       it('should have not reinstalled if package update completed', async function () {
         const packageBeforeSetup = await kibanaServer.savedObjects.get({
@@ -103,7 +114,7 @@ export default function (providerContext: FtrProviderContext) {
           id: pkgName,
         });
         const installStartedAtBeforeSetup = packageBeforeSetup.attributes.install_started_at;
-        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -124,7 +135,7 @@ export default function (providerContext: FtrProviderContext) {
             install_version: pkgUpdateVersion, // set version back
           },
         });
-        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -147,7 +158,7 @@ export default function (providerContext: FtrProviderContext) {
             version: pkgVersion, // set version back
           },
         });
-        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -158,9 +169,11 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageAfterSetup.attributes.version).equal(pkgVersion);
       });
       after(async () => {
+        if (!server.enabled) return;
         await supertest
           .delete(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
-          .set('kbn-xsrf', 'xxxx');
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
       });
     });
   });

@@ -35,7 +35,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
       <StyledText>
         {listItems.length > 0 &&
           listItems.map((item, i) => (
-            <span key={`${item.title}-${i}`}>
+            <span data-test-subj="card-list-item" key={`${item.title}-${i}`}>
               <strong>{`${item.title}: `}</strong>
               {item.description}
             </span>

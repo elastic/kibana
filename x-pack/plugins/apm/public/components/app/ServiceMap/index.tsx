@@ -10,6 +10,7 @@ import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
   isActivePlatinumLicense,
+  SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
@@ -19,9 +20,10 @@ import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
-import { getCytoscapeDivStyle } from './cytoscapeOptions';
+import { getCytoscapeDivStyle } from './cytoscape_options';
 import { EmptyBanner } from './EmptyBanner';
 import { EmptyPrompt } from './empty_prompt';
+import { TimeoutPrompt } from './timeout_prompt';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 
@@ -61,7 +63,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
   const { urlParams } = useUrlParams();
 
-  const { data = { elements: [] }, status } = useFetcher(() => {
+  const { data = { elements: [] }, status, error } = useFetcher(() => {
     // When we don't have a license or a valid license, don't make the request.
     if (!license || !isActivePlatinumLicense(license)) {
       return;
@@ -109,6 +111,20 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     );
   }
 
+  if (
+    status === FETCH_STATUS.FAILURE &&
+    error &&
+    'body' in error &&
+    error.body.statusCode === 500 &&
+    error.body.message === SERVICE_MAP_TIMEOUT_ERROR
+  ) {
+    return (
+      <PromptContainer>
+        <TimeoutPrompt isGlobalServiceMap={!serviceName} />
+      </PromptContainer>
+    );
+  }
+
   return (
     <div
       data-test-subj="ServiceMap"
@@ -121,7 +137,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         elements={data.elements}
         height={height}
         serviceName={serviceName}
-        style={getCytoscapeDivStyle(theme)}
+        style={getCytoscapeDivStyle(theme, status)}
       >
         <Controls />
         {serviceName && <EmptyBanner />}

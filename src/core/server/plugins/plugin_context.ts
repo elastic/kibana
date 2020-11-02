@@ -201,7 +201,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
     },
     getStartServices: () => plugin.startDependencies,
-    auditTrail: deps.auditTrail,
   };
 }
 
@@ -250,7 +249,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
-    auditTrail: deps.auditTrail,
     coreUsageData: deps.coreUsageData,
   };
 }

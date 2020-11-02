@@ -62,6 +62,7 @@ export const createThreatSignals = async ({
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
+    listClient,
     searchAfter: undefined,
     sortField: undefined,
     sortOrder: undefined,

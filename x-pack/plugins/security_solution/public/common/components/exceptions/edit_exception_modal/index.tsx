@@ -307,6 +307,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
                 indexPatterns={indexPatterns}
+                ruleType={maybeRule?.type}
               />
 
               <EuiSpacer />

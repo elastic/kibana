@@ -35,6 +35,7 @@ export function getSuggestions({
   table,
   state,
   keptLayerIds,
+  subVisualizationId,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   if (
     // We only render line charts for multi-row queries. We require at least
@@ -66,7 +67,12 @@ export function getSuggestions({
     return [];
   }
 
-  const suggestions = getSuggestionForColumns(table, keptLayerIds, state);
+  const suggestions = getSuggestionForColumns(
+    table,
+    keptLayerIds,
+    state,
+    subVisualizationId as SeriesType | undefined
+  );
 
   if (suggestions && suggestions instanceof Array) {
     return suggestions;
@@ -78,7 +84,8 @@ export function getSuggestions({
 function getSuggestionForColumns(
   table: TableSuggestion,
   keptLayerIds: string[],
-  currentState?: State
+  currentState?: State,
+  seriesType?: SeriesType
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
@@ -93,6 +100,7 @@ function getSuggestionForColumns(
       currentState,
       tableLabel: table.label,
       keptLayerIds,
+      requestedSeriesType: seriesType,
     });
   } else if (buckets.length === 0) {
     const [x, ...yValues] = prioritizeColumns(values);
@@ -105,6 +113,7 @@ function getSuggestionForColumns(
       currentState,
       tableLabel: table.label,
       keptLayerIds,
+      requestedSeriesType: seriesType,
     });
   }
 }
@@ -117,8 +126,6 @@ function flipSeriesType(seriesType: SeriesType) {
       return 'bar_stacked';
     case 'bar':
       return 'bar_horizontal';
-    case 'bar_horizontal_stacked':
-      return 'bar_stacked';
     case 'bar_horizontal_percentage_stacked':
       return 'bar_percentage_stacked';
     case 'bar_percentage_stacked':
@@ -190,6 +197,7 @@ function getSuggestionsForLayer({
   currentState,
   tableLabel,
   keptLayerIds,
+  requestedSeriesType,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -199,9 +207,11 @@ function getSuggestionsForLayer({
   currentState?: State;
   tableLabel?: string;
   keptLayerIds: string[];
+  requestedSeriesType?: SeriesType;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
-  const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue);
+  const seriesType: SeriesType =
+    requestedSeriesType || getSeriesType(currentState, layerId, xValue);
 
   const options = {
     currentState,

@@ -37,7 +37,7 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
-    attributeService: LensAttributeService;
+    attributeService: () => Promise<LensAttributeService>;
   }
 ) {
   const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
@@ -54,7 +54,7 @@ export async function mountApp(
     data,
     storage,
     navigation,
-    attributeService,
+    attributeService: await attributeService(),
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
@@ -97,9 +97,12 @@ export async function mountApp(
 
   const redirectTo = (routeProps: RouteComponentProps<{ id?: string }>, savedObjectId?: string) => {
     if (!savedObjectId) {
-      routeProps.history.push('/');
+      routeProps.history.push({ pathname: '/', search: routeProps.history.location.search });
     } else {
-      routeProps.history.push(`/edit/${savedObjectId}`);
+      routeProps.history.push({
+        pathname: `/edit/${savedObjectId}`,
+        search: routeProps.history.location.search,
+      });
     }
   };
 

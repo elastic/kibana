@@ -136,8 +136,8 @@ export function MetricChart({
   }
 
   const value =
-    column && column.formatHint
-      ? formatFactory(column.formatHint).convert(row[accessor])
+    column && column.meta?.params
+      ? formatFactory(column.meta?.params).convert(row[accessor])
       : Number(Number(row[accessor]).toFixed(3)).toString();
 
   return (

@@ -52,7 +52,8 @@ describe('AllRulesTable Columns', () => {
         dispatch,
         dispatchToaster,
         history,
-        reFetchRules
+        reFetchRules,
+        true
       )[1];
       await duplicateRulesActionObject.onClick(rule);
       expect(results).toEqual(['duplicateRulesAction', 'reFetchRules']);
@@ -73,7 +74,8 @@ describe('AllRulesTable Columns', () => {
         dispatch,
         dispatchToaster,
         history,
-        reFetchRules
+        reFetchRules,
+        true
       )[3];
       await deleteRulesActionObject.onClick(rule);
       expect(results).toEqual(['deleteRulesAction', 'reFetchRules']);

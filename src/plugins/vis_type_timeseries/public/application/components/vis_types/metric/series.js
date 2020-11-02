@@ -89,6 +89,7 @@ function MetricSeriesUi(props) {
     } else {
       seriesBody = (
         <SeriesConfig
+          panel={panel}
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}

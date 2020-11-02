@@ -72,7 +72,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
     reporters: [
       'default',
       [
-        `${kibanaDirectory}/src/dev/jest/junit_reporter.js`,
+        `${kibanaDirectory}/packages/kbn-test/target/jest/junit_reporter`,
         {
           reportName: 'X-Pack Jest Tests',
         },

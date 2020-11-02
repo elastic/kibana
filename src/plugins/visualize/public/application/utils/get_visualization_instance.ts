@@ -35,7 +35,12 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { chrome, data, overlays, createVisEmbeddableFromObject, savedObjects } = visualizeServices;
+  const {
+    data,
+    createVisEmbeddableFromObject,
+    savedObjects,
+    savedObjectsPublic,
+  } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
@@ -55,10 +60,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   if (vis.data.savedSearchId) {
     savedSearch = await createSavedSearchesLoader({
       savedObjectsClient: savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome,
-      overlays,
+      savedObjects: savedObjectsPublic,
     }).get(vis.data.savedSearchId);
   }
 

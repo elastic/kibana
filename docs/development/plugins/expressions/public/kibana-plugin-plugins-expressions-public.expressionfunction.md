@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class ExpressionFunction 
+export declare class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> 
 ```
 
 ## Constructors
@@ -23,9 +23,14 @@ export declare class ExpressionFunction
 |  [accepts](./kibana-plugin-plugins-expressions-public.expressionfunction.accepts.md) |  | <code>(type: string) =&gt; boolean</code> |  |
 |  [aliases](./kibana-plugin-plugins-expressions-public.expressionfunction.aliases.md) |  | <code>string[]</code> | Aliases that can be used instead of <code>name</code>. |
 |  [args](./kibana-plugin-plugins-expressions-public.expressionfunction.args.md) |  | <code>Record&lt;string, ExpressionFunctionParameter&gt;</code> | Specification of expression function parameters. |
+|  [disabled](./kibana-plugin-plugins-expressions-public.expressionfunction.disabled.md) |  | <code>boolean</code> |  |
+|  [extract](./kibana-plugin-plugins-expressions-public.expressionfunction.extract.md) |  | <code>(state: ExpressionAstFunction['arguments']) =&gt; {</code><br/><code>        state: ExpressionAstFunction['arguments'];</code><br/><code>        references: SavedObjectReference[];</code><br/><code>    }</code> |  |
 |  [fn](./kibana-plugin-plugins-expressions-public.expressionfunction.fn.md) |  | <code>(input: ExpressionValue, params: Record&lt;string, any&gt;, handlers: object) =&gt; ExpressionValue</code> | Function to run function (context, args) |
 |  [help](./kibana-plugin-plugins-expressions-public.expressionfunction.help.md) |  | <code>string</code> | A short help text. |
+|  [inject](./kibana-plugin-plugins-expressions-public.expressionfunction.inject.md) |  | <code>(state: ExpressionAstFunction['arguments'], references: SavedObjectReference[]) =&gt; ExpressionAstFunction['arguments']</code> |  |
 |  [inputTypes](./kibana-plugin-plugins-expressions-public.expressionfunction.inputtypes.md) |  | <code>string[] &#124; undefined</code> | Type of inputs that this function supports. |
+|  [migrations](./kibana-plugin-plugins-expressions-public.expressionfunction.migrations.md) |  | <code>{</code><br/><code>        [key: string]: (state: SerializableState) =&gt; SerializableState;</code><br/><code>    }</code> |  |
 |  [name](./kibana-plugin-plugins-expressions-public.expressionfunction.name.md) |  | <code>string</code> | Name of function |
+|  [telemetry](./kibana-plugin-plugins-expressions-public.expressionfunction.telemetry.md) |  | <code>(state: ExpressionAstFunction['arguments'], telemetryData: Record&lt;string, any&gt;) =&gt; Record&lt;string, any&gt;</code> |  |
 |  [type](./kibana-plugin-plugins-expressions-public.expressionfunction.type.md) |  | <code>string</code> | Return type of function. This SHOULD be supplied. We use it for UI and autocomplete hinting. We may also use it for optimizations in the future. |
 

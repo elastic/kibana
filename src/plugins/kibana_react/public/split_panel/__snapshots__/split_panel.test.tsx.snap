@@ -67,7 +67,7 @@ exports[`Split panel should render correctly 1`] = `
           <EuiIcon
             type="grabHorizontal"
           >
-            <div
+            <span
               data-euiicon-type="grabHorizontal"
             />
           </EuiIcon>

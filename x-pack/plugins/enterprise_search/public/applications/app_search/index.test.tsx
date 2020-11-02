@@ -121,9 +121,7 @@ describe('AppSearchNav', () => {
     setMockValues({ myRole: { canViewAccountCredentials: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/credentials'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/credentials');
   });
 
   it('renders the Role Mappings link', () => {

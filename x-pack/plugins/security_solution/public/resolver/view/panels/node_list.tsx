@@ -38,17 +38,14 @@ import { LimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
 import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { CopyablePanelField } from './copyable_panel_field';
 
 interface ProcessTableView {
   name?: string;
   timestamp?: Date;
   nodeID: string;
-  event: SafeResolverEvent;
 }
 
 /**
@@ -68,7 +65,7 @@ export const NodeList = memo(() => {
         sortable: true,
         truncateText: true,
         render(name: string | undefined, item: ProcessTableView) {
-          return <NodeDetailLink name={name} event={item.event} nodeID={item.nodeID} />;
+          return <NodeDetailLink name={name} nodeID={item.nodeID} />;
         },
       },
       {
@@ -101,7 +98,6 @@ export const NodeList = memo(() => {
             name,
             timestamp: eventModel.timestampAsDateSafeVersion(processEvent),
             nodeID,
-            event: processEvent,
           });
         }
       }
@@ -111,7 +107,7 @@ export const NodeList = memo(() => {
 
   const numberOfProcesses = processTableView.length;
 
-  const crumbs = useMemo(() => {
+  const breadcrumbs = useMemo(() => {
     return [
       {
         text: i18n.translate('xpack.securitySolution.resolver.panel.nodeList.title', {
@@ -127,7 +123,7 @@ export const NodeList = memo(() => {
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
     <StyledPanel>
-      <Breadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={breadcrumbs} />
       {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView>
@@ -141,15 +137,7 @@ export const NodeList = memo(() => {
   );
 });
 
-function NodeDetailLink({
-  name,
-  nodeID,
-  event,
-}: {
-  name?: string;
-  nodeID: string;
-  event: SafeResolverEvent;
-}) {
+function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
   const isOrigin = useSelector((state: ResolverState) => {
     return selectors.originID(state) === nodeID;
   });
@@ -164,18 +152,18 @@ function NodeDetailLink({
     (mouseEvent: React.MouseEvent<HTMLAnchorElement>) => {
       linkProps.onClick(mouseEvent);
       dispatch({
-        type: 'userBroughtProcessIntoView',
+        type: 'userBroughtNodeIntoView',
         payload: {
-          process: event,
+          nodeID,
           time: timestamp(),
         },
       });
     },
-    [timestamp, linkProps, dispatch, event]
+    [timestamp, linkProps, dispatch, nodeID]
   );
   return (
     <EuiButtonEmpty onClick={handleOnClick} href={linkProps.href}>
-      {name === '' ? (
+      {name === undefined ? (
         <EuiBadge color="warning">
           {i18n.translate(
             'xpack.securitySolution.endpoint.resolver.panel.table.row.valueMissingDescription',
@@ -218,6 +206,6 @@ const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }
   return formattedDate ? (
     <CopyablePanelField textToCopy={formattedDate} content={formattedDate} />
   ) : (
-    getEmptyTagValue()
+    <span>{'—'}</span>
   );
 });
