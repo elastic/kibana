@@ -22,7 +22,7 @@ export interface INDEX_SETTINGS {
 
 export async function loadIndexSettings(indexPatternTitle: string): Promise<INDEX_SETTINGS> {
   if (indexSettings.has(indexPatternTitle)) {
-    return indexSettings.get(indexPatternTitle) as INDEX_SETTINGS;
+    return indexSettings.get(indexPatternTitle) as Promise<INDEX_SETTINGS>;
   }
 
   const fetchPromise = fetchIndexSettings(indexPatternTitle);

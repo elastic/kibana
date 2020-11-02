@@ -61,7 +61,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   async getVectorFileMeta(): Promise<LayerConfig> {
     const regionList: LayerConfig[] = getKibanaRegionList() as LayerConfig[];
     const layerConfig: LayerConfig | undefined = regionList.find(
-      (regionConfig: LayerConfig) => (regionConfig.name as string) === this._descriptor.name
+      (regionConfig: LayerConfig) => regionConfig.name === this._descriptor.name
     );
     if (!layerConfig) {
       throw new Error(
@@ -77,7 +77,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
-    const vectorFileMeta: LayerConfig = await this.getVectorFileMeta();
+    const vectorFileMeta = await this.getVectorFileMeta();
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: vectorFileMeta.format.type as FORMAT_TYPE,
       featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
@@ -93,9 +93,9 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     const vectorFileMeta: LayerConfig = await this.getVectorFileMeta();
     return vectorFileMeta.fields.map(
       (field): KibanaRegionField => {
-        return this.createField({ fieldName: field.name }) as KibanaRegionField;
+        return this.createField({ fieldName: field.name });
       }
-    ) as KibanaRegionField[];
+    );
   }
 
   async getDisplayName(): Promise<string> {

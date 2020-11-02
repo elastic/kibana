@@ -325,10 +325,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
   }
 
-  async getFields(): Promise<IField[]> {
-    return [];
-  }
-
   async supportsFitToBounds(): Promise<boolean> {
     try {
       const geoField = await this._getGeoField();
@@ -339,7 +335,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async _getGeoField(): Promise<IFieldType> {
-    const indexPattern: IndexPattern = await this.getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this.getGeoFieldName());
     if (!geoField) {
       throw new Error(
@@ -402,9 +398,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     });
 
     const fieldAggRequests = await Promise.all(promises);
-    const aggs: Record<string, any> = fieldAggRequests.reduce(
-      (aAggs: Record<string, any>, fieldAggRequest: unknown) => {
-        return fieldAggRequest ? { ...aAggs, ...(fieldAggRequest as Record<string, any>) } : aAggs;
+    const allAggs: Record<string, any> = fieldAggRequests.reduce(
+      (aggs: Record<string, any>, fieldAggRequest: unknown | null) => {
+        return fieldAggRequest ? { ...aggs, ...(fieldAggRequest as Record<string, any>) } : aggs;
       },
       {}
     );
@@ -415,7 +411,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
-    searchSource.setField('aggs', aggs);
+    searchSource.setField('aggs', allAggs);
     if (sourceQuery) {
       searchSource.setField('query', sourceQuery);
     }
@@ -445,6 +441,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
     return resp.aggregations;
   }
+
   getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
     try {
       const indexPattern = await this.getIndexPattern();

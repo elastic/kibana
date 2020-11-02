@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, Query } from 'src/plugins/data/public';
 import {
@@ -23,17 +22,6 @@ import {
   extractPropertiesFromBucket,
   BucketProperties,
 } from '../../../../common/elasticsearch_util';
-
-const TERMS_AGG_NAME = 'join';
-
-const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import {
   ESTermSourceDescriptor,
   VectorJoinSourceRequestMeta,
@@ -41,8 +29,11 @@ import {
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
+const TERMS_AGG_NAME = 'join';
+const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
+
 export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
-  const propertiesMap = new Map<string, BucketProperties>();
+  const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
   const buckets: any[] = _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []);
   buckets.forEach((termBucket: any) => {
     const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
@@ -51,7 +42,7 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
     }
     propertiesMap.set(termBucket.key.toString(), properties);
   });
-  return propertiesMap as PropertiesMap;
+  return propertiesMap;
 }
 
 export class ESTermSource extends AbstractESAggSource {
