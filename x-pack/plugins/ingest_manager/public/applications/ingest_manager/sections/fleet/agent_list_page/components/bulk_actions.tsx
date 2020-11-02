@@ -88,7 +88,7 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.reassignPolicy"
+              id="xpack.fleet.agentBulkActions.reassignPolicy"
               defaultMessage="Assign to new policy"
             />
           ),
@@ -102,7 +102,7 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.unenrollAgents"
+              id="xpack.fleet.agentBulkActions.unenrollAgents"
               defaultMessage="Unenroll agents"
             />
           ),
@@ -116,7 +116,7 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.upgradeAgents"
+              id="xpack.fleet.agentBulkActions.upgradeAgents"
               defaultMessage="Upgrade agents"
             />
           ),
@@ -130,7 +130,7 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.clearSelection"
+              id="xpack.fleet.agentBulkActions.clearSelection"
               defaultMessage="Clear selection"
             />
           ),
@@ -192,7 +192,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           <EuiText size="xs" color="subdued">
             {totalAgents > SO_SEARCH_LIMIT ? (
               <FormattedMessage
-                id="xpack.ingestManager.agentBulkActions.totalAgentsWithLimit"
+                id="xpack.fleet.agentBulkActions.totalAgentsWithLimit"
                 defaultMessage="Showing {count} of {total} agents"
                 values={{
                   count: <FormattedNumber value={SO_SEARCH_LIMIT} />,
@@ -201,7 +201,7 @@ export const AgentBulkActions: React.FunctionComponent<{
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.agentBulkActions.totalAgents"
+                id="xpack.fleet.agentBulkActions.totalAgents"
                 defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
                 values={{ count: totalAgents }}
               />
@@ -226,7 +226,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                     onClick={openMenu}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentBulkActions.agentsSelected"
+                      id="xpack.fleet.agentBulkActions.agentsSelected"
                       defaultMessage="{count, plural, one {# agent} other {# agents}} selected"
                       values={{
                         count:
@@ -257,7 +257,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                   onClick={() => setSelectionMode('query')}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.agentBulkActions.selectAll"
+                    id="xpack.fleet.agentBulkActions.selectAll"
                     defaultMessage="Select everything on all pages"
                   />
                 </Button>

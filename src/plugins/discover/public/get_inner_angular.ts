@@ -36,6 +36,7 @@ import {
   createToolBarPagerButtonsDirective,
   createToolBarPagerTextDirective,
 } from './application/angular/doc_table/components/pager';
+import { createContextAppLegacy } from './application/components/context_app/context_app_legacy_directive';
 import { createTableRowDirective } from './application/angular/doc_table/components/table_row';
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
@@ -194,5 +195,7 @@ function createDocTableModule() {
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
     .directive('docViewer', createDocViewerDirective)
-    .directive('discoverGrid', createDiscoverGridDirective);
+    .directive('discoverGrid', createDiscoverGridDirective)
+    .directive('docViewer', createDocViewerDirective)
+    .directive('contextAppLegacy', createContextAppLegacy);
 }

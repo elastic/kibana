@@ -14,6 +14,8 @@ import {
 import * as Registry from '../../registry';
 import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
+import { getInstallationObject } from '../../packages';
+import { deletePipelineRefs } from './remove';
 
 interface RewriteSubstitution {
   source: string;
@@ -31,6 +33,7 @@ export const installPipelines = async (
   // it can be created pointing to the new template, without removing the old one and effecting data
   // so do not remove the currently installed pipelines here
   const dataStreams = installablePackage.data_streams;
+  const { name: pkgName, version: pkgVersion } = installablePackage;
   if (!dataStreams?.length) return [];
   const pipelinePaths = paths.filter((path) => isPipeline(path));
   // get and save pipeline refs before installing pipelines
@@ -50,6 +53,20 @@ export const installPipelines = async (
     acc.push(...pipelineObjectRefs);
     return acc;
   }, []);
+
+  // check that we don't duplicate the pipeline refs if the user is reinstalling
+  const installedPkg = await getInstallationObject({
+    savedObjectsClient,
+    pkgName,
+  });
+  if (!installedPkg) throw new Error("integration wasn't found while installing pipelines");
+  // remove the current pipeline refs, if any exist, associated with this version before saving new ones so no duplicates occur
+  await deletePipelineRefs(
+    savedObjectsClient,
+    installedPkg.attributes.installed_es,
+    pkgName,
+    pkgVersion
+  );
   await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, pipelineRefs);
   const pipelines = dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
     if (dataStream.ingest_pipeline) {

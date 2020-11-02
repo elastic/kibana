@@ -87,6 +87,7 @@ const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
   LOADING: 'loading',
   COMPLETE: 'complete',
+  ERROR: 'error',
 };
 
 const app = getAngularModule();
@@ -639,6 +640,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     setHeaderActionMenu: getHeaderActionMenuMounter(),
     filterManager,
     setAppState,
+    data,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -704,7 +706,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
           function pick(rows, oldRows, fetchStatus) {
             // initial state, pretend we're already loading if we're about to execute a search so
             // that the uninitilized message doesn't flash on screen
-            if (rows == null && oldRows == null && shouldSearchOnPageLoad()) {
+            if (!$scope.fetchError && rows == null && oldRows == null && shouldSearchOnPageLoad()) {
               return status.LOADING;
             }
 
@@ -841,7 +843,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
         if (error instanceof Error && error.name === 'AbortError') return;
 
         $scope.fetchStatus = fetchStatuses.NO_RESULTS;
-        $scope.rows = [];
+        $scope.fetchError = error;
 
         data.search.showError(error);
       });

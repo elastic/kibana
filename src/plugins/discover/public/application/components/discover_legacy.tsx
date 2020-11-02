@@ -18,24 +18,15 @@
  */
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiButtonToggle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHideFor,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { getServices, IndexPattern } from '../../kibana_services';
-// @ts-ignore
-import { DiscoverNoResults } from '../angular/directives/no_results';
-import { DiscoverUninitialized } from '../angular/directives/uninitialized';
-import { DiscoverHistogram } from '../angular/directives/histogram';
+import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
+import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
@@ -46,6 +37,7 @@ import {
   TimeRange,
   Query,
   IndexPatternAttributes,
+  DataPublicPluginStart,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
@@ -60,6 +52,7 @@ export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
+  fetchError: Error;
   fieldCounts: Record<string, number>;
   histogramData: Chart;
   hits: number;
@@ -80,6 +73,7 @@ export interface DiscoverLegacyProps {
     sampleSize: number;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
     setAppState: (state: Partial<AppState>) => void;
+    data: DataPublicPluginStart;
   };
   resetQuery: () => void;
   resultState: string;
@@ -101,6 +95,7 @@ export function DiscoverLegacy({
   fetch,
   fetchCounter,
   fieldCounts,
+  fetchError,
   histogramData,
   hits,
   indexPattern,
@@ -190,6 +185,8 @@ export function DiscoverLegacy({
               <DiscoverNoResults
                 timeFieldName={opts.timefield}
                 queryLanguage={state.query ? state.query.language : ''}
+                data={opts.data}
+                error={fetchError}
               />
             )}
             {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
@@ -220,15 +217,14 @@ export function DiscoverLegacy({
                       />
                     </EuiFlexItem>
                     <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                      <EuiButtonToggle
-                        label={toggleOn ? 'Hide chart' : 'Show chart'}
+                      <EuiButtonEmpty
                         iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                        onChange={(e: any) => {
-                          toggleChart(e.target.checked);
+                        onClick={() => {
+                          toggleChart(!toggleOn);
                         }}
-                        isSelected={toggleOn}
-                        isEmpty
-                      />
+                      >
+                        {toggleOn ? 'Hide chart' : 'Show chart'}
+                      </EuiButtonEmpty>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </div>

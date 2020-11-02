@@ -20,20 +20,18 @@ import React, { useState } from 'react';
 import rison from 'rison-node';
 // import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
 import { getServices } from '../../kibana_services';
-
-// @ts-ignore
-import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import './discover.scss';
 import { esFilters, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
+import { DiscoverNoResults } from './no_results';
 
 export function Discover({
   addColumn,
@@ -138,6 +136,8 @@ export function Discover({
                   <DiscoverNoResults
                     timeFieldName={opts.timefield}
                     queryLanguage={state.query.language}
+                    data={opts.data}
+                    error={fetchError}
                   />
                 )}
                 {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
@@ -168,15 +168,14 @@ export function Discover({
                           />
                         </EuiFlexItem>
                         <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                          <EuiButtonToggle
-                            label={toggleOn ? 'Hide chart' : 'Show chart'}
+                          <EuiButtonEmpty
                             iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                            onChange={(e: any) => {
-                              toggleChart(e.target.checked);
+                            onChange={() => {
+                              toggleChart(!toggleOn);
                             }}
-                            isSelected={toggleOn}
-                            isEmpty
-                          />
+                          >
+                            {toggleOn ? 'Hide chart' : 'Show chart'}
+                          </EuiButtonEmpty>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </div>
