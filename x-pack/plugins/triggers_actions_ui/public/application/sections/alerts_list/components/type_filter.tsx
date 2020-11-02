@@ -4,14 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import {
+  EuiFilterGroup,
+  EuiPopover,
+  EuiFilterButton,
+  EuiFilterSelectItem,
+  EuiTitle,
+} from '@elastic/eui';
 
 interface TypeFilterProps {
   options: Array<{
-    value: string;
-    name: string;
+    groupName: string;
+    subOptions: Array<{
+      value: string;
+      name: string;
+    }>;
   }>;
   onChange?: (selectedTags: string[]) => void;
 }
@@ -52,22 +61,29 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
         }
       >
         <div className="euiFilterSelect__items">
-          {options.map((item, index) => (
-            <EuiFilterSelectItem
-              key={index}
-              onClick={() => {
-                const isPreviouslyChecked = selectedValues.includes(item.value);
-                if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter((val) => val !== item.value));
-                } else {
-                  setSelectedValues(selectedValues.concat(item.value));
-                }
-              }}
-              checked={selectedValues.includes(item.value) ? 'on' : undefined}
-              data-test-subj={`alertType${item.value}FilterOption`}
-            >
-              {item.name}
-            </EuiFilterSelectItem>
+          {options.map((groupItem, groupIndex) => (
+            <Fragment key={`group${groupIndex}`}>
+              <EuiTitle data-test-subj={`alertType${groupIndex}Group`} size="xxs">
+                <h3>{groupItem.groupName}</h3>
+              </EuiTitle>
+              {groupItem.subOptions.map((item, index) => (
+                <EuiFilterSelectItem
+                  key={index}
+                  onClick={() => {
+                    const isPreviouslyChecked = selectedValues.includes(item.value);
+                    if (isPreviouslyChecked) {
+                      setSelectedValues(selectedValues.filter((val) => val !== item.value));
+                    } else {
+                      setSelectedValues(selectedValues.concat(item.value));
+                    }
+                  }}
+                  checked={selectedValues.includes(item.value) ? 'on' : undefined}
+                  data-test-subj={`alertType${item.value}FilterOption`}
+                >
+                  {item.name}
+                </EuiFilterSelectItem>
+              ))}
+            </Fragment>
           ))}
         </div>
       </EuiPopover>
