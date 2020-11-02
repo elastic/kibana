@@ -32,7 +32,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -98,7 +97,7 @@ describe('delete()', () => {
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -112,7 +111,7 @@ describe('delete()', () => {
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
@@ -142,14 +141,14 @@ describe('delete()', () => {
     });
 
     await alertsClient.delete({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 
   test('swallows error when invalidate API key throws', async () => {
-    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
+    // alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.delete({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to invalidate API Key: Fail'
     );
@@ -159,7 +158,7 @@ describe('delete()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
     await alertsClient.delete({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
     );

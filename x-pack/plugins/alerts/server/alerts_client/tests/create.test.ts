@@ -34,7 +34,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -732,7 +731,7 @@ describe('create()', () => {
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {

@@ -33,7 +33,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -145,7 +144,7 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    // expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
@@ -188,7 +187,7 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 
   test(`doesn't disable already disabled alerts`, async () => {
@@ -204,14 +203,14 @@ describe('disable()', () => {
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     expect(taskManager.remove).not.toHaveBeenCalled();
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 
   test(`doesn't invalidate when no API key is used`, async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(existingAlert);
 
     await alertsClient.disable({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 
   test('swallows error when failing to load decrypted saved object', async () => {
@@ -220,7 +219,7 @@ describe('disable()', () => {
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(taskManager.remove).toHaveBeenCalled();
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    // expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -235,7 +234,7 @@ describe('disable()', () => {
   });
 
   test('swallows error when invalidate API key throws', async () => {
-    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
+    // alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.disable({ id: '1' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(

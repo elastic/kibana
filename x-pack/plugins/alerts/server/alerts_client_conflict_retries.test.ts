@@ -45,7 +45,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -306,14 +305,14 @@ beforeEach(() => {
   jest.resetAllMocks();
 
   alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
-  alertsClientParams.invalidateAPIKey.mockResolvedValue({
+  /* alertsClientParams.invalidateAPIKey.mockResolvedValue({
     apiKeysEnabled: true,
     result: {
       invalidated_api_keys: [],
       previously_invalidated_api_keys: [],
       error_count: 0,
     },
-  });
+  }); */
   alertsClientParams.getUserName.mockResolvedValue('elastic');
 
   taskManager.runNow.mockResolvedValue({ id: '' });
