@@ -48,7 +48,9 @@ This section summarizes the changes in each release.
 [[release-notes-7.10.0]]
 == {kib} 7.10.0
 
-For breaking changes, refer to <<breaking-changes-7.10>,breaking changes in 7.10>>.
+For detailed information about the 7.10.0 release, review the following sections.
+
+<<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>> | <<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>>
 
 [float]
 [[enhancement-v7.10.0]]
@@ -65,7 +67,7 @@ APM::
 * Metrics-powered UI {kibana-pull}73953[#73953]
 * Uses platform history {kibana-pull}74328[#74328]
 * Immediately returns terms for unbound queries {kibana-pull}74543[#74543]
-* [Fixes #20660] Implement nest level expand/collapse toggle for each span row {kibana-pull}75259[#75259]
+* Implements nest level expand/collapse toggle for each span row {kibana-pull}75259[#75259]
 * Removes additional "No data" message and re-ordering charts {kibana-pull}75399[#75399]
 * Uses the outcome field to calculate the transaction error rate chart {kibana-pull}75528[#75528]
 * Improves breakdown data gaps  {kibana-pull}75534[#75534]
@@ -181,7 +183,7 @@ to the boolean, binary, completion, date, flattened, geo_point, numeric, range, 
 * The ingest node pipeline editor now has the ability to move processors into an empty tree {kibana-pull}76885[#76885]
 * The ILM UI now allows attaching a lifecycle policy to both a composable index template and a legacy index templatee {kibana-pull}77077[#77077]
 * Adds forcemerge action to hot phase with a rollover enabled {kibana-pull}77193[#77193]
-* Transforms: Extend editing and creation options. {kibana-pull}77370[#77370]
+* Transforms: Extend editing and creation options {kibana-pull}77370[#77370]
 * The mappings editor in the Index Templates UI now supports configuring the point field type {kibana-pull}77543[#77543]
 * Adds an option to select a higher compression codec for force merge action in ILM {kibana-pull}78175[#78175]
 * The mappings editor in the Index Templates UI now supports configuring the version field type {kibana-pull}78206[#78206]
@@ -322,6 +324,10 @@ Discover::
 Ingest Manager::
 * Fixes removing ingest pipelines from elasticsearch {kibana-pull}75092[#75092]
 * Installs previous version of package if update fails {kibana-pull}76694[#76694]
+* Agent Policy names are unique {kibana-pull}79201[#79201]
+* Index pattern installation uses requested package version {kibana-pull}80079[#80079]
+* Removes fields from index pattern during package uninstall {kibana-pull}80082[#80082]
+* Allows default packages to be deleted from the default agent policy {kibana-pull}81535[#81535]
 Kibana UI::
 * Removes duplicate string in search dropdown {kibana-pull}77429[#77429]
 Lens and visualizations::
@@ -357,6 +363,7 @@ If a visualization contained these local queries and filters deliberately, they 
 Logs::
 * Returns 403s rather than 500s for ML privilege errors {kibana-pull}74506[#74506]
 * Correctly filters for log rate anomaly examples with missing dataset {kibana-pull}76775[#76775]
+* Fixes logs permissions for alert management {kibana-pull}81199[#81199]
 Machine Learning::
 * Updates broken job config callout error {kibana-pull}75481[#75481]
 * Replaces all use of date_histogram interval with fixed_interval {kibana-pull}76876[#76876]
@@ -390,6 +397,7 @@ Management::
 * Fixes an issue when editing the mappings of an index template and selecting the "Other" type {kibana-pull}79434[#79434]
 * Transforms/DF Analytics: Fixes data grid column sorting. {kibana-pull}80618[#80618]
 * Transforms: Fixes tab ids for expanded row. {kibana-pull}80666[#80666]
+* Fixes package upgrade breaking after first rollover before new data has arrived {kibana-pull}79887[#79887]
 Maps::
 * Fixes swap hidden/show icons in layer action panel {kibana-pull}74549[#74549]
 * Fixes double fetch when filters are modified {kibana-pull}74893[#74893]
@@ -446,130 +454,74 @@ We fixed that and now in certain cases we ignore unauthenticated intermediate se
 * Node list and node detail tests {kibana-pull}74421[#74421]
 * Improves simulator. Add more click-through tests and panel tests. {kibana-pull}74601[#74601]
 * [Detections] Refactors signal ancestry to allow multiple parents {kibana-pull}76531[#76531]
+* Fixes for the Ticket 78375 {kibana-pull}79004[#79004]
+* Resolver Tree Events tests {kibana-pull}79344[#79344]
+* Adds the correct class to truncate the names in Endpoint list {kibana-pull}79921[#79921]
+* [Detections] Fixes remaining render and validation bug with query preview + tests {kibana-pull}80110[#80110]
+* New events resolver {kibana-pull}80850[#80850]
+* enable_APM-ci branch fixes {kibana-pull}81658[#81658]
 Sharing::
 * Uses App Title for Display Instead of App Id {kibana-pull}75457[#75457]
+Spaces::
+* Fixes infinite loading spinner on the spaces selector screen. In the case an error occurs while trying to load the spaces that the current user has access to, an error message will now be shown instead of the loading spinner {kibana-pull}79471[#79471]
 Uptime::
 * Ml anomaly alert edit {kibana-pull}76909[#76909]
 * Removes custom handling of license enabling {kibana-pull}82019[#82019]
-
-
-
-
-Unknown::
-
-
-
-
-
-
-
-
-* Fixes for the Ticket 78375 {kibana-pull}79004[#79004]
-* [Fixes #71651] Agent Policy names are unique {kibana-pull}79201[#79201]
-* Resolver Tree Events tests {kibana-pull}79344[#79344]
-* Handle errors better in spaces selector {kibana-pull}79471[#79471]
-  - Fixes infinite loading spinner on the spaces selector screen. In the case an error occurs while trying to load the spaces that the current user has access to, an error message will now be shown instead of the loading spinner.
-* [Fixes #79370] Fix package upgrade breaking after first rollover before new data has arrived {kibana-pull}79887[#79887]
-* add the correct class to truncate the names in Endpoint list {kibana-pull}79921[#79921]
-* add the correct class to truncate the names (#79921) {kibana-pull}79957[#79957]
-* Index pattern installation use requested package version {kibana-pull}80079[#80079]
-* Remove fields from index pattern during package uninstall {kibana-pull}80082[#80082]
-* [Detections] - Fix remaining render and validation bug with query preview + tests {kibana-pull}80110[#80110]
-* New events resolver {kibana-pull}80850[#80850]
-* Fix logs permissions for alert management  {kibana-pull}81199[#81199]
-* [Fixes #74515] Allow default packages to be deleted from the default agent policy {kibana-pull}81535[#81535]
-* enable_APM-ci branch fixes {kibana-pull}81658[#81658]
 
 [float]
 [[deprecation-v7.10.0]]
 === Deprecations
 Monitoring::
-* [Fixes #51718] "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
+* "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
 Platform::
-* Migrate status & stats APIs to KP + remove legacy status lib {kibana-pull}76054[#76054]
-  - The /api/status endpoint response format is now deprecated and will change in 8.0.
-* Move metrics to setup and add cgroup metrics {kibana-pull}76730[#76730]
-  - These two config keys have been renamed and the old names will no longer work as of 8.0:
+* The /api/status endpoint response format is now deprecated and will change in 8.0. {kibana-pull}76054[#76054]
+* These two config keys have been renamed and the old names will no longer work as of 8.0: cpu.cgroup.path.override => ops.cGroupOverrides.cpuPath and cpuacct.cgroup.path.override => ops.cGroupOverrides.cpuAcctPath {kibana-pull}76730[#76730]
 Visualizations::
-* [Fixes #63012] Timelion app deprecation warning {kibana-pull}74660[#74660]
+* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. {kibana-pull}74660[#74660]
++
+To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
++
+NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
+visualizations in *Dashboard*, *Visualize*, and *Canvas*.
++
+To migrate a *Timelion* worksheet to a dashboard:
+
+. Open the main menu, click *Dashboard*, then click *Create dashboard*.
+
+. For each *Timelion* app worksheet, complete the following steps.
+
+.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
+
+.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
++
+[role="screenshot"]
+image::images/timelion-copy-expression.png[Timelion app chart]
+
+.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
++
+[role="screenshot"]
+image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
+
+.. In the toolbar, click *Save*.
+
+.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
++
+The Timelion visualization panel appears on the dashboard.
++
+[role="screenshot"]
+image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
 
 [float]
 [[breaking-v7.10.0]]
-=== Breaking Changes
+=== Breaking changes
+Lens and visualizations::
+* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
 Operations::
-* support KP plugins instead {kibana-pull}74604[#74604]
-  - The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format.
+* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
 Platform::
-* [Fixes #71927] Remove legacy plugins support {kibana-pull}77599[#77599]
-  - The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API
-SIEM::
-* [Case] Settings per case per connector {kibana-pull}77327[#77327]
-* [Detections] Update signals template if outdated and rollover indices {kibana-pull}80019[#80019]
-Visualizations::
-* [Fixes #30951] Deprecate schema-less specs in Vega {kibana-pull}73805[#73805]
-  - We decided to don't support Vega visualizations without a $schema specification property.
+* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
 
-[float]
-[[unknown-v7.10.0]]
-=== Unknown
-Alerting::
-* [Fixes #63961] Use Alerts client & Actions client when fetching these types of SOs {kibana-pull}73257[#73257]
-Management::
-* Remove dependencies from index pattern field and index pattern list {kibana-pull}75185[#75185]
-  - The index pattern fields class has the following changes
-* IndexPattern class - no longer use `getConfig` or `uiSettingsValues` {kibana-pull}75717[#75717]
-  - IndexPattern class no longer uses getConfig or uiSettingsValues dependencies. It now takes shortDotsEnable (boolean) and metaFields (string[]) as arguments - these were formerly provided by uiSettings
-* Index pattern save => Index pattern service {kibana-pull}76706[#76706]
-  - IndexPattern.save has been replaced with IndexPatternsService.save
-* Index pattern  - refactor constructor {kibana-pull}77791[#77791]
-  - The index pattern factory and crud methods have been refactored -
-Operations::
-* [Fixes #78168] remove from build (take 2) {kibana-pull}79379[#79379]
-  - Kibana plugins can no longer rely on their server code being automatically transpiled with Babel. The @kbn/plugin-helpers provide a build task that will transform your plugin's server code to plain JS via Babel, but plugin authors can use any tool they like to accomplish the same result.
-Platform::
-* Expose new es client {kibana-pull}73651[#73651]
-  - Kibana provides the new elasticsearch client as a part of the elasticsearch service on the server-side. The legacy client is deprecated on and subject for removal in 7.x. Reference the provided  migration guide to refactor your code https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client
-* [Fixes #46906] Remove legacy APIs. {kibana-pull}75517[#75517]
-  - The expressions plugin has officially removed its __LEGACY APIs beginning in 7.10, which were designed for internal use in Canvas. In the unlikely event you are relying on anything in the expressions.__LEGACY namespace, you will need to copy the relevant code into your plugin before updating.
-* [Fixes #77579] Error notification alignment {kibana-pull}77788[#77788]
-  - This PR introduces explicit error types to the data.search service:
-Querying & Filtering::
-* Query Input String manager {kibana-pull}72093[#72093]
-  - This PR allows gracefully extracting the query string state, to be consumed by other services.
-One can now use the data.query.state$ observable and receive all state updates in one place.
-SIEM::
-* [Fixes #56426] [Connectors] Refactor Jira: Generic Implementation (phase one) {kibana-pull}73778[#73778]
-* [Connectors] Refactor IBM Resilient: Generic Implementation (phase one) {kibana-pull}74357[#74357]
-Uptime::
-* [Fixes #62438] Adds Role Based Access-Control to the Alerting & Action plugins based on Kibana Feature Controls {kibana-pull}67157[#67157]
-* [Fixes #69665] Control Alerts Management via feature controls & privileges {kibana-pull}72029[#72029]
-Unknown::
-* [Fixes #73557] Allow routes to specify the idle socket timeout in addition to the payload timeout {kibana-pull}73730[#73730]
-  - Route definitions can now specify the idleSocket timeout in addition to the payload timeout.
-* Move some SearchSource dependencies to the server. {kibana-pull}74607[#74607]
-  - getSearchErrorType and the SearchError class have been removed from the static exports of the data plugin's contract. If you rely on these, please copy the code directly into your plugin. Note that the SearchError interface is still exposed.
-* Rename agent/package config(s) to agent/package policy(ies) {kibana-pull}74914[#74914]
-  - The following Ingest Manager API routes were changed:
-* Extract dependencies and pass them in from the service definition. {kibana-pull}75368[#75368]
-  - The search service's getParamsFromSearchRequest helper has been changed to prepare for exposing SearchSource on the server. If your plugin relies on this helper, please update the dependencies passed to it as follows:
-* [Fixes #75321] Add a new advanced setting searchTimeout {kibana-pull}75728[#75728]
-  - This PR changes the behavior of how we timeout search requests:
-* Remove legacy ES client APIs. {kibana-pull}75943[#75943]
-  - The __LEGACY APIs have been removed from the data plugin's client-side search service. Specifically data.search.__LEGACY.esClient is no longer exposed and the legacy elasticsearch-browser package has been removed from the repo. If you rely on this client in your plugin, we recommend migrating to the new elasticsearch-js client.
-* Replace FetchOptions with ISearchOptions {kibana-pull}76538[#76538]
-  - The FetchOptions type was removed, use the ISearchOptions type instead.
-The ISearchOptions signal option was renamed to abortSignal.
-* Adding KibanaRequest#uuid {kibana-pull}76822[#76822]
-  - The KibanaRequest now has a uuid property which is a UUID that uniquely identifies the request.
-* Adding `className` prop to QueryStringInput component {kibana-pull}76848[#76848]
-  - This PR allows to add a className prop to QueryStringInput that will be added to the main container of the component.
-* Add response status helpers {kibana-pull}78006[#78006]
-  - Introduces the following search helpers
-* Rename API /api/ingest_manager => /api/fleet {kibana-pull}79193[#79193]
-  - The following Ingest Manager API routes changed:
-* Move config from xpack.ingestManager to xpack.fleet {kibana-pull}79406[#79406]
-  - In the effort of renaming the ingest manger plugin fleet:
-
+//For more information, refer to <<breaking-changes-7.10>,breaking changes in 7.10>>.
 
 [[release-notes-7.9.3]]
 == {kib} 7.9.3

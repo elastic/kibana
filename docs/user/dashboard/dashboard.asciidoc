@@ -416,47 +416,16 @@ For more information about *Vega* and *Vega-Lite*, refer to:
 [role="screenshot"]
 image::images/timelion.png[Timelion UI]
 
+NOTE: In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
+For migration information, refer to <<deprecation-v7.10.0>>.
+Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
+visualizations in *Dashboard*, *Visualize*, and *Canvas*.
+
 Ready to try out Timelion? For step-by-step tutorials, refer to:
 
 * <<timelion-tutorial-create-time-series-visualizations,Create time series visualizations>>
 * <<timelion-tutorial-create-visualizations-with-mathematical-functions,Create visualizations with mathematical functions>>
 * <<timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends,Create visualizations with conditional logic and tracking trends>>
-
-[float]
-[[timelion-deprecation]]
-==== Timelion app deprecation
-
-In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
-
-NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
-visualizations in *Dashboard*, *Visualize*, and *Canvas*.
-
-To migrate a *Timelion* worksheet to a dashboard:
-
-. Open the main menu, click *Dashboard*, then click *Create dashboard*.
-
-. For each *Timelion* app worksheet, complete the following steps.
-
-.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
-
-.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
-+
-[role="screenshot"]
-image::images/timelion-copy-expression.png[Timelion app chart]
-
-.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
-+
-[role="screenshot"]
-image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
-
-.. In the toolbar, click *Save*.
-
-.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
-+
-The Timelion visualization panel appears on the dashboard.
-+
-[role="screenshot"]
-image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
 
 [float]
 [[save-panels]]
