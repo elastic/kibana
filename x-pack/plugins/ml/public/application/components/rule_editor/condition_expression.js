@@ -190,7 +190,6 @@ export class ConditionExpression extends Component {
             closePopover={this.closeAppliesTo}
             panelPaddingSize="none"
             ownFocus
-            withTitle
             anchorPosition="downLeft"
           >
             {this.renderAppliesToPopover()}
