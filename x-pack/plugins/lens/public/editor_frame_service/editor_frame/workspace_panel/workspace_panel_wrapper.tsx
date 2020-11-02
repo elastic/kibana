@@ -15,6 +15,7 @@ import {
   EuiPageContentHeader,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Datasource, FramePublicAPI, Visualization } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
@@ -104,18 +105,25 @@ export function WorkspacePanelWrapper({
         </EuiFlexGroup>
       </div>
       <EuiPageContent className="lnsWorkspacePanelWrapper">
-        {(!emptyExpression || title) && (
+        {!emptyExpression || title ? (
           <EuiPageContentHeader
             className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
               // eslint-disable-next-line @typescript-eslint/naming-convention
               'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
             })}
           >
-            <span data-test-subj="lns_ChartTitle">
+            <h1 data-test-subj="lns_ChartTitle">
               {title ||
                 i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
-            </span>
+            </h1>
           </EuiPageContentHeader>
+        ) : (
+          <EuiScreenReaderOnly>
+            <h1 data-test-subj="lns_ChartTitle">
+              {title ||
+                i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+            </h1>
+          </EuiScreenReaderOnly>
         )}
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
           {children}

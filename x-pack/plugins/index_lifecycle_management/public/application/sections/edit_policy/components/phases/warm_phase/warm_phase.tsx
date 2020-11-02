@@ -48,16 +48,21 @@ const i18nTexts = {
 
 const warmProperty: keyof Phases = 'warm';
 
+const formFieldPaths = {
+  enabled: '_meta.warm.enabled',
+  warmPhaseOnRollover: '_meta.warm.warmPhaseOnRollover',
+};
+
 export const WarmPhase: FunctionComponent = () => {
   const { originalPolicy } = useEditPolicyContext();
   const form = useFormContext();
   const [formData] = useFormData({
-    watch: [useRolloverPath, '_meta.warm.enabled', '_meta.warm.warmPhaseOnRollover'],
+    watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
 
-  const enabled = get(formData, '_meta.warm.enabled');
+  const enabled = get(formData, formFieldPaths.enabled);
   const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
-  const warmPhaseOnRollover = get(formData, '_meta.warm.warmPhaseOnRollover');
+  const warmPhaseOnRollover = get(formData, formFieldPaths.warmPhaseOnRollover);
   const isShowingErrors = form.isValid === false;
 
   return (
@@ -88,7 +93,7 @@ export const WarmPhase: FunctionComponent = () => {
                 />
               </p>
               <UseField
-                path="_meta.warm.enabled"
+                path={formFieldPaths.enabled}
                 component={ToggleField}
                 componentProps={{
                   euiFieldProps: {
@@ -106,7 +111,7 @@ export const WarmPhase: FunctionComponent = () => {
               <Fragment>
                 {hotPhaseRolloverEnabled && (
                   <UseField
-                    path="_meta.warm.warmPhaseOnRollover"
+                    path={formFieldPaths.warmPhaseOnRollover}
                     component={ToggleField}
                     componentProps={{
                       fullWidth: false,
