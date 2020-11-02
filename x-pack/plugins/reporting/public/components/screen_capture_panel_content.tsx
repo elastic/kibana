@@ -12,7 +12,7 @@ import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content';
 
-interface Props {
+export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;

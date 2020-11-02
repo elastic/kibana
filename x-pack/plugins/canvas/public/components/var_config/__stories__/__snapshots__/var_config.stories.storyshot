@@ -24,7 +24,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           <span
             className="euiAccordion__iconWrapper"
           >
-            <div
+            <span
               className="euiAccordion__icon"
               data-euiicon-type="arrowRight"
               size="m"
@@ -65,7 +65,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="plusInCircle"

@@ -1,5 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`TelemetryManagementSectionComponent does not show the endpoint link when isSecurityExampleEnabled returns false 1`] = `
+<React.Fragment>
+  <p>
+    <FormattedMessage
+      defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+      id="telemetry.telemetryConfigAndLinkDescription"
+      values={
+        Object {
+          "privacyStatementLink": <EuiLink
+            href="https://www.elastic.co/legal/privacy-statement"
+            target="_blank"
+          >
+            <FormattedMessage
+              defaultMessage="Privacy Statement"
+              id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+              values={Object {}}
+            />
+          </EuiLink>,
+        }
+      }
+    />
+  </p>
+  <p>
+    <FormattedMessage
+      defaultMessage="See an example of the {clusterData} that we collect."
+      id="telemetry.seeExampleOfClusterData"
+      values={
+        Object {
+          "clusterData": <EuiLink
+            data-test-id="cluster_data_example"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="cluster data"
+              id="telemetry.clusterData"
+              values={Object {}}
+            />
+          </EuiLink>,
+        }
+      }
+    />
+  </p>
+</React.Fragment>
+`;
+
 exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 <Fragment>
   <EuiPanel
@@ -82,10 +127,11 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
-                  id="telemetry.seeExamplesOfWhatWeCollect"
+                  id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
                   values={
                     Object {
                       "clusterData": <EuiLink
+                        data-test-id="cluster_data_example"
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -95,6 +141,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                         />
                       </EuiLink>,
                       "endpointSecurityData": <EuiLink
+                        data-test-id="endpoint_security_example"
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -226,10 +273,24 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "timeZone": null,
     }
   }
+  isSecurityExampleEnabled={
+    [MockFunction] {
+      "calls": Array [
+        Array [],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": true,
+        },
+      ],
+    }
+  }
   onQueryMatchChange={[MockFunction]}
   showAppliesSettingMessage={true}
   telemetryService={
     TelemetryService {
+      "currentKibanaVersion": "mock_kibana_version",
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
         "banner": true,

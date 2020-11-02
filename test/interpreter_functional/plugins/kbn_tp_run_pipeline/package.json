@@ -12,7 +12,7 @@
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {
-    "@elastic/eui": "29.3.0",
+    "@elastic/eui": "30.1.1",
     "@kbn/plugin-helpers": "1.0.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",

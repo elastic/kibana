@@ -35,7 +35,9 @@ export default function ({
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('shakespeare', '');
     });
-    loadTestFile(require.resolve('./index_patterns'));
+
     loadTestFile(require.resolve('./search'));
+    loadTestFile(require.resolve('./session'));
+    loadTestFile(require.resolve('./index_patterns'));
   });
 }

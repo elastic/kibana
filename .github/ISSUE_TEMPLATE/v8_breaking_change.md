@@ -2,24 +2,35 @@
 name: 8.0 Breaking change
 about: Breaking changes from 7.x -> 8.0
 title: "[Breaking change]"
-labels: Team:Elasticsearch UI, Feature:Upgrade Assistant
+labels: Team:Elasticsearch UI, Feature:Upgrade Assistant, Breaking Change
 assignees: ''
 
 ---
+
+<!-- 
+****************************************
+******* LABEL CHANGES NECESSARY ********
+****************************************
+ 
+Please add a "NeededFor:${TeamName}" label to denote the team that is
+requesting the breaking change is surfaced in the Upgrade Assistant.
+ 
+-->
 
 ## Change description
 
 **Which release will ship the breaking change?**
 
-<!-- e.g., v7.6.2 -->
+8.0
 
 **Describe the change. How will it manifest to users?**
 
-**What percentage of users will be affected?**
+**How many users will be affected?**
 
-<!-- e.g., Roughly 75% will need to make changes to x. -->
+<!-- e.g., Based on telemetry data, roughly 75% of our users will need to make changes to x -->
+<!-- e.g., A majority of users will need to make changes to x. -->
 
-**What can users to do to address the change manually?**
+**What can users do to address the change manually?**
 
 <!-- If applicable, describe the manual workaround -->
 

@@ -65,8 +65,8 @@ class OutputService {
     return outputs.saved_objects[0].id;
   }
 
-  public async getAdminUser(soClient: SavedObjectsClientContract) {
-    if (cachedAdminUser) {
+  public async getAdminUser(soClient: SavedObjectsClientContract, useCache = true) {
+    if (useCache && cachedAdminUser) {
       return cachedAdminUser;
     }
 

@@ -49,6 +49,10 @@ function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
   return prev;
 }
 
+function isStepEnd(step: Ping) {
+  return step.synthetics?.type === 'step/end';
+}
+
 interface ExecutedJourneyProps {
   journey: JourneyState;
 }
@@ -64,17 +68,18 @@ export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => (
       </h3>
       <p>
         {statusMessage(
-          journey.steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
+          journey.steps
+            .filter(isStepEnd)
+            .reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
         )}
       </p>
     </EuiText>
     <EuiSpacer />
     <EuiFlexGroup direction="column">
-      {journey.steps
-        .filter((step) => step.synthetics?.type === 'step/end')
-        .map((step, index) => (
-          <ExecutedStep key={index} index={index} step={step} />
-        ))}
+      {journey.steps.filter(isStepEnd).map((step, index) => (
+        <ExecutedStep key={index} index={index} step={step} />
+      ))}
+      <EuiSpacer size="s" />
     </EuiFlexGroup>
   </div>
 );

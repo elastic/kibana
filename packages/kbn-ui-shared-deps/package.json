@@ -9,8 +9,8 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@elastic/charts": "23.2.1",
-    "@elastic/eui": "29.3.0",
+    "@elastic/charts": "24.0.0",
+    "@elastic/eui": "30.1.1",
     "@elastic/numeral": "^2.5.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/monaco": "1.0.0",

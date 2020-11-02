@@ -12,6 +12,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const dockerServers = getService('dockerServers');
+  const server = dockerServers.get('registry');
   const pkgName = 'datastreams';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
@@ -63,6 +65,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     afterEach(async () => {
+      if (!server.enabled) return;
       await es.transport.request({
         method: 'DELETE',
         path: `/_data_stream/${logsTemplateName}-default`,

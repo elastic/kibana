@@ -6,10 +6,12 @@
 
 import { LensFilterEvent } from './types';
 import { desanitizeFilterContext } from './utils';
+import { Datatable } from '../../../../src/plugins/expressions/common';
 
 describe('desanitizeFilterContext', () => {
   it(`When filtered value equals '(empty)' replaces it with '' in table and in value.`, () => {
-    const table = {
+    const table: Datatable = {
+      type: 'datatable',
       rows: [
         {
           'f903668f-1175-4705-a5bd-713259d10326': 1589414640000,
@@ -35,14 +37,17 @@ describe('desanitizeFilterContext', () => {
         {
           id: 'f903668f-1175-4705-a5bd-713259d10326',
           name: 'order_date per 30 seconds',
+          meta: { type: 'date' },
         },
         {
           id: '5d5446b2-72e8-4f86-91e0-88380f0fa14c',
           name: 'Top values of customer_phone',
+          meta: { type: 'string' },
         },
         {
           id: '9f0b6f88-c399-43a0-a993-0ad943c9af25',
           name: 'Count of records',
+          meta: { type: 'number' },
         },
       ],
     };
@@ -102,6 +107,7 @@ describe('desanitizeFilterContext', () => {
               },
             ],
             columns: table.columns,
+            type: 'datatable',
           },
         },
       ],

@@ -12,7 +12,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     <span
       className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
     >
-      <div
+      <span
         className="euiButtonContent__icon"
         data-euiicon-type="arrowRight"
         size="m"
@@ -20,7 +20,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
       <span
         className="euiButtonEmpty__text"
       >
-        <div
+        <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
         />
@@ -57,7 +57,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     <span
       className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
     >
-      <div
+      <span
         className="euiButtonContent__icon"
         data-euiicon-type="arrowRight"
         size="m"
@@ -65,7 +65,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       <span
         className="euiButtonEmpty__text"
       >
-        <div
+        <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
         />
@@ -111,6 +111,11 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
         className="euiButton euiButton--secondary euiButton--small euiButton--fill"
         disabled={false}
         onClick={[Function]}
+        style={
+          Object {
+            "minWidth": undefined,
+          }
+        }
         type="button"
       >
         <span
