@@ -275,7 +275,6 @@
     "@kbn/config-schema": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
-    "@kbn/ui-framework": "1.0.0",
     "@slack/webhook": "^5.0.0",
     "@turf/circle": "6.0.1",
     "angular-resource": "1.8.0",

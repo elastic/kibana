@@ -103,14 +103,12 @@ export function uiRenderMixin(kbnServer, server, config) {
               themeVersion === 'v7'
                 ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
                 : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
               `${basePath}/ui/legacy_dark_theme.css`,
             ]
           : [
               themeVersion === 'v7'
                 ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
                 : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
               `${basePath}/ui/legacy_light_theme.css`,
             ]),
       ];

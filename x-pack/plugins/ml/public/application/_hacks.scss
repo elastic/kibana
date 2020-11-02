@@ -1,6 +1,6 @@
 .tab-datavisualizer_index_select,
 .tab-timeseriesexplorer,
-.tab-explorer, {
+.tab-explorer {
   // Make all page background white until More of the pages use EuiPage to wrap in panel-like components
   background-color: $euiColorEmptyShade;
 }
@@ -10,15 +10,12 @@
   display: inline;
 }
 
-.button-wrapper.disabled .kuiButton[disabled] {
-  pointer-events: none;
-}
-
 .button-wrapper.disabled {
   cursor: not-allowed;
 }
 
 // SASSTODO: Remove all the floats
-.clear, .clearfix {
+.clear,
+.clearfix {
   clear: both;
 }

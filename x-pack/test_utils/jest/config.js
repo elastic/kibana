@@ -33,7 +33,6 @@ export default {
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
-    '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],

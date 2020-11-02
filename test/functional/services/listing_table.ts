@@ -56,7 +56,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
 
     private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
       const visualizationNames = [];
-      const links = await find.allByCssSelector('.kuiLink');
+      const links = await find.allByCssSelector('.euiLink');
       for (let i = 0; i < links.length; i++) {
         visualizationNames.push(await links[i].getVisibleText());
       }
