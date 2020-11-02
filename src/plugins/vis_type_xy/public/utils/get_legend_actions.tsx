@@ -100,7 +100,6 @@ export const getLegendActions = (
         isOpen={popoverOpen}
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"
-        withTitle
         anchorPosition="upLeft"
         title={i18n.translate('visTypeXy.legend.filterOptionsLegend', {
           defaultMessage: '{legendDataLabel}, filter options',
