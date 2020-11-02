@@ -86,9 +86,10 @@ export interface PluginSetupContract {
   registerType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-    Params extends ActionTypeParams = ActionTypeParams
+    Params extends ActionTypeParams = ActionTypeParams,
+    ExecutorResultData = void
   >(
-    actionType: ActionType<Config, Secrets, Params>
+    actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
 }
 
@@ -254,9 +255,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-        Params extends ActionTypeParams = ActionTypeParams
+        Params extends ActionTypeParams = ActionTypeParams,
+        ExecutorResultData = void
       >(
-        actionType: ActionType<Config, Secrets, Params>
+        actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
