@@ -34,10 +34,6 @@ import {
   SeverityMappingItem,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-const SeverityMappingEuiFormRow = styled(EuiFormRow)`
-  width: 468px;
-`;
-
 const NestedContent = styled.div`
   margin-left: 24px;
 `;
@@ -67,7 +63,6 @@ export const SeverityField = ({
   isDisabled,
   options,
 }: SeverityFieldProps) => {
-  const fieldValueInputWidth = 160;
   const { setValue } = field;
   const { value, isMappingChecked, mapping } = field.value as AboutStepSeverity;
 
@@ -253,7 +248,6 @@ export const SeverityField = ({
                           isDisabled={isDisabled}
                           isClearable={false}
                           indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
                           onChange={handleFieldChange.bind(
                             null,
                             index,
@@ -276,7 +270,6 @@ export const SeverityField = ({
                           isDisabled={isDisabled}
                           isLoading={false}
                           indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
                           onChange={handleFieldMatchValueChange.bind(
                             null,
                             index,
