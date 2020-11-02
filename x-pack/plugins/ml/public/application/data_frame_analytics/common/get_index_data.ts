@@ -53,7 +53,7 @@ export const getIndexData = async (
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],
-          _source: [],
+          _source: false,
           query: searchQuery,
           from: pageIndex * pageSize,
           size: pageSize,

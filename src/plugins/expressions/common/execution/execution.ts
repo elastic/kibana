@@ -99,7 +99,7 @@ export class Execution<
    * Races a given promise against the "abort" event of `abortController`.
    */
   private race<T>(promise: Promise<T>): Promise<T> {
-    return Promise.race<T>([this.abortRejection, promise]);
+    return Promise.race<T>([this.abortRejection.promise, promise]);
   }
 
   /**
@@ -189,14 +189,18 @@ export class Execution<
       else reject(error);
     });
 
-    this.firstResultFuture.promise.then(
-      (result) => {
-        this.state.transitions.setResult(result);
-      },
-      (error) => {
-        this.state.transitions.setError(error);
-      }
-    );
+    this.firstResultFuture.promise
+      .then(
+        (result) => {
+          this.state.transitions.setResult(result);
+        },
+        (error) => {
+          this.state.transitions.setError(error);
+        }
+      )
+      .finally(() => {
+        this.abortRejection.cleanup();
+      });
   }
 
   async invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any> {
