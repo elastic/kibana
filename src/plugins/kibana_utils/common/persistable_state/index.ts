@@ -27,6 +27,11 @@ export type SerializableState = {
   [key: string]: Serializable;
 };
 
+export type MigrateFunction<
+  FromVersion extends SerializableState = SerializableState,
+  ToVersion extends SerializableState = SerializableState
+> = (state: FromVersion) => ToVersion;
+
 export interface PersistableState<P extends SerializableState = SerializableState> {
   /**
    *  function to extract telemetry information
@@ -47,8 +52,29 @@ export interface PersistableState<P extends SerializableState = SerializableStat
    * @param state
    */
   extract: (state: P) => { state: P; references: SavedObjectReference[] };
+
+  /**
+   * migrateToLatest function receives state of older version and should migrate to the latest version
+   * @param state
+   * @param version
+   */
+  migrateToLatest?: (state: SerializableState, version: string) => P;
+
+  /**
+   * migrate function runs the specified migration
+   * @param state
+   * @param version
+   */
+  migrate?: (state: SerializableState, version: string) => SerializableState;
 }
 
 export type PersistableStateDefinition<P extends SerializableState = SerializableState> = Partial<
-  PersistableState<P>
->;
+  Omit<PersistableState<P>, 'migrate'>
+> & {
+  /**
+   * list of all migrations per semver
+   */
+  migrations?: {
+    [key: string]: MigrateFunction;
+  };
+};
