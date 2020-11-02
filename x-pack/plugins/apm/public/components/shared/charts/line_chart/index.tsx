@@ -23,23 +23,34 @@ import { TimeSeries } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useChartsSync } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
-import { Annotations } from '../annotations';
+import { ChartContainer } from '../chart_container';
 import { onBrushEnd } from '../helper/helper';
+import { Annotations } from '../annotations';
 
 interface Props {
-  timeseries: TimeSeries[];
-  tickFormatY: (y: number) => string;
   id: string;
+  isLoading: boolean;
   onToggleLegend?: LegendItemListener;
+  timeseries: TimeSeries[];
+  /**
+   * Formatter for y-axis tick values
+   */
+  yLabelFormat: (y: number) => string;
+  /**
+   * Formatter for legend and tooltip values
+   */
+  yTickFormat: (y: number) => string;
 }
 
 const XY_HEIGHT = unit * 16;
 
 export function LineChart({
-  timeseries,
-  tickFormatY,
   id,
+  isLoading,
   onToggleLegend,
+  timeseries,
+  yLabelFormat,
+  yTickFormat,
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
@@ -65,8 +76,16 @@ export function LineChart({
     },
   };
 
+  const isEmpty = timeseries
+    .map((serie) => serie.data)
+    .flat()
+    .every(
+      ({ y }: { x?: number | null; y?: number | null }) =>
+        y === null || y === undefined
+    );
+
   return (
-    <div style={{ height: XY_HEIGHT }}>
+    <ChartContainer isLoading={isLoading} height={XY_HEIGHT}>
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
@@ -97,7 +116,8 @@ export function LineChart({
           id="y-axis"
           ticks={3}
           position={Position.Left}
-          tickFormat={tickFormatY}
+          tickFormat={yTickFormat}
+          labelFormat={yLabelFormat}
           showGridLines
         />
 
@@ -112,12 +132,12 @@ export function LineChart({
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
-              data={serie.data}
+              data={isEmpty ? [] : serie.data}
               color={serie.color}
             />
           );
         })}
       </Chart>
-    </div>
+    </ChartContainer>
   );
 }

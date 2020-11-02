@@ -22,13 +22,13 @@ import {
 } from '../../../../../common/transaction_types';
 import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { ChartsSyncContextProvider2 } from '../../../../context/charts_sync_context';
+import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { ErroneousTransactionsRateChart } from '../erroneous_transactions_rate_chart/legacy';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
-import { ErroneousTransactionsRateChart } from '../ErroneousTransactionsRateChart';
 import { LineChart } from '../line_chart';
 import { getResponseTimeTickFormatter } from './helper';
 import { MLHeader } from './ml_header';
@@ -59,7 +59,7 @@ export function TransactionCharts({
 
   return (
     <>
-      <ChartsSyncContextProvider2>
+      <ChartsSyncContextProvider>
         <EuiFlexGrid columns={2} gutterSize="s">
           <EuiFlexItem data-cy={`transaction-duration-charts`}>
             <EuiPanel>
@@ -115,7 +115,7 @@ export function TransactionCharts({
             <TransactionBreakdown />
           </EuiFlexItem>
         </EuiFlexGrid>
-      </ChartsSyncContextProvider2>
+      </ChartsSyncContextProvider>
     </>
   );
 }

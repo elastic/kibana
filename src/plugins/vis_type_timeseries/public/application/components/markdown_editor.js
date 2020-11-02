@@ -134,7 +134,7 @@ export class MarkdownEditor extends Component {
                 values={{
                   handlebarLink: (
                     <a
-                      href="https://handlebarsjs.com/guide/expressions.html"
+                      href="https://ela.st/handlebars-docs"
                       target="_BLANK"
                       rel="noreferrer noopener"
                     >
